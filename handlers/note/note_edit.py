@@ -464,6 +464,9 @@ class SaveAjaxHandler:
 
         with dbutil.get_write_lock(id):
             file = check_get_note(id)
+            if version != file.version:
+                raise NoteException("conflict", "笔记已经被修改，请刷新后重试")
+            
             new_file = Storage(**file)
             new_file.size = len(content)
             new_file.mtime = xutils.format_datetime()

@@ -54,20 +54,13 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)d|%(message)s')
 
-
-def print_debug_info(*args):
-    logging.info("%s" % args)
-
-
 def get_bool_by_sys_arg(value):
     return value == "yes" or value == "true"
-
 
 def get_int_by_sys_arg(value):
     if value is None:
         return value
     return int(value)
-
 
 def handle_args_and_init_config(boot_config_kw=None):
     parser = argparse.ArgumentParser()
@@ -136,8 +129,8 @@ def try_init_sqlite():
         xconfig.errors.append("初始化sqlite失败")
 
 
-@log_mem_info_deco("try_init_ldb")
-def try_init_ldb():
+@log_mem_info_deco("try_init_kv_db")
+def try_init_kv_db():
     try:
 
         block_cache_size = xconfig.get_global_config("system.block_cache_size")
@@ -209,11 +202,16 @@ def try_init_ldb():
                     sys.exit(1)
 
         dbutil.set_driver_name(db_driver)
+        
+        # 是否开启binlog
+        binlog=xconfig.get_system_config("binlog")
+        assert isinstance(binlog, bool)
+
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR,
                     db_instance=db_instance,
                     db_cache=cacheutil._global_cache,
-                    binlog=xconfig.get_system_config("binlog"),
+                    binlog=binlog,
                     binlog_max_size=xconfig.get_system_config("binlog_max_size"))
     except:
         xutils.print_exc()
@@ -292,7 +290,7 @@ def init_app_no_lock(boot_config_kw=None):
 
     # 初始化数据库
     try_init_sqlite()
-    try_init_ldb()
+    try_init_kv_db()
     xtables_new.init()
 
     # 初始化工具箱

@@ -79,22 +79,29 @@ class TestMain(BaseTestCase):
             data=dict(name="xnote-unit-test", content="hello", parent_id = group_id))
 
         id = file["id"]
+        note_info = NoteDao.get_by_id(id)
+        version = note_info.version
+
         self.check_OK("/note/view?id=" + str(id))
         self.check_OK("/note/print?id=" + str(id))
 
         # 乐观锁更新
-        json_request("/note/update", method="POST", 
-            data=dict(id=id, content="new-content2", type="md", version=0))
-        json_request("/note/update", method="POST", 
-            data=dict(id=id, content="new-content3", type="md", version=1))
+        resp = json_request("/note/update", method="POST", 
+            data=dict(id=id, content="new-content2", type="md", version=version, resp_type="json"))
+        self.assertEqual("success", resp["code"])
+
+        resp = json_request("/note/update", method="POST", 
+            data=dict(id=id, content="new-content3", type="md", version=version+1, resp_type="json"))
+        self.assertEqual("success", resp["code"])
 
         # 访问日志
         visit_note("test", id)
         
         # 普通更新
-        json_request("/note/save", method="POST",
-            data=dict(id=id, content="new-content"))
-        
+        resp = json_request("/note/save", method="POST",
+            data=dict(id=id, content="new-content", version=version+2, resp_type="json"))
+        self.assertEqual("success", resp["code"])
+
         note_info = NoteDao.get_by_id(id)
         self.assertEqual(note_info.content, "new-content")
         json_request("/note/remove?id=" + str(id))

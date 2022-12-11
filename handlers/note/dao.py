@@ -31,15 +31,9 @@ from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
 from .dao_api import NoteDao
 
-# 配置日志模块
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)d|%(message)s')
-
-
 def register_note_table(name, description, check_user=False, user_attr=None):
     dbutil.register_table(name, description, category="note",
                           check_user=check_user, user_attr=user_attr)
-
 
 register_note_table("note_full", "笔记完整信息 <note_full:note_id>")
 register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
