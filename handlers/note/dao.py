@@ -1245,9 +1245,9 @@ def add_history(note_id, version, new_note):
     note_copy['note_id'] = note_id
     _note_history_db.with_user(note_id).put(version_str, note_copy)
 
-def list_history(note_id):
+def list_history(note_id, limit=1000):
     """获取笔记历史的列表"""
-    result_list = _note_history_index_db.with_user(note_id).list()
+    result_list = _note_history_index_db.with_user(note_id).list(limit=limit, reverse = True)
     history_list = [y for x,y in result_list]
     history_list = sorted(
         history_list, key=lambda x: x.mtime or "", reverse=True)
