@@ -836,6 +836,8 @@ class NoteIndexHandler:
     def find_class(self):
         user_name = xauth.current_name()
         home_path = xconfig.get_user_config(user_name, "HOME_PATH")
+        if xutils.is_mobile_client():
+            home_path = xconfig.get_user_config(user_name, "HOME_PATH_MOBILE")
         clazz = xutils.lookup_func("url:" + home_path)
         if clazz is None:
             return GroupListHandler

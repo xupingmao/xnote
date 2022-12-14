@@ -112,14 +112,14 @@ class LdbHashTable:
         return count_table(key_prefix)
     
     def first(self):
-        # type: () -> tuple[str, any]
+        # type: () -> tuple[str|None, object]
         records = self.list(limit=1)
         if len(records) > 0:
             return records[0]
         return None, None
     
     def last(self):
-        # type: () -> tuple[str, any]
+        # type: () -> tuple[str|None, object]
         records = self.list(limit = 1, reverse = True)
         if len(records) > 0:
             return records[0]

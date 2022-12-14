@@ -43,6 +43,18 @@
 </div>
 
 <div class="settings-row">
+    <div class="settings-key">首页(移动端)</div>
+    <div class="settings-value">
+        <select name="HOME_PATH_MOBILE" data-type="str" value="{{_user_config.HOME_PATH_MOBILE}}">
+            <option value="/note/group">笔记本列表</option>
+            <option value="/note/all">笔记列表</option>
+            <option value="/system/index">功能列表</option>
+            <option value="/message/log">随手记</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row">
     <div class="settings-key">字体大小</div>
     <div class="settings-value">
         <select name="FONT_SCALE" data-type="int" value="{{_user_config.FONT_SCALE}}">

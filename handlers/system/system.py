@@ -75,8 +75,8 @@ NOTE_TOOLS = [
 
 DATA_TOOLS = [
     admin_link("SQLite", "/system/sqlite", "database"),
-    admin_link("leveldb", "/system/db_scan", "database"),
-    admin_link("Cache", "/system/cache", "database"),
+    admin_link("数据库", "/system/db_scan", "database"),
+    admin_link("缓存管理", "/system/cache", "database"),
 ]
 
 # 所有功能配置
