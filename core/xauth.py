@@ -26,7 +26,7 @@ from xutils import logutil
 from xutils import cacheutil
 from xutils.functions import listremove
 
-session_db = None
+session_db = None # type: dbutil.LdbHashTable | None
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
 
@@ -142,14 +142,12 @@ def create_uuid():
     return uuid.uuid4().hex
 
 def get_valid_session_by_id(sid):
-    if sid == None:
+    if sid == None or sid == "":
         return None
     session_info = session_cache.get(sid)
     if session_info == None:
         session_info = session_db.get(sid)
-        if session_info == None:
-            session_cache.put_empty(sid)
-        else:
+        if session_info != None:
             session_cache.put(sid, session_info, expire = DEFAULT_CACHE_EXPIRE)
 
     if session_info == None or session_cache.is_empty(session_info):
@@ -236,6 +234,7 @@ def _get_builtin_user(name):
     return BUILTIN_USER_DICT.get(name)
 
 def find_by_name(name):
+    # type: (str) -> Storage | None
     if name is None:
         return None
     

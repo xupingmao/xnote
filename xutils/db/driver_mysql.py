@@ -97,8 +97,12 @@ class MySQLKV:
         self.pool_size = 0
         self.debug_pool = True
 
-        self.init()
-        RdbSortedSet.init_class(db_instance=self)
+        try:
+            self.init()
+            RdbSortedSet.init_class(db_instance=self)
+        except Exception as e:
+            logging.error("mysql driver init failed, host=%s, port=%s, database=%s", self.db_host, self.db_port, self.db_database)
+            raise e
 
     def get_connection(self):
         # 如果不缓存起来, 每次connect和close都会产生网络请求
