@@ -36,10 +36,10 @@ def public_link(name, url, icon="cube"):
 
 SYS_TOOLS = [
     user_link("设置",   "/system/settings", "cog"),
+    user_link("系统信息",   "/system/info", "info-circle"),
     public_link("关于", "/code/wiki/README.md", "info-circle"),
     guest_link("登录", "/login", "sign-in"),
     admin_link("文件",       "/fs_list", "file"),
-    admin_link("脚本",    "/fs_link/scripts"),
     admin_link("定时任务",   "/system/crontab", "clock-o"),
     admin_link("事件注册", "/system/event"),
     admin_link("线程管理", "/system/thread_info"),
@@ -51,7 +51,6 @@ SYS_TOOLS = [
     admin_link("Menu_Plugin",   "/plugins_list", "cogs"),
     admin_link("Shell",    "/tools/shell", "terminal"),
     admin_link("集群管理", "/system/sync?p=home"),
-    user_link("退出", "/logout", "sign-out"),
 ]
 
 NOTE_TOOLS = [
@@ -67,16 +66,14 @@ NOTE_TOOLS = [
     user_link("时光轴", "/note/timeline?type=all"),
     user_link("词典", "/note/dict"),
     user_link("搜索历史", "/search", "history"),
-    # user_link("日历", "/message/calendar", "calendar"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
-    # user_link("笔记索引", "/note/index", "th-large"),
 ]
 
 DATA_TOOLS = [
-    admin_link("SQLite", "/system/sqlite", "database"),
-    admin_link("数据库", "/system/db_scan", "database"),
+    admin_link("数据库", "/system/db_admin?p=meta", "database"),
     admin_link("缓存管理", "/system/cache", "database"),
+    admin_link("SQLite", "/system/sqlite", "database"),
 ]
 
 # 所有功能配置
@@ -106,6 +103,7 @@ def get_tools_config(user):
 class IndexHandler:
 
     def GET(self):
+        arg_show_back = xutils.get_argument("show_back", type=bool)
         user_name = xauth.current_name()
         menu_list = []
 
@@ -127,11 +125,11 @@ class IndexHandler:
 
         kw = Storage()
         kw.Storage = Storage
-        kw.os = os
         kw.user = xauth.get_current_user()
         kw.menu_list = menu_list
         kw.customized_items = []
         kw.html_title = "系统"
+        kw.show_back = arg_show_back
 
         return xtemplate.render("system/page/system_index.html", **kw)
 

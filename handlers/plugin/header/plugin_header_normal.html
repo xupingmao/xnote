@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-title">
         <span>{{ title }}</span>
-        {% if _is_mobile and category_name != None %}
+        {% if _is_mobile and category_name != None and category_name != "" %}
             <span>: {{category_name}}</span>
         {% end %}
         <div class="float-right">

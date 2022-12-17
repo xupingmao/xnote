@@ -44,15 +44,8 @@
 {% end %}
 
 {% block body_right %}
-    <div class="desktop-only">
-        {% init show_recent_update = False %}
-
-        {% include note/component/group_special_folder.html %}
-        {% include note/card/note_types.html %}
-
-        {% if show_recent_update %}
-            {% include note/card/recent_update_notes.html %}
-        {% end %}
-    </div>
+    {% include note/component/sidebar/group_list_sidebar.html %}
 {% end %}
+
+
 

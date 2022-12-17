@@ -32,7 +32,7 @@
             background-color: #ccc;
         }
 
-        @media screen and (max-width: 700px) {
+        @media screen and (max-width: 800px) {
             /** mobile **/
             .item {
                 width: 25%;
@@ -43,7 +43,6 @@
             float: left;
             width: 100%;
             margin: 0px 0px 10px 0px;
-            /*padding: 5px;*/
         }
 
         .user-name {
@@ -61,13 +60,31 @@
     </style>
 {% end %}
 
-{% block body %}
+{% block body_left %}
 
-{% for category_temp in menu_list %}
+<div class="card">
+    <div class="grid-title">
+        <span>应用列表</span>
+        <div class="float-right">
+            {% if show_back %}
+                {% include common/button/back_button.html %}
+            {% end %}
+        </div>
+    </div>
+</div>
+
+{% for index, category_temp in enumerate(menu_list) %}
 
     {% if len(category_temp.children) > 0 %}
         <div class="col-md-12 bottom-offset-1 grid-card">
-            <div class="grid-title">{{T(category_temp.name)}}</div>
+            <div class="grid-title hide">
+                <span>{{T(category_temp.name)}}</span>
+                {% if show_back and index == 0 %}
+                    <div class="float-right">
+                        {% include common/button/back_button.html %}
+                    </div>
+                {% end %}
+            </div>
             <div class="col-md-12">
                 {% for link in category_temp.children %}
                     <a class="item" href="{{link.url}}">
@@ -105,6 +122,7 @@
 
 {% end %}
 
-{% block aside %}
-    {% include system/mod_aside.html %}
+{% block body_right %}
+    {% include note/component/sidebar/group_list_sidebar.html %}
 {% end %}
+
