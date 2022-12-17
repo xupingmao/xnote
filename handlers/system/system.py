@@ -36,9 +36,9 @@ def public_link(name, url, icon="cube"):
 
 SYS_TOOLS = [
     user_link("设置",   "/system/settings", "cog"),
-    user_link("系统信息",   "/system/info", "info-circle"),
-    public_link("关于", "/code/wiki/README.md", "info-circle"),
     guest_link("登录", "/login", "sign-in"),
+
+    admin_link("系统信息",   "/system/info", "info-circle"),
     admin_link("文件",       "/fs_list", "file"),
     admin_link("定时任务",   "/system/crontab", "clock-o"),
     admin_link("事件注册", "/system/event"),
@@ -51,6 +51,8 @@ SYS_TOOLS = [
     admin_link("Menu_Plugin",   "/plugins_list", "cogs"),
     admin_link("Shell",    "/tools/shell", "terminal"),
     admin_link("集群管理", "/system/sync?p=home"),
+    
+    public_link("关于", "/code/wiki/README.md", "info-circle"),
 ]
 
 NOTE_TOOLS = [
@@ -81,6 +83,7 @@ xconfig.MENU_LIST = [
     Storage(name="Note", children=NOTE_TOOLS, need_login=True),
     Storage(name="System", children=SYS_TOOLS, need_login=True),
     Storage(name="数据管理", children=DATA_TOOLS, need_login=True),
+    # TODO 增加一栏自定义的插件
 ]
 
 xconfig.NOTE_OPTIONS = [

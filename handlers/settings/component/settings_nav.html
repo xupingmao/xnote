@@ -4,6 +4,9 @@
     Storage(name = "搜索设置", url = "/system/settings?category=search"),
 ] %}
 
+{% init show_app_index_icon = False %}
+{% include common/sidebar/app_index.html %}
+
 <div class="card list">
 
     {% for item in data_list %}

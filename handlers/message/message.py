@@ -42,6 +42,7 @@ from handlers.message.message_utils import (
 
 from .message_utils import sort_keywords_by_marked
 from . import dao
+from .dao import MessageDao
 from handlers.message import message_utils
 from xutils.db.lock import RecordLock
 
@@ -101,14 +102,14 @@ def on_search_message(ctx):
 
 def get_current_message_stat():
     user_name = xauth.current_name()
-    message_stat = MSG_DAO.get_message_stat(user_name)
+    message_stat = MessageDao.get_message_stat(user_name)
     return format_message_stat(message_stat)
 
 
 def update_keyword_amount(message, user_name, key):
     msg_list, amount = dao.search_message(user_name, key, 0, 1)
     message.amount = amount
-    MSG_DAO.update(message)
+    MessageDao.update(message)
     xutils.log("[message.refresh] user:%s,key:%s,amount:%s" %
                (user_name, key, amount))
 
@@ -148,7 +149,7 @@ def after_message_create_or_update(msg_item):
     if get_length(msg_item.keywords) == 0:
         msg_item.no_tag = True
         msg_item.keywords = None
-        MSG_DAO.update(msg_item)
+        MessageDao.update(msg_item)
     after_upsert_async(msg_item)
 
 
@@ -355,13 +356,13 @@ class ListAjaxHandler:
 
 def update_message_status(id, status):
     user_name = xauth.current_name()
-    data = MSG_DAO.get_by_id(id)
+    data = MessageDao.get_by_id(id)
     if data and data.user == user_name:
         data.status = status
         data.mtime = xutils.format_datetime()
 
-        MSG_DAO.update(data)
-        MSG_DAO.refresh_message_stat(user_name)
+        MessageDao.update(data)
+        MessageDao.refresh_message_stat(user_name)
 
         event = Storage(id=id, user=user_name,
                         status=status, content=data.content)
@@ -373,15 +374,15 @@ def update_message_status(id, status):
 
 
 def update_message_content(id, user_name, content):
-    data = MSG_DAO.get_by_id(id)
+    data = MessageDao.get_by_id(id)
     if data and data.user == user_name:
         # 先保存历史
-        MSG_DAO.add_history(data)
+        MessageDao.add_history(data)
 
         data.content = content
         data.mtime = xutils.format_datetime()
         data.version = data.get('version', 0) + 1
-        MSG_DAO.update(data)
+        MessageDao.update(data)
 
         xmanager.fire("message.update", dict(
             id=id, user=user_name, content=content))
@@ -399,12 +400,12 @@ def create_done_message(old_message):
     new_message['user'] = old_message['user']
     new_message['ctime'] = xutils.format_datetime()
 
-    MSG_DAO.create(**new_message)
+    MessageDao.create(**new_message)
 
 
 def update_message_tag(id, tag):
     user_name = xauth.current_name()
-    data = MSG_DAO.get_by_id(id)
+    data = MessageDao.get_by_id(id)
     if data and data.user == user_name:
         # 修复status数据，全部采用tag
         if 'status' in data:
@@ -416,8 +417,8 @@ def update_message_tag(id, tag):
             # 任务完成时除了标记原来任务的完成时间，还要新建一条消息
             create_done_message(data)
 
-        MSG_DAO.update(data)
-        MSG_DAO.refresh_message_stat(user_name)
+        MessageDao.update(data)
+        MessageDao.refresh_message_stat(user_name)
         xmanager.fire("message.updated", Storage(
             id=id, user=user_name, tag=tag, content=data.content))
 
@@ -470,13 +471,13 @@ class UpdateStatusAjaxHandler:
 class TouchAjaxHandler:
 
     def do_touch_by_id(self, id):
-        msg = MSG_DAO.get_by_id(id)
+        msg = MessageDao.get_by_id(id)
         if msg is None:
             return failure(message="message not found, id:%s" % id)
         if msg.user != xauth.current_name():
             return failure(message="not authorized")
         msg.mtime = xutils.format_datetime()
-        MSG_DAO.update(msg)
+        MessageDao.update(msg)
         return success()
 
     def do_touch_by_key(self, key):
@@ -506,7 +507,7 @@ class DeleteAjaxHandler:
             return failure(message="id为空")
 
         try:
-            msg = MSG_DAO.get_by_id(id)
+            msg = MessageDao.get_by_id(id)
         except:
             return failure(message="删除失败")
 
@@ -517,11 +518,11 @@ class DeleteAjaxHandler:
             return dict(code="fail", message="no permission")
 
         # 先保存历史
-        MSG_DAO.add_history(msg)
+        MessageDao.add_history(msg)
 
         # 删除并刷新统计信息
-        MSG_DAO.delete(id)
-        MSG_DAO.refresh_message_stat(msg.user)
+        MessageDao.delete(id)
+        MessageDao.refresh_message_stat(msg.user)
         return dict(code="success")
 
 
@@ -556,13 +557,13 @@ def create_message(user_name, tag, content, ip):
     message.mtime = ctime
     message.content = content
 
-    id = MSG_DAO.create(**message)
+    id = MessageDao.create(**message)
 
     message.id = id
 
-    MSG_DAO.refresh_message_stat(user_name)
+    MessageDao.refresh_message_stat(user_name)
 
-    created_msg = MSG_DAO.get_by_id(id)
+    created_msg = MessageDao.get_by_id(id)
     assert created_msg != None
     after_message_create_or_update(created_msg)
 
@@ -935,10 +936,10 @@ class MessageEditHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
-        detail = MSG_DAO.get_by_id(id)
+        detail = MessageDao.get_by_id(id)
 
         if detail.ref != None:
-            detail = MSG_DAO.get_by_id(detail.ref)
+            detail = MessageDao.get_by_id(detail.ref)
 
         return xtemplate.render("message/page/message_edit.html",
                                 show_nav=False,
@@ -1090,7 +1091,7 @@ class MessageKeywordAjaxHandler:
             else:
                 key_obj.is_marked = True
 
-            MSG_DAO.update(key_obj)
+            MessageDao.update(key_obj)
         
         return dict(code="success")
 
@@ -1128,7 +1129,7 @@ class SearchHandler:
 
         cost_time = functions.second_to_ms(time.time() - start_time)
 
-        MSG_DAO.add_search_history(user_name, key, cost_time)
+        MessageDao.add_search_history(user_name, key, cost_time)
 
         return chatlist, amount
 

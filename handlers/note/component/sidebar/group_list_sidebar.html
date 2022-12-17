@@ -9,6 +9,7 @@
 #} -->
 
 {% if _is_desktop %}
+    {% include common/sidebar/app_index.html %}
     {% include note/component/group_special_folder.html %}
     {% include note/card/note_types.html %}
 
@@ -30,17 +31,5 @@
         </div>
     </div>
     {% end %}
-
-    <div class="card">
-        <div class="list-box">
-            <a href="/system/index?show_back=true" class="list-item">
-                <i class="fa fa-th-large"></i>
-                <span>应用列表</span>
-                <div class="float-right">
-                    <i class="fa fa-chevron-right"></i>
-                </div>
-            </a>
-        </div>
-    </div>
 
 {% end %}

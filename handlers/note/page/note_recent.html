@@ -9,7 +9,7 @@
 
 {% end %}
 
-{% block body %}
+{% block body_left %}
     <div class="card">
         <div class="card-title">
             <span>我的动态</span>
@@ -38,4 +38,8 @@
         {% include base/pagination.html %}
     </div>
 
+{% end %}
+
+{% block body_right %}
+    {% include note/component/sidebar/group_list_sidebar.html %}
 {% end %}

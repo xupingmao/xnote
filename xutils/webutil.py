@@ -15,7 +15,7 @@ from web import utils
 #################################################################
 
 IS_TEST = False
-MOBILE_UA_NAMES = ("iphone", "android", "webos")
+MOBILE_UA_NAMES = ("iphone", "android", "ipad", "webos")
 
 
 def print_web_ctx_env():

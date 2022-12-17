@@ -285,6 +285,7 @@ def check_before_delete(id):
 
 
 def delete_message_by_id(id):
+    # type: (str) -> None
     check_before_delete(id)
 
     old = get_message_by_id(id)
@@ -314,6 +315,7 @@ def count_message(user, status):
 
 
 def get_message_by_id(full_key):
+    # type: (str) -> object
     check_param_id(full_key)
     if full_key.startswith("message:"):
         value = _msg_db.get_by_key(full_key)
@@ -620,6 +622,40 @@ def get_message_tag(user, tag, priority=0):
 
     raise Exception("unknown tag:%s" % tag)
 
+class MessageDao:
+    """message的数据接口"""
+
+    @staticmethod
+    def get_by_id(full_key):
+        return get_message_by_id(full_key)
+    
+    @staticmethod
+    def create(**kw):
+        return create_message(**kw)
+    
+    @staticmethod
+    def update(message):
+        return update_message(message)
+
+    @staticmethod
+    def delete(full_key):
+        return delete_message_by_id(full_key)
+
+    @staticmethod
+    def add_search_history(user, search_key, cost_time=0):
+        return add_search_history(user, search_key, cost_time)
+
+    @staticmethod
+    def add_history(message):
+        return add_message_history(message)
+    
+    @staticmethod
+    def refresh_message_stat(user):
+        return refresh_message_stat(user)
+    
+    @staticmethod
+    def get_message_stat(user):
+        return get_message_stat(user)
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.update", update_message)

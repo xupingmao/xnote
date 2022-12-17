@@ -20,8 +20,10 @@
     Storage(name = "集群和同步管理", url = "/system/sync?p=home"),
     Storage(name = "Shell终端", url = "/tools/shell"),
     Storage(name = "开发者", url = "/system/develop"),
-    Storage(name = "应用列表", url = "/system/index"),
 ] %}
+
+{% init show_app_index_icon = False %}
+{% include common/sidebar/app_index.html %}
 
 <div class="card list">
 
