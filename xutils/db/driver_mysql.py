@@ -338,6 +338,7 @@ class MySQLKV:
             cursor = con.cursor(prepared=True)
             try:
                 self.doDelete(key, cursor=cursor)
+                con.commit()
             finally:
                 self.close_cursor(cursor)
 

@@ -1494,10 +1494,8 @@ def expire_search_history(user_name, limit=1000):
 
     if count > limit:
         with dbutil.get_write_lock(user_name):
-            for i in range(count-limit):
-                key, value = db.first()
-                if key != None:
-                    db.delete(key=key)
+            for key, value in db.list(limit = count-limit, reverse=False):
+                db.delete(key)
 
 @xutils.async_func_deco()
 def refresh_note_stat_async(user_name):
