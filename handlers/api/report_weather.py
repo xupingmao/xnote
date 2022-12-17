@@ -5,12 +5,11 @@
 """Description here"""
 
 import re
-import six
 from bs4 import BeautifulSoup
 import xutils
 import xtables
 import xconfig
-from xutils import u
+from xutils import u, six
 
 """
 杭州 101210101

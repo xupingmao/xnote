@@ -79,7 +79,7 @@ class HttpClient:
         params["token"] = self.token
 
         url = "{host}/system/sync/leader?p=get_stat".format(host = self.host)
-        result = netutil.http_get(url, params = params)
+        result = netutil.http_get(url, params = params, skip_empty_value = True)
         result_obj = textutil.parse_json(result, ignore_error = True)
         return result_obj    
 

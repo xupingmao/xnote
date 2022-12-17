@@ -6,12 +6,12 @@ import os
 import sys
 import gc
 import web
-import six
 import xauth
 import xutils
 import xconfig
 import xtemplate
 from xutils import u
+from xutils import six
 
 SCRIPT_EXT_LIST = (
     ".bat", 

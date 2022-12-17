@@ -15,7 +15,7 @@
 import os
 import re
 import codecs
-import six
+import xutils.six as six
 import socket
 import io
 import gzip
@@ -218,9 +218,9 @@ def _join_url_and_params(url, params, *, skip_empty_value=False):
     else:
         return url + "?" + query_string
 
-def http_get(url, charset=None, params = None):
+def http_get(url, charset=None, params = None, skip_empty_value=False):
     """Http的GET请求"""
-    url = _join_url_and_params(url, params)
+    url = _join_url_and_params(url, params, skip_empty_value=skip_empty_value)
 
     if _mock != None:
         # 用于单元测试mock

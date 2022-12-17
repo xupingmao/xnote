@@ -2,12 +2,12 @@
 # @author xupingmao
 # @since
 # @modified 2021/11/07 22:01:00
-import six
 import xutils
 import xtemplate
 import sys
 import inspect
 from xutils import textutil
+from xutils import six
 
 class ModuleInfo:
     def __init__(self, mod, sysname):

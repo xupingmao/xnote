@@ -15,7 +15,6 @@ import re
 import time
 import copy
 import inspect
-import six
 import web
 import xconfig
 import xutils
@@ -27,6 +26,7 @@ from threading import Thread
 from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, cacheutil, u, dbutil, fsutil
+from xutils import six
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"

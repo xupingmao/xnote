@@ -20,22 +20,30 @@
 #         print("Key: {0}, Value: {1}".format(tag, tags[tag]))
 
 import os
-from PIL import Image
-from PIL import ExifTags
+try:
+    import PIL
+    from PIL import Image
+    from PIL import ExifTags
+except ImportError:
+    PIL = None
 
-# Pillow 文档 https://pillow.readthedocs.io/en/stable/
-fpath = r"/Users/xupingmao/Downloads/mmexport1668347065669.jpg"
-fpath_new = fpath + "_fixed.jpg"
 
-tag_orientation = 0x112
-Image.init()
+if PIL != None:
+    # Pillow 文档 https://pillow.readthedocs.io/en/stable/
+    fpath = r"/Users/xupingmao/Downloads/mmexport1668347065669.jpg"
+    fpath_new = fpath + "_fixed.jpg"
 
-print(os.path.splitext(fpath))
-print("SAVE_ALL", Image.SAVE_ALL)
-print("SAVE", Image.SAVE)
-print("_plugins", Image._plugins)
+    tag_orientation = 0x112
+    Image.init()
+
+    print(os.path.splitext(fpath))
+    print("SAVE_ALL", Image.SAVE_ALL)
+    print("SAVE", Image.SAVE)
+    print("_plugins", Image._plugins)
 
 def do_fix():
+    if PIL == None:
+        return
     with Image.open(fpath) as img:
         exif = img.getexif()
         print(exif)

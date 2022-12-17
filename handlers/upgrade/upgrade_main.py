@@ -14,11 +14,11 @@
 3. 升级文件需要自己处理幂等逻辑，这里提供了幂等表`upgrade_log`
 """
 
-import six
 import xmanager
 import xutils
 import xauth
 import logging
+from xutils import six
 from xutils import dbutil
 from xutils import dateutil
 from xutils import Storage

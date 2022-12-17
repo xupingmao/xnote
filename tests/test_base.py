@@ -10,11 +10,11 @@ import xmanager
 import xtemplate
 import xtables_new
 import web
-import six
 import json
 import xauth
 from xutils import dbutil
 from xutils import cacheutil
+from xutils import six
 from handlers.fs.fs_upload import get_upload_file_path
 from xutils.db.driver_sqlite import SqliteKV
 

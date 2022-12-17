@@ -5,12 +5,11 @@
 # @modified 2022/04/16 09:05:41
 from __future__ import print_function
 
-
-import six
-from six.moves.configparser import ConfigParser
-from six.moves.urllib.parse import quote, unquote
-from six.moves.urllib.request import urlopen
-from six import StringIO
+from . import six
+from .six.moves.configparser import ConfigParser
+from .six.moves.urllib.parse import quote, unquote
+from .six.moves.urllib.request import urlopen
+from .six import StringIO
 
 import sys
 import os

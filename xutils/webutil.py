@@ -7,7 +7,7 @@ from http.server import BaseHTTPRequestHandler
 import profile
 import time
 import web
-from lib.six import BytesIO
+from xutils.six import BytesIO
 from web import utils
 
 #################################################################

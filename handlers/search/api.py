@@ -3,10 +3,10 @@
 # @modified 2018/11/11 17:59:26
 from __future__ import print_function
 import os
-import six
 import xutils
 import xconfig
 import xauth
+from xutils import six
 
 SearchResult = xutils.SearchResult
 ROOT_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")

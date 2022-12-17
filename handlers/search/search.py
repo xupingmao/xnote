@@ -6,7 +6,6 @@
 import re
 import time
 import math
-import six
 import web
 import xutils
 import xconfig
@@ -17,6 +16,7 @@ from xutils import textutil, u
 from xutils import Storage
 from xutils import dateutil
 from xutils import mem_util
+from xutils import six
 from xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
