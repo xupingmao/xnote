@@ -14,6 +14,8 @@ from xutils.db.binlog import BinLog
 from xutils.db.dbutil_deque import DequeTable
 from xutils.db.encode import decode_id
 
+import pdb
+import logging
 import os
 import threading
 import sqlite3
@@ -168,6 +170,17 @@ def run_snapshot_test(test, db):
     pass
 
 
+def to_str_list(list):
+    result = []
+    for item in list:
+        if isinstance(item, bytes):
+            result.append(item.decode("utf8"))
+        elif isinstance(item, str):
+            result.append(item)
+        else:
+            raise Exception("invalid type: %s" % type(item))
+    return result
+
 class TestMain(BaseTestCase):
 
     def test_dbutil_lmdb(self):
@@ -208,26 +221,44 @@ class TestMain(BaseTestCase):
         run_test_db_engine(self, db)
         run_snapshot_test(self, db.CreateSnapshot())
 
-    def test_dbutil_mysql(self):
+    def get_mysql_db2(self):
         from xutils.db.driver_mysql import MySQLKV
+        host = os.environ.get("mysql_host")
+        user = os.environ.get("mysql_user")
+        password = os.environ.get("mysql_password")
+        database = "test2"
+
+        print("host=%s, user=%s, password=%s" % (host, user, password))
+
+        db = MySQLKV(host=host, user=user,
+                     password=password, database=database)
+        return db
+
+    def test_dbutil_mysql(self):
+        print("test_dbutil_mysql start...")
         skip_mysql_test = os.environ.get("skip_mysql_test")
         if skip_mysql_test == "True":
             print("skip mysql test")
             return
-
-        db = MySQLKV(host="192.168.50.153", user="root",
-                     password="root", database="test2")
+        
+        db = self.get_mysql_db2()
         run_test_db_engine(self, db)
 
     def test_dbutil_mysql_enhanced(self):
+        print("test_dbutil_mysql_enhanced start...")
         from xutils.db.driver_mysql_enhance import EnhancedMySQLKV
         skip_mysql_test = os.environ.get("skip_mysql_test")
         if skip_mysql_test == "True":
             print("skip mysql test")
             return
+                
+        host = os.environ.get("mysql_host")
+        user = os.environ.get("mysql_user")
+        password = os.environ.get("mysql_password")
+        database = "test3"
 
-        db = EnhancedMySQLKV(host="192.168.50.153", user="root",
-                     password="root", database="test3")
+        db = EnhancedMySQLKV(host=host, user=user,
+                     password=password, database=database)
         self.do_test_lmdb_large_key(db)
 
     def triggle_database_locked(self):
@@ -304,8 +335,11 @@ class TestMain(BaseTestCase):
         # 先清理数据
         for key in db.RangeIter(include_value=False):
             db.Delete(key)
+        
+        data = list(db.RangeIter())
+        self.assertEqual(0, len(data))
 
-        prefix = textutil.random_string(1000)
+        prefix = "test:a_" + textutil.random_string(1000)
         key1 = (prefix + "_key1").encode("utf-8")
         key2 = (prefix + "_key2").encode("utf-8")
         key3 = (prefix + "_key3").encode("utf-8")
@@ -319,7 +353,8 @@ class TestMain(BaseTestCase):
         value1b = db.Get(key1)
         self.assertEqual(value1, value1b)
 
-        db.Delete(key1)
+        db.Delete(key1) # 还剩下 key2, key3
+
         value1c = db.Get(key1)
         self.assertEqual(None, value1c)
 
@@ -335,16 +370,30 @@ class TestMain(BaseTestCase):
         self.assertEqual(2, len(data2))
 
         # 插入两个新的超长key
-        large_key = "test:" + textutil.random_string(1003)
+        large_key = "test:b_" + textutil.random_string(1003)
         batch = dbutil.create_write_batch(db_instance=db)
-        batch.put(large_key + "#1", dict(name="test1"))
-        batch.put(large_key + "#2", dict(name="test2"))
+        key4 = large_key + "_key4"
+        key5 = large_key + "_key5"
+
+        batch.put(key4, dict(name="test1"))
+        batch.put(key5, dict(name="test2"))
         batch.commit()
 
-        # 逻辑视图: 4个超长的key
+        # 逻辑视图: 4个超长的key (key2,key3,key4,key5)
         data = list(db.RangeIter())
+        keys = []
+        for key, value in db.RangeIter():
+            keys.append(key)
+
         print("[RangeIter]", db, data)
-        self.assertEqual(4, len(data))
+
+        list1 = to_str_list(keys)
+        list2 = to_str_list([key2,key3,key4,key5])
+
+        print("list1:", list1)
+        print("list2:", list2)
+
+        self.assertEqual(list1, list2)
 
         # 物理视图: 2个超长key
         self.assertEqual(2, len(list(db.RangeIterRaw())))
@@ -702,6 +751,7 @@ class TestMain(BaseTestCase):
         self.assertEqual(20.6, result[0][1])
 
     def test_dbutil_sortedset_mysql(self):
+        print("test_dbutil_sortedset_mysql start...")
         from xutils.db.driver_mysql import MySQLKV
         from xutils.db.dbutil_sortedset import SortedSet
 
@@ -710,8 +760,7 @@ class TestMain(BaseTestCase):
             print("skip mysql test")
             return
 
-        db = MySQLKV(host="192.168.50.153", user="root",
-                     password="root", database="test2")
+        db = self.get_mysql_db2()
         dbutil.set_driver_name("mysql")
         db = SortedSet("sorted_set_test")
 
@@ -738,8 +787,7 @@ class TestMain(BaseTestCase):
             print("skip mysql test")
             return
 
-        engine = MySQLKV(host="192.168.50.153", user="root",
-                     password="root", database="test2")
+        engine = self.get_mysql_db2()
         engine.scan_limit = 10
 
         dbutil.set_driver_name("mysql")

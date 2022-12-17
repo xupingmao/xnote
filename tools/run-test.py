@@ -31,8 +31,13 @@ def check_and_install_pkg(py_module, pip_version = ""):
 def run_test(args):
 	target = args.target
 	os.environ["skip_mysql_test"] = str(args.skip_mysql_test)
+	os.environ["mysql_host"] = str(args.mysql_host)
+	os.environ["mysql_password"] = str(args.mysql_password)
+	os.environ["mysql_database"] = str(args.mysql_database)
+	os.environ["mysql_user"] = str(args.mysql_user)
 
 	if target == "xutils_db":
+		# os.system("python3 -m pytest tests/test_xutils_db.py::TestMain::test_dbutil_mysql_enhanced --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		os.system("python3 -m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		os.system("python3 -m coverage html")
 		return
@@ -88,6 +93,10 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("target", default="all", nargs="?")
 	parser.add_argument("--skip_mysql_test", action="store_true")
+	parser.add_argument("--mysql_host", default="192.168.50.153")
+	parser.add_argument("--mysql_user", default="root")
+	parser.add_argument("--mysql_password", default="root")
+	parser.add_argument("--mysql_database", default="test2")
 	args = parser.parse_args()
 
 	do_clean()

@@ -8,7 +8,7 @@
 @FilePath     : /xnote/xutils/db/driver_mysql_enhance.py
 @Description  : 支持长key
 """
-
+import pdb
 from xutils.db import encode
 from xutils.db.driver_mysql import MySQLKV
 
@@ -38,7 +38,7 @@ class EnhancedMySQLKV(MySQLKV):
         else:
             for key in self.RangeIterRaw(*args, **kw):
                 if len(key) >= self.max_key_len:
-                    value_bytes = self.doGet(key)
+                    value_bytes = super().Get(key)
                     value_dict = encode.convert_bytes_to_dict(value_bytes)
                     # 必须要保证key的迭代顺序
                     for fullkey in sorted(value_dict.keys(), reverse=reverse):
@@ -48,7 +48,7 @@ class EnhancedMySQLKV(MySQLKV):
 
     def doDeleteLongNoLock(self, key, cursor):
         short_key = key[:self.max_key_len]
-        data_bytes = self.doGet(short_key)
+        data_bytes = self.doGet(short_key, cursor=cursor)
         data_dict = encode.convert_bytes_to_dict(data_bytes)
         if key in data_dict:
             del data_dict[key]
@@ -72,7 +72,7 @@ class EnhancedMySQLKV(MySQLKV):
         if len(key) >= self.max_key_len:
             short_key = key[:self.max_key_len]
             with self.lock:
-                data_bytes = self.doGet(short_key)
+                data_bytes = self.doGet(short_key, cursor=cursor)
                 data_dict = encode.convert_bytes_to_dict(data_bytes)
                 data_dict[key] = value
                 self.doPutRaw(
@@ -83,8 +83,8 @@ class EnhancedMySQLKV(MySQLKV):
     def Get(self, key):
         if len(key) >= self.max_key_len:
             short_key = key[:self.max_key_len]
-            data_bytes = self.doGet(short_key)
+            data_bytes = super().Get(short_key)
             data_dict = encode.convert_bytes_to_dict(data_bytes)
             return data_dict.get(key)
         else:
-            return self.doGet(key)
+            return super().Get(key)

@@ -60,6 +60,7 @@ class ConnectionWrapper:
         return self.is_closed == False and not self.is_expired()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.commit()
         self.pool.append(self)
 
     def close(self):
@@ -168,10 +169,13 @@ class MySQLKV:
             try:
                 # tinyblob 最大长度 255
                 # KEY索引长度并不对key的长度做限制，只是索引最多使用200字节
+                # 但是如果索引前缀是相同的，会报主键冲突的错误
+                # 比如索引长度为5, 存在12345A，插入12345B会报错，插入12346A可以成功
                 # 一个CHAR占用3个字节，索引最多用1000个字节
                 cursor.execute("""CREATE TABLE IF NOT EXISTS `kv_store` (
                     `key` blob not null comment '键值对key', 
                     value blob comment '键值对value',
+                    version int not null default 0 comment '版本',
                     PRIMARY KEY (`key`(200))
                 ) COMMENT '键值对存储';
                 """)
@@ -179,7 +183,7 @@ class MySQLKV:
                     `key` varchar(512) not null comment '键值对key',
                     `member` varchar(512) not null comment '成员',
                     `score` decimal(40,20) not null comment '分数',
-                    `version` int not null comment '版本',
+                    `version` int not null default 0 comment '版本',
                     PRIMARY KEY (`key`(100), `member`(100)) ,
                     KEY idx_score(`score`)
                 ) COMMENT '有序集合';
@@ -189,36 +193,38 @@ class MySQLKV:
                 self.close_cursor(cursor)
             logging.info("mysql connection: %s", con)
 
-    def doGet(self, key):
-        # type: (bytes) -> bytes
+    def doGet(self, key, cursor):
+        # type: (bytes, ) -> bytes
         """通过key读取Value
         @param {bytes} key
         @return {bytes|None} value
         """
-        start_time = time.time()
-        con = self.get_connection()
+        assert cursor != None
 
+        start_time = time.time()
+        try:
+            sql = "SELECT value FROM kv_store WHERE `key`=%s"
+            cursor.execute(sql, (key, ))
+            for result in cursor.fetchall():
+                return self.mysql_to_py(result[0])
+            return None
+        finally:
+            cost_time = time.time() - start_time
+            if self.log_get_profile:
+                logging.debug("GET (%s) cost %.2fms", key, cost_time*1000)
+
+            if self.sql_logger != None:
+                log_info = sql % key + " [%.2fms]" % (cost_time*1000)
+                self.sql_logger.append(log_info)
+
+    def Get(self, key):
+        con = self.get_connection()
         with con:
             cursor = con.cursor(prepared=True)
             try:
-                sql = "SELECT value FROM kv_store WHERE `key`=%s"
-                cursor.execute(sql, (key, ))
-                for result in cursor.fetchall():
-                    return self.mysql_to_py(result[0])
-                return None
+                return self.doGet(key, cursor=cursor)
             finally:
-                cost_time = time.time() - start_time
-                if self.log_get_profile:
-                    logging.debug("GET (%s) cost %.2fms", key, cost_time*1000)
-
-                if self.sql_logger != None:
-                    log_info = sql % key + " [%.2fms]" % (cost_time*1000)
-                    self.sql_logger.append(log_info)
-
                 self.close_cursor(cursor)
-
-    def Get(self, key):
-        return self.doGet(key)
 
     def BatchGet(self, key_list):
         # type: (list[bytes]) -> dict[bytes, bytes]
@@ -252,46 +258,40 @@ class MySQLKV:
                     self.sql_logger.append(log_info)
 
                 self.close_cursor(cursor)
+    
+    def log_sql(self, sql, params, start_time, key):
+        assert isinstance(params, tuple)
+
+        if self.debug:
+            logging.debug("SQL:%s, params:%s", sql, params)
+
+        if self.sql_logger:
+            cost_time = time.time() - start_time
+            log_info = sql % ("?", key) + \
+                " [%.2fms]" % (cost_time*1000)
+            self.sql_logger.append(log_info)
 
     def doPut(self, key, value, cursor=None):
-        # type: (bytes,bytes,any) -> None
+        # type: (bytes,bytes,mysql.connector.connection.MySQLCursor) -> None
         assert cursor != None
 
         start_time = time.time()
-        select_sql = "SELECT `key` FROM kv_store WHERE `key` = %s"
-        insert_sql = "INSERT INTO kv_store (`key`, value) VALUES (%s, %s)"
-        update_sql = "UPDATE kv_store SET value=%s WHERE `key` = %s"
-        cursor.execute(select_sql, (key, ))
-        result = cursor.fetchall()
-        if len(result) == 0:
-            if self.debug:
-                logging.debug("SQL:%s, params:%s", insert_sql, (key, value))
+        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES (%s, %s, 0)"
+        update_sql = "UPDATE kv_store SET value=%s, version=version+1 WHERE `key` = %s"
+        params = (value, key)
 
-            if self.sql_logger:
-                cost_time = time.time() - start_time
-                log_info = insert_sql % (key, "?") + \
-                    " [%.2fms]" % (cost_time*1000)
-                self.sql_logger.append(log_info)
-
-            try:
-                cursor.execute(insert_sql, (key, value))
-            except:
-                logging.info("key(%s) exists, try update", key)
-                cursor.execute(update_sql, (value, key))
+        cursor.execute(update_sql, params)
+        if cursor.rowcount == 0:
+            # 数据不存在,执行插入动作
+            # 如果这里冲突了，按照默认规则抛出异常
+            params = (key, value)
+            cursor.execute(insert_sql, params)
+            self.log_sql(insert_sql, params, start_time=start_time, key=key)
         else:
-            if self.debug:
-                logging.debug("SQL:%s, params:%s", update_sql, (key, value))
-
-            if self.sql_logger:
-                cost_time = time.time() - start_time
-                log_info = update_sql % ("?", key) + \
-                    " [%.2fms]" % (cost_time*1000)
-                self.sql_logger.append(log_info)
-
-            cursor.execute(update_sql, (value, key))
+            self.log_sql(update_sql, params, start_time=start_time, key=key)
 
     def Put(self, key, value, sync=False, cursor=None):
-        # type: (bytes,bytes,bool,any) -> None
+        # type: (bytes,bytes,bool,object) -> None
         """写入Key-Value键值对
         @param {bytes} key
         @param {bytes} value
@@ -443,11 +443,14 @@ class MySQLKV:
                 cursor.execute("begin;")
                 for key in batch._puts:
                     value = batch._puts[key]
-                    self.Put(key, value, cursor=cursor)
+                    self.doPut(key, value, cursor=cursor)
 
                 for key in batch._deletes:
                     self.doDelete(key, cursor=cursor)
                 cursor.execute("commit;")
+            except Exception as e:
+                cursor.execute("rollback;")
+                raise e
             finally:
                 self.close_cursor(cursor)
 
@@ -504,7 +507,7 @@ class RdbSortedSet:
                 "UPDATE zset SET `score`=%s, version=version+1 WHERE `key`=%s AND member=%s", params)
             if cursor.rowcount == 0:
                 cursor.execute(
-                    "INSERT INTO zset (score, `key`, member) VALUES(%s,%s,%s)", params)
+                    "INSERT INTO zset (score, `key`, member, version) VALUES(%s,%s,%s,0)", params)
 
     def get(self, member, prefix=""):
         key = self.table_name + prefix
