@@ -48,23 +48,24 @@ SYS_TOOLS = [
     admin_link("Menu_Refresh",  "/system/reload", "refresh"),
     admin_link("Menu_Modules",  "/system/modules_info"),
     admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
-    admin_link("Menu_Plugin",   "/plugins_list", "cogs"),
     admin_link("Shell",    "/tools/shell", "terminal"),
     admin_link("集群管理", "/system/sync?p=home"),
-    
+
+    user_link("Menu_Plugin",   "/plugins_list?show_back=true", "cogs"),    
     public_link("关于", "/code/wiki/README.md", "info-circle"),
 ]
 
 NOTE_TOOLS = [
     user_link("笔记本", "/note/group", "book"),
     user_link("待办",  "/message?tag=task", "calendar-check-o"),
+    user_link("随手记",  "/message?tag=log", "pencil"),
+    user_link("标签列表", "/note/taglist", "tags"),
 
     # 笔记
     user_link("最近更新",      "/note/recent?orderby=update", "folder"),
     user_link("最近创建",      "/note/recent?orderby=create", "folder"),
     user_link("最近查看",       "/note/recent?orderby=view", "folder"),
     user_link("常用笔记", "/note/recent?orderby=myhot", "heart"),
-    user_link("标签列表", "/note/taglist", "tags"),
     user_link("时光轴", "/note/timeline?type=all"),
     user_link("词典", "/note/dict"),
     user_link("搜索历史", "/search", "history"),

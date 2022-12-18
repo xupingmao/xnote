@@ -1,3 +1,12 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-05-07 22:04:04
+@LastEditors  : xupingmao
+@LastEditTime : 2022-12-18 12:21:36
+@FilePath     : /xnote/handlers/dict/component/dict_sidebar.html
+@Description  : 描述
+ #} -->
 {# <!--
 @Author       : xupingmao
 @email        : 578749341@qq.com
@@ -7,6 +16,10 @@
 @FilePath     : /xnote/handlers/dict/component/dict_sidebar.html
 @Description  : 描述
 --> #}
+
+{% set-global show_app_index_icon = False %}
+{% include common/sidebar/app_index.html %}
+
 <div class="list card">
     <a class="list-item" href="/dict/list">词典</a>
     <a class="list-item" href="/dict/relevant/list">关联词典</a>

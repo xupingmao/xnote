@@ -15,6 +15,10 @@ SCAN_HTML = """
         width:100%;
         height:95%;
     }
+
+    .input-group {
+        height: 36px;
+    }
 </style>
 
 {% include system/component/db_nav.html %}
