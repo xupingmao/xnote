@@ -34,6 +34,10 @@ HTML = """
 {% end %}
 """
 
+SIDEBAR_HTML = """
+{% include note/component/sidebar/group_list_sidebar.html %}
+"""
+
 class StatHandler(BasePlugin):
 
     title = "数据统计"
@@ -82,6 +86,7 @@ class StatHandler(BasePlugin):
             admin_stat_list = self.get_admin_stat_list(hide_index)
         
         self.writetemplate(HTML, stat_list = stat_list, admin_stat_list = admin_stat_list)
+        self.write_aside(SIDEBAR_HTML)
 
 
 xurls = (

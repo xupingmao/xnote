@@ -5,7 +5,7 @@
 @modified 2021/12/04 21:13:05
 -->
 
-{% block body %}
+{% block body_left %}
 
 {% init hot_logs = [] %}
 
@@ -60,4 +60,8 @@
         });
     })
 </script>
+{% end %}
+
+{% block body_right %}
+    {% include search/component/search_sidebar.html %}
 {% end %}

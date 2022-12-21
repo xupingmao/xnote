@@ -19,7 +19,7 @@
 </style>
 {% end %}
 
-{% block body %}
+{% block body_left %}
 
 {% init parent_link = None %}
 {% init title_link = None %}
@@ -219,6 +219,6 @@
 </script>
 {% end %}
 
-{% block aside %}
-  {% include note/component/mod_aside.html %}
+{% block body_right %}
+    {% include note/component/sidebar/group_list_sidebar.html %}
 {% end %}

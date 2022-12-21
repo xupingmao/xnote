@@ -61,6 +61,9 @@ def list_words(page = 1, pagesize = 20, key = None):
     return _db.count(), result
 
 def get_relevant_words(word, exclude_self = True):
+    if word == "":
+        return []
+
     word = word.lower()
     words = _db.get(word)
     if words == None:

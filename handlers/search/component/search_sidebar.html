@@ -7,8 +7,12 @@
 @FilePath     : /xnote/handlers/search/component/search_sidebar.html
 --> #}
 
+{% init key = "" %}
 {% set-global relevant_words = xutils.call("dict_relevant.get_relevant_words", key) %}
 
+{% include common/sidebar/app_index.html %}
+
+{% if key != "" %}
 <div class="card">
     <div class="card-title">
         <span>相关搜索</span>
@@ -28,3 +32,4 @@
         {% end %}
     </div>
 </div>
+{% end %}

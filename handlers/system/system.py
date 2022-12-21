@@ -39,7 +39,7 @@ SYS_TOOLS = [
     guest_link("登录", "/login", "sign-in"),
 
     admin_link("系统信息",   "/system/info", "info-circle"),
-    admin_link("文件",       "/fs_list", "file"),
+    admin_link("文件",       "/fs_list", "file-text-o"),
     admin_link("定时任务",   "/system/crontab", "clock-o"),
     admin_link("事件注册", "/system/event"),
     admin_link("线程管理", "/system/thread_info"),
@@ -47,9 +47,8 @@ SYS_TOOLS = [
     admin_link("Menu_Log",    "/system/log"),
     admin_link("Menu_Refresh",  "/system/reload", "refresh"),
     admin_link("Menu_Modules",  "/system/modules_info"),
-    admin_link("Menu_CSS", "/code/edit?type=script&path=user.css"),
     admin_link("Shell",    "/tools/shell", "terminal"),
-    admin_link("集群管理", "/system/sync?p=home"),
+    admin_link("集群管理", "/system/sync?p=home", "server"),
 
     user_link("Menu_Plugin",   "/plugins_list?show_back=true", "cogs"),    
     public_link("关于", "/code/wiki/README.md", "info-circle"),
@@ -68,7 +67,7 @@ NOTE_TOOLS = [
     user_link("常用笔记", "/note/recent?orderby=myhot", "heart"),
     user_link("时光轴", "/note/timeline?type=all"),
     user_link("词典", "/note/dict"),
-    user_link("搜索历史", "/search", "history"),
+    user_link("搜索历史", "/search", "search"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
 ]
@@ -76,7 +75,7 @@ NOTE_TOOLS = [
 DATA_TOOLS = [
     admin_link("数据库", "/system/db_admin?p=meta", "database"),
     admin_link("缓存管理", "/system/cache", "database"),
-    admin_link("SQLite", "/system/sqlite", "database"),
+    admin_link("消息队列", "/system/todo", "database"),
 ]
 
 # 所有功能配置
