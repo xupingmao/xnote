@@ -11,6 +11,7 @@
 PS. 类似的功能可以参考 webdav
 """
 import os
+import sys
 import mimetypes
 import web
 import xutils
@@ -19,12 +20,13 @@ import xconfig
 import xtemplate
 import xmanager
 import logging
-from io import BytesIO
+import multiprocessing
 
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
 from .fs_mode import get_fs_page_by_mode
 from .fs_helpers import sort_files_by_size
+from . import fs_image
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
@@ -241,43 +243,15 @@ class FileSystemHandler:
                 # print("%s Read %s K" % (time.ctime(), blocksize))
                 yield block
                 block = fp.read(blocksize)
-
-    def create_thumbnail_data(self, img_path):
-        im = None
-        crop_im = None
-        
-        try:
-            from PIL import Image
-            im = Image.open(img_path)
-            w,h = im.size
-            
-            # 先裁剪成正方形
-            width = min(w,h)
-            
-            start_x = (w-width)//2
-            start_y = (h-width)//2
-            
-            stop_x = start_x + width
-            stop_y = start_y + width
-            
-            region = (start_x,start_y,stop_x,stop_y)
-            
-            logging.info("File:%s,size:%s,region:%s", img_path, im.size, region)
-
-            crop_im = im.crop(region)
-            crop_im.thumbnail((200,200))
-            img_bytes = BytesIO()
-            crop_im.save(img_bytes, format=im.format)
-            return img_bytes.getvalue()
-        except:
-            xutils.print_exc()
-            return None
-        finally:
-            del im
-            del crop_im
             
     def read_thumbnail(self, path, blocksize):
-        data = self.create_thumbnail_data(path)
+        # TODO 限制进程数量
+        # 在SAE环境中，pillow处理图片后无法释放内存，改成用子进程处理
+        q = multiprocessing.Queue()
+        p = multiprocessing.Process(target = fs_image.create_thumbnail_data, args=(path, q))
+        p.start()
+        p.join(timeout = 0.5)
+        data = q.get()
         # print("data=", data)
         if data != None:
             yield data
