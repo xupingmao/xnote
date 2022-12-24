@@ -1,6 +1,10 @@
-{% extends base.html %}
+{% extends base %}
 
-{% block body %}
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
+{% end %}
+
+{% block body_left %}
 
 <div class="card">
     {% set title = "模块信息" %}
@@ -34,7 +38,6 @@
         </tr>
     {% end %}
     </table>
-    </div>
 </div>
 
 {% end %}

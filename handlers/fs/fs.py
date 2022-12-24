@@ -243,6 +243,9 @@ class FileSystemHandler:
                 block = fp.read(blocksize)
 
     def create_thumbnail_data(self, img_path):
+        im = None
+        crop_im = None
+        
         try:
             from PIL import Image
             im = Image.open(img_path)
@@ -269,6 +272,9 @@ class FileSystemHandler:
         except:
             xutils.print_exc()
             return None
+        finally:
+            del im
+            del crop_im
             
     def read_thumbnail(self, path, blocksize):
         data = self.create_thumbnail_data(path)
