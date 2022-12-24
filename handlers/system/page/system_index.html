@@ -57,13 +57,22 @@
             padding: 10px;
         }
 
+        .app-icon.img-box {
+            height: 50px;
+        }
+
+        .app-icon img {
+            height: 30px;
+            width: 30px;
+        }
+
     </style>
 {% end %}
 
 {% block body_left %}
 
 <div class="card">
-    <div class="grid-title">
+    <div class="card-title btn-line-height">
         <span>应用列表</span>
         <div class="float-right">
             {% if show_back %}
@@ -87,10 +96,16 @@
             </div>
             <div class="col-md-12">
                 {% for link in category_temp.children %}
-                    <a class="item" href="{{link.url}}">
-                        <div class="app-icon">
-                            <i class="fa fa-{{link.icon}}"></i>
-                        </div>
+                    <a class="item" href="{{link.url}}"> 
+                        {% if link.img_src != None %}
+                            <div class="app-icon img-box">
+                                <img src="{{link.img_src}}">
+                            </div>
+                        {% else %}
+                            <div class="app-icon">
+                                <i class="fa fa-{{link.icon}} {{link.icon}}"></i>
+                            </div>
+                        {% end %}
                         <span>{{T(link.name)}}</span>
                     </a>
                 {% end %}

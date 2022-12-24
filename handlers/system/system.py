@@ -14,6 +14,17 @@ from xutils import Storage
 from xutils import webutil
 
 
+class AppLink:
+    def __init__(self):
+        self.name = None # type: str|None
+        self.url = None
+        self.user = None
+        self.is_admin = False
+        self.is_user = False
+        self.is_guest = False
+        self.icon = None # type: str|None
+        self.img_src = None
+
 def link(name, url, user=None, icon="cube"):
     return Storage(name=name, url=url, link=url, user=user, icon=icon)
 
@@ -22,8 +33,13 @@ def admin_link(name, url, icon="cube"):
     return link(name, url, "admin", icon)
 
 
-def user_link(name, url, icon="cube"):
-    return Storage(name=name, url=url, link=url, user=None, is_user=True, icon=icon)
+def user_link(name, url, icon="cube", img_src = None):
+    link = AppLink()
+    link.name = name
+    link.url = url
+    link.icon = icon
+    link.img_src = img_src
+    return link
 
 
 def guest_link(name, url, icon="cube"):
@@ -61,12 +77,12 @@ NOTE_TOOLS = [
     user_link("标签列表", "/note/taglist", "tags"),
 
     # 笔记
-    user_link("最近更新",      "/note/recent?orderby=update", "folder"),
-    user_link("最近创建",      "/note/recent?orderby=create", "folder"),
-    user_link("最近查看",       "/note/recent?orderby=view", "folder"),
-    user_link("常用笔记", "/note/recent?orderby=myhot", "heart"),
+    user_link("最近更新",      "/note/recent?orderby=update", "edit"),
+    user_link("最近创建",      "/note/recent?orderby=create", "plus"),
+    user_link("最近查看",       "/note/recent?orderby=view", "eye"),
+    user_link("常用笔记", "/note/recent?orderby=myhot", "star-o"),
     user_link("时光轴", "/note/timeline?type=all"),
-    user_link("词典", "/note/dict"),
+    user_link("词典", "/note/dict", img_src = "/static/image/icon_dict.svg"),
     user_link("搜索历史", "/search", "search"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),

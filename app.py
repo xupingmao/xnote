@@ -333,7 +333,8 @@ def init_app():
 def count_worker_thread():
     count = 0
     for t in threading.enumerate():
-        if t.isDaemon():
+        if t.daemon:
+            # 忽略守护线程
             continue
         count += 1
     return count
