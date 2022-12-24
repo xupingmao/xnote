@@ -44,6 +44,7 @@ def generate_filename(filename, prefix, ext=None):
         prefix = ''
     if filename is None:
         filename = time.strftime("%Y%m%d_%H%M%S")
+        filename += "_" + xutils.create_uuid()
     filename = get_safe_file_name(filename)
     if ext:
         filename += ext

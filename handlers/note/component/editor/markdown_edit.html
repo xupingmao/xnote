@@ -308,7 +308,7 @@
         // 通过剪切板上传
         $(document).on("paste", function (e) {
             e.preventDefault();
-            xnote.requestUploadByClip(e, 'N' + fileId, function (respJson) {
+            xnote.requestUploadByClip(e, '', function (respJson) {
                 console.log(respJson);
                 var link = respJson.link;
                 codeInsert(link);

@@ -4,6 +4,7 @@ import traceback
 from io import BytesIO
 
 def create_thumbnail_data(img_path, q):
+    """创建缩略图数据,此方法会在子进程中运行"""
     im = None
     crop_im = None
 
