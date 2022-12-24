@@ -18,6 +18,9 @@ import xauth
 import xconfig
 import xtemplate
 import xmanager
+import logging
+from io import BytesIO
+
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
 from .fs_mode import get_fs_page_by_mode
@@ -239,14 +242,41 @@ class FileSystemHandler:
                 yield block
                 block = fp.read(blocksize)
 
+    def create_thumbnail_data(self, img_path):
+        try:
+            from PIL import Image
+            im = Image.open(img_path)
+            w,h = im.size
+            
+            # 先裁剪成正方形
+            width = min(w,h)
+            
+            start_x = (w-width)//2
+            start_y = (h-width)//2
+            
+            stop_x = start_x + width
+            stop_y = start_y + width
+            
+            region = (start_x,start_y,stop_x,stop_y)
+            
+            logging.info("File:%s,size:%s,region:%s", img_path, im.size, region)
+
+            crop_im = im.crop(region)
+            crop_im.thumbnail((200,200))
+            img_bytes = BytesIO()
+            crop_im.save(img_bytes, format=im.format)
+            return img_bytes.getvalue()
+        except:
+            xutils.print_exc()
+            return None
+            
     def read_thumbnail(self, path, blocksize):
-        dirname = os.path.dirname(path)
-        fname   = os.path.basename(path)
-        thumbnail_path = os.path.join(dirname, ".thumbnails", fname)
-        if os.path.exists(thumbnail_path):
-            return self.read_all(thumbnail_path, blocksize)
+        data = self.create_thumbnail_data(path)
+        # print("data=", data)
+        if data != None:
+            yield data
         else:
-            return self.read_all(path, blocksize)
+            yield from self.read_all(path, blocksize)
 
     def read_file(self, path, content_type=None):
         # 强制缓存

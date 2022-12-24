@@ -65,7 +65,7 @@ def get_index_dirs():
 
 def get_file_thumbnail(fpath):
     if xutils.is_img_file(fpath):
-        return xutils.get_webpath(fpath)
+        return xutils.get_webpath(fpath) + "?mode=thumbnail"
 
     if xutils.is_text_file(fpath):
         return "/static/image/icon_txt.png"

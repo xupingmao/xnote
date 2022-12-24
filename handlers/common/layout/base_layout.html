@@ -79,9 +79,7 @@
     function loadStyle() {
       var contentWidth = parseInt("{{CONTENT_WIDTH}}");
       var winWidth = $(window).width();
-      var leftWidth = 700;
-      var rightWidth = 300;
-
+      
       // Pad设备
       if (winWidth>=800 && winWidth<1000) {
         contentWidth = winWidth - 20;
@@ -111,13 +109,22 @@
       styleText += ".main-content { width:" + contentWidth + "px; margin-left:" + marginLeft + "px;}";
       styleText += ".root{ min-height:" + rootMinHeight + "px;}";
 
+      var leftRatio = 0.7;
       if (contentWidth>=800) {
+        leftRatio = 0.7;
         styleText += ".content-left { width:70%; }";
         styleText += ".content-right { width:30%; }";
       } else {
+        leftRatio = 1.0;
         styleText += ".content-left { width: 100%; }";
         styleText += ".content-right { display: none; }";
       }
+
+      // 设备大小信息
+      xnote.device.isMobile = winWidth < xnote.MOBILE_MAX_WIDTH;
+      xnote.device.isDesktop = winWidth >= xnote.MOBILE_MAX_WIDTH;
+      xnote.device.contentWidth = contentWidth;
+      xnote.device.contentLeftWidth = parseInt(contentWidth * leftRatio);
 
       // 居中的样式
       $("#layout-css").html(styleText);

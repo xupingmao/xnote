@@ -10,22 +10,34 @@
 if (window.xnote === undefined) {
     // 全局对象
     var xnote = {};
-    // 后端接口API模块
-    xnote.api = {};
-    // 表格模块
-    xnote.table = {};
-    // 编辑器模块
-    xnote.editor = {};
-    // 状态
-    xnote.state = {};
+
+    // 设备信息
+    xnote.device = {
+        contentWidth: 0,     // 内容的宽度，包括左侧主数据和侧边栏
+        contentLeftWidth: 0, // 左侧的宽度
+        isMobile: false, // 是否是移动端
+        isDesktop: true, // 默认是桌面端
+        end: 0
+    };
 
     // 内部属性
     xnote._dialogIdStack = [];
 
     // 常量
     xnote.MOBILE_MAX_WIDTH = 1000;
-}
+    xnote.constants = {
+        MOBILE_MAX_WIDTH: 100
+    };
 
+    // 后端接口API模块
+    xnote.api = {};
+    // 表格模块
+    xnote.table = {};
+    // 编辑器模块
+    xnote.editor = {};
+    // 业务状态
+    xnote.state = {};
+}
 
 xnote.registerApiModule = function (name) {
     if (xnote.api[name] === undefined) {

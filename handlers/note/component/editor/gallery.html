@@ -16,6 +16,38 @@
     {% include note/component/view_header_tag.html %}
 </div>
 
+<style id="gallery-css" type="text/css"></style>
+
+<script type="text/javascript">
+xnote.execute(function () {
+    $("#noteIdInput").val("{{file.id}}");
+    function updateSize() { 
+        console.log("updateSize");
+        var listWidth = xnote.device.contentLeftWidth - 10;
+        var photoWidth = 150; // PC的默认值
+
+        if (xnote.device.isMobile) {
+            photoWidth = 100;
+            listWidth = listWidth - 20; // 移动端有一个padding
+        }
+
+        var cols = parseInt(listWidth / photoWidth);
+        photoWidth = parseInt(listWidth / cols);
+
+        console.log("photoWidth:", photoWidth);
+
+        var cssText = ".gallery-item{ width: ${width}px; height:${width}px;}";
+        cssText = xnote.renderTemplate(cssText, {width: photoWidth});
+
+        $("#gallery-css").html(cssText);
+        // 采用读写分离的方式，阅读和编辑使用两个不同的视图
+    }
+
+    updateSize();
+    $(window).on("resize", updateSize);
+});
+</script>
+
 <div class="card">
     <!-- 上传文件组件 -->
     {% if file.creator == _user_name %} 
@@ -54,26 +86,3 @@
     </div>
 </div>
 
-<script type="text/javascript">
-$(function () {
-    $("#noteIdInput").val("{{file.id}}");
-    function updateSize() { 
-        console.log("updateSize");
-        var listWidth = $(".file-list").width();
-        var photoWidth = 200;
-
-        if (listWidth <= 400) {
-            photoWidth = 100;
-        }
-
-        var cols = parseInt(listWidth / photoWidth);
-        photoWidth = parseInt(listWidth / cols);
-
-        $(".gallery-item").css("width", photoWidth);
-        // 采用读写分离的方式，阅读和编辑使用两个不同的视图
-    }
-
-    updateSize();
-    $(window).on("resize", updateSize);
-})
-</script>
