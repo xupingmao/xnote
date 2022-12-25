@@ -26,7 +26,6 @@ from threading import Thread
 from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, cacheutil, u, dbutil, fsutil
-from xutils import six
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -36,15 +35,15 @@ __contributors__ = []
 dbutil.register_table("schedule", "任务调度表 <schedule:id>")
 
 TASK_POOL_SIZE = 500
-
-# 对外接口
-_manager = None
-_event_manager = None
 LOCK = threading.RLock()
 _event_logger = logutil.new_mem_logger("xmanager.event")
 _async_logger = logutil.new_mem_logger("xmanager.async")
 _debug_logger = logutil.new_mem_logger("xmanager.debug")
 _error_logger = logutil.new_mem_logger("xmanager.error")
+
+# 对外接口
+_manager = None # type: HandlerManager
+_event_manager = None # type: EventManager
 
 
 def do_wrap_handler(pattern, handler_clz):
@@ -177,6 +176,11 @@ def warn(msg):
     xutils.warn("xmanager", msg)
 
 
+def import_module(name):
+    """Import module, returning the module after the last dot."""
+    __import__(name)
+    return sys.modules[name]
+
 class HandlerManager:
     """模块管理器
     启动时自动加载`handlers`目录下的处理器以及定时任务
@@ -273,8 +277,8 @@ class HandlerManager:
         if not os.path.exists(dirname):
             return
         for filename in os.listdir(dirname):
+            filepath = os.path.join(dirname, filename)
             try:
-                filepath = os.path.join(dirname, filename)
                 if os.path.isdir(filepath):
                     self.load_model_dir(
                         parent + "." + filename, unload=unload, load=load)
@@ -299,7 +303,7 @@ class HandlerManager:
                     # mod = __import__(modname, fromlist=1, level=0)
                     # six的这种方式也不错
                     if load:
-                        mod = six._import_module(modname)
+                        mod = import_module(modname)
                         self.resolve_module(mod, modname)
             except Exception as e:
                 self.failed_mods.append([filepath, e])
@@ -315,7 +319,6 @@ class HandlerManager:
             log("Failed info: %s" % info)
 
     def resolve_module(self, module, modname):
-        name = modname
         modpath = "/".join(modname.split(".")[1:-1])
         if not modpath.startswith("/"):
             modpath = "/" + modpath
@@ -454,7 +457,7 @@ class CronTaskManager:
                     if task.tm_wday == "no-repeat":
                         # 一次性任务直接删除
                         dbutil.delete(task.id)
-                        self.load_tasks()
+                        self.do_load_tasks()
                 except Exception as e:
                     xutils.log("run task [%s] failed, %s" % (task.url, e))
 
@@ -492,12 +495,8 @@ class CronTaskManager:
             CronTaskThread(run).start()
             self.thread_started = True
 
-    def add_task(self, url, interval):
-        if self._add_task(url, interval):
-            self.save_tasks()
-
     def del_task(self, url):
-        self.load_tasks()
+        self.do_load_tasks()
 
     def _add_task(self, task):
         url = task.url
@@ -520,7 +519,7 @@ class CronTaskManager:
             self.task_list.append(Storage(**task))
 
     def save_tasks(self):
-        self.load_tasks()
+        self.do_load_tasks()
 
     def get_task_list(self):
         return copy.deepcopy(self.task_list)
@@ -592,7 +591,7 @@ class WorkerThread(Thread):
 class EventHandler:
     """事件处理器,执行的时候不抛出异常"""
 
-    def __init__(self, event_type, func, is_async=True, description=''):
+    def __init__(self, event_type, func, is_async=True, description=None):
         self.event_type = event_type
         self.key = None
         self.func = func
@@ -641,7 +640,11 @@ class EventHandler:
 
 class SearchHandler(EventHandler):
 
+    pattern = None
+
     def execute(self, ctx=None):
+        assert isinstance(self.pattern, re.Pattern)
+        
         try:
             matched = self.pattern.match(ctx.key)
             if not matched:
@@ -729,15 +732,15 @@ def instance():
 
 
 @xutils.log_init_deco("xmanager.reload")
-def reload():
+def reload():    
     with LOCK:
-        _event_manager.remove_handlers()
+        get_event_manager().remove_handlers()
 
         # 重载处理器
-        _manager.reload()
+        get_handler_manager().reload()
 
         # 重新加载定时任务
-        _manager.load_tasks()
+        get_handler_manager().load_tasks()
 
         cacheutil.clear_temp()
         load_init_script()
@@ -772,39 +775,47 @@ def put_task_async(func, *args, **kw):
     """添加异步任务到队列"""
     WorkerThread.add_task(func, args, kw)
 
+def get_handler_manager():
+    # type: () -> HandlerManager
+    return _manager
+
+def get_event_manager():
+    # type: () -> EventManager
+    return _event_manager
 
 def load_tasks():
-    _manager.load_tasks()
+    get_handler_manager().load_tasks()
 
 
 def get_task_list():
-    return _manager.get_task_list()
+    return get_handler_manager().get_task_list()
 
 
 def request(*args, **kw):
     global _manager
     # request参数如下
     # localpart='/', method='GET', data=None, host="0.0.0.0:8080", headers=None, https=False, **kw
-    return _manager.app.request(*args, **kw)
+    return get_handler_manager().app.request(*args, **kw)
 
 
 def add_event_handler(handler):
-    _event_manager.add_handler(handler)
+    get_event_manager().add_handler(handler)
 
 
 def remove_event_handlers(event_type=None):
-    _event_manager.remove_handlers(event_type)
+    get_event_manager().remove_handlers(event_type)
 
 
 def set_event_handlers0(event_type, handlers, is_async=True):
-    _event_manager.remove_handlers(event_type)
+    manager = get_event_manager()
+    manager.remove_handlers(event_type)
     for handler in handlers:
-        _event_manager.add_handler(event_type, handler, is_async)
+        manager.add_handler(event_type, handler, is_async)
 
 
 def fire(event_type, ctx=None):
     """发布一个事件"""
-    _event_manager.fire(event_type, ctx)
+    get_event_manager().fire(event_type, ctx)
 
 
 def listen(event_type_list, is_async=True, description=None):
@@ -815,19 +826,19 @@ def listen(event_type_list, is_async=True, description=None):
         is_async = False
 
     def deco(func):
-        global _event_manager
+        event_manager = get_event_manager()
         if isinstance(event_type_list, list):
             for event_type in event_type_list:
                 handler = EventHandler(event_type, func,
                                        is_async=is_async,
                                        description=description)
-                _event_manager.add_handler(handler)
+                event_manager.add_handler(handler)
         else:
             event_type = event_type_list
             handler = EventHandler(event_type, func,
                                    is_async=is_async,
                                    description=description)
-            _event_manager.add_handler(handler)
+            event_manager.add_handler(handler)
         return func
     return deco
 
@@ -855,6 +866,6 @@ def add_visit_log(user_name, url):
 
 
 def restart():
-    _manager.app.stop()
+    get_handler_manager().app.stop()
     xconfig.EXIT_CODE = 205
     sys.exit(205)

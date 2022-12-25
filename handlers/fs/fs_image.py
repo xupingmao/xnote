@@ -1,9 +1,10 @@
 # encoding=utf-8
 import logging
 import traceback
+import multiprocessing
 from io import BytesIO
 
-def create_thumbnail_data(img_path, q):
+def do_create_thumbnail_data(img_path, q):
     """创建缩略图数据,此方法会在子进程中运行"""
     im = None
     crop_im = None
@@ -35,3 +36,11 @@ def create_thumbnail_data(img_path, q):
     except:
         traceback.print_exc()
         q.put(None)
+
+def create_thumbnail_data(path):
+    """TODO: 热加载的时候Pickle反序列化会报错"""
+    q = multiprocessing.Queue()
+    p = multiprocessing.Process(target = do_create_thumbnail_data, args=(path, q))
+    p.start()
+    p.join(timeout = 0.5)
+    return q.get()

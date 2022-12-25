@@ -26,7 +26,7 @@ from xutils import logutil
 from xutils import cacheutil
 from xutils.functions import listremove
 
-session_db = None # type: dbutil.LdbHashTable | None
+session_db = None # type: dbutil.LdbHashTable
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
 

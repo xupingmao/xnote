@@ -247,12 +247,7 @@ class FileSystemHandler:
     def read_thumbnail(self, path, blocksize):
         # TODO 限制进程数量
         # 在SAE环境中，pillow处理图片后无法释放内存，改成用子进程处理
-        q = multiprocessing.Queue()
-        p = multiprocessing.Process(target = fs_image.create_thumbnail_data, args=(path, q))
-        p.start()
-        p.join(timeout = 0.5)
-        data = q.get()
-        # print("data=", data)
+        data = fs_image.create_thumbnail_data(path)
         if data != None:
             yield data
         else:

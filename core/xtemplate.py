@@ -19,10 +19,11 @@ import xconfig
 import xauth
 import xutils
 from tornado.template import Template, Loader
-from xutils import dateutil, quote, u
+from xutils import dateutil, u
 from xutils import tojson
 from xutils import Storage
 from xutils import textutil
+from six.moves.urllib.parse import quote
 import x_trace
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
@@ -34,7 +35,7 @@ NAMESPACE = dict(
 
 _lang_dict = dict()
 _mobile_name_dict = dict()
-_loader = None
+_loader = None # type: XnoteLoader
 NAV_LIST = []
 
 SEARCH_DAO = xutils.DAO("search")
@@ -363,7 +364,7 @@ class Panel:
 
     def render(self):
         html = '<div class="row x-plugin-panel">'
-        for child in html:
+        for child in self.children:
             html += child.render()
         html += '</div>'
         return html

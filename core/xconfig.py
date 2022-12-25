@@ -305,6 +305,7 @@ def init(boot_config_file=None, boot_config_kw = None):
 
 
 def load_default_boot_config():
+    # type: () -> dict
     text = fsutil.readfile("config/boot/boot.default.properties")
     return textutil.parse_config_text(text, "dict")
 
@@ -436,6 +437,7 @@ def load_file_type_config0(fpath):
 
 
 def load_config_as_dict(fpath):
+    # type: (str) -> dict
     from xutils import fsutil, textutil
     text = fsutil.readfile(fpath)
     return textutil.parse_config_text(text, 'dict')
