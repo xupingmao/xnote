@@ -691,13 +691,24 @@ class TouchHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
+        resp_type = xutils.get_argument("resp_type", "")
         user_name = xauth.current_name()
         # TODO 创建一个watch日志记录即可
-        note = NOTE_DAO.get_by_id_creator(id, user_name)
+        note = NoteDao.get_by_id_creator(id, user_name)
         if note != None:
-            update_and_notify(note, dict())
+            kw = Storage()
+            kw.version = note.version+1
+            kw.name = note.name
+            kw.mtime = xutils.format_datetime()
+            update_and_notify(note, kw)
+        
+        if resp_type == "json":
+            return dict(code="success")
 
-        raise web.found("/note/%s" % id)
+        raise web.found(note.url)
+    
+    def POST(self):
+        return self.GET()
 
 class DraftHandler:
     """保存草稿功能"""

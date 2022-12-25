@@ -43,6 +43,15 @@ xnote.execute(function () {
         // 采用读写分离的方式，阅读和编辑使用两个不同的视图
     }
 
+    xnote.events.onUploadPrepareEvent(function (event) {
+        console.log("onUploadPrepareEvent", event);
+        if (event.target.uploadType == "fs") {
+            $.post("/note/touch", {id: "{{file.id}}", resp_type: "json"}, function (resp) {
+                console.log(resp);
+            });
+        }
+    });
+
     updateSize();
     $(window).on("resize", updateSize);
 });

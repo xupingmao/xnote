@@ -304,3 +304,21 @@ $(function () {
   
   init();
 });
+
+
+xnote.events.fireUploadEvent = function (event) {
+  xnote.fire("fs.upload", event);
+}
+
+xnote.events.onUploadEvent = function (listener) {
+  xnote.on("fs.upload", listener);
+}
+
+xnote.events.fireUploadPrepareEvent = function (event) {
+  console.log("fireUploadPrepareEvent", event);
+  xnote.fire("fs.upload.prepare", event);
+}
+
+xnote.events.onUploadPrepareEvent = function (listener) {
+  xnote.on("fs.upload.prepare", listener);
+}

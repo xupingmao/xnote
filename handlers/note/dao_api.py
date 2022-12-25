@@ -19,6 +19,11 @@ class NoteDao:
         raise NotImplementedError()
     
     @staticmethod
+    def get_by_id_creator(id, creator):
+        """通过ID+创建用户查询笔记信息"""
+        raise NotImplementedError()
+    
+    @staticmethod
     def batch_query_list(id_list):
         """通过ID列表批量查询笔记"""
         raise NotImplementedError()

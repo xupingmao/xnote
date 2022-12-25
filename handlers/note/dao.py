@@ -1654,6 +1654,7 @@ xutils.register_func("note.get_gallery_path", get_gallery_path)
 xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
 
 NoteDao.get_by_id = get_by_id
+NoteDao.get_by_id_creator = get_by_id_creator
 NoteDao.get_root = get_root
 NoteDao.batch_query_list = batch_query_list
 NoteDao.add_history = add_history

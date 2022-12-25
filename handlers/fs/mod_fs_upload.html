@@ -80,6 +80,11 @@ $(function () {
 
             $img.attr( 'src', src );
         }, thumbnailWidth, thumbnailHeight );
+
+        // 发送上传准备的消息
+        xnote.events.fireUploadPrepareEvent({
+            uploadType: "fs"
+        });
     });
 
     // 文件上传过程中创建进度条实时显示。
@@ -103,6 +108,11 @@ $(function () {
         setTimeout(function () {
             $("#" + file.id).remove();
         }, 500);
+        // 发送上传完成的消息
+        xnote.events.fireUploadEvent({
+            uploadType: "fs",
+            fileId: file.id
+        });
     });
 
     // 文件上传失败，显示上传出错。
