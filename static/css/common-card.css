@@ -93,7 +93,7 @@ body {
 }
 
 /** 移动端样式放在最后 **/
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
     /** mobile **/
     .main-content {
         padding-left: 10px;

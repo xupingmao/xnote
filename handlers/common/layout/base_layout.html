@@ -79,11 +79,6 @@
     function loadStyle() {
       var contentWidth = parseInt("{{CONTENT_WIDTH}}");
       var winWidth = $(window).width();
-      
-      // Pad设备
-      if (winWidth>=800 && winWidth<1000) {
-        contentWidth = winWidth - 20;
-      }
 
       var marginLeft = (winWidth - contentWidth) / 2;
       // 设置最小的高度
@@ -110,7 +105,7 @@
       styleText += ".root{ min-height:" + rootMinHeight + "px;}";
 
       var leftRatio = 0.7;
-      if (contentWidth>=800) {
+      if (contentWidth>=xnote.MOBILE_MAX_WIDTH) {
         leftRatio = 0.7;
         styleText += ".content-left { width:70%; }";
         styleText += ".content-right { width:30%; }";
