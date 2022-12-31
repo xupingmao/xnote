@@ -46,5 +46,7 @@ def create_thumbnail_data(path):
     p.join(timeout = 0.5)
     try:
         return q.get(False)
-    except:
+    except Exception as e:
+        logging.error("image thumbnail data: exception occurs")
+        traceback.print_exc()
         return None

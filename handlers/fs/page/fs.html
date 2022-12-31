@@ -11,7 +11,7 @@
     <input type="text" name="path" class="hide" value="{{?path}}"/>
 {% end %}
 
-{% block body %}
+{% block body_left %}
 
 {% init find_key = "" %}
 {% init error = "" %}
@@ -97,6 +97,6 @@
 
 {% end %}
 
-{% block aside %}
-    {% include fs/mod_aside.html %}
+{% block body_right %}
+    {% include fs/component/fs_sidebar.html %}
 {% end %}

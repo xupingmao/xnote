@@ -1,0 +1,21 @@
+{% set data_list = [
+    Storage(name = "收藏夹", url = "/fs_bookmark"),
+    Storage(name = "图片管理(TODO)", url = "/system/todo"),
+    Storage(name = "文档管理(TODO)", url = "/system/todo"),
+] %}
+
+{% init show_app_index_icon = False %}
+{% include common/sidebar/app_index.html %}
+
+<div class="card list">
+
+    {% for item in data_list %}
+        <a class="list-link" href="{{item.url}}">
+            <span>{{item.name}}</span>
+            <div class="float-right">
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+    {% end %}
+
+</div>

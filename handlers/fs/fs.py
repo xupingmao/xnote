@@ -12,6 +12,9 @@ PS. 类似的功能可以参考 webdav
 """
 import os
 import sys
+import time
+import datetime
+
 import mimetypes
 import web
 import xutils
@@ -254,35 +257,46 @@ class FileSystemHandler:
             yield from self.read_all(path, blocksize)
 
     def read_file(self, path, content_type=None):
-        # 强制缓存
-        if not xconfig.DEBUG:
-            web.header("Cache-Control", "max-age=3600")
-
         environ = web.ctx.environ
         etag = '"%s"' % os.path.getmtime(path)
         client_etag = environ.get('HTTP_IF_NONE_MATCH')
+
+        if etag == client_etag:
+            web.ctx.status = "304 Not Modified"
+            return b'' # 其实webpy已经通过yield空bytes来避免None
+
+
+        # 需要注意的是，服务器端在生成状态码为 304 的响应的时候，必须同时生成以下会存在于对应的 200 响应中的首部：
+        # Cache-Control、Content-Location、Date、ETag、Expires 和 Vary。
+
+        if not xconfig.DEBUG:
+            # 强制缓存
+            web.header("Cache-Control", "max-age=3600")
+        else:
+            # 在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证 (协商缓存验证)。
+            web.header("Cache-Control", "no-cache")
         web.header("Etag", etag)
+        web.header("Vary", "*")
+        web.header("Content-Location", web.ctx.fullpath)
+
+        expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        web.header("Expires", expires.strftime("%a, %d %b %Y %H:%M:%S GMT"))
 
         if content_type != None:
             web.header("Content-Type", content_type)
         else:
             self.handle_content_type(path)
-        # self.handle_content_encoding(ext)
 
-        if etag == client_etag:
-            web.ctx.status = "304 Not Modified"
-            return b'' # 其实webpy已经通过yield空bytes来避免None
+        http_range = environ.get("HTTP_RANGE")
+        blocksize = 64 * 1024;
+
+        if http_range is not None:
+            return self.read_range(path, http_range, blocksize)
         else:
-            http_range = environ.get("HTTP_RANGE")
-            blocksize = 64 * 1024;
-
-            if http_range is not None:
-                return self.read_range(path, http_range, blocksize)
-            else:
-                mode = xutils.get_argument("mode", "")
-                if mode == "thumbnail":
-                    return self.read_thumbnail(path, blocksize)
-                return self.read_all(path, blocksize)            
+            mode = xutils.get_argument("mode", "")
+            if mode == "thumbnail":
+                return self.read_thumbnail(path, blocksize)
+            return self.read_all(path, blocksize)            
 
     def handle_get(self, path, content_type=None):
         if path == "":

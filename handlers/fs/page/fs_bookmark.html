@@ -18,7 +18,7 @@
 {% end %}
 
 
-{% block body %}
+{% block body_left %}
 
     {% init find_key = "" %}
     {% init error = "" %}
@@ -71,4 +71,9 @@ $(function () {
     })
 })
 </script>
+{% end %}
+
+
+{% block body_right %}
+    {% include fs/component/fs_sidebar.html %}
 {% end %}
