@@ -2,11 +2,23 @@
 import logging
 import traceback
 import multiprocessing
+import xconfig
+import os
+import sys
+import subprocess
+import base64
 
 from io import BytesIO
+from xutils import cacheutil
 
-def do_create_thumbnail_data(img_path, q):
+
+def do_create_thumbnail_async(img_path, q):
     """创建缩略图数据,此方法会在子进程中运行"""
+    result = do_create_thumbnail_inner(img_path)
+    q.put(result)
+
+def do_create_thumbnail_inner(img_path):
+    """创建缩略图"""
     im = None
     crop_im = None
 
@@ -32,20 +44,51 @@ def do_create_thumbnail_data(img_path, q):
         crop_im.thumbnail((200,200))
         img_bytes = BytesIO()
         crop_im.save(img_bytes, format=im.format)
-        result = img_bytes.getvalue()
-        q.put(result)
+        return img_bytes.getvalue()
     except:
         traceback.print_exc()
-        q.put(None)
+        return None
+
+
+class ImageCache:
+
+    cache = cacheutil.PrefixedCache("image-cache:")
+
+    @classmethod
+    def get(cls, path):
+        cls.cache.get(path)
+
+    @classmethod
+    def save(cls, path, data):
+        cls.cache.put(path, data)
+
+
+def do_create_thumbnail(path, debug=False):
+    q = multiprocessing.Queue()
+    if debug:
+        return do_create_thumbnail_inner(path)
+    else:
+        # Windows和Mac不能使用COW的方式创建线程，multiprocessing性能比较差
+        args = [sys.executable, "tools/image-thumbnail.py", path]
+        with subprocess.Popen(args, stdout=subprocess.PIPE, shell=True) as proc:
+            buf = proc.stdout.read()
+            if buf == "":
+                return None
+            return base64.b64decode(buf.decode("utf-8"))
 
 def create_thumbnail_data(path):
     """TODO: 热加载的时候Pickle反序列化会报错"""
-    q = multiprocessing.Queue()
-    p = multiprocessing.Process(target = do_create_thumbnail_data, args=(path, q))
-    p.start()
-    p.join(timeout = 0.5)
+
+    cache_data = ImageCache.get(path)
+    if cache_data != None:
+        logging.info("hit image cache, path=%s", path)
+        return cache_data
+
     try:
-        return q.get(False)
+        data = do_create_thumbnail(path)
+        if data != None:
+            ImageCache.save(path, data)
+        return data
     except Exception as e:
         logging.error("image thumbnail data: exception occurs")
         traceback.print_exc()

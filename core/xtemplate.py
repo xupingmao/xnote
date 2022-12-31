@@ -58,22 +58,25 @@ def load_languages():
         _lang_dict[name] = config
 
 
-class NavItem(Storage):
+class NavItem:
 
-    field_text = "导航文字"
-    field_url = "导航URL"
+    def __init__(self, text = "", need_login = False, need_logout = False, require_admin = False, url = "", css_class = ""):
+        self.text = text
+        self.need_login = need_login
+        self.need_logout = need_logout
+        self.require_admin = require_admin
+        self.url = url
+        self.css_class = css_class
 
     def check_platform(self):
-        if self.desktop_only:
-            return not is_mobile_device()
         return True
 
     def is_visible(self):
-        if self.require_admin:
-            return xauth.is_admin() and self.check_platform()
-
         if self.need_login:
             return xauth.has_login() and self.check_platform()
+        
+        if self.require_admin:
+            return xauth.is_admin() and self.check_platform()
 
         if self.need_logout:
             return not xauth.has_login() and self.check_platform()
@@ -91,13 +94,13 @@ def load_nav_list():
     NAV_LIST.append(NavItem(text="分享", need_login=False,
                     require_admin=False, url="/note/public"))
     NAV_LIST.append(NavItem(text="插件", need_login=True,
-                    require_admin=False, desktop_only=True, url="/plugin_list"))
+                    require_admin=False, css_class="desktop-only", url="/plugin_list"))
     NAV_LIST.append(NavItem(text="文件", need_login=True,
-                    require_admin=True, desktop_only=True, url="/fs_bookmark"))
+                    require_admin=True, css_class="desktop-only", url="/fs_bookmark"))
     NAV_LIST.append(NavItem(text="设置", need_login=True,
                     require_admin=False, url="/system/settings"))
     NAV_LIST.append(NavItem(text="后台", need_login=True,
-                    require_admin=True, desktop_only=True, url="/system/admin"))
+                    require_admin=True, css_class="desktop-only", url="/system/admin"))
     NAV_LIST.append(NavItem(text="登录", need_logout=True,
                     require_admin=False, url="/login"))
 

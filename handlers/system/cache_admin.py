@@ -42,6 +42,8 @@ class CacheHandler:
             expire_time = cache.get_expire(key)
             expire_text = dateutil.format_time(expire_time)
             value = cache.get_raw(key)
+            if isinstance(value, bytes):
+                value = str(value)
             value_short = value
             if value != None and len(value) > 50:
                 value_short = value[:50] + "..."

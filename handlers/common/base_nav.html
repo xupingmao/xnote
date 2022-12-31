@@ -21,7 +21,7 @@
       <ul class="nav-ul">
         {% for nav in _nav_list %}
           {% if nav.is_visible() %}
-            <li class="nav-item">
+            <li class="nav-item {{nav.css_class}}">
               <a href="{{nav.url}}">{{T(nav.text)}}</a>
             </li>
           {% end %}

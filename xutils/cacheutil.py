@@ -102,7 +102,10 @@ class Cache:
         if value != None:
             if self.is_alive(key):
                 self.dict.move_to_end(key, last=False) # 移动到最前面
-                obj = json.loads(value)
+                if isinstance(value, bytes):
+                    obj = value
+                else:
+                    obj = json.loads(value)
                 return self._fix_storage(obj)
             else:
                 self.delete(key)
@@ -114,7 +117,10 @@ class Cache:
     def put(self, key, value, expire=60*5, random_range=60*5):
         assert expire > 0
         with self.lock:
-            self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
+            if isinstance(value, bytes):
+                self.dict[key] = value
+            else:
+                self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
             self.dict.move_to_end(key, last=False) # 移动到最前面
             self.expire_dict[key] = time.time() + expire + random.randint(0, random_range)
             
