@@ -1,21 +1,12 @@
 # encoding=utf-8
 import logging
 import traceback
-import multiprocessing
-import xconfig
-import os
 import sys
 import subprocess
 import base64
 
 from io import BytesIO
 from xutils import cacheutil
-
-
-def do_create_thumbnail_async(img_path, q):
-    """创建缩略图数据,此方法会在子进程中运行"""
-    result = do_create_thumbnail_inner(img_path)
-    q.put(result)
 
 def do_create_thumbnail_inner(img_path):
     """创建缩略图"""
@@ -64,27 +55,26 @@ class ImageCache:
 
 
 def do_create_thumbnail(path, debug=False):
-    q = multiprocessing.Queue()
     if debug:
         return do_create_thumbnail_inner(path)
     else:
-        # Windows和Mac不能使用COW的方式创建线程，multiprocessing性能比较差
+        logging.info("path=%s", path)
+        # multiprocessing在Windows和Mac的性能比较差，因为他们默认使用新线程而不是fork的方式创建线程，
         args = [sys.executable, "tools/image-thumbnail.py", path]
-        with subprocess.Popen(args, stdout=subprocess.PIPE, shell=True) as proc:
+        with subprocess.Popen(args, stdout=subprocess.PIPE) as proc:
             buf = proc.stdout.read()
-            if buf == "":
+            if buf.strip() == "":
                 return None
             return base64.b64decode(buf.decode("utf-8"))
 
 def create_thumbnail_data(path):
-    """TODO: 热加载的时候Pickle反序列化会报错"""
-
     cache_data = ImageCache.get(path)
     if cache_data != None:
         logging.info("hit image cache, path=%s", path)
         return cache_data
 
     try:
+        # SAE上处理PIL存在泄漏，暂时先通过子进程处理
         data = do_create_thumbnail(path)
         if data != None:
             ImageCache.save(path, data)

@@ -43,3 +43,5 @@ if __name__ == "__main__":
     if data != None:
         buf = base64.b64encode(data)
         sys.stdout.write(buf.decode("utf-8"))
+    else:
+        sys.stdout.write("")
