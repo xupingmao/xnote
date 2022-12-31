@@ -182,15 +182,12 @@ h3.marked-heading {
 /* 菜单的链接样式 */
 .nav-item>a, .menu-link {
     color: white;
-    padding: 3px;
+    padding: 3px 5px;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .nav-item>a:hover, .menu-link:hover {
-    /*color: white;*/
-    /*background-color: #08c;*/
-    /*text-decoration: none;*/
     text-decoration: underline;
 }
 
@@ -213,16 +210,6 @@ h3.marked-heading {
     word-wrap: break-word;
     word-break: break-all;
 }
-
-/*
-.table tr:hover td {
-    background: none;
-}
-
-.table tr:hover {
-    background: #eee;
-}
-*/
 
 .row-no, .index-td {
     width: 50px;
@@ -464,7 +451,7 @@ li.menu-item:hover {
 .nav-search {
     width: 345px;
     float: right;
-    padding: 5px 0px;
+    padding: 10px 0px;
 }
 
 .navMenu-top { 
@@ -864,7 +851,7 @@ li.menu-item:hover {
     list-style: none;
     padding-left: 0px;
     margin: 0px;
-    line-height: 40px;
+    line-height: 50px;
 }
 
 .nav-item {

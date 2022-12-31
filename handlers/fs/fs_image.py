@@ -2,6 +2,7 @@
 import logging
 import traceback
 import multiprocessing
+
 from io import BytesIO
 
 def do_create_thumbnail_data(img_path, q):
@@ -43,4 +44,7 @@ def create_thumbnail_data(path):
     p = multiprocessing.Process(target = do_create_thumbnail_data, args=(path, q))
     p.start()
     p.join(timeout = 0.5)
-    return q.get()
+    try:
+        return q.get(False)
+    except:
+        return None

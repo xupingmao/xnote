@@ -44,7 +44,7 @@ BUILTIN_USER_DICT = None
 NAME_LENGTH_MIN  = 4
 PASSWORD_LEN_MIN = 6
 INVALID_NAMES    = None
-USER_CONFIG_PROP = None
+USER_CONFIG_PROP = None # type: dict
 MAX_SESSION_SIZE = 20
 SESSION_EXPIRE   = 24 * 3600 * 7
 PRINT_DEBUG_LOG  = False
@@ -167,6 +167,8 @@ def list_user_session_id(user_name):
     session_id_list = user_session_rel_db.get(user_name)
     if session_id_list is None:
         return []
+    
+    assert isinstance(session_id_list, list)
 
     expire_id_set = set()
     for sid in session_id_list:
