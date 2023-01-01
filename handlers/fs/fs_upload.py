@@ -75,7 +75,6 @@ def try_touch_note(note_id):
 def try_lock_file(fpath):
     return True
 
-
 def try_fix_orientation(fpath):
     fix_orientation = xutils.get_argument("fix_orientation", "")
     # print("fix_orientation", fix_orientation)
@@ -113,7 +112,7 @@ def try_fix_orientation(fpath):
 # 业务上用到的函数
 
 
-def get_upload_file_path(user, filename, upload_dir="files", replace_exists=False):
+def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=False):
     """生成上传文件名"""
     import xconfig
     if xconfig.USE_URLENCODE:
@@ -132,7 +131,7 @@ def get_upload_file_path(user, filename, upload_dir="files", replace_exists=Fals
         # get upload directory
         return os.path.abspath(dirname), webpath
 
-    while not replace_exists and os.path.exists(newfilepath):
+    while not rename_conflict and os.path.exists(newfilepath):
         name, ext = os.path.splitext(filename)
         # 使用下划线，括号会使marked.js解析图片url失败
         temp_filename = "{}_{}{}".format(name, fileindex, ext)
@@ -154,13 +153,13 @@ class UploadHandler:
         note_id = xutils.get_argument("note_id")
         user_name = xauth.current_name()
 
-        if file.filename != None:
+        if file.filename != None:            
             filename = get_safe_file_name(file.filename)
             if file.filename == "":
                 return dict(code="fail", message="filename is empty")
             basename, ext = os.path.splitext(filename)
             if name == "auto":
-                # filename = str(uuid.uuid1()) + ext
+                # iOS上传文件截图文件固定是image.png
                 filename = generate_filename(None, prefix, ext)
             # xutils.makedirs(dirname)
             filepath, webpath = get_upload_file_path(user_name, filename)
@@ -222,6 +221,15 @@ class RangeUploadHandler:
             xmanager.fire("fs.upload", dict(user=user_name,
                           path=dest_path, fpath=dest_path))
 
+    def is_fixed_name(self, filename):
+        name, ext = os.path.splitext(filename)
+        return name == "image"
+
+    def find_available_path(self, filename):
+        name, ext = os.path.splitext(filename)
+        assert name == "image"
+        return name + "_" + xutils.create_uuid() + ext
+
     @xauth.login_required()
     def POST(self):
         user_name = xauth.current_name()
@@ -251,13 +259,17 @@ class RangeUploadHandler:
             filename = get_safe_file_name(filename)
             filename = xutils.get_real_path(filename)
             if dirname == "auto":
-                filename = generate_filename(filename, prefix)
+                filename = generate_filename(None, prefix)
                 filepath, webpath = get_upload_file_path(
-                    user_name, filename, replace_exists=True)
+                    user_name, filename, rename_conflict=True)
                 dirname = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
             else:
                 # TODO check permission.
+                filepath = os.path.join(dirname, filename)
+            
+            if self.is_fixed_name(origin_name):
+                filename = self.find_available_path(origin_name)
                 filepath = os.path.join(dirname, filename)
 
             if chunk == 0:
