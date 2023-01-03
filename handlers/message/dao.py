@@ -543,7 +543,19 @@ def get_message_stat0(user):
     return stat
 
 
+def get_empty_stat():
+    stat = Storage()
+    stat.task_count = 0
+    stat.log_count = 0
+    stat.done_count = 0
+    stat.cron_count = 0
+    stat.key_count = 0
+    stat.canceled_count = 0
+    return stat
+
 def get_message_stat(user):
+    if user == None:
+        return get_empty_stat()
     check_param_user(user)
 
     value = _msg_stat_cache.get(user)
