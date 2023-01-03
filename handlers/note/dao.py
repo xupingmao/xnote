@@ -1530,8 +1530,16 @@ def refresh_note_stat(user_name):
     dbutil.put("user_stat:%s:note" % user_name, stat)
     return stat
 
+def get_empty_note_stat():
+    stat = Storage()
+    stat.total = 0
+    stat.group_count = 0
+    return stat
+
 
 def get_note_stat(user_name):
+    if user_name == None:
+        return get_empty_note_stat()
     stat = dbutil.get("user_stat:%s:note" % user_name)
     if stat is None:
         stat = refresh_note_stat(user_name)
