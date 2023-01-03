@@ -572,6 +572,8 @@ def get_message_stat(user):
 
 
 def refresh_message_stat(user):
+    if user == None:
+        return
     # TODO 优化，只需要更新原来的tag和新的tag
     task_count = count_by_tag(user, "task")
     log_count = count_by_tag(user, "log")
