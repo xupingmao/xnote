@@ -27,6 +27,8 @@ def get_mem_info_by_psutil():
     sys_mem           = psutil.virtual_memory()
     sys_mem_used      = xutils.format_size(sys_mem.used)
     sys_mem_total     = xutils.format_size(sys_mem.total)
+    if xutils.is_mac():
+        sys_mem_used = xutils.format_size(sys_mem.total * sys_mem.percent / 100)
     return Storage(mem_used = mem_used, sys_mem_used = sys_mem_used, sys_mem_total = sys_mem_total)
 
 def get_mem_info_by_tasklist():

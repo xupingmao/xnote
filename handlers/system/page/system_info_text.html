@@ -1,0 +1,28 @@
+{% extends base.html %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
+{% end %}
+
+{% block body_left %}
+
+{% include system/component/system_css.html %}
+{% init comment_html = "" %}
+
+<div class="card">
+    <div class="card-title">
+        <span>系统信息</span>
+        <div class="float-right">
+            <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <textarea class="row" rows="30">{{text}}</textarea>
+    {% if comment_html != "" %}
+    <div class="info light">{% raw comment_html %}</div>
+    {% end %}
+</div>
+
+{% end %}

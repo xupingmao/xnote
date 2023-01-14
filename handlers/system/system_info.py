@@ -8,14 +8,21 @@ import xutils
 import sys
 import platform
 import xconfig
+import os
 from xutils import dateutil
 from xutils import fsutil
 from xutils import mem_util
+from xutils import Storage
 
 try:
     import sqlite3
 except ImportError:
     sqlite3 = None
+
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 def get_xnote_version():
     return xconfig.get_global_config("system.version")
@@ -45,9 +52,47 @@ def get_free_data_space():
 
 class SystemInfoItem:
 
-    def __init__(self, name = "", value = ""):
+    def __init__(self, name = "", value = "", link = ""):
         self.name  = name
         self.value = value
+        self.link = link
+
+def get_sys_info_detail():
+    if psutil is None:
+        return Storage(error = "psutil is None")
+    p = psutil.Process(pid=os.getpid())
+    mem_info = p.memory_info()
+    sys_mem = psutil.virtual_memory()
+    swap_memory = psutil.swap_memory()
+    cpu_freq = psutil.cpu_freq()
+
+    return Storage(
+        cpu = Storage(
+            count = psutil.cpu_count(),
+            freq = Storage(current = cpu_freq.current, max = cpu_freq.max, min = cpu_freq.min),
+        ),
+        process_mem = Storage(
+            rss = xutils.format_size(mem_info.rss),
+            vms = xutils.format_size(mem_info.vms),
+            # memory_full_info = p.memory_full_info(),
+        ),
+        system_mem = Storage(
+            total = xutils.format_size(sys_mem.total),
+            available = xutils.format_size(sys_mem.available),
+            percent = sys_mem.percent,
+            used = xutils.format_size(sys_mem.used),
+            free = xutils.format_size(sys_mem.free),
+            active = xutils.format_size(sys_mem.active),
+            inactive = xutils.format_size(sys_mem.inactive),
+            wired = xutils.format_size(sys_mem.wired),
+        ),
+        swap_memory = Storage(
+            total = xutils.format_size(swap_memory.total),
+            used = xutils.format_size(swap_memory.used),
+            free = xutils.format_size(swap_memory.free),
+            percent = swap_memory.percent,
+        ),
+    )
 
 class InfoHandler:
 
@@ -55,7 +100,14 @@ class InfoHandler:
     def GET(self):
         p = xutils.get_argument("p", "")
         if p == "config_dict":
-            return xconfig.get_config_dict()
+            text = xconfig.get_config_dict()
+            text = xutils.tojson(text, format=True)
+            return xtemplate.render("system/page/system_info_text.html", text=text)
+        if p == "sys_info_detail":
+            sys_info = get_sys_info_detail()
+            text = xutils.tojson(sys_info, format=True)
+            comment = "wired代表系统占用内存"
+            return xtemplate.render("system/page/system_info_text.html", text=text, comment_html = comment)
 
         mem_info = mem_util.get_mem_info()
         sys_mem_info = "%s/%s" % (mem_info.sys_mem_used, mem_info.sys_mem_total)
@@ -64,7 +116,6 @@ class InfoHandler:
             SystemInfoItem("Python版本", value = get_python_version()),
             SystemInfoItem("Xnote版本", value = get_xnote_version()),
             SystemInfoItem("应用内存使用量", value = mem_info.mem_used),
-            SystemInfoItem("系统内存使用量", value = sys_mem_info),
             SystemInfoItem("磁盘可用容量", get_free_data_space()),
             SystemInfoItem("数据库驱动", xconfig.get_system_config("db_driver")),
             SystemInfoItem("sqlite版本", sqlite3.sqlite_version if sqlite3 != None else ''),
@@ -72,6 +123,9 @@ class InfoHandler:
             SystemInfoItem("操作系统", platform.system()),
             SystemInfoItem("操作系统版本", platform.version()),
             SystemInfoItem("系统启动时间", get_startup_time()),
+            SystemInfoItem("系统配置", "查看", link = "/system/info?p=config_dict"),
+            SystemInfoItem("详细系统信息", "查看", link="/system/info?p=sys_info_detail"),
+            SystemInfoItem("浏览器信息", "查看", link = "/tools/browser_info"),
         ]
 
         return xtemplate.render("system/page/system_info.html", items = items, 

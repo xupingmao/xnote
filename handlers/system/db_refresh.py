@@ -11,6 +11,7 @@
 
 import xauth
 from xutils import dbutil
+from xutils import cacheutil
 
 class RefreshHandler:
 
@@ -20,6 +21,7 @@ class RefreshHandler:
         for table_info in dbutil.get_table_dict_copy().values():
             count = dbutil.count_table(table_info.name)
             result.append((table_info.name, count))
+        cacheutil._global_cache.clear_expired()
         return result
 
 

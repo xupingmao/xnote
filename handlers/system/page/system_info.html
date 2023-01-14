@@ -22,17 +22,14 @@
         <div class="settings-row">
             <div class="settings-key">{{item.name}}</div>
             <div class="settings-value">
-                {{item.value}}
+                {% if item.link != "" %}
+                    <a class="btn btn-default" href="{{item.link}}">{{item.value}}</a>
+                {% else %}
+                    {{item.value}}
+                {% end %}
             </div>
         </div>
     {% end %}
-    
-    <div class="settings-row btn-line-height">
-        <div class="settings-key">浏览器信息</div>
-        <div class="settings-value">
-            <a class="btn btn-default" href="/tools/browser_info">查看</a>
-        </div>
-    </div>
 
     <div class="settings-row btn-line-height">
         <div class="settings-key">重启应用</div>

@@ -76,7 +76,6 @@ def log_error(msg):
     print(msg)
 
 
-
 class Cache:
     """缓存实现,一般情况下不要直接用它,优先使用 PrefixedCache, 这样便于迁移到Redis之类的分布式缓存"""
 
@@ -139,7 +138,6 @@ class Cache:
                 del self.expire_dict[key]
 
     def check_size_and_clear(self):
-        # TODO 清理失效的缓存
         if self.max_size <= 0:
             return
 
@@ -152,6 +150,12 @@ class Cache:
 
     def keys(self):
         return self.dict.keys()
+    
+    def clear_expired(self):
+        """清理失效的缓存"""
+        for key in self.keys():
+            if not self.is_alive(key):
+                self.delete(key)
 
 class DummyCache:
     """用于禁用缓存, 兼容缓存的API"""
