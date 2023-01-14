@@ -84,7 +84,7 @@ def get_sys_info_detail():
             free = xutils.format_size(sys_mem.free),
             active = xutils.format_size(sys_mem.active),
             inactive = xutils.format_size(sys_mem.inactive),
-            wired = xutils.format_size(xutils.attrget(sys_mem, "wired", 0),
+            wired = xutils.format_size(xutils.attrget(sys_mem, "wired", 0)),
         ),
         swap_memory = Storage(
             total = xutils.format_size(swap_memory.total),
