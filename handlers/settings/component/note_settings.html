@@ -9,29 +9,26 @@
 <div class="settings-row">
     <div class="settings-key">关于系统</div>
     <div class="settings-value">
-        <a href="/code/wiki/README.md">查看</a>
-        <i class="fa fa-chevron-right"></i>
+        <a class="btn btn-default" href="/code/wiki/README.md">查看</a>
     </div>
 </div>
 
 <div class="settings-row admin-visible mobile-only">
     <div class="settings-key">文件管理</div>
     <div class="settings-value">
-        <a href="/fs_list">进入</a>
-        <i class="fa fa-chevron-right"></i>
+        <a class="btn btn-default" href="/fs_list">进入</a>
     </div>
 </div>
 
 <div class="settings-row admin-visible mobile-only">
     <div class="settings-key">插件管理</div>
     <div class="settings-value">
-        <a href="/plugins_list">进入</a>
-        <i class="fa fa-chevron-right"></i>
+        <a class="btn btn-default" href="/plugins_list">进入</a>
     </div>
 </div>
 
 <div class="settings-row">
-    <div class="settings-key">首页</div>
+    <div class="settings-key">桌面端首页</div>
     <div class="settings-value">
         <select name="HOME_PATH" data-type="str" value="{{HOME_PATH}}">
             <option value="/note/group">笔记本列表</option>
@@ -43,7 +40,7 @@
 </div>
 
 <div class="settings-row">
-    <div class="settings-key">首页(移动端)</div>
+    <div class="settings-key">移动端首页</div>
     <div class="settings-value">
         <select name="HOME_PATH_MOBILE" data-type="str" value="{{_user_config.HOME_PATH_MOBILE}}">
             <option value="/note/group">笔记本列表</option>
@@ -131,8 +128,7 @@
 <div class="settings-row">
     <div class="settings-key">搜索设置</div>
     <div class="settings-value">
-        <a href="/system/settings?category=search">进入</a>
-        <i class="fa fa-chevron-right"></i>
+        <a class="btn btn-default" href="/system/settings?category=search">进入</a>
     </div>
 </div>
 
@@ -140,8 +136,7 @@
     <div class="settings-row">
         <div class="settings-key">管理员设置</div>
         <div class="settings-value">
-            <a href="/system/settings?category=admin">进入</a>
-            <i class="fa fa-chevron-right"></i>
+            <a class="btn btn-default" href="/system/settings?category=admin">进入</a>
         </div>
     </div>
 {% end %}

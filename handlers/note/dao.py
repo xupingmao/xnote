@@ -537,7 +537,7 @@ def create_note_base(note_dict, date_str=None, note_id=None):
     note_dict["atime"] = ctime0
     note_dict["mtime"] = ctime0
     note_dict["ctime"] = ctime0
-    note_dict["version"] = 0
+    note_dict["version"] = 1
 
     if note_id is not None:
         # 指定id创建笔记
@@ -598,13 +598,17 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     if "category" not in note_dict:
         note_dict["category"] = "000"
 
-    with dbutil.get_write_lock():
+    with dbutil.get_write_lock(name):
         # 检查名称是否冲突
         if check_name:
             check_by_name(creator, name)
 
         # 创建笔记的基础信息
         note_id = create_note_base(note_dict, date_str, note_id)
+    
+    if content != "":
+        # 如果内部不为空，创建一个历史记录
+        add_history(note_id, note_dict["version"], note_dict)
 
     # 更新分组下面页面的数量
     update_children_count(note_dict["parent_id"])
@@ -1234,6 +1238,7 @@ def add_history_index(id, version, new_note):
     _note_history_index_db.with_user(id).put(version_str, brief)
 
 def add_history(note_id, version, new_note):
+    # type: (str, int, dict) -> None
     """version是新的版本"""
     assert version != None
 
@@ -1666,3 +1671,4 @@ NoteDao.get_by_id_creator = get_by_id_creator
 NoteDao.get_root = get_root
 NoteDao.batch_query_list = batch_query_list
 NoteDao.add_history = add_history
+NoteDao.create = create_note

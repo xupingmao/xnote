@@ -45,7 +45,7 @@ def create_note_for_test(type, name, *, content = "", tags=None):
     if tags != None:
         assert isinstance(tags, str), "tags must be str"
 
-    data = dict(name = name, type = type, content = "hello,world", tags=tags)
+    data = dict(name = name, type = type, content = content, tags=tags)
 
     if type != "group":
         data["parent_id"] = get_default_group_id()
@@ -70,17 +70,20 @@ def assert_json_request_success(test_case, url):
 
 class TestMain(BaseTestCase):
 
-    def test_note_add_remove(self):
+    def test_note_create_remove(self):
         self.check_200_debug("/note/recent_edit")
         delete_note_for_test("xnote-unit-test")
+        delete_note_for_test("xnote-unit-test-copy")
 
         group_id = get_default_group_id()
         file = json_request("/note/add", method="POST", 
             data=dict(name="xnote-unit-test", content="hello", parent_id = group_id))
+        assert isinstance(file, dict)
 
         id = file["id"]
         note_info = NoteDao.get_by_id(id)
         version = note_info.version
+        assert isinstance(version, int)
 
         self.check_OK("/note/view?id=" + str(id))
         self.check_OK("/note/print?id=" + str(id))
@@ -88,6 +91,8 @@ class TestMain(BaseTestCase):
         # 乐观锁更新
         resp = json_request("/note/update", method="POST", 
             data=dict(id=id, content="new-content2", type="md", version=version, resp_type="json"))
+        assert isinstance(resp, dict)
+
         self.assertEqual("success", resp["code"])
 
         resp = json_request("/note/update", method="POST", 
@@ -104,19 +109,26 @@ class TestMain(BaseTestCase):
 
         note_info = NoteDao.get_by_id(id)
         self.assertEqual(note_info.content, "new-content")
-        json_request("/note/remove?id=" + str(id))
-
+        
         # 第二次更新 使用新的api
         NoteDao.update_content(note_info, "new-content-2")
         note_info = NoteDao.get_by_id(id)
         self.assertEqual(note_info.content, "new-content-2")
 
-        note_info = get_by_id(id)
+        # 复制笔记
+        assert isinstance(note_info.name, str)
+        copy_data = dict(name=note_info.name + "-copy", origin_id = note_info.id)
+        resp = json_request("/note/copy", method="POST", data=copy_data)
+        self.assertEqual("success", resp["code"])
+
+        # 删除笔记
+        json_request("/note/remove?id=" + str(id))
+        note_info = NoteDao.get_by_id(id)
         self.assertEqual(note_info.is_deleted, 1)
 
         # 恢复笔记
         json_request("/note/recover", method="POST", data=dict(id=id))
-        note_info = get_by_id(id)
+        note_info = NoteDao.get_by_id(id)
         self.assertEqual(note_info.is_deleted, 0)
 
     def test_create_page(self):
@@ -211,15 +223,22 @@ class TestMain(BaseTestCase):
         json_request("/note/remove?name=xnote-html-test")
 
         id = create_note_for_test("html", "xnote-html-test", content = "test")
-
+        note_info = NoteDao.get_by_id(id)
+        
         self.assertTrue(id != "")
         print("id=%s" % id)
-        json_request("/note/save", method="POST", data=dict(id=id, type="html", data="<p>hello</p>"))
+
+        save_data = dict(id=id, type="html", data="<p>hello</p>", version = note_info.version)
+        resp = json_request("/note/save", method="POST", data = save_data)
+        self.assertEqual("success", resp["code"])
+
         file = json_request("/note/view?id=%s&_format=json" % id).get("file")
         self.assertEqual("html", file["type"])
         self.assertEqual("<p>hello</p>", file["data"])
+
         if xutils.bs4 != None:
             self.assertEqual("hello", file["content"])
+        
         self.check_200("/note/edit?id=%s"%id)
         json_request("/note/remove?id=%s" % id)
 

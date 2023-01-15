@@ -61,4 +61,53 @@ xnote.updateCategoryName = function (req) {
             }
         })
     });
-}
+};
+
+// 创建笔记接口
+xnote.api["note.create"] = function (req) {
+    xnote.validate.notUndefined(req.name, "req.name is undefined");
+    xnote.validate.notUndefined(req.parentId, "req.parentId is undefined");
+    xnote.validate.notUndefined(req.type, "req.type is undefined");
+    xnote.validate.isFunction(req.callback, "req.callback is not function");
+
+    var createOption = {};
+    createOption.name = req.name;
+    createOption.parent_id = req.parentId;
+    createOption.type = req.type;
+    createOption._format = "json";
+
+    var title = req.name;
+    
+    $.post("/note/create", createOption, function (resp) {
+        if (resp.code == "success") {
+            req.callback(resp);
+        } else {
+            xnote.alert(title + "失败:" + resp.message);
+        }
+    }).fail(function (e) {
+        console.error(title + "失败", e);
+        xnote.alert(title + "失败:" + e);
+    });
+};
+
+// 复制笔记接口
+xnote.api["note.copy"] = function (req) {
+    xnote.validate.notUndefined(req.name, "req.name is undefined");
+    xnote.validate.notUndefined(req.originId, "req.originId is undefined");
+    var copyOption = {
+        name: req.name,
+        origin_id: req.originId
+    };
+    var title = req.name;
+
+    $.post("/note/copy", copyOption, function (resp) {
+        if (resp.code == "success") {
+            req.callback(resp);
+        } else {
+            xnote.alert(title + "失败:" + resp.message);
+        }
+    }).fail(function (e) {
+        console.error("Copy " + title + "失败", e);
+        xnote.alert("Copy " + title + "失败:" + e);
+    });
+};

@@ -106,7 +106,7 @@ class InfoHandler:
         if p == "sys_info_detail":
             sys_info = get_sys_info_detail()
             text = xutils.tojson(sys_info, format=True)
-            comment = "wired代表系统占用内存"
+            comment = "wired代表macOS系统占用内存"
             return xtemplate.render("system/page/system_info_text.html", text=text, comment_html = comment)
 
         mem_info = mem_util.get_mem_info()

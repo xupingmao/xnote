@@ -1,0 +1,25 @@
+{% init is_note_copy_script_loaded = False %}
+
+{% if not is_note_copy_script_loaded %}
+{% set-global is_note_copy_script_loaded = True %}
+
+<script type="text/javascript">
+$(function () {
+    function successCallback(resp) {
+        xnote.toast("复制成功, 正在跳转...");
+        window.location.href = resp.url;
+    }
+
+    // 复制笔记
+    $(".copy-btn").click(function (e) {
+        xnote.prompt("请输入新的笔记名称", xnote.state.note.name, function (newName) {
+            xnote.api["note.copy"]({
+                name: newName,
+                originId: xnote.state.note.id,
+                callback: successCallback
+            });
+        });
+    })
+});
+</script>
+{% end %}

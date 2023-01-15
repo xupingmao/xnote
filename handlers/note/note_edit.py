@@ -474,16 +474,16 @@ class SaveAjaxHandler:
             new_file.edit_token = edit_token
 
             if type == "html":
-                new_file.data    = data
+                new_file.data = data
                 new_file.content = data
                 if xutils.bs4 is not None:
-                    soup          = xutils.bs4.BeautifulSoup(data, "html.parser")
-                    content       = soup.get_text(separator=" ")
+                    soup = xutils.bs4.BeautifulSoup(data, "html.parser")
+                    content = soup.get_text(separator=" ")
                     new_file.content = content
                 new_file.size = len(content)
             else:
                 new_file.content = content
-                new_file.data = ''
+                new_file.data = ""
                 new_file.size = len(content)
 
             update_and_notify(file, new_file)
@@ -756,7 +756,7 @@ class UpdateAttrAjaxHandler:
             return dict(code="400", message="key不能为空")
         
         user_name = xauth.current_name()
-        note_info = NOTE_DAO.get_by_id_creator(id, user_name)
+        note_info = NoteDao.get_by_id_creator(id, user_name)
 
         if note_info == None:
             return dict(code="400", message="笔记不存在")
@@ -773,6 +773,34 @@ class UpdateAttrAjaxHandler:
             return dict(code="400", message="不支持的属性")
 
 
+class CopyHandler:
+
+    def GET(self):
+        pass
+
+    @xauth.login_required()
+    def POST(self):
+        name = xutils.get_argument("name", "")
+        origin_id = xutils.get_argument("origin_id", "")
+        user_name = xauth.current_name()
+
+        origin_note = NoteDao.get_by_id_creator(origin_id, user_name)
+        if origin_note == None:
+            return dict(code="404", message = "笔记不存在或没有权限")
+        
+        new_note_dict = Storage()
+        new_note_dict.name = name
+        new_note_dict.content = origin_note.content
+        new_note_dict.type = origin_note.type
+        new_note_dict.parent_id = origin_note.parent_id
+        new_note_dict.creator = user_name
+
+        try:
+            new_note_id = NoteDao.create(new_note_dict)
+            return dict(code="success", url = NoteDao.get_view_url_by_id(new_note_id))
+        except Exception as e:
+            return dict(code="500", message = str(e))
+
 
 xurls = (
     r"/note/add"         , CreateHandler,
@@ -784,6 +812,7 @@ xurls = (
     r"/note/save"        , SaveAjaxHandler,
     r"/note/draft"       , DraftHandler,
     r"/note/attribute/update", UpdateAttrAjaxHandler,
+    r"/note/copy", CopyHandler,
 
     r"/note/append"      , AppendAjaxHandler,
     r"/note/stick"       , StickHandler,

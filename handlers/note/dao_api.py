@@ -9,12 +9,21 @@
 @Description  : DAO接口定义
 """
 
+from xutils import Storage
+
 class NoteDao:
 
     """笔记的DAO接口"""
 
     @staticmethod
+    def create(req):
+        # type: (dict) -> str
+        """创建笔记接口"""
+        raise NotImplementedError()
+
+    @staticmethod
     def get_by_id(id, include_full=True, creator=None):
+        # type: (str, bool, str|None) -> Storage
         """通过ID查询笔记信息"""
         raise NotImplementedError()
     
@@ -66,3 +75,7 @@ class NoteDao:
     @staticmethod
     def get_root(creator=None):
         raise NotImplementedError()
+    
+    @staticmethod
+    def get_view_url_by_id(note_id):
+        return "/note/view/{}".format(note_id)

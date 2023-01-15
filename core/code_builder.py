@@ -126,6 +126,7 @@ def build_app_js():
 
         # app.js
         builder.append("./static/js/app.js")
+        builder.append("./static/js/note.js")
 
 
 def build():
