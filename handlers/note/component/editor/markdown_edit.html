@@ -315,11 +315,8 @@
             });
         });
 
-        // 保存文件操作
-        $(".save-note-btn").click(function (e) {
-            e.preventDefault();
+        function serverSaveNote() {
             var input = $("#markdown-input").val();
-
             var params = {
                 id: fileId,
                 content: input,
@@ -327,7 +324,7 @@
                 edit_token: "{{edit_token}}",
                 version: "{{file.version}}"
             };
-            
+
 
             $.post("/note/save", params, function (resp) {
                 if (resp.code == "success") {
@@ -340,6 +337,18 @@
             }).fail(function (err) {
                 xnote.alert("保存失败:" + err);
             });
+        }
+
+        // 保存笔记操作
+        $(".save-note-btn").click(function (e) {
+            e.preventDefault();
+            if (xnote.state.system.nodeRole == "follower") {
+                xnote.confirm("当前是从节点运行, 保存后可能被覆盖, 确认保存?", function (resp) {
+                    serverSaveNote();
+                })
+            } else {
+                serverSaveNote();
+            }
         });
 
         // 退出确认的询问

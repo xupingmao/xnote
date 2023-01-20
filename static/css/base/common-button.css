@@ -155,3 +155,8 @@
 .toolbar.homepage>.action:hover {
     opacity: 1.0;
 }
+
+.btn.large {
+    width: 100px;
+    height: 30px;
+}

@@ -52,6 +52,7 @@ $(function () {
 
 {% block body_right %}
 <div class="desktop-only">
+    {% include common/sidebar/app_index.html %}
     {% init show_sidebar_group_entry = False %}
     {% init show_sidebar_note_brothers = True %}
     {% include note/component/sidebar/note_sidebar.html %}

@@ -1,5 +1,35 @@
+{% init file_op_script_loaded = False %}
+{% if not file_op_script_loaded %}
+{% set-global file_op_script_loaded = True %}
+
+<script type="text/template" id="fileItemOptionDialog">
+    <div class="card">
+        <div class="align-center">
+            <button class="btn btn-default large">按钮1</button>
+            <button class="btn btn-default large">按钮2</button>
+            <button class="btn btn-default large">按钮3</button>
+            <button class="btn btn-default large">按钮4</button>
+        </div>
+    </div>
+</script>
 
 <script type="text/javascript">
+
+if (xnote.action.fs == undefined) {
+    xnote.action.fs = {};
+}
+
+xnote.action.fs.openOptionDialog = function (target) {
+    console.log(window.event);
+    window.event.preventDefault();
+    window.event.stopPropagation();
+    console.log(target);
+    var path = $(target).attr("data-path");
+    var html = $("#fileItemOptionDialog").html();
+    xnote.openDialog("选项", html);
+};
+
+
 $(function () {
     $(".rename-btn").click(function (e) {
         var dirname = $("#dirname").val();
@@ -40,3 +70,295 @@ $(function () {
     })
 })
 </script>
+
+
+<script type="text/javascript">
+    $(function () {
+        var globalPath = $("#currentPath").val();
+        var globalError = $("#currentError").val();
+    
+        function getCurrentPath() {
+            return $("#currentPath").val();
+        }
+    
+        function previewImages() {
+            $(".fs-image-div").each(function (index, target) {
+                var src = $(target).attr("img-src");
+                var img = $("<img>").attr("src", src)
+                    .attr("alt", src)
+                    .addClass("fs-image")
+                    .addClass("x-photo");
+                $(target).append(img);
+                img.on("load", function (event) {
+                    $(target).append($("<span class='fs-image-size'>").text(img[0].naturalWidth + "*" + img[0].naturalHeight));
+                });
+            })
+            $("#previewImg").val("取消预览");
+        }
+    
+        function togglePreview() {
+            var self = this;
+            var value = $(self).val();
+            if (window.location.hash != '#preview') {
+                previewImages();
+                window.location.hash = '#preview';
+            } else {
+                $(".fs-image").remove();
+                $(".fs-image-size").remove();
+                $(self).val("预览图片");
+                window.location.hash = '';
+            }  
+        }
+    
+        $("#previewImg").on("click", togglePreview);
+    
+        if (window.location.hash == '#preview') {
+            previewImages();
+        }
+    
+        function showErrorMessage(message) {
+            showMessage("error", message);
+        }
+    
+        function showMessage(level, message) {
+            var ele = ".error";
+            if (level == "error") {
+                ele = ".error";
+            }
+            if (level == "success") {
+                ele = ".success";
+            }
+            // $(ele).text(message).fadeIn(200).delay(3000).fadeOut(300);
+            showToast(message, 3000);
+        }
+    
+        function createFile(promptMessage, url) {
+            xnote.prompt(promptMessage, "", function (fileName) {
+                if (fileName && fileName != "") {
+                    $.post(url, {path: globalPath, filename: fileName}, function (respText) {
+                        console.log(respText);
+                        var data = respText;
+                        if (data.code == "success") {
+                            window.location.reload();
+                        } else {
+                            showErrorMessage(data.message);
+                        }
+                    }).fail(function (data) {
+                        console.log(data);
+                        showErrorMessage(data);
+                    })
+                }
+            });
+            
+        }
+    
+        $("#addDirectory").on("click", function (target) {
+            createFile("新建文件夹", "/fs_api/add_dir");
+        });
+    
+        $(".add-file-btn").on("click", function (event) {
+            var target = event.target;
+            var title = $(target).text();
+            var api   = $(target).attr("data-api");
+            createFile(title, api);
+        })
+    
+        $(".native-opener").on("click", function () {
+            openByNative();
+        });
+    
+        window.openByNative = function () {
+            $.post("/system/command/open", {path: "{{path}}"});
+        }
+    
+        window.openTerminal = function () {
+            $.post("/system/command/openTerminal", {command: "openTerminal", path: "{{path}}"});
+        }
+    
+        $(".command-btn").on("click", function () {
+            var command = $(this).attr("data-command");
+            $.get("/system/command", {command: command, path: globalPath});
+        })
+    
+        function doDeleteFile(path) {
+            var pathlist;
+            if (path instanceof Array) {
+                pathlist = path
+            } else {
+                pathlist = [path]
+            }
+    
+            var rest = pathlist.length;
+            for (var i = 0; i < pathlist.length; i++) {
+                rest--;
+                var path = pathlist[i];        
+                $.post("/fs_api/remove", {path: path}, function (resp) {
+                    if (resp.code == "success" && rest <= 0) {
+                        location.reload();
+                    } else {
+                        showErrorMessage("删除失败, %s".format(resp.message));
+                    }
+                }).fail(function (resp) {
+                    console.log(resp);
+                    showErrorMessage("删除失败");
+                })
+            }
+        }
+    
+        window.removeFile = function(path) {
+            if (path instanceof Array) {
+                xnote.confirm("确认删除%s个文件?".format(path.length), function (result) {
+                    doDeleteFile(path);
+                });
+            } else {
+                // 从path中获取文件名
+                var name = /([^\/\\]+)[\\\/]?$/.exec(path)[1];
+                name = decodeURI(name);
+    
+                xnote.confirm("确认删除 '%s' ?".format(name), function (result) {
+                    doDeleteFile(path);
+                });
+            }
+        }
+    
+        $(".delete-link").click(function (e) {
+            var path = $(this).attr("data-path");
+            removeFile(path);
+        })
+    
+        $(".delete-btn").on("click", function () {
+            var checked = $(".checkboxTd :checked");
+            if (checked.length == 0) {
+                xnote.alert("请选择文件");
+            } else if (checked.length > 1) {
+                var pathlist = []
+                $(".checkboxTd :checked").each(function (index, element) {
+                    var name = $(element).attr("data-name");
+                    var path = $(element).attr("data-path");
+                    pathlist.push(path);
+                });
+    
+                removeFile(pathlist);
+            } else {
+                var name = checked.attr("data-name");
+                var path = checked.attr("data-path");
+                removeFile(path);
+            }
+        });
+    
+        $("#renameBtn").on("click", function () {
+            var checked = $(".checkboxTd :checked");
+            if (checked.length == 0) {
+                xnote.alert("请选择文件");
+            } else if (checked.length > 1) {
+                xnote.alert("不支持批量重命名");
+            } else {
+                var name = checked.attr("data-name");
+                var path = checked.attr("data-path");
+                var dirname = "{{path}}";
+                xnote.prompt("重命名为", name, function (new_name) {
+                    if (new_name) {
+                        $.post("/fs_api/rename", 
+                            {dirname: dirname, old_name: name, new_name: new_name}, 
+                            function (resp) {
+                                if (resp.code == "success") {
+                                    location.reload();
+                                } else {
+                                    showErrorMessage("重命名失败, %s".format(resp.message));
+                                }
+                        }).fail(function (resp) {
+                            console.log(resp);
+                            xnote.alert("重命名失败");
+                        })
+                    }
+                });
+            }
+        });
+    
+    
+        $("#cutBtn").on("click", function () {
+            var checked = $(".checkboxTd :checked");
+            if (checked.length == 0) {
+                xnote.alert("请选择文件");
+            } else {
+                var cutPathList = [];
+                checked.each(function (index, element) {
+                    // console.log(element);
+                    var path = $(element).attr("data-path");
+                    console.log(path);
+                    cutPathList.push(path);
+                });
+                var data = {"files": cutPathList};
+                $.post("/fs_api/cut", data, function (resp) {
+                    console.log(resp);
+                    window.location.reload();
+                }).fail(function (errorMessage) {
+                    alert("update clipboard failed!" + errorMessage);
+                })
+            }
+        });
+    
+        $("#showMoreOptsBtn").click(function (event) {
+            $(".advanced-opt").toggle(200);
+        });
+    
+        $("#uploadFileBtn").click(function () {
+            $("#uploadFileArea").toggle(200);
+        });
+    
+        $("#selectAllBtn").click(function () {
+            var toggle = parseInt($(this).attr("toggle") || 0);
+            if (toggle % 2 === 0) {        
+                $("input[type=checkbox]").prop("checked", true);
+                $(this).val("反选");
+            } 
+    
+            if (toggle % 2 === 1) {        
+                $("input[type=checkbox]").prop("checked", false);
+                $(this).val("全选");
+            }
+            toggle += 1;
+            $(this).attr("toggle", toggle);
+        });
+    
+        $("#clipboardBtn").click(function () {
+            showClipboardDialog();
+        });
+    
+        $("#addToBookmarkBtn").click(function (event) {
+            var path = getCurrentPath();
+            var params = {"path": path};
+            $.post("/fs_api/bookmark", params, function (resp) {
+                layer.msg("收藏成功");
+            }).fail(function (e) {
+                layer.alert("收藏失败:" + e);
+            });
+        });
+    
+        $(".fs-sort-btn").click(function (e) {
+            var order = $(e.target).attr("data-order");
+            var params = {
+                "action": "sort",
+                "order": order,
+            };
+            $.post("/fs_api/config", params, function (resp) {
+                if (resp.code === "success") {
+                    window.location.reload();
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        });
+    
+        $(".rebuild-index-option").click(function (e) {
+            xnote.showIframeDialog("重建索引", "/fs_index?p=rebuild&path={{xutils.quote(path)}}&embed=true");
+        });
+    
+        // do not adjust height in mobile
+        if (isPc()) {
+            adjustHeight(".file-list", 30);
+        }
+    });
+</script>
+    
+{% end %}

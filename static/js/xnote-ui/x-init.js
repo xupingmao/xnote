@@ -31,6 +31,8 @@ if (window.xnote === undefined) {
 
     // 后端接口API模块
     xnote.api = {};
+    // 操作动作接口
+    xnote.action = {};
     // 事件相关接口
     xnote.events = {};
     // 表格模块
@@ -39,6 +41,8 @@ if (window.xnote === undefined) {
     xnote.editor = {};
     // 业务状态
     xnote.state = {};
+    // 系统状态
+    xnote.state.system = {};
 }
 
 xnote.registerApiModule = function (name) {
@@ -127,7 +131,7 @@ xnote.appendCSS = function (styleText) {
     } 
 
     document.head.appendChild(style);
-}
+};
 
 var XUI = function(window) {
     // 处理select标签选中情况
@@ -191,7 +195,7 @@ var XUI = function(window) {
         } else {
             window.location.href = link;
         }
-    })
+    });
 
     // 点击prompt按钮
     // <input type="button" class="prompt-btn" action="/rename?name=" message="重命名为" value="重命名">
@@ -215,13 +219,13 @@ var XUI = function(window) {
         initRadio();
         initXRadio();
         xnote.table.adjustWidth(".default-table");
-    }
+    };
 
     window.xnote.assert = function (expression, message) {
         if (!expression) {
             xnote.alert(message);
         }
-    }
+    };
 
     // 刷新各种默认值
     xnote.refresh = function () {
@@ -230,7 +234,7 @@ var XUI = function(window) {
         // 注册事件
         xnote.addEventListener("init-default-value", initDefaultValue);
         xnote.addEventListener("xnote.reload", initDefaultValue);
-    }
+    };
 
     xnote.refresh();
 };
