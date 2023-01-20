@@ -42,14 +42,9 @@
                 {% continue %}
             {% end %}
             
-            {% if xutils.is_img_file(_item.path) %}
-                <a class="list-item x-photo" href="#" src="/fs/{{_item.encoded_path}}">
-            {% elif xutils.is_audio_file(_item.path) %}
-                <a class="list-item x-audio" data-src="/fs/{{_item.encoded_path}}">
-            {% else %}
-                <a class="list-item" href="{{_item.url}}">
-            {% end %}
-                
+            <a class="list-item {{_item.css_class}}" href="{{_item.url}}" 
+                data-src="/fs/{{_item.encoded_path}}">
+
                 <i class="fa {{_item.icon}}"></i>
                 <span>{{_item.name}}</span>
 

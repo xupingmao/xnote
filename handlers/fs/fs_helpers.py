@@ -25,7 +25,7 @@ _index_db.set_binlog_enabled(False)
 def get_index_db(): # type: ()-> LdbTable
     return _index_db
 
-def file_post_handler(item):
+def handle_file_item(item):
     """文件的后置处理器"""
     if item.type == "dir":
         item.icon = "fa-folder orange"
@@ -46,17 +46,16 @@ def file_post_handler(item):
     return item
 
 def handle_file_url(item):
+    item.css_class = ""
     if item.type == "dir":
         item.url = "/fs/%s" % item.encoded_path
     elif xutils.is_img_file(item.path):
-        item.url = "/fs/%s" % item.encoded_path
+        item.url = "#"
+        item.css_class = "x-photo"
     elif xutils.is_audio_file(item.path):
         item.url = "/fs/%s" % item.encoded_path
     else:
-        item.url = "/fs_view?path=%s" % item.encoded_path
-
-FileItem.set_post_handler(file_post_handler)
-
+        item.url = "/fs_preview?path=%s&embed=false" % item.encoded_path
 
 
 def get_index_dirs():

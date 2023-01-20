@@ -145,7 +145,11 @@ def format_size(size):
     '1.3T'
     >>> format_size(1429365116108000)
     '1.3P'
+    >>> format_size(-10240)
+    '-10.00K'
     """
+    if size < 0:
+        return "-" + format_size(-size)
     if size < 1024:
         return '%sB' % size
     elif size < 1024**2:
@@ -535,8 +539,6 @@ def fixed_basename(path):
 class FileItem(Storage):
     """文件对象"""
 
-    post_handler = None  # hook: 后置处理器
-
     def __init__(self,
                  path,
                  parent=None,
@@ -567,9 +569,6 @@ class FileItem(Storage):
 
         if name != None:
             self.name = name
-
-        if FileItem.post_handler is not None:
-            FileItem.post_handler(self)
 
     def handle_file_stat(self, merge):
         path = self.path
@@ -618,10 +617,6 @@ class FileItem(Storage):
         if self.type == "dir":
             return -1
         return 1
-
-    @staticmethod
-    def set_post_handler(func):
-        FileItem.post_handler = func
 
 
 def touch(path):
@@ -741,6 +736,7 @@ def load_set_config(fpath):
 
 
 def load_prop_config(fpath):
+    # type: (str) -> dict[str, str]
     text = readfile(fpath)
     from xutils.text_parser_properties import parse_prop_text
     return parse_prop_text(text, "dict")

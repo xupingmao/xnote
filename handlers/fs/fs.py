@@ -30,6 +30,7 @@ from xutils import dbutil
 from .fs_mode import get_fs_page_by_mode
 from .fs_helpers import sort_files_by_size
 from . import fs_image
+from . import fs_helpers
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
@@ -107,6 +108,8 @@ def check_file_auth(path, user_name):
 def process_file_list(pathlist, parent = None):
     filelist = [FileItem(fpath, parent, merge = False) for fpath in pathlist]
     filelist.sort()
+    for item in filelist:
+        fs_helpers.handle_file_item(item)
 
     user_name = xauth.current_name()
     fs_order = xauth.get_user_config(user_name, "fs_order")
@@ -525,61 +528,6 @@ class LinkHandler:
         link_path = os.path.abspath(link_path)
         raise web.seeother("/fs/%s" % link_path)
 
-class RecentHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        datapath, webpath = xutils.get_upload_file_path(xauth.current_name(), "")
-        raise web.seeother("/fs/%s" % datapath)
-
-class ViewHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        fpath = xutils.get_argument("path")
-        fpath = fpath.replace("\\", "/")
-        
-        basename, ext = os.path.splitext(fpath)
-        encoded_fpath = xutils.encode_uri_component(fpath)
-
-        if ext == ".txt":
-            raise web.found("/fs_text?path=%s" % encoded_fpath)
-
-        if ext in (".html", ".htm"):
-            raise web.found("/fs/%s" % encoded_fpath)
-
-        if ext in (".md", ".csv"):
-            raise web.found("/code/preview?path=%s" % encoded_fpath)
-
-        if ext in (".key", ".numbers"):
-            os.system("open %r" % fpath)
-            parent_fpath = os.path.abspath(os.path.dirname(fpath))
-            encoded_parent = xutils.encode_uri_component(parent_fpath)
-            raise web.found("/fs/%s" % encoded_parent)
-
-        if ext == ".db":
-            raise web.found("/system/sqlite?path=%s" % encoded_fpath)
-
-        if xutils.is_text_file(fpath) or xutils.is_code_file(fpath):
-            raise web.found("/code/edit?path=%s" % encoded_fpath)
-
-        raise web.found("/fs/%s" % encoded_fpath)
-
-
-class EditHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        fpath = xutils.get_argument("path")
-        basename, ext = os.path.splitext(fpath)
-        encoded_fpath = xutils.encode_uri_component(fpath)
-
-        if xutils.is_text_file(fpath):
-            raise web.found("/code/edit?path=%s" % encoded_fpath)
-
-        raise web.found("/fs_hex?path=%s" % encoded_fpath)
-
-
 class Bookmark:
 
     def __init__(self, user_name):
@@ -587,6 +535,7 @@ class Bookmark:
         bookmark = dbutil.get("fs_bookmark:%s" % user_name)
         if bookmark is None:
             bookmark = []
+        assert isinstance(bookmark, list)
         self.bookmark = bookmark
 
         for i, value in enumerate(bookmark):
@@ -627,6 +576,9 @@ class BookmarkHandler:
             item = FileItem(fpath)
             item.is_user_defined = True
             filelist.append(item)
+        
+        for item in filelist:
+            fs_helpers.handle_file_item(item)
 
         kw.show_path = False
         kw.show_fake_path = True
@@ -666,10 +618,7 @@ dbutil.register_table("fs_bookmark", "文件收藏夹")
 xutils.register_func("fs.process_file_list", process_file_list)
 
 xurls = (
-    r"/fs_edit",   EditHandler,
-    r"/fs_view",   ViewHandler,
     r"/fs_link/(.*)", LinkHandler,
-    r"/fs_recent", RecentHandler,
     r"/fs_tools",  ToolListHandler,
 
     # Ajax服务

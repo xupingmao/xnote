@@ -123,6 +123,7 @@ class IndexHandler:
 
     def GET(self):
         arg_show_back = xutils.get_argument("show_back", type=bool)
+        arg_show_menu = xutils.get_argument("show_menu", "true", type=bool)
         user_name = xauth.current_name()
         menu_list = []
 
@@ -149,6 +150,7 @@ class IndexHandler:
         kw.customized_items = []
         kw.html_title = "系统"
         kw.show_back = arg_show_back
+        kw.show_menu = arg_show_menu
 
         return xtemplate.render("system/page/system_index.html", **kw)
 

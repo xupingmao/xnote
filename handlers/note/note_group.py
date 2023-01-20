@@ -23,6 +23,7 @@ from xtemplate import T
 from .dao_category import list_category, get_category_by_code
 from . import dao_tag
 from . import dao
+from .dao_api import NoteDao
 
 VIEW_TPL = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -769,7 +770,7 @@ class ManagementHandler:
         parent_id = kw.parent_id
         user_name = kw.user_name
 
-        parent_note = NOTE_DAO.get_by_id(parent_id)
+        parent_note = NoteDao.get_by_id(parent_id)
         if parent_note == None:
             raise web.notfound()
 

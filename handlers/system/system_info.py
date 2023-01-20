@@ -65,6 +65,9 @@ def get_sys_info_detail():
     sys_mem = psutil.virtual_memory()
     swap_memory = psutil.swap_memory()
     cpu_freq = psutil.cpu_freq()
+    active_mem = xutils.attrget(sys_mem, "active", 0)
+    inactive_mem = xutils.attrget(sys_mem, "inactive", 0)
+    wired_mem = xutils.attrget(sys_mem, "wired", 0)
 
     return Storage(
         cpu = Storage(
@@ -82,9 +85,9 @@ def get_sys_info_detail():
             percent = sys_mem.percent,
             used = xutils.format_size(sys_mem.used),
             free = xutils.format_size(sys_mem.free),
-            active = xutils.format_size(sys_mem.active),
-            inactive = xutils.format_size(sys_mem.inactive),
-            wired = xutils.format_size(xutils.attrget(sys_mem, "wired", 0)),
+            active = xutils.format_size(active_mem),
+            inactive = xutils.format_size(inactive_mem),
+            wired = xutils.format_size(wired_mem),
         ),
         swap_memory = Storage(
             total = xutils.format_size(swap_memory.total),
@@ -106,7 +109,7 @@ class InfoHandler:
         if p == "sys_info_detail":
             sys_info = get_sys_info_detail()
             text = xutils.tojson(sys_info, format=True)
-            comment = "wired代表macOS系统占用内存"
+            comment = "wired代表macOS不可被交换的内存"
             return xtemplate.render("system/page/system_info_text.html", text=text, comment_html = comment)
 
         mem_info = mem_util.get_mem_info()
