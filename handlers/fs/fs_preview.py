@@ -39,7 +39,7 @@ class PreviewHandler:
         path = xutils.get_argument("path")
         embed = xutils.get_argument("embed", "true")
         path = xutils.get_real_path(path)
-        encoded_path = xutils.quote_unicode(path)
+        encoded_path = xutils.encode_uri_component(path)
         _, ext = os.path.splitext(path)
         ext = ext.lower()
         

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2019-01-10 00:21:16
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-12 00:29:25
+@LastEditTime : 2023-01-21 16:48:26
 @FilePath     : /xnote/handlers/fs/fs_hex.py
 @Description  : 二进制查看工具
 """
@@ -27,7 +27,23 @@ HTML = """
     }
 {% end %}
 
+    .lineno-text {
+        width:10%;
+        float:left;
+    }
+
+    .hex-text {
+        width:50%;
+        float:left;
+    }
+
+    .plain-text {
+        width:40%;
+        float:left;
+    }
 </style>
+
+{% init plain_text = "" %}
 
 {% if embed == "true" %}
     <a class="btn btn-default" href="/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
@@ -48,7 +64,9 @@ HTML = """
     {% if embed == "false" %}
         {% include mod_fs_path.html %}
     {% end %}
-    <textarea class="row hex-text" rows=32>{{hex_text}}</textarea>
+    <textarea class="lineno-text" rows=32>{{lineno_text}}</textarea>
+    <textarea class="hex-text" rows=32>{{hex_text}}</textarea>
+    <textarea class="plain-text" rows=32>{{plain_text}}</textarea>
 </div>
 
 """
@@ -96,6 +114,10 @@ class Main(BasePlugin):
 
         path = xutils.get_argument("path", "")
         page = xutils.get_argument("page", 1, type=int)
+
+        assert isinstance(path, str)
+        assert isinstance(page, int)
+
         offset = max(page-1, 0) * pagesize
         embed = xutils.get_argument("embed", "false")
 
@@ -106,6 +128,8 @@ class Main(BasePlugin):
 
         path = xutils.get_real_path(path)
         hex_text = ""
+        plain_text = ""
+        lineno_text = ""
 
         if not os.path.isfile(path):
             return "`%s` IS NOT A FILE!" % path
@@ -114,20 +138,22 @@ class Main(BasePlugin):
             line_fmt = "%05x"
             step = 16
             self.page_max = math.ceil(filesize / pagesize)
-            padding = ' ' * 4
+            # padding = ' ' * 4
             with open(path, 'rb') as fp:
                 fp.seek(offset)
                 for i in range(0, pagesize, step):
                     bytes = fp.read(step)
                     if len(bytes) == 0:
                         break
-                    hex_text += line_fmt % (offset + i)
-                    hex_text += padding + bytes_hex(bytes).ljust(step * 3)
-                    hex_text += padding + bytes_chars(bytes) + '\n'
+                    lineno_text += line_fmt % (offset + i) + "\n"
+                    hex_text += bytes_hex(bytes).ljust(step * 3) + "\n"
+                    plain_text += bytes_chars(bytes) + "\n"
 
             kw = Storage()
             kw.path = path
             kw.hex_text = hex_text
+            kw.plain_text = plain_text
+            kw.lineno_text = lineno_text
             kw.embed = embed
 
             if embed == "true":
