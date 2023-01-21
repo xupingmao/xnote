@@ -8,7 +8,7 @@ import xtemplate
 
 from xtemplate import T
 from xutils import dbutil
-from .fs_helpers import sort_files_by_size
+from .fs_helper import sort_files_by_size
 
 dbutil.register_table("fs_index", "文件索引")
 

@@ -13,7 +13,7 @@ from fnmatch import fnmatch
 from xutils import dbutil
 from xutils import Storage
 
-from .fs_helpers import get_index_db
+from .fs_helper import get_index_db
 
 dbutil.register_table("fs_index", "文件索引")
 

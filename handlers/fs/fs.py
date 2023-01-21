@@ -28,9 +28,9 @@ import multiprocessing
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
 from .fs_mode import get_fs_page_by_mode
-from .fs_helpers import sort_files_by_size
+from .fs_helper import sort_files_by_size
 from . import fs_image
-from . import fs_helpers
+from . import fs_helper
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
@@ -109,7 +109,7 @@ def process_file_list(pathlist, parent = None):
     filelist = [FileItem(fpath, parent, merge = False) for fpath in pathlist]
     filelist.sort()
     for item in filelist:
-        fs_helpers.handle_file_item(item)
+        fs_helper.handle_file_item(item)
 
     user_name = xauth.current_name()
     fs_order = xauth.get_user_config(user_name, "fs_order")
@@ -578,7 +578,7 @@ class BookmarkHandler:
             filelist.append(item)
         
         for item in filelist:
-            fs_helpers.handle_file_item(item)
+            fs_helper.handle_file_item(item)
 
         kw.show_path = False
         kw.show_fake_path = True

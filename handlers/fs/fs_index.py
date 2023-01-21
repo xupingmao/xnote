@@ -18,7 +18,7 @@ import xmanager
 import xutils
 from xutils import Storage
 
-from .fs_helpers import get_index_dirs, get_index_db
+from .fs_helper import get_index_dirs, get_index_db
 
 class IndexBuilder:
 
