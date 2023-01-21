@@ -62,6 +62,7 @@ def do_create_thumbnail(path, debug=False):
         # multiprocessing在Windows和Mac的性能比较差，因为他们默认使用新线程而不是fork的方式创建线程，
         args = [sys.executable, "tools/image-thumbnail.py", path]
         with subprocess.Popen(args, stdout=subprocess.PIPE) as proc:
+            assert proc.stdout != None
             buf = proc.stdout.read()
             if buf.strip() == "":
                 return None

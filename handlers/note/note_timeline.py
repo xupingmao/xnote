@@ -14,6 +14,10 @@ from xutils import webutil
 from xutils.textutil import split_words
 from xtemplate import T
 from .constant import *
+from handlers.message.dao import MessageDao
+from handlers.note.dao_api import NoteDao
+from handlers.note import note_helper
+import handlers.note.dao as note_dao
 import xmanager
 
 NOTE_DAO = xutils.DAO("note")
@@ -61,7 +65,7 @@ class TaskGroup(Storage):
         self.mtime = dateutil.format_time()
         self.url = "/message?tag=task"
         self.priority = 1
-        self.size = MSG_DAO.get_message_stat(self.user).task_count
+        self.size = MessageDao.get_message_stat(self.user).task_count
 
 
 class PlanGroup(SystemGroup):
@@ -69,14 +73,14 @@ class PlanGroup(SystemGroup):
 
     def __init__(self):
         super(PlanGroup, self).__init__(u"计划列表", "/note/plan")
-        self.size = NOTE_DAO.get_note_stat(self.user).plan_count
+        self.size = NoteDao.get_note_stat(self.user).plan_count
 
 
 class StickyGroup(SystemGroup):
 
     def __init__(self):
         super(StickyGroup, self).__init__(u"置顶笔记", "/note/sticky")
-        self.size = NOTE_DAO.get_note_stat(self.user).sticky_count
+        self.size = NoteDao.get_note_stat(self.user).sticky_count
         self.icon = "fa fa-thumb-tack"
 
 
@@ -96,7 +100,7 @@ class DefaultProjectGroup(SystemGroup):
 
 
 def search_group(user_name, words):
-    rows = NOTE_DAO.list_group(user_name)
+    rows = note_dao.list_group(user_name)
     result = []
     for row in rows:
         if textutil.contains_all(row.name, words):
@@ -183,19 +187,19 @@ def list_search_func(context):
         words = split_words(search_key)
 
         if search_tag == "public":
-            rows = NOTE_DAO.search_public(words)
+            rows = note_dao.search_public(words)
         else:
-            rows = NOTE_DAO.search_name(words, user_name, parent_id=parent_id)
+            rows = note_dao.search_name(words, user_name, parent_id=parent_id)
 
         rows = rows[offset: offset + limit]
         cost_time = time.time() - start_time
-        NOTE_DAO.add_search_history(user_name, search_key, "note", cost_time)
+        note_dao.add_search_history(user_name, search_key, "note", cost_time)
 
     return build_date_result(rows, 'ctime', sticky_title=True, group_title=True)
 
 
 def insert_default_project(rows, user_name):
-    root_notes = NOTE_DAO.list_by_parent(
+    root_notes = note_dao.list_by_parent(
         user_name, 0, 0, 1000, skip_group=True)
     if len(root_notes) > 0:
         rows.insert(0, DefaultProjectGroup(root_notes))
@@ -213,7 +217,7 @@ def list_project_func(context):
     if offset > 0:
         rows = []
     else:
-        rows = NOTE_DAO.list_group(user_name, parent_id=parent_id, orderby="name")
+        rows = note_dao.list_group(user_name, parent_id=parent_id, orderby="name")
         # 处理默认项目
         insert_default_project(rows, user_name)
         # 处理备忘录
@@ -227,7 +231,7 @@ def list_root_func(context):
     if offset > 0:
         rows = []
     else:
-        rows = NOTE_DAO.list_group(user_name, parent_id="0")
+        rows = note_dao.list_group(user_name, parent_id="0")
         # 处理默认项目
         insert_default_project(rows, user_name)
         # 处理备忘录
@@ -402,6 +406,8 @@ class BaseTimelineHandler:
     check_login = True
     show_recent_btn = False
     show_back_btn = False
+    show_create_btn = False
+    show_group_btn = False
 
     def GET(self):
         self.before_get()
@@ -409,6 +415,20 @@ class BaseTimelineHandler:
 
     def before_get(self):
         pass
+
+    def handle_type_all(self):
+        self.show_create_btn = False
+        self.show_group_btn = True
+    
+    def handle_type_group_list(self):
+        self.show_create_btn = False
+
+    def get_handle_by_type(self, type):
+        if type == "all":
+            return self.handle_type_all
+        if type == "group_list":
+            return self.handle_type_group_list
+        return None
 
     def do_get(self):
         type = xutils.get_argument("type", self.note_type)
@@ -427,7 +447,11 @@ class BaseTimelineHandler:
         title = NOTE_TYPE_DICT.get(type, u"最新笔记")
         title_link = None
         note_priority = 0
-        file = NOTE_DAO.get_by_id(parent_id)
+        file = NoteDao.get_by_id(parent_id)
+    
+        handle = self.get_handle_by_type(type)
+        if handle != None:
+            handle()
 
         xmanager.add_visit_log(user_name, webutil.get_request_path())
 
@@ -449,27 +473,30 @@ class BaseTimelineHandler:
         kw.show_aside = False
         kw.show_recent_btn = self.show_recent_btn
         kw.show_back_btn = self.show_back_btn
+        kw.show_create_btn = self.show_create_btn
+        kw.show_group_btn = self.show_group_btn
         if parent_id == "0":
             kw.show_rename_btn = False
         kw.type = type
         kw.file = file
         kw.title = title
+        kw.title_link = title_link
+        kw.parent_link = parent_link
+        kw.show_create = self.show_create
+        kw.search_type = self.search_type
 
         return xtemplate.render(
             "note/page/timeline/timeline.html",
             key=key,
             pathlist=pathlist,
-            show_create=self.show_create,
-            search_type=self.search_type,
             search_ext_dict=dict(parent_id=parent_id),
-            parent_link=parent_link,
-            title_link=title_link,
             CREATE_BTN_TEXT_DICT=CREATE_BTN_TEXT_DICT,
             **kw)
 
 
 class TimelineHandler(BaseTimelineHandler):
     note_type = "group"
+    show_create_btn = True
 
     def before_get(self):
         parent_id = xutils.get_argument("parent_id", "0")
@@ -481,6 +508,7 @@ class TimelineRecentHandler(BaseTimelineHandler):
     note_type = "all"
     show_recent_btn = False
     show_back_btn = True
+    show_create_btn = False
 
 
 class PublicTimelineHandler(TimelineHandler):
@@ -569,8 +597,8 @@ class DateHandler:
 
         notes = []
         # 待办任务
-        notes.append(MSG_DAO.get_message_tag(user_name, "task", priority=2))
-        notes.append(MSG_DAO.get_message_tag(user_name, "log",  priority=2))
+        notes.append(MessageDao.get_message_tag(user_name, "task", priority=2))
+        notes.append(MessageDao.get_message_tag(user_name, "log",  priority=2))
         notes.append(SystemGroup(
             "我的人生", "/note/view?skey=my_life", priority=2))
         notes.append(SystemGroup("我的年报:%s" % year, "/note/view?skey=year_%s" % year,
@@ -578,9 +606,9 @@ class DateHandler:
         notes.append(SystemGroup("我的月报:%s" % date, "/note/view?skey=month_%s" % date,
                                  priority=2))
 
-        notes_new = NOTE_DAO.list_by_date("ctime", user_name, date)
+        notes_new = note_dao.list_by_date("ctime", user_name, date)
         notes = notes + notes_new
-        notes_by_date = NOTE_DAO.assemble_notes_by_date(notes)
+        notes_by_date = note_helper.assemble_notes_by_date(notes)
 
         return xtemplate.render("note/page/list_by_date.html",
                                 html_title=T("我的笔记"),
@@ -595,12 +623,13 @@ class DateHandler:
 xutils.register_func("note.build_date_result", build_date_result)
 
 xurls = (
-    r"/note/timeline/month", DateTimelineAjaxHandler,
     r"/note/api/timeline", TimelineAjaxHandler,
 
     # 时光轴视图
     r"/note/timeline", TimelineHandler,
     r"/note/timeline/recent", TimelineRecentHandler,
+    r"/note/timeline/month", DateTimelineAjaxHandler,
+    
     r"/note/plan", PlanListHandler,
     r"/project/default", DefaultProjectHandler,
 

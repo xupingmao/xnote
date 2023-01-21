@@ -83,7 +83,7 @@ class Cache:
         self.dict = OrderedDict()
         self.expire_dict = dict()
         self.max_size = max_size
-        self.lock = threading.RLock(0)
+        self.lock = threading.RLock()
 
     def _fix_storage(self, obj):
         if isinstance(obj, dict):
@@ -265,6 +265,7 @@ class CacheObj:
         return self.valid_key_pattern.match(key) != None
 
     def _get_path(self, key):
+        assert STORAGE_DIR != None
         return os.path.join(STORAGE_DIR, key + ".json")
 
     def get_dump_value(self):

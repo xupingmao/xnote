@@ -26,8 +26,11 @@
 {% init type = "ctime" %}
 {% init base_path = "/note/timeline" %}
 {% init key = "" %}
+{% init show_old_create = False %}
+{% init show_create_btn = False %}
 {% init show_recent_btn = False %}
 {% init show_back_btn = False %}
+{% init show_group_btn = False %}
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
@@ -37,9 +40,17 @@
     <span class="note-header-span">{{title}}</span>
 
     <div class="float-right">
-        {% if type not in ("search", "public") %}
+        {% if show_old_create %}
           <!-- 原来使用 create_option.html 弹窗创建并没有预期的方便，而且不好做扩展 -->
           {% include note/component/timeline/timeline_create_option.html %}
+        {% end %}
+
+        {% if show_create_btn %}
+          <a class="btn" href="/note/create?parent_id={{parent_id}}">新建笔记</a>
+        {% end %}
+
+        {% if show_group_btn %}
+          <a href="/note/timeline?type=group_list" class="btn btn-default">笔记本</a>
         {% end %}
 
         {% if show_recent_btn %}

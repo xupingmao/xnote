@@ -670,6 +670,10 @@ class MessageDao:
     @staticmethod
     def get_message_stat(user):
         return get_message_stat(user)
+    
+    @staticmethod
+    def get_message_tag(user, tag, priority=0):
+        return get_message_tag(user, tag, priority)
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.update", update_message)

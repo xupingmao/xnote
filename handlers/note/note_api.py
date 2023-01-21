@@ -4,8 +4,8 @@
 # @modified 2021/07/24 17:51:17
 import xutils
 import xauth
-from xutils import dateutil
-from . import dao
+from handlers.note import dao
+from handlers.note.note_helper import assemble_notes_by_date
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -27,7 +27,7 @@ class GroupApiHandler:
 
         parent_id = 0
         if id != "0":
-            parent = NOTE_DAO.get_by_id(id)
+            parent = dao.get_by_id(id)
             if parent != None:
                 parent_id = parent.parent_id
 
@@ -39,7 +39,7 @@ class GroupApiHandler:
 
 def list_recent_groups(limit=5):
     creator = xauth.current_name()
-    return NOTE_DAO.list_group(creator, orderby="mtime_desc", limit=5)
+    return dao.list_group(creator, orderby="mtime_desc", limit=5)
 
 
 def list_recent_notes(limit=5):
@@ -54,31 +54,6 @@ def get_date_by_type(note, type):
             return note.mtime.split()[0]
         return dtime.split()[0]
     return note.ctime.split()[0]
-
-
-def assemble_notes_by_date(notes, time_attr="ctime"):
-    from collections import defaultdict
-    notes_dict = defaultdict(list)
-    for note in notes:
-        if note.priority == 1:
-            notes_dict["置顶"].append(note)
-            continue
-        if note.priority == 2:
-            notes_dict["超级置顶"].append(note)
-            continue
-        datetime_str = note.get(time_attr)
-        cdate = dateutil.format_date(datetime_str)
-        notes_dict[cdate].append(note)
-        note.badge_info = cdate
-
-    result = []
-    for date in notes_dict:
-        item = (date, notes_dict[date])
-        result.append(item)
-
-    result.sort(key=lambda x: x[0], reverse=True)
-    return result
-
 
 xutils.register_func("page.list_recent_groups", list_recent_groups)
 xutils.register_func("page.list_recent_notes", list_recent_notes)

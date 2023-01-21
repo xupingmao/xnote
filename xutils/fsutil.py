@@ -799,6 +799,7 @@ def get_free_space(folder):
     Python3.3 shutil模块新增了 disk_usage 方法，可以直接使用
     """
     if platform.system() == 'Windows':
+        assert ctypes != None
         free_bytes = ctypes.c_ulonglong(0)
         c_folder = ctypes.c_wchar_p(folder)
         ctypes.windll.kernel32.GetDiskFreeSpaceExW(c_folder, None, None,

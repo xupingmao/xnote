@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-19 15:16:04
 @LastEditors  : xupingmao
-@LastEditTime : 2022-12-10 22:01:17
+@LastEditTime : 2023-01-21 18:02:33
 @FilePath     : /xnote/handlers/note/dao_api.py
 @Description  : DAO接口定义
 """
@@ -79,3 +79,7 @@ class NoteDao:
     @staticmethod
     def get_view_url_by_id(note_id):
         return "/note/view/{}".format(note_id)
+
+    @staticmethod
+    def get_note_stat(user_name):
+        raise NotImplementedError()

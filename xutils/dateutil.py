@@ -40,8 +40,8 @@ import time
 import math
 
 SECONDS_PER_DAY = 3600 * 24
-DEFAULT_FORMAT  = '%Y-%m-%d %H:%M:%S'
-FORMAT          = DEFAULT_FORMAT
+DEFAULT_FORMAT = '%Y-%m-%d %H:%M:%S'
+FORMAT = DEFAULT_FORMAT
 
 WDAY_DICT = {
     "*": u"每天",
@@ -57,10 +57,10 @@ WDAY_DICT = {
 class DateClass:
 
     def __init__(self):
-        self.year = None
-        self.month = None
-        self.day = None
-        self.wday = None
+        self.year = 0
+        self.month = 0
+        self.day = 0
+        self.wday = 0 # week day
 
     def __repr__(self):
         return "(%r,%r,%r)" % (self.year, self.month, self.day)
@@ -112,7 +112,9 @@ def format_time_only(seconds=None):
 
 def format_wday(date_str, fmt = None):
     if fmt is None:
-        tm = time.strptime(date_str, "%Y-%m-%d")
+        fmt = "%Y-%m-%d"
+    
+    tm = time.strptime(date_str, fmt)
     wday = str(tm.tm_wday + 1)
     return WDAY_DICT.get(wday)
 
@@ -149,7 +151,7 @@ def format_mmdd(seconds=None):
     >>> format_mmdd("2020-12-02")
     '12/02'
     """
-    if is_str(seconds):
+    if isinstance(seconds, str):
         date_part = seconds.split(" ")[0]
         date_part = date_part.replace("-", "/")
         parts = date_part.split("/")
@@ -200,7 +202,7 @@ def parse_date_to_object(date_str):
         date_object.month = _parse_int(parts[1])
 
     if len(parts) >= 3:
-        date_object.date = _parse_int(parts[2])
+        date_object.day = _parse_int(parts[2])
 
     return date_object
 
@@ -320,7 +322,7 @@ def match_time(year = None, month = None, day = None, wday = None, tm = None):
         return False
     if month is not None and month != tm.tm_mon:
         return False
-    if day is not None and day != tm.tm_day:
+    if day is not None and day != tm.tm_mday:
         return False
     if wday is not None and wday != tm.tm_wday:
         return False

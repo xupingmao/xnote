@@ -14,7 +14,6 @@ import xauth
 import xconfig
 import os
 from xutils import dbutil
-from xutils import FileItem
 from xutils import format_size
 from xutils import fsutil
 from xutils.dbutil import LdbTable

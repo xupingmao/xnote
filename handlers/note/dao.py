@@ -1672,3 +1672,4 @@ NoteDao.get_root = get_root
 NoteDao.batch_query_list = batch_query_list
 NoteDao.add_history = add_history
 NoteDao.create = create_note
+NoteDao.get_note_stat = get_note_stat
