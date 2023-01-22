@@ -6,30 +6,112 @@
 <script type="text/template" id="fileItemOptionDialog">
     <div class="card">
         <div class="align-center">
-            <button class="btn btn-default large">按钮1</button>
-            <button class="btn btn-default large">按钮2</button>
-            <button class="btn btn-default large">按钮3</button>
-            <button class="btn btn-default large">按钮4</button>
+            <button class="btn btn-default large" data-path="{{!filePath}}" 
+                onclick="xnote.action.fs.download(this);">下载</button>
+            <button class="btn btn-default large" 
+                data-path="{{!filePath}}" 
+                data-name="{{!fileName}}"
+                onclick="xnote.action.fs.rename(this);">重命名</button>
+            <button class="btn btn-default large" 
+                data-path="{{!filePath}}"
+                data-name="{{!fileName}}"
+                onclick="xnote.action.fs.delete(this);">删除</button>
+            <button class="btn btn-default large"
+                data-path="{{!filePath}}"
+                onclick="xnote.action.fs.move(this);">移动</button>
+            <button class="btn btn-default large"
+                onclick="xnote.action.fs.copy(this);">复制</button>
+            <button class="btn btn-default large"
+                onclick="xnote.action.fs.showDetail(this);">详细信息</button>
         </div>
     </div>
 </script>
 
 <script type="text/javascript">
+if (xnote.api.fs == undefined) {
+    xnote.api.fs = {};
+}
 
 if (xnote.action.fs == undefined) {
     xnote.action.fs = {};
 }
+
+xnote.api.fs.rename = function(dirname, oldName, newName, callback) {
+    if (newName != oldName && newName) {
+        $.post("/fs_api/rename", 
+            {dirname: dirname, old_name: oldName, new_name: newName}, 
+            function (resp) {
+                if (resp.code == "success") {
+                    callback(resp);
+                } else {
+                    xnote.alert("重命名失败:" + resp.message);
+                }
+        }).fail(function (e) {
+            xnote.alert("系统繁忙，请稍后重试");
+        });
+    } else {
+        xnote.alert("请输入有效文件名");
+    }
+};
 
 xnote.action.fs.openOptionDialog = function (target) {
     console.log(window.event);
     window.event.preventDefault();
     window.event.stopPropagation();
     console.log(target);
-    var path = $(target).attr("data-path");
-    var html = $("#fileItemOptionDialog").html();
+    var filePath = $(target).attr("data-path");
+    var fileName = $(target).attr("data-name");
+    var html = $("#fileItemOptionDialog").render({
+        "filePath": filePath,
+        "fileName": fileName
+    });
+
     xnote.openDialog("选项", html);
 };
 
+xnote.action.fs.download = function(target) {
+    var path = $(target).attr("data-path");
+    window.open("/fs/" + path +"?type=blob", "_blank");
+};
+
+xnote.action.fs.rename = function(target) {
+    var filePath = $(target).attr("data-path");
+    var oldName = $(target).attr("data-name");
+    var dirname = $("#currentPath").val();
+    xnote.prompt("输入新的文件名", oldName, function (newName) {
+        xnote.api.fs.rename(dirname, oldName, newName, function(resp) {
+            window.location.reload();
+        });
+    });
+};
+
+xnote.action.fs.delete = function(target) {
+    var path = $(target).attr("data-path");
+    var name = $(target).attr("data-name");
+    xnote.confirm("删除【" + name + "】?", function (value) {
+        $.post("/fs_api/remove", {path: path}, function (resp) {
+            if (resp.code == "success") {
+                window.location.reload();
+            } else {
+                xnote.alert("删除失败:" + resp.message);
+            }
+        }).fail(function (resp) {
+            xnote.alert("系统繁忙，请稍后重试");
+        });
+    });
+};
+
+xnote.action.fs.move = function(target) {
+    xnote.alert("功能开发中...");
+};
+
+xnote.action.fs.copy = function(target) {
+    xnote.alert("功能开发中...");
+};
+
+xnote.action.fs.showDetail = function(target) {
+    xnote.alert("功能开发中...");
+};
 
 $(function () {
     $(".rename-btn").click(function (e) {
@@ -49,7 +131,7 @@ $(function () {
                     xnote.alert("系统繁忙，请稍后重试");
                 });
             } else {
-                xnote.alert("请输入有限文件名");
+                xnote.alert("请输入有效文件名");
             }
         });
     });

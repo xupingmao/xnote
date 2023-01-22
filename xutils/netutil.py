@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-18 12:31:03
+@LastEditTime : 2023-01-22 00:50:55
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -195,6 +195,7 @@ def do_http(method, url, headers, data = None, charset = 'utf-8'):
         return resp.getcode(), response_headers, codecs.decode(buf, charset)
 
 def http_get_by_requests(url, charset = None):
+    assert requests != None
     resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
     return resp.text
 
@@ -266,6 +267,7 @@ def http_post(url, body='', charset='utf-8'):
     return body
 
 def http_download_by_requests(url, destpath):
+    assert requests != None
     resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
     with open(destpath, "wb") as fp:
         for chunk in resp.iter_content(chunk_size = BUFSIZE):
