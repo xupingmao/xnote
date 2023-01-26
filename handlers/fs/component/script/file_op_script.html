@@ -2,6 +2,7 @@
 {% init path = "" %}
 {% if not file_op_script_loaded %}
 {% set-global file_op_script_loaded = True %}
+{% include fs/component/move_file_dialog.html %}
 
 <script type="text/template" id="fileItemOptionDialog">
     <div class="card">
@@ -102,7 +103,11 @@ xnote.action.fs.delete = function(target) {
 };
 
 xnote.action.fs.move = function(target) {
-    xnote.alert("功能开发中...");
+    var path = $(target).attr("data-path");
+    var req = {
+        selectedFiles: [path]
+    };
+    xnote.action.fs.openMoveDialog(req);
 };
 
 xnote.action.fs.copy = function(target) {
