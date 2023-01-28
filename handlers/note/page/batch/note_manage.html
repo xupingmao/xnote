@@ -5,11 +5,12 @@
 @modified 2021/07/31 10:38:21
 -->
 
-{% block body %}
+{% block body_left %}
 
 {% init show_note_path = True %}
 
 {% include common/script/load_vue.html %}
+{% include note/component/script/group_select_script.html %}
 
 <div id="vueApp">
     <div class="card note-list">
@@ -95,6 +96,31 @@ $(function () {
         });
     });
 
+    // 移动笔记
+    $(".move-btn").click(function (e) {
+        var checked = $(":checked");
+        if (checked.length == 0) {
+            xnote.alert("请选择笔记");
+            return;
+        }
+
+        var req = {};
+        var idList = [];
+        req.callback = function (parentId) {
+            if (parentId === undefined || parentId == "") {
+                xnote.alert("parentId is undefined");
+                return;
+            }
+            checked.each(function (index, element) {
+                var selfId = $(element).attr("data-id");
+                idList.push(selfId);
+
+                doMoveTo(idList, selfId, parentId);
+            });
+        };
+        xnote.api["note.move.dialog"](req);
+    });
+
     function doMoveTo(idList, selfId, parentId) {
         $.post("/note/move", 
           {id:selfId, parent_id: parentId}, 
@@ -143,3 +169,6 @@ $(function () {
 
 {% end %}
 
+{% block body_right %}
+    {% include common/sidebar/app_index.html %}
+{% end %}

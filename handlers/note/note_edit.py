@@ -21,6 +21,9 @@ from xtemplate import T
 from .constant import *
 from . import dao_delete
 from .dao_api import NoteDao
+import handlers.note.dao as note_dao
+from handlers.note import dao_read
+from handlers.note import dao_draft
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -75,7 +78,7 @@ def create_log_func(note, ctx):
     if date_str is None or date_str == "":
         date_str = time.strftime("%Y-%m-%d")
     note.name = u"日志:" + date_str + dateutil.convert_date_to_wday(date_str)
-    return NOTE_DAO.create(note, date_str)
+    return note_dao.create_note(note, date_str)
 
 def default_create_func(note, ctx):
     method   = ctx.method
@@ -90,14 +93,14 @@ def default_create_func(note, ctx):
         message = u'标题为空'
         raise Exception(message)
 
-    return NOTE_DAO.create(note, date_str)
+    return note_dao.create_note(note, date_str)
 
 CREATE_FUNC_DICT = {
     "log.bak": create_log_func
 }
 
 def list_groups_for_create(creator):
-    notes = NOTE_DAO.list_group(creator, orderby = "name")
+    notes = note_dao.list_group(creator, orderby = "name")
 
     sticky_groups   = list(filter(lambda x: x.priority != None and x.priority > 0, notes))
     archived_groups = list(filter(lambda x: x.archived == True, notes))
@@ -172,7 +175,7 @@ class CreateHandler:
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)
             inserted_id = create_func(note, ctx)
 
-            new_note = NOTE_DAO.get_by_id_creator(inserted_id, creator)
+            new_note = note_dao.get_by_id_creator(inserted_id, creator)
             self.after_create(new_note)
 
             if type == "group":
@@ -424,16 +427,16 @@ def update_and_notify(file, update_kw):
     edit_token = update_kw.get("edit_token", "")
     if edit_token != None and edit_token != "":
         # 这里只加一个0秒的锁，相当于更新完之后锁就释放了
-        if not NOTE_DAO.refresh_edit_lock(file.id, edit_token, time.time()):
+        if not dao_draft.refresh_edit_lock(file.id, edit_token, time.time()):
             raise NoteException("conflict", "当前笔记正在被其他设备编辑")
 
     # 先记录变更历史
     NoteDao.add_history(file.id, update_kw.get("version"), update_kw)
 
     # 执行变更
-    rowcount = NOTE_DAO.update(file.id, **update_kw)
+    rowcount = note_dao.update_note(file.id, **update_kw)
     if rowcount > 0:
-        NOTE_DAO.save_draft(file.id, "") # 清空草稿
+        dao_draft.save_draft(file.id, "") # 清空草稿
         fire_update_event(file)
     else:
         # 更新冲突了
@@ -624,9 +627,10 @@ class MoveAjaxHandler:
     def GET(self):
         id        = xutils.get_argument("id", "")
         parent_id = xutils.get_argument("parent_id", "")
+        parent_id = str(parent_id)
         user_name = xauth.current_name()
-        file = NOTE_DAO.get_by_id_creator(id, user_name)
-        target_book = NOTE_DAO.get_by_id_creator(parent_id, user_name)
+        file = NoteDao.get_by_id_creator(id, user_name)
+        target_book = NoteDao.get_by_id_creator(parent_id, user_name)
 
         if file is None:
             return dict(code="fail", message="笔记不存在")
@@ -634,26 +638,28 @@ class MoveAjaxHandler:
         if target_book is None:
             return dict(code="fail", message="目标笔记本不存在")
         
-        if str(id) == str(parent_id):
+        if str(id) == parent_id:
             return dict(code="fail", message="不能移动到自身目录")
         
         if target_book.type != "group":
             return dict(code="fail", message="只能移动到笔记本中")
 
-        pathlist = NOTE_DAO.list_path(target_book)
+        pathlist = note_dao.list_path(target_book)
         for item in pathlist:
             if item.id == file.id:
                 return dict(code="fail", message="不能移动笔记本到自身的子笔记本中")
         
         if file.type == "group":
             max_depth = xconfig.get_system_config("max_book_depth", 2)
+            assert isinstance(max_depth, int)
+
             # pathlist包含了根目录
-            depth = len(pathlist) - 1 + NOTE_DAO.get_depth(file)
+            depth = len(pathlist) - 1 + dao_read.get_note_depth(file)
             if depth > max_depth:
                 return dict(code="fail", message="笔记本的层次不能超过%d, 当前层次:%d" % (max_depth, depth))
 
         with dbutil.get_write_lock(user_name):
-            NOTE_DAO.move(file, parent_id)
+            note_dao.move_note(file, parent_id)
         return dict(code="success")
 
     def POST(self):
@@ -670,6 +676,8 @@ class AppendAjaxHandler:
         note_id = xutils.get_argument("note_id")
         content = xutils.get_argument("content")
         version = xutils.get_argument("version", 1, type = int)
+
+        note_id = str(note_id)
         note = NoteDao.get_by_id(note_id)
 
         if note == None:
@@ -681,7 +689,7 @@ class AppendAjaxHandler:
         if note.list_items is None:
             note.list_items = []
         note.list_items.append(content)
-        NOTE_DAO.update0(note)
+        note_dao.update0(note)
 
         fire_update_event(note)
         return dict(code = "success")
@@ -724,17 +732,17 @@ class DraftHandler:
         note = check_get_note(note_id)
         if action == "lock_and_save":
             with dbutil.get_write_lock(note_id):
-                if not NOTE_DAO.refresh_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE):
+                if not dao_draft.refresh_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE):
                     return dict(code = "conflict", message = "该文章正在被其他设备编辑，是否偷锁编辑")
                 
                 if version < note.version:
                     return dict(code = "version_too_low", message = "当前编辑的版本过低，是否加载最新的草稿")
 
-                NOTE_DAO.save_draft(note_id, content)
+                dao_draft.save_draft(note_id, content)
                 return dict(code = "success")
         if action == "steal_lock":
-            NOTE_DAO.steal_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE)
-            draft_content = NOTE_DAO.get_draft(note_id)
+            dao_draft.steal_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE)
+            draft_content = dao_draft.get_draft(note_id)
             if draft_content == None or draft_content == "":
                 draft_content = note.content
             return dict(code = "success", data = draft_content)
@@ -764,7 +772,7 @@ class UpdateAttrAjaxHandler:
         if key in ("category"):
             old_value = getattr(note_info, key)
             setattr(note_info, key, value)
-            NOTE_DAO.update0(note_info)
+            note_dao.update0(note_info)
             if key == "category":
                 refresh_category_count(user_name, value)
                 refresh_category_count(user_name, old_value)

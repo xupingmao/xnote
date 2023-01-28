@@ -24,6 +24,7 @@ from .dao_category import list_category, get_category_by_code
 from . import dao_tag
 from . import dao
 from .dao_api import NoteDao
+import handlers.note.dao as note_dao
 
 VIEW_TPL = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -127,8 +128,8 @@ class DefaultListHandler:
         user_name = xauth.get_current_name()
         pagesize = xconfig.PAGE_SIZE
         offset = (page-1) * pagesize
-        files = NOTE_DAO.list_default_notes(user_name, offset, pagesize)
-        amount = NOTE_DAO.count_by_parent(user_name, 0)
+        files = note_dao.list_default_notes(user_name, offset, pagesize)
+        amount = note_dao.count_by_parent(user_name, 0)
 
         return xtemplate.render("note/page/note_default.html",
                                 notes=files,
@@ -144,7 +145,7 @@ class ShareListHandler:
 
     def list_notes(self, user_name, offset, limit):
         orderby = xutils.get_argument("tab", "ctime_desc")
-        notes = NOTE_DAO.list_public(offset, limit, orderby)
+        notes = note_dao.list_public(offset, limit, orderby)
         for note in notes:
             note.url = "/note/view/public?id=%s" % note.id
             if orderby == "hot":
@@ -154,7 +155,7 @@ class ShareListHandler:
         return notes
 
     def count_notes(self, user_name):
-        return NOTE_DAO.count_public()
+        return note_dao.count_public()
 
     def GET(self):
         page = xutils.get_argument("page", 1, type=int)
@@ -774,7 +775,7 @@ class ManagementHandler:
         if parent_note == None:
             raise web.notfound()
 
-        notes = NOTE_DAO.list_by_parent(user_name, parent_id,
+        notes = note_dao.list_by_parent(user_name, parent_id,
                                         0, 200, orderby=parent_note.orderby, tags=q_tags)
 
         parent = Storage(url="/note/%s" % parent_id,
@@ -826,7 +827,7 @@ class ManagementHandler:
 
         current = Storage(url="#", name="整理")
         return xtemplate.render(kw.template,
-                                pathlist=NOTE_DAO.list_path(parent_note),
+                                pathlist=note_dao.list_path(parent_note),
                                 files=notes,
                                 show_path=True,
                                 current=current, **kw)

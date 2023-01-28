@@ -812,6 +812,7 @@ def update_note(note_id, **kw):
 
 
 def move_note(note, new_parent_id):
+    # type: (Storage, str) -> None
     assert isinstance(new_parent_id, str)
     assert len(new_parent_id) > 0
 
@@ -829,6 +830,7 @@ def move_note(note, new_parent_id):
         note.path = parent_path + " - " + note.name
     
     # 没有更新内容，只需要更新索引数据
+    note.mtime = dateutil.format_datetime()
     update_index(note)
 
     # 更新文件夹的容量
