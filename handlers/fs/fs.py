@@ -93,13 +93,6 @@ def list_file_objects(fpath):
         filenames = list_abs_dir(fpath)
     return process_file_list(filenames)
 
-def get_parent_file_object(fpath):
-    fpath = os.path.abspath(fpath)
-    parent_path = os.path.dirname(fpath)
-    file_object = FileItem(parent_path)
-    file_object.name = u"[上级目录]"
-    return file_object
-
 def check_file_auth(path, user_name):
     user_dir = os.path.join(xconfig.UPLOAD_DIR, user_name)
     path = os.path.abspath(path)
@@ -157,6 +150,9 @@ class FileSystemHandler:
     def list_directory(self, path):
         try:
             filelist = list_file_objects(path)
+            parent_file = fs_helper.get_parent_file_object(path, "[上级目录]")
+            if not fsutil.is_same_file(parent_file.path, path):
+                filelist.insert(0, parent_file)
         except OSError:
             return xtemplate.render("fs/page/fs.html", 
                 show_aside = False,
@@ -178,8 +174,10 @@ class FileSystemHandler:
         kw.filelist    = filelist
         kw.path        = path
         kw.quoted_path = xutils.quote(path)
+        user_info = xauth.current_user()
+        assert isinstance(user_info, Storage)
 
-        kw["token"]         = xauth.get_current_user().token
+        kw["token"]         = user_info.token
         kw["parent_path"]   = get_parent_path(path)
         kw["search_action"] = "/fs_find"
         kw["show_aside"]    = False
@@ -350,6 +348,7 @@ class DocFileHandler:
 
     def GET(self):
         fpath = xutils.get_argument("fpath", "")
+        assert isinstance(fpath, str)
         if fpath == "":
             raise web.notfound()
         if ".." in fpath:
@@ -394,6 +393,7 @@ class RemoveAjaxHandler:
     @xauth.login_required()
     def POST(self):
         path = xutils.get_argument("path")
+        assert isinstance(path, str)
         user_name = xauth.current_name()
         if not xauth.is_admin() and not check_file_auth(path, user_name):
             return dict(code="fail", message="unauthorized")
@@ -419,6 +419,10 @@ class RenameAjaxHandler:
         old_name = xutils.get_argument("old_name", "")
         new_name = xutils.get_argument("new_name", "")
         user_name = xauth.current_name()
+
+        assert isinstance(old_name, str)
+        assert isinstance(new_name, str)
+        assert isinstance(dirname, str)
 
         if dirname is None or dirname == "":
             return dict(code="fail", message="dirname is blank")
@@ -454,6 +458,7 @@ class CutAjaxHandler:
     @xauth.login_required("admin")
     def POST(self):
         files = xutils.get_argument("files[]", list())
+        assert isinstance(files, list)
         for i, fpath in enumerate(files):
             files[i] = os.path.abspath(fpath)
         xconfig.FS_CLIP = files
@@ -507,7 +512,7 @@ class ListAjaxHandler:
 
         files = list_file_objects(fpath)
         if show_parent == "true":
-            files.insert(0, get_parent_file_object(fpath))
+            files.insert(0, fs_helper.get_parent_file_object(fpath))
 
         return dict(code = "success", fpath = fpath, data = files)
 
@@ -562,6 +567,7 @@ class BookmarkHandler:
     @xauth.login_required("admin")
     def GET(self):
         user_name = xauth.current_name()
+        assert isinstance(user_name, str)
 
         xmanager.add_visit_log(user_name, "/fs_bookmark")
 

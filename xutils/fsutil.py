@@ -24,6 +24,7 @@ from xutils.imports import *
 from xutils.base import Storage
 from fnmatch import fnmatch
 from six.moves.configparser import ConfigParser
+from xutils import logutil
 
 # mbcs泛指通过2字节来编码的字符编码
 # https://zhuanlan.zhihu.com/p/453675608
@@ -40,9 +41,9 @@ def get_real_path(path):
     import xconfig
     """获取真实的path信息，如果配置了urlencode，强制进行urlencode，否则先按原路径检查，如果文件不存在，再进行urlencode
     之所以要这样做，主要是为了兼容从不支持unicode文件名的服务器同步到本地的文件"""
-    if path == None:
-        return None
-
+    assert isinstance(path, str)
+    if path == "":
+        return path
     if xconfig.USE_URLENCODE:
         return get_real_path_encode_first(path)
 
@@ -115,6 +116,7 @@ def get_relative_path(path, parent):
 
 
 def detect_encoding(fpath, raise_error=True):
+    last_err = None
     for encoding in ENCODING_TUPLE:
         try:
             with open(fpath, encoding=encoding) as fp:
@@ -278,7 +280,7 @@ def tmp_path(fname="", prefix="", ext=""):
         if not os.path.exists(path):
             return path
         path = "%s_%s" % (base_path, i) + ext
-    return None
+    raise Exception("创建临时文件失败, 请手动重试")
 
 
 def data_path(fname):
@@ -343,6 +345,7 @@ def _try_readlines(fpath, limit=-1, encoding='utf-8'):
 
 
 def readlines(fpath, limit=-1):
+    last_err = None
     for encoding in ENCODING_TUPLE:
         try:
             return _try_readlines(fpath, limit, encoding)
@@ -435,6 +438,7 @@ def rmdir(path, hard=False):
 
 
 def rmfile(path, hard=False):
+    # type: (str, bool) -> bool
     """删除文件，默认软删除，移动到trash目录中，如果已经在trash目录或者硬删除，从磁盘中抹除
     @param {str} path
     @param {bool} hard=False 是否硬删除
@@ -478,6 +482,7 @@ def rmfile(path, hard=False):
         # os.remove(path)
     elif os.path.isdir(path):
         rmdir(path, hard)
+    return True
 
 
 remove = rmfile
@@ -565,12 +570,12 @@ class FileItem(Storage):
             self.encoded_path = xutils.encode_uri_component(self.path)
 
         # 处理文件属性
-        self.handle_file_stat(merge)
+        self.handle_file_stat(merge, parent)
 
         if name != None:
             self.name = name
 
-    def handle_file_stat(self, merge):
+    def handle_file_stat(self, merge, parent):
         path = self.path
         try:
             st = os.stat(path)
@@ -808,3 +813,6 @@ def get_free_space(folder):
     else:
         st = os.statvfs(folder)
         return st.f_bavail * st.f_frsize
+
+def is_same_file(path1, path2):
+    return os.path.abspath(path1) == os.path.abspath(path2)

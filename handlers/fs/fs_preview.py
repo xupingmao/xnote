@@ -16,7 +16,7 @@ class SidebarHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        path = xutils.get_argument("path")
+        path = xutils.get_argument("path", "")
         path = xutils.get_real_path(path)
         error = ""
         if path == None or path == "":
@@ -36,7 +36,7 @@ class PreviewHandler:
     @xauth.login_required("admin")
     def GET(self):
         # TODO 使用文件扩展
-        path = xutils.get_argument("path")
+        path = xutils.get_argument("path", "")
         embed = xutils.get_argument("embed", "true")
         path = xutils.get_real_path(path)
         encoded_path = xutils.encode_uri_component(path)

@@ -17,6 +17,7 @@ from xutils import dbutil
 from xutils import format_size
 from xutils import fsutil
 from xutils.dbutil import LdbTable
+from xutils.fsutil import FileItem
 
 _index_db = dbutil.get_table("fs_index")
 _index_db.set_binlog_enabled(False)
@@ -42,6 +43,7 @@ def handle_file_item(item):
         item.icon = "fa-file-image-o"
 
     handle_file_url(item)
+    item.show_opt_btn = True
     return item
 
 def handle_file_url(item):
@@ -56,6 +58,14 @@ def handle_file_url(item):
     else:
         item.url = "/fs_preview?path=%s&embed=false" % item.encoded_path
 
+def get_parent_file_object(path, name = ""):
+    path = os.path.abspath(path)
+    parent_file = FileItem(os.path.dirname(path))
+    handle_file_item(parent_file)
+    if name != "":
+        parent_file.name = name
+    parent_file.show_opt_btn = False
+    return parent_file
 
 def get_index_dirs():
     index_dirs = xauth.get_user_config("admin", "fs_index_dirs")

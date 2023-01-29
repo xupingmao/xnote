@@ -48,6 +48,7 @@
                 <i class="fa {{_item.icon}}"></i>
                 <span>{{_item.name}}</span>
 
+                {% if _item.show_opt_btn %}
                 <div class="float-right">
                     <span class="fs-size-span">{{_item.size}}</span>
                     <span>&nbsp;</span>
@@ -56,6 +57,7 @@
                         data-name="{{_item.name}}"
                         onclick="xnote.action.fs.openOptionDialog(this)">{{T("操作")}}</button>
                 </div>
+                {% end %}
             </a>
         {% end %}
     </div>
