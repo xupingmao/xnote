@@ -17,6 +17,7 @@ from xutils import cacheutil
 from xutils import Storage
 from xutils import fsutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
+from . import dao_visit_log
 
 
 PLUGIN_API = xutils.Module("plugin")
@@ -83,7 +84,7 @@ class NewPluginHandler(BasePlugin):
             xutils.writefile(name, code)
             # 添加一个访问记录，使得新增的插件排在前面
             basename = os.path.basename(name)
-            PLUGIN_API.add_visit_log(user_name, "/plugins/" + basename)
+            dao_visit_log.add_visit_log(user_name, "/plugins/" + basename)
             raise web.seeother('/code/edit?path=%s' % name)
 
 

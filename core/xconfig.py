@@ -390,6 +390,7 @@ def init_http_port():
         os.environ["PORT"] = port
 
     if not os.environ.get("PORT"):
+        assert isinstance(port, str)
         os.environ["PORT"] = port
 
     # 兼容
@@ -618,3 +619,18 @@ def get_system_files():
         BACKUP_DB_DIR,
     ])
 
+
+class SystemConfig:
+
+    def get_int(self, name, default_value=0):
+        value = get_system_config(name, default_value)
+        assert isinstance(value, int)
+        return value
+    
+    def get_str(self, name, default_value=""):
+        value = get_system_config(name, default_value)
+        return str(value)
+
+    def get_bool(self, name, default_value=False):
+        value = get_system_config(name, default_value)
+        return bool(value)
