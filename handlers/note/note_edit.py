@@ -69,7 +69,7 @@ def fire_rename_event(note):
 
 def create_log_func(note, ctx):
     method   = ctx.method
-    date_str = ctx.date
+    date_str: str = ctx.date
 
     if method != "POST":
         # GET请求直接返回
@@ -223,7 +223,7 @@ class CreateHandler:
             raise Exception(u"无效的类型: %s" % note.type0)
 
         name = note.name
-        check_by_name = NOTE_DAO.get_by_name(note.creator, name)
+        check_by_name = note_dao.get_by_name(note.creator, name)
         if check_by_name != None:
             message = u"笔记【%s】已存在" % name
             raise Exception(message)
@@ -290,9 +290,9 @@ class RecoverAjaxHandler:
         file = None
 
         if id != "" and id != None:
-            file = NOTE_DAO.get_by_id(id)
+            file = note_dao.get_by_id(id)
         elif name != "":
-            file = NOTE_DAO.get_by_name(xauth.current_name(), name)
+            file = note_dao.get_by_name(xauth.current_name(), name)
         else:
             return dict(code="fail", message="id,name至少一个不为空")
 
@@ -336,7 +336,7 @@ class RenameAjaxHandler:
         if old.creator != xauth.get_current_name():
             return dict(code="fail", message="没有权限")
 
-        file = NOTE_DAO.get_by_name(xauth.current_name(), name)
+        file = note_dao.get_by_name(xauth.current_name(), name)
         if file is not None:
             return dict(code="fail", message="%r已存在" % name)
 
@@ -360,7 +360,7 @@ class NoteShareHandler:
     def GET(self):
         id      = xutils.get_argument("id")
         note    = check_get_note(id)
-        NOTE_DAO.update(id, is_public = 1)
+        note_dao.update_note(id, is_public = 1)
         return dict(code = "success")
 
     @xauth.login_required()
@@ -389,7 +389,7 @@ class LinkShareHandler:
             return dict(code = "success", data = "/note/view?token=%s" % note.token)
         else:
             token = NOTE_DAO.create_token("note", note.id)
-            NOTE_DAO.update(note.id, token = token)
+            note_dao.update_note(note.id, token = token)
         return dict(code = "success", data = "/note/view?token=%s" % token)
 
 class UnshareHandler:
@@ -402,7 +402,7 @@ class UnshareHandler:
         if to_user != "":
             NOTE_DAO.delete_share(id, to_user = to_user)
         else:
-            NOTE_DAO.update(id, is_public = 0)
+            note_dao.update_note(id, is_public = 0)
         return dict(code = "success", message = "取消分享成功")
 
     def POST(self):
@@ -555,7 +555,7 @@ class StickHandler:
             priority = int(level)
 
         note = check_get_note(id)
-        NOTE_DAO.update(id, priority = priority, archived = False)
+        note_dao.update_note(id, priority = priority, archived = False)
         raise web.found("/note/%s" % id)
 
 class UnstickHandler:
@@ -564,7 +564,7 @@ class UnstickHandler:
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
-        NOTE_DAO.update(id, priority = 0)
+        note_dao.update_note(id, priority = 0)
         raise web.found("/note/%s" % id)
 
 class ArchiveHandler:
@@ -573,7 +573,7 @@ class ArchiveHandler:
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
-        NOTE_DAO.update(id, archived=True, priority = -1)
+        note_dao.update_note(id, archived=True, priority = -1)
         raise web.found("/note/%s" % id)
 
 class ResetHandler:
@@ -582,7 +582,7 @@ class ResetHandler:
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
-        NOTE_DAO.update(id, archived=False, priority = 0)
+        note_dao.update_note(id, archived=False, priority = 0)
         raise web.found(note.url)
 
 class UnarchiveHandler:
@@ -591,7 +591,7 @@ class UnarchiveHandler:
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
-        NOTE_DAO.update(id, archived=False, priority = 0)
+        note_dao.update_note(id, archived=False, priority = 0)
         raise web.found("/note/%s" % id)
 
 class UpdateStatusHandler:
@@ -605,7 +605,7 @@ class UpdateStatusHandler:
         note = check_get_note(id)
         
         archived = (status == "-1")
-        NOTE_DAO.update(id, priority = int(status), archived = archived)
+        note_dao.update_note(id, priority = int(status), archived = archived)
         return dict(code = "success", message = "更新状态成功")
 
 class UpdateOrderByHandler:
@@ -618,7 +618,7 @@ class UpdateOrderByHandler:
             return dict(code = "fail", message = "无效的排序方式: %s" % orderby)
         note = check_get_note(id)
         
-        NOTE_DAO.update(id, orderby = orderby)
+        note_dao.update_note(id, orderby = orderby)
         return dict(code = "success", message = "更新排序方式成功")
 
 class MoveAjaxHandler:
@@ -756,6 +756,7 @@ class UpdateAttrAjaxHandler:
         id = xutils.get_argument("id", "")
         key = xutils.get_argument("key", "")
         value = xutils.get_argument("value", "")
+        assert isinstance(key, str)
 
         if id == "":
             return dict(code="400", message="id不能为空")
