@@ -514,16 +514,25 @@ class BaseListHandler:
     show_ext_info = True
 
     def count_notes(self, user_name):
-        return NOTE_DAO.count_by_type(user_name, self.note_type)
+        return note_dao.count_by_type(user_name, self.note_type)
 
     def list_notes(self, user_name, offset, limit):
-        return NOTE_DAO.list_by_type(user_name, self.note_type, offset, limit, self.orderby)
+        return note_dao.list_by_type(user_name, self.note_type, offset, limit, self.orderby)
 
     def map_notes(self, notes):
         for note in notes:
             note.badge_info = dateutil.format_date(note.ctime)
 
         return notes
+    
+    def get_type_list(self):
+        return [
+            Storage(url="/note/all", name="全部", tag_code="all"),
+            Storage(url="/note/all?type=md", name="文档", tag_code="md"),
+            Storage(url="/note/all?type=gallery", name="相册", tag_code="gallery"),
+            Storage(url="/note/all?type=list", name="清单", tag_code="list"),
+            Storage(url="/note/all?type=table", name="表格", tag_code="table"),
+        ]
 
     @xauth.login_required()
     def GET(self):
@@ -533,6 +542,8 @@ class BaseListHandler:
 
         limit = xconfig.PAGE_SIZE
         offset = (page-1)*limit
+
+        self.note_type = xutils.get_argument("type", self.note_type)
 
         amount = self.count_notes(user_name)
         notes = self.list_notes(user_name, offset, limit)
@@ -546,16 +557,19 @@ class BaseListHandler:
         kw.page_url = "/note/%s?page=" % self.note_type
         kw.parent_id = get_default_book_id(user_name)
         kw.notes = notes
+        kw.group_type = self.note_type
+        kw.note_type = self.note_type
+        kw.title = self.title
+        kw.date_type = self.date_type
+        kw.type_list = self.get_type_list()
+        kw.show_path = False
+        kw.file_type = "group"
 
         # 上级菜单
         parent = PathNode(T("根目录"), "/note/group")
+        kw.pathlist = [parent, PathNode(self.title, "/note/" + self.note_type)]
+        
         return xtemplate.render("note/page/note_list.html",
-                                pathlist=[parent, PathNode(
-                                    self.title, "/note/" + self.note_type)],
-                                file_type="group",
-                                title=self.title,
-                                group_type=self.note_type,
-                                date_type=self.date_type,
                                 show_group_option=False,
                                 create_text=self.create_text,
                                 create_type=self.create_type,

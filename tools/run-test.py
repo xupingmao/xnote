@@ -26,7 +26,11 @@ def check_and_install_pkg(py_module, pip_version = ""):
 		__import__(py_module)
 	except ImportError:
 		print("准备安装:", pip_version)
-		os.system("python3 -m pip install %s" % pip_version)
+		cmd = sys.executable
+		os.system("%s -m pip install %s" % (cmd, pip_version))
+
+def py_exec(cmd_line):
+	os.system("%s %s" % (sys.executable, cmd_line))
 
 def run_test(args):
 	target = args.target
@@ -38,8 +42,8 @@ def run_test(args):
 
 	if target == "xutils_db":
 		# os.system("python3 -m pytest tests/test_xutils_db.py::TestMain::test_dbutil_mysql_enhanced --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
-		os.system("python3 -m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
-		os.system("python3 -m coverage html")
+		py_exec("-m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
+		py_exec("-m coverage html")
 		return
 	
 	if target == "xutils_cache":
@@ -81,13 +85,14 @@ def run_test(args):
 		print("未知的操作:", target)
 		sys.exit(1)
 	
-	check_and_install_pkg("pytest", "pytest==5.1.0")
-	os.system("python3 -m pip install pytest-cov==2.7.1")
-	os.system("python3 -m pip install python-coveralls==2.9.3")
-	os.system("python3 -m pip install coverage==4.5.4")
-	os.system("python3 -m pip install lmdb")
-	os.system("python3 -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core")
-	os.system("python3 -m coverage html")
+	executable = sys.executable
+	check_and_install_pkg("pytest", "pytest>=5.1.0")
+	os.system("%s -m pip install pytest-cov>=2.7.1" % executable)
+	os.system("%s -m pip install python-coveralls>=2.9.3" % executable)
+	os.system("%s -m pip install coverage>=4.5.4" % executable)
+	os.system("%s -m pip install lmdb" % executable)
+	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core" % executable)
+	os.system("%s -m coverage html" % executable)
 
 def main():
 	parser = argparse.ArgumentParser()

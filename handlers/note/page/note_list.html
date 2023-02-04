@@ -7,6 +7,7 @@
 
     {% init show_back = True %}
     {% init show_create_option = True %}
+    {% init show_path = True %}
 
     <div class="card">
         <div class="grid-title">
@@ -28,9 +29,13 @@
         {% include note/component/script/create_script.html %}
     </div>
 
+    {% if show_path %}
     <div class="card">
         {% include note/component/note_path.html %}
     </div>
+    {% end %}
+
+    {% include note/component/filter/type_filter.html %}
 
     {% set files = notes %}
     {% include note/component/note_list_component.html %}

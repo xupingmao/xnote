@@ -14,6 +14,8 @@
 </div>
 
 {% if tab == "active" %}
-    {% include note/component/group_special_folder.html %}
+    <div class="hide">
+        {% include note/component/group_special_folder.html %}
+    </div>
     {% include note/component/filter/group_tag_filter.html %}
 {% end %}
