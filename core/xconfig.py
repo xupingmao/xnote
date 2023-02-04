@@ -498,6 +498,8 @@ def put(name, value):
 def set_global_config(name, value):
     _config[name] = value
 
+def set_system_config(name, value):
+    set_global_config("system." + name, value)
 
 def get_config():
     raise Exception("deprecated: use xconfig.get_config_dict")

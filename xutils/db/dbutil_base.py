@@ -645,7 +645,7 @@ def prefix_list(*args, **kw):
 
 
 def prefix_iter(prefix,  # type: str
-                filter_func=None,  # type: function
+                filter_func=None,  # type: function|None
                 offset=0,  # type: int
                 limit=-1,  # type: int
                 reverse=False,

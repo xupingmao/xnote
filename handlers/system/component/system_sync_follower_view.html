@@ -24,6 +24,16 @@
 </div>
 
 <div class="list-item">
+    <span>同步状态</span>
+    <div class="float-right">
+        <select class="config-select" data-key="sync_status" data-type="bool" value="{{sync_status}}">
+            <option value="True">开启</option>
+            <option value="False">关闭</option>
+        </select>
+    </div>
+</div>
+
+<div class="list-item">
     <span>主节点文件索引数</span>
     <div class="float-right">
         <span>{{fs_index_count}}</span>
@@ -89,3 +99,24 @@
         </div>
     </div>
 {% end %}
+
+<script type="text/javascript">
+$(function() {
+    $(".config-select").change(function (e) {
+        var key = $(e.target).attr("data-key");
+        var value = $(e.target).val();
+        var params = {};
+        params.p = "set_config";
+        params.key = key;
+        params.value = value;
+
+        $.post("/system/sync", params, function (resp) {
+            if (resp.code == "success") {
+                xnote.toast(resp.message);
+            } else {
+                xnote.alert(resp.message);
+            }
+        });
+    });
+})
+</script>

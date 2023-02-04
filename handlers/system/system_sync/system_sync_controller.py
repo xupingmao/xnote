@@ -36,13 +36,30 @@ from xutils import netutil
 from .node_follower import Follower
 from .node_leader import Leader
 from . import system_sync_indexer
-from xutils.mem_util import log_mem_info_deco
 
 LOCK = threading.Lock()
 
 dbutil.register_table("cluster_config", "集群配置")
 CONFIG = dbutil.get_hash_table("cluster_config")
 
+
+class SyncConfig:
+
+    @staticmethod
+    def need_sync_db():
+        return xconfig.get_system_config("sync_db_from_leader")
+    
+    @staticmethod
+    def need_sync_files():
+        return xconfig.get_system_config("sync_files_from_leader")
+    
+    @staticmethod
+    def set_need_sync_db(bool_value = False):
+        xconfig.set_system_config("sync_db_from_leader", bool_value)
+    
+    @staticmethod
+    def set_need_sync_files(bool_value = False):
+        xconfig.set_system_config("sync_files_from_leader", bool_value)
 
 def get_system_role():
     return xconfig.get_global_config("system.node_role")
@@ -86,6 +103,9 @@ class ConfigHandler:
 
         if key == "trigger_sync":
             return self.trigger_sync()
+        
+        if key == "sync_status":
+            return self.set_sync_status(value)
 
         return dict(code="success")
 
@@ -109,6 +129,18 @@ class ConfigHandler:
     def set_leader_token(self, token):
         CONFIG.put("leader.token", token)
         return dict(code="success")
+    
+    def set_sync_status(self, value):
+        if value == None:
+            return dict(code="err", message="配置值为空")
+        bool_value = value.lower() == "true"
+        SyncConfig.set_need_sync_db(bool_value)
+        SyncConfig.set_need_sync_files(bool_value)
+        if bool_value:
+            message = "同步已开启"
+        else:
+            message = "同步已关闭"
+        return dict(code="success", message=message)
 
 
 def get_leader_url():
@@ -185,6 +217,7 @@ class SyncHandler:
         kw.follower_binlog_seq = FOLLOWER.db_syncer.get_binlog_last_seq()
         kw.follower_db_sync_state = FOLLOWER.db_syncer.get_db_sync_state()
         kw.follower_db_last_key = FOLLOWER.db_syncer.get_db_last_key()
+        kw.sync_status = SyncConfig.need_sync_db()
 
         return xtemplate.render("system/page/system_sync.html", **kw)
 
@@ -228,11 +261,11 @@ class LeaderHandler(SyncHandler):
     def GET(self):
         return self.handle_leader_action()
 
-    def get_token():
+    def get_token(self):
         """通过临时令牌换取访问token"""
         pass
 
-    def refresh_token():
+    def refresh_token(self):
         """刷新访问token"""
         pass
 
@@ -342,7 +375,7 @@ def on_sync_files_from_leader(ctx=None):
     if role == "leader":
         return None
     
-    if xconfig.get("system.sync_files_from_leader") == False:
+    if not SyncConfig.need_sync_files():
         return None
     
     if FOLLOWER.is_at_full_sync():
@@ -366,7 +399,7 @@ def on_sync_db_from_leader(ctx=None):
     if role == "leader":
         return None
     
-    if xconfig.get_system_config("sync_db_from_leader") == False:
+    if not SyncConfig.need_sync_db():
         return None
 
     try:

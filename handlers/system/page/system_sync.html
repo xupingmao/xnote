@@ -86,7 +86,9 @@ $(function () {
                 } else {
                     xnote.alert(resp.message);
                 }
-            });
+            }).fail(function (err) {
+                xnote.alert("请求接口失败:" + err);
+            })
         });
     });
 
