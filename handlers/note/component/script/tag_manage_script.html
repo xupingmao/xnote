@@ -5,7 +5,8 @@
             <span>标签</span>
             <a href="{{!linkOfTagAll}}" class="tag lightgray large {{! if selectedTags.length==0 }}active{{!/if}}">全部</a>
             {{! each tagList tag }}
-                <a class="tag lightgray meta large {{!tag.active}}">{{! tag.tag_name }}</a>
+                <a class="tag lightgray meta large {{!tag.active}}" 
+                    data-name="{{! tag.tag_name }}">{{! tag.tag_name }}({{!tag.amount}})</a>
             {{!/each}}
         </div>
 
@@ -95,7 +96,7 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
 
     $("body").on("click", ".tag", function(e) {
         var me = $(this);
-        var tagName = me.text();
+        var tagName = me.attr("data-name");
         var tagId = me.attr("data-id");
 
         me.toggleClass("active");
@@ -123,7 +124,7 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
         xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
             var selectedNames = [];
             $(".tag.bind.active").each(function (idx, ele) {
-                var tagName = $(ele).text().trim();
+                var tagName = $(ele).attr("data-name");
                 selectedNames.push(tagName);
             });
 

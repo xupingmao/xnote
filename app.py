@@ -331,21 +331,22 @@ def init_app():
 
 
 def count_worker_thread():
-    count = 0
+    result = []
     for t in threading.enumerate():
         if t.daemon:
             # 忽略守护线程
             continue
-        count += 1
-    return count
+        result.append(t.name)
+    return len(result), result
 
 
 def wait_thread_exit():
     while True:
-        count = count_worker_thread()
+        count, names = count_worker_thread()
         logging.debug("线程数量:%s", count)
+        logging.debug("运行的线程:%s", names)
         if count > 1:
-            time.sleep(0.1)
+            time.sleep(0.2)
         else:
             return
 

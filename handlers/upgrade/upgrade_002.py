@@ -9,8 +9,8 @@
 import xutils
 from xutils import dbutil
 from xutils import dateutil
+from . import base as UPGRADE
 
-UPGRADE = xutils.DAO("upgrade")
 NOTE_DAO = xutils.DAO("note")
 
 def log_info(fmt, *args):

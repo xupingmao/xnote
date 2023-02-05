@@ -87,8 +87,8 @@ def run_test(args):
 	
 	executable = sys.executable
 	check_and_install_pkg("pytest", "pytest>=5.1.0")
-	os.system("%s -m pip install pytest-cov>=2.7.1" % executable)
-	os.system("%s -m pip install python-coveralls>=2.9.3" % executable)
+	check_and_install_pkg("pytest_cov", "pytest-cov>=2.7.1")
+	check_and_install_pkg("coveralls", "python-coveralls>=2.9.3")
 	os.system("%s -m pip install coverage>=4.5.4" % executable)
 	os.system("%s -m pip install lmdb" % executable)
 	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core" % executable)

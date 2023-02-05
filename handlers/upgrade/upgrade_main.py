@@ -13,58 +13,31 @@
 2. 升级文件中的入口为`do_upgrade`
 3. 升级文件需要自己处理幂等逻辑，这里提供了幂等表`upgrade_log`
 """
-
+import os
 import xmanager
 import xutils
 import xauth
 import logging
 from xutils import six
-from xutils import dbutil
 from xutils import dateutil
 from xutils import Storage
-
-MAX_FILE_COUNT = 10
-dbutil.register_table("db_upgrade_log", "数据库升级日志")
-sys_log_db = dbutil.get_table("sys_log")
-
-def get_upgrade_log_table():
-    return dbutil.get_hash_table("db_upgrade_log")
-
-def is_upgrade_done(op_flag):
-    db = get_upgrade_log_table()
-    return db.get(op_flag) == "1"
-
-def mark_upgrade_done(op_flag):
-    db = get_upgrade_log_table()
-    db.put(op_flag, "1")
-
-
-def log_info(fmt, *args):
-    print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
-
-def log_error(fmt, *args):
-    print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
-
-def log_warn(fmt, *args):
-    print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
+from .base import *
 
 @xmanager.listen("sys.reload")
 def check_upgrade(ctx = None):
     logging.info("check_upgrade...")
+    dirname = os.path.dirname(__file__)
 
-    i = 0
-    for i in range(MAX_FILE_COUNT):
-        mod_name = "handlers.upgrade.upgrade_%03d" % i
-        try:
-            mod = six._import_module(mod_name)
-        except ImportError:
-            logging.warning("加载模块失败: %s", mod_name)
+    for fname in sorted(os.listdir(dirname)):
+        if not fname.startswith("upgrade_"):
             continue
-
-        if hasattr(mod, "do_upgrade"):
-            logging.info("执行升级: %s", mod_name)
-            # 如果升级失败，直接跳过
-            mod.do_upgrade()
+        if fname.startswith("upgrade_main"):
+            continue
+        basename, ext = os.path.splitext(fname)
+        mod_name = "handlers.upgrade." + basename
+        mod = six._import_module(mod_name)
+        logging.info("执行升级: %s", mod_name)
+        mod.do_upgrade()
 
     logging.info("check_upgrade done")
 

@@ -482,7 +482,7 @@ class CronTaskManager:
                 # 等待下一个分钟
                 sleep_sec = 60 - tm.tm_sec % 60
                 if sleep_sec > 0:
-                    time.sleep(sleep_sec)
+                    quick_sleep(sleep_sec)
 
         self.do_load_tasks()
 
@@ -550,7 +550,7 @@ class SyncTaskThread(Thread):
     def run(self):
         while True:
             fire("sync.step")
-            time.sleep(3)
+            quick_sleep(3)
 
 
 class WorkerThread(Thread):
@@ -812,6 +812,16 @@ def set_event_handlers0(event_type, handlers, is_async=True):
     for handler in handlers:
         manager.add_handler(event_type, handler, is_async)
 
+def quick_sleep(seconds):
+    """可以快速从睡眠中重启"""
+    start_time = time.time()
+    while True:
+        time.sleep(0.1)
+        wait_time = time.time() - start_time
+        if wait_time > seconds:
+            return
+        if xconfig.EXIT_CODE == 205:
+            return
 
 def fire(event_type, ctx=None):
     """发布一个事件"""

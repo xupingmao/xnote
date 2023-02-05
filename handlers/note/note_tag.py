@@ -83,11 +83,12 @@ class TagListHandler:
     def GET(self):
         if xauth.has_login():
             user_name = xauth.get_current_name()
-            tag_list = xutils.call("note.list_tag", user_name)
+            assert isinstance(user_name, str)
 
+            tag_list = dao_tag.list_tag(user_name)
             xmanager.add_visit_log(user_name, "/note/taglist")
         else:
-            tag_list = xutils.call("note.list_tag", "")
+            tag_list = dao_tag.list_tag("")
         return xtemplate.render("note/page/taglist.html",
                                 html_title="标签列表",
                                 show_aside=False,
@@ -189,7 +190,7 @@ class BindTagAjaxHandler:
             return dict(code="500", message="笔记不存在或者无权限")
 
         tag_names = json.loads(tag_names_str)
-        dao_tag.update_tags(user_name, group_id, tag_names)
+        dao_tag.bind_tags(user_name, group_id, tag_names, tag_type="group")
         return dict(code="success")
     
     def bind_note_tag(self):
@@ -204,7 +205,7 @@ class BindTagAjaxHandler:
             return dict(code="500", message="笔记不存在或者无权限")
 
         tag_names = json.loads(tag_names_str)
-        dao_tag.update_tags(user_name, note_id, tag_names)
+        dao_tag.bind_tags(user_name, note_id, tag_names, tag_type="note")
         return dict(code="success")
 
     @xauth.login_required()

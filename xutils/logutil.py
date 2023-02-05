@@ -31,15 +31,15 @@ def _format_time():
     tf_base = time.strftime('%Y-%m-%d %H:%M:%S', st)
     return "%s,%03d" % (tf_base, msecs)
 
-class LogThread(threading.Thread):
+class AsyncThreadBase(threading.Thread):
     
-    task_queue = deque()
     MAX_TASK_QUEUE = 200
 
-    def __init__(self, name="LogThread"):
-        super(LogThread, self).__init__()
+    def __init__(self, name="AsyncThread"):
+        super(AsyncThreadBase, self).__init__()
         self.setDaemon(True)
         self.setName(name)
+        self.task_queue = deque()
 
     def put_task(self, func, *args, **kw):
         if len(self.task_queue) > self.MAX_TASK_QUEUE:
@@ -61,14 +61,24 @@ class LogThread(threading.Thread):
             except Exception as e:
                 xutils.print_exc()
 
+class LogThread(AsyncThreadBase):
+    def __init__(self, name="LogThread"):
+        super().__init__(name)
+
+class AsyncThread(AsyncThreadBase):
+    pass
+
 LOG_THREAD = LogThread()
 LOG_THREAD.start()
+
+ASYNC_THREAD = AsyncThread()
+ASYNC_THREAD.start()
 
 def async_func_deco():
     """同步调用转化成异步调用的装饰器"""
     def deco(func):
         def handle(*args, **kw):
-            LOG_THREAD.put_task(func, *args, **kw)
+            ASYNC_THREAD.put_task(func, *args, **kw)
         return handle
     return deco
 
