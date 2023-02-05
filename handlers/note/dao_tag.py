@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-02-05 16:56:06
+@LastEditTime : 2023-02-05 18:26:34
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -66,7 +66,7 @@ class TagMetaDao:
     
     @classmethod
     @xutils.async_func_deco()
-    def update_amount_async(cls, user_name: str, tag_names: list[str], tag_type: str, parent_id = None):
+    def update_amount_async(cls, user_name: str, tag_names: list, tag_type: str, parent_id = None):
         for tag_name in tag_names:
             tag_info = get_tag_meta_by_name(user_name, tag_name, tag_type=tag_type, group_id=parent_id)
             if tag_info != None:
