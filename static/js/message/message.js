@@ -1,8 +1,3 @@
-
-if (xnote.action.message === undefined) {
-    xnote.action.message = {};
-}
-
 if (xnote.api.message === undefined) {
     xnote.api.message = {};
 }
@@ -10,6 +5,11 @@ if (xnote.api.message === undefined) {
 if (xnote.state.message === undefined) {
     xnote.state.message = {};
 }
+
+var MessageView = {};
+MessageView.state = {};
+MessageView.state.isEditDialog = false;
+xnote.action.message = MessageView;
 
 $(function() {
     var LAST_DATE;
@@ -101,8 +101,7 @@ $(function() {
         fixOrientation: true
     });
 
-    // 通过剪切板上传
-    $(".input-box").on("paste", function (e) {
+    $("body").on("paste", ".edit-box,.input-box", function (e) {
         xnote.requestUploadByClip(e, "msg", function (resp) {
             console.log(resp);
             var webpath = "file://" + resp.webpath;
@@ -113,21 +112,50 @@ $(function() {
 });
 
 // 更新输入框
-xnote.action.message.updateInputBox = function (webpath) {
-    var oldText = $(".input-box").val();
+MessageView.updateInputBox = function (webpath) {
+    var oldText = this.getInputText();
     var leftPart = oldText;
     if (leftPart != "" && leftPart[leftPart.length-1]) {
         leftPart += "\n";
     }
     var newText = leftPart + webpath + "\n";
-    $(".input-box").val(newText);
+    this.setInputText(newText);
 }
 
-xnote.action.message.closeEdit = function () {
+MessageView.getInputText = function () {
+    if (this.state.isEditDialog) {
+        return $(".edit-box").val();
+    } else {
+        return $(".input-box").val();
+    }
+}
+
+MessageView.setInputText = function (text) {
+    if (this.state.isEditDialog) {
+        $(".edit-box").val(text);
+    } else {
+        $(".input-box").val(text);
+    }
+}
+
+// 更新输入框
+MessageView.insertBeforeInputBox = function (text) {
+    var oldText = this.getInputText();
+    var newText = text + " " + oldText;
+    this.setInputText(newText);
+}
+
+MessageView.closeEdit = function () {
     // 打开编辑框的时候会重写这个方法
 };
 
-xnote.action.message.edit = function (target) {
+MessageView.closeTopicDiloag = function () {
+    // 关闭
+}
+
+MessageView.edit = function (target) {
+    MessageView.state.isEditDialog = true;
+
     var id = $(target).attr("data-id");
     // 打开编辑器
     var params = {
@@ -139,9 +167,10 @@ xnote.action.message.edit = function (target) {
                 detail: resp.data
             });
             var layerId = xnote.openDialog("编辑", html);
-            xnote.action.message.closeEdit = function () {
+            MessageView.closeEdit = function () {
                 // console.log("close dialog:", layerId);
                 xnote.closeDialog(layerId);
+                MessageView.state.isEditDialog = false;
             };
         } else {
             xnote.alert(resp.message);
@@ -151,26 +180,42 @@ xnote.action.message.edit = function (target) {
     });
 };
 
-xnote.action.message.selectTopic = function (target) {
-    // 选择标签
-    xnote.openDialog("选择标签", html);
+MessageView.showTopicDialog = function (target) {
+    $.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
+        if (resp.code != "success") {
+            xnote.alert(resp.message);
+        } else {
+            // 选择标签
+            var html = $("#msg-tag-list-tpl").render({
+                itemList: resp.data
+            });
+            var dialogId = xnote.openDialog("选择标签", html);
+            MessageView.closeTopicDiloag = function () {
+                xnote.closeDialog(dialogId);
+            }
+        }
+    }).fail(function (err) {
+        xnote.alert("调用接口失败, err=" + err);
+    });
 };
 
-xnote.action.message.saveMessage = function (target) {
+MessageView.saveMessage = function (target) {
     // 保存信息
     var id = $("#messageEditId").val();
     var content = $("#messageEditContent").val();
 
     var params = {
         id: id,
-        content: content
+        content: content,
     }
+
+    var self = this;
 
     $.post("/message/update", params, function (resp) {
         if (resp.code == "success") {
             xnote.toast("更新成功");
-            xnote.action.message.closeEdit();
-            xnote.action.message.refreshList();
+            self.closeEdit();
+            self.refreshList();
         } else {
             xnote.alert("更新失败:" + resp.message);
         }
@@ -180,8 +225,73 @@ xnote.action.message.saveMessage = function (target) {
     });
 };
 
-xnote.action.message.upload = function () {
+MessageView.upload = function () {
     // 上传文件
     console.log("select file button click");
     $("#filePicker").click();
 };
+
+
+MessageView.touchTopic = function(topic) {
+    var params = {"key": topic};
+    $.post("/message/touch", params, function (resp) {
+        console.log(resp);
+    }).fail(function (error) {
+        console.error(error);
+    })
+}
+
+// 创建话题标签
+MessageView.createTopicText = function(topic) {
+    if (topic.Get(0) == '#' && topic.Get(-1) == '#') {
+        return topic;
+    }
+
+    if (topic.Get(0) == '《' && topic.Get(-1) == '》') {
+        return topic;
+    }
+    
+    return '#' + topic + '#';
+}
+
+
+MessageView.selectTopic = function (target) {
+    var topic = $(target).text();
+
+    // 将话题置顶
+    this.touchTopic(topic);
+
+    var topicText = this.createTopicText(topic);
+
+    this.closeTopicDiloag();
+
+    // 发布选择消息的事件
+    this.insertBeforeInputBox(topicText);
+}
+
+// 搜索话题标签
+MessageView.searchTopic = function(inputText) {
+    var showCount = 0;
+
+    $(".empty-item").hide();
+    
+    $(".topic-item").each(function (index, element) {
+        var text = $(element).text();
+        if (text.indexOf(inputText) < 0) {
+            $(element).hide();
+        } else {
+            $(element).show();
+            showCount++;
+        }
+    });
+
+    if (showCount == 0) {
+        $(".empty-item").show();
+    }
+}
+
+$("body").on("keyup", ".nav-search-input", function (e) {
+    console.log(e);
+    var inputText = $(e.target).val();
+    MessageView.searchTopic(inputText);
+});

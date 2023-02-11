@@ -909,6 +909,10 @@ li.menu-item:hover {
     background-color: #fff;
 }
 
+.main-content-bg {
+    background-color: #fff;
+}
+
 .aside {
     float: left;
     width: 220px;

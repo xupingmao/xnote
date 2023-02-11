@@ -14,6 +14,8 @@
 {% end %}
 
 {% block body_left %}
+    <!-- 编辑 -->
+    {% include message/component/message_edit.html %}
 
     {% init message_tag = "" %}
     {% init p = "" %}
@@ -75,6 +77,10 @@
     {% include message/component/message_list.html %}
 
     <script type="text/javascript">
+
+xnote.state.message.messageTag = "{{message_tag}}";
+xnote.state.message.tag = "{{tag}}";
+
         $(function (e) {
             function getParamTag() {
                 return "{{tag}}";
@@ -110,9 +116,6 @@
 
             xnote.on("message.updated", onMessageRefresh);
             xnote.on("message.created", onMessageCreated);
-
-            // 定义刷新消息列表函数
-            xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
 
             // 触发更新事件
             xnote.fire("message.updated");

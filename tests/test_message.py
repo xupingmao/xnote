@@ -172,7 +172,7 @@ class TestMain(BaseTestCase):
                                      data=dict(id=task_id, status=100))
         self.assertEqual("success", update_result.get("code"))
 
-        self.check_OK("/message/edit?id=%s" % task_id)
+        self.check_OK("/message/detail?id=%s" % task_id)
 
     def test_message_dairy(self):
         self.check_OK("/message/dairy")

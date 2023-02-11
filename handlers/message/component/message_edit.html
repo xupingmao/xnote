@@ -3,13 +3,13 @@
         <!-- 编辑器 -->
         <div class="card">
             <textarea id="messageEditContent" 
-                class="col-md-12 input-box" rows=20
+                class="col-md-12 edit-box" rows=20
                 placeholder="请输入内容...">{{!detail.content}}</textarea>
 
             <input type="hidden" id="messageEditId" value="{{!detail.id}}"/>
 
             <input type="button" class="send-button btn btn-default" 
-                onclick="xnote.action.message.selectTopic(this);" value="#标签">
+                onclick="xnote.action.message.showTopicDialog(this);" value="#标签">
             <input type="button" id="filePickerBtn" class="send-button btn btn-default" 
                 onclick="xnote.action.message.upload(this);" value="添加附件"/>
             <input type="button" id="updateMessageBtn" class="send-button btn"
@@ -18,11 +18,21 @@
     </div>
 </script>
 
-<script type="text/template" id="msg-tag-list">
-    <div class="card">
-        {{!each item}}
-            <a class="list-item"></a>
-        {{!/each}}
+<script type="text/template" id="msg-tag-list-tpl">
+    <div class="main-content-bg row">
+        <div class="row">
+            <input type="text" class="nav-search-input" placeholder="搜索标签" onchange="onSearchInputChange(this)"/>
+            <button class="nav-search-btn btn-default">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        
+        <div class="card top-offset-1">
+            <a class="list-item empty-item hide">&lt;无匹配标签&gt;</a>
+            {{!each itemList msg}}
+                <a onclick="xnote.action.message.selectTopic(this);" class="list-item topic-item">{{!msg.content}}</a>
+            {{!/each}}
+        </div>
     </div>
 </script>
 

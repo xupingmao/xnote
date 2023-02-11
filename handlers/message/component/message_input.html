@@ -6,13 +6,15 @@
 {% init create_tag = tag %}
 
 <div class="message-input-box card">
-    <textarea class="col-md-12 input-box" rows=3 autoHeight=true placeholder="{{message_placeholder}}">{{filter_default_content(default_content)}}</textarea>
+    <textarea class="col-md-12 input-box" rows=3 autoHeight=true 
+        placeholder="{{message_placeholder}}">{{filter_default_content(default_content)}}</textarea>
     <input type="file" id="filePicker" class="hide" multiple/>
 
     <div class="col-md-12 btn-line-height">
         {% if show_tag_btn %}
             <!-- <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签" @click=""> -->
-            <input type="button" class="send-button btn btn-default select-topic-btn" value="#标签">
+            <input type="button" class="send-button btn btn-default"
+                onclick="xnote.action.message.showTopicDialog(this);" value="#标签">
         {% end %}
 
         {% if show_attachment_btn %}

@@ -45,6 +45,7 @@ from . import dao
 from .dao import MessageDao
 from handlers.message import message_utils
 from xutils.db.lock import RecordLock
+import handlers.message.dao as msg_dao
 
 MSG_DAO = xutils.DAO("message")
 # 消息处理规则
@@ -118,7 +119,7 @@ def update_keyword_amount(message, user_name, key):
 def refresh_key_amount():
     for user_info in xauth.iter_user(limit=-1):
         user_name = user_info.name
-        msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, -1)
+        msg_list, amount = msg_dao.list_by_tag(user_name, "key", 0, -1)
         for index, message in enumerate(msg_list):
             key = message.content
             update_keyword_amount(message, user_name, key)
@@ -234,7 +235,7 @@ class ListAjaxHandler:
         if list_func != None:
             return list_func(user_name, offset, pagesize)
         else:
-            return MSG_DAO.list_by_tag(user_name, tag, offset, pagesize)
+            return msg_dao.list_by_tag(user_name, tag, offset, pagesize)
 
     def do_get_html(self, chatlist, page, page_max, tag="task"):
         show_todo_check = True
@@ -322,30 +323,30 @@ class ListAjaxHandler:
         status = xutils.get_argument("status", "")
 
         if p == "done":
-            return MSG_DAO.list_task_done(user_name, offset, limit)
+            return msg_dao.list_task_done(user_name, offset, limit)
 
         if filter_key != "":
-            msg_list, amount = MSG_DAO.list_task(
+            msg_list, amount = msg_dao.list_task(
                 user_name, offset=0, limit=MAX_LIST_LIMIT)
             msg_list = filter_msg_list_by_key(msg_list, filter_key)
             return msg_list[offset:offset+limit], len(msg_list)
         else:
-            return MSG_DAO.list_task(user_name, offset, limit)
+            return msg_dao.list_task(user_name, offset, limit)
 
     def do_list_by_date(self, user_name, date, offset, pagesize):
         filter_key = xutils.get_argument("filterKey", "")
 
         if filter_key != "":
-            msg_list, amount = MSG_DAO.list_by_date(
+            msg_list, amount = msg_dao.list_by_date(
                 user_name, date, 0, MAX_LIST_LIMIT)
             msg_list = filter_msg_list_by_key(msg_list, filter_key)
             return msg_list[offset:offset+pagesize], len(msg_list)
         else:
-            return MSG_DAO.list_by_date(user_name, date, offset, pagesize)
+            return msg_dao.list_by_date(user_name, date, offset, pagesize)
 
     def do_list_key(self, user_name, offset, limit):
         orderby = xutils.get_argument("orderby", "")
-        msg_list, amount = MSG_DAO.list_by_tag(
+        msg_list, amount = msg_dao.list_by_tag(
             user_name, "key", 0, MAX_LIST_LIMIT)
         p = message_utils.MessageKeyWordProcessor(msg_list)
         p.process()
@@ -576,7 +577,7 @@ def create_message(user_name, tag, content, ip):
 
 def check_content_for_update(user_name, tag, content):
     if tag == 'key':
-        return MSG_DAO.get_by_content(user_name, tag, content)
+        return msg_dao.get_by_content(user_name, tag, content)
     return None
 
 
@@ -588,13 +589,13 @@ def touch_key_by_content(user_name, tag, content):
             item.visit_cnt = 0
         item.visit_cnt += 1
 
-        MSG_DAO.update(item)
+        msg_dao.update_message(item)
     return item
 
 
 def get_or_create_keyword(user_name, content, ip):
     with RecordLock(user_name):
-        item = MSG_DAO.get_by_content(user_name, "key", content)
+        item = msg_dao.get_by_content(user_name, "key", content)
         if item != None:
             return item
         return create_message(user_name, "key", content, ip)
@@ -657,7 +658,7 @@ class DateAjaxHandler:
         offset = get_offset_from_page(page)
         limit = xconfig.PAGE_SIZE
 
-        msg_list, msg_count = MSG_DAO.list_by_date(
+        msg_list, msg_count = msg_dao.list_by_date(
             user_name, date, offset, limit)
 
         parser = MessageListParser(msg_list)
@@ -829,7 +830,7 @@ class MessageListHandler:
 
     def get_task_taglist_page(self):
         user_name = xauth.current_name()
-        msg_list, amount = MSG_DAO.list_task(user_name, 0, -1)
+        msg_list, amount = msg_dao.list_task(user_name, 0, -1)
 
         tag_list = get_tags_from_message_list(
             msg_list, "task", display_tag="taglist")
@@ -857,7 +858,7 @@ class MessageListHandler:
 
         year, month, mday = do_split_date(date)
 
-        msg_list, amount = MSG_DAO.list_by_date(
+        msg_list, amount = msg_dao.list_by_date(
             user_name, date, limit=MAX_LIST_LIMIT)
 
         tag_list = get_tags_from_message_list(msg_list, "date", date)
@@ -940,22 +941,6 @@ class MessageListHandler:
         tag = xutils.get_argument("tag")
         return self.do_get(tag)
 
-
-class MessageEditHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        id = xutils.get_argument("id")
-        detail = MessageDao.get_by_id(id)
-
-        if detail.ref != None:
-            detail = MessageDao.get_by_id(detail.ref)
-
-        return xtemplate.render("message/page/message_edit.html",
-                                show_nav=False,
-                                detail=detail)
-
-
 class MessageDetailAjaxHandler:
 
     @xauth.login_required()
@@ -993,7 +978,7 @@ class StatAjaxHandler:
     @xauth.login_required()
     def GET(self):
         user = xauth.current_name()
-        stat = MSG_DAO.get_message_stat(user)
+        stat = msg_dao.get_message_stat(user)
         format_message_stat(stat)
         return stat
 
@@ -1013,7 +998,7 @@ class TodoHandler(MessageHandler):
     @xauth.login_required()
     def do_get(self, tag="todo", title="待办任务", show_input_box=True):
         user_name = xauth.current_name()
-        message_stat = MSG_DAO.get_message_stat(user_name)
+        message_stat = msg_dao.get_message_stat(user_name)
         xmanager.add_visit_log(user_name, "/message/todo")
 
         return xtemplate.render("message/page/message_todo.html",
@@ -1056,7 +1041,7 @@ class MessageListByDayHandler():
 
         year, month, day = do_split_date(date)
 
-        item_list, amount = MSG_DAO.list_by_date(
+        item_list, amount = msg_dao.list_by_date(
             user_name, date, limit=MAX_LIST_LIMIT)
         message_list = convert_message_list_to_day_folder(
             item_list, date, True)
@@ -1101,7 +1086,7 @@ class MessageKeywordAjaxHandler:
         user_name = xauth.current_name()
         
         with RecordLock(user_name):
-            key_obj = MSG_DAO.get_by_content(user_name, "key", keyword)
+            key_obj = msg_dao.get_by_content(user_name, "key", keyword)
 
             if key_obj == None:
                 # 不存在，创建新的标签
@@ -1186,7 +1171,6 @@ xurls = (
     r"/message/log", MessageLogHandler,
     r"/message/done", TodoDoneHandler,
     r"/message/canceled", TodoCanceledHandler,
-    r"/message/edit", MessageEditHandler,
     r"/message/detail", MessageDetailAjaxHandler,
 
     # 日记
