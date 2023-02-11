@@ -697,6 +697,9 @@ class MessageListHandler:
         if tag == "key" and op == "select":
             return self.do_select_key()
 
+        if tag == "api.tag_list":
+            return self.get_tag_list()
+
         if tag == "key":
             return self.get_log_tags_page()
 
@@ -714,12 +717,19 @@ class MessageListHandler:
     def do_select_key(self):
         user_name = xauth.current_name()
         offset = 0
-        msg_list, amount = MSG_DAO.list_by_tag(
+        msg_list, amount = dao.list_by_tag(
             user_name, "key", offset, MAX_LIST_LIMIT)
 
         return xtemplate.render("message/page/message_tag_select.html",
                                 msg_list=msg_list,
                                 show_nav=False)
+    
+    def get_tag_list(self):
+        user_name = xauth.current_name()
+        offset = 0
+        msg_list, amount = dao.list_by_tag(
+            user_name, "key", offset, MAX_LIST_LIMIT)
+        return dict(code="success", data = msg_list)
 
     def get_log_tags_page(self):
         orderby = xutils.get_argument("orderby", "")
@@ -946,6 +956,18 @@ class MessageEditHandler:
                                 detail=detail)
 
 
+class MessageDetailAjaxHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument("id")
+        detail = MessageDao.get_by_id(id)
+
+        if detail.ref != None:
+            detail = MessageDao.get_by_id(detail.ref)
+        
+        return dict(code="success", data = detail)
+
 class CalendarHandler:
 
     @xauth.login_required()
@@ -1165,6 +1187,7 @@ xurls = (
     r"/message/done", TodoDoneHandler,
     r"/message/canceled", TodoCanceledHandler,
     r"/message/edit", MessageEditHandler,
+    r"/message/detail", MessageDetailAjaxHandler,
 
     # 日记
     r"/message/dairy", MessageListByDayHandler,

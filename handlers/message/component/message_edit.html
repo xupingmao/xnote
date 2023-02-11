@@ -1,0 +1,74 @@
+<script type="text/template" id="msg-edit-tpl">
+    <div class="card">
+        <!-- 编辑器 -->
+        <div class="card">
+            <textarea id="messageEditContent" 
+                class="col-md-12 input-box" rows=20
+                placeholder="请输入内容...">{{!detail.content}}</textarea>
+
+            <input type="hidden" id="messageEditId" value="{{!detail.id}}"/>
+
+            <input type="button" class="send-button btn btn-default" 
+                onclick="xnote.action.message.selectTopic(this);" value="#标签">
+            <input type="button" id="filePickerBtn" class="send-button btn btn-default" 
+                onclick="xnote.action.message.upload(this);" value="添加附件"/>
+            <input type="button" id="updateMessageBtn" class="send-button btn"
+                onclick="xnote.action.message.saveMessage(this);" value="更新">
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="msg-tag-list">
+    <div class="card">
+        {{!each item}}
+            <a class="list-item"></a>
+        {{!/each}}
+    </div>
+</script>
+
+<script type="text/javascript">
+
+$(function () {
+    $("#updateMessageBtn").click(function () {
+        var id = $("#messageEditId").val();
+        var content = $("#messageEditContent").val();
+
+        var params = {
+            id: id,
+            content: content
+        }
+
+        $.post("/message/update", params, function (resp) {
+            if (resp.code == "success") {
+                xnote.toast("更新成功");
+
+                // 更新节点
+                var msg = {type: "message.updated"};
+                xnote.fire("message.updated", msg);
+            } else {
+                xnote.alert("更新失败:" + resp.message);
+            }
+        }).fail(function (e) {
+            console.error(e);
+            xnote.alert("系统繁忙，请稍后重试");
+        });
+    });
+
+    function onFileUploaded(event) {
+        var inputText = event.target;
+        var oldText = $(".input-box").val();
+        var newText = oldText + "\n" + inputText + "\n";
+        $(".input-box").val(newText);
+    }
+
+    function onTopicSelected(event) {
+        xnote.closeAllDialog();
+        var topic = event.target;
+        var oldText = $(".input-box").val();
+        $(".input-box").val(topic + " " + oldText);
+    }
+
+    xnote.on("message.upload", onFileUploaded);
+    xnote.on("message.topic.selected", onTopicSelected);
+});
+</script>

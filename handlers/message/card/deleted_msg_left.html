@@ -8,6 +8,8 @@
 {% include message/component/message_upload.html %}
 <!-- 随手记事件 -->
 {% include message/component/message_event.html %}
+<!-- 编辑 -->
+{% include message/component/message_edit.html %}
 
 <!-- 编辑器 -->
 <div class="message-input-box card" v-if="inputBoxVisible">
@@ -416,8 +418,9 @@
 
             openEditDialog: function (event) {
                 var id = $(event.currentTarget).attr("msg-id");
-                var editUrl = "/message/edit?id=" + id;
-                xnote.showIframeDialog("编辑", editUrl);
+                // var editUrl = "/message/edit?id=" + id;
+                // xnote.showIframeDialog("编辑", editUrl);
+                xnote.action.message.edit();
             }
         }
     });

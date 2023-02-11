@@ -37,7 +37,9 @@
         <div class="todo-foot">
 
             {% if show_edit_btn %}
-            <a class="todo-edit-btn btn btn-default" data-url="/message/edit?id={{item.id}}">编辑</a>
+            <a class="todo-edit-btn btn btn-default" data-id="{{item.id}}" 
+                onclick="xnote.action.message.edit(this);"
+                data-url="/message/edit?id={{item.id}}">编辑</a>
             {% end %}
 
             <div class="float-right">
@@ -67,14 +69,6 @@
 
 <script type="text/javascript">
     $(function () {
-
-        // 编辑弹窗
-        $(".todo-edit-btn").click(function (e) {
-            var url = $(e.target).attr("data-url");
-            var layerId = xnote.showIframeDialog("编辑", url);
-            // 更新后会调用 postMessage 发送消息
-        });
-
         function updateMessageTag(id, tag) {
             $.post("/message/tag", { id: id, tag: tag }, function (resp) {
                 if (resp.code == "success") {
@@ -100,8 +94,7 @@
             xnote.confirm("确认删除[" + content + "]吗?", function (result) {
                 $.post("/message/delete", { id: id }, function (resp) {
                     if (resp.code == "success") {
-                        var msg = { type: "message.updated" };
-                        window.postMessage(JSON.stringify(msg), "*");
+                        xnote.action.message.refreshList();
                     } else {
                         xnote.alert(data.message);
                     }

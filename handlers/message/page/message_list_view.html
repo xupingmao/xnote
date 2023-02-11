@@ -4,7 +4,8 @@
 
     {% init default_content = "" %}
     {% init show_tab = True %}
-
+    <link rel="stylesheet" type="text/css" href="/static/lib/webuploader/webuploader.css">
+    <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
     <script type="text/javascript" src="/static/js/message/message.js"></script>
 
     <input class="msg-search-key" type="hidden" value="{{key}}"/>
@@ -27,6 +28,9 @@
 
     <!-- 事件转换 -->
     {% include message/component/message_event.html %}
+
+    <!-- 编辑 -->
+    {% include message/component/message_edit.html %}
 
     <!-- Tab页 -->
     {% if show_tab %}
@@ -60,6 +64,9 @@
 
     <script type="text/javascript">
         $(function (e) {
+            xnote.state.message.messageTag = "{{message_tag}}";
+            xnote.state.message.tag = "{{tag}}";
+
             function getParamTag() {
                 var tag = "{{message_tag}}";
                 if (tag != "") {

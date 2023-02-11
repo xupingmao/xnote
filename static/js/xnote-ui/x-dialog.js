@@ -69,7 +69,7 @@ xnote.closeDialog = function (flag) {
         layer.close(lastId);
     }
 
-    if (flag instanceof Number) {
+    if (typeof(flag) === 'number') {
         layer.close(flag);
         // TODO 移除_dialogIdStack中的元素
     }
