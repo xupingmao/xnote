@@ -203,10 +203,12 @@ MessageView.saveMessage = function (target) {
     // 保存信息
     var id = $("#messageEditId").val();
     var content = $("#messageEditContent").val();
+    var tag = $("#messageEditTag").val();
 
     var params = {
         id: id,
         content: content,
+        tag: tag
     }
 
     var self = this;
@@ -223,6 +225,26 @@ MessageView.saveMessage = function (target) {
         console.error(e);
         xnote.alert("系统繁忙，请稍后重试");
     });
+};
+
+// 基于标签创建新记录
+MessageView.createMessageOnTag = function(target) {
+    var self = this;
+    self.state.isEditDialog = true;
+    var keyword = $(target).attr("data-keyword");
+    var tag = $(target).attr("data-tag");
+    var html = $("#msg-edit-tpl").render({
+        detail: {
+            content: keyword + " ",
+            tag: tag
+        }
+    });
+    var layerId = xnote.openDialog("编辑", html);
+    self.closeEdit = function () {
+        // console.log("close dialog:", layerId);
+        xnote.closeDialog(layerId);
+        self.state.isEditDialog = false;
+    };
 };
 
 MessageView.upload = function () {

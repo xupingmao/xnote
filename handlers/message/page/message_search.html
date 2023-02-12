@@ -60,10 +60,6 @@
     <!-- 事件转换 -->
     {% include message/component/message_event.html %}
 
-    {% if p in ("task", "log") %}
-        {% include message/component/message_input.html %}
-    {% end %}
-
     {% include message/component/message_keyword_info.html %}
 
     {% if date != "" %}
@@ -78,8 +74,8 @@
 
     <script type="text/javascript">
 
-xnote.state.message.messageTag = "{{message_tag}}";
-xnote.state.message.tag = "{{tag}}";
+        xnote.state.message.messageTag = "{{message_tag}}";
+        xnote.state.message.tag = "{{tag}}";
 
         $(function (e) {
             function getParamTag() {
@@ -119,7 +115,7 @@ xnote.state.message.tag = "{{tag}}";
 
             // 触发更新事件
             xnote.fire("message.updated");
-        })
+        });
     </script>
 
 {% end %}

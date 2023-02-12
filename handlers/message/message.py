@@ -905,7 +905,7 @@ class MessageListHandler:
             show_back_btn=False,
             message_tab="log",
             message_placeholder="记录发生的事情/产生的想法",
-            side_tags=MSG_DAO.list_hot_tags(user_name, 20),
+            side_tags=message_utils.list_hot_tags(user_name, 20),
         )
 
         if key != "" or input_tag == "search":
@@ -1115,8 +1115,9 @@ class SearchHandler:
         kw.key = key
         kw.keyword = key
         kw.default_content = message_utils.filter_key(key)
-        kw.side_tags = MSG_DAO.list_hot_tags(user_name, 20)
+        kw.side_tags = message_utils.list_hot_tags(user_name, 20)
         kw.create_tag = self.get_create_tag()
+        kw.show_create_on_tag = kw.create_tag != "forbidden"
 
         return xtemplate.render("message/page/message_search.html", **kw)
 

@@ -7,6 +7,7 @@
                 placeholder="请输入内容...">{{!detail.content}}</textarea>
 
             <input type="hidden" id="messageEditId" value="{{!detail.id}}"/>
+            <input type="hidden" id="messageEditTag" value="{{!detail.tag}}"/>
 
             <input type="button" class="send-button btn btn-default" 
                 onclick="xnote.action.message.showTopicDialog(this);" value="#标签">
