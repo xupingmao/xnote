@@ -68,6 +68,9 @@ def init():
     db = dbutil.register_table("plugin_visit_log", "插件访问日志", user_attr="user", check_user = True)
     db.register_index("url", "页面URL")
 
+    # 月度计划
+    db = dbutil.register_table("month_plan", "月度计划", user_attr="user", check_user=True)
+
     # 重建索引(系统会根据索引版本增量构建)
     build_index_async()
 

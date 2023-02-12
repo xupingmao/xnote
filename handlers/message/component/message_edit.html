@@ -29,7 +29,7 @@
         </div>
         
         <div class="card top-offset-1">
-            <a class="list-item empty-item hide">&lt;无匹配标签&gt;</a>
+            <a class="list-item empty-item hide" onclick="xnote.action.message.selectTopic(this);">&lt;无匹配标签&gt;</a>
             {{!each itemList msg}}
                 <a onclick="xnote.action.message.selectTopic(this);" class="list-item topic-item">{{!msg.content}}</a>
             {{!/each}}

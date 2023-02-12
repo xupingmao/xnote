@@ -29,7 +29,7 @@
 
 {% end %}
 
-{% block body %}
+{% block body_left %}
     <div class="card">
         <div class="card-title btn-line-height">
             <span>笔记工作台</span>
@@ -42,20 +42,14 @@
         </div>
     </div>
     
-    <div class="content-left">
-        {% include note/card/sticky_notes.html %}
-        {% include note/card/recent_update_notes.html %}
-    </div>
-
-    <div class="content-right">
-        {% include note/card/task_memo.html %}
-        {% include note/card/note_groups.html %}
-        {% include note/card/hot_notes.html %}
-        {% include note/card/note_types.html %}
-    </div>
+    {% include note/card/sticky_notes.html %}
+    {% include note/card/recent_update_notes.html %}
 
 {% end %}
 
-{% block aside %}
-    {% include note/component/mod_aside.html %}
+{% block body_right %}
+    {% include note/card/task_memo.html %}
+    {% include note/card/note_groups.html %}
+    {% include note/card/hot_notes.html %}
+    {% include note/card/note_types.html %}
 {% end %}

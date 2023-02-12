@@ -86,6 +86,7 @@ NOTE_TOOLS = [
     user_link("搜索历史", "/search", "search"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
+    user_link("月度计划", "/plan/month", "calendar"),
 ]
 
 DATA_TOOLS = [

@@ -34,7 +34,7 @@ def get_table_old(table_name, type="rdb"):
     return table
 
 
-def get_table(table_name, user_name=None):
+def get_table(table_name, user_name=None, user_attr = "user"):
     """获取table对象
     @param {str} table_name 表名
     @return {LdbTable}

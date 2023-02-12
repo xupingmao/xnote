@@ -908,7 +908,7 @@ class DateListHandler:
         notes.append(NoteLink("我的月报:%s" % date, "/note/view?skey=month_%s" % date,
                               priority=2))
 
-        notes_new = NOTE_DAO.list_by_date(
+        notes_new = note_dao.list_by_date(
             "ctime", user_name, date, orderby="ctime_desc")
         for note in notes_new:
             note.badge_info = dateutil.format_date(note.ctime)

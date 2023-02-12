@@ -1,0 +1,80 @@
+{% extends base %}
+
+
+{% block body_left %}
+{% init show_back = True %}
+    <script type="text/javascript" src="/static/js/plan/plan.js"></script>
+
+    <script type="text/template" id="select-note-tpl">
+        <div style="padding:10px">
+            <div class="row">
+                <input type="text" class="nav-search-input" placeholder="搜索笔记" onchange="onSearchInputChange(this)">
+                <button class="nav-search-btn btn-default" onclick="onSearchBtnClick(this)">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+
+            <div>
+                <div class="row note-search-dialog-body" style="padding-top: 10px;">
+                    {{!each itemList item}}
+                    <h3 class="card-title-2">{{!item.title}}</h3>
+
+                        {{!each item.children subItem }}
+                        <p class="card-row share-dialog-row">
+                            <i class="fa fa-file-text-o"></i>
+                            <a href="{{!subItem.url}}">{{!subItem.name}}</a>
+                            <input type="checkbox"
+                                class="select-note-checkbox float-right" 
+                                data-id="{{!subItem.id}}">
+                        <p>
+                        {{!/each}}
+                    {{!/each}}
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <div class="card">
+        <div class="card-title">
+            <span>月度计划</span>
+            <div class="float-right">
+                {% if show_back %}
+                    {% include common/button/back_button.html %}
+                {% end %}
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-title">
+            <span>笔记</span>
+            <div class="float-right">
+                <button class="btn btn-default" onclick="xnote.action.plan.addNote(this)">添加笔记</button>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for item in record.notes %}
+                <a class="list-item {{item.css_class}}" href="{{item.url}}">
+    
+                    <i class="fa {{item.icon}}"></i>
+                    <span>{{item.name}}</span>
+    
+                    <div class="float-right">
+                    </div>
+                </a>
+            {% end %}
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        PlanView.state.month = "{{record._id}}";
+    </script>
+
+{% end %}
+
+{% block body_right %}
+    {% include note/component/sidebar/group_list_sidebar.html %}
+{% end %}

@@ -308,7 +308,7 @@ MessageView.searchTopic = function(inputText) {
     });
 
     if (showCount == 0) {
-        $(".empty-item").show();
+        $(".empty-item").text("#" + inputText + "#").show();
     }
 }
 
