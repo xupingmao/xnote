@@ -8,8 +8,12 @@
         </h3>
     </div>
 
-    <div class="card">
-        <input type="hidden" id="dirname" value="{{dirname}}"/>
+    <input id="currentDir" type="hidden" value="{{dirname}}"/>
+    <input type="hidden" id="dirname" value="{{dirname}}"/>
+
+    <script type="text/javascript" src="/static/js/fs/fs.js"></script>
+
+    <div class="card">    
         {% include fs/component/filelist_simple.html %}
     </div>
 {% end %}

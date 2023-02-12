@@ -14,13 +14,13 @@
             <td class="option-td">
                 <div class="float-right">
                     {% if show_rename_file_link %}
-                        <a class="rename-btn" data-name="{{display_name}}">重命名</a>
+                        <a class="rename-btn" data-name="{{display_name}}" 
+                            onclick="xnote.action.fs.rename(this);">重命名</a>
                     {% end %}
-                    <a class="delete-btn danger-link" data-path="{{fpath}}" data-name="{{display_name}}">删除</a>
+                    <a class="danger-link" data-path="{{fpath}}" data-name="{{display_name}}" 
+                        onclick="xnote.action.fs.delete(this);">删除</a>
                 </div>
             </td>
         </tr>
     {% end %}
 </table>
-
-{% include fs/component/script/file_op_script.html %}
