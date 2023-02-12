@@ -6,33 +6,35 @@
     <script type="text/javascript" src="/static/js/plan/plan.js"></script>
 
     <script type="text/template" id="select-note-tpl">
-        <div style="padding:10px">
-            <div class="row">
-                <input type="text" class="nav-search-input" placeholder="搜索笔记" onchange="onSearchInputChange(this)">
-                <button class="nav-search-btn btn-default" onclick="onSearchBtnClick(this)">
-                    <i class="fa fa-search"></i>
-                </button>
-            </div>
+        <div class="row note-search-dialog-body" style="padding-top: 10px;">
+            {{!each itemList item}}
+            <h3 class="card-title-2">{{!item.title}}</h3>
 
-            <div>
-                <div class="row note-search-dialog-body" style="padding-top: 10px;">
-                    {{!each itemList item}}
-                    <h3 class="card-title-2">{{!item.title}}</h3>
-
-                        {{!each item.children subItem }}
-                        <p class="card-row share-dialog-row">
-                            <i class="fa fa-file-text-o"></i>
-                            <a href="{{!subItem.url}}">{{!subItem.name}}</a>
-                            <input type="checkbox"
-                                class="select-note-checkbox float-right" 
-                                data-id="{{!subItem.id}}">
-                        <p>
-                        {{!/each}}
-                    {{!/each}}
-                </div>
-            </div>
+                {{!each item.children subItem }}
+                <p class="card-row share-dialog-row">
+                    <i class="fa {{!subItem.icon}}"></i>
+                    <a href="{{!subItem.url}}">{{!subItem.name}}</a>
+                    <input type="checkbox"
+                        class="select-note-checkbox float-right" 
+                        data-id="{{!subItem.id}}">
+                <p>
+                {{!/each}}
+            {{!/each}}
         </div>
     </script>
+
+    <div id="select-note-dialog" class="hide" style="padding: 10px;">
+        <div class="row">
+            <input type="text" class="nav-search-input" id="plan-note-search-text" placeholder="搜索笔记">
+            <button class="nav-search-btn btn-default" onclick="xnote.action.plan.searchNote(this)">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+
+        <div id="select-note-dialog-body">
+            <!-- ajax内容 -->
+        </div>
+    </div>
 
     <div class="card">
         <div class="card-title">

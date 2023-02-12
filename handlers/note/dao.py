@@ -1544,7 +1544,7 @@ def get_empty_note_stat():
     return stat
 
 
-def get_note_stat(user_name):
+def get_note_stat(user_name) -> Storage:
     if user_name == None:
         return get_empty_note_stat()
     stat = dbutil.get("user_stat:%s:note" % user_name)

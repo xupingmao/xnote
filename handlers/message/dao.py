@@ -553,7 +553,7 @@ def get_empty_stat():
     stat.canceled_count = 0
     return stat
 
-def get_message_stat(user):
+def get_message_stat(user) -> Storage:
     if user == None:
         return get_empty_stat()
     check_param_user(user)
@@ -571,9 +571,9 @@ def get_message_stat(user):
     return value
 
 
-def refresh_message_stat(user):
+def refresh_message_stat(user) -> Storage:
     if user == None:
-        return
+        return get_empty_stat()
     # TODO 优化，只需要更新原来的tag和新的tag
     task_count = count_by_tag(user, "task")
     log_count = count_by_tag(user, "log")

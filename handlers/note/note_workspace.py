@@ -8,6 +8,8 @@ import xtemplate
 import xutils
 import xconfig
 from xtemplate import T
+import handlers.note.dao as note_dao
+import handlers.message.dao as msg_dao
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -44,7 +46,7 @@ def list_note_types(user_name = None):
     if user_name is None:
         user_name = xauth.current_name()
 
-    note_stat = NOTE_DAO.get_note_stat(user_name)
+    note_stat = note_dao.get_note_stat(user_name)
 
     return [
         NoteLink("标签", "/note/taglist", "fa-tags", size=note_stat.tag_count),
@@ -61,7 +63,7 @@ def list_msg_types(user_name = None):
     if user_name is None:
         user_name = xauth.current_name()
 
-    msg_stat  = MSG_DAO.get_message_stat(user_name)
+    msg_stat  = msg_dao.get_message_stat(user_name)
 
     return [
         NoteLink("待办任务", "/message/todo", "fa-calendar-check-o", size = msg_stat.task_count),
@@ -72,7 +74,7 @@ def list_system_types(user_name = None):
     if user_name is None:
         user_name = xauth.current_name()
 
-    msg_stat  = MSG_DAO.get_message_stat(user_name)
+    msg_stat  = msg_dao.get_message_stat(user_name)
 
     return [
         NoteLink("插件", "/plugins_list", "fa-th-large", size = msg_stat.task_count),
@@ -85,11 +87,12 @@ def list_special_groups(user_name = None):
 
     # 短消息：任务、通知和备忘
     fixed_books = []
-    fixed_books.append(MSG_DAO.get_message_tag(user_name, "task"))
-    fixed_books.append(MSG_DAO.get_message_tag(user_name, "log"))
+    fixed_books.append(msg_dao.get_message_tag(user_name, "task"))
+    fixed_books.append(msg_dao.get_message_tag(user_name, "log"))
     fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart&show_back=true", 
         size = NOTE_DAO.count_smart_group(), 
         icon = "fa-folder"))
+    fixed_books.append(NoteLink("月度计划", "/plan/month", size = "", icon = "fa-calendar"))
 
     return fixed_books
 

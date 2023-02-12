@@ -25,6 +25,7 @@ from . import dao_tag
 from . import dao
 from .dao_api import NoteDao
 import handlers.note.dao as note_dao
+import handlers.message.dao as msg_dao
 
 VIEW_TPL = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -343,7 +344,7 @@ class GroupManageHandler:
         offset = (page-1) * limit
 
         user_name = kw.user_name
-        parent_note = NOTE_DAO.get_root()
+        parent_note = note_dao.get_root()
 
         list_group_kw = Storage()
         list_group_kw.tags = q_tags
@@ -351,7 +352,7 @@ class GroupManageHandler:
         list_group_kw.count_total = True
         list_group_kw.category = category_code
 
-        notes, total = NOTE_DAO.list_group(user_name, orderby=orderby, offset=offset,
+        notes, total = note_dao.list_group(user_name, orderby=orderby, offset=offset,
                                            limit=limit, **list_group_kw)
 
         kw.parent_note = parent_note
@@ -391,8 +392,8 @@ class GroupManageHandler:
 
 
 def load_note_index(user_name):
-    msg_stat = MSG_DAO.get_message_stat(user_name)
-    note_stat = NOTE_DAO.get_note_stat(user_name)
+    msg_stat = msg_dao.get_message_stat(user_name)
+    note_stat = note_dao.get_note_stat(user_name)
 
     return [
         NoteCard("分类", [
@@ -431,7 +432,7 @@ def load_note_index(user_name):
 
 
 def load_category(user_name, include_system=False):
-    data = NOTE_DAO.list_group(user_name, orderby="name")
+    data = note_dao.list_group(user_name, orderby="name")
     sticky_groups = list(filter(lambda x: x.priority !=
                          None and x.priority > 0, data))
     archived_groups = list(filter(lambda x: x.archived == True, data))
@@ -900,8 +901,8 @@ class DateListHandler:
 
         notes = []
         # 待办任务
-        notes.append(MSG_DAO.get_message_tag(user_name, "task", priority=2))
-        notes.append(MSG_DAO.get_message_tag(user_name, "log",  priority=2))
+        notes.append(msg_dao.get_message_tag(user_name, "task", priority=2))
+        notes.append(msg_dao.get_message_tag(user_name, "log",  priority=2))
         notes.append(NoteLink("我的人生", "/note/view?skey=my_life", priority=2))
         notes.append(NoteLink("我的年报:%s" % year, "/note/view?skey=year_%s" % year,
                               priority=2))

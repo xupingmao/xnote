@@ -311,7 +311,9 @@ def default_list_func(context):
     limit = context['limit']
     user_name = context['user_name']
     parent_id = context['parent_id']
-    rows = NOTE_DAO.list_by_parent(
+    if parent_id == "":
+        parent_id = "0"
+    rows = note_dao.list_by_parent(
         user_name, parent_id, offset, limit, 'ctime_desc')
     return build_date_result(rows, 'ctime', sticky_title=True, group_title=True)
 
@@ -357,7 +359,7 @@ class TimelineAjaxHandler:
         offset = xutils.get_argument("offset", 0, type=int)
         limit = xutils.get_argument("limit", 20, type=int)
         type = xutils.get_argument("type", "root")
-        parent_id = xutils.get_argument("parent_id", "0", type=str)
+        parent_id = xutils.get_argument("parent_id", "", type=str)
         search_key = xutils.get_argument("key", None, type=str)
         orderby = xutils.get_argument("orderby", "mtime_desc", type=str)
         search_tag = xutils.get_argument("search_tag", None, type=str)
