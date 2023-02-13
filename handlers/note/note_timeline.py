@@ -155,7 +155,7 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
         result.append(dict(title=u'置顶', children=sticky_notes))
 
     if len(project_notes) > 0:
-        result.append(dict(title=u'项目', children=project_notes))
+        result.append(dict(title=u'笔记本', children=project_notes))
 
     result += tmp_sorted_result
 
@@ -242,7 +242,7 @@ def list_root_func(context):
 def list_public_func(context):
     offset = context['offset']
     limit = context['limit']
-    rows = NOTE_DAO.list_public(offset, limit)
+    rows = note_dao.list_public(offset, limit)
     return build_date_result(rows, 'ctime')
 
 
@@ -250,7 +250,7 @@ def list_sticky_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    rows = NOTE_DAO.list_sticky(user_name, offset, limit)
+    rows = note_dao.list_sticky(user_name, offset, limit)
     return build_date_result(rows, 'ctime', group_title=False)
 
 
@@ -258,7 +258,7 @@ def list_removed_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    rows = NOTE_DAO.list_removed(user_name, offset, limit)
+    rows = note_dao.list_removed(user_name, offset, limit)
     return build_date_result(rows, 'ctime')
 
 
@@ -266,7 +266,7 @@ def list_archived_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    rows = NOTE_DAO.list_archived(user_name, offset, limit)
+    rows = note_dao.list_archived(user_name, offset, limit)
     return build_date_result(rows, 'ctime')
 
 
@@ -275,7 +275,7 @@ def list_by_type_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    rows = NOTE_DAO.list_by_type(user_name, type, offset, limit)
+    rows = note_dao.list_by_type(user_name, type, offset, limit)
     return build_date_result(rows, 'ctime')
 
 
@@ -283,7 +283,7 @@ def list_plan_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    rows = NOTE_DAO.list_by_type(user_name, 'plan', offset, limit)
+    rows = note_dao.list_by_type(user_name, 'plan', offset, limit)
     old_task = TaskGroup("待办任务(旧版)")
     if old_task.size > 0:
         rows.append(old_task)
@@ -322,7 +322,7 @@ def list_root_notes_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    rows = NOTE_DAO.list_by_parent(
+    rows = note_dao.list_by_parent(
         user_name, 0, offset, limit, orderby='ctime_desc', skip_group=True)
     return build_date_result(rows, 'ctime', sticky_title=True, group_title=True)
 

@@ -14,6 +14,7 @@ import xutils
 from xutils import Storage
 from handlers.plan.dao import MonthPlanDao
 from handlers.note import dao as note_dao
+from xutils import functions
 
 class MonthPlanHandler:
 
@@ -26,6 +27,7 @@ class MonthPlanHandler:
         if len(record.note_ids) > 0:
             note_ids = list(filter(lambda x:x!="", record.note_ids))
             record.notes = note_dao.batch_query_list(note_ids)
+            record.notes.sort(key = lambda x:x.name)
 
         kw.record = record
         return xtemplate.render("plan/page/month_plan.html", **kw)
@@ -52,7 +54,25 @@ class MonthPlanAddHandler:
         else:
             return dict(code="500", message="计划不存在")
 
+class MonthPlanRemoveHandler:
+    @xauth.login_required()
+    def POST(self):
+        month = xutils.get_argument("month", "")
+        note_id = xutils.get_argument("note_id", "")
+        if month == "":
+            return dict(code="400", message="参数month不能为空")
+
+        user_name = xauth.current_name()
+        record = MonthPlanDao.get_by_month(user_name, month)
+        if record != None:
+            functions.listremove(record.note_ids, note_id)
+            record.save()
+            return dict(code="success")
+        else:
+            return dict(code="500", message="计划不存在")
+
 xurls = (
     r"/plan/month", MonthPlanHandler,
-    r"/plan/month/add", MonthPlanAddHandler
+    r"/plan/month/add", MonthPlanAddHandler,
+    r"/plan/month/remove", MonthPlanRemoveHandler,
 )

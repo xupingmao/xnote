@@ -25,7 +25,8 @@
 
     <div id="select-note-dialog" class="hide" style="padding: 10px;">
         <div class="row">
-            <input type="text" class="nav-search-input" id="plan-note-search-text" placeholder="搜索笔记">
+            <input type="text" class="nav-search-input" id="plan-note-search-text" placeholder="搜索笔记" 
+                onkeyup="xnote.action.plan.searchNote(this);">
             <button class="nav-search-btn btn-default" onclick="xnote.action.plan.searchNote(this)">
                 <i class="fa fa-search"></i>
             </button>
@@ -64,6 +65,8 @@
                     <span>{{item.name}}</span>
     
                     <div class="float-right">
+                        <button class="btn btn-default" data-id="{{item.id}}" 
+                            onclick="xnote.action.plan.removeNote(this)">移除</button>
                     </div>
                 </a>
             {% end %}

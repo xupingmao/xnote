@@ -18,6 +18,29 @@ PlanView.addNote = function (target) {
     });
 };
 
+
+PlanView.removeNote = function (target) {
+    window.event.preventDefault();
+    window.event.stopPropagation();
+    
+    var noteId = $(target).attr("data-id");
+    var params = {
+        month: PlanView.state.month,
+        note_id: noteId
+    };
+    $.post("/plan/month/remove", params, function (resp) {
+        if (resp.code == "success") {
+            xnote.toast("移除成功");
+            window.location.reload();
+        } else {
+            xnote.alert(resp.message);
+        }
+    }).fail(function (err) {
+        xnote.alert("调用接口失败:" + err);
+    })
+};
+
+
 PlanView.addSelectedToPlan = function () {
     var selectedIds = [];
     $(".select-note-checkbox:checked").each(function (idx, ele) {
@@ -37,7 +60,7 @@ PlanView.addSelectedToPlan = function () {
         }
     }).fail(function (err) {
         xnote.alert("调用接口失败:" + err);
-    })
+    });
 };
 
 PlanView.renderNoteList = function (itemList) {
