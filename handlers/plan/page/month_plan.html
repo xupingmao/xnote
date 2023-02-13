@@ -48,6 +48,7 @@
         </div>
     </div>
 
+    {% include common/date/month_picker.html %}
 
     <div class="card">
         <div class="card-title">
@@ -76,6 +77,12 @@
 
     <script type="text/javascript">
         PlanView.state.month = "{{record._id}}";
+        xnote.on("date.month.selected", function (event) {
+            var dateStr = event.target;
+            dateStr = dateStr.replace("-", "/");
+            var href = xnote.addUrlParam(window.location.href, "date", dateStr);
+            window.location.href = href;
+        });
     </script>
 
 {% end %}

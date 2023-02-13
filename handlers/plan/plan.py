@@ -22,14 +22,20 @@ class MonthPlanHandler:
     def GET(self):
         kw = Storage()
         user_name = xauth.current_name()
-        record = MonthPlanDao.get_or_create(user_name, "now")
+        date = xutils.get_argument("date", "now")
+        date = date.replace("-", "/")
+        record = MonthPlanDao.get_or_create(user_name, date)
 
         if len(record.note_ids) > 0:
             note_ids = list(filter(lambda x:x!="", record.note_ids))
             record.notes = note_dao.batch_query_list(note_ids)
             record.notes.sort(key = lambda x:x.name)
 
+        year, month = record._id.split("/")
+
         kw.record = record
+        kw.year = int(year)
+        kw.month = int(month)
         return xtemplate.render("plan/page/month_plan.html", **kw)
 
 
