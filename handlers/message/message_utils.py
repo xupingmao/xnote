@@ -341,7 +341,7 @@ def get_similar_key(key):
 
 class MessageListParser(object):
 
-    def __init__(self, chatlist, tag="log"):
+    def __init__(self, chatlist: list, tag="log"):
         self.chatlist = chatlist
         self.tag = tag
         self.search_tag = tag

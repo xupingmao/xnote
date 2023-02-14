@@ -1,11 +1,31 @@
 {% init show_marked_tag = True %}
+{% init top_keywords = [] %}
+{% init recent_keywords = [] %}
+{% init show_sub_link = True %}
+
+{% if len(recent_keywords) > 0 %}
+    <div class="card">
+        <h3 class="card-title">最近</h3>
+        {% for item in recent_keywords %}
+            <span class="tag-span">
+                <span>{% raw item.html %}</span>
+                <span class="black">{{item.badge_info}}</span>
+            </span>
+        {% end %}
+    </div>
+{% end %}
+
+{% if tag == "key" and show_sub_link %}
+    <div class="card">
+        {% include message/component/tag/orderby_tab.html %}
+    </div>
+{% end %}
 
 {% if len(item_list) == 0 %}
     <div class="card">
         {% include common/text/empty_text.html %}
     </div>
 {% end %}
-
 
 {% for item in item_list %}
     <div class="card">
