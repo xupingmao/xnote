@@ -39,7 +39,7 @@ class MonthPlanHandler:
         return xtemplate.render("plan/page/month_plan.html", **kw)
 
 
-class MonthPlanAddHandler:
+class MonthPlanAddAjaxHandler:
     @xauth.login_required()
     def POST(self):
         month = xutils.get_argument("month", "")
@@ -60,7 +60,7 @@ class MonthPlanAddHandler:
         else:
             return dict(code="500", message="计划不存在")
 
-class MonthPlanRemoveHandler:
+class MonthPlanRemoveAjaxHandler:
     @xauth.login_required()
     def POST(self):
         month = xutils.get_argument("month", "")
@@ -79,6 +79,6 @@ class MonthPlanRemoveHandler:
 
 xurls = (
     r"/plan/month", MonthPlanHandler,
-    r"/plan/month/add", MonthPlanAddHandler,
-    r"/plan/month/remove", MonthPlanRemoveHandler,
+    r"/plan/month/add", MonthPlanAddAjaxHandler,
+    r"/plan/month/remove", MonthPlanRemoveAjaxHandler,
 )

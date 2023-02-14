@@ -13,11 +13,12 @@ from xutils import Storage, dateutil, textutil
 from xutils import webutil
 from xutils.textutil import split_words
 from xtemplate import T
-from .constant import *
+from handlers.note.constant import *
 from handlers.message.dao import MessageDao
 from handlers.note.dao_api import NoteDao
 from handlers.note import note_helper
 import handlers.note.dao as note_dao
+import handlers.note.dao_log as dao_log
 import xmanager
 
 NOTE_DAO = xutils.DAO("note")
@@ -36,7 +37,7 @@ def get_parent_link(user_name, type, priority=0):
     if priority < 0:
         return PathLink(T("Archived_Project"), "/note/archived")
     if type == "default" or type == "root_notes":
-        return PathLink(u"根目录", "/note/timeline")
+        return PathLink(u"根目录", "/note/timeline?type=group_list&orderby=name")
     if type == "public":
         return None
     return None
@@ -152,14 +153,17 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
     result = []
 
     if len(sticky_notes) > 0:
+        sticky_notes.sort(key = lambda x:x[orderby])
         result.append(dict(title=u'置顶', children=sticky_notes))
 
     if len(project_notes) > 0:
+        project_notes.sort(key = lambda x:x[orderby])
         result.append(dict(title=u'笔记本', children=project_notes))
 
     result += tmp_sorted_result
 
     if len(archived_notes) > 0:
+        archived_notes.sort(key = lambda x:x[orderby])
         result.append(dict(title=u'归档', children=archived_notes))
 
     return dict(code='success', data=result)
@@ -195,7 +199,7 @@ def list_search_func(context):
         cost_time = time.time() - start_time
         note_dao.add_search_history(user_name, search_key, "note", cost_time)
 
-    return build_date_result(rows, 'ctime', sticky_title=True, group_title=True)
+    return build_date_result(rows, orderby='ctime', sticky_title=True, group_title=True)
 
 
 def insert_default_project(rows, user_name):
@@ -223,7 +227,7 @@ def list_project_func(context):
         # 处理备忘录
         insert_task_project(rows, user_name)
 
-    return build_date_result(rows, 'mtime', sticky_title=True, group_title=True, archived_title=True)
+    return build_date_result(rows, 'name', sticky_title=True, group_title=True, archived_title=True)
 
 def list_root_func(context):
     offset = context['offset']
@@ -294,7 +298,7 @@ def list_all_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    rows = NOTE_DAO.list_recent_created(user_name, offset, limit)
+    rows = dao_log.list_recent_created(user_name, offset, limit)
     return build_date_result(rows, 'ctime')
 
 
@@ -302,11 +306,11 @@ def list_recent_edit_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    rows = NOTE_DAO.list_recent_edit(user_name, offset, limit)
+    rows = dao_log.list_recent_edit(user_name, offset, limit)
     return build_date_result(rows, 'mtime')
 
 
-def default_list_func(context):
+def default_list_func(context: Storage):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
@@ -315,7 +319,11 @@ def default_list_func(context):
         parent_id = "0"
     rows = note_dao.list_by_parent(
         user_name, parent_id, offset, limit, 'ctime_desc')
-    return build_date_result(rows, 'ctime', sticky_title=True, group_title=True)
+    
+    orderby = "ctime"
+    if context.orderby == "name":
+        orderby = "name"
+    return build_date_result(rows, orderby=orderby, sticky_title=True, group_title=True)
 
 
 def list_root_notes_func(context):
@@ -382,12 +390,12 @@ class TimelineAjaxHandler:
 class DateTimelineAjaxHandler:
     @xauth.login_required()
     def GET(self):
-        year = xutils.get_argument("year")
-        month = xutils.get_argument("month")
+        year = xutils.get_argument("year", "")
+        month = xutils.get_argument("month", "")
         if len(month) == 1:
             month = "0" + month
         user_name = xauth.current_name()
-        rows = NOTE_DAO.list_by_date(
+        rows = note_dao.list_by_date(
             "ctime", user_name, "%s-%s" % (year, month))
         result = dict()
         for row in rows:

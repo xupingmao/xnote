@@ -19,6 +19,7 @@ from xutils import dbutil
 from xutils import dateutil
 from xutils import Storage
 from .dao_api import NoteDao
+import handlers.note.dao as note_dao
 
 dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True, user_attr="user")
 dbutil.register_table_index("user_note_log", "visit_cnt")
@@ -114,7 +115,7 @@ def list_hot(user_name, offset = 0, limit = 100):
         
     note_ids = get_note_ids_from_logs(logs)
 
-    notes = NOTE_DAO.batch_query_list(note_ids)
+    notes = note_dao.batch_query_list(note_ids)
     for note in notes:
         note.badge_info = str(hot_dict.get(note.id))
         note.user_log = log_dict.get(note.id)
@@ -140,7 +141,7 @@ def list_recent_edit(user_name = None, offset = 0, limit = None, skip_deleted = 
     for log in logs:
         id_list.append(log.note_id)
     
-    note_list = NOTE_DAO.batch_query_list(id_list)
+    note_list = note_dao.batch_query_list(id_list)
     for note in note_list:
         if note is None:
             continue
@@ -162,7 +163,7 @@ def list_recent_created(user_name = None, offset = 0, limit = 10, skip_archived 
     db = get_user_note_log_table(user_name)
     logs = db.list_by_index("ctime", offset = offset, limit = limit, reverse = True)
     note_ids = get_note_ids_from_logs(logs)
-    notes = NOTE_DAO.batch_query_list(note_ids)
+    notes = note_dao.batch_query_list(note_ids)
 
     for note in notes:
         note.badge_info = dateutil.format_date(note.mtime, "/")

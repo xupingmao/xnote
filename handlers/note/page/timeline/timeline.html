@@ -50,7 +50,7 @@
         {% end %}
 
         {% if show_group_btn %}
-          <a href="/note/timeline?type=group_list" class="btn btn-default">笔记本</a>
+          <a href="/note/timeline?type=group_list&orderby=name" class="btn btn-default">笔记本</a>
         {% end %}
 
         {% if show_recent_btn %}
@@ -96,7 +96,8 @@
             <i class="fa" v-bind:class="file.icon"></i>
             <a v-bind:href="file.url">{{!file.name}}</a>
             <span v-if="file.is_public == 1" class="tag info">分享</span>
-            <span v-if="file.type=='group' || file.type=='system'" class="float-right gray-text">{{!file.size}}</span>
+            <span v-if="file.type=='group' || file.type=='system'" 
+              class="float-right gray-text">{{!file.children_count}}</span>
           </p>
           <p class="brief"><span class="text-green"></span></p>
         </aside>
@@ -149,10 +150,16 @@
       if (app.isLoading) {
         return;
       }
-      var type = "{{type}}" || getUrlParam("type");
-      var parent_id = getUrlParam("parent_id");
-      var searchTag = getUrlParam("search_tag");
-      var searchKey = "{{quote(key)}}";
+
+      var param = {};
+      param.type = "{{type}}" || getUrlParam("type");
+      param.parent_id = getUrlParam("parent_id");
+      param.search_tag = getUrlParam("search_tag");
+      param.key = "{{quote(key)}}";
+      param.orderby = xnote.getUrlParam("orderby", "ctime");
+      param.offset = app.offset;
+      param.limit = QUERY_LIMIT;
+
       var loadingNoteIndex;
       layer.ready(function(){
         // 等待layer的资源加载完再显示，不然样式会漂移
@@ -160,14 +167,7 @@
       }); 
 
       app.isLoading = true;
-      $.get("/note/api/timeline?_type=json&type=" + type, 
-        { 
-          offset: app.offset,
-          limit : QUERY_LIMIT,
-          parent_id: parent_id,
-          key: searchKey,
-          search_tag: searchTag,
-        }, 
+      $.get("/note/api/timeline?_type=json", param,
         function (resp, status) {
           app.isLoading = false;
           layer.close(loadingNoteIndex);
@@ -214,18 +214,6 @@
       // 等待layer资源加载
       loadMore(false);
     });
-
-    //滚动加载
-    /**
-    $(".x-body").scroll(function() {
-      var scrollTop = $(".x-body").scrollTop();
-      var scrollHeight = $("#app").height();
-      var windowHeight = $(window).height();
-      console.log(scrollTop, windowHeight, scrollTop + windowHeight, scrollHeight);
-      if (scrollTop + windowHeight >= scrollHeight + 100) {
-        loadMore(true);
-      }
-    });*/
 
 </script>
 {% end %}
