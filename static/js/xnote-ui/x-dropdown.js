@@ -30,6 +30,29 @@ xnote.enableBodyScroll = function (e) {
     $("body").css("overflow", "auto");
 }
 
+xnote.showDropdown = function (target) {
+    var dropdownContent = $(target).siblings(".dropdown-content");
+    if (dropdownContent.hasClass("mobile")) {
+        console.log("dropdown mobile");
+        // 移动端动画
+        if (dropdownContent.hasClass("active")) {
+            // 已经展示了
+            return;
+        } else {
+            // 隐藏 -> 展示
+            $(target).parent().find(".dropdown-mask").show();
+            dropdownContent.show().animate({
+                "height": "60%"
+            }).addClass("active");
+            xnote.disableBodyScroll();
+        }
+    } else {
+        dropdownContent.slideDown("fast");
+        if (dropdownContent.offset() && dropdownContent.offset().left < 0) {
+            dropdownContent.css("left", 0);
+        }
+    }
+}
 
 xnote.toggleDropdown = function (target) {
     var dropdownContent = $(target).siblings(".dropdown-content");
@@ -53,6 +76,7 @@ xnote.toggleDropdown = function (target) {
             dropdownContent.css("left", 0);
         }
 
+        // 关闭非当前的dropdown
         $(".dropdown-content").each(function (index, element) {
             if (element != dropdownContent[0]) {
                 $(element).slideUp(0);

@@ -165,7 +165,7 @@ def after_upsert_async(msg_item):
 
 
 def is_marked_keyword(user_name, keyword):
-    obj = MSG_DAO.get_by_content(user_name, "key", keyword)
+    obj = msg_dao.get_by_content(user_name, "key", keyword)
     return obj != None and obj.is_marked
 
 # class
@@ -295,7 +295,8 @@ class ListAjaxHandler:
             user_name = xauth.current_name()
             assert isinstance(user_name, str)
             kw.top_keywords = []
-            kw.recent_keywords = self.get_recent_keywords(user_name, tag = tag, page = page)
+            if orderby == "amount_desc" and page == 1:
+                kw.recent_keywords = self.get_recent_keywords(user_name, tag = tag)
 
         return xtemplate.render(template_file, **kw)
     
@@ -307,9 +308,7 @@ class ListAjaxHandler:
                 result.append(item)
         return result
     
-    def get_recent_keywords(self, user_name: str, tag: str, page: int):
-        if page > 1:
-            return []
+    def get_recent_keywords(self, user_name: str, tag: str):
         msg_list, amount = self.do_list_key(user_name, 0, 20, orderby = "recent")
         parser = MessageListParser(msg_list, tag=tag)
         parser.parse()
@@ -945,15 +944,6 @@ class MessageListHandler:
             side_tags=message_utils.list_hot_tags(user_name, 20),
         )
 
-        if key != "" or input_tag == "search":
-            # 搜索操作
-            kw["title"] = T("随手记-搜索")
-            kw["html_title"] = T("随手记-搜索")
-            kw.show_back_btn = True
-            kw.show_keyword_info = True
-            kw.keyword = key
-            kw.is_keyword_marked = is_marked_keyword(user_name, key)
-
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def do_view_by_date(self, date):
@@ -1156,6 +1146,7 @@ class SearchHandler:
         kw.side_tags = message_utils.list_hot_tags(user_name, 20)
         kw.create_tag = self.get_create_tag()
         kw.show_create_on_tag = kw.create_tag != "forbidden"
+        kw.is_keyword_marked = is_marked_keyword(user_name, key)
 
         return xtemplate.render("message/page/message_search.html", **kw)
 

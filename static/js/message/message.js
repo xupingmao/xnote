@@ -164,7 +164,8 @@ MessageView.edit = function (target) {
     $.get("/message/detail", params, function (resp) {
         if (resp.code == "success") {
             var html = $("#msg-edit-tpl").render({
-                detail: resp.data
+                detail: resp.data,
+                submitBtnText: "更新"
             });
             var layerId = xnote.openDialog("编辑", html);
             MessageView.closeEdit = function () {
@@ -233,13 +234,15 @@ MessageView.createMessageOnTag = function(target) {
     self.state.isEditDialog = true;
     var keyword = $(target).attr("data-keyword");
     var tag = $(target).attr("data-tag");
+    var title = $(target).attr("data-title");
     var html = $("#msg-edit-tpl").render({
         detail: {
             content: keyword + " ",
-            tag: tag
-        }
+            tag: tag,
+        },
+        submitBtnText: "创建"
     });
-    var layerId = xnote.openDialog("编辑", html);
+    var layerId = xnote.openDialog(title, html);
     self.closeEdit = function () {
         // console.log("close dialog:", layerId);
         xnote.closeDialog(layerId);
@@ -310,6 +313,21 @@ MessageView.searchTopic = function(inputText) {
     if (showCount == 0) {
         $(".empty-item").text("#" + inputText + "#").show();
     }
+}
+
+MessageView.markTagLevel = function (e) {
+    var params = {};
+    params.keyword = $(".keyword-span").text();
+    params.action = $(e.target).attr("data-action");
+
+    $.post("/message/keyword", params, function (resp) {
+        if (resp.code == "success") {
+            xnote.toast("标记成功");
+            window.location.reload();
+        } else {
+            xnote.alert("标记失败:" + resp.message);
+        }
+    });
 }
 
 $("body").on("keyup", ".nav-search-input", function (e) {

@@ -6,37 +6,24 @@
     <span class="info-tag">标签</span>
     <span class="keyword-span">{{keyword}}</span>
     <div class="float-right">
-        {% if show_create_on_tag %}
-            <button class="btn-default mark-btn" 
-                data-keyword="{{keyword}}"
-                data-tag="{{create_tag}}"
-                onclick="xnote.action.message.createMessageOnTag(this);">创建</button>
-        {% end %}
-        
+        <button class="btn-default" 
+            data-keyword="{{keyword}}"
+            data-tag="task"
+            data-title="创建待办"
+            onclick="xnote.action.message.createMessageOnTag(this);">+待办</button>
+        <button class="btn-default" 
+            data-keyword="{{keyword}}"
+            data-tag="task"
+            data-title="创建随手记"
+            onclick="xnote.action.message.createMessageOnTag(this);">+随手记</button>
+    
         {% if is_keyword_marked %}
-            <button class="btn-default mark-btn" data-action="unmark">取消置顶</button>
+            <button class="btn-default mark-btn" data-action="unmark"
+                onclick="xnote.action.message.markTagLevel(event);">取消置顶</button>
         {% else %}
-            <button class="btn-default mark-btn" data-action="mark">置顶</button>
+            <button class="btn-default mark-btn" data-action="mark" 
+                onclick="xnote.action.message.markTagLevel(event);">置顶</button>
         {% end %}
     </div>
 </div>
 {% end %}
-
-<script type="text/javascript">
-    $(function () {
-        $(".mark-btn").click(function (e) {
-            var params = {};
-            params.keyword = $(".keyword-span").text();
-            params.action = $(e.target).attr("data-action");
-
-            $.post("/message/keyword", params, function (resp) {
-                if (resp.code == "success") {
-                    xnote.toast("标记成功");
-                    window.location.reload();
-                } else {
-                    xnote.alert("标记失败:" + resp.message);
-                }
-            });
-        });
-    });
-</script>
