@@ -111,3 +111,85 @@ xnote.api["note.copy"] = function (req) {
         xnote.alert("Copy " + title + "失败:" + e);
     });
 };
+
+var noteAPI = {};
+xnote.api.note = noteAPI;
+
+
+// 绑定标签
+noteAPI.bindTag = function (cmd) {
+    var currentTags = cmd.currentTags;
+    var tagList = cmd.tagList;
+    var targetId = cmd.targetId;
+    
+    if (cmd.tagType != "group" && cmd.tagType != "note") {
+        throw new TypeError("无效的tagType");
+    }
+
+    // 渲染绑定标签的html
+    var html = $("#bindTagTemplate").render({
+        tagList: tagList,
+        selectedNames: currentTags,
+        manageLink: cmd.manageLink,
+        globalTagList: [
+            {tag_name: "待办", tag_code: "$todo$"}
+        ],
+    });
+
+    console.log("bind-tag-dialog", html);
+
+    xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
+        var selectedNames = [];
+        $(".tag.bind.active").each(function (idx, ele) {
+            var tagName = $(ele).attr("data-code");
+            selectedNames.push(tagName);
+        });
+
+        var bindParams = {
+            tag_type: cmd.tagType,
+            group_id: cmd.groupId,
+            note_id: cmd.noteId,
+            tag_names: JSON.stringify(selectedNames),
+        };
+
+        $.post("/note/tag/bind", bindParams, function (resp) {
+            if (resp.code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                xnote.toast("添加标签成功");
+            }
+            location.reload();
+        }).fail(function (err) {
+            console.error(err);
+            xnote.alert("系统繁忙，请稍后重试");
+        })
+    });
+}
+
+
+var NoteView = {};
+xnote.action.note = NoteView;
+
+// 编辑笔记的标签
+NoteView.editNoteTag = function (target) {
+    var parentId = $(target).attr("data-parent-id");
+    var noteId = $(target).attr("data-id");
+
+    var listParams = {
+        tag_type:"note",
+        group_id:parentId,
+    };
+
+    $.get("/note/tag/list", listParams, function (resp) {
+        var tagsJson = $("#noteTagJson").val();
+        var cmd = {
+            tagType: "note",
+            currentTags: JSON.parse(tagsJson),
+            noteId: noteId,
+            manageLink: "/note/manage?parent_id=" + parentId,
+        };
+        cmd.tagList = resp.data;
+        // 调用绑定标签组件
+        xnote.api.note.bindTag(cmd);
+    })
+};

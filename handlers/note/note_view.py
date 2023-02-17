@@ -346,6 +346,7 @@ class ViewHandler:
 
         kw.file = file
         kw.can_edit = can_edit
+        kw.get_tag_name_by_code = dao_tag.get_name_by_code
         
         # 处理目录按钮的展示
         self.handle_contents_btn(kw)

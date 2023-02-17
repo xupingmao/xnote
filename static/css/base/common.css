@@ -1036,6 +1036,16 @@ select.no-border {
     border: none;
 }
 
+.split-title {
+    width: 100%;
+    float: left;
+    background-color: #eee;
+    padding: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    line-height: normal;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 1000px) {
     /** mobile **/

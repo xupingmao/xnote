@@ -6,13 +6,16 @@
     <span>(无)</span>
 {% end %}
 
-{% for tag_name in file.tags %}
-    <a class="tag lightgray large" href="/note/{{file.parent_id}}?tag={{quote(tag_name)}}">{{tag_name}}</a>
+{% for tag_code in file.tags %}
+    <a class="tag lightgray large" href="/note/{{file.parent_id}}?tag={{quote(tag_code)}}">{{get_tag_name_by_code(tag_code)}}</a>
 {% end %}
 
 <div class="float-right">
     {% if can_edit %}
-        <button class="btn btn-default tag-edit-btn">编辑</button>
+        <button class="btn btn-default tag-edit-btn"
+            data-parent-id="{{file.parent_id}}"
+            data-id="{{file.id}}"
+            onclick="xnote.action.note.editNoteTag(this);">编辑</button>
     {% end %}
 </div>
 
@@ -59,25 +62,3 @@
 {% include note/component/script/tag_script.html %}
 
 <input type="hidden" id="noteTagJson" value="{{file.tags_json}}"/>
-
-<script type="text/javascript">
-$(".tag-edit-btn").click(function () {
-    var listParams = {
-        tag_type:"note",
-        group_id:"{{file.parent_id}}",
-    };
-
-    $.get("/note/tag/list", listParams, function (resp) {
-        var tagsJson = $("#noteTagJson").val();
-        var cmd = {
-            tagType: "note",
-            currentTags: JSON.parse(tagsJson),
-            noteId: "{{file.id}}",
-            manageLink: "/note/manage?parent_id={{file.parent_id}}",
-        };
-        cmd.tagList = resp.data;
-        // 调用绑定标签组件
-        xnote.api.note.bindTag(cmd);
-    })
-});
-</script>

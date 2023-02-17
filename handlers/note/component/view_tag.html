@@ -17,6 +17,14 @@
 </div>
 {% end %}
 
+<script type="text/template" id="tag-list-tpl">
+    {{! each tagList tag }}
+        <span class="tag gray-tag">
+            <a class="link" href="/note/tagname/{{!tag.code}}">{{!tag.name}}</a>
+        </span>
+    {{!/each}}
+</script>
+
 <script type="text/javascript">
 var gFileId = "{{file.id}}";
 
@@ -28,18 +36,10 @@ function initTags() {
         var tagsList = [];
         var response = data;
         var tags = response.data;
-        $("#tags-span").html("");
-        tags.forEach(function (element, index) {
-            var span = $("<span>");
-            var link = $("<a>");
-            link.addClass("link");
-            link.text(element.name);
-            link.attr("href", "/note/tagname/"+element.name);
-            span.addClass("tag gray-tag");
-            span.append(link);
-            $("#tags-span").append(span);
-            tagsList.push(element.name);
-        })
+        var html = $("tag-list-tpl").render({
+            tagList: tags
+        });
+        $("#tags-span").html(html);
         $("#tagEditText").val(tagsList.join(" "));
     }).fail(function (text) {
 

@@ -12,7 +12,7 @@ import xmanager
 import json
 from xutils import Storage
 from xutils import dbutil
-
+from xtemplate import T
 from . import dao_tag
 
 tag_db = dbutil.get_table("note_tag_meta")
@@ -22,9 +22,9 @@ class TagAjaxHandler:
     @xauth.login_required()
     def GET(self, id):
         creator = xauth.current_name()
-        tags = xutils.call("note.get_tags", creator, id)
+        tags = dao_tag.get_tags(creator, id)
         if tags != None:
-            tags = [Storage(name=name) for name in tags]
+            tags = [Storage(code=code, name=dao_tag.get_name_by_code(code)) for code in tags]
         if not isinstance(tags, list):
             tags = []
         return dict(code="", message="", data=tags)
@@ -58,6 +58,10 @@ class TagNameHandler:
         tagname = xutils.unquote(tagname)
         page = xutils.get_argument("page", 1, type=int)
         limit = xutils.get_argument("limit", xconfig.PAGE_SIZE, type=int)
+
+        assert isinstance(page, int)
+        assert isinstance(limit, int)
+
         offset = (page-1) * limit
 
         if xauth.has_login():
@@ -68,14 +72,16 @@ class TagNameHandler:
         count = len(files)
 
         files = files[offset: offset+limit]
-        return xtemplate.render("note/page/tagname.html",
-                                show_aside=True,
-                                tagname=tagname,
-                                tags=tagname,
-                                files=files,
-                                show_mdate=True,
-                                page_max=math.ceil(count / limit),
-                                page=page)
+
+        kw = Storage()
+        kw.tagname = dao_tag.get_name_by_code(tagname)
+        kw.tags = tagname
+        kw.files = files
+        kw.page = page
+        kw.page_max = math.ceil(count/limit)
+        kw.show_mdate = True
+
+        return xtemplate.render("note/page/tagname.html", **kw)
 
 
 class TagListHandler:
@@ -89,10 +95,12 @@ class TagListHandler:
             xmanager.add_visit_log(user_name, "/note/taglist")
         else:
             tag_list = dao_tag.list_tag("")
-        return xtemplate.render("note/page/taglist.html",
-                                html_title="标签列表",
-                                show_aside=False,
-                                tag_list=tag_list)
+        kw = Storage()
+        kw.html_title = T("标签列表")
+        kw.tag_list = tag_list
+        kw.system_tag_list = dao_tag.get_system_tag_list()
+
+        return xtemplate.render("note/page/taglist.html", **kw)
 
 
 class CreateTagAjaxHandler:

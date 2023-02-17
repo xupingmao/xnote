@@ -15,6 +15,7 @@
     "edit": "更新了笔记"
 } %}
 {% init get_date_by_type = xutils.get_func_by_name("note.get_date_by_type") %}
+{% init get_tag_name_by_code = xutils.get_func_by_name("note_tag.get_name_by_code") %}
 {% init sticky_position = "left" %} 
 
 {% if False %}
@@ -71,8 +72,8 @@
         {% end %}
 
         {% if item.tags != None %}
-            {% for tag_name in item.tags %}
-                <span class="tag lightblue">{{tag_name}}</span>
+            {% for tag_code in item.tags %}
+                <span class="tag lightblue">{{get_tag_name_by_code(tag_code)}}</span>
             {% end %}
         {% end %}
 

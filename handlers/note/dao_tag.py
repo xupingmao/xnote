@@ -182,11 +182,29 @@ def list_tag(user):
     tag_list.sort(key=lambda x: -x.amount)
     return tag_list
 
+def get_system_tag_list():
+    result = [
+        Storage(code = "$todo$", name = "待办", amount = 0),
+    ]
+    return result
+
+def get_system_tag_code_map():
+    result = {}
+    for item in get_system_tag_list():
+        result[item.code] = item.name
+    return result
+
+static_code_map = get_system_tag_code_map()
+
+def get_name_by_code(code):
+    return static_code_map.get(code, code)
+
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_by_tag", list_by_tag)
 xutils.register_func("note.get_tags", get_tags)
 xutils.register_func("note.update_tags", bind_tags)
 xutils.register_func("note_tag_meta.get_by_name", get_tag_meta_by_name)
 xutils.register_func("note_tag_meta.list", list_tag_meta)
+xutils.register_func("note_tag.get_name_by_code", get_name_by_code)
 
 NoteDao.count_tag = count_tag
