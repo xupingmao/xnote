@@ -1550,6 +1550,10 @@ def get_note_stat(user_name) -> Storage:
     stat = dbutil.get("user_stat:%s:note" % user_name)
     if stat is None:
         stat = refresh_note_stat(user_name)
+    
+    assert isinstance(stat, Storage)
+    if stat.tag_count == None:
+        stat.tag_count = 0
     return stat
 
 

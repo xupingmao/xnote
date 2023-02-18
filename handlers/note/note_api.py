@@ -5,6 +5,7 @@
 import xutils
 import xauth
 from handlers.note import dao
+import handlers.note.dao_log as dao_log
 from handlers.note.note_helper import assemble_notes_by_date
 
 NOTE_DAO = xutils.DAO("note")
@@ -44,7 +45,7 @@ def list_recent_groups(limit=5):
 
 def list_recent_notes(limit=5):
     creator = xauth.current_name()
-    return NOTE_DAO.list_recent_edit(creator, limit=limit)
+    return dao_log.list_recent_edit(creator, limit=limit)
 
 
 def get_date_by_type(note, type):
