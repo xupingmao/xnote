@@ -10,6 +10,8 @@ import xconfig
 from xtemplate import T
 import handlers.note.dao as note_dao
 import handlers.message.dao as msg_dao
+import handlers.note.dao_book as book_dao
+import handlers.note.dao_log as log_dao
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -90,9 +92,8 @@ def list_special_groups(user_name = None):
     fixed_books.append(msg_dao.get_message_tag(user_name, "task"))
     fixed_books.append(msg_dao.get_message_tag(user_name, "log"))
     fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart&show_back=true", 
-        size = NOTE_DAO.count_smart_group(), 
+        size = book_dao.SmartGroupService.count_smart_group(), 
         icon = "fa-folder"))
-    fixed_books.append(NoteLink("月度计划", "/plan/month", size = "", icon = "fa-calendar"))
 
     return fixed_books
 
@@ -105,11 +106,11 @@ class NoteWorkspaceHandler:
             recent_update_limit = 10
 
         creator = xauth.current_name()
-        memos   = [MSG_DAO.get_message_tag(creator, "task"), MSG_DAO.get_message_tag(creator, "log")]
-        sticky_notes = NOTE_DAO.list_sticky(creator, limit = 5, orderby = "mtime_desc")
-        hot_notes    = NOTE_DAO.list_hot(creator, limit = 5)
-        note_groups  = NOTE_DAO.list_group(creator, orderby = "mtime_desc", limit = 5)
-        recent_update_notes = NOTE_DAO.list_recent_edit(creator, limit = recent_update_limit, skip_deleted = True)
+        memos = [msg_dao.get_message_tag(creator, "task"), msg_dao.get_message_tag(creator, "log")]
+        sticky_notes = note_dao.list_sticky(creator, limit = 5, orderby = "mtime_desc")
+        hot_notes    = log_dao.list_hot(creator, limit = 5)
+        note_groups  = note_dao.list_group(creator, orderby = "mtime_desc", limit = 5)
+        recent_update_notes = log_dao.list_recent_edit(creator, limit = recent_update_limit, skip_deleted = True)
 
         return xtemplate.render_by_ua("note/page/index/note_workspace.html",
             html_title = T("笔记工作台"),

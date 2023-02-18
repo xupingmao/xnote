@@ -95,10 +95,11 @@ class TagListHandler:
             xmanager.add_visit_log(user_name, "/note/taglist")
         else:
             tag_list = dao_tag.list_tag("")
+        
         kw = Storage()
         kw.html_title = T("标签列表")
         kw.tag_list = tag_list
-        kw.system_tag_list = dao_tag.get_system_tag_list()
+        kw.system_tag_list = dao_tag.get_system_tag_list(tag_list)
 
         return xtemplate.render("note/page/taglist.html", **kw)
 

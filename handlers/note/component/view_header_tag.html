@@ -6,8 +6,8 @@
     <span>(无)</span>
 {% end %}
 
-{% for tag_code in file.tags %}
-    <a class="tag lightgray large" href="/note/{{file.parent_id}}?tag={{quote(tag_code)}}">{{get_tag_name_by_code(tag_code)}}</a>
+{% for tag_info in file.tag_info_list %}
+    <a class="tag lightgray large" href="{{tag_info.url}}">{{tag_info.name}}</a>
 {% end %}
 
 <div class="float-right">

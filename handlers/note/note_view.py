@@ -23,6 +23,9 @@ from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
 from .dao_api import NoteDao
+import handlers.note.dao_log as dao_log
+import handlers.note.dao as note_dao
+import handlers.note.dao_share as dao_share
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
@@ -32,7 +35,7 @@ def visit_by_id(ctx):
     note_id   = ctx.id
     user_name = ctx.user_name
     with dbutil.get_write_lock(user_name):
-        NOTE_DAO.visit(user_name, note_id)
+        note_dao.visit_note(user_name, note_id)
 
 def check_auth(file, user_name):
     if user_name == "admin":
@@ -48,11 +51,11 @@ def check_auth(file, user_name):
         xauth.redirect_to_login();
 
     # 笔记的分享
-    if NOTE_DAO.get_share_to(user_name, file.id) != None:
+    if dao_share.get_share_to(user_name, file.id) != None:
         return
 
     # 笔记本的分享
-    if NOTE_DAO.get_share_to(user_name, file.parent_id) != None:
+    if dao_share.get_share_to(user_name, file.parent_id) != None:
         return
     
     raise web.seeother("/unauthorized")
@@ -65,15 +68,15 @@ def handle_note_recommend(kw, file, user_name):
         result = [])
     xmanager.fire("note.recommend", ctx)
     kw.recommended_notes = ctx.result
-    kw.next_note = NOTE_DAO.find_next_note(file, user_name)
-    kw.prev_note = NOTE_DAO.find_prev_note(file, user_name)
+    kw.next_note = note_dao.find_next_note(file, user_name)
+    kw.prev_note = note_dao.find_prev_note(file, user_name)
 
 def view_gallery_func(file, kw):
     fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
     filelist = []
     # 处理相册
     # print(file)
-    fpath = NOTE_DAO.get_gallery_path(file)
+    fpath = note_dao.get_gallery_path(file)
     # print(fpath)
     if fpath != None:
         filelist = fsutil.list_files(fpath, webpath = True)
@@ -140,7 +143,7 @@ def view_group_detail_func(file, kw):
         return
     
     if orderby != "" and orderby != file.orderby:
-        NOTE_DAO.update(file.id, orderby = orderby)
+        note_dao.update_note(file.id, orderby = orderby)
     
     if orderby == None or orderby == "":
         orderby = file.orderby
@@ -153,7 +156,7 @@ def view_group_detail_func(file, kw):
         q_tags = [q_tag]
     
     offset = max(page-1, 0) * pagesize
-    files  = NOTE_DAO.list_by_parent(file.creator, file.id, 
+    files  = note_dao.list_by_parent(file.creator, file.id, 
         offset, pagesize, orderby, tags = q_tags)
 
     for child in files:
@@ -219,14 +222,25 @@ def view_func_before(note, kw):
     if note.tags == None:
         note.tags = []
     note.tags_json = xutils.tojson(note.tags)
+    tag_info_list = []
+    for tag_code in note.tags:
+        tag_name = dao_tag.get_name_by_code(tag_code)
+        tag_info = Storage(code = tag_code, name = tag_name)
+        if tag_code != tag_name:
+            tag_info.url = "/note/tagname/%s" % tag_code
+        else:
+            tag_info.url = "/note/%s?tag=%s" % (note.parent_id, xutils.quote(tag_name))
+
+        tag_info_list.append(tag_info)
+    note.tag_info_list = tag_info_list
 
 def find_note_for_view0(token, id, name):
     if token != "":
-        return NOTE_DAO.get_by_token(token)
+        return note_dao.get_by_token(token)
     if id != "":
-        return NOTE_DAO.get_by_id(id)
+        return note_dao.get_by_id(id)
     if name != "":
-        return NOTE_DAO.get_by_name(xauth.current_name(), name)
+        return note_dao.get_by_name(xauth.current_name(), name)
 
     raise HTTPError(504)
 
@@ -269,7 +283,7 @@ class ViewHandler:
             root.name = "根目录"
             return [root, file]
         else:
-            return NOTE_DAO.list_path(file)
+            return note_dao.list_path(file)
 
     @xutils.timeit(name = "Note.View", logfile = True)
     def GET(self, op, id = None, is_public_page = False):
@@ -299,7 +313,7 @@ class ViewHandler:
 
         if skey != None and skey != "":
             try:
-                file = NOTE_DAO.get_or_create(skey, user_name)
+                file = note_dao.get_or_create_note(skey, user_name)
             except Exception as e:
                 return xtemplate.render("error.html", error = e)
         else:
@@ -351,13 +365,14 @@ class ViewHandler:
         # 处理目录按钮的展示
         self.handle_contents_btn(kw)
 
-        return xtemplate.render_by_ua(template_name,
-            html_title    = file.name,
-            note_id       = id,
-            pathlist = pathlist,
-            recent_created    = recent_created,
-            CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT,
-            is_iframe         = is_iframe, **kw)
+        kw.html_title = file.name
+        kw.note_id = id
+        kw.pathlist = pathlist
+        kw.recent_created = recent_created
+        kw.CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT
+        kw.is_iframe = is_iframe
+
+        return xtemplate.render_by_ua(template_name, **kw)
 
 class ViewByIdHandler(ViewHandler):
 

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-02-05 18:26:34
+@LastEditTime : 2023-02-18 17:06:38
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -182,10 +182,17 @@ def list_tag(user):
     tag_list.sort(key=lambda x: -x.amount)
     return tag_list
 
-def get_system_tag_list():
+def get_system_tag_list(tag_list = None):
     result = [
         Storage(code = "$todo$", name = "待办", amount = 0),
     ]
+    if tag_list != None:
+        tag_count_map = dict()
+        for item in tag_list:
+            tag_count_map[item.name] = item.amount
+        for item in result:
+            item.amount = tag_count_map.get(item.code, 0)
+
     return result
 
 def get_system_tag_code_map():
