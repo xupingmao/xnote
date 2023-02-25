@@ -268,23 +268,25 @@ class FileSystemHandler:
             return b'' # 其实webpy已经通过yield空bytes来避免None
 
 
-        # 需要注意的是，服务器端在生成状态码为 304 的响应的时候，必须同时生成以下会存在于对应的 200 响应中的首部：
+        # 注意：Edge浏览器没有按照cache-control的建议执行
+        # 需要注意的是，服务器端在生成状态码为 304 的响应的时候，必须同时生成
+        # 以下会存在于对应的 200 响应中的首部：
         # Cache-Control、Content-Location、Date、ETag、Expires 和 Vary。
 
         if not xconfig.DEBUG:
             # 强制缓存
             web.header("Cache-Control", "max-age=3600000")
-            web.header("Vary", "*")
-            expires = datetime.datetime.utcnow() + datetime.timedelta(days=30)
-            web.header("Expires", expires.strftime("%a, %d %b %Y %H:%M:%S GMT"))
         else:
             # 在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证 (协商缓存验证)。
             web.header("Cache-Control", "no-cache")
             modified = time.gmtime(mtime)
             web.header("Last-Modified", time.strftime("%a, %d %b %Y %H:%M:%S GMT", modified))
-
+        
+        expires = datetime.datetime.utcnow() + datetime.timedelta(days=30)
+        web.header("Expires", expires.strftime("%a, %d %b %Y %H:%M:%S GMT"))
         web.header("Etag", etag)
         web.header("Content-Location", web.ctx.fullpath)
+        web.header("Vary", "*")
 
         if content_type != None:
             web.header("Content-Type", content_type)
