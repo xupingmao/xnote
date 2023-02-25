@@ -390,8 +390,8 @@ class TimelineAjaxHandler:
 class DateTimelineAjaxHandler:
     @xauth.login_required()
     def GET(self):
-        year = xutils.get_argument("year", "")
-        month = xutils.get_argument("month", "")
+        year = xutils.get_argument_str("year", "")
+        month = xutils.get_argument_str("month", "")
         if len(month) == 1:
             month = "0" + month
         user_name = xauth.current_name()
@@ -442,7 +442,7 @@ class BaseTimelineHandler:
 
     def do_get(self):
         type = xutils.get_argument("type", self.note_type)
-        parent_id = xutils.get_argument("parent_id", "0")
+        parent_id = xutils.get_argument_str("parent_id", "0")
         key = xutils.get_argument("key", "")
         title = u"最新笔记"
 
@@ -453,7 +453,7 @@ class BaseTimelineHandler:
         if type == "search" and key == "":
             raise web.found("/search")
 
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         title = NOTE_TYPE_DICT.get(type, u"最新笔记")
         title_link = None
         note_priority = 0

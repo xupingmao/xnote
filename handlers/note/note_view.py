@@ -23,7 +23,8 @@ from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
 from .dao_api import NoteDao
-import handlers.note.dao_log as dao_log
+from . import dao_draft
+from . import dao_log
 import handlers.note.dao as note_dao
 import handlers.note.dao_share as dao_share
 
@@ -106,7 +107,7 @@ def view_or_edit_md_func(file, kw):
     
     if kw.op == "edit":
         # 读取草稿
-        draft_content = NOTE_DAO.get_draft(file.id)
+        draft_content = dao_draft.get_draft(file.id)
 
         if draft_content != "" and draft_content != None:
             kw.content = draft_content
@@ -380,7 +381,7 @@ class ViewByIdHandler(ViewHandler):
         return ViewHandler.GET(self, "view", id)
 
     def POST(self, id):
-        return ViewHandler.POST(self, "view", id)
+        return ViewHandler.GET(self, "view", id)
 
 class PrintHandler:
 
@@ -424,11 +425,11 @@ class NoteHistoryHandler:
     def GET(self):
         note_id = xutils.get_argument("id")
         creator = xauth.current_name()
-        note = NOTE_DAO.get_by_id_creator(note_id, creator)
+        note = note_dao.get_by_id_creator(note_id, creator)
         if note is None:
             history_list = []
         else:
-            history_list = NOTE_DAO.list_history(note_id)
+            history_list = note_dao.list_history(note_id)
         return xtemplate.render("note/page/history_list.html", 
             current_note = note,
             history_list = history_list,
@@ -442,7 +443,7 @@ class HistoryViewHandler:
         version = xutils.get_argument("version")
         
         creator = xauth.current_name()
-        note = NOTE_DAO.get_by_id_creator(note_id, creator)
+        note = note_dao.get_by_id_creator(note_id, creator)
         content = ""
         if note != None:
             history = xutils.call("note.get_history", note_id, version)
@@ -457,32 +458,32 @@ class QueryHandler:
     def GET(self, action = ""):
         if action == "get_by_id":
             id = xutils.get_argument("id")
-            return dict(code = "success", data = NOTE_DAO.get_by_id(id))
+            return dict(code = "success", data = note_dao.get_by_id(id))
         if action == "get_by_name":
             name = xutils.get_argument("name")
-            return dict(code = "success", data = NOTE_DAO.get_by_name(xauth.current_name(), name))
+            return dict(code = "success", data = note_dao.get_by_name(xauth.current_name(), name))
         return dict(code="fail", message = "unknown action")
 
 class GetDialogHandler:
 
     def get_group_option_dialog(self, kw):
-        note_id = xutils.get_argument("note_id")
+        note_id = xutils.get_argument_str("note_id", "")
         file    = NoteDao.get_by_id(note_id)
         if file != None and file.children_count == 0:
             kw.show_delete_btn = True
         kw.file = file
 
     def get_share_group_dialog(self, kw):
-        note_id = xutils.get_argument("note_id")
-        file    = NoteDao.get_by_id(note_id)
+        note_id = xutils.get_argument_str("note_id", "")
+        file    = note_dao.get_by_id(note_id)
         kw.file = file
         kw.share_to_list = []
 
         if file != None:
-            kw.share_to_list = NOTE_DAO.list_share_by_note_id(file.id)
+            kw.share_to_list = dao_share.list_share_by_note_id(file.id)
 
     def get_share_note_dialog(self, kw):
-        note_id = xutils.get_argument("note_id")
+        note_id = xutils.get_argument_str("note_id")
         file    = NoteDao.get_by_id(note_id)
         kw.file = file
 

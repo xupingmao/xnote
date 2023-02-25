@@ -21,7 +21,10 @@ from xtemplate import T
 from .constant import *
 from . import dao_delete
 from .dao_api import NoteDao
-import handlers.note.dao as note_dao
+from . import dao as note_dao
+from . import dao_delete
+from . import dao_share
+
 from handlers.note import dao_read
 from handlers.note import dao_draft
 
@@ -126,16 +129,16 @@ class CreateHandler:
     @xauth.login_required()
     def POST(self, method='POST'):
         name      = xutils.get_argument("name", "")
-        tags      = xutils.get_argument("tags", "")
+        tags      = xutils.get_argument_str("tags", "")
         key       = xutils.get_argument("key", "")
-        content   = xutils.get_argument("content", "")
-        type0     = xutils.get_argument("type", "md")
+        content   = xutils.get_argument_str("content", "")
+        type0     = xutils.get_argument_str("type", "md")
         date      = xutils.get_argument("date", "")
         format    = xutils.get_argument("_format", "")
         parent_id = xutils.get_argument("parent_id", "0")
         deafult_name = xutils.get_argument("default_name", "")
 
-        creator = xauth.current_name()
+        creator = xauth.current_name_str()
         xmanager.add_visit_log(creator, "/note/create")
 
         if key == "":
@@ -249,9 +252,9 @@ class RemoveAjaxHandler:
         file = None
 
         if id != "" and id != None:
-            file = NOTE_DAO.get_by_id(id)
+            file = note_dao.get_by_id(id)
         elif name != "":
-            file = NOTE_DAO.get_by_name(xauth.current_name(), name)
+            file = note_dao.get_by_name(xauth.current_name(), name)
         else:
             return dict(code="fail", message="id,name至少一个不为空")
 
@@ -263,11 +266,11 @@ class RemoveAjaxHandler:
             return dict(code="fail", message="没有删除权限")
 
         if file.type == "group":
-            children_count = NOTE_DAO.count_by_parent(creator, file.id)
+            children_count = note_dao.count_by_parent(creator, file.id)
             if children_count > 0:
                 return dict(code="fail", message="分组不为空")
 
-        NOTE_DAO.delete(file.id)
+        dao_delete.delete_note(file.id)
         
         self.after_delete(file)
 
@@ -376,7 +379,7 @@ class NoteShareHandler:
         if share_to == share_from:
             return dict(code = "fail", message = "不需要分享给自己")
 
-        NOTE_DAO.share_to(note, share_from, share_to)
+        dao_share.share_note_to(note, share_from, share_to)
         return dict(code = "success", message = "分享成功")
 
 class LinkShareHandler:
@@ -388,7 +391,7 @@ class LinkShareHandler:
         if note.token != None:
             return dict(code = "success", data = "/note/view?token=%s" % note.token)
         else:
-            token = NOTE_DAO.create_token("note", note.id)
+            token = note_dao.create_token("note", note.id)
             note_dao.update_note(note.id, token = token)
         return dict(code = "success", data = "/note/view?token=%s" % token)
 
@@ -400,7 +403,7 @@ class UnshareHandler:
         to_user = xutils.get_argument("share_to", "")
         note = check_get_note(id)
         if to_user != "":
-            NOTE_DAO.delete_share(id, to_user = to_user)
+            dao_share.delete_share(id, to_user = to_user)
         else:
             note_dao.update_note(id, is_public = 0)
         return dict(code = "success", message = "取消分享成功")
@@ -549,7 +552,7 @@ class StickHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id")
-        level = xutils.get_argument("level")
+        level = xutils.get_argument_str("level", "0")
         priority = 1
         if level in ("0", "2"):
             priority = int(level)
@@ -599,7 +602,7 @@ class UpdateStatusHandler:
     @xauth.login_required()
     def POST(self):
         id = xutils.get_argument("id")
-        status = xutils.get_argument("status")
+        status = xutils.get_argument_str("status", "")
         if status not in ("0", "-1", "1"):
             return dict(code = "fail", message = "无效的状态: %s" % status)
         note = check_get_note(id)
@@ -724,7 +727,7 @@ class DraftHandler:
     @xauth.login_required()
     def POST(self):
         action = xutils.get_argument("action")
-        note_id = xutils.get_argument("id")
+        note_id = xutils.get_argument_str("id", "")
         content = xutils.get_argument("content")
         token   = xutils.get_argument("token")
         version = xutils.get_argument("version", 0, type=int)
