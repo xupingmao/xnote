@@ -259,7 +259,8 @@ class FileSystemHandler:
 
     def read_file(self, path, content_type=None):
         environ = web.ctx.environ
-        etag = '"%s"' % os.path.getmtime(path)
+        mtime = os.path.getmtime(path)
+        etag = '"%s"' % mtime
         client_etag = environ.get('HTTP_IF_NONE_MATCH')
 
         if etag == client_etag:
@@ -272,16 +273,18 @@ class FileSystemHandler:
 
         if not xconfig.DEBUG:
             # 强制缓存
-            web.header("Cache-Control", "max-age=3600")
+            web.header("Cache-Control", "max-age=3600000")
+            web.header("Vary", "*")
+            expires = datetime.datetime.utcnow() + datetime.timedelta(days=30)
+            web.header("Expires", expires.strftime("%a, %d %b %Y %H:%M:%S GMT"))
         else:
             # 在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证 (协商缓存验证)。
             web.header("Cache-Control", "no-cache")
-        web.header("Etag", etag)
-        web.header("Vary", "*")
-        web.header("Content-Location", web.ctx.fullpath)
+            modified = time.gmtime(mtime)
+            web.header("Last-Modified", time.strftime("%a, %d %b %Y %H:%M:%S GMT", modified))
 
-        expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-        web.header("Expires", expires.strftime("%a, %d %b %Y %H:%M:%S GMT"))
+        web.header("Etag", etag)
+        web.header("Content-Location", web.ctx.fullpath)
 
         if content_type != None:
             web.header("Content-Type", content_type)

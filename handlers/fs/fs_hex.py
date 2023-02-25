@@ -64,6 +64,11 @@ HTML = """
     {% if embed == "false" %}
         {% include mod_fs_path.html %}
     {% end %}
+
+    {% if error != "" %}
+        <div class="error">{{error}}</div>
+    {% end %}
+
     <textarea class="lineno-text" rows=32>{{lineno_text}}</textarea>
     <textarea class="hex-text" rows=32>{{hex_text}}</textarea>
     <textarea class="plain-text" rows=32>{{plain_text}}</textarea>
@@ -130,31 +135,37 @@ class Main(BasePlugin):
         hex_text = ""
         plain_text = ""
         lineno_text = ""
+        error = ""
 
         if not os.path.isfile(path):
             return "`%s` IS NOT A FILE!" % path
         else:
             filesize = xutils.get_file_size(path, format=False)
+            assert isinstance(filesize, int)
             line_fmt = "%05x"
             step = 16
             self.page_max = math.ceil(filesize / pagesize)
             # padding = ' ' * 4
-            with open(path, 'rb') as fp:
-                fp.seek(offset)
-                for i in range(0, pagesize, step):
-                    bytes = fp.read(step)
-                    if len(bytes) == 0:
-                        break
-                    lineno_text += line_fmt % (offset + i) + "\n"
-                    hex_text += bytes_hex(bytes).ljust(step * 3) + "\n"
-                    plain_text += bytes_chars(bytes) + "\n"
-
+            try:
+                with open(path, 'rb') as fp:
+                    fp.seek(offset)
+                    for i in range(0, pagesize, step):
+                        bytes = fp.read(step)
+                        if len(bytes) == 0:
+                            break
+                        lineno_text += line_fmt % (offset + i) + "\n"
+                        hex_text += bytes_hex(bytes).ljust(step * 3) + "\n"
+                        plain_text += bytes_chars(bytes) + "\n"
+            except Exception as e:
+                xutils.print_exc()
+                error = str(e)
             kw = Storage()
             kw.path = path
             kw.hex_text = hex_text
             kw.plain_text = plain_text
             kw.lineno_text = lineno_text
             kw.embed = embed
+            kw.error = error
 
             if embed == "true":
                 self.show_nav = False

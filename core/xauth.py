@@ -384,6 +384,8 @@ def current_name():
 
 def current_name_str() -> str:
     name = get_current_name()
+    if name == None:
+        name = "public"
     assert isinstance(name, str)
     return name
 

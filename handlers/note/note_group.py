@@ -173,11 +173,9 @@ class ShareListHandler:
         tab = xutils.get_argument("tab", "")
         assert isinstance(page, int)
 
-        user_name = xauth.get_current_name()
+        user_name = xauth.current_name_str()
         limit = xconfig.PAGE_SIZE
         offset = (page-1) * limit
-
-        assert isinstance(user_name, str)
 
         files = self.list_notes(user_name, offset, limit)
         amount = self.count_notes(user_name)
