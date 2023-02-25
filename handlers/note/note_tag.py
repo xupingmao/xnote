@@ -14,6 +14,7 @@ from xutils import Storage
 from xutils import dbutil
 from xtemplate import T
 from . import dao_tag
+from . import dao as note_dao
 
 tag_db = dbutil.get_table("note_tag_meta")
 
@@ -37,15 +38,14 @@ class TagUpdateAjaxHandler:
         id = xutils.get_argument("file_id")
         tags_str = xutils.get_argument("tags")
         user_name = xauth.get_current_name()
-        note = xutils.call("note.get_by_id", id)
 
         if tags_str is None or tags_str == "":
-            xutils.call("note.update_tags", note_id=id,
-                        creator=user_name, tags=[])
+            dao_tag.bind_tags(note_id=id, creator=user_name, tags=[])
             return dict(code="success")
-        new_tags = tags_str.split(" ")
-        xutils.call("note.update_tags", note_id=id,
-                    creator=user_name, tags=new_tags)
+
+        assert isinstance(tags_str, str)
+        new_tags = tags_str.split()
+        dao_tag.bind_tags(note_id=id, creator=user_name, tags=new_tags)
         return dict(code="success", message="", data="OK")
 
     def GET(self):
@@ -149,6 +149,7 @@ class DeleteTagAjaxHandler:
 
     def delete_group_tag(self, user_name):
         tag_ids_str = xutils.get_argument("tag_ids", "[]")
+        assert isinstance(tag_ids_str, str)
         tag_ids = json.loads(tag_ids_str)
         if len(tag_ids) == 0:
             return dict(code="400", message="请选择要删除的标签")
@@ -191,6 +192,7 @@ class BindTagAjaxHandler:
     def bind_group_tag(self):
         group_id = xutils.get_argument("group_id", "")
         tag_names_str = xutils.get_argument("tag_names", "")
+        assert isinstance(tag_names_str, str)
 
         assert group_id != ""
         
@@ -208,6 +210,7 @@ class BindTagAjaxHandler:
         tag_names_str = xutils.get_argument("tag_names", "")
 
         assert note_id != ""
+        assert isinstance(tag_names_str, str)
         
         user_name = xauth.current_name()
         book_info = get_by_id_creator(note_id, user_name)

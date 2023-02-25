@@ -7,8 +7,8 @@ import xutils
 import xmanager
 from xutils import dbutil
 from xtemplate import BasePlugin
-
-MSG_DAO = xutils.DAO("message")
+import handlers.message.dao as msg_dao
+import handlers.note.dao as note_dao
 
 HTML = """
 <style>
@@ -47,13 +47,19 @@ class StatHandler(BasePlugin):
 
     def get_stat_list(self, user_name):
         stat_list = []
-        message_stat = MSG_DAO.get_message_stat(user_name)
-        stat_list.append(["我的笔记本", xutils.call("note.count_by_type", user_name, "group")])
-        stat_list.append(["我的笔记", dbutil.count_table("note_tiny:%s" % user_name)])
+        message_stat = msg_dao.get_message_stat(user_name)
+        note_stat = note_dao.get_note_stat(user_name)
+        group_count = note_stat.group_count
+        note_count = note_stat.total
+        comment_count = note_stat.comment_count
+        search_count = dbutil.count_table("search_history:%s" % user_name, use_cache=True)
+
+        stat_list.append(["我的笔记本", group_count])
+        stat_list.append(["我的笔记", note_count])
         stat_list.append(["我的待办", message_stat.task_count])
         stat_list.append(["我的记事", message_stat.log_count])
-        stat_list.append(["搜索记录", dbutil.count_table("search_history:%s" % user_name)])
-        stat_list.append(["我的评论", dbutil.count_table("comment_index:%s" % user_name)])
+        stat_list.append(["搜索记录", search_count])
+        stat_list.append(["我的评论", comment_count])
         return stat_list
 
     def get_admin_stat_list(self, hide_index):
@@ -75,6 +81,7 @@ class StatHandler(BasePlugin):
         p = xutils.get_argument("p", "")
         hide_index = xutils.get_argument("hide_index", "true")
         user_name = xauth.current_name()
+        assert isinstance(user_name, str)
 
         xmanager.add_visit_log(user_name, "/note/stat")
         

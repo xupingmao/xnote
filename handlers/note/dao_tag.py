@@ -162,6 +162,7 @@ def count_tag(user_name):
 
 
 def bind_tags(creator, note_id, tags, tag_type="group"):
+    assert isinstance(tags, list)
     note = note_dao.get_by_id(note_id)
     assert note != None, "笔记不存在"
 
