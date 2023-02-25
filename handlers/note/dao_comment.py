@@ -12,6 +12,7 @@ from xutils import dbutil
 from xutils import textutil
 from xutils import dateutil
 from .dao_api import NoteDao
+from . import dao as note_dao
 
 def register_note_table(name, description, user_attr=None):
     dbutil.register_table(name, description, category="note", user_attr=user_attr)
@@ -82,7 +83,7 @@ def create_comment(comment):
 
     _comment_db.insert(comment)
 
-    NOTE_DAO.refresh_note_stat_async(comment["user"])
+    note_dao.refresh_note_stat_async(comment["user"])
 
 
 def update_comment(comment):
@@ -98,7 +99,7 @@ def delete_comment(comment_id):
     comment = get_comment(comment_id)
     if comment != None:
         _comment_db.delete(comment)
-        NOTE_DAO.refresh_note_stat_async(comment.user)
+        note_dao.refresh_note_stat_async(comment.user)
 
 
 def count_comment(user_name):

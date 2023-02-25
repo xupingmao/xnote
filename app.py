@@ -171,6 +171,7 @@ def try_init_kv_db():
             database = xconfig.get_system_config("mysql_database")
             mysql_cloud_type = xconfig.get_system_config("mysql_cloud_type")
             pool_size = xconfig.get_system_config("mysql_pool_size")
+            assert isinstance(pool_size, int)
 
             if mysql_cloud_type == "sae":
                 host = os.environ["MYSQL_HOST"]

@@ -190,6 +190,7 @@ class LdbTable:
             batch.commit(sync)
 
     def is_valid_key(self, key=None, user_name=None):
+        assert isinstance(key, str)
         if user_name is None:
             return key.startswith(self.prefix)
         else:

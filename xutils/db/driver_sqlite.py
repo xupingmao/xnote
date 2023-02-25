@@ -10,6 +10,7 @@ import sqlite3
 import threading
 import logging
 from xutils.mem_util import log_mem_info_deco
+from . import driver_interface
 
 class FreeLock:
 
@@ -44,13 +45,13 @@ def db_execute(db, sql, *args):
 
 class Holder(threading.local):
     def __init__(self):
-        self.db = None
+        self.db: sqlite3.Connection = None
 
     def __del__(self):
         if self.db != None:
             self.db.close()
 
-class SqliteKV:
+class SqliteKV(driver_interface.DBInterface):
 
     _lock = threading.RLock()
 
@@ -59,41 +60,49 @@ class SqliteKV:
                  write_buffer_size=None,
                  config_dict=None,
                  debug=True):
-        """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
+        """通过 sqlite 来实现leveldb的接口代理"""
         self.db_file = db_file
-        self.db_holder = Holder()
         self.debug = debug
         self.config_dict = config_dict
+        self.is_snapshot = False
 
         if snapshot != None:
+            # sqlite并不支持快照，这里模拟下
             self._db = snapshot
+            self.is_snapshot = True
         else:
             self._db = None
+        
+        self.db_holder = Holder()
+
+    def init_db_connection(self):
+        # db_holder是threadlocal对象，这里是线程安全的
+        logging.info("init_db_connection")
+        config_dict = self.config_dict
+
+        with self._lock:
+            # 设置 isolation_level=None 开启自动提交
+            db = sqlite3.connect(self.db_file, isolation_level=None)
+
+            if config_dict != None and config_dict.sqlite_journal_mode == "WAL":
+                db_execute(db, "PRAGMA journal_mode = WAL;")
+            else:
+                # WAL模式，并发度更高
+                db_execute(db, "PRAGMA journal_mode = DELETE;")
+
+            # db_execute(self.db_holder.db, "PRAGMA journal_mode = DELETE;") # 默认模式
+            db_execute(db, "CREATE TABLE IF NOT EXISTS `kv_store` (`key` blob primary key, value blob);")
+
+        return db
 
     def _get_db(self):
         if self._db != None:
             return self._db
-
+        
         if self.db_holder.db == None:
-            # db_holder是threadlocal对象，这里是线程安全的
-            logging.info("init db")
-            config_dict = self.config_dict
-
-            with self._lock:
-                # 设置 isolation_level=None 开启自动提交
-                self.db_holder.db = sqlite3.connect(self.db_file, isolation_level=None)
-
-                if config_dict != None and config_dict.sqlite_journal_mode == "WAL":
-                    db_execute(self.db_holder.db, "PRAGMA journal_mode = WAL;")
-                else:
-                    # WAL模式，并发度更高
-                    db_execute(self.db_holder.db,
-                               "PRAGMA journal_mode = DELETE;")
-
-                # db_execute(self.db_holder.db, "PRAGMA journal_mode = DELETE;") # 默认模式
-                db_execute(
-                    self.db_holder.db, "CREATE TABLE IF NOT EXISTS `kv_store` (`key` blob primary key, value blob);")
-
+            # 这是一个 threadlocal
+            self.db_holder.db = self.init_db_connection()
+            
         return self.db_holder.db
 
     def cursor(self):

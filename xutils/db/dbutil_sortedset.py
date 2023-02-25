@@ -27,8 +27,7 @@ class RankTable:
         if self.prefix[-1] != ":":
             self.prefix += ":"
 
-    def _format_score(self, score):
-        # type: (float)->bytes
+    def _format_score(self, score: float) -> str:
         assert isinstance(score, float)
         buf = struct.pack(">d", score)
         return buf.hex()

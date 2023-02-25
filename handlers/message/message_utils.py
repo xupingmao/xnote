@@ -26,6 +26,8 @@ from xutils.functions import Counter
 from xutils.textutil import quote
 from handlers.message.message_model import MessageFolder, MessageTag
 
+from . import dao as msg_dao
+
 MSG_DAO = xutils.DAO("message")
 TAG_TEXT_DICT = dict(
     done="完成",
@@ -389,7 +391,7 @@ class MessageListParser(object):
         done_time = message.done_time
 
         if message.ref != None:
-            task = MSG_DAO.get_by_id(message.ref)
+            task = msg_dao.get_message_by_id(message.ref)
 
         if task != None:
             html, keywords = mark_text(task.content, "done")
@@ -478,7 +480,7 @@ def sort_keywords_by_marked(msg_list):
 def list_hot_tags(user_name, limit=20):
     assert isinstance(user_name, str)
 
-    msg_list, amount = MSG_DAO.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
+    msg_list, amount = msg_dao.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
     sort_message_list(msg_list, "amount_desc")
     for msg in msg_list:
         msg.url = "/message?tag=search&key={key}".format(
@@ -489,7 +491,7 @@ def list_hot_tags(user_name, limit=20):
 def list_task_tags(user_name, limit=20, offset=0):
     assert isinstance(user_name, str)
 
-    msg_list, amount = MSG_DAO.list_task(
+    msg_list, amount = msg_dao.list_task(
         user_name, offset=0, limit=MAX_LIST_LIMIT)
     return get_tags_from_message_list(msg_list, "task", display_tag="taglist")
 

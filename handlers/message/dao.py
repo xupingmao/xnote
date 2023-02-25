@@ -314,7 +314,7 @@ def count_message(user, status):
     return kv_count_message(user, status)
 
 
-def get_message_by_id(full_key):
+def get_message_by_id(full_key) -> Storage:
     # type: (str) -> object
     check_param_id(full_key)
     if full_key.startswith("message:"):

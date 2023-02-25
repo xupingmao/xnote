@@ -198,30 +198,6 @@ def get_instance():
         raise Exception("leveldb instance is None!")
     return _leveldb
 
-
-def create_db_instance(db_dir, block_cache_size=None, write_buffer_size=None):
-    if block_cache_size is None:
-        block_cache_size = DEFAULT_BLOCK_CACHE_SIZE
-
-    if write_buffer_size is None:
-        write_buffer_size = DEFAULT_WRITE_BUFFER_SIZE
-
-    logging.info("block_cache_size=%s", block_cache_size)
-
-    if leveldb:
-        return leveldb.LevelDB(db_dir,
-                               block_cache_size=block_cache_size,
-                               write_buffer_size=write_buffer_size)
-
-    if xutils.is_windows():
-        import leveldbpy
-        return LevelDBProxy(db_dir,
-                            block_cache_size=block_cache_size,
-                            write_buffer_size=write_buffer_size)
-
-    raise Exception("create_db_instance failed: not supported")
-
-
 def check_not_empty(value, message):
     if value == None or value == "":
         raise Exception(message)

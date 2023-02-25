@@ -121,6 +121,7 @@ def get_html_title(soup):
 
 
 def import_from_html(html, baseurl=""):
+    assert BeautifulSoup != None
     soup = BeautifulSoup(html, "html.parser")
     element_list = soup.find_all(["script", "style"])
     for element in element_list:
@@ -157,13 +158,13 @@ class ImportNoteHandler:
     def get_kw(self):
         user_name = xauth.current_name()
         kw = Storage()
-        kw.groups = NOTE_DAO.list_group(user_name, orderby="name")
+        kw.groups = dao.list_group(user_name, orderby="name")
         return kw
 
     def GET(self):
         address = xutils.get_argument("url")
         save = xutils.get_argument("save")
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
 
         # 添加日志
         xmanager.add_visit_log(user_name, "/note/html_importer")

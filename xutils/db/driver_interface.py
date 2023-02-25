@@ -21,6 +21,10 @@ class DBInterface:
         @return {bytes|None} value
         """
         raise NotImplementedError("Get")
+    
+    def BatchGet(self, keys):
+        """批量get操作"""
+        raise NotImplementedError("BatchGet")
 
     def Put(self, key, value, sync = False):
         # type: (bytes,bytes,bool) -> None
