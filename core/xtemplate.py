@@ -72,12 +72,13 @@ class NavItem:
         return True
 
     def is_visible(self):
-        if self.need_login:
-            return xauth.has_login() and self.check_platform()
-        
+        # 先判断高权限的
         if self.require_admin:
             return xauth.is_admin() and self.check_platform()
 
+        if self.need_login:
+            return xauth.has_login() and self.check_platform()
+        
         if self.need_logout:
             return not xauth.has_login() and self.check_platform()
 

@@ -13,6 +13,7 @@ import xmanager
 from xutils import Storage
 from xutils import dateutil, dbutil, fsutil
 import xutils
+import handlers.note.dao as note_dao
 from .dao import get_by_id, create_note, update_note, list_default_notes, move_note
 
 _db = dbutil.get_table("notebook")
@@ -90,7 +91,7 @@ def get_default_book_id(user_name):
 class SmartGroupService:
 
     SMART_GROUP_COUNT = 0
-    _smart_groups = None
+    _smart_groups = []
 
     @classmethod
     def init(cls):
@@ -112,7 +113,7 @@ class SmartGroupService:
 
     @classmethod
     def list_smart_group(cls, user_name):
-        note_stat = NOTE_DAO.get_note_stat(user_name)
+        note_stat = note_dao.get_note_stat(user_name)
         smart_group_list = copy.deepcopy(cls._smart_groups)
 
         for item in smart_group_list:
