@@ -68,7 +68,8 @@ class TagNameHandler:
             user_name = xauth.get_current_name()
         else:
             user_name = ""
-        files = xutils.call("note.list_by_tag", user_name, tagname)
+
+        files = dao_tag.list_by_tag(user_name, tagname)
         count = len(files)
 
         files = files[offset: offset+limit]
@@ -98,8 +99,8 @@ class TagListHandler:
         
         kw = Storage()
         kw.html_title = T("标签列表")
-        kw.tag_list = tag_list
         kw.system_tag_list = dao_tag.get_system_tag_list(tag_list)
+        kw.tag_list = dao_tag.get_user_defined_tags(tag_list)
 
         return xtemplate.render("note/page/taglist.html", **kw)
 

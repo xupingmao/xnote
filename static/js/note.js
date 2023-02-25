@@ -193,3 +193,26 @@ NoteView.editNoteTag = function (target) {
         xnote.api.note.bindTag(cmd);
     })
 };
+
+
+NoteView.renderNoteList = function (itemList) {
+    var html = $("#select-note-tpl").render({
+        itemList: itemList
+    });
+    $("#select-note-dialog-body").html(html);
+};
+
+
+NoteView.openDialogToAddNote = function (event) {
+    $.get("/note/api/timeline?type=all&limit=100",  function (resp) {
+        if (resp.code != "success") {
+            xnote.alert(resp.message);
+        } else {
+            var html = NoteView.renderNoteList(resp.data);
+            var dialogEle = $("#select-note-dialog").html(html);
+            xnote.openDialog("选择笔记", dialogEle, ["确定", "取消"], function () {
+                NoteView.addNoteToTag();
+            });
+        }
+    });
+};

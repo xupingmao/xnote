@@ -283,6 +283,12 @@ def get_system_tag_code_map():
 
 static_code_map = get_system_tag_code_map()
 
+def get_user_defined_tags(tag_list):
+    result = []
+    for item in tag_list:
+        if item.name not in static_code_map:
+            result.append(item)
+    return result
 
 def get_name_by_code(code):
     return static_code_map.get(code, code)
