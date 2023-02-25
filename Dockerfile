@@ -5,7 +5,7 @@ COPY config/requirements.txt ./
 RUN pip install --upgrade pip
 
 # install required packages
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -i http://pypi.douban.com/simple
 
 # set timezone
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
