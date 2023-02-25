@@ -18,7 +18,9 @@ class LdbHashTable:
     def __init__(self, table_name, user_name = None, key_name = "_key"):
         check_table_name(table_name)
 
-        table_info = get_table_info(table_name) # type: TableInfo
+        table_info = get_table_info(table_name)
+        assert isinstance(table_info, TableInfo)
+        
         self.table_name = table_name
         self.key_name = key_name
         self.user_name = user_name

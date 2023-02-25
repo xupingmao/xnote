@@ -124,6 +124,9 @@ class WriteBatchProxy:
         """
         check_before_write(key, check_table)
 
+        if hasattr(val, "to_storage"):
+            val = val.to_storage()
+
         key_bytes = key.encode("utf-8")
         val_bytes = convert_object_to_json(val).encode("utf-8")
 

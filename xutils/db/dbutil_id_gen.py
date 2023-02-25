@@ -24,7 +24,7 @@ class IdGenerator:
         max_id_key = "_max_id:" + self.table_name
 
         with get_write_lock():
-            last_id = db_get(max_id_key)
+            last_id = db_get(max_id_key) # type: int
             if last_id is None:
                 if start_id != None:
                     last_id = start_id

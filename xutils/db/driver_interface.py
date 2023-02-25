@@ -79,3 +79,13 @@ class DBLockInterface:
     def Refresh(self, resource_id, token, refresh_time):
         raise NotImplementedError("Refresh")
 
+class RecordInterface:
+    """数据库记录的接口"""
+
+    def from_storage(self, dict_value: dict):
+        """从数据库记录转为领域模型"""
+        self.__dict__.update(dict_value)
+
+    def to_storage(self):
+        """从领域模型转为数据库记录"""
+        return self.__dict__

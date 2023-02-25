@@ -13,6 +13,20 @@ import threading
 from xutils import Storage
 from xutils.db.dbutil_base import create_write_batch, db_get, db_put, get_write_lock, prefix_list
 from xutils.db.encode import encode_index_value
+from xutils.db import driver_interface
+
+
+class MetaInfo(driver_interface.RecordInterface):
+    """双端队列的元信息"""
+    def __init__(self) -> None:
+        self._id = ""
+        self._key = ""
+        self.first_id = 0
+        self.last_id = 0
+        self.size = 0
+    
+    def to_storage(self):
+        return self.__dict__
 
 class DequeTable:
 
@@ -26,9 +40,15 @@ class DequeTable:
     def get_meta_info(self):
         info = db_get(self.meta_key)
         if info == None:
-            return Storage(first_id = 0, last_id = 0, size = 0)
+            return MetaInfo()
         else:
-            return info
+            assert isinstance(info, dict)
+            result = MetaInfo()
+            result.__dict__.update(info)
+            return result
+
+    def update_meta_info(self, info):
+        db_put(self.meta_key, info.__dict__)
     
     def __len__(self):
         return self.get_meta_info().size
@@ -117,7 +137,7 @@ class DequeTable:
             meta.first_id = first_id
             meta.size -= 1
             
-            db_put(self.meta_key, meta)
+            self.update_meta_info(meta)
             return first_value
 
     def pop(self):
@@ -135,7 +155,7 @@ class DequeTable:
             meta.last_id = last_id
             meta.size -= 1
             
-            db_put(self.meta_key, meta)
+            self.update_meta_info(meta)
             return last_value
     
     def first(self):
