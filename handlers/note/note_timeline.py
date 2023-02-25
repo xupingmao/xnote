@@ -101,7 +101,7 @@ class DefaultProjectGroup(SystemGroup):
 
 
 def search_group(user_name, words):
-    rows = note_dao.list_group(user_name)
+    rows, count = note_dao.list_group_with_count(user_name)
     result = []
     for row in rows:
         if textutil.contains_all(row.name, words):
@@ -592,11 +592,14 @@ class DateHandler:
     def GET(self):
         user_name = xauth.current_name()
         show_back = xutils.get_argument("show_back", "")
+        date = xutils.get_argument("date", time.strftime("%Y-%m"))
+
+        assert isinstance(user_name, str)
+        assert isinstance(date, str)
 
         xmanager.add_visit_log(
             user_name, "/note/date?show_back=%s" % show_back)
 
-        date = xutils.get_argument("date", time.strftime("%Y-%m"))
         parts = date.split("-")
         if len(parts) == 2:
             year = int(parts[0])
@@ -620,14 +623,16 @@ class DateHandler:
         notes = notes + notes_new
         notes_by_date = note_helper.assemble_notes_by_date(notes)
 
-        return xtemplate.render("note/page/list_by_date.html",
-                                html_title=T("我的笔记"),
-                                date=date,
-                                year=year,
-                                month=month,
-                                notes_by_date=notes_by_date,
-                                show_back=show_back,
-                                search_type="default")
+        kw = Storage()
+        kw.html_title = T("我的笔记")
+        kw.date = date
+        kw.year = year
+        kw.month = month
+        kw.notes_by_date = notes_by_date
+        kw.show_back = show_back
+        kw.search_type = "default"
+
+        return xtemplate.render("note/page/list_by_date.html", **kw)
 
 
 xutils.register_func("note.build_date_result", build_date_result)

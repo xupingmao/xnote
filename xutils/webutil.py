@@ -84,6 +84,12 @@ def get_argument(key, default_value=None, type = None, strip=False):
     
     return value
 
+def get_argument_str(key: str, default_value = ""):
+    """获取字符串参数"""
+    value = get_argument(key, default_value, type = str, strip = True)
+    assert isinstance(value, str)
+    return value
+
 def get_client_user_agent():
     if IS_TEST:
         return ""

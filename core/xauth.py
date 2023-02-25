@@ -382,6 +382,11 @@ def get_current_name():
 def current_name():
     return get_current_name()
 
+def current_name_str() -> str:
+    name = get_current_name()
+    assert isinstance(name, str)
+    return name
+
 def get_current_role():
     """获取当前用户的角色"""
     user = get_current_user()

@@ -942,7 +942,7 @@ def check_group_status(status):
 
 
 @xutils.timeit(name="NoteDao.ListGroup:leveldb", logfile=True)
-def list_group(creator=None,
+def list_group_with_count(creator=None,
                orderby="mtime_desc",
                skip_archived=False,
                status="all",
@@ -1005,7 +1005,7 @@ def list_group(creator=None,
         return True
 
     if count_only:
-        return _book_db.count(user_name=creator, filter_func=list_group_func)
+        return [], _book_db.count(user_name=creator, filter_func=list_group_func)
 
     notes = _book_db.list(
         user_name=creator, filter_func=list_group_func, limit=limit)
@@ -1017,8 +1017,16 @@ def list_group(creator=None,
             return result, len(notes)
         return result, _book_db.count(user_name=creator, filter_func=list_group_func)
     else:
-        return result
+        return result, 0
 
+
+def list_group(*args, **kw):
+    list, count = list_group_with_count(*args, **kw)
+    if kw.get("count_only") == True:
+        return count
+    if kw.get("count_total") == True:
+        return list, count
+    return list
 
 def count_group(creator, status=None):
     check_group_status(status)
@@ -1036,7 +1044,8 @@ def count_group_by_db(creator, status=None):
     if status is None:
         return _book_db.count(user_name=creator)
 
-    return len(list_group(creator, status=status))
+    data, count = list_group_with_count(creator, status = status, count_only=True)
+    return count
 
 
 @xutils.timeit(name="NoteDao.ListRootGroup:leveldb", logfile=True)
@@ -1075,6 +1084,7 @@ def list_public(offset, limit, orderby="ctime_desc"):
 
     build_note_list_info(notes)
     for note in notes:
+        assert isinstance(note, Storage)
         if note.is_deleted:
             logging.warning("笔记已删除:%s,name:%s", note.id, note.name)
             db.delete_by_id(note.id)

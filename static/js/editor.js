@@ -13,6 +13,9 @@
 // fixedGutter
 // 设置gutter跟随编辑器内容水平滚动（false）还是固定在左侧（true或默认）
 
+// 编辑器组件
+var EditorView = {};
+
 /**
  * 初始化codeMirror编辑器
  * @param {string} selector 选择器

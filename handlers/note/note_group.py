@@ -23,6 +23,9 @@ from xtemplate import T
 from .dao_category import list_category, get_category_by_code
 from . import dao_tag
 from . import dao
+from . import dao_book
+from . import dao_share
+from . import dao_log
 from .dao_api import NoteDao
 import handlers.note.dao as note_dao
 import handlers.message.dao as msg_dao
@@ -126,6 +129,9 @@ class DefaultListHandler:
     @xauth.login_required()
     def GET(self):
         page = xutils.get_argument("page", 1, type=int)
+
+        assert isinstance(page, int)
+
         user_name = xauth.get_current_name()
         pagesize = xconfig.PAGE_SIZE
         offset = (page-1) * pagesize
@@ -146,8 +152,12 @@ class ShareListHandler:
 
     def list_notes(self, user_name, offset, limit):
         orderby = xutils.get_argument("tab", "ctime_desc")
+
+        assert isinstance(orderby, str)
+
         notes = note_dao.list_public(offset, limit, orderby)
         for note in notes:
+            assert isinstance(note, Storage)
             note.url = "/note/view/public?id=%s" % note.id
             if orderby == "hot":
                 note.badge_info = note.hot_index
@@ -161,9 +171,13 @@ class ShareListHandler:
     def GET(self):
         page = xutils.get_argument("page", 1, type=int)
         tab = xutils.get_argument("tab", "")
+        assert isinstance(page, int)
+
         user_name = xauth.get_current_name()
         limit = xconfig.PAGE_SIZE
         offset = (page-1) * limit
+
+        assert isinstance(user_name, str)
 
         files = self.list_notes(user_name, offset, limit)
         amount = self.count_notes(user_name)
@@ -191,10 +205,10 @@ class ShareToMeListHandler(ShareListHandler):
     orderby = "ctime_desc"
 
     def count_notes(self, user_name):
-        return NOTE_DAO.count_share_to(user_name)
+        return dao_share.count_share_to(user_name)
 
     def list_notes(self, user_name, offset, limit):
-        return NOTE_DAO.list_share_to(user_name, offset, limit, self.orderby)
+        return dao_share.list_share_to(user_name, offset, limit, self.orderby)
 
 
 class GroupListHandler:
@@ -214,10 +228,10 @@ class GroupListHandler:
                                    tags=kw.q_tags,
                                    category=kw.note_category)
         else:
-            notes = NOTE_DAO.list_smart_group(user_name)
+            notes = SmartGroupService.list_smart_group(user_name)
 
         if status == "active":
-            group = NOTE_DAO.get_virtual_group(user_name, "ungrouped")
+            group = note_dao.get_virtual_group(user_name, "ungrouped")
             if group.size > 0:
                 notes.insert(0, group)
 
@@ -280,6 +294,8 @@ class GroupListHandler:
     @xauth.login_required()
     def do_get(self):
         user_name = xauth.current_name()
+        assert isinstance(user_name, str)
+
         orderby_default = xconfig.get_user_config(
             user_name, "group_list_order_by", "name_asc")
         logging.debug("orderby_default:%s", orderby_default)
@@ -287,7 +303,7 @@ class GroupListHandler:
         category = xutils.get_argument("note_category", "all")
         tab = xutils.get_argument("tab", "active")
         orderby = xutils.get_argument("orderby", orderby_default)
-        user_name = xauth.current_name()
+
         show_back = xutils.get_argument("show_back", type=bool)
         q_tag_name = xutils.get_argument("tag_name", "")
         q_tags = []
@@ -300,7 +316,7 @@ class GroupListHandler:
             xconfig.update_user_config(
                 user_name, "group_list_order_by", orderby)
 
-        root = NOTE_DAO.get_root()
+        root = note_dao.get_root()
         kw = Storage()
         kw.tab = tab
         kw.orderby = orderby
@@ -337,6 +353,11 @@ class GroupManageHandler:
         category_code = xutils.get_argument("note_category", "all")
         q_key = xutils.get_argument("key", "")
         q_tags_str = xutils.get_argument("tags", "[]")
+
+        assert isinstance(q_tags_str, str)
+        assert isinstance(page, int)
+        assert isinstance(orderby, str)
+
         q_tags = json.loads(q_tags_str)
 
         assert page > 0
@@ -352,7 +373,7 @@ class GroupManageHandler:
         list_group_kw.count_total = True
         list_group_kw.category = category_code
 
-        notes, total = note_dao.list_group(user_name, orderby=orderby, offset=offset,
+        notes, total = note_dao.list_group_with_count(user_name, orderby=orderby, offset=offset,
                                            limit=limit, **list_group_kw)
 
         kw.parent_note = parent_note
@@ -382,6 +403,7 @@ class GroupManageHandler:
     def GET(self):
         parent_id = xutils.get_argument("parent_id", "0")
         user_name = xauth.current_name()
+        assert isinstance(user_name, str)
 
         xmanager.add_visit_log(user_name, "/note/group_list/edit")
         kw = Storage(user_name=user_name, parent_id=parent_id)
@@ -452,7 +474,7 @@ def load_category(user_name, include_system=False):
             NoteLink("分组", "/note/add?type=group", "fa-folder")
         ]
 
-        default_book_count = NOTE_DAO.count_by_parent(user_name, 0)
+        default_book_count = note_dao.count_by_parent(user_name, 0)
         if default_book_count > 0:
             sticky_groups.insert(0, SystemLink(
                 "默认分组", "/note/default", default_book_count))
@@ -490,10 +512,10 @@ class GroupSelectHandler:
             # view == flat
             q_parent_id = None
 
-        files = NOTE_DAO.list_group(
+        files = note_dao.list_group(
             user_name, orderby="default", parent_id=q_parent_id)
 
-        parent = NOTE_DAO.get_by_id_creator(parent_id, user_name)
+        parent = note_dao.get_by_id_creator(parent_id, user_name)
 
         return xtemplate.render(template,
                                 id=id,
@@ -541,10 +563,13 @@ class BaseListHandler:
         page = xutils.get_argument("page", 1, type=int)
         user_name = xauth.current_name()
 
+        assert isinstance(page, int)
+
         limit = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
         self.note_type = xutils.get_argument("type", self.note_type)
+        assert isinstance(self.note_type, str)
 
         amount = self.count_notes(user_name)
         notes = self.list_notes(user_name, offset, limit)
@@ -627,10 +652,10 @@ class RemovedListHandler(BaseListHandler):
     title = T("回收站")
 
     def count_notes(self, user_name):
-        return NOTE_DAO.count_removed(user_name)
+        return note_dao.count_removed(user_name)
 
     def list_notes(self, user_name, offset, limit):
-        return NOTE_DAO.list_removed(user_name, offset, limit, self.orderby)
+        return note_dao.list_removed(user_name, offset, limit, self.orderby)
 
     def map_notes(self, notes):
         for note in notes:
@@ -644,14 +669,14 @@ class StickyListHandler(BaseListHandler):
     title = T("我的置顶")
 
     def count_notes(self, user_name):
-        note_stat = NOTE_DAO.get_note_stat(user_name)
+        note_stat = note_dao.get_note_stat(user_name)
         if note_stat:
             return note_stat.sticky_count
         else:
             return 0
 
     def list_notes(self, user_name, offset, limit):
-        return NOTE_DAO.list_sticky(user_name, offset, limit)
+        return note_dao.list_sticky(user_name, offset, limit)
 
 
 class LogListHandler(BaseListHandler):
@@ -679,7 +704,7 @@ class AllNoteListHandler(BaseListHandler):
     show_ext_info = False
 
     def count_notes(self, user_name):
-        note_stat = NOTE_DAO.get_note_stat(user_name)
+        note_stat = note_dao.get_note_stat(user_name)
         if note_stat:
             return note_stat.total
         else:
@@ -697,20 +722,20 @@ class RecentHandler:
     """最近的笔记/常用的笔记"""
 
     def count_note(self, user_name, orderby):
-        return NOTE_DAO.count_visit_log(user_name)
+        return dao_log.count_visit_log(user_name)
 
     def list_notes(self, creator, offset, limit, orderby):
         if orderby == "all":
-            return NOTE_DAO.list_recent_events(creator, offset, limit)
+            return dao_log.list_recent_events(creator, offset, limit)
         elif orderby == "view":
-            return NOTE_DAO.list_recent_viewed(creator, offset, limit)
+            return dao_log.list_recent_viewed(creator, offset, limit)
         elif orderby == "create":
-            return NOTE_DAO.list_recent_created(creator, offset, limit)
+            return dao_log.list_recent_created(creator, offset, limit)
         elif orderby == "myhot":
-            return NOTE_DAO.list_hot(creator, offset, limit)
+            return dao_log.list_hot(creator, offset, limit)
 
         # 最近更新的
-        notes = NOTE_DAO.list_recent_edit(creator, offset, limit)
+        notes = dao_log.list_recent_edit(creator, offset, limit)
         for note in notes:
             note.badge_info = dateutil.format_date(note.mtime, "/")
         return notes
@@ -739,11 +764,15 @@ class RecentHandler:
         page = xutils.get_argument("page", 1, type=int)
         pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
         orderby = xutils.get_argument("orderby", "create")
+
+        assert isinstance(page, int)
+        assert isinstance(pagesize, int)
+
         page = max(1, page)
         offset = max(0, (page-1) * pagesize)
         limit = pagesize
         dir_type = "recent_edit"
-        creator = xauth.get_current_name()
+        creator = xauth.current_name_str()
 
         xmanager.add_visit_log(creator, "/note/recent?orderby=%s" % orderby)
 
@@ -780,7 +809,7 @@ class ManagementHandler:
     """批量管理处理器"""
 
     def handle_group(self, kw):
-        q_tags_str = xutils.get_argument("tags", "[]")
+        q_tags_str = xutils.get_argument_str("tags", "[]")
         q_tags = json.loads(q_tags_str)
 
         parent_id = kw.parent_id
@@ -803,8 +832,8 @@ class ManagementHandler:
 
     def handle_default(self, kw):
         user_name = kw.user_name
-        parent_note = NOTE_DAO.get_default_group()
-        notes = NOTE_DAO.list_default_notes(user_name)
+        parent_note = note_dao.get_default_group()
+        notes = note_dao.list_default_notes(user_name)
 
         kw.parent_note = parent_note
         kw.notes = notes
@@ -812,7 +841,7 @@ class ManagementHandler:
     @xauth.login_required()
     def GET(self):
         parent_id = xutils.get_argument("parent_id", "0")
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
 
         xmanager.add_visit_log(user_name, "/note/manage")
 
@@ -833,7 +862,7 @@ class ManagementHandler:
             raise web.seeother("/unauthorized")
 
         if parent_note.type == "gallery":
-            fpath = NOTE_DAO.get_gallery_path(parent_note)
+            fpath = note_dao.get_gallery_path(parent_note)
             pathlist = fsutil.listdir_abs(fpath, False)
             return xtemplate.render("note/page/batch/gallery_manage.html",
                                     note=parent_note,
@@ -885,12 +914,12 @@ class DateListHandler:
 
     @xauth.login_required()
     def GET(self):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         show_back = xutils.get_argument("show_back", "")
 
         xmanager.add_visit_log(user_name, "/note/date")
 
-        date = xutils.get_argument("date", time.strftime("%Y-%m"))
+        date = xutils.get_argument_str("date", time.strftime("%Y-%m"))
         parts = date.split("-")
         if len(parts) == 2:
             year = int(parts[0])
