@@ -435,6 +435,11 @@ def random_string(length, chars=ALPHA_NUM):
 def parse_config_text(text, ret_type = 'list'):
     return parse_prop_text(text, ret_type)
 
+def parse_config_text_to_dict(text) -> dict:
+    result = parse_prop_text(text, "dict")
+    assert isinstance(result, dict)
+    return result
+
 def parse_prop_text(text, ret_type = "dict"):
     from xutils.text_parser_properties import parse_prop_text as parse_prop_text_impl
     return parse_prop_text_impl(text, ret_type)

@@ -24,7 +24,7 @@ MSG_DAO  = xutils.DAO("message")
 DICT_DAO = xutils.DAO("dict")
 
 config = xconfig
-SEARCH_TYPE_DICT = dict()
+SEARCH_TYPE_DICT = dict() # type: dict[str, Storage]
 
 
 def register_search_handler(search_type, placeholder = None, action = None, tag = None):
@@ -39,14 +39,15 @@ def register_search_handler(search_type, placeholder = None, action = None, tag 
         tag = tag
     )
 
-def get_search_handler(search_type):
+def get_search_handler(search_type) -> Storage:
     handler = SEARCH_TYPE_DICT.get(search_type)
     if handler != None:
         return handler
 
     return SEARCH_TYPE_DICT.get("default")
 
-
+# 注册到xtemplate的实现
+xtemplate.get_search_handler = get_search_handler
 
 class BaseRule:
 

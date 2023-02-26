@@ -18,6 +18,7 @@ import web
 import xconfig
 import xauth
 import xutils
+import time
 from tornado.template import Template, Loader
 from xutils import dateutil, u
 from xutils import tojson
@@ -37,10 +38,11 @@ _lang_dict = dict()
 _mobile_name_dict = dict()
 _loader = None # type: XnoteLoader
 NAV_LIST = []
-
-SEARCH_DAO = xutils.DAO("search")
+LOAD_TIME = int(time.time())
 PLUGIN_DAO = xutils.DAO("plugin")
 
+def get_search_handler(search_type) -> Storage:
+    raise NotImplementedError("待search实现")
 
 def load_languages():
     """加载系统语言配置"""
@@ -183,7 +185,7 @@ def get_nav_list():
     return NAV_LIST
 
 
-def render_before_kw(kw):
+def render_before_kw(kw: dict):
     """模板引擎预处理过程"""
     user_name = xauth.current_name() or ""
     user_role = xauth.current_role() or ""
@@ -203,6 +205,7 @@ def render_before_kw(kw):
     kw["xutils"] = xutils
     kw["xconfig"] = xconfig
     kw["T"] = T
+    kw["_ts"] = LOAD_TIME  # 用于标识前端资源的缓存版本
 
     # 用户配置
     kw["_user_config"] = xconfig.get_user_config_dict(user_name)
@@ -281,7 +284,7 @@ def render_search(kw):
         return
 
     search_type = kw.get("search_type")
-    handler = SEARCH_DAO.get_search_handler(search_type)
+    handler = get_search_handler(search_type)
     if handler != None:
         kw["search_action"] = handler.action
         kw["search_placeholder"] = handler.placeholder

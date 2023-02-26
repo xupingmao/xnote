@@ -1,3 +1,5 @@
+base 包请移动到 common/base
+
 # 关于base包
 
 - base指的是基础的东西，比如模板、基类等等

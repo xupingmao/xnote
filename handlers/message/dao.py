@@ -6,6 +6,7 @@ import xutils
 import xconfig
 import xmanager
 import re
+import logging
 from xutils import dbutil, cacheutil, textutil, Storage, functions
 from xutils import dateutil
 from xutils.functions import del_dict_key
@@ -31,7 +32,7 @@ VALID_TAG_SET = set(["task", "done", "log", "key", "date"])
 _keyword_db = dbutil.get_hash_table("msg_key")
 _msg_db = dbutil.get_table("message")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
-
+_debug = False
 
 class MessageDO(Storage):
 
@@ -535,7 +536,7 @@ def count_by_tag(user, tag):
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
 
-def get_message_stat0(user):
+def get_message_stat0(user) -> Storage:
     stat = dbutil.get("user_stat:%s:message" % user)
     if stat != None:
         if stat.canceled_count is None:
@@ -559,7 +560,9 @@ def get_message_stat(user) -> Storage:
     check_param_user(user)
 
     value = _msg_stat_cache.get(user)
-    print("[get_message_stat] cacheValue=", value)
+
+    if _debug:
+        logging.debug("[get_message_stat] cacheValue=%s", value)
 
     if value == None:
         value = get_message_stat0(user)
