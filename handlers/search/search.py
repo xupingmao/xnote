@@ -12,6 +12,7 @@ import xconfig
 import xauth
 import xmanager
 import xtemplate
+import hooks
 from xutils import textutil, u
 from xutils import Storage
 from xutils import dateutil
@@ -47,7 +48,7 @@ def get_search_handler(search_type) -> Storage:
     return SEARCH_TYPE_DICT.get("default")
 
 # 注册到xtemplate的实现
-xtemplate.get_search_handler = get_search_handler
+hooks.get_search_handler = get_search_handler
 
 class BaseRule:
 

@@ -26,6 +26,7 @@ from xutils import Storage
 from xutils import textutil
 from six.moves.urllib.parse import quote
 import x_trace
+import hooks
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(
@@ -39,10 +40,6 @@ _mobile_name_dict = dict()
 _loader = None # type: XnoteLoader
 NAV_LIST = []
 LOAD_TIME = int(time.time())
-PLUGIN_DAO = xutils.DAO("plugin")
-
-def get_search_handler(search_type) -> Storage:
-    raise NotImplementedError("待search实现")
 
 def load_languages():
     """加载系统语言配置"""
@@ -284,7 +281,7 @@ def render_search(kw):
         return
 
     search_type = kw.get("search_type")
-    handler = get_search_handler(search_type)
+    handler = hooks.get_search_handler(search_type)
     if handler != None:
         kw["search_action"] = handler.action
         kw["search_placeholder"] = handler.placeholder
@@ -605,7 +602,7 @@ class BasePlugin:
         output = u("")
         try:
             self.page = self.get_page()
-            self.category_name = PLUGIN_DAO.get_category_name_by_code(
+            self.category_name = hooks.get_category_name_by_code(
                 self.category)
             output = self.handle(input) or u("")
             if self.get_format() == "text":

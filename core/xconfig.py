@@ -56,6 +56,7 @@ DEBUG = False
 DEBUG_HTML_BOX = False
 
 PORT = "1234"
+port = PORT
 SITE_HOME = None
 # 线程数
 MIN_THREADS = 20
