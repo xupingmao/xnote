@@ -229,6 +229,11 @@
     border-bottom: none;
 }
 
+.edit-box {
+    font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA;
+    font-size: 14px; 
+}
+
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 360px) {
