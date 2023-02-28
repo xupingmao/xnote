@@ -274,8 +274,8 @@ class FileSystemHandler:
         # Cache-Control、Content-Location、Date、ETag、Expires 和 Vary。
 
         if not xconfig.DEBUG:
-            # 强制缓存
-            web.header("Cache-Control", "max-age=31536000")
+            # 强制缓存，缓存30天
+            web.header("Cache-Control", "max-age=2592000")
         else:
             # 在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证 (协商缓存验证)。
             web.header("Cache-Control", "no-cache")
