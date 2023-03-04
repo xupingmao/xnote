@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-02-18 18:44:12
+@LastEditTime : 2023-03-04 10:49:28
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -294,6 +294,22 @@ def get_user_defined_tags(tag_list):
 def get_name_by_code(code):
     return static_code_map.get(code, code)
 
+def handle_tag_for_note(note_info):
+    note = note_info
+    if note.tags == None:
+        note.tags = []
+    note.tags_json = xutils.tojson(note.tags)
+    tag_info_list = []
+    for tag_code in note.tags:
+        tag_name = get_name_by_code(tag_code)
+        tag_info = Storage(code = tag_code, name = tag_name)
+        if tag_code != tag_name:
+            tag_info.url = "/note/tagname/%s" % tag_code
+        else:
+            tag_info.url = "/note/%s?tag=%s" % (note.parent_id, xutils.quote(tag_name))
+
+        tag_info_list.append(tag_info)
+    note.tag_info_list = tag_info_list
 
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_by_tag", list_by_tag)

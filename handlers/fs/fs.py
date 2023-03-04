@@ -256,6 +256,28 @@ class FileSystemHandler:
             yield data
         else:
             yield from self.read_all(path, blocksize)
+    
+    def set_cache_control(self, mtime, etag, expire_days=30):
+        # 如果Edge浏览器没有按照cache-control的建议执行，将浏览器设置重置
+        # 需要注意的是，服务器端在生成状态码为 304 的响应的时候，必须同时生成
+        # 以下会存在于对应的 200 响应中的首部：
+        # Cache-Control、Content-Location、Date、ETag、Expires 和 Vary。
+        # HTTP/1.0的缓存header是Expires
+        # HTTP/1.1的缓存首部是Cache-Control
+        expire_seconds = expire_days * 3600 * 24
+        expire_time = datetime.datetime.utcnow() + datetime.timedelta(days=expire_days)
+
+        web.header("Cache-Control", "max-age=%s" % expire_seconds)
+
+        # 在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证 (协商缓存验证)。
+        # web.header("Cache-Control", "no-cache")
+        
+        modified = time.gmtime(mtime)
+        web.header("Last-Modified", time.strftime("%a, %d %b %Y %H:%M:%S GMT", modified))
+        web.header("Expires", expire_time.strftime("%a, %d %b %Y %H:%M:%S GMT"))
+        web.header("Etag", etag)
+        web.header("Content-Location", web.ctx.fullpath)
+        web.header("Vary", "User-Agent")
 
     def read_file(self, path, content_type=None):
         environ = web.ctx.environ
@@ -267,26 +289,7 @@ class FileSystemHandler:
             web.ctx.status = "304 Not Modified"
             return b'' # 其实webpy已经通过yield空bytes来避免None
 
-
-        # 注意：Edge浏览器没有按照cache-control的建议执行
-        # 需要注意的是，服务器端在生成状态码为 304 的响应的时候，必须同时生成
-        # 以下会存在于对应的 200 响应中的首部：
-        # Cache-Control、Content-Location、Date、ETag、Expires 和 Vary。
-
-        if not xconfig.DEBUG:
-            # 强制缓存，缓存30天
-            web.header("Cache-Control", "max-age=2592000")
-        else:
-            # 在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证 (协商缓存验证)。
-            web.header("Cache-Control", "no-cache")
-            modified = time.gmtime(mtime)
-            web.header("Last-Modified", time.strftime("%a, %d %b %Y %H:%M:%S GMT", modified))
-        
-        expires = datetime.datetime.utcnow() + datetime.timedelta(days=30)
-        web.header("Expires", expires.strftime("%a, %d %b %Y %H:%M:%S GMT"))
-        web.header("Etag", etag)
-        web.header("Content-Location", web.ctx.fullpath)
-        web.header("Vary", "User-Agent")
+        self.set_cache_control(mtime, etag)
 
         if content_type != None:
             web.header("Content-Type", content_type)

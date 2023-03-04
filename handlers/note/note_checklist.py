@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-06-26 10:49:13
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-26 11:24:39
+@LastEditTime : 2023-03-04 10:50:10
 @FilePath     : /xnote/handlers/note/note_checklist.py
 @Description  : 清单列表
 """
@@ -15,6 +15,7 @@ from xutils.base import Storage
 
 from .dao import get_by_id as get_note_by_id
 from .dao import list_path
+from . import dao_tag
 
 
 class ChecklistSearchHandler:
@@ -30,6 +31,7 @@ class ChecklistSearchHandler:
         if note_detail.creator != user_name and not note_detail.is_public:
             raise Exception("无访问权限")
 
+        dao_tag.handle_tag_for_note(note_detail)
         kw = Storage()
         kw.search_type = "checklist"
         kw.search_ext_dict = dict(note_id = note_id)

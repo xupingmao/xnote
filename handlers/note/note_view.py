@@ -220,20 +220,7 @@ VIEW_FUNC_DICT = {
 
 def view_func_before(note, kw):
     kw.show_comment_edit = (xconfig.get_user_config(note.creator, "show_comment_edit") == "true")
-    if note.tags == None:
-        note.tags = []
-    note.tags_json = xutils.tojson(note.tags)
-    tag_info_list = []
-    for tag_code in note.tags:
-        tag_name = dao_tag.get_name_by_code(tag_code)
-        tag_info = Storage(code = tag_code, name = tag_name)
-        if tag_code != tag_name:
-            tag_info.url = "/note/tagname/%s" % tag_code
-        else:
-            tag_info.url = "/note/%s?tag=%s" % (note.parent_id, xutils.quote(tag_name))
-
-        tag_info_list.append(tag_info)
-    note.tag_info_list = tag_info_list
+    dao_tag.handle_tag_for_note(note)
 
 def find_note_for_view0(token, id, name):
     if token != "":

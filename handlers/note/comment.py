@@ -13,6 +13,8 @@ from xutils import Storage
 from xutils import quote
 from xutils import textutil
 from xtemplate import T
+from . import dao as note_dao
+from . import dao_comment
 
 from .dao_comment import search_comment
 
@@ -50,13 +52,13 @@ def process_comments(comments, show_note = False):
         comment.html = mark_text(comment.content)
 
         if show_note:
-            note = NOTE_DAO.get_by_id(comment.note_id, False)
+            note = note_dao.get_by_id(comment.note_id, False)
             if note != None:
                 comment.note_name = note.name
                 comment.note_url  = note.url
 
 def search_comment_summary(ctx):
-    comments = NOTE_DAO.search_comment(user_name = ctx.user_name, keywords = ctx.words)
+    comments = dao_comment.search_comment(user_name = ctx.user_name, keywords = ctx.words)
     if len(comments) > 0:
         result = Storage()
         result.name = "搜索到[%s]条评论" % len(comments)
@@ -71,7 +73,7 @@ def search_comment_detail(ctx):
     @return None
     """
     result = []
-    comments = NOTE_DAO.search_comment(user_name = ctx.user_name, keywords = ctx.words)
+    comments = dao_comment.search_comment(user_name = ctx.user_name, keywords = ctx.words)
 
     process_comments(comments, show_note = True)
 
@@ -157,7 +159,7 @@ class SaveCommentAjaxHandler:
         if content == "":
             return dict(code = "400", message = "content参数为空")
 
-        NOTE_DAO.save_comment(Storage(note_id = note_id, 
+        dao_comment.create_comment(Storage(note_id = note_id, 
             user = user, 
             type = type,
             content = content))
@@ -172,19 +174,19 @@ class DeleteCommentAjaxHandler:
     def POST(self):
         comment_id = xutils.get_argument("comment_id")
         user       = xauth.current_name()
-        comment    = NOTE_DAO.get_comment(comment_id)
+        comment    = dao_comment.get_comment(comment_id)
         if comment is None:
             return dict(success = False, message = "comment not found")
         if user != comment.user:
             return dict(success = False, message = "unauthorized")
-        NOTE_DAO.delete_comment(comment_id)
+        dao_comment.delete_comment(comment_id)
         return dict(success = True, code = "success")
 
 class MyCommentsHandler:
 
     @xauth.login_required()
     def GET(self):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/note/comment/mine")
         date = xutils.get_argument("date", "")
 
@@ -204,7 +206,7 @@ class CommentAjaxHandler:
         comment_id = xutils.get_argument("comment_id", "")
 
         if p == "edit":
-            comment = NOTE_DAO.get_comment(comment_id)
+            comment = dao_comment.get_comment(comment_id)
             if comment == None:
                 return "评论不存在"
             if comment.user != user_name:
@@ -212,14 +214,14 @@ class CommentAjaxHandler:
             return xtemplate.render("note/ajax/comment_edit_dialog.html", comment = comment)
         
         if p == "update":
-            comment = NOTE_DAO.get_comment(comment_id)
+            comment = dao_comment.get_comment(comment_id)
             if comment == None:
                 return dict(code = "404", message = "评论不存在")
             if comment.user != user_name:
                 return dict(code = "403", message = "无权限操作")
             content = xutils.get_argument("content", "")
             comment.content = content
-            NOTE_DAO.update_comment(comment)
+            dao_comment.update_comment(comment)
             return dict(code = "success")
         return "未知的操作"
 
