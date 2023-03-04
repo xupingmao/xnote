@@ -8,8 +8,9 @@
 @FilePath     : /xnote/xutils/db/dbutil_id_gen.py
 @Description  : id生成
 """
+import time
 import xutils
-from xutils.db.dbutil_base import get_write_lock, db_get, db_put, validate_none, timeseq
+from xutils.db import dbutil_base as base
 from xutils.db.encode import encode_id
 
 class IdGenerator:
@@ -23,8 +24,8 @@ class IdGenerator:
 
         max_id_key = "_max_id:" + self.table_name
 
-        with get_write_lock():
-            last_id = db_get(max_id_key) # type: int
+        with base.get_write_lock():
+            last_id = base.db_get(max_id_key) # type: int
             if last_id is None:
                 if start_id != None:
                     last_id = start_id
@@ -32,24 +33,67 @@ class IdGenerator:
                     last_id = 1
             else:
                 last_id += 1
-            db_put(max_id_key, last_id)
+            base.db_put(max_id_key, last_id)
             return encode_id(last_id)
 
     def create_new_id(self, id_type="uuid", id_value=None):
         if id_type == "uuid":
-            validate_none(id_value, "invalid id_value")
+            base.validate_none(id_value, "invalid id_value")
             return xutils.create_uuid()
 
         if id_type == "timeseq":
-            validate_none(id_value, "invalid id_value")
-            return timeseq()
+            base.validate_none(id_value, "invalid id_value")
+            return base.timeseq()
 
         if id_type == "auto_increment":
-            validate_none(id_value, "invalid id_value")
+            base.validate_none(id_value, "invalid id_value")
             return self.create_increment_id()
 
         if id_value != None:
-            validate_none(id_type, "invalid id_type")
+            base.validate_none(id_type, "invalid id_type")
             return id_value
 
         raise Exception("unknown id_type:%s" % id_type)
+
+
+
+class TimeSeqId:
+
+    """时间序列ID生成器,第1位数字用于标识ID版本,不保证定长"""
+
+    LAST_TIME_SEQ = -1
+
+    @classmethod
+    def create(cls, value):
+        """生成一个时间序列
+        @param {float|None} value 时间序列，单位是秒，可选
+        @return {string}    20位的时间序列
+        """
+        return cls.create_v0(value)
+
+    @classmethod
+    def create_v0(cls, value):
+        """v0版本是一个20位固定长度的数字(19位用于毫秒时间序列)的ID"""
+        if value != None:
+            error_msg = "expect <class 'float'> but see %r" % type(value)
+            assert isinstance(value, float), error_msg
+
+            value = int(value * 1000)
+            ts = "%020d" % value
+        else:
+            t = int(time.time() * 1000)
+            # 加锁防止并发生成一样的值
+            # 注意这里的锁是单个进程级别的,后续可以考虑分布式锁,在时间戳后面增加机器的编号用于防止重复
+            with base.get_write_lock("time_seq"):
+                if t == cls.LAST_TIME_SEQ:
+                    # 等于上次生成的值，说明太快了，sleep一下进行控速
+                    # print("too fast, sleep 0.001")
+                    # 如果不sleep，下次还可能会重复
+                    time.sleep(0.001)
+                    t = int(time.time() * 1000)
+                cls.LAST_TIME_SEQ = t
+                ts = "%020d" % t
+        
+        assert len(ts) == 20
+        assert ts[0] == "0" # 其他数字用于扩展操作
+        return ts
