@@ -38,8 +38,8 @@ def save_login_error_count(name, count):
 class LoginHandler:
 
     def POST(self):
-        name = xutils.get_argument("username", "")
-        pswd = xutils.get_argument("password", "")
+        name = xutils.get_argument_str("username", "")
+        pswd = xutils.get_argument_str("password", "")
         error = ""
         count = _login_failed_count.get(name, 0)
         name = name.strip()
@@ -81,8 +81,11 @@ class LoginHandler:
             if pswd == user["password"]:
                 save_login_info(name, "success")
 
-                xauth.login_user_by_name(name, login_ip=get_real_ip())
-
+                try:
+                    xauth.login_user_by_name(name, login_ip=get_real_ip())
+                except Exception as e:
+                    xutils.print_exc()
+                    return str(e)
                 if target == "":
                     raise web.found("/")
                 raise web.found(target)
