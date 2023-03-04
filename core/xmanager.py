@@ -640,11 +640,9 @@ class EventHandler:
 
 class SearchHandler(EventHandler):
 
-    pattern = None
+    pattern = re.compile(r".*")
 
-    def execute(self, ctx=None):
-        assert isinstance(self.pattern, re.Pattern)
-        
+    def execute(self, ctx=None):        
         try:
             matched = self.pattern.match(ctx.key)
             if not matched:
