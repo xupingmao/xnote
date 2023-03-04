@@ -31,12 +31,14 @@ import handlers.note.dao_share as dao_share
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
 
+
 @xmanager.listen("note.view")
 def visit_by_id(ctx):
-    note_id   = ctx.id
+    note_id = ctx.id
     user_name = ctx.user_name
     with dbutil.get_write_lock(user_name):
         note_dao.visit_note(user_name, note_id)
+
 
 def check_auth(file, user_name):
     if user_name == "admin":
@@ -49,7 +51,7 @@ def check_auth(file, user_name):
         return
 
     if user_name is None:
-        xauth.redirect_to_login();
+        xauth.redirect_to_login()
 
     # 笔记的分享
     if dao_share.get_share_to(user_name, file.id) != None:
@@ -58,33 +60,36 @@ def check_auth(file, user_name):
     # 笔记本的分享
     if dao_share.get_share_to(user_name, file.parent_id) != None:
         return
-    
+
     raise web.seeother("/unauthorized")
 
 
 def handle_note_recommend(kw, file, user_name):
-    ctx = Storage(id=file.id, name = file.name, creator = file.creator, 
-        content = file.content,
-        parent_id = file.parent_id,
-        result = [])
+    ctx = Storage(id=file.id, name=file.name, creator=file.creator,
+                  content=file.content,
+                  parent_id=file.parent_id,
+                  result=[])
     xmanager.fire("note.recommend", ctx)
     kw.recommended_notes = ctx.result
     kw.next_note = note_dao.find_next_note(file, user_name)
     kw.prev_note = note_dao.find_prev_note(file, user_name)
 
+
 def view_gallery_func(file, kw):
-    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator, str(file.parent_id), str(file.id))
+    fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator,
+                         str(file.parent_id), str(file.id))
     filelist = []
     # 处理相册
     # print(file)
     fpath = note_dao.get_gallery_path(file)
     # print(fpath)
     if fpath != None:
-        filelist = fsutil.list_files(fpath, webpath = True)
-    file.path     = fpath
+        filelist = fsutil.list_files(fpath, webpath=True)
+    file.path = fpath
     kw.show_aside = False
-    kw.path       = fpath
-    kw.filelist   = filelist
+    kw.path = fpath
+    kw.filelist = filelist
+
 
 def view_html_func(file, kw):
     """处理html/post等类型的文档"""
@@ -98,13 +103,14 @@ def view_html_func(file, kw):
     kw.show_recommend = True
     kw.show_pagination = False
 
+
 def view_or_edit_md_func(file, kw):
     device = xutils.get_argument("device", "desktop")
     kw.content = file.content
     kw.show_recommend = True
     kw.show_pagination = False
     kw.edit_token = textutil.create_uuid()
-    
+
     if kw.op == "edit":
         # 读取草稿
         draft_content = dao_draft.get_draft(file.id)
@@ -119,20 +125,23 @@ def view_or_edit_md_func(file, kw):
     if kw.op == "edit" and device == "mobile":
         # 强制使用移动端编辑器
         kw.template_name = "note/component/editor/markdown_edit.mobile.html"
-    
+
     if kw.op == "edit" and webutil.is_mobile_client():
         kw.show_nav = False
+
 
 def view_group_timeline_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
 
+
 def view_group_detail_func(file, kw):
     # 代码暂时不用
-    orderby   = kw.orderby
+    orderby = kw.orderby
     user_name = kw.user_name
-    page      = kw.page
+    page = kw.page
     # pagesize  = kw.pagesize
-    pagesize  = 1000
+    pagesize = 1000
+    is_public_page = kw.is_public_page
 
     dialog = xutils.get_argument("dialog", "false")
     q_tag = xutils.get_argument("tag", "")
@@ -142,40 +151,45 @@ def view_group_detail_func(file, kw):
         kw.show_recommend = False
         kw.template_name = "note/component/editor/markdown_edit.html"
         return
-    
+
     if orderby != "" and orderby != file.orderby:
-        note_dao.update_note(file.id, orderby = orderby)
-    
+        note_dao.update_note(file.id, orderby=orderby)
+
     if orderby == None or orderby == "":
         orderby = file.orderby
-    
+
     if orderby == None or orderby == "":
         orderby = "ctime_desc"
 
     q_tags = None
     if q_tag != "":
         q_tags = [q_tag]
-    
+
     offset = max(page-1, 0) * pagesize
-    files  = note_dao.list_by_parent(file.creator, file.id, 
-        offset, pagesize, orderby, tags = q_tags)
+    files = note_dao.list_by_parent(file.creator, parent_id=file.id,
+                                    offset=offset, limit=pagesize,
+                                    orderby=orderby, tags=q_tags)
+
+    if is_public_page:
+        files = list(filter(lambda x: x.is_public, files))
 
     for child in files:
         if child.type == "group":
             child.badge_info = child.children_count
 
-    amount             = file.size or 0
-    kw.content         = file.content
+    amount = file.size or 0
+    kw.content = file.content
     kw.show_search_div = True
-    kw.show_add_file   = True
-    kw.show_aside      = False
+    kw.show_add_file = True
+    kw.show_aside = False
     kw.show_pagination = True
-    kw.files           = files
+    kw.files = files
     kw.show_parent_link = False
-    kw.page_max        = math.ceil(amount/pagesize)
-    kw.parent_id  = file.id
+    kw.page_max = math.ceil(amount/pagesize)
+    kw.parent_id = file.id
     kw.q_tag = q_tag
-    kw.tag_meta_list = dao_tag.list_tag_meta(user_name = user_name, group_id = file.id, tag_type = "note")
+    kw.tag_meta_list = dao_tag.list_tag_meta(
+        user_name=user_name, group_id=file.id, tag_type="note")
     kw.show_orderby = True
     kw.orderby = orderby
 
@@ -185,6 +199,7 @@ def view_group_detail_func(file, kw):
     else:
         kw.template_name = "note/page/detail/group_detail.html"
 
+
 def view_checklist_func(note, kw):
     kw.show_aside = False
     kw.show_pagination = False
@@ -193,34 +208,40 @@ def view_checklist_func(note, kw):
     kw.op = "view"
     kw.template_name = "note/page/detail/checklist_detail.html"
     kw.search_type = "checklist"
-    kw.search_ext_dict = dict(note_id = note.id)
+    kw.search_ext_dict = dict(note_id=note.id)
+
 
 def view_table_func(note, kw):
     kw.show_aside = False
     kw.template_name = "note/page/detail/table_detail.html"
+
 
 def view_form_func(note, kw):
     # 表单支持脚本处理，可以实现一些标准化的表单工具
     kw.template_name = "note/page/detail/form_detail.html"
     kw.file_id = note.id
 
+
 VIEW_FUNC_DICT = {
     "group": view_group_detail_func,
-    "md"  : view_or_edit_md_func,
+    "md": view_or_edit_md_func,
     "text": view_or_edit_md_func,
     "memo": view_or_edit_md_func,
-    "log" : view_or_edit_md_func,
+    "log": view_or_edit_md_func,
     "list": view_checklist_func,
-    "csv" : view_table_func,
+    "csv": view_table_func,
     "gallery": view_gallery_func,
     "html": view_html_func,
     "post": view_html_func,
     "form": view_form_func,
 }
 
+
 def view_func_before(note, kw):
-    kw.show_comment_edit = (xconfig.get_user_config(note.creator, "show_comment_edit") == "true")
+    kw.show_comment_edit = (xconfig.get_user_config(
+        note.creator, "show_comment_edit") == "true")
     dao_tag.handle_tag_for_note(note)
+
 
 def find_note_for_view0(token, id, name):
     if token != "":
@@ -232,6 +253,7 @@ def find_note_for_view0(token, id, name):
 
     raise HTTPError(504)
 
+
 def find_note_for_view(token, id, name):
     note = find_note_for_view0(token, id, name)
     if note != None:
@@ -240,21 +262,23 @@ def find_note_for_view(token, id, name):
         note.adate = note.atime.split(" ")[0]
     return note
 
+
 def create_view_kw():
     kw = Storage()
-    kw.show_left   = False
+    kw.show_left = False
     kw.show_groups = False
-    kw.show_aside  = True
-    kw.groups      = []
-    kw.files       = []
-    kw.show_mdate  = False
+    kw.show_aside = True
+    kw.groups = []
+    kw.files = []
+    kw.show_mdate = False
     kw.recommended_notes = []
-    kw.show_add_file     = False
-    kw.template_name     = "note/page/detail/note_detail.html"
-    kw.search_type       = "note"
+    kw.show_add_file = False
+    kw.template_name = "note/page/detail/note_detail.html"
+    kw.search_type = "note"
     kw.comment_source_class = "hide"
 
     return kw
+
 
 class ViewHandler:
 
@@ -263,7 +287,7 @@ class ViewHandler:
         can_edit = kw.can_edit
         is_valid_type = (file.type != "group") and (file.parent_id != "0")
         kw.show_contents_btn = is_valid_type and can_edit
-    
+
     def handle_pathlist(self, file, is_public_page):
         if is_public_page:
             root = Storage()
@@ -273,27 +297,27 @@ class ViewHandler:
         else:
             return note_dao.list_path(file)
 
-    @xutils.timeit(name = "Note.View", logfile = True)
-    def GET(self, op, id = None, is_public_page = False):
+    @xutils.timeit(name="Note.View", logfile=True)
+    def GET(self, op, id=None, is_public_page=False):
         if id is None:
             id = xutils.get_argument("id", "")
-        name          = xutils.get_argument("name", "")
-        page          = xutils.get_argument("page", 1, type=int)
-        pagesize      = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
-        orderby       = xutils.get_argument("orderby", "")
-        is_iframe     = xutils.get_argument("is_iframe", "false")
-        token         = xutils.get_argument("token", "")
-        user_name     = xauth.current_name()
-        skey          = xutils.get_argument("skey")
+        name = xutils.get_argument("name", "")
+        page = xutils.get_argument("page", 1, type=int)
+        pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
+        orderby = xutils.get_argument("orderby", "")
+        is_iframe = xutils.get_argument("is_iframe", "false")
+        token = xutils.get_argument("token", "")
+        user_name = xauth.current_name()
+        skey = xutils.get_argument("skey")
 
         kw = create_view_kw()
 
-        kw.op          = op
-        kw.user_name   = user_name
-        kw.page        = page
-        kw.orderby     = orderby
-        kw.pagesize    = pagesize
-        kw.page_url    = "/note/view?id=%s&orderby=%s&page=" % (id, orderby)
+        kw.op = op
+        kw.user_name = user_name
+        kw.page = page
+        kw.orderby = orderby
+        kw.pagesize = pagesize
+        kw.page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby)
         kw.is_public_page = is_public_page
 
         if id == "0":
@@ -303,14 +327,14 @@ class ViewHandler:
             try:
                 file = note_dao.get_or_create_note(skey, user_name)
             except Exception as e:
-                return xtemplate.render("error.html", error = e)
+                return xtemplate.render("error.html", error=e)
         else:
             # 回收站的笔记也能看到
             file = find_note_for_view(token, id, name)
 
         if file is None:
             if id != "":
-                event = Storage(id = id, user_name = user_name)
+                event = Storage(id=id, user_name=user_name)
                 xmanager.fire("note.notfound", event)
             raise web.notfound()
 
@@ -324,7 +348,7 @@ class ViewHandler:
         # 定义一些变量
         recent_created = []
 
-        event_ctx = Storage(id = file.id, user_name = user_name)
+        event_ctx = Storage(id=file.id, user_name=user_name)
         xmanager.fire("note.view", event_ctx)
 
         # 通用的预处理
@@ -349,7 +373,7 @@ class ViewHandler:
         kw.file = file
         kw.can_edit = can_edit
         kw.get_tag_name_by_code = dao_tag.get_name_by_code
-        
+
         # 处理目录按钮的展示
         self.handle_contents_btn(kw)
 
@@ -362,6 +386,7 @@ class ViewHandler:
 
         return xtemplate.render_by_ua(template_name, **kw)
 
+
 class ViewByIdHandler(ViewHandler):
 
     def GET(self, id):
@@ -370,23 +395,27 @@ class ViewByIdHandler(ViewHandler):
     def POST(self, id):
         return ViewHandler.GET(self, "view", id)
 
+
 class PrintHandler:
 
     @xauth.login_required()
     def GET(self):
-        id        = xutils.get_argument("id")
-        file      = xutils.call("note.get_by_id", id)
+        id = xutils.get_argument("id")
+        file = xutils.call("note.get_by_id", id)
         user_name = xauth.current_name()
         check_auth(file, user_name)
-        return xtemplate.render("note/page/print.html", show_menu = False, note = file)
+        return xtemplate.render("note/page/print.html", show_menu=False, note=file)
 
-def result(success = True, msg=None):
+
+def result(success=True, msg=None):
     return {"success": success, "result": None, "msg": msg}
+
 
 def get_link(filename, webpath):
     if xutils.is_img_file(filename):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
+
 
 class MarkHandler:
 
@@ -395,7 +424,8 @@ class MarkHandler:
         id = xutils.get_argument("id")
         db = xtables.get_file_table()
         db.update(is_marked=1, where=dict(id=id))
-        raise web.seeother("/note/view?id=%s"%id)
+        raise web.seeother("/note/view?id=%s" % id)
+
 
 class UnmarkHandler:
 
@@ -404,7 +434,8 @@ class UnmarkHandler:
         id = xutils.get_argument("id")
         db = xtables.get_file_table()
         db.update(is_marked=0, where=dict(id=id))
-        raise web.seeother("/note/view?id=%s"%id)
+        raise web.seeother("/note/view?id=%s" % id)
+
 
 class NoteHistoryHandler:
 
@@ -417,10 +448,11 @@ class NoteHistoryHandler:
             history_list = []
         else:
             history_list = note_dao.list_history(note_id)
-        return xtemplate.render("note/page/history_list.html", 
-            current_note = note,
-            history_list = history_list,
-            show_aside = True)
+        return xtemplate.render("note/page/history_list.html",
+                                current_note=note,
+                                history_list=history_list,
+                                show_aside=True)
+
 
 class HistoryViewHandler:
 
@@ -428,7 +460,7 @@ class HistoryViewHandler:
     def GET(self):
         note_id = xutils.get_argument("id")
         version = xutils.get_argument("version")
-        
+
         creator = xauth.current_name()
         note = note_dao.get_by_id_creator(note_id, creator)
         content = ""
@@ -436,33 +468,34 @@ class HistoryViewHandler:
             history = xutils.call("note.get_history", note_id, version)
             if history != None:
                 content = history.content
-        return dict(code = "success", data = content)
+        return dict(code="success", data=content)
 
 
 class QueryHandler:
 
     @xauth.login_required("admin")
-    def GET(self, action = ""):
+    def GET(self, action=""):
         if action == "get_by_id":
             id = xutils.get_argument("id")
-            return dict(code = "success", data = note_dao.get_by_id(id))
+            return dict(code="success", data=note_dao.get_by_id(id))
         if action == "get_by_name":
             name = xutils.get_argument("name")
-            return dict(code = "success", data = note_dao.get_by_name(xauth.current_name(), name))
-        return dict(code="fail", message = "unknown action")
+            return dict(code="success", data=note_dao.get_by_name(xauth.current_name(), name))
+        return dict(code="fail", message="unknown action")
+
 
 class GetDialogHandler:
 
     def get_group_option_dialog(self, kw):
         note_id = xutils.get_argument_str("note_id", "")
-        file    = NoteDao.get_by_id(note_id)
+        file = NoteDao.get_by_id(note_id)
         if file != None and file.children_count == 0:
             kw.show_delete_btn = True
         kw.file = file
 
     def get_share_group_dialog(self, kw):
         note_id = xutils.get_argument_str("note_id", "")
-        file    = note_dao.get_by_id(note_id)
+        file = note_dao.get_by_id(note_id)
         kw.file = file
         kw.share_to_list = []
 
@@ -471,11 +504,11 @@ class GetDialogHandler:
 
     def get_share_note_dialog(self, kw):
         note_id = xutils.get_argument_str("note_id")
-        file    = NoteDao.get_by_id(note_id)
+        file = NoteDao.get_by_id(note_id)
         kw.file = file
 
     @xauth.login_required()
-    def GET(self, name = ""):
+    def GET(self, name=""):
         kw = Storage()
 
         if name == "group_option_dialog":
@@ -492,24 +525,23 @@ class GetDialogHandler:
 
 class ViewPublicHandler:
     """查看公开的笔记"""
-    
+
     def GET(self):
         id = xutils.get_argument("id", "")
         return ViewHandler().GET("view", id, is_public_page=True)
 
 
 xurls = (
-    r"/note/(edit|view)"   , ViewHandler,
-    r"/note/print"         , PrintHandler,
-    r"/note/(\d+)"         , ViewByIdHandler,
+    r"/note/(edit|view)", ViewHandler,
+    r"/note/print", PrintHandler,
+    r"/note/(\d+)", ViewByIdHandler,
     r"/note/view/public", ViewPublicHandler,
     r"/note/view/([\w\-]+)", ViewByIdHandler,
-    r"/note/history"       , NoteHistoryHandler,
-    r"/note/history_view"  , HistoryViewHandler,
-    r"/note/query/(\w+)"   , QueryHandler,
-    r"/note/ajax/(.+)"     , GetDialogHandler,
-    r"/file/mark"          , MarkHandler,
-    r"/file/unmark"        , UnmarkHandler,
-    r"/file/markdown"      , ViewHandler
+    r"/note/history", NoteHistoryHandler,
+    r"/note/history_view", HistoryViewHandler,
+    r"/note/query/(\w+)", QueryHandler,
+    r"/note/ajax/(.+)", GetDialogHandler,
+    r"/file/mark", MarkHandler,
+    r"/file/unmark", UnmarkHandler,
+    r"/file/markdown", ViewHandler
 )
-
