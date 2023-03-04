@@ -200,8 +200,8 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
     session_id_list = list_user_session_id(user_name)
 
     if len(session_id_list) > MAX_SESSION_SIZE:
-        # TODO 踢出最早的登录
-        raise Exception("用户登录设备过多: %s" % user_name)
+        # 踢出最早的登录
+        del session_id_list[0]
 
     # 保存用户和会话关系
     session_id_list.append(session_id)

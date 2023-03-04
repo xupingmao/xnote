@@ -278,7 +278,8 @@ class FileSystemHandler:
         web.header("Expires", expire_time.strftime("%a, %d %b %Y %H:%M:%S GMT"))
         web.header("Etag", etag)
         web.header("Content-Location", web.ctx.fullpath)
-        web.header("Vary", "User-Agent")
+        web.header("Vary", "Accept-Encoding") # 请求编码变化时缓存失效
+        # web.header("Vary", "User-Agent") # User-Agent变化时缓存失效
 
     def read_file(self, path, content_type=None):
         environ = web.ctx.environ
