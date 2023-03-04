@@ -1,4 +1,4 @@
-<!-- 暂时没有使用了 @see group_select_tree -->
+<!-- 笔记本设置的移动功能 -->
 <div class="note-group-select col-md-12 scroll-y">
     
     <div class="group-select-search">
@@ -11,15 +11,13 @@
     <div class="book-item">
         <a class="move-link" data-id="{{parent.parent_id}}">
             <span class="tag system">系统</span>
-            <i class="fa fa-folder black"></i>                
             <span>上级目录</span>
         </a>
     </div>
-
+    
     <div class="book-item">
         <a class="move-link" data-id="0">
             <span class="tag system">系统</span>
-            <i class="fa fa-folder black"></i>                
             <span>根目录</span>
         </a>
         <button class="float-right do-move-btn btn-default" data-id="0" onclick="xnote.handleMoveTo(this)">移到这里</button>

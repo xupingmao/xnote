@@ -18,6 +18,7 @@ xnote.onMoveNoteClick = function (target) {
     var noteId = $(target).attr("data-id");
     console.log("noteId:", noteId);
 
+    // 移动笔记-树视图
     $.get("/note/group/select?view=tree&id="+noteId, function (html) {
         xnote.openDialog("移动笔记", html);
     });

@@ -514,15 +514,14 @@ class GroupSelectHandler:
             user_name, orderby="default", parent_id=q_parent_id)
 
         parent = note_dao.get_by_id_creator(parent_id, user_name)
-
-        return xtemplate.render(template,
-                                id=id,
-                                groups_tuple=groups_tuple,
-                                callback=callback,
-                                parent_id=parent_id,
-                                parent=parent,
-                                files=files)
-
+        kw = Storage()
+        kw.id = id
+        kw.groups_tuple = groups_tuple
+        kw.callback = callback
+        kw.parent_id = parent_id
+        kw.parent = parent
+        kw.files = files
+        return xtemplate.render(template, **kw)
 
 class BaseListHandler:
 
