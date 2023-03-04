@@ -269,6 +269,7 @@ class FileSystemHandler:
 
         web.header("Cache-Control", "max-age=%s" % expire_seconds)
 
+        # DEBUG模式会刷新ts
         # 在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证 (协商缓存验证)。
         # web.header("Cache-Control", "no-cache")
         
@@ -510,7 +511,7 @@ class ListAjaxHandler:
     @xauth.login_required("admin")
     def GET(self):
         fpath = xutils.get_argument("fpath")
-        show_parent = xutils.get_argument("show_parent")
+        show_parent = xutils.get_argument_str("show_parent")
 
         if fpath == "" or fpath == None:
             return dict(code = "400", message = u"fpath参数为空")
@@ -520,7 +521,7 @@ class ListAjaxHandler:
 
         files = list_file_objects(fpath)
         if show_parent == "true":
-            files.insert(0, fs_helper.get_parent_file_object(fpath))
+            files.insert(0, fs_helper.get_parent_file_object(fpath, "[上级目录]"))
 
         return dict(code = "success", fpath = fpath, data = files)
 

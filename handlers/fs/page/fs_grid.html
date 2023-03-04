@@ -81,18 +81,6 @@
     {% include fs/component/options/fs_options.html %}
 
     <div class="file-list">
-        
-        {% if parent_path %}
-        <div class="gallery-item">
-            <div class="checkbox-box">
-            </div>
-            <div class="icon-box">
-                <img class="fs-icon" src="/static/image/folder2.png">
-            </div>
-            <a href="/fs/{{parent_path}}?mode=grid">上级目录</a>
-        </div>
-        {% end %}
-
         {% for item in filelist %}
             {# 隐藏文件 #}
             {% if item.name == "" %}
