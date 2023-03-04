@@ -619,11 +619,13 @@ def init():
     global INVALID_NAMES
     global USER_CONFIG_PROP
     global session_db
+    global MAX_SESSION_SIZE
 
     session_db = dbutil.get_hash_table("session")
 
     INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
     USER_CONFIG_PROP = fsutil.load_prop_config("./config/user/user_config.default.properties")
+    MAX_SESSION_SIZE = xconfig.get_system_config("auth_max_session_size")
 
     BUILTIN_USER_DICT = dict()
     _create_temp_user(BUILTIN_USER_DICT, "admin")
