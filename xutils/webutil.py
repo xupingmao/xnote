@@ -84,10 +84,22 @@ def get_argument(key, default_value=None, type = None, strip=False):
     
     return value
 
-def get_argument_str(key: str, default_value = ""):
+def get_argument_str(key: str, default_value = "") -> str:
     """获取字符串参数"""
     value = get_argument(key, default_value, type = str, strip = True)
     assert isinstance(value, str)
+    return value
+
+def get_argument_int(key: str, default_value = 0) -> int:
+    """获取int参数"""
+    value = get_argument(key, default_value=default_value, type = int, strip = True)
+    assert isinstance(value, int)
+    return value
+
+def get_argument_bool(key: str, default_value = False) -> bool:
+    """获取bool参数"""
+    value = get_argument(key, default_value=default_value, type = bool, strip = True)
+    assert isinstance(value, bool)
     return value
 
 def get_client_user_agent():

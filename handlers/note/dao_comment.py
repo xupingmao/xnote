@@ -64,7 +64,8 @@ def count_comments_by_user(*args, **kw):
     return handle_comments_by_user("count", *args, **kw)
 
 
-def get_comment(comment_id):
+def get_comment(comment_id:str):
+    """通过comment_id实际上是key)获取comment"""
     value = _comment_db.get_by_key(comment_id)
     if value != None:
         value.id = comment_id
@@ -75,7 +76,9 @@ def check_comment(comment):
     assert comment != None, "comment is None"
     assert comment.user != None, "comment.user is None"
     assert comment.type in (None, "list_item"), "comment.type is invalid"
-
+    assert comment.note_id != None
+    assert comment.content != None
+    assert comment.content != ""
 
 def create_comment(comment):
     check_comment(comment)

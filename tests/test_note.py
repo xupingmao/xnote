@@ -20,6 +20,9 @@ except ImportError:
 import xauth
 
 from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
+from handlers.note import dao_comment
+from handlers.note import dao_delete
+
 from xutils import Storage
 from xutils import textutil
 
@@ -39,7 +42,7 @@ def get_default_group_id():
         return note.id
     return create_note_for_test("group", name)
 
-def create_note_for_test(type, name, *, content = "", tags=None):
+def create_note_for_test(type, name, *, content = "", tags=None) -> str:
     assert type != None, "type cannot be None"
     assert name != None, "name cannot be None"
     if tags != None:
@@ -573,3 +576,22 @@ class TestMain(BaseTestCase):
         self.assertEqual(recent_notes[0].badge_info, "102")
 
 
+    def test_comment_search(self):
+        note_id = create_note_for_test("list", "check-list-test")
+        comment = Storage(user = xauth.current_name_str(), type = "list_item")
+        comment.note_id = note_id
+        comment.content = "test comment search"
+
+        dao_comment.create_comment(comment)
+        self.check_200("/note/comments?note_id=%s&list_type=search&key=test&resp_type=html&page=1" % note_id)
+
+        comment_list = self.json_request("/note/comments?note_id=%s&list_type=search&key=test&page=1" % note_id)
+        assert isinstance(comment_list, list)
+        assert len(comment_list) > 0
+
+        # 删除comment
+        for item in comment_list:
+            dao_comment.delete_comment(item["id"])
+        
+        dao_delete.delete_note(note_id)
+        

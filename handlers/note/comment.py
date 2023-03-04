@@ -109,17 +109,17 @@ class CommentListAjaxHandler:
         list_type = xutils.get_argument("list_type")
         resp_type = xutils.get_argument("resp_type")
         list_date = xutils.get_argument("list_date")
-        show_note = xutils.get_argument("show_note", type=bool)
-        show_edit = xutils.get_argument("show_edit", type=bool)
-        page = xutils.get_argument("page", 1, type = int)
+        show_note = xutils.get_argument_bool("show_note")
+        show_edit = xutils.get_argument_bool("show_edit")
+        page = xutils.get_argument_int("page", 1)
         page_max  = 1
         page_size = xconfig.PAGE_SIZE
         user_name = xauth.current_name()
         offset = max(0, page-1) * xconfig.PAGE_SIZE
 
         if list_type == "user":
-            count  = NOTE_DAO.count_comment_by_user(user_name, list_date)
-            comments = NOTE_DAO.list_comments_by_user(user_name, 
+            count  = dao_comment.count_comments_by_user(user_name, list_date)
+            comments = dao_comment.list_comments_by_user(user_name, 
                 date = list_date, offset = offset, 
                 limit = page_size)
         elif list_type == "search":
@@ -127,8 +127,8 @@ class CommentListAjaxHandler:
             count = len(comments)
         else:
             assert note_id != None and note_id != ""
-            comments  = NOTE_DAO.list_comments(note_id, offset = offset, limit = page_size)
-            count = NOTE_DAO.count_comment_by_note(note_id)
+            comments  = dao_comment.list_comments(note_id, offset = offset, limit = page_size)
+            count = dao_comment.count_comment_by_note(note_id)
         
         page_max = get_page_max(count)
 
