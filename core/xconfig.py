@@ -38,7 +38,7 @@ from xutils.base import Storage
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
-__copyright__ = "(C) 2016-2021 xupingmao. GNU GPL 3."
+__copyright__ = "(C) 2016-2023 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 # 系统错误信息
@@ -243,6 +243,7 @@ def init(boot_config_file=None, boot_config_kw = None):
         init_boot_config(boot_config_file, boot_config_kw=boot_config_kw)
 
     path = get_system_config("data")
+    assert isinstance(path, str)
     DATA_PATH = os.path.abspath(path)
     DATA_DIR = os.path.abspath(path)
 
@@ -299,7 +300,6 @@ def init(boot_config_file=None, boot_config_kw = None):
     # 初始化系统版本配置
     init_system_version()
 
-    from xutils import fsutil
     PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl.py")
 
     RUNTIME_ID = textutil.generate_uuid()

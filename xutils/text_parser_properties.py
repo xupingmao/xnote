@@ -14,15 +14,12 @@ parse_prop_text(text:str, ret_type="dict") -> {dict|list}
 
 """
 
-def parse_prop_text(text, ret_type = "dict"):
+def parse_prop_text_to_pairs(text: str) -> list:
     """解析key/value格式的配置文本
     @param {string} text 配置文本内容
     @param {string} ret_type 返回的格式，包含list, dict
     """
-    if ret_type == 'dict':
-        config = dict()
-    else:
-        config = []
+    config = []
 
     if text == None or text == "":
         return config
@@ -49,15 +46,24 @@ def parse_prop_text(text, ret_type = "dict"):
                 value = value.split("#", 1)[0]
                 break
 
-        if key is None:
+        if key is None or value is None:
             continue
 
         key = key.strip()
         value = value.strip()
 
-        if ret_type == 'dict':
-            config[key] = value
-        else:
-            config.append(dict(key=key, value=value))
+        config.append(dict(key=key, value=value))
 
     return config
+
+def parse_prop_text(text, ret_type = "dict"):
+    assert ret_type in ("dict", "list")
+    pairs = parse_prop_text_to_pairs(text)
+    if ret_type == "dict":
+        result = dict()
+        for item in pairs:
+            key = item.get("key")
+            value = item.get("value")
+            result[key] = value
+        return result
+    return pairs
