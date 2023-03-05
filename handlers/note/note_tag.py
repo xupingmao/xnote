@@ -56,13 +56,11 @@ class TagNameHandler:
 
     def GET(self, tagname):
         tagname = xutils.unquote(tagname)
-        page = xutils.get_argument("page", 1, type=int)
-        limit = xutils.get_argument("limit", xconfig.PAGE_SIZE, type=int)
-
-        assert isinstance(page, int)
-        assert isinstance(limit, int)
+        page = xutils.get_argument_int("page", 1)
+        limit = xutils.get_argument_int("limit", xconfig.PAGE_SIZE)
 
         offset = (page-1) * limit
+        assert offset >= 0
 
         if xauth.has_login():
             user_name = xauth.get_current_name()
@@ -76,6 +74,7 @@ class TagNameHandler:
 
         kw = Storage()
         kw.tagname = dao_tag.get_name_by_code(tagname)
+        kw.tagcode = tagname
         kw.tags = tagname
         kw.files = files
         kw.page = page

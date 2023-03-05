@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-04 10:49:28
+@LastEditTime : 2023-03-05 20:31:12
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -190,7 +190,7 @@ def delete_tags(creator, note_id):
     tag_bind_db.delete_by_id(note_id, user_name=creator)
 
 
-def list_by_tag(user, tagname):
+def list_by_tag(user, tagname, limit = 1000):
     # TODO 优化查询性能
     if user is None:
         user = "public"
@@ -200,7 +200,7 @@ def list_by_tag(user, tagname):
             return False
         return tagname in value.tags
 
-    tags = tag_bind_db.list(filter_func=list_func, user_name=user)
+    tags = tag_bind_db.list(filter_func=list_func, user_name=user, limit = limit)
     files = []
     for tag in tags:
         note = note_dao.get_by_id(tag.note_id)
