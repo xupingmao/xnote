@@ -1,7 +1,8 @@
 {% set data_list = [
-    Storage(name = "基本设置", url = "/system/settings"),
-    Storage(name = "账号设置", url = "/user/info"),
-    Storage(name = "搜索设置", url = "/system/settings?category=search"),
+    Storage(name = "基本设置", url = "/system/settings", need_admin = False),
+    Storage(name = "账号设置", url = "/user/info", need_admin = False),
+    Storage(name = "搜索设置", url = "/system/settings?category=search", need_admin = False),
+    Storage(name = "管理员设置", url = "/system/settings?category=admin", need_admin = True),
 ] %}
 
 {% init show_app_index_icon = False %}
@@ -10,6 +11,9 @@
 <div class="card list">
 
     {% for item in data_list %}
+        {% if item.need_admin and not _is_admin %}
+            {% continue %}
+        {% end %}
         <a class="list-link" href="{{item.url}}">
             <span>{{item.name}}</span>
             <div class="float-right">

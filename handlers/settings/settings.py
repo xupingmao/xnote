@@ -17,7 +17,6 @@ import xconfig
 import xauth
 import xtables
 import xmanager
-from logging.handlers import TimedRotatingFileHandler
 from xutils import sqlite3, Storage, cacheutil
 from xtemplate import T
 from xutils import logutil
@@ -214,7 +213,7 @@ class ConfigHandler:
     @xauth.login_required()
     def POST(self):
         key   = xutils.get_argument("key")
-        value = xutils.get_argument("value")
+        value = xutils.get_argument_str("value", "")
         type  = xutils.get_argument("type")
         p     = xutils.get_argument("p")
 
