@@ -19,6 +19,7 @@ import xutils.six as six
 import socket
 import io
 import gzip
+import logging
 
 from xutils.imports import try_decode, quote
 from xutils.base import print_exc
@@ -241,17 +242,13 @@ def http_get(url, charset=None, params = None, skip_empty_value=False):
             out.append(chunk)
             readsize += len(chunk)
             chunk = conn.read(bufsize)
-        print("get %s bytes" % readsize)
+        logging.info("get %s bytes", readsize)
         bytes = b''.join(out)
         if charset:
             return codecs.decode(bytes, charset)
         else:
             return try_decode(bytes)
     finally:
-        try:
-            conn.fp._sock.recv = None
-        except:
-            print_exc()
         conn.close()
 
 def http_post(url, body='', charset='utf-8'):

@@ -62,7 +62,6 @@ class Storage(dict):
 
 def print_exc():
     """打印系统异常堆栈"""
-    ex_type, ex, tb = sys.exc_info()
     exc_info = traceback.format_exc()
     print(exc_info)
     return exc_info
