@@ -12,7 +12,6 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' 
 
 
 COPY . /home
-RUN cd /home
 
-CMD ["python", "sentinel.py", "app.py", "--config", "config/boot/boot.sae.properties"]
+CMD ["python", "/home/sentinel.py", "/home/app.py", "--config", "/home/config/boot/boot.sae.properties"]
 
