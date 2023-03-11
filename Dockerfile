@@ -11,7 +11,8 @@ RUN pip install -r requirements.txt -i https://pypi.douban.com/simple
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
 
-COPY . .
+COPY . /home
+RUN cd /home
 
 CMD ["python", "sentinel.py", "app.py", "--config", "config/boot/boot.sae.properties"]
 
