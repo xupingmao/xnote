@@ -13,6 +13,7 @@ import xauth
 import xmanager
 import xtemplate
 import hooks
+import handlers.note.dao as note_dao
 from xutils import textutil, u
 from xutils import Storage
 from xutils import dateutil
@@ -63,6 +64,8 @@ class SearchContext:
         # 输入的文本
         self.key              = ''
         self.input_text       = ''
+        self.words = [] # 根据key分割的token
+        self.category = "" # 搜索类型
         # 正则匹配的分组
         self.groups           = []
         self.user_name        = ''
@@ -84,24 +87,28 @@ class SearchContext:
         self.notes    = [] # 笔记
         self.files    = [] # 文件
 
+        # 分页信息
+        self.offset = 1
+        self.limit = 20
+
     def join_as_files(self):
         return self.commands + self.tools + self.dicts + self.messages + self.notes + self.files
 
 def fill_note_info(files):
     for file in files:
         if file.category == "note":
-            parent = NOTE_DAO.get_by_id(file.parent_id, file.creator)
+            parent = note_dao.get_by_id(file.parent_id, file.creator)
             if parent is not None:
                 file.parent_name = parent.name
             file.show_move = True
             file.badge_info = "热度:%s" % file.hot_index
 
 def log_search_history(user, key, category = "default", cost_time = 0):
-    NOTE_DAO.add_search_history(user, key, category, cost_time)
+    note_dao.add_search_history(user, key, category, cost_time)
 
 @xutils.timeit(name = "Search.ListRecent", logargs = True, logfile = True)
 def list_search_history(user_name, limit = -1):
-    raw_history_list = NOTE_DAO.list_search_history(user_name)
+    raw_history_list = note_dao.list_search_history(user_name)
     history_list = []
 
     for item in raw_history_list:
@@ -214,8 +221,8 @@ class SearchHandler:
     @mem_util.log_mem_info_deco("do_search_with_profile", log_args = True)
     def do_search_with_profile(self, page_ctx, key, offset, limit):
         user_name = xauth.current_name()
-        category  = xutils.get_argument("category", "")
-        search_type = xutils.get_argument("search_type", "")
+        category  = xutils.get_argument_str("category", "")
+        search_type = xutils.get_argument_str("search_type", "")
 
         start_time = time.time()
 
@@ -223,7 +230,7 @@ class SearchHandler:
 
         cost_time = int((time.time() - start_time) * 1000)
 
-        if category is None:
+        if category == "":
             category = search_type
 
         log_search_history(user_name, key, category, cost_time)
@@ -243,14 +250,14 @@ class SearchHandler:
         user_name = xauth.get_current_name()
         parent_id = xutils.get_argument("parent_id")
         words = textutil.split_words(key)
-        notes = NOTE_DAO.search_name(words, user_name, parent_id = parent_id)
+        notes = note_dao.search_name(words, user_name, parent_id = parent_id)
         for note in notes:
             note.category = "note"
             note.mdate = dateutil.format_date(note.mtime)
         fill_note_info(notes)
 
         if parent_id != "" and parent_id != None:
-            ctx.parent_note = NOTE_DAO.get_by_id(parent_id)
+            ctx.parent_note = note_dao.get_by_id(parent_id)
 
         offset = ctx.offset
         limit  = ctx.limit
@@ -305,10 +312,10 @@ class SearchHandler:
     def GET(self, path_key = None):
         """search files by name and content"""
         RuleManager.load_rules()
-        key         = xutils.get_argument("key", "")
+        key         = xutils.get_argument_str("key", "")
         title       = xutils.get_argument("title", "")
         category    = xutils.get_argument("category", "default")
-        page        = xutils.get_argument("page", 1, type = int)
+        page        = xutils.get_argument_int("page", 1)
         search_type = xutils.get_argument("search_type", "")
         user_name   = xauth.get_current_name()
         page_url    =  "/search/search?key={key}&category={category}&search_type={search_type}&page=".format(**locals())
@@ -365,11 +372,11 @@ class SearchHistoryHandler:
 
     @xauth.login_required()
     def GET(self):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/search/history")
-        NOTE_DAO.expire_search_history(user_name)
+        note_dao.expire_search_history(user_name)
 
-        raw_history_list = NOTE_DAO.list_search_history(user_name)
+        raw_history_list = note_dao.list_search_history(user_name)
 
         kw = Storage()
         kw.show_aside = False
@@ -386,7 +393,7 @@ class SearchHistoryHandler:
         p = xutils.get_argument("p", "")
         user_name = xauth.current_name()
         if p == "clear":
-            NOTE_DAO.clear_search_history(user_name)
+            note_dao.clear_search_history(user_name)
             return dict(code = "success")
 
         return dict(code = "500", message = "无效的操作")
