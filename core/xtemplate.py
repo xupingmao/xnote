@@ -37,9 +37,10 @@ NAMESPACE = dict(
 
 _lang_dict = dict()
 _mobile_name_dict = dict()
-_loader = None # type: XnoteLoader
+_loader = None  # type: XnoteLoader
 NAV_LIST = []
 LOAD_TIME = int(time.time())
+
 
 def load_languages():
     """加载系统语言配置"""
@@ -59,7 +60,7 @@ def load_languages():
 
 class NavItem:
 
-    def __init__(self, text = "", need_login = False, need_logout = False, require_admin = False, url = "", css_class = ""):
+    def __init__(self, text="", need_login=False, need_logout=False, require_admin=False, url="", css_class=""):
         self.text = text
         self.need_login = need_login
         self.need_logout = need_logout
@@ -77,7 +78,7 @@ class NavItem:
 
         if self.need_login:
             return xauth.has_login() and self.check_platform()
-        
+
         if self.need_logout:
             return not xauth.has_login() and self.check_platform()
 
@@ -87,6 +88,8 @@ class NavItem:
 def load_nav_list():
     global NAV_LIST
     NAV_LIST = []
+    NAV_LIST.append(NavItem(text="首页", need_logout=True,
+                            require_admin=False, url="/system/index"))
     NAV_LIST.append(NavItem(text="首页", need_login=True,
                     require_admin=False, url="/note/index"))
     NAV_LIST.append(NavItem(text="动态", need_login=True,
