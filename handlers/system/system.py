@@ -190,9 +190,7 @@ class UserCssHandler:
         web.header("Content-Type", "text/css")
         environ = web.ctx.environ
         path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
-
-        if not xconfig.DEBUG:
-            web.header("Cache-Control", "max-age=3600")
+        web.header("Cache-Control", "max-age=3600")
 
         if not os.path.exists(path):
             return b''
@@ -211,7 +209,11 @@ class UserJsHandler:
 
     def GET(self):
         web.header("Content-Type", "application/javascript")
-        return xconfig.get("USRE_JS", "")
+        web.header("Cache-Control", "max-age=3600")
+        path = os.path.join(xconfig.SCRIPTS_DIR, "user.js")
+        if not os.path.exists(path):
+            return ""
+        return xutils.readfile(path)
 
 
 xutils.register_func("url:/system/index", IndexHandler)

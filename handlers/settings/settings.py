@@ -270,10 +270,14 @@ def on_reload(ctx = None):
         if value is not None:
             setattr(xconfig, key, value)
 
-    path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
-    if not os.path.exists(path):
-        return 
-    xconfig.USER_CSS = xutils.readfile(path)
+    # TODO 优化扩展样式和脚本
+    css_path = os.path.join(xconfig.SCRIPTS_DIR, "user.css")
+    if os.path.exists(css_path): 
+        xconfig.USER_CSS = xutils.readfile(css_path)
+    
+    js_path = os.path.join(xconfig.SCRIPTS_DIR, "user.js")
+    if os.path.exists(js_path):
+        xconfig.USER_JS = xutils.readfile(js_path)
 
     # 暂时取消多主题
     # xconfig.THEME = "left"

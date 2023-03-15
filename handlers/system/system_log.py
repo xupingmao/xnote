@@ -11,10 +11,12 @@ import xauth
 import xutils
 import xconfig
 import xmanager
-from xutils import logutil
+from xutils import logutil, dbutil, webutil, dateutil
 from xutils.imports import *
 from xtemplate import BasePlugin
 from xutils.functions import iter_exists
+
+uv_db = dbutil.get_table("uv")
 
 OPTION_HTML = '''
 <div class="row">
@@ -158,7 +160,7 @@ class LogHandler(BasePlugin):
         return xutils.readfile(fpath, limit=1024 * 1024)
 
     def handle(self, content):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/system/log")
 
         log_type = xutils.get_argument("log_type", "file")
@@ -192,6 +194,30 @@ class LogHandler(BasePlugin):
                        trace_log_path=get_log_path(date, "TRACE"))
 
 
+class UvRecord(dbutil.RecordInterface):
+
+    def __init__(self) -> None:
+        self.ip = ""
+        self.count = 0
+    
+class LogVisitHandler:
+
+    def GET(self):
+        site = xutils.get_argument_str("site", "xnote")
+        ip = webutil.get_real_ip()
+        date = dateutil.format_date()
+        id = site + "," + date + "," + ip
+        db_record = uv_db.get_by_id(id)
+        record = UvRecord()
+        if db_record != None:
+            record.from_storage(db_record)
+        record.count+=1
+        record.ip = ip
+        uv_db.update_by_id(id, record.to_storage())
+        return "console.log('log visit success');"
+
+
 xurls = (
     r"/system/log", LogHandler,
+    r"/system/log/visit", LogVisitHandler,
 )

@@ -39,12 +39,12 @@
 
 {# 自定义的样式 #}
 {% if xconfig.USER_CSS != None %}
-  <link rel="stylesheet" type="text/css" href="/system/user.css">
+  <link rel="stylesheet" type="text/css" href="/system/user.css?ts={{_ts}}">
 {% end %}
 
 {# 自定义脚本 #}
 {% if xconfig.USER_JS != None %}
-  <script type="text/javascript" src="/system/user.js"></script>
+  <script type="text/javascript" src="/system/user.js?ts={{_ts}}" async="true"></script>
 {% end %}
 
 <script type="text/javascript">

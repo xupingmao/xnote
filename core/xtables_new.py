@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2022-12-10 16:57:57
-@FilePath     : /xnote/core/xtables_new.py
+@LastEditTime : 2023-03-15 23:47:32
+@FilePath     : /duck_rushd:/projects/99-myprojects/xnote/core/xtables_new.py
 @Description  : 描述
 """
 
@@ -70,6 +70,9 @@ def init():
 
     # 月度计划
     db = dbutil.register_table("month_plan", "月度计划", user_attr="user", check_user=True)
+
+    # uv统计
+    db = dbutil.register_table("uv", "uv访问统计")
 
     # 重建索引(系统会根据索引版本增量构建)
     build_index_async()

@@ -42,6 +42,8 @@ class LoginHandler:
         pswd = xutils.get_argument_str("password", "")
         error = ""
         count = _login_failed_count.get(name, 0)
+        assert isinstance(count, int)
+
         name = name.strip()
         pswd = pswd.strip()
 
