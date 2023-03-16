@@ -27,6 +27,8 @@ from xutils.db.dbutil_base import (
     IndexInfo,
 )
 
+from .driver_interface import BatchInterface
+
 class TableIndex:
 
     def __init__(self, table_name=None, index_name=None, user_attr=None, check_user=False,index_type="ref"):
@@ -70,7 +72,7 @@ class TableIndex:
         else:
             return None
 
-    def update_index(self, old_obj, new_obj, batch=None, force_update=False):
+    def update_index(self, old_obj, new_obj, batch: BatchInterface, force_update=False):
         index_name = self.index_name
 
         validate_obj(new_obj, "invalid new_obj")

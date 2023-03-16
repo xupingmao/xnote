@@ -53,7 +53,7 @@ import xutils
 from xutils.imports import is_str
 from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json
-from .driver_interface import DBInterface
+from .driver_interface import DBInterface, BatchInterface
 from .dbutil_id_gen import TimeSeqId
 
 try:
@@ -99,7 +99,7 @@ class DBException(Exception):
         self.message = message
 
 
-class WriteBatchProxy:
+class WriteBatchProxy(BatchInterface):
     """批量操作代理，批量操作必须在同步块中执行（必须加锁）"""
 
     def __init__(self, db_instance=None):

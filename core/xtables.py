@@ -9,7 +9,7 @@ import os
 import xutils
 import xconfig
 import web.db
-from xutils import sqlite3
+import sqlite3
 
 class SqliteTableManager:
     """检查数据库字段，如果不存在就自动创建"""
@@ -387,6 +387,9 @@ class MockedDB():
     def count(self, *args, **kw):
         return 0
 
+    def delete(self, *args, **kw):
+        return
+
 class DBWrapper:
     """基于web.db的装饰器
     SqliteDB是全局唯一的，它的底层使用了连接池技术，每个线程都有独立的sqlite连接
@@ -399,9 +402,6 @@ class DBWrapper:
         self.dbpath = dbpath
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         _db = DBWrapper._pool.get(dbpath)
-        if xutils.sqlite3 is None:
-            self.db = MockedDB()
-            return
         if _db is None:
             raise Exception("db wrapper %s is not inited!" % dbpath)
         self.db = _db

@@ -42,8 +42,8 @@ class DBInterface:
         raise NotImplementedError("Delete")
 
     def RangeIter(self, 
-            key_from = None, # type: bytes
-            key_to = None,  # type: bytes
+            key_from = b'', # type: bytes
+            key_to = b'',  # type: bytes
             reverse = False,
             include_value = True, 
             fill_cache = False):
@@ -62,6 +62,9 @@ class DBInterface:
 
     def Write(self, batch_proxy, sync = False):
         raise NotImplementedError("Write")
+
+    def Count(self, key_from:bytes, key_to:bytes)->int:
+        raise NotImplementedError("待子类实现")
 
 
 class DBLockInterface:
@@ -89,3 +92,15 @@ class RecordInterface:
     def to_storage(self):
         """从领域模型转为数据库记录"""
         return self.__dict__
+
+
+class BatchInterface:
+
+    def check_and_delete(self, key: str):
+        raise NotImplementedError("待子类实现")
+    
+    def check_and_put(self, key:str, value):
+        raise NotImplementedError("待子类实现")
+
+    def commit(self, sync=False, retries=0):
+        raise NotImplementedError("待子类实现")

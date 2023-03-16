@@ -76,7 +76,7 @@ class MigrateHandler(BasePlugin):
         if action == "user":
             result = migrate_user()
         if action == "search":
-            result = migrade_search()
+            result = migrate_search()
 
         cost = int((time.time() - t1) * 1000)
         self.writetemplate(HTML, result = result, cost = cost)
