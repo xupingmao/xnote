@@ -341,6 +341,7 @@ class IndexInfo:
         self.index_name = index_name
         self.index_type = index_type
         self.columns = [index_name]
+        self.ignore_none_value = True # 忽略None值
 
     @classmethod
     def register(cls, table_name, index_name, columns, index_type):

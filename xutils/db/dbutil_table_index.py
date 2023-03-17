@@ -124,6 +124,10 @@ class TableIndex:
             old_index_key = index_prefix + ":" + old_value + ":" + escaped_obj_id
             batch.check_and_delete(old_index_key)
 
+        if self.index_info.ignore_none_value and new_value == chr(0):
+            # None值不处理
+            return
+
         # 新的索引值始终更新
         new_index_key = index_prefix + ":" + new_value + ":" + escaped_obj_id
 

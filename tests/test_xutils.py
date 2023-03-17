@@ -323,7 +323,8 @@ class TestMain(unittest.TestCase):
 
         # 插入测试
         row = Storage(name = "system-test", value = "value")
-        new_key = table.insert(row, id_type = "timeseq")
+        new_id = table.insert(row, id_type = "timeseq")
+        new_key = "unit_test:" + new_id
         # 查询测试
         new_row = table.get_by_key(new_key)
         self.assertTrue(new_row != None)

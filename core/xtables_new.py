@@ -64,11 +64,11 @@ def init_note_tables():
 
     # ID维度笔记索引
     db = dbutil.register_table(
-        "note_index", "笔记索引，不包含内容 <note_index:note_id>", category="note")
+        "note_index", "笔记索引，不包含内容", category="note")
     db.register_index("parent_id", comment = "父级笔记ID")
 
     # 用户维度笔记索引
-    db = dbutil.register_table("note_tiny", "用户维度的笔记索引 <table:user:id>",
+    db = dbutil.register_table("note_tiny", "用户维度的笔记索引",
                                category="note", check_user=True, user_attr="creator")
     db.register_index("name")
     db.register_index("ctime")
@@ -76,7 +76,8 @@ def init_note_tables():
 
     # 笔记修改历史
     dbutil.register_table("note_history_index", "笔记历史索引", category="note")
-    dbutil.register_table("search_history", "搜索历史")
+    db = dbutil.register_table("search_history", "搜索历史")
+    db.register_index("user", comment="用户索引")
 
     # 分享关系
     db = dbutil.register_table("note_share", "笔记分享", category="note")

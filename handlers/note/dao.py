@@ -15,7 +15,7 @@ token:<uuid>                     = 用于链接分享的令牌
 note_history:<note_id>:<version> = 笔记的历史版本
 note_comment:<note_id>:<timeseq> = 笔记的评论
 comment_index:<user>:<timeseq>   = 用户维度的评论索引
-search_history:<user>:<timeseq>  = 用户维度的搜索历史
+search_history:<id>  = 用户维度的搜索历史
 note_public:<note_id>            = 公开的笔记索引
 """
 import time
@@ -53,7 +53,7 @@ _tiny_db = dbutil.get_table("note_tiny")
 _stat_db = dbutil.get_table("user_stat")
 _index_db = dbutil.get_table("note_index")
 _book_db = dbutil.get_table("notebook")
-_search_history_db = dbutil.get_hash_table("search_history")
+_search_history_db = dbutil.get_table("search_history")
 
 _note_history_db = dbutil.get_hash_table("note_history")
 _note_history_index_db = dbutil.get_hash_table("note_history_index")
@@ -1481,19 +1481,15 @@ def add_search_history(user, search_key, category="default", cost_time=0):
         user = "public"
     
     expire_search_history(user)
-    
-    id = dbutil.timeseq()
-    value = Storage(key=search_key, category=category, cost_time=cost_time)
-    
-    db = _search_history_db.with_user(user)
-    db.put(id, value=value)
+    value = Storage(user = user, key=search_key, category=category, cost_time=cost_time)
+    return _search_history_db.insert(value)
 
 
 def list_search_history(user, limit=1000, orderby="time_desc"):
     if user is None or user == "":
         return []
     result = []
-    for key, value in _search_history_db.with_user(user).iter(limit = limit, reverse=True):
+    for value in _search_history_db.list_by_index("user", index_value = user, limit = limit, reverse=True):
         result.append(value)
     return result
 
@@ -1501,18 +1497,18 @@ def list_search_history(user, limit=1000, orderby="time_desc"):
 def clear_search_history(user_name):
     assert user_name != None
     assert user_name != ""
-    db = _search_history_db.with_user(user_name)
-    for item in db.iter(reverse=True, limit=-1):
+    db = _search_history_db
+    for item in db.list_by_index("user", where = dict(user=user_name), reverse=True, limit=1000):
         db.delete(item)
 
 def expire_search_history(user_name, limit=1000):
-    db = _search_history_db.with_user(user_name)
-    count = db.count()
+    db = _search_history_db
+    count = _search_history_db.count_by_index("user", where = dict(user = user_name))
 
     if count > limit:
         with dbutil.get_write_lock(user_name):
-            for key, value in db.list(limit = count-limit, reverse=False):
-                db.delete(key)
+            for value in db.list_by_index("user", index_value=user_name, limit = count-limit, reverse=False):
+                db.delete(value)
 
 @xutils.async_func_deco()
 def refresh_note_stat_async(user_name):
