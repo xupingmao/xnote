@@ -83,6 +83,12 @@ def init_note_tables():
     db.register_index("note_id", comment = "笔记ID")
     db.register_index("to_user", comment = "分享的目标用户")
 
+
+    db = dbutil.register_table("comment", "评论模型", category="note")
+    db.register_index("user", comment = "用户索引", index_type="copy")
+    db.register_index("note_id", comment = "笔记ID索引", index_type="copy")
+
+
     # 公共笔记
     db = dbutil.register_table("note_public", "公共笔记", category="note")
     db.register_index("hot_index")

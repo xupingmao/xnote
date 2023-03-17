@@ -14,14 +14,6 @@ from xutils import dateutil
 from .dao_api import NoteDao
 from . import dao as note_dao
 
-def register_note_table(name, description, user_attr=None):
-    dbutil.register_table(name, description, category="note", user_attr=user_attr)
-
-
-register_note_table("comment", "评论模型")
-dbutil.register_table_index("comment", "user", "用户索引", index_type="copy")
-dbutil.register_table_index("comment", "note_id", "笔记ID索引", index_type="copy")
-
 NOTE_DAO = xutils.DAO("note")
 
 _comment_db = dbutil.get_table("comment")
