@@ -181,8 +181,8 @@ class TableIndexRepair:
 
         # 先删除无效的索引，这样速度更快
         for name in db.index_names:
-            prefix1 = "_index$%s$%s" % (db.table_name, name)
-            prefix2 = IndexInfo.build_prefix(db.table_name, name)
+            prefix1 = "_index$%s$%s" % (db.table_name, name)      # v1版本的索引前缀
+            prefix2 = IndexInfo.build_prefix(db.table_name, name) # v2版本的索引前缀
             self.delete_invalid_index(name, prefix1)
             self.delete_invalid_index(name, prefix2)
 

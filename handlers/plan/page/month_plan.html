@@ -76,7 +76,7 @@
     </div>
 
     <script type="text/javascript">
-        PlanView.state.month = "{{record._id}}";
+        PlanView.state.id = "{{record._id}}";
         xnote.on("date.month.selected", function (event) {
             var dateStr = event.target;
             dateStr = dateStr.replace("-", "/");

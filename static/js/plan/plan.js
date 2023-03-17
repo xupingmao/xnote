@@ -1,6 +1,7 @@
 var PlanView = {};
 PlanView.state = {
-    month: ""
+    month: "",
+    id: ""
 };
 xnote.action.plan = PlanView;
 
@@ -25,7 +26,7 @@ PlanView.removeNote = function (target) {
     
     var noteId = $(target).attr("data-id");
     var params = {
-        month: PlanView.state.month,
+        id: PlanView.state.id,
         note_id: noteId
     };
     $.post("/plan/month/remove", params, function (resp) {
@@ -48,7 +49,7 @@ PlanView.addSelectedToPlan = function () {
         selectedIds.push(dataId);
     });
     var params = {
-        month: PlanView.state.month,
+        id: PlanView.state.id,
         note_ids: selectedIds.join(",")
     }
     $.post("/plan/month/add", params, function (resp) {

@@ -31,7 +31,7 @@ class MonthPlanHandler:
             record.notes = note_dao.batch_query_list(note_ids)
             record.notes.sort(key = lambda x:x.name)
 
-        year, month = record._id.split("/")
+        year, month = record.month.split("/")
 
         kw.record = record
         kw.year = int(year)
@@ -42,14 +42,14 @@ class MonthPlanHandler:
 class MonthPlanAddAjaxHandler:
     @xauth.login_required()
     def POST(self):
-        month = xutils.get_argument_str("month", "")
+        plan_id = xutils.get_argument_str("id", "")
         note_ids_str = xutils.get_argument_str("note_ids", "")
         note_ids = note_ids_str.split(",")
-        if month == "":
-            return dict(code="400", message="参数month不能为空")
+        if plan_id == "":
+            return dict(code="400", message="参数id不能为空")
 
         user_name = xauth.current_name_str()
-        record = MonthPlanDao.get_by_month(user_name, month)
+        record = MonthPlanDao.get_by_id(user_name, plan_id)
         if record != None:
             assert isinstance(note_ids, list)
             for id in note_ids:
@@ -63,15 +63,15 @@ class MonthPlanAddAjaxHandler:
 class MonthPlanRemoveAjaxHandler:
     @xauth.login_required()
     def POST(self):
-        month = xutils.get_argument_str("month", "")
+        id = xutils.get_argument_str("id", "")
         note_id = xutils.get_argument_str("note_id", "")
-        if month == "":
-            return dict(code="400", message="参数month不能为空")
+        if id == "":
+            return dict(code="400", message="参数id不能为空")
         if note_id == "":
             return dict(code="400", message="参数note_id不能为空")
 
         user_name = xauth.current_name_str()
-        record = MonthPlanDao.get_by_month(user_name, month)
+        record = MonthPlanDao.get_by_id(user_name, id)
         if record != None:
             functions.listremove(record.note_ids, note_id)
             record.save()

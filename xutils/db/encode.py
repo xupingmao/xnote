@@ -119,6 +119,11 @@ def encode_str_index(value):
     value = value.replace(",", "%2C")
     return value
 
+def encode_list(value):
+    result = []
+    for item in value:
+        result.append(encode_index_value(item))
+    return ",".join(result)
 
 def encode_index_value(value) -> str:
     if value is None:
@@ -129,6 +134,8 @@ def encode_index_value(value) -> str:
         return encode_int(value)
     if isinstance(value, float):
         return encode_float(value)
+    if isinstance(value, list):
+        return encode_list(value)
     raise Exception("unknown index_type:%r" % type(value))
 
 def _encode_json(obj):

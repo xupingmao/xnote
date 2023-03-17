@@ -42,7 +42,8 @@ def init():
     db.register_index("url", comment = "页面URL")
 
     # 月度计划
-    db = dbutil.register_table("month_plan", "月度计划", user_attr="user", check_user=True)
+    db = dbutil.register_table("month_plan", "月度计划")
+    db.register_index("user_month", columns = ["user", "month"])
 
     # uv统计
     db = dbutil.register_table("uv", "uv访问统计")

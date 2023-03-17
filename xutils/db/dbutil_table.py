@@ -15,6 +15,7 @@ from xutils.db.encode import (
 )
 from xutils.db.dbutil_id_gen import IdGenerator
 from xutils.db.binlog import BinLog
+from xutils.db import filters
 
 register_table("_id", "系统ID表")
 MAX_ID_KEY = "_id:max_id"
@@ -271,7 +272,7 @@ class LdbTable:
         obj[self.id_name] = id_value
 
         self._put_obj(key, obj)
-        return key
+        return id_value
 
     def insert_by_user(self, user_name, obj, id_type="timeseq"):
         """@deprecated 定义user_attr之后使用insert即可满足
@@ -383,7 +384,7 @@ class LdbTable:
             batch.commit()
 
     def iter(self, offset=0, limit=20, reverse=False, key_from=None,
-             filter_func=None, fill_cache=False, user_name=None):
+             filter_func=None, where = None, fill_cache=False, user_name=None):
         """返回一个遍历的迭代器
         @param {int} offset 返回结果下标开始
         @param {int} limit  返回结果最大数量
@@ -402,6 +403,10 @@ class LdbTable:
         else:
             prefix = self.prefix
 
+        if where != None:
+            assert filter_func == None, "不能同时设置 filter_func 和 where"
+            filter_func = filters.create_func_by_where(where)
+
         for key, value in prefix_iter(prefix, filter_func, offset, limit,
                                       reverse=reverse, include_key=True, key_from=key_from,
                                       fill_cache=fill_cache):
@@ -413,9 +418,9 @@ class LdbTable:
             result.append(value)
         return result
 
-    def get_first(self, filter_func=None, *, user_name=None):
+    def get_first(self, filter_func=None, *, where = None, user_name=None):
         """读取第一个满足条件的数据"""
-        result = self.list(limit=1, filter_func=filter_func,
+        result = self.list(limit=1, filter_func=filter_func, where = where,
                            user_name=user_name)
         if len(result) > 0:
             return result[0]
@@ -442,7 +447,11 @@ class LdbTable:
         return self.list(offset=offset, limit=limit, reverse=reverse,
                          filter_func=filter_func, user_name=user_name)
 
-    def create_index_map_func(self, filter_func, index_type="ref"):
+    def create_index_map_func(self, filter_func, where = None, index_type="ref"):
+        if where != None:
+            assert filter_func == None, "不能同时设置 filter_func 和 where"
+            filter_func = filters.create_func_by_where(where)
+
         def map_func_for_copy(batch_list):
             result = []
             for key, value in batch_list:
@@ -516,7 +525,10 @@ class LdbTable:
         index_prefix = IndexInfo.build_prefix(self.table_name, index_name)
         return self._build_key_no_prefix(index_prefix, self.user_name or user_name)
 
-    def _get_index_prefix_by_value(self, index_name, index_value, user_name=None):
+    def _get_index_prefix_by_value(self, index_name, index_value, where = None, user_name=None):
+        index_info = IndexInfo.get_table_index_info(self.table_name, index_name)
+        assert index_info != None
+
         if isinstance(index_value, dict):
             assert len(index_value) == 1, "只能设置1个属性"
             if index_value.get("$prefix") != None:
@@ -529,25 +541,31 @@ class LdbTable:
             index_value = encode_index_value(index_value)
             return self._get_index_prefix(
                 index_name, user_name=user_name) + ":" + index_value + ":"
+        elif where != None:
+            cols = []
+            for col in index_info.columns:
+                cols.append(where.get(col))
+            prefix_value_encoded = encode_index_value(cols)
+            return self._get_index_prefix(index_name, user_name=user_name) + ":" + prefix_value_encoded
         else:
             return self._get_index_prefix(index_name, user_name=user_name) + ":"
 
 
-    def count_by_index(self, index_name, filter_func=None, index_value=None, user_name=None):
+    def count_by_index(self, index_name, filter_func=None, index_value=None, user_name=None, where = None):
         validate_str(index_name, "index_name can not be empty")
         index_info = IndexInfo.get_table_index_info(
             self.table_name, index_name)
         if index_info == None:
             raise Exception("index not found: %s", index_name)
 
-        prefix = self._get_index_prefix_by_value(index_name, index_value, user_name=user_name)
+        prefix = self._get_index_prefix_by_value(index_name, index_value, where = where, user_name=user_name)
         map_func = self.create_index_map_func(
             filter_func, index_type=index_info.index_type)
         return prefix_count_batch(prefix, map_func=map_func)
     
     def list_by_index(self, index_name, filter_func=None,
                       offset=0, limit=20, *, reverse=False,
-                      index_value=None, user_name=None):
+                      index_value=None, user_name=None, where = None):
         """通过索引查询结果列表
         @param {str}  index_name 索引名称
         @param {func} filter_func 过滤函数
@@ -563,7 +581,7 @@ class LdbTable:
 
         prefix = self._get_index_prefix_by_value(index_name, index_value, user_name=user_name)
         map_func = self.create_index_map_func(
-            filter_func, index_type=index_info.index_type)
+            filter_func, index_type=index_info.index_type, where = where)
         return list(prefix_iter_batch(prefix, offset=offset, limit=limit,
                                       map_func=map_func,
                                       reverse=reverse, include_key=False))

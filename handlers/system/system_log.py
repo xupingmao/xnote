@@ -216,7 +216,7 @@ class LogVisitHandler:
             record.date = date
             record.site = site
             record.ip = ip
-            uv_db.insert(record)
+            uv_db.insert(record.to_storage())
         else:
             record = UvRecord()
             record.from_storage(db_record)
