@@ -97,7 +97,7 @@ def run_test(args):
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("target", default="all", nargs="?")
-	parser.add_argument("--skip_mysql_test", action="store_true")
+	parser.add_argument("--skip_mysql_test", action="store_true", default=True)
 	parser.add_argument("--mysql_host", default="192.168.50.153")
 	parser.add_argument("--mysql_user", default="root")
 	parser.add_argument("--mysql_password", default="root")

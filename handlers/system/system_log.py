@@ -198,6 +198,8 @@ class UvRecord(dbutil.RecordInterface):
 
     def __init__(self) -> None:
         self.ip = ""
+        self.site = ""
+        self.date = ""
         self.count = 0
     
 class LogVisitHandler:
@@ -206,14 +208,21 @@ class LogVisitHandler:
         site = xutils.get_argument_str("site", "xnote")
         ip = webutil.get_real_ip()
         date = dateutil.format_date()
-        id = site + "," + date + "," + ip
-        db_record = uv_db.get_by_id(id)
-        record = UvRecord()
-        if db_record != None:
+        db_record = uv_db.first_by_index("date_ip", where = dict(date = date, ip = ip, site = site))
+
+        if db_record == None:
+            record = UvRecord()
+            record.count += 1
+            record.date = date
+            record.site = site
+            record.ip = ip
+            uv_db.insert(record)
+        else:
+            record = UvRecord()
             record.from_storage(db_record)
-        record.count+=1
-        record.ip = ip
-        uv_db.update_by_id(id, record.to_storage())
+            record.count+=1
+            record.ip = ip
+            uv_db.update(record.to_storage())
         return "console.log('log visit success');"
 
 

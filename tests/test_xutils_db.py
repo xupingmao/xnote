@@ -559,7 +559,7 @@ class TestMain(BaseTestCase):
 
         # 校验索引值是否正确
         obj1_name_index = dbutil.db_get(
-            "_index$index_test$name:Ada:" + obj1._id)
+            "index_test$name:Ada:" + obj1._id)
         self.assertEqual(obj1_name_index.key, "index_test:" + obj1._id)
         self.assertEqual(obj1_name_index.value["name"], "Ada")
         self.assertEqual(obj1_name_index.value["age"], 20)

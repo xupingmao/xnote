@@ -98,26 +98,33 @@ def encode_float(value):
 def encode_str(value):
     """编码字符串
     >>> encode_str("a:b")
-    'a%58b'
+    'a%3Ab'
     >>> encode_str("a%b")
-    'a%20b'
+    'a%25b'
     >>> encode_str("中文123")
     '中文123'
     """
-    value = value.replace("%", "%20")
-    value = value.replace(":", "%58")
+    value = value.replace("%", "%25")
+    value = value.replace(":", "%3A")
     return value
 
 def decode_str(value):
-    value = value.replace("%58", ":")
-    value = value.replace("%20", "%")
+    value = value.replace("%3A", ":")
+    value = value.replace("%25", "%")
     return value
 
-def encode_index_value(value):
+def encode_str_index(value):
+    value = value.replace("%", "%25")
+    value = value.replace(":", "%3A")
+    value = value.replace(",", "%2C")
+    return value
+
+
+def encode_index_value(value) -> str:
     if value is None:
         return chr(0)
     if isinstance(value, str):
-        return encode_str(value)
+        return encode_str_index(value)
     if isinstance(value, int):
         return encode_int(value)
     if isinstance(value, float):
@@ -164,6 +171,26 @@ def clean_value_before_update(value):
         _dict_del(value, "_key")
 
 def encode_id(id_value):
+    """对ID进行编码, 第一位是标记位, 起步5位, 指数增长
+    >>> encode_id(100) > encode_id(50)
+    True
+    >>> encode_id(10**5+10) > encode_id(20)
+    True
+    """
+    assert isinstance(id_value, int)
+    assert id_value > 0
+    if id_value < 10**5:
+        return "1%05d" % id_value
+    
+    if id_value < 10**10:
+        return "2%010d" % id_value
+    
+    if id_value < 10**20:
+        return "3%020d" % id_value
+    
+    raise Exception("too large id value")
+
+def encode_id_v1(id_value):
     """对ID进行编码
     >>> encode_id(100) > encode_id(50)
     True

@@ -31,17 +31,19 @@ from .driver_interface import BatchInterface
 
 class TableIndex:
 
-    def __init__(self, table_name=None, index_name=None, user_attr=None, check_user=False,index_type="ref"):
-        assert table_name != None
-        assert index_name != None
+    def __init__(self, index_info: IndexInfo, user_attr=None, check_user=False,index_type="ref"):
+        table_name = index_info.table_name
+        index_name = index_info.index_name
 
+        self.index_info = index_info
         self.user_attr = user_attr
         self.index_name = index_name
         self.table_name = table_name
         self.key_name = "_key"
         self.check_user = check_user
-        self.prefix = IndexInfo.get_index_prefix(self.table_name, index_name)
+        self.prefix = IndexInfo.build_prefix(self.table_name, index_name)
         self.index_type = index_type
+        self.index_info = index_info
 
         if check_user and user_attr == None:
             raise Exception("user_attr没有注册, table_name:%s" % table_name)
@@ -71,9 +73,21 @@ class TableIndex:
             return user_name
         else:
             return None
+    
+    def get_index_value(self, obj) -> str:
+        if len(self.index_info.columns) > 1:
+            result = []
+            for colname in self.index_info.columns:
+                value = obj.get(colname)
+                result.append(encode_index_value(value))
+            return ",".join(result)
+        else:
+            value = obj.get(self.index_name)
+            return encode_index_value(value)
 
     def update_index(self, old_obj, new_obj, batch: BatchInterface, force_update=False):
         index_name = self.index_name
+        assert isinstance(new_obj, dict)
 
         validate_obj(new_obj, "invalid new_obj")
 
@@ -90,10 +104,9 @@ class TableIndex:
 
         if old_obj != None and isinstance(old_obj, dict):
             # 旧的数据必须为dict类型
-            old_value = old_obj.get(index_name)
+            old_value = self.get_index_value(old_obj)
 
-        if new_obj != None:
-            new_value = new_obj.get(index_name)
+        new_value = self.get_index_value(new_obj)
 
         # 索引值是否变化
         index_changed = (new_value != old_value)
@@ -105,14 +118,13 @@ class TableIndex:
             if not force_update:
                 return
 
+        assert isinstance(new_value, str)
         # 只要有旧的记录，就要清空旧索引值
-        if old_obj != None and index_changed:
-            old_value = encode_index_value(old_value)
+        if old_value != None and index_changed:
             old_index_key = index_prefix + ":" + old_value + ":" + escaped_obj_id
             batch.check_and_delete(old_index_key)
 
         # 新的索引值始终更新
-        new_value = encode_index_value(new_value)
         new_index_key = index_prefix + ":" + new_value + ":" + escaped_obj_id
 
         if self.index_type == "copy":
@@ -169,7 +181,10 @@ class TableIndexRepair:
 
         # 先删除无效的索引，这样速度更快
         for name in db.index_names:
-            self.delete_invalid_index(name)
+            prefix1 = "_index$%s$%s" % (db.table_name, name)
+            prefix2 = IndexInfo.build_prefix(db.table_name, name)
+            self.delete_invalid_index(name, prefix1)
+            self.delete_invalid_index(name, prefix2)
 
         for value in db.iter(limit=-1):
             if db._need_check_user:
@@ -211,9 +226,8 @@ class TableIndexRepair:
             return record.get(key)
         return getattr(record, key)
 
-    def delete_invalid_index(self, index_name):
+    def delete_invalid_index(self, index_name, index_prefix):
         db = self.db
-        index_prefix = "_index$%s$%s" % (db.table_name, index_name)
 
         for old_key, index_object in prefix_iter(index_prefix, include_key=True):
             if isinstance(index_object, dict):
@@ -243,8 +257,7 @@ class TableIndexRepair:
                     logging.error("invalid key: (%s)", record_key)
                     error_log = dict(
                         key=old_key, value=record_key, type="index")
-                    self.repair_error_db.insert(
-                        error_log, id_type="auto_increment")
+                    self.repair_error_db.insert(error_log)
                     self.do_delete(old_key)
                     continue
 

@@ -326,9 +326,9 @@ class TableInfo:
     def get_index_names(self):
         return IndexInfo.get_table_index_names(self.name)
 
-    def register_index(self, index_name, comment=None, index_type="ref"):
-        register_table_index(self.name, index_name,
-                             comment, index_type=index_type)
+    def register_index(self, index_name, *, columns = [], comment="", index_type="ref"):
+        register_table_index(self.name, index_name, columns = columns,
+                             comment = comment, index_type=index_type)
         return self
 
 
@@ -340,10 +340,12 @@ class IndexInfo:
         self.table_name = table_name
         self.index_name = index_name
         self.index_type = index_type
+        self.columns = [index_name]
 
     @classmethod
-    def register(cls, table_name, index_name, index_type):
+    def register(cls, table_name, index_name, columns, index_type):
         info = IndexInfo(table_name, index_name, index_type)
+        info.columns = columns
         index_dict = cls._table_dict.get(table_name)
         if index_dict == None:
             index_dict = dict()
@@ -367,10 +369,10 @@ class IndexInfo:
     @classmethod
     def get_table_index_dict(cls, table_name):
         return cls._table_dict.get(table_name)
-    
-    @classmethod
-    def get_index_prefix(cls, table_name, index_name):
-        return "_index$%s$%s" % (table_name, index_name)
+
+    @staticmethod
+    def build_prefix(table_name, index_name):
+        return "%s$%s" % (table_name, index_name)
 
 
 def register_table(table_name,
@@ -410,7 +412,7 @@ def _register_table_inner(table_name,
     return info
 
 
-def register_table_index(table_name, index_name, comment=None, index_type="ref"):
+def register_table_index(table_name, index_name, columns = [], comment="", index_type="ref"):
     """注册表的索引"""
     validate_str(table_name, "invalid table_name")
     validate_str(index_name, "invalid index_name")
@@ -419,7 +421,10 @@ def register_table_index(table_name, index_name, comment=None, index_type="ref")
 
     check_table_name(table_name)
 
-    IndexInfo.register(table_name, index_name, index_type)
+    if len(columns) == 0:
+        columns = [index_name]
+
+    IndexInfo.register(table_name, index_name, columns, index_type)
 
     # 注册索引表
     index_table = get_index_table_name(table_name, index_name)
@@ -452,7 +457,7 @@ def get_table_index_names(table_name):
 
 
 def get_index_table_name(table_name, index_name):
-    return "_index$%s$%s" % (table_name, index_name)
+    return IndexInfo.build_prefix(table_name, index_name)
 
 
 def get(*args, **kw):
@@ -727,7 +732,7 @@ def delete_index_count_cache(table_name, index_name):
     if _cache == None:
         return
 
-    index_prefix = IndexInfo.get_index_prefix(table_name, index_name)
+    index_prefix = IndexInfo.build_prefix(table_name, index_name)
     cache_key = "table_count:%s:" % index_prefix
     _cache.delete(cache_key)
 

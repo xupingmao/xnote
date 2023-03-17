@@ -81,7 +81,7 @@ class LdbTable:
         if index_dict != None:
             for index_name in index_dict:
                 index_info = index_dict[index_name]
-                indexes.append(TableIndex(self.table_name, index_info.index_name, table_info.user_attr,
+                indexes.append(TableIndex(index_info, table_info.user_attr,
                                           check_user=table_info.check_user,
                                           index_type=index_info.index_type))
         return indexes
@@ -253,7 +253,7 @@ class LdbTable:
 
         return batch_result
 
-    def insert(self, obj, id_type="timeseq", id_value=None):
+    def insert(self, obj, id_type="auto_increment", id_value=None):
         """插入新数据
         @param {object} obj 插入的对象
         @param {string} id_type id类型
@@ -513,7 +513,7 @@ class LdbTable:
         self._check_index_name(index_name)
         self._check_user_name(user_name)
 
-        index_prefix = "_index$%s$%s" % (self.table_name, index_name)
+        index_prefix = IndexInfo.build_prefix(self.table_name, index_name)
         return self._build_key_no_prefix(index_prefix, self.user_name or user_name)
 
     def _get_index_prefix_by_value(self, index_name, index_value, user_name=None):

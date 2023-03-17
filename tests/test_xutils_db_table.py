@@ -136,6 +136,11 @@ class TestMain(BaseTestCase):
 
     def test_insert(self):
         obj = Storage(name = "Bob")
+        db = dbutil.get_table("test")
+        for item in db.list():
+            db.delete(item)
+        dbutil.db_delete("_max_id:test")
+        dbutil.db_delete("test:1")
         new_id = dbutil.insert("test", obj)
         new_id_int = decode_id(new_id)
         self.assertEqual(1, new_id_int)

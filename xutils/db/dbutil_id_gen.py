@@ -25,16 +25,17 @@ class IdGenerator:
         max_id_key = "_max_id:" + self.table_name
 
         with base.get_write_lock():
+            new_id = 0
             last_id = base.db_get(max_id_key) # type: int
             if last_id is None:
                 if start_id != None:
-                    last_id = start_id
+                    new_id = start_id
                 else:
-                    last_id = 1
+                    new_id = 1
             else:
-                last_id += 1
-            base.db_put(max_id_key, last_id)
-            return encode_id(last_id)
+                new_id = last_id + 1
+            base.db_put(max_id_key, new_id)
+            return encode_id(new_id)
 
     def create_new_id(self, id_type="uuid", id_value=None):
         if id_type == "uuid":
@@ -43,7 +44,7 @@ class IdGenerator:
 
         if id_type == "timeseq":
             base.validate_none(id_value, "invalid id_value")
-            return base.timeseq()
+            return TimeSeqId.create(id_value)
 
         if id_type == "auto_increment":
             base.validate_none(id_value, "invalid id_value")
