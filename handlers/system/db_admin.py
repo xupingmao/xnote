@@ -382,16 +382,12 @@ class DbScanHandler(BasePlugin):
         if key_from == "" and real_prefix != "":
             key_from = real_prefix + ":"
 
-        reverse = False
         key_to = b'\xff'
         if need_reverse:
             key_to = key_from.encode("utf8") + b'\xff'
-            reverse = True
-        else:
-            reverse = False
 
         dbutil.scan(key_from=key_from, key_to=key_to, func=func,
-                    reverse=reverse, parse_json=False)
+                    reverse=need_reverse, parse_json=False)
 
         kw = Storage()
         kw.result = result
