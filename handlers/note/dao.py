@@ -35,8 +35,7 @@ from . import dao_log
 def register_note_table(name, description, check_user=False, user_attr=None):
     dbutil.register_table(name, description, category="note",
                           check_user=check_user, user_attr=user_attr)
-
-register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
+    
 register_note_table("notebook", "笔记分组", check_user=True, user_attr="creator")
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
@@ -45,7 +44,6 @@ NOTE_DAO = xutils.DAO("note")
 
 _full_db = dbutil.get_table("note_full")
 _tiny_db = dbutil.get_table("note_tiny")
-_stat_db = dbutil.get_table("user_stat")
 _index_db = dbutil.get_table("note_index")
 _book_db = dbutil.get_table("notebook")
 _search_history_db = dbutil.get_table("search_history")
@@ -469,27 +467,15 @@ def get_by_token(token):
 
 def get_by_user_skey(user_name, skey):
     skey = skey.replace("-", "_")
-    note_info = dbutil.get("note_skey:%s:%s" % (user_name, skey))
+    note_info = _index_db.first_by_index("skey", where = dict(creator=user_name, skey=skey))
     if note_info != None:
-        return get_by_id(note_info.note_id)
+        return get_by_id(note_info.id)
     else:
         return None
 
-
-def save_note_skey(note):
-    skey = note.get("skey")
-    if skey is None or skey == "":
-        return
-    key = "note_skey:%s:%s" % (note.creator, note.skey)
-    dbutil.put(key, Storage(note_id=note.id))
-
-
 def delete_note_skey(note):
-    skey = note.skey
-    if skey is None or skey == "":
-        return
-    key = "note_skey:%s:%s" % (note.creator, note.skey)
-    dbutil.delete(key)
+    # 使用的是note_index的索引,不需要处理
+    pass
 
 
 def get_or_create_note(skey, creator):
@@ -543,7 +529,7 @@ def create_note_base(note_dict, date_str=None, note_id=None):
         return note_id
     elif date_str is None or date_str == "":
         # 默认创建规则
-        note_id = dbutil.timeseq()
+        note_id = _index_db.insert(note_dict)
         note_dict["id"] = note_id
         put_note_to_db(note_id, note_dict)
         # 创建日志
@@ -558,19 +544,14 @@ def create_note_base(note_dict, date_str=None, note_id=None):
         else:
             timestamp = int(dateutil.parse_date_to_timestamp(date_str) * 1000)
 
-        while True:
-            note_id = "%020d" % timestamp
-            note_dict["ctime"] = dateutil.format_datetime(timestamp/1000)
-            old = get_by_id(note_id)
-            if old is None:
-                note_dict["id"] = note_id
-                put_note_to_db(note_id, note_dict)
+        note_dict["ctime"] = dateutil.format_datetime(timestamp/1000)
+        note_id = _index_db.insert(note_dict)
+        note_dict["id"] = note_id
+        put_note_to_db(note_id, note_dict)
 
-                # 创建日志
-                add_create_log(note_dict)
-                return note_id
-            else:
-                timestamp += 1
+        # 创建日志
+        add_create_log(note_dict)
+        return note_id
 
 
 def is_not_empty(value):
@@ -618,9 +599,6 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
 
     # 更新目录修改时间
     touch_note(note_dict["parent_id"])
-
-    # 保存skey索引
-    save_note_skey(note_dict)
 
     # 最后发送创建笔记成功的消息
     create_msg = dict(name=name, type=type, id=note_id)

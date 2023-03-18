@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2022-12-04 20:59:22
+@LastEditTime : 2023-03-18 22:50:19
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
@@ -15,7 +15,6 @@ from .dao_api import NoteDao
 from .dao import (
     delete_history,
     add_history,
-    delete_note_skey,
     get_by_id,
     update_children_count,
     put_note_to_db,

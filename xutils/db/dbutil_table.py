@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 22:42:08
+@LastEditTime : 2023-03-18 23:06:41
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -266,19 +266,30 @@ class LdbTable:
         @param {string} id_type id类型
         """
         self._check_value(obj)
-        id_value = self.id_gen.create_new_id(id_type, id_value)
 
-        user_name = None
-        if self._need_check_user:
-            user_name = obj.get(self.user_attr)
+        if id_value != None:
+            try_times = 1
+        else:
+            try_times = 10
 
-        key = self._build_key_with_user(id_value, user_name=user_name)
+        with get_write_lock(self.table_name):
+            # TODO 优化加锁逻辑
+            for i in range(try_times):
+                id_value = self.id_gen.create_new_id(id_type, id_value)
+                user_name = None
+                if self._need_check_user:
+                    user_name = obj.get(self.user_attr)
 
-        obj[self.key_name] = key
-        obj[self.id_name] = id_value
+                key = self._build_key_with_user(id_value, user_name=user_name)
+                conflict = self.get_by_key(key)
+                if conflict != None:
+                    continue
 
-        self._put_obj(key, obj)
-        return id_value
+                obj[self.key_name] = key
+                obj[self.id_name] = id_value
+
+                self._put_obj(key, obj)
+                return id_value
 
     def insert_by_user(self, user_name, obj, id_type="auto_increment"):
         """@deprecated 定义user_attr之后使用insert即可满足
@@ -289,11 +300,16 @@ class LdbTable:
 
         validate_str(user_name, "invalid user_name")
         self._check_value(obj)
-
-        id_value = self._create_new_id(id_type)
-        key = self._build_key_with_user(id_value, user_name)
-        self._put_obj(key, obj)
-        return key
+            
+        with get_write_lock(self.table_name):
+            for i in range(10):
+                id_value = self._create_new_id(id_type)
+                key = self._build_key_with_user(id_value, user_name)
+                conflict = self.get_by_key(key)
+                if conflict != None:
+                    continue
+                self._put_obj(key, obj)
+                return key
 
     def update(self, obj):
         """从`obj`中获取主键`key`进行更新"""

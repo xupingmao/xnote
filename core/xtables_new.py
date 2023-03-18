@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 15:55:19
+@LastEditTime : 2023-03-18 22:52:22
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -63,6 +63,9 @@ def init_old_table():
     db = dbutil.register_table("user_session_rel", "用户会话关系")
     db.is_deleted = True
 
+    db = dbutil.register_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
+    db.is_deleted = True
+
 def init_note_tables():
     # 笔记信息
     dbutil.register_table("note_tags", "笔记标签绑定",
@@ -78,8 +81,9 @@ def init_note_tables():
     db = dbutil.register_table(
         "note_index", "笔记索引，不包含内容", category="note")
     db.register_index("parent_id", comment = "父级笔记ID")
-    db.register_index("uk_name", columns=["creator", "name"])
-    db.register_index("uk_ctime", columns=["creator", "ctime"])
+    db.register_index("name", columns=["creator", "name"])
+    db.register_index("ctime", columns=["creator", "ctime"])
+    db.register_index("skey", columns=["creator", "skey"])
 
     # 用户维度笔记索引
     db = dbutil.register_table("note_tiny", "用户维度的笔记索引",
@@ -112,7 +116,7 @@ def init_note_tables():
 
 @xutils.async_func_deco()
 def build_index_async():
-    dbutil.get_table("note_index").rebuild_index("v4")
+    dbutil.get_table("note_index").rebuild_index("v5")
     dbutil.get_table("note_tiny").rebuild_index("v3")
     dbutil.get_table("plugin_visit_log").rebuild_index("v2")
     dbutil.get_table("note_public").rebuild_index("v1")
