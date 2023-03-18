@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-05 20:31:12
+@LastEditTime : 2023-03-18 17:23:30
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -21,6 +21,29 @@ tag_bind_db = dbutil.get_table("note_tags")
 tag_meta_db = dbutil.get_table("note_tag_meta")
 # TODO 可以考虑使用 parent_id 代替 tag_meta.tag_type
 
+
+class TagBind(Storage):
+    """标签绑定信息"""
+    def __init__(self):
+        self.note_id = ""
+        self.user_name = ""
+        self.tags = []
+        self.parent_id = ""
+
+def dict_to_tag_bind(dict_value):
+    if dict_value == None:
+        return None
+    bind = TagBind()
+    bind.update(**dict_value)
+    return bind
+
+class TagMeta(Storage):
+    """标签元信息"""
+    def __init__(self):
+        self.user = ""
+        self.tag_name = ""
+        self.tag_type = "" # group - 笔记本标签 note-笔记标签 global-全局标签(不分区笔记本还是笔记)
+        self.amount = 0
 
 def get_tags(creator, note_id):
     note_tags = tag_bind_db.get_by_id(note_id, user_name=creator)
@@ -39,7 +62,8 @@ class TagBindDao:
 
     @staticmethod
     def get_by_note_id(user_name, note_id):
-        return tag_bind_db.get_by_id(note_id, user_name=user_name)
+        record = tag_bind_db.get_by_id(note_id, user_name=user_name)
+        return dict_to_tag_bind(record)
 
     @staticmethod
     def count_user_tag(user_name = "", tag_name = "", parent_id=None):
@@ -303,10 +327,7 @@ def handle_tag_for_note(note_info):
     for tag_code in note.tags:
         tag_name = get_name_by_code(tag_code)
         tag_info = Storage(code = tag_code, name = tag_name)
-        if tag_code != tag_name:
-            tag_info.url = "/note/tagname/%s" % tag_code
-        else:
-            tag_info.url = "/note/%s?tag=%s" % (note.parent_id, xutils.quote(tag_name))
+        tag_info.url = "/note/tagname/%s" % xutils.quote(tag_code)
 
         tag_info_list.append(tag_info)
     note.tag_info_list = tag_info_list
