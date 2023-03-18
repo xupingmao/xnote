@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 19:13:55
+@LastEditTime : 2023-03-18 19:17:59
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -186,16 +186,16 @@ class Leader(NodeManagerBase):
             value["seq"] = int(seq)
             return value
 
-        result = []
+        data_list = []
         # 预读一位 用于获取下一个key
         binlogs = self.binlog.list(last_seq, limit + 1, map_func=map_func)
         if self.log_debug:
             logging.debug("binlogs:%s", binlogs)
 
         has_next = len(binlogs) > limit
-        next_key = ""
+        next_seq = ""
         if has_next:
-            next_key = binlogs[-1].key
+            next_seq = binlogs[-1].seq
 
         for log in binlogs[:limit]:
             key = log.key
@@ -203,9 +203,14 @@ class Leader(NodeManagerBase):
             if log.value == None:
                 log.optype = "delete"
                 
-            result.append(log)
+            data_list.append(log)
 
-        return dict(code="success", data=result, has_next = has_next, next_key = next_key)
+        result = Storage()
+        result.code = "success"
+        result.data = data_list
+        result.has_next = has_next
+        result.next_seq = next_seq
+        return result
 
     def list_db(self, last_key, limit=20):
         def filter_func(key, value):
