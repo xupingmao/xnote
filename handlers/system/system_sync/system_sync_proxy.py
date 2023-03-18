@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 19:02:54
+@LastEditTime : 2023-03-18 19:22:44
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -206,7 +206,7 @@ class HttpClient:
     @log_mem_info_deco("proxy.list_binlog")
     def list_binlog(self, last_seq) -> dict:
         assert isinstance(last_seq, int)
-        params = dict(last_seq=str(last_seq))
+        params = dict(last_seq=str(last_seq), include_req_seq=False)
 
         leader_host = self.host
         leader_token = self.token

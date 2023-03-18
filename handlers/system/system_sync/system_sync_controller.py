@@ -319,12 +319,13 @@ class LeaderHandler(SyncHandler):
 
         if p == "list_binlog":
             binlog_last_seq = xutils.get_argument("last_seq", 0, type=int)
-            limit = xutils.get_argument("limit", 20, type=int)
-            return LEADER.list_binlog(binlog_last_seq, limit)
+            limit = xutils.get_argument_int("limit", 20)
+            include_req_seq = xutils.get_argument_bool("include_req_seq", True)
+            return LEADER.list_binlog(binlog_last_seq, limit, include_req_seq=include_req_seq)
 
         if p == "list_db":
             last_key = xutils.get_argument("last_key", "")
-            limit = xutils.get_argument("limit", 20, type=int)
+            limit = xutils.get_argument_int("limit", 20)
             data = LEADER.list_db(last_key, limit)
             return dict(code="success", data=data)
 

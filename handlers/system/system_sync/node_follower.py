@@ -1,10 +1,13 @@
 # -*- coding:utf-8 -*-
-# @author xupingmao
-# @since 2022/02/12 18:13:41
-# @modified 2022/02/26 18:55:14
-# @filename node_follower.py
-
-"""从节点管理"""
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-02-12 18:13:41
+@LastEditors  : xupingmao
+@LastEditTime : 2023-03-18 19:19:59
+@FilePath     : /xnote/handlers/system/system_sync/node_follower.py
+@Description  : 从节点管理
+"""
 
 import time
 import logging

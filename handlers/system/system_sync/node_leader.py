@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 19:17:59
+@LastEditTime : 2023-03-18 19:32:14
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -171,7 +171,10 @@ class Leader(NodeManagerBase):
             return True
         return key.startswith(skipped_prefix_tuple)
 
-    def list_binlog(self, last_seq, limit=20):
+    def list_binlog(self, last_seq, limit=20, include_req_seq=True):
+        """列出指定条件的binlog
+        include_req_seq: 是否包含请求的seq对应的binlog
+        """
         sync_diff = self.binlog.last_seq - last_seq
         out_of_sync = sync_diff > self.binlog.count_size()
 
@@ -192,12 +195,10 @@ class Leader(NodeManagerBase):
         if self.log_debug:
             logging.debug("binlogs:%s", binlogs)
 
-        has_next = len(binlogs) > limit
-        next_seq = ""
-        if has_next:
-            next_seq = binlogs[-1].seq
-
-        for log in binlogs[:limit]:
+        for log in binlogs:
+            if not include_req_seq and log.seq == last_seq:
+                continue
+            
             key = log.key
             log.value = dbutil.get(key)
             if log.value == None:
@@ -208,8 +209,6 @@ class Leader(NodeManagerBase):
         result = Storage()
         result.code = "success"
         result.data = data_list
-        result.has_next = has_next
-        result.next_seq = next_seq
         return result
 
     def list_db(self, last_key, limit=20):
