@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 00:23:35
+@LastEditTime : 2023-03-19 00:44:38
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -160,6 +160,9 @@ def after_message_create_or_update(msg_item):
         MessageDao.update(msg_item)
     after_upsert_async(msg_item)
 
+def after_message_delete(msg_item):
+    process_message(msg_item)
+    after_upsert_async(msg_item)
 
 @xutils.async_func_deco()
 def after_upsert_async(msg_item):
@@ -557,7 +560,7 @@ class DeleteAjaxHandler:
         # 删除并刷新统计信息
         MessageDao.delete(id)
         MessageDao.refresh_message_stat(msg.user)
-        after_message_create_or_update(msg)
+        after_message_delete(msg)
 
         return dict(code="success")
 

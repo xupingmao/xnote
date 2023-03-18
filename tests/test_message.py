@@ -23,8 +23,10 @@ json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
-MSG_DB = dbutil.get_table("message")
+# 必须init之后再import
+import handlers.message.dao as msg_dao
 
+MSG_DB = dbutil.get_table("message")
 
 def get_script_path(name):
     return os.path.join(xconfig.SCRIPTS_DIR, name)
@@ -205,9 +207,31 @@ class TestMain(BaseTestCase):
 
         from handlers.message.message import get_or_create_keyword
 
-        keyword = get_or_create_keyword(xauth.current_name(), "#test#", "127.0.0.1")
+        user_name = xauth.current_name()
+        keyword = get_or_create_keyword(user_name, "#test#", "127.0.0.1")
         print(keyword)
         self.assertTrue(keyword.is_marked)
+
+    def test_message_keyword_delete(self):
+        user_name = xauth.current_name()
+        tagname = "#delete-test#"
+
+        keyword = Storage()
+        keyword.tag = "key"
+        keyword.user = user_name
+        keyword.content = tagname
+        keyword.ctime = dateutil.format_datetime()
+        keyword.mtime = dateutil.format_datetime()
+        keyword.date = dateutil.format_date()
+
+        key = msg_dao.create_message(**keyword)
+
+        resp = json_request("/message/delete", method="POST", data=dict(id=key))
+        self.assertEqual("success", resp["code"])
+
+        keyword = msg_dao.get_by_content(user_name, "key", tagname)
+        print(keyword)
+        self.assertIsNone(keyword)
 
     def test_message_calendar(self):
         self.check_OK("/message/calendar")
