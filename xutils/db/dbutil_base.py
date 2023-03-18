@@ -487,7 +487,7 @@ def db_get(key, default_value=None):
 
 
 def _db_batch_get_mysql(key_list, default_value=None):
-    # type: (list[str], any) -> dict[str, any]
+    # type: (list[str], object) -> dict[str, object]
     key_bytes_list = []
     for key in key_list:
         key_bytes_list.append(key.encode("utf-8"))
@@ -504,7 +504,7 @@ def _db_batch_get_mysql(key_list, default_value=None):
 
 
 def db_batch_get(key_list, default_value=None):
-    # type: (list[str], any) -> dict[str, any]
+    # type: (list[str], object) -> dict[str, object]
     """批量查询"""
     check_leveldb()
     if _driver_name == "mysql":

@@ -208,12 +208,19 @@ META_HTML = """
 </style>
 
 {% include system/component/db_nav.html %}
+{% init show_delete = False %}
 
 <div class="card admin-stat">
     <div class="card-title"> 
         <span>元数据</span>
 
         <div class="float-right">
+            {% if show_delete == False %}
+                <a class="btn btn-default" href="?p=meta&show_delete=true">查看删除的表</a>
+            {% else %}
+                <a class="btn btn-default" href="?p=meta">查看活跃的表</a>
+            {% end %}
+            
             {% if hide_index != "true" %}
                 <a class="btn btn-default" href="?p={{p}}&hide_index=true&tab=meta">隐藏索引</a>
             {% else %}
@@ -411,11 +418,19 @@ class DbScanHandler(BasePlugin):
             return META_HTML
         return SCAN_HTML
 
+    def is_visible(self, table_info: dbutil.TableInfo, show_delete):
+        if show_delete:
+            return table_info.is_deleted
+        else:
+            return not table_info.is_deleted
+
     def handle_admin_stat_list(self, kw):
         p = xutils.get_argument("p", "")
+        show_delete = xutils.get_argument_bool("show_delete", False)
+
         if p != "meta":
             return
-        hide_index = xutils.get_argument("hide_index", "true")
+        hide_index = xutils.get_argument_bool("hide_index", True)
 
         admin_stat_list = []
         if xauth.is_admin():
@@ -424,7 +439,9 @@ class DbScanHandler(BasePlugin):
                                   key=lambda x: (x.category, x.name))
             for table_info in table_values:
                 name = table_info.name
-                if hide_index == "true" and name.find("$")>=0:
+                if hide_index and name.find("$")>=0:
+                    continue
+                if not self.is_visible(table_info, show_delete):
                     continue
                 admin_stat_list.append([table_info.category,
                                         table_info.name,
@@ -432,6 +449,7 @@ class DbScanHandler(BasePlugin):
                                         dbutil.count_table(name, use_cache=True)])
 
         kw.admin_stat_list = admin_stat_list
+        kw.show_delete = show_delete
 
 
 xurls = (

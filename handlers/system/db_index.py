@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-14 12:31:02
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-14 22:50:32
+@LastEditTime : 2023-03-18 15:26:26
 @FilePath     : /xnote/handlers/system/db_index.py
 @Description  : 数据库索引管理
 """
@@ -35,6 +35,10 @@ class IndexHandler:
         index_list = []
         
         for table_name in dbutil.get_table_names():
+            table_info = dbutil.get_table_info(table_name)
+            assert table_info != None
+            if table_info.is_deleted:
+                continue
             index_names = dbutil.get_table_index_names(table_name)
             if len(index_names) > 0:
                 index_list.append(TableIndex(table_name, index_names))
