@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 23:06:41
+@LastEditTime : 2023-03-19 00:08:39
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -59,6 +59,7 @@ class LdbTable:
         self.id_name = "_id"
         self.prefix = table_name
         self.user_name = user_name
+        self.table_info = table_info
         self.index_names = table_info.get_index_names()
         self._need_check_user = table_info.check_user
         self.user_attr = None
@@ -272,24 +273,24 @@ class LdbTable:
         else:
             try_times = 10
 
+        user_name = None
+        if self._need_check_user:
+            user_name = obj.get(self.user_attr)
+
         with get_write_lock(self.table_name):
             # TODO 优化加锁逻辑
             for i in range(try_times):
-                id_value = self.id_gen.create_new_id(id_type, id_value)
-                user_name = None
-                if self._need_check_user:
-                    user_name = obj.get(self.user_attr)
-
-                key = self._build_key_with_user(id_value, user_name=user_name)
+                new_id = self.id_gen.create_new_id(id_type, id_value)
+                key = self._build_key_with_user(new_id, user_name=user_name)
                 conflict = self.get_by_key(key)
                 if conflict != None:
                     continue
 
                 obj[self.key_name] = key
-                obj[self.id_name] = id_value
+                obj[self.id_name] = new_id
 
                 self._put_obj(key, obj)
-                return id_value
+                return new_id
 
     def insert_by_user(self, user_name, obj, id_type="auto_increment"):
         """@deprecated 定义user_attr之后使用insert即可满足
@@ -303,8 +304,8 @@ class LdbTable:
             
         with get_write_lock(self.table_name):
             for i in range(10):
-                id_value = self._create_new_id(id_type)
-                key = self._build_key_with_user(id_value, user_name)
+                new_id = self._create_new_id(id_type)
+                key = self._build_key_with_user(new_id, user_name)
                 conflict = self.get_by_key(key)
                 if conflict != None:
                     continue
@@ -419,6 +420,9 @@ class LdbTable:
 
         if key_from != None:
             key_from = self._build_key(key_from)
+        
+        if user_name == None and where != None and self.user_attr != None:
+            user_name = where.get(self.user_attr)
 
         if user_name != None:
             prefix = self.table_name + ":" + user_name
@@ -448,7 +452,7 @@ class LdbTable:
             return result[0]
         else:
             return None
-
+    
     def get_last(self, filter_func=None, *, user_name=None):
         """读取最后一个满足条件的数据"""
         result = self.list(limit=1, reverse=True,

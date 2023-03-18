@@ -19,7 +19,7 @@ dbutil.register_table_index("message", "tag")
 dbutil.register_table("msg_search_history", "备忘搜索历史",
                       check_user=True, user_attr="user")
 
-dbutil.register_table("msg_key", "备忘关键字/标签")
+dbutil.register_table("msg_key", "备忘关键字/标签", check_user=True, user_attr="user")
 dbutil.register_table("msg_task_idx", "待办索引")
 dbutil.register_table("msg_history", "备忘历史")
 
@@ -29,7 +29,7 @@ CREATE_MAX_RETRY = 20
 MOBILE_LENGTH = 11
 VALID_TAG_SET = set(["task", "done", "log", "key", "date"])
 
-_keyword_db = dbutil.get_hash_table("msg_key")
+_keyword_db = dbutil.get_table("msg_key")
 _msg_db = dbutil.get_table("message")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
 _debug = False
@@ -149,9 +149,10 @@ def _create_message_without_date(kw):
     kw['date'] = dateutil.format_date(ctime)
 
     if tag == 'key':
-        key = "msg_key:%s:%s" % (kw['user'], dbutil.timeseq())
+        _keyword_db.insert(kw)
+        key = kw["_key"]
         kw["id"] = key
-        dbutil.put(key, kw)
+        _keyword_db.update(kw)
     else:
         _msg_db.insert(kw)
         key = kw["_key"]
@@ -463,12 +464,14 @@ def get_content_filter_func(tag, content):
 def get_by_content(user, tag, content):
     if tag == "key":
         # tag是独立的表，不需要比较tag
-        filter_func = get_content_filter_func(None, content)
-        msg_list = dbutil.prefix_list("msg_key:%s" % user, filter_func, 0, 1)
-        return functions.first_or_none(msg_list)
+        return _keyword_db.get_first(where = dict(user = user, content=content))
     else:
         return None
 
+def delete_keyword(user, content):
+    first = _keyword_db.get_first(where = dict(user = user, content = content))
+    if first != None:
+        _keyword_db.delete(first)
 
 def list_task(user, offset=0, limit=xconfig.PAGE_SIZE):
     return list_by_tag(user, "task", offset, limit)

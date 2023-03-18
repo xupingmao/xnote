@@ -1,13 +1,17 @@
 # -*- coding:utf-8 -*-
-# Created by xupingmao on 2017/05/29
-# @since 2017/08/04
-# @modified 2022/04/11 23:23:57
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2017-05-29 00:00:00
+@LastEditors  : xupingmao
+@LastEditTime : 2023-03-19 00:23:35
+@FilePath     : /xnote/handlers/message/message.py
+@Description  : 描述
+"""
 
 """短消息处理，比如任务、备忘、临时文件等等
-
 tag: 短消息的类型
 key/keyword: 短消息关键字
-
 """
 import time
 import math
@@ -110,7 +114,10 @@ def get_current_message_stat():
 def update_keyword_amount(message, user_name, key):
     msg_list, amount = dao.search_message(user_name, key, 0, 1)
     message.amount = amount
-    MessageDao.update(message)
+    if amount == 0:
+        msg_dao.delete_keyword(user_name, key)
+    else:
+        MessageDao.update(message)
     xutils.log("[message.refresh] user:%s,key:%s,amount:%s" %
                (user_name, key, amount))
 
@@ -550,6 +557,8 @@ class DeleteAjaxHandler:
         # 删除并刷新统计信息
         MessageDao.delete(id)
         MessageDao.refresh_message_stat(msg.user)
+        after_message_create_or_update(msg)
+
         return dict(code="success")
 
 
