@@ -1,14 +1,21 @@
 # -*- coding:utf-8 -*-
-# @author xupingmao
-# @since 2022/02/12 18:13:41
-# @modified 2022/04/18 23:22:15
-# @filename node_leader.py
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-02-12 18:13:41
+@LastEditors  : xupingmao
+@LastEditTime : 2023-03-18 19:13:55
+@FilePath     : /xnote/handlers/system/system_sync/node_leader.py
+@Description  : 描述
+"""
+
 
 import threading
 import time
 import xauth
 import xconfig
 import xutils
+import logging
 
 from xutils import dateutil
 from xutils import textutil
@@ -48,6 +55,7 @@ class Leader(NodeManagerBase):
     _lock = threading.RLock()
     FOLLOWER_DICT = dict()
     binlog = BinLog.get_instance()
+    log_debug = False
 
     def get_follower_info(self, client_id):
         client_info = self.FOLLOWER_DICT.get(client_id)
@@ -179,11 +187,17 @@ class Leader(NodeManagerBase):
             return value
 
         result = []
-        binlogs = self.binlog.list(last_seq, limit, map_func=map_func)
-        print("binlogs:", binlogs)
-        has_next = len(binlogs)>=limit
+        # 预读一位 用于获取下一个key
+        binlogs = self.binlog.list(last_seq, limit + 1, map_func=map_func)
+        if self.log_debug:
+            logging.debug("binlogs:%s", binlogs)
 
-        for log in binlogs:
+        has_next = len(binlogs) > limit
+        next_key = ""
+        if has_next:
+            next_key = binlogs[-1].key
+
+        for log in binlogs[:limit]:
             key = log.key
             log.value = dbutil.get(key)
             if log.value == None:
@@ -191,7 +205,7 @@ class Leader(NodeManagerBase):
                 
             result.append(log)
 
-        return dict(code="success", data=result, has_next = has_next)
+        return dict(code="success", data=result, has_next = has_next, next_key = next_key)
 
     def list_db(self, last_key, limit=20):
         def filter_func(key, value):

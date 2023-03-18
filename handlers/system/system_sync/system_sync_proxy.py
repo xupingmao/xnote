@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-06 10:54:52
+@LastEditTime : 2023-03-18 19:02:54
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -204,7 +204,7 @@ class HttpClient:
         return netutil.http_get(url, params=params)
 
     @log_mem_info_deco("proxy.list_binlog")
-    def list_binlog(self, last_seq):
+    def list_binlog(self, last_seq) -> dict:
         assert isinstance(last_seq, int)
         params = dict(last_seq=str(last_seq))
 
@@ -216,6 +216,7 @@ class HttpClient:
         result = self.http_get(url, params=params)
         try:
             result_obj = textutil.parse_json(result)
+            assert isinstance(result_obj, dict)
             return result_obj
         except:
             logging.error("解析json失败:%s", result)

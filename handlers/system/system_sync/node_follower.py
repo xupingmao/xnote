@@ -296,7 +296,7 @@ class DBSyncer:
         assert state in ("full", "binlog")
         CONFIG.put("follower_db_sync_state", state)
     
-    def get_db_last_key(self):
+    def get_db_last_key(self) -> str:
         # 全量同步使用，按照key进行遍历
         return CONFIG.get("follower_db_last_key", "")
 
@@ -366,11 +366,11 @@ class DBSyncer:
             logging.debug("-------------\nresp:%s\n\n", result)
 
         result_obj = textutil.parse_json(result)
-
-        return self._sync_db_full_step_work(result_obj, last_key)
+        assert isinstance(result_obj, dict)
+        count = self._sync_db_full_step_work(result_obj, last_key)
 
     @log_mem_info_deco("sync_by_binlog")
-    def sync_by_binlog(self, proxy): # type: (HttpClient) -> any
+    def sync_by_binlog(self, proxy): # type: (HttpClient) -> object
         has_next = True
         loops = 0
         last_seq = ""
@@ -389,6 +389,7 @@ class DBSyncer:
 
             code = result_obj.get("code")
             data_list = result_obj.get("data")
+            has_next = result_obj.get("has_next")
 
             if code == "success":
                 self.sync_by_binlog_step(result_obj)
@@ -439,7 +440,7 @@ class DBSyncer:
         else:
             logging.info("已经保持同步")
 
-    def _sync_db_full_step_work(self, result_obj, last_key):
+    def _sync_db_full_step_work(self, result_obj: dict, last_key):
         # type: (dict, str) -> int
         code = result_obj.get("code")
         count = 0
