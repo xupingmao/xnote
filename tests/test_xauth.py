@@ -58,8 +58,8 @@ class TestXauth(BaseTestCase):
 
     def test_create_and_list_user_session(self):
         # 先清理
-        for sid in xauth.list_user_session_id("admin"):
-            xauth.delete_user_session_by_id(sid)
+        for session_info in xauth.list_user_session_detail("admin"):
+            xauth.delete_user_session_by_id(session_info.sid)
 
         # 创建并且查询
         xauth.create_user_session("admin")

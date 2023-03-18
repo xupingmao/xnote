@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2022-11-26 19:13:10
+@LastEditTime : 2023-03-18 16:07:15
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -82,7 +82,8 @@ class TableIndex:
                 result.append(encode_index_value(value))
             return ",".join(result)
         else:
-            value = obj.get(self.index_name)
+            index_attr = self.index_info.columns[0]
+            value = obj.get(index_attr)
             return encode_index_value(value)
 
     def update_index(self, old_obj, new_obj, batch: BatchInterface, force_update=False):

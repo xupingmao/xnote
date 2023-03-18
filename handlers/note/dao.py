@@ -36,16 +36,10 @@ def register_note_table(name, description, check_user=False, user_attr=None):
     dbutil.register_table(name, description, category="note",
                           check_user=check_user, user_attr=user_attr)
 
-register_note_table("note_full", "笔记完整信息 <note_full:note_id>")
 register_note_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
 register_note_table("notebook", "笔记分组", check_user=True, user_attr="creator")
 register_note_table("token", "用于分享的令牌")
 register_note_table("note_history", "笔记的历史版本")
-
-# 公开分享的笔记索引
-register_note_table("note_public", "公共笔记索引")
-dbutil.register_table_index("note_public", "hot_index")
-dbutil.register_table_index("note_public", "share_time")
 
 NOTE_DAO = xutils.DAO("note")
 

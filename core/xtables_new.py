@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 14:48:38
+@LastEditTime : 2023-03-18 15:55:19
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -35,8 +35,9 @@ def init():
     # 用户信息
     dbutil.register_table("user", "用户信息表")
     dbutil.register_table("user_config", "用户配置表")
-    dbutil.register_table("session", "用户会话信息")
-    dbutil.register_table("user_session_rel", "用户会话关系")
+    db = dbutil.register_table("session", "用户会话信息")
+    db.register_index("user", columns=["user_name"])
+    
     dbutil.register_table("user_stat", "用户数据统计")
 
     db = dbutil.register_table("plugin_visit", "插件访问日志")
@@ -59,14 +60,19 @@ def init_old_table():
     db.register_index("url", comment = "页面URL")
     db.is_deleted = True
 
+    db = dbutil.register_table("user_session_rel", "用户会话关系")
+    db.is_deleted = True
+
 def init_note_tables():
-  # 笔记信息
+    # 笔记信息
     dbutil.register_table("note_tags", "笔记标签绑定",
                           category="note", user_attr="user")
     dbutil.register_table("note_tag_meta", "笔记标签",
                           category="note", user_attr="user")
     dbutil.register_table("note_draft", "笔记草稿", category="note")
     dbutil.register_table("note_lock", "笔记编辑锁", category="note")
+
+    dbutil.register_table("note_full", "笔记的完整信息")
 
     # ID维度笔记索引
     db = dbutil.register_table(
