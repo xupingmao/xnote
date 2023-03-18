@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 19:32:14
+@LastEditTime : 2023-03-18 19:36:27
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -208,7 +208,7 @@ class Leader(NodeManagerBase):
 
         result = Storage()
         result.code = "success"
-        result.data = data_list
+        result.data = data_list[:limit]
         return result
 
     def list_db(self, last_key, limit=20):
