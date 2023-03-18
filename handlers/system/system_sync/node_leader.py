@@ -155,9 +155,12 @@ class Leader(NodeManagerBase):
 
         return result
 
-    def skip_db_sync(self, key):
+    def skip_db_sync(self, key:str):
         skipped_prefix_tuple = ("_binlog:", "_index$", "cluster_config:",
                                 "fs_index:", "fs_sync_index:", "fs_sync_index_copy:")
+        table_name = key.split(":", 1)[0]
+        if table_name.find("$")>=0:
+            return True
         return key.startswith(skipped_prefix_tuple)
 
     def list_binlog(self, last_seq, limit=20):
@@ -178,6 +181,7 @@ class Leader(NodeManagerBase):
         result = []
         binlogs = self.binlog.list(last_seq, limit, map_func=map_func)
         print("binlogs:", binlogs)
+        has_next = len(binlogs)>=limit
 
         for log in binlogs:
             key = log.key
@@ -187,7 +191,7 @@ class Leader(NodeManagerBase):
                 
             result.append(log)
 
-        return dict(code="success", data=result)
+        return dict(code="success", data=result, has_next = has_next)
 
     def list_db(self, last_key, limit=20):
         def filter_func(key, value):
