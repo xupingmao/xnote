@@ -1,8 +1,14 @@
 # -*- coding:utf-8 -*-
-# @author xupingmao
-# @since 2021/12/04 21:22:40
-# @modified 2022/04/16 08:53:11
-# @filename dbutil_table.py
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2021-12-04 21:22:40
+@LastEditors  : xupingmao
+@LastEditTime : 2023-03-18 22:42:08
+@FilePath     : /xnote/xutils/db/dbutil_table.py
+@Description  : 数据库表-API
+"""
+
 from urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
@@ -274,7 +280,7 @@ class LdbTable:
         self._put_obj(key, obj)
         return id_value
 
-    def insert_by_user(self, user_name, obj, id_type="timeseq"):
+    def insert_by_user(self, user_name, obj, id_type="auto_increment"):
         """@deprecated 定义user_attr之后使用insert即可满足
         指定用户名插入数据
         """
@@ -556,7 +562,7 @@ class LdbTable:
         index_info = IndexInfo.get_table_index_info(
             self.table_name, index_name)
         if index_info == None:
-            raise Exception("index not found: %s", index_name)
+            raise Exception("index not found: %s" % index_name)
 
         prefix = self._get_index_prefix_by_value(index_name, index_value, where = where, user_name=user_name)
         map_func = self.create_index_map_func(
@@ -577,7 +583,7 @@ class LdbTable:
         index_info = IndexInfo.get_table_index_info(
             self.table_name, index_name)
         if index_info == None:
-            raise Exception("index not found: %s", index_name)
+            raise Exception("index not found: %s" % index_name)
 
         prefix = self._get_index_prefix_by_value(index_name, index_value, user_name=user_name)
         map_func = self.create_index_map_func(
