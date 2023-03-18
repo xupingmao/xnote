@@ -3,7 +3,7 @@
         "./core",
         "./lib",
     ],
-    "fileheader.configObj": {
+    "fileheader.configObj": { // koroFileHeader
         "autoAdd": true, // 检测文件没有头部注释，自动添加文件头部注释
         "autoAddLine": 20, // 文件超过多少行数 不再自动添加头部注释
         "wideSame": true, // 头部注释等宽设置

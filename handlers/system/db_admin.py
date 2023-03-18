@@ -283,11 +283,11 @@ class DbScanHandler(BasePlugin):
 
     @xauth.login_required("admin")
     def do_search(self):
-        prefix = xutils.get_argument("prefix", "")
+        prefix = xutils.get_argument_str("prefix", "")
         cursor = xutils.get_argument("cursor", "")
         keyword = xutils.get_argument("keyword", "")
-        reverse = xutils.get_argument("reverse", False, type=bool)
-        q_user_name = xutils.get_argument("q_user_name", "")
+        reverse = xutils.get_argument_bool("reverse", False)
+        q_user_name = xutils.get_argument_str("q_user_name", "")
         result = []
 
         if q_user_name != "":
@@ -332,10 +332,10 @@ class DbScanHandler(BasePlugin):
     def handle(self, input):
         action = xutils.get_argument("action", "")
         db_key = xutils.get_argument("db_key", "")
-        q_user_name = xutils.get_argument("q_user_name", "")
-        prefix = xutils.get_argument("prefix", "")
+        q_user_name = xutils.get_argument_str("q_user_name", "")
+        prefix = xutils.get_argument_str("prefix", "")
         reverse = xutils.get_argument("reverse", "")
-        key_from = xutils.get_argument("key_from", "")
+        key_from = xutils.get_argument_str("key_from", "")
 
         if action == "delete":
             return self.do_delete()
@@ -375,13 +375,16 @@ class DbScanHandler(BasePlugin):
         if key_from == "" and real_prefix != "":
             key_from = real_prefix + ":"
 
+        reverse = False
+        key_to = b'\xff'
         if need_reverse:
             key_to = key_from.encode("utf8") + b'\xff'
-            dbutil.scan(key_to=key_to, func=func,
-                        reverse=True, parse_json=False)
+            reverse = True
         else:
-            dbutil.scan(key_from=key_from, func=func,
-                        reverse=False, parse_json=False)
+            reverse = False
+
+        dbutil.scan(key_from=key_from, key_to=key_to, func=func,
+                    reverse=reverse, parse_json=False)
 
         kw = Storage()
         kw.result = result
@@ -421,7 +424,7 @@ class DbScanHandler(BasePlugin):
                                   key=lambda x: (x.category, x.name))
             for table_info in table_values:
                 name = table_info.name
-                if hide_index == "true" and name.startswith("_index"):
+                if hide_index == "true" and name.find("$")>=0:
                     continue
                 admin_stat_list.append([table_info.category,
                                         table_info.name,

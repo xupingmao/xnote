@@ -295,6 +295,7 @@ class TableInfo:
         self.category = category
         self.check_user = False
         self.user_attr = None
+        self.is_deleted = False
 
     @classmethod
     def register(cls, name, description, category):
@@ -569,11 +570,13 @@ def scan(key_from=None,
     @param {boolean} reverse
     """
     check_leveldb()
+    assert isinstance(key_from, (str, bytes))
+    assert isinstance(key_to, (str, bytes))
 
-    if key_from != None and isinstance(key_from, str):
+    if isinstance(key_from, str):
         key_from = key_from.encode("utf-8")
 
-    if key_to != None and isinstance(key_to, str):
+    if isinstance(key_to, str):
         key_to = key_to.encode("utf-8")
 
     iterator = _leveldb.RangeIter(

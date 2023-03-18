@@ -4,9 +4,9 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-15 23:47:32
-@FilePath     : /duck_rushd:/projects/99-myprojects/xnote/core/xtables_new.py
-@Description  : 描述
+@LastEditTime : 2023-03-18 14:48:38
+@FilePath     : /xnote/core/xtables_new.py
+@Description  : 数据库-表定义
 """
 
 import xutils
@@ -14,13 +14,15 @@ from xutils import dbutil
 
 @xutils.log_init_deco("xtables_new")
 def init():
-
-    init_note_tables()
-
     # 使用NoSQL风格的数据库接口
     # 数据库索引保证最终一致，不保证强一致
     dbutil.register_table("sys_log", "系统日志")
     dbutil.register_table("dict", "词典")
+
+    init_note_tables()
+    # 初始化一些废弃的表，防止覆盖老版本数据
+    init_old_table()
+
 
     # 文件相关
     db = dbutil.register_table("fs_index", "文件索引")
@@ -37,9 +39,8 @@ def init():
     dbutil.register_table("user_session_rel", "用户会话关系")
     dbutil.register_table("user_stat", "用户数据统计")
 
-    # 统计数据
-    db = dbutil.register_table("plugin_visit_log", "插件访问日志", user_attr="user", check_user = True)
-    db.register_index("url", comment = "页面URL")
+    db = dbutil.register_table("plugin_visit", "插件访问日志")
+    db.register_index("uk_url", columns=["user", "url"])
 
     # 月度计划
     db = dbutil.register_table("month_plan", "月度计划")
@@ -52,6 +53,11 @@ def init():
     # 重建索引(系统会根据索引版本增量构建)
     build_index_async()
 
+def init_old_table():
+    # 统计数据
+    db = dbutil.register_table("plugin_visit_log", "插件访问日志", user_attr="user", check_user = True)
+    db.register_index("url", comment = "页面URL")
+    db.is_deleted = True
 
 def init_note_tables():
   # 笔记信息
@@ -66,6 +72,8 @@ def init_note_tables():
     db = dbutil.register_table(
         "note_index", "笔记索引，不包含内容", category="note")
     db.register_index("parent_id", comment = "父级笔记ID")
+    db.register_index("uk_name", columns=["creator", "name"])
+    db.register_index("uk_ctime", columns=["creator", "ctime"])
 
     # 用户维度笔记索引
     db = dbutil.register_table("note_tiny", "用户维度的笔记索引",
@@ -98,7 +106,7 @@ def init_note_tables():
 
 @xutils.async_func_deco()
 def build_index_async():
-    dbutil.get_table("note_index").rebuild_index("v3")
+    dbutil.get_table("note_index").rebuild_index("v4")
     dbutil.get_table("note_tiny").rebuild_index("v3")
     dbutil.get_table("plugin_visit_log").rebuild_index("v2")
     dbutil.get_table("note_public").rebuild_index("v1")
@@ -106,3 +114,4 @@ def build_index_async():
     dbutil.get_table("uv").rebuild_index("v1")
     dbutil.get_table("user_note_log").rebuild_index("v1")
     dbutil.get_table("message").rebuild_index("v1")
+    dbutil.get_table("note_share").rebuild_index("v1")

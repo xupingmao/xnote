@@ -30,6 +30,7 @@ from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
 from .dao_api import NoteDao
+from . import dao_log
 
 def register_note_table(name, description, check_user=False, user_attr=None):
     dbutil.register_table(name, description, category="note",
@@ -643,11 +644,11 @@ def create_token(type, id):
 
 
 def add_create_log(note):
-    NOTE_DAO.add_create_log(note.creator, note)
+    dao_log.add_create_log(note.creator, note)
 
 
 def add_visit_log(user_name, note):
-    NOTE_DAO.add_visit_log(user_name, note)
+    dao_log.add_visit_log(user_name, note)
 
 
 def remove_virtual_fields(note):
@@ -660,7 +661,7 @@ def remove_virtual_fields(note):
 def put_note_to_db(note_id, note):
     creator = note.creator
     # 增加编辑日志
-    NOTE_DAO.add_edit_log(creator, note)
+    dao_log.add_edit_log(creator, note)
 
     # 删除不需要持久化的数据
     remove_virtual_fields(note)
