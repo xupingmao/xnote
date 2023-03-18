@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 00:08:39
+@LastEditTime : 2023-03-19 00:33:55
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -291,6 +291,7 @@ class LdbTable:
 
                 self._put_obj(key, obj)
                 return new_id
+        raise Exception("insert conflict")
 
     def insert_by_user(self, user_name, obj, id_type="auto_increment"):
         """@deprecated 定义user_attr之后使用insert即可满足
@@ -311,6 +312,7 @@ class LdbTable:
                     continue
                 self._put_obj(key, obj)
                 return key
+        raise Exception("insert conflict")
 
     def update(self, obj):
         """从`obj`中获取主键`key`进行更新"""
