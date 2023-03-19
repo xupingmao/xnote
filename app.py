@@ -132,11 +132,11 @@ def try_init_sqlite():
 @log_mem_info_deco("try_init_kv_db")
 def try_init_kv_db():
     try:
-
         block_cache_size = xconfig.get_global_config("system.block_cache_size")
         write_buffer_size = xconfig.get_global_config(
             "system.write_buffer_size")
         max_open_files = xconfig.get_global_config("system.max_open_files")
+        db_log_debug = xconfig.get_system_config("db_log_debug")
 
         leveldb_kw = dict(block_cache_size=block_cache_size,
                           write_buffer_size=write_buffer_size,
@@ -191,6 +191,7 @@ def try_init_kv_db():
             try:
                 from xutils.db.driver_leveldb import LevelDBImpl
                 db_instance = LevelDBImpl(xconfig.DB_DIR, **leveldb_kw)
+                db_instance.log_debug = db_log_debug
             except ImportError:
                 if xutils.is_windows():
                     logging.warning("检测到Windows环境，自动切换到leveldbpy驱动")

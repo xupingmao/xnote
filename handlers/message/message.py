@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 00:44:38
+@LastEditTime : 2023-03-19 14:45:27
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -191,8 +191,8 @@ class ListAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
-        page = xutils.get_argument("page", 1, type=int)
+        pagesize = xutils.get_argument_int("pagesize", xconfig.PAGE_SIZE)
+        page = xutils.get_argument_int("page", 1)
         tag = xutils.get_argument("tag", "task")
         format = xutils.get_argument("format")
         offset = get_offset_from_page(page, pagesize)

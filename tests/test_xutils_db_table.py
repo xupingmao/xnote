@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-14 17:17:50
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-02 10:53:29
+@LastEditTime : 2023-03-19 15:49:27
 @FilePath     : /xnote/tests/test_xutils_db_table.py
 @Description  : table测试
 """
@@ -23,9 +23,9 @@ json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
-dbutil.register_table("test", "测试数据库")
-dbutil.register_table_index("test", "name")
-dbutil.register_table_index("test", "age")
+db = dbutil.register_table("test", "测试数据库")
+db.register_index("name")
+db.register_index("age")
 
 dbutil.register_table("test_user_db1", "测试数据库用户版v1")
 
@@ -149,3 +149,23 @@ class TestMain(BaseTestCase):
         new_id2 = dbutil.insert("test", obj2)
         new_id2_int = decode_id(new_id2)
         self.assertEqual(2, new_id2_int)
+
+    def test_where(self):
+        db = dbutil.get_table("test")
+        for item in db.iter(limit=-1):
+            db.delete(item)
+        
+        db.insert(dict(name = "name-1", age = 20))
+        db.insert(dict(name = "name-2", age = 21))
+
+        result = db.get_first(where = dict(name = "name-1"))
+        self.assertEqual(20, result.age)
+        self.assertEqual("name-1", result.name)
+
+        where = {
+            "name": {
+                "$prefix": "name"
+            }
+        }
+        result = db.list(where = where, limit = 20)
+        self.assertEqual(2, len(result))

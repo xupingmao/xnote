@@ -5,8 +5,11 @@
 # @filename driver_leveldb.py
 
 import leveldb
+import logging
 
 class LevelDBImpl:
+
+    log_debug = False
 
     def __init__(self, path, *, config_dict=None, **kw):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
@@ -26,6 +29,8 @@ class LevelDBImpl:
         return self._db.Delete(key, sync = sync)
 
     def RangeIter(self, *args, **kw):
+        if self.log_debug:
+            logging.info("RangeIter(args=%s, kw=%s)", args, kw)
         return self._db.RangeIter(*args, **kw)
 
     def CreateSnapshot(self):

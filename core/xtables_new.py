@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 22:52:22
+@LastEditTime : 2023-03-19 15:13:22
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -20,6 +20,7 @@ def init():
     dbutil.register_table("dict", "词典")
 
     init_note_tables()
+    init_message_tables()
     # 初始化一些废弃的表，防止覆盖老版本数据
     init_old_table()
 
@@ -64,6 +65,9 @@ def init_old_table():
     db.is_deleted = True
 
     db = dbutil.register_table("note_skey", "用户维度的skey索引 <note_skey:user:skey>")
+    db.is_deleted = True
+
+    db = dbutil.register_table("msg_task_idx", "待办索引")
     db.is_deleted = True
 
 def init_note_tables():
@@ -114,6 +118,18 @@ def init_note_tables():
     db.register_index("share_time")
 
 
+def init_message_tables():
+    db = dbutil.register_table("message", "短文本", check_user=True, user_attr="user")
+    db.register_index("date")
+    db.register_index("tag")
+    db.register_index("tag_ctime", columns=["tag", "ctime"])
+    db.register_index("ctime")
+
+    db = dbutil.register_table("msg_key", "备忘关键字/标签", check_user=True, user_attr="user")
+    dbutil.register_table("msg_search_history", "备忘搜索历史", check_user=True, user_attr="user")
+    dbutil.register_table("msg_history", "备忘历史")
+
+
 @xutils.async_func_deco()
 def build_index_async():
     dbutil.get_table("note_index").rebuild_index("v5")
@@ -123,5 +139,5 @@ def build_index_async():
     dbutil.get_table("comment").rebuild_index("v1")
     dbutil.get_table("uv").rebuild_index("v1")
     dbutil.get_table("user_note_log").rebuild_index("v1")
-    dbutil.get_table("message").rebuild_index("v1")
+    dbutil.get_table("message").rebuild_index("v2")
     dbutil.get_table("note_share").rebuild_index("v1")

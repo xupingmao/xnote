@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 00:33:55
+@LastEditTime : 2023-03-19 15:36:32
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -24,8 +24,6 @@ from xutils.db.binlog import BinLog
 from xutils.db import filters
 
 register_table("_id", "系统ID表")
-MAX_ID_KEY = "_id:max_id"
-
 register_table("_max_id", "最大ID")
 register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
@@ -432,8 +430,7 @@ class LdbTable:
             prefix = self.prefix
 
         if where != None:
-            assert filter_func == None, "不能同时设置 filter_func 和 where"
-            filter_func = filters.create_func_by_where(where)
+            filter_func = filters.create_func_by_where(where, filter_func)
 
         for key, value in prefix_iter(prefix, filter_func, offset, limit,
                                       reverse=reverse, include_key=True, key_from=key_from,
@@ -477,8 +474,7 @@ class LdbTable:
 
     def create_index_map_func(self, filter_func, where = None, index_type="ref"):
         if where != None:
-            assert filter_func == None, "不能同时设置 filter_func 和 where"
-            filter_func = filters.create_func_by_where(where)
+            filter_func = filters.create_func_by_where(where, filter_func)
 
         def map_func_for_copy(batch_list):
             result = []
@@ -557,6 +553,9 @@ class LdbTable:
         index_info = IndexInfo.get_table_index_info(self.table_name, index_name)
         assert index_info != None
 
+        if self.user_attr != None and user_name == None and where != None:
+            user_name = where.get(self.user_attr)
+
         if isinstance(index_value, dict):
             assert len(index_value) == 1, "只能设置1个属性"
             if index_value.get("$prefix") != None:
@@ -571,9 +570,22 @@ class LdbTable:
                 index_name, user_name=user_name) + ":" + index_value + ":"
         elif where != None:
             cols = []
+            is_prefix_match = False
             for col in index_info.columns:
+                col_value = where.get(col)
+                if col_value == None:
+                    break
+                if isinstance(col_value, dict):
+                    prefix = col_value.get("$prefix")
+                    if prefix != None:
+                        cols.append(prefix)
+                        is_prefix_match = True
+                        break
                 cols.append(where.get(col))
+
             prefix_value_encoded = encode_index_value(cols)
+            if is_prefix_match == False and len(cols) > 0 and len(cols) < len(index_info.columns):
+                prefix_value_encoded += ","
             return self._get_index_prefix(index_name, user_name=user_name) + ":" + prefix_value_encoded
         else:
             return self._get_index_prefix(index_name, user_name=user_name) + ":"
@@ -607,7 +619,7 @@ class LdbTable:
         if index_info == None:
             raise Exception("index not found: %s" % index_name)
 
-        prefix = self._get_index_prefix_by_value(index_name, index_value, user_name=user_name)
+        prefix = self._get_index_prefix_by_value(index_name, index_value, where = where, user_name=user_name)
         map_func = self.create_index_map_func(
             filter_func, index_type=index_info.index_type, where = where)
         return list(prefix_iter_batch(prefix, offset=offset, limit=limit,

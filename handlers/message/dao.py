@@ -12,17 +12,6 @@ from xutils import dateutil
 from xutils.functions import del_dict_key
 from xtemplate import T
 
-dbutil.register_table("message", "短文本", check_user=True, user_attr="user")
-dbutil.register_table_index("message", "date")
-dbutil.register_table_index("message", "tag")
-
-dbutil.register_table("msg_search_history", "备忘搜索历史",
-                      check_user=True, user_attr="user")
-
-dbutil.register_table("msg_key", "备忘关键字/标签", check_user=True, user_attr="user")
-dbutil.register_table("msg_task_idx", "待办索引")
-dbutil.register_table("msg_history", "备忘历史")
-
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
 CREATE_MAX_RETRY = 20
@@ -47,6 +36,7 @@ class MessageDO(Storage):
 def check_before_create(kw):
     if "id" in kw:
         raise Exception("message.dao.create: can not set id")
+    
     if "user" not in kw:
         raise Exception("message.dao.create: key `user` is missing")
 
@@ -106,7 +96,6 @@ def get_message_key(user_name, timestamp):
 
 
 def _create_message_with_date(kw):
-    user_name = kw["user"]
     date = kw["date"]
     old_ctime = kw["ctime"]
     kw["tag"] = "log"
@@ -117,30 +106,17 @@ def _create_message_with_date(kw):
         return _create_message_without_date(kw)
 
     timestamp = dateutil.parse_date_to_timestamp(date)
-    timestamp += 60 * 60 * 23  # 追加日志的开始时间默认为23点
+    timestamp += 60 * 60 * 23 + 60 * 59 # 追加日志的开始时间默认为23点59
 
     kw["ctime0"] = old_ctime
+    kw["ctime"] = dateutil.format_datetime(timestamp)
     kw["date"] = date
-    # 调整类型为记事
-    retry = 0
-
-    while True:
-        with dbutil.get_write_lock():
-            if retry > CREATE_MAX_RETRY:
-                raise Exception("message.dao.create: too many retry")
-
-            key = get_message_key(user_name, timestamp)
-            kw["ctime"] = dateutil.format_time(timestamp)
-            kw["id"] = key
-            result = _msg_db.get_by_key(key)
-            if result is None:
-                _msg_db.update_by_key(key, kw)
-                execute_after_create(kw)
-                return key
-            else:
-                timestamp += 1
-
-            retry += 1
+    _msg_db.insert(kw)
+    key = kw.get("_key")
+    kw["id"] = key
+    _msg_db.update(kw)
+    execute_after_create(kw)
+    return key
 
 
 def _create_message_without_date(kw):
@@ -359,7 +335,7 @@ def list_file_page(user, offset, limit):
         if value.content is None:
             return False
         return value.content.find("file://") >= 0
-    chatlist = _msg_db.list(filter_func=filter_func, offset=offset,
+    chatlist = _msg_db.list_by_index("ctime", filter_func=filter_func, offset=offset,
                             limit=limit, reverse=True, user_name=user)
     # TODO 后续可以用message_stat加速
     amount = _msg_db.count(filter_func=filter_func, user_name=user)
@@ -371,10 +347,11 @@ def list_link_page(user, offset, limit):
         if value.content is None:
             return False
         return value.content.find("http://") >= 0 or value.content.find("https://") >= 0
-    chatlist = dbutil.prefix_list(
-        "message:%s" % user, filter_func, offset, limit, reverse=True)
+    chatlist = _msg_db.list_by_index("ctime", filter_func = filter_func, 
+                                     offset = offset, limit = limit, reverse=True, 
+                                     user_name = user)
     # TODO 后续可以用message_stat加速
-    amount = dbutil.prefix_count("message:%s" % user, filter_func)
+    amount = _msg_db.count(filter_func = filter_func, user_name = user)
     return chatlist, amount
 
 
@@ -490,11 +467,13 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
         filter_func = get_filter_by_tag_func(tag)
         if tag == "task":
             chatlist = _msg_db.list_by_index(
-                "tag", index_value=tag, filter_func=filter_func, 
-                offset=offset, limit=limit, reverse=True, user_name=user)
+                "tag_ctime", filter_func=filter_func, 
+                offset=offset, limit=limit, reverse=True, 
+                where = dict(user = user, tag = tag))
         else:
-            chatlist = _msg_db.list(
-                filter_func=filter_func, offset=offset, limit=limit, reverse=True, user_name=user)
+            chatlist = _msg_db.list_by_index("ctime",
+                filter_func=filter_func, offset=offset, 
+                limit=limit, reverse=True, user_name=user)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -518,14 +497,16 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
 def list_by_date(user, date, offset=0, limit=xconfig.PAGE_SIZE):
     if date is None or date == "":
         return []
-
-    def list_by_date_func(key, value):
-        return value.ctime.find(date) == 0
-
-    amount = dbutil.prefix_count("message:%s" % user, list_by_date_func)
-
-    msg_list = dbutil.prefix_list(
-        "message:%s" % user, list_by_date_func, offset, limit, reverse=True)
+    
+    where = {
+        "user": user,
+        "date": {
+            "$prefix": date,
+        },
+    }
+    amount = _msg_db.count_by_index("date", where = where)
+    msg_list = _msg_db.list_by_index("date", offset= offset, limit=limit, 
+                                     reverse=True, where = where)
 
     return msg_list, amount
 
