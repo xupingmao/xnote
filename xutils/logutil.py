@@ -60,6 +60,11 @@ class AsyncThreadBase(threading.Thread):
                     time.sleep(0.01)
             except Exception as e:
                 xutils.print_exc()
+    
+    def wait_task_done(self):
+        while len(self.task_queue) > 0:
+            func, args, kw = self.task_queue.popleft()
+            func(*args, **kw)
 
 class LogThread(AsyncThreadBase):
     def __init__(self, name="LogThread"):

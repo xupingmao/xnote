@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-06 10:56:42
+@LastEditTime : 2023-03-19 16:59:16
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -29,6 +29,8 @@ BaseTestCase = test_base.BaseTestCase
 
 _config_db = dbutil.get_hash_table("cluster_config")
 
+DBSyncer.MAX_LOOPS = 5
+DBSyncer.FULL_SYNC_MAX_LOOPS = 5
 
 class LeaderNetMock:
 
@@ -164,7 +166,6 @@ class TestSystemSync(BaseTestCase):
 
     def test_system_sync_db_full(self):
         netutil.set_net_mock(LeaderNetMock())
-        DBSyncer.MAX_LOOPS = 5
 
         try:
             from handlers.system.system_sync.system_sync_controller import FOLLOWER
@@ -187,7 +188,6 @@ class TestSystemSync(BaseTestCase):
 
     def test_system_sync_db_binlog(self):
         netutil.set_net_mock(LeaderNetMock())
-        DBSyncer.MAX_LOOPS = 5
 
         try:
             from handlers.system.system_sync.system_sync_controller import FOLLOWER

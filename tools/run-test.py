@@ -77,7 +77,7 @@ def run_test(args):
 		return
 	
 	if target == "xauth":
-		os.system("python3 -m pytest tests/test_xauth.py --doctest-modules --cov core.xauth --capture no")
+		os.system("python3 -m pytest tests/test_xauth.py --doctest-modules --cov xauth --capture no")
 		os.system("python3 -m coverage html")
 		return
 
@@ -91,7 +91,7 @@ def run_test(args):
 	check_and_install_pkg("coveralls", "python-coveralls>=2.9.3")
 	os.system("%s -m pip install coverage>=4.5.4" % executable)
 	os.system("%s -m pip install lmdb" % executable)
-	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core" % executable)
+	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --ff" % executable)
 	os.system("%s -m coverage html" % executable)
 
 def main():

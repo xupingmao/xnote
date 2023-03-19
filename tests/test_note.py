@@ -283,13 +283,13 @@ class TestMain(BaseTestCase):
 
         share_resp = json_request("/note/share", method="POST",
             data=dict(id=id, share_to="test2"))
-        logging.info("share_resp:%s", share_resp)
+        print("share_resp:", share_resp)
         self.assertEqual("success", share_resp["code"])
 
         delete_share_resp = json_request("/note/share/cancel", method="POST",
             data=dict(id=id, share_to="test2"))
         
-        logging.info("delete_share_resp:%s", delete_share_resp)
+        print("delete_share_resp:", delete_share_resp)
         self.assertEqual("success", delete_share_resp["code"])
         self.check_OK("/note/share_to_me")
 

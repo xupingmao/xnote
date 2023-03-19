@@ -78,3 +78,11 @@ class RecordLock:
 
     def __del__(self):
         self.release()
+    
+    @classmethod
+    def clear_expired(cls):
+        with cls._enter_lock:
+            for key in cls._lock_dict.keys():
+                lock = cls._lock_dict.get(key)
+                if lock != None and lock.is_expired():
+                    del cls._lock_dict[key]

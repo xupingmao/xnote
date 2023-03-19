@@ -13,6 +13,7 @@ from xutils import netutil
 from xutils.db.binlog import BinLog
 from xutils.db.dbutil_deque import DequeTable
 from xutils.db.encode import decode_id
+from xutils.logutil import ASYNC_THREAD
 
 import pdb
 import logging
@@ -59,7 +60,7 @@ class MockedWriteBatch:
 
 
 def run_range_test_from_None(test, db):
-    for key in db.RangeIter(include_value=False):
+    for key in db.RangeIter(include_value=False, key_from = b'', key_to = b'\xff'):
         db.Delete(key)
         print("Delete", key, db)
 
@@ -131,9 +132,12 @@ def run_range_test(test, db):
 
 
 def run_test_db_engine(test, db):
+    # 等待异步任务完成
+    ASYNC_THREAD.wait_task_done()
+
     for key in db.RangeIter(include_value=False):
         db.Delete(key)
-        print("Delete", key, db)
+        # print("Delete", key, db)
 
     db.Put(b"key", b"value")
     test.assertEqual(b"value", db.Get(b"key"))
@@ -597,7 +601,7 @@ class TestMain(BaseTestCase):
     def test_table_only_id(self):
         db = dbutil.get_table("test")
 
-        for item in db.iter():
+        for item in db.iter(limit = -1):
             db.delete(item)
 
         db.insert(dict(name="Ada", age=23))
@@ -623,19 +627,21 @@ class TestMain(BaseTestCase):
         print("test_dbutil_lock")
         from xutils.db.lock import RecordLock
 
+        RecordLock._lock_dict = dict()
+
         print(RecordLock._lock_dict)
 
         self.assertEqual(0, len(RecordLock._lock_dict))
 
         lock1 = RecordLock("lock")
         lock2 = RecordLock("lock")
-        self.assertTrue(lock1.acquire(timeout=1))
-        self.assertFalse(lock2.acquire(timeout=1))
+        self.assertTrue(lock1.acquire(timeout=10))
+        self.assertFalse(lock2.acquire(timeout=0.5))
 
         lock1.release()
         lock2.release()
 
-        print(RecordLock._lock_dict)
+        print("_lock_dict", RecordLock._lock_dict)
 
         self.assertEqual(0, len(RecordLock._lock_dict))
 
@@ -669,6 +675,7 @@ class TestMain(BaseTestCase):
         BinLog.set_max_size(10)
 
         binlog = BinLog.get_instance()
+        binlog.log_debug = True
 
         for i in range(20):
             binlog.add_log("put", "test_binlog_clear", "test")

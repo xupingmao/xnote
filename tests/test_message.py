@@ -11,6 +11,7 @@ import xauth
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil, dbutil
+from xutils.logutil import ASYNC_THREAD
 
 # cannot perform relative import
 try:
@@ -176,6 +177,8 @@ class TestMain(BaseTestCase):
 
         self.check_OK("/message/detail?id=%s" % task_id)
 
+        ASYNC_THREAD.wait_task_done()
+
     def test_message_dairy(self):
         self.check_OK("/message/dairy")
 
@@ -212,6 +215,8 @@ class TestMain(BaseTestCase):
         print(keyword)
         self.assertTrue(keyword.is_marked)
 
+        ASYNC_THREAD.wait_task_done()
+
     def test_message_keyword_delete(self):
         user_name = xauth.current_name()
         tagname = "#delete-test#"
@@ -232,6 +237,8 @@ class TestMain(BaseTestCase):
         keyword = msg_dao.get_by_content(user_name, "key", tagname)
         print(keyword)
         self.assertIsNone(keyword)
+
+        ASYNC_THREAD.wait_task_done()
 
     def test_message_calendar(self):
         self.check_OK("/message/calendar")
