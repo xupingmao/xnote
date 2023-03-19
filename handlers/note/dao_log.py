@@ -21,12 +21,6 @@ from xutils import Storage
 from .dao_api import NoteDao
 import handlers.note.dao as note_dao
 
-dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True, user_attr="user")
-dbutil.register_table_index("user_note_log", "visit_cnt")
-dbutil.register_table_index("user_note_log", "atime")
-dbutil.register_table_index("user_note_log", "mtime")
-dbutil.register_table_index("user_note_log", "ctime")
-
 
 NOTE_DAO = xutils.DAO("note")
 MAX_EDIT_LOG    = 500

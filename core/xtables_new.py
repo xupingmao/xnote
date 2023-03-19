@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 15:13:22
+@LastEditTime : 2023-03-19 18:32:59
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -53,7 +53,7 @@ def init():
     db.register_index("date_ip", columns = ["date", "ip"])
 
     # 重建索引(系统会根据索引版本增量构建)
-    build_index_async()
+    rebuild_index()
 
 def init_old_table():
     # 统计数据
@@ -117,6 +117,13 @@ def init_note_tables():
     db.register_index("hot_index")
     db.register_index("share_time")
 
+    # 操作日志
+    db = dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True, user_attr="user")
+    db.register_index("visit_cnt")
+    db.register_index("atime")
+    db.register_index("mtime")
+    db.register_index("ctime")
+
 
 def init_message_tables():
     db = dbutil.register_table("message", "短文本", check_user=True, user_attr="user")
@@ -130,8 +137,7 @@ def init_message_tables():
     dbutil.register_table("msg_history", "备忘历史")
 
 
-@xutils.async_func_deco()
-def build_index_async():
+def rebuild_index():
     dbutil.get_table("note_index").rebuild_index("v5")
     dbutil.get_table("note_tiny").rebuild_index("v3")
     dbutil.get_table("plugin_visit_log").rebuild_index("v2")
