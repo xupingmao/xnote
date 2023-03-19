@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 18:12:20
+@LastEditTime : 2023-03-19 19:01:17
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -245,9 +245,12 @@ class TableIndexRepair:
         db_delete(key)
     
     def get_record_attr(self, record, key):
+        # TODO 要改成按照 columns 去组装索引的值
         if isinstance(record, dict):
             return record.get(key)
-        return getattr(record, key)
+        if hasattr(record, key):
+            return getattr(record, key)
+        return None
 
     def delete_invalid_index(self, index_name, index_prefix):
         db = self.db
