@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 16:07:15
+@LastEditTime : 2023-03-19 18:12:20
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -15,6 +15,8 @@
 
 import logging
 import xutils
+import time
+from xutils import Storage
 from xutils.db.encode import encode_index_value, clean_value_before_update, decode_str
 from xutils.db.dbutil_base import (
     db_delete, 
@@ -161,6 +163,15 @@ class TableIndex:
             db_delete(key)
 
 
+class ErrorLog(Storage):
+
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.key = ""
+        self.value = ""
+        self.ctime = "2022-02-03 00:00:00"
+        self.type = "exception"
+        self.err_msg = "error"
 
 class TableIndexRepair:
     """表索引修复工具，不是标准功能，所以抽象到一个新的类里面"""
@@ -168,15 +179,19 @@ class TableIndexRepair:
     def __init__(self, db, error_db):
         self.db = db
         self.repair_error_db = error_db
+    
+    def current_time(self):
+        return time.strftime('%Y-%m-%d %H:%M:%S')
 
     def repair_index(self):
         try:
             self.do_repair_index()
         except:
             err_msg = xutils.print_exc()
-            error_log = dict(err_msg=err_msg, type="exception")
-            self.repair_error_db.insert(
-                error_log, id_type="auto_increment")
+            error_log = ErrorLog()
+            error_log.ctime = self.current_time()
+            error_log.err_msg = err_msg
+            self.repair_error_db.insert(error_log)
 
     def do_repair_index(self):
         db = self.db
@@ -199,9 +214,12 @@ class TableIndexRepair:
                     parts = key.split(":")
                     if len(parts) != 3:
                         logging.error("invalid key: %s", key)
-                        error_log = dict(key=key, value=value, type="record")
-                        self.repair_error_db.insert(
-                            error_log, id_type="auto_increment")
+                        error_log = ErrorLog()
+                        error_log.key = key
+                        error_log.value = value
+                        error_log.type = "record"
+                        error_log.ctime = self.current_time()
+                        self.repair_error_db.insert(error_log)
                         db_delete(key)
                         continue
                     table_name, user_name, id = key.split(":")
@@ -260,8 +278,11 @@ class TableIndexRepair:
                     user_name = decode_str(user_name)
                 except:
                     logging.error("invalid key: (%s)", record_key)
-                    error_log = dict(
-                        key=old_key, value=record_key, type="index")
+                    error_log = ErrorLog()
+                    error_log.key = old_key
+                    error_log.value = record_key
+                    error_log.type = "index"
+                    error_log.ctime = self.current_time()
                     self.repair_error_db.insert(error_log)
                     self.do_delete(old_key)
                     continue

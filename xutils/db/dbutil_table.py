@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 15:36:32
+@LastEditTime : 2023-03-19 18:13:50
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -28,8 +28,8 @@ register_table("_max_id", "最大ID")
 register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
 register_table("_idx_version", "索引版本")
-register_table("_repair_error", "修复错误记录")
-
+db = register_table("_repair_error", "修复错误记录")
+db.register_index("ctime")
 
 class LdbTable:
     """基于leveldb的表, 比较常见的是以下2种
