@@ -6,7 +6,7 @@ import time
 import argparse
 import sys
 
-APP_VERSION_PREFIX = "v2.9.4-dev-"
+APP_VERSION_PREFIX: str = "v2.9.4-dev-"
 
 def do_clean():
 	print("一些清理工作...")
@@ -27,7 +27,7 @@ def check_and_install_pkg(py_module, pip_version = ""):
 	except ImportError:
 		print("准备安装:", pip_version)
 		cmd = sys.executable
-		os.system("%s -m pip install %s" % (cmd, pip_version))
+		os.system("%s -m pip install %r" % (cmd, pip_version))
 
 def py_exec(cmd_line):
 	os.system("%s %s" % (sys.executable, cmd_line))
@@ -89,7 +89,7 @@ def run_test(args):
 	check_and_install_pkg("pytest", "pytest>=5.1.0")
 	check_and_install_pkg("pytest_cov", "pytest-cov>=2.7.1")
 	check_and_install_pkg("coveralls", "python-coveralls>=2.9.3")
-	os.system("%s -m pip install coverage>=4.5.4" % executable)
+	os.system("%s -m pip install 'coverage>=4.5.4'" % executable)
 	os.system("%s -m pip install lmdb" % executable)
 	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --ff" % executable)
 	os.system("%s -m coverage html" % executable)

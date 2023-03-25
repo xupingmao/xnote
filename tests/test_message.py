@@ -110,6 +110,10 @@ class TestMain(BaseTestCase):
             del_msg_by_id(msg['id'])
 
     def test_message_key(self):
+        key_result = json_request("/message/list?tag=key")
+        for item in key_result["data"]:
+            del_msg_by_id(item["id"])
+
         response = json_request(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test", tag="key"))
         self.assertEqual("success", response.get("code"))

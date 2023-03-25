@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 17:23:30
+@LastEditTime : 2023-03-20 00:11:56
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -44,6 +44,8 @@ class TagMeta(Storage):
         self.tag_name = ""
         self.tag_type = "" # group - 笔记本标签 note-笔记标签 global-全局标签(不分区笔记本还是笔记)
         self.amount = 0
+        self.book_id = ""
+        self.group_id = ""
 
 def get_tags(creator, note_id):
     note_tags = tag_bind_db.get_by_id(note_id, user_name=creator)
@@ -107,7 +109,7 @@ class TagMetaDao:
         assert tag_info.tag_name != ""
         assert tag_info.tag_type != ""
         assert tag_info.amount != None
-        tag_meta_db.insert(tag_info, id_type="auto_increment")
+        tag_meta_db.insert(tag_info)
 
     @classmethod
     def get_by_name(cls, user_name, tag_name, tag_type="", group_id=None):
@@ -147,7 +149,7 @@ class TagMetaDao:
                 tag_info.amount = amount
                 cls.update(tag_info)
             else:
-                tag_info = Storage()
+                tag_info = TagMeta()
                 tag_info.user = user_name
                 tag_info.tag_name = tag_name
                 tag_info.tag_type = "global"

@@ -107,8 +107,8 @@ class TagListHandler:
 class CreateTagAjaxHandler:
 
     def create_group_tag(self, user_name, tag_type):
-        tag_name = xutils.get_argument("tag_name", "")
-        group_id = xutils.get_argument("group_id", "")
+        tag_name = xutils.get_argument_str("tag_name", "")
+        group_id = xutils.get_argument_str("group_id", "")
 
         if group_id == "":
             group_id = None
@@ -119,19 +119,18 @@ class CreateTagAjaxHandler:
         if tag_type == "note" and group_id == None:
             return dict(code="400", message="group_id不能为空, 请重新输入")
 
-        obj = dict(
-            tag_type=tag_type,
-            tag_name=tag_name,
-            user=user_name,
-            group_id=group_id,
-            book_id=group_id,
-        )
+        obj = dao_tag.TagMeta()
+        obj.tag_type = tag_type
+        obj.tag_name = tag_name
+        obj.user = user_name
+        obj.group_id = group_id
+        obj.book_id = group_id
 
         tag_meta = dao_tag.get_tag_meta_by_name(user_name, tag_name, tag_type=tag_type, group_id=group_id)
         if tag_meta != None:
             return dict(code="500", message="标签已经存在,请重新输入")
 
-        tag_db.insert(obj, id_type="auto_increment")
+        tag_db.insert(obj)
         return dict(code="success")
 
     @xauth.login_required()

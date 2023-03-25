@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 18:13:50
+@LastEditTime : 2023-03-25 14:32:36
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -186,7 +186,7 @@ class LdbTable:
         batch = create_write_batch()
         with get_write_lock(key):
             old_obj = db_get(key)
-            self._format_value(key, obj)
+            self._format_value(key, old_obj)
             batch.put(key, self._convert_to_db_row(obj))
             self._update_index(old_obj, obj, batch)
             if self.binlog_enabled:
@@ -317,11 +317,11 @@ class LdbTable:
         self._check_value(obj)
 
         obj_key = self._get_key_from_obj(obj)
+        assert isinstance(obj_key, str), "obj_key must be str"
+        
         self._check_key(obj_key)
 
-        update_obj = self._convert_to_db_row(obj)
-
-        self._put_obj(obj_key, update_obj)
+        self._put_obj(obj_key, obj)
 
     def update_by_id(self, id, obj, user_name=None):
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)"""
@@ -345,7 +345,10 @@ class LdbTable:
         self._check_key(key)
         self._check_value(obj)
 
-        update_obj = self._convert_to_db_row(obj)
+        obj[self.key_name] = key
+        obj[self.id_name] = self._get_id_from_key(key)
+        
+        update_obj = obj
         self._put_obj(key, update_obj)
 
     def rebuild_single_index(self, obj, user_name=None):
@@ -523,6 +526,8 @@ class LdbTable:
                     logging.warning(
                         "invalid obj_id:(%s), obj_id:(%s)", obj_id, key_obj_id)
                     continue
+                
+                self._format_value(ref_key, obj)
 
                 # 用于调试
                 # setattr(obj, "_idx_key", key)
