@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 14:32:36
+@LastEditTime : 2023-03-25 14:55:16
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -638,7 +638,10 @@ class LdbTable:
             return result[0]
         return None
 
-    def count(self, filter_func=None, user_name=None, id_prefix=None):
+    def count(self, filter_func=None, user_name=None, id_prefix=None, where = None):
+        if user_name == None and where != None and self.user_attr != None:
+            user_name = where.get(self.user_attr)
+
         prefix = self._get_prefix(user_name=user_name)
         if id_prefix != None:
             prefix += encode_str(id_prefix)

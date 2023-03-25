@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 18:32:59
+@LastEditTime : 2023-03-25 14:51:13
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -98,8 +98,7 @@ def init_note_tables():
 
     # 笔记修改历史
     dbutil.register_table("note_history_index", "笔记历史索引", category="note")
-    db = dbutil.register_table("search_history", "搜索历史")
-    db.register_index("user", comment="用户索引")
+    db = dbutil.register_table("search_history", "搜索历史", user_attr="user", check_user=True)
 
     # 分享关系
     db = dbutil.register_table("note_share", "笔记分享", category="note")

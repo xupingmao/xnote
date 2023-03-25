@@ -54,6 +54,7 @@ _note_history_index_db = dbutil.get_hash_table("note_history_index")
 DB_PATH = xconfig.DB_PATH
 MAX_STICKY_SIZE = 1000
 MAX_SEARCH_SIZE = 1000
+MAX_SEARCH_KEY_LENGTH = 20
 MAX_LIST_SIZE = 1000
 _cache = cacheutil.PrefixedCache("note:")
 
@@ -1448,13 +1449,30 @@ def list_by_func(creator, list_func, offset, limit):
     build_note_list_info(notes)
     return notes
 
+class SearchHistory(Storage):
 
-def add_search_history(user, search_key, category="default", cost_time=0):
+    def __init__(self) -> None:
+        self.user = ""
+        self.key = ""
+        self.category = "default"
+        self.cost_time = 0.0
+        self.ctime = dateutil.format_datetime()
+
+def add_search_history(user, search_key: str, category="default", cost_time=0.0):
     if user == None:
         user = "public"
     
+    if len(search_key) > MAX_SEARCH_KEY_LENGTH:
+        return
+    
     expire_search_history(user)
-    value = Storage(user = user, key=search_key, category=category, cost_time=cost_time)
+    
+    value = SearchHistory()
+    value.user = user
+    value.key = search_key
+    value.category = category
+    value.cost_time = cost_time
+
     return _search_history_db.insert(value)
 
 
@@ -1462,7 +1480,7 @@ def list_search_history(user, limit=1000, orderby="time_desc"):
     if user is None or user == "":
         return []
     result = []
-    for value in _search_history_db.list_by_index("user", index_value = user, limit = limit, reverse=True):
+    for value in _search_history_db.list(limit = limit, reverse=True, where = dict(user=user)):
         result.append(value)
     return result
 
@@ -1471,22 +1489,22 @@ def clear_search_history(user_name):
     assert user_name != None
     assert user_name != ""
     db = _search_history_db
-    for item in db.list_by_index("user", where = dict(user=user_name), reverse=True, limit=1000):
+    for item in db.list(where = dict(user=user_name), reverse=True, limit=1000):
         db.delete(item)
 
 def expire_search_history(user_name, limit=1000):
     db = _search_history_db
-    count = _search_history_db.count_by_index("user", where = dict(user = user_name))
+    count = _search_history_db.count(where = dict(user = user_name))
 
     if count > limit:
         with dbutil.get_write_lock(user_name):
-            for value in db.list_by_index("user", index_value=user_name, limit = count-limit, reverse=False):
+            for value in db.list(where = dict(user=user_name), limit = 10, reverse=False):
                 db.delete(value)
 
 @xutils.async_func_deco()
 def refresh_note_stat_async(user_name):
     """异步刷新笔记统计"""
-    with dbutil.get_write_lock():
+    with dbutil.get_write_lock(user_name):
         refresh_note_stat(user_name)
 
 
