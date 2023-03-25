@@ -195,6 +195,9 @@ def encode_id(id_value):
     if id_value < 10**20:
         return "3%020d" % id_value
     
+    if id_value < 10**40:
+        return "4%040d" % id_value
+    
     raise Exception("too large id value")
 
 def encode_id_v1(id_value):

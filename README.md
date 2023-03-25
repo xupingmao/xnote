@@ -39,8 +39,9 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 ## 安装&运行
 
 ### 安装依赖环境
-- 安装python（建议Python3，Python2.7版本不再维护）
+- Python >= 3.6
 - 安装依赖的软件包
+    - 最小化安装(使用sqlite) `python3 -m pip install -r config/requirements.min.txt`
     - Mac/Linux执行 ```python -m pip install -r config/requirements.txt```
     - Windows执行 `python -m pip install -r config/requirements.win.txt`
 
@@ -50,8 +51,12 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 默认的配置文件位于`config/boot/boot.default.properties`，具体的功能参考配置的注释
 
 ```sh
-# 指定自定义的配置文件
-python3 app.py --config config/boot/自定义名称.properties
+# 切换到xnote目录
+> cd xnote
+# 复制配置并且进行自定义配置
+> cp config/boot/boot.min.properties config/boot/boot.local.properties
+# 启动
+> python3 app.py --config config/boot/boot.local.properties
 ```
 
 如果不修改端口号，启动之后在浏览器打开 http://localhost:1234/ 就可以使用了，初始化的管理员账号是admin，默认密码是 123456
@@ -60,10 +65,6 @@ python3 app.py --config config/boot/自定义名称.properties
 
 - 新浪SAE TODO
 - [CentOS - 百度BAE](https://blog.csdn.net/u011320646/article/details/126334377) 
-
-### 兼容性问题
-
-如果安装老版本后更新启动失败参考 [数据库迁移](./docs/db_migrate.md) 或者查看Issue，如果问题还没解决可以提交新的Issue
 
 ## 主要功能
 
@@ -109,6 +110,7 @@ python3 app.py --config config/boot/自定义名称.properties
 - [编码规范](./docs/code_style.md)
 - [插件扩展](./docs/plugins.md)
 - [搜索扩展](./docs/search_extension.md)
+- [数据库迁移](./docs/db_migrate.md)
 
 ## 协议
 
