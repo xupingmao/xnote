@@ -15,6 +15,7 @@ $(function () {
 
     $(".show-password-link").click(function (e) {
         var data = $(this).attr("data-value");
+        var data = $("<div>").text(data).html();
         xnote.alert(data);
     });
 })

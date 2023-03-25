@@ -124,6 +124,14 @@ xnote.addUrlParam = function(url, key, value) {
     return result;
 }
 
+/**
+ * HTML转义
+ * @param {string} text 待转义的文本
+ * @returns {string}
+ */
+xnote.escapeHTML = function (text) {
+    return $("<div>").text(text).html();
+}
 
 window.parseUrl = xnote.parseUrl
 window.getUrlParam = xnote.getUrlParam
