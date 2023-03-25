@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-03-18 14:27:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 15:13:35
+@LastEditTime : 2023-03-25 15:34:46
 @FilePath     : /xnote/handlers/upgrade/upgrade_011.py
 @Description  : 迁移pulgin_visit表
 """
@@ -37,11 +37,13 @@ def do_upgrade_plugin_log():
     base.mark_upgrade_done(upgrade_key)
 
 def do_upgrade_search_log_20230325():
-    upgrade_key = "upgrade_011.b"
+    upgrade_key = "upgrade_011.c"
     if base.is_upgrade_done(upgrade_key):
         return
 
     db = dbutil.get_table("search_history")
+    db.fix_user_attr = False
+    
     for item in db.iter(limit = -1):
         if item.get("user") != None:
             continue

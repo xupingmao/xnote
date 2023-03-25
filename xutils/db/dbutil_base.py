@@ -332,6 +332,10 @@ class TableInfo:
                              comment = comment, index_type=index_type)
         return self
 
+    def drop_index(self, index_name, comment = ""):
+        # TODO 记录删除的索引
+        return self
+
 
 class IndexInfo:
 

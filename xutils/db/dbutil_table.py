@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 14:55:16
+@LastEditTime : 2023-03-25 15:34:04
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -62,6 +62,7 @@ class LdbTable:
         self._need_check_user = table_info.check_user
         self.user_attr = None
         self.id_gen = IdGenerator(self.table_name)
+        self.fix_user_attr = True
 
         if table_info.check_user:
             if table_info.user_attr == None:
@@ -126,7 +127,7 @@ class LdbTable:
 
         value[self.key_name] = key
         value[self.id_name] = self._get_id_from_key(key)
-        if self.user_attr != None:
+        if self.user_attr != None and self.fix_user_attr:
             user = value.get(self.user_attr)
             parts = key.split(":")
             if user == None and len(parts) == 3:
