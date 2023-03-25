@@ -19,7 +19,7 @@ from xutils import dbutil
 from xutils import dateutil
 from xutils import Storage
 from .dao_api import NoteDao
-import handlers.note.dao as note_dao
+from . import dao as note_dao
 
 
 NOTE_DAO = xutils.DAO("note")

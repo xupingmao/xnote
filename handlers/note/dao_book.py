@@ -13,7 +13,7 @@ import xmanager
 from xutils import Storage
 from xutils import dateutil, dbutil, fsutil
 import xutils
-import handlers.note.dao as note_dao
+from . import dao as note_dao
 from .dao import get_by_id, create_note, update_note, list_default_notes, move_note
 
 _db = dbutil.get_table("notebook")

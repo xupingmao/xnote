@@ -53,6 +53,7 @@ tools.md
 /testdir/
 /中文/
 .coverage
+/py3.6/
 /py3.7/
 /py3.8/
 /htmlcov/
