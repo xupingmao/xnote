@@ -1497,8 +1497,9 @@ def expire_search_history(user_name, limit=1000):
     count = _search_history_db.count(where = dict(user = user_name))
 
     if count > limit:
+        list_limit = min(20, count - limit)
         with dbutil.get_write_lock(user_name):
-            for value in db.list(where = dict(user=user_name), limit = 10, reverse=False):
+            for value in db.list(where = dict(user=user_name), limit = list_limit, reverse=False):
                 db.delete(value)
 
 @xutils.async_func_deco()
