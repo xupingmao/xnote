@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 14:01:35
+@LastEditTime : 2023-03-25 23:02:07
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -73,6 +73,8 @@ class TableIndex:
 
     def _get_id_from_obj(self, obj):
         key = self._get_key_from_obj(obj)
+        if key == None:
+            return None
         return key.rsplit(":", 1)[-1]
 
     def _get_user_name(self, obj):
