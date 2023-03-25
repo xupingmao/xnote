@@ -340,6 +340,18 @@
         return '<strong class="marked-strong"><a href="/s/' + text + '">' + text + '</a></strong>';
     }
 
+    // 重写html标签
+    myRenderer.html = function (html) {
+        var cap = marked.Lexer.rules.html.exec(html);
+        console.log(cap, html);
+        var htmlTag = cap[1].toLowerCase();
+        if (htmlTag == "script" || htmlTag == "pre") {
+            // 过滤脚本
+            return "";
+        }
+        return html;
+    }
+
     myRenderer.table = function (header, body) {
         return '<table class="table marked-table">\n'
             + '<thead>\n'
@@ -398,6 +410,7 @@
         xnote.table.adjustWidth(".marked-table");
     }
 
+    // 重写parse方法
     marked.parse = function (text) {
         if (!marked.showMenu) {
             return oldParse(text);
