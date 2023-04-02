@@ -16,7 +16,6 @@
     <div class="root">
         <!-- 导航/菜单栏 -->
         {% include common/base_nav.html %}
-        {% include common/search/search_mobile.html %}
 
         <!-- 主体部分（内容） -->
         <div class="x-body">
@@ -26,7 +25,6 @@
                 </form>
             </div>
 
-
             <div class="main-content">
                 <div class="col-md-12">
                     {% if warn != "" and warn != None %}
@@ -34,6 +32,8 @@
                         {{warn}}
                     </pre>
                     {% end %}
+
+                    {% include common/search/search_mobile.html %}
 
                     <!-- 标题栏 -->
                     {% block body_top %} {% end %}

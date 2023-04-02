@@ -92,8 +92,8 @@
     function loadStyle() {
       var navStyle = "{{_user_config.nav_style}}";
       var contentWidth = parseInt("{{CONTENT_WIDTH}}");
-      var winWidth = $(window).width();
-      var leftNavWidth = 0;
+      var winWidth = $(window).width(); // 窗口的宽度
+      var leftNavWidth = 0; // 左侧导航的宽度
 
       if (navStyle == "left") {
         leftNavWidth = 180;
@@ -105,9 +105,9 @@
       // 设置最小的高度
       var rootMinHeight = $(window).height() - 39;
 
-      if (winWidth < contentWidth) {
-        contentWidth = winWidth;
-        marginLeft = 0;
+      if (winWidth < contentWidth + leftNavWidth) {
+        contentWidth = winWidth - leftNavWidth;
+        marginLeft = leftNavWidth;
       }
 
       var styleText = ".x-center, .nav-container {"
@@ -116,7 +116,7 @@
         + "margin-left:" + marginLeft + "px;"
         + "}";
 
-      if (winWidth > contentWidth) {
+      if (winWidth > contentWidth + leftNavWidth) {
         styleText += ".mobile-only {display: none;}";
       } else {
         styleText += ".desktop-only {display: none;}";

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 17:51:07
+@LastEditTime : 2023-04-02 16:56:32
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -1159,6 +1159,7 @@ class SearchHandler:
         kw.create_tag = self.get_create_tag()
         kw.show_create_on_tag = kw.create_tag != "forbidden"
         kw.is_keyword_marked = is_marked_keyword(user_name, key)
+        kw.search_type = "message"
 
         return xtemplate.render("message/page/message_search.html", **kw)
 

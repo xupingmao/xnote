@@ -42,11 +42,8 @@ class SettingsHandler:
 
     @xauth.login_required()
     def GET(self):
-        mem_used          = 0
-        sys_mem_used      = 0
         sys_mem_total     = 0
         thread_cnt        = 0
-        formated_mem_size = 0
 
         thread_cnt = len(threading.enumerate())
         item_list  = [
@@ -218,7 +215,7 @@ class ConfigHandler:
         p     = xutils.get_argument("p")
 
         update_msg = "%s,%s,%s" % (type, key, value)
-        print(update_msg)
+        logging.info(update_msg)
         xutils.info("UpdateConfig", update_msg)
 
         if type == "int":

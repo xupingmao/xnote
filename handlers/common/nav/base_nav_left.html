@@ -1,50 +1,59 @@
 <div class="nav-left">
-  <!-- 侧边菜单栏 -->
-  <div class="nav-left-block">
-    <ul class="navMenu">
-      {% if _has_login %}
-      <!-- 登录状态 -->
-      <li><a href="/note/index">{{T("我的笔记")}}</a></li>
-      <li><a href="/note/recent?orderby=update">{{T("笔记动态")}}</a></li>
-      <li><a href="/note/taglist">{{T("笔记标签")}}</a></li>
-      <li><a href="/search/history">{{T("搜索笔记")}}</a></li>
-      {% end %}
-    </ul>
-  </div>
+  <div class="nav-scroll">
+    <!-- 侧边菜单栏 -->
+    <div class="nav-left-block">
+      <ul class="navMenu">
+        {% if _has_login %}
+        <!-- 登录状态 -->
+        <li><a href="/note/index">{{T("我的笔记")}}</a></li>
+        <li><a href="/note/recent?orderby=update">{{T("笔记动态")}}</a></li>
+        <li><a href="/note/taglist">{{T("笔记标签")}}</a></li>
+        <li><a href="/search/history">{{T("搜索笔记")}}</a></li>
+        {% end %}
+      </ul>
+    </div>
 
-  <div class="nav-left-block">
-    <ul class="navMenu">
-      {% if _has_login %}
-      <!-- 登录状态 -->
-      <li><a href="/message?tag=task">{{T("待办任务")}}</a></li>
-      <li><a href="/message?tag=log">{{T("随手记")}}</a></li>
-      {% end %}
-    </ul>
-  </div>
+    <div class="nav-left-block">
+      <ul class="navMenu">
+        {% if _has_login %}
+        <!-- 登录状态 -->
+        <li><a href="/message?tag=task">{{T("待办任务")}}</a></li>
+        <li><a href="/message?tag=log">{{T("随手记")}}</a></li>
+        {% end %}
+      </ul>
+    </div>
 
-  <div class="nav-left-block">
-    <ul class="navMenu">
-      <li><a href="/note/public">{{T("分享中心")}}</a></li>
-      <li><a href="/plugins_list">{{T("插件中心")}}</a></li>
-      <li><a href="/system/settings">{{T("系统设置")}}</a></li>
+    <div class="nav-left-block">
+      <ul class="navMenu">
+        <li><a href="/note/public">{{T("分享中心")}}</a></li>
+        <li><a href="/plugins_list">{{T("插件中心")}}</a></li>
+        <li><a href="/system/settings">{{T("系统设置")}}</a></li>
 
-      {% if _is_admin %}
-      <li><a href="/fs_list">{{T("文件管理")}}</a></li>
-      <li><a href="/system/admin">{{T("后台管理")}}</a></li>
-      {% end %}
+        {% if _is_admin %}
+        <li><a href="/fs_list">{{T("文件管理")}}</a></li>
+        <li><a href="/system/admin">{{T("后台管理")}}</a></li>
+        {% end %}
 
-      {% if not _has_login %}
-      <!-- 未登录状态 -->
-      <li><a href="/note/public">公开笔记</a></li>
-      <li><a href="/login" class="afinve"><span>登陆系统</span></a></li>
-      {% end %}
+        {% if not _has_login %}
+        <!-- 未登录状态 -->
+        <li><a href="/note/public">公开笔记</a></li>
+        <li><a href="/login" class="afinve"><span>登陆系统</span></a></li>
+        {% end %}
 
-    </ul>
-    <div id="poweredBy">
-      Powered by <a href="/code/wiki/README.md">Xnote</a>
+      </ul>
+
+      <div id="poweredBy">
+        <div>Powered by <a href="/code/wiki/README.md">Xnote</a></div>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+(function() {
+  $(".nav-left").width(xnote.device.leftNavWidth);
+})();
+</script>
 
 <style>
   .nav-left {
@@ -54,7 +63,13 @@
     height: 100%;
     position: fixed;
     padding-top: 50px;
+    padding-bottom: 50px;
     background-color: gray;
+  }
+
+  .nav-scroll {
+    height: 100%;
+    overflow-y: auto;
   }
 
   .nav-left li {
@@ -68,11 +83,11 @@
   }
 
   #poweredBy,
-  #poweredBy>a {
+  #poweredBy a {
     color: white;
   }
-</style>
 
-<script>
-  $(".nav-left").width(xnote.device.leftNavWidth);
-</script>
+  #poweredBy a {
+    text-decoration: underline;
+  }
+</style>
