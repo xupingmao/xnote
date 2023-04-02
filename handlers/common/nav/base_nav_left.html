@@ -9,6 +9,7 @@
         <li><a href="/note/recent?orderby=update">{{T("笔记动态")}}</a></li>
         <li><a href="/note/taglist">{{T("笔记标签")}}</a></li>
         <li><a href="/search/history">{{T("搜索笔记")}}</a></li>
+        <li><a href="/note/public">{{T("分享中心")}}</a></li>
         {% end %}
       </ul>
     </div>
@@ -26,7 +27,7 @@
     <div class="nav-left-block">
       <ul class="navMenu">
         {% if _has_login %}
-        <li><a href="/note/public">{{T("分享中心")}}</a></li>
+        <li><a href="/system/index">{{T("应用列表")}}</a></li>
         <li><a href="/plugins_list">{{T("插件中心")}}</a></li>
         <li><a href="/system/settings">{{T("系统设置")}}</a></li>
         {% end %}
