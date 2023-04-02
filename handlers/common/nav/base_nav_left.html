@@ -4,10 +4,20 @@
     <ul class="navMenu">
       {% if _has_login %}
       <!-- 登录状态 -->
-      <li><a href="{{HOME_PATH}}">{{T("我的笔记")}}</a></li>
+      <li><a href="/note/index">{{T("我的笔记")}}</a></li>
       <li><a href="/note/recent?orderby=update">{{T("笔记动态")}}</a></li>
       <li><a href="/note/taglist">{{T("笔记标签")}}</a></li>
       <li><a href="/search/history">{{T("搜索笔记")}}</a></li>
+      {% end %}
+    </ul>
+  </div>
+
+  <div class="nav-left-block">
+    <ul class="navMenu">
+      {% if _has_login %}
+      <!-- 登录状态 -->
+      <li><a href="/message?tag=task">{{T("待办任务")}}</a></li>
+      <li><a href="/message?tag=log">{{T("随手记")}}</a></li>
       {% end %}
     </ul>
   </div>

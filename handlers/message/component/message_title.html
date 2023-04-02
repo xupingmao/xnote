@@ -17,6 +17,8 @@
             <a class="x-tab" href="/message?tag=task" data-tab-value="task">{{T("待办任务")}}</a>
         </span>
         <div class="float-right">
+            {% include common/hook/message_search_btn_hook.html %}
+
             {% if HOME_PATH == "/message/log" and not show_back_btn %}
                 <a class="btn btn-default" href="/note/group">笔记</a>
                 <a class="btn btn-default" href="/note/tools">工具</a>
