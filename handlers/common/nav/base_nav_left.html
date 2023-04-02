@@ -25,9 +25,11 @@
 
     <div class="nav-left-block">
       <ul class="navMenu">
+        {% if _has_login %}
         <li><a href="/note/public">{{T("分享中心")}}</a></li>
         <li><a href="/plugins_list">{{T("插件中心")}}</a></li>
         <li><a href="/system/settings">{{T("系统设置")}}</a></li>
+        {% end %}
 
         {% if _is_admin %}
         <li><a href="/fs_list">{{T("文件管理")}}</a></li>
