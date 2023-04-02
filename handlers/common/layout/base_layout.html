@@ -95,7 +95,7 @@
       var winWidth = $(window).width(); // 窗口的宽度
       var leftNavWidth = 0; // 左侧导航的宽度
 
-      if (navStyle == "left") {
+      if (navStyle == "left" && xnote.isDesktop()) {
         leftNavWidth = 180;
         xnote.device.leftNavWidth = leftNavWidth;
       }

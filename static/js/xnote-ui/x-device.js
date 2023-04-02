@@ -27,12 +27,13 @@ window.getWindowHeight = xnote.getWindowHeight
 /**
  * 判断是否是PC设备，要求width>=800 && height>=600
  */
-window.isPc = function() {
+xnote.isDesktop = function() {
     return getWindowWidth() >= 800;
 }
 
 // alias
-window.isDesktop = window.isPc;
+window.isPc = xnote.isDesktop;
+window.isDesktop = window.isDesktop;
 
 window.isMobile = function() {
     return !isPc();
