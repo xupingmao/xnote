@@ -538,12 +538,13 @@ class TestMain(BaseTestCase):
         binlog = BinLog.get_instance()
         binlog.add_log("test", "666")
 
-        self.assertTrue(binlog.last_seq > 0)
-        last_seq = binlog.last_seq
+        with binlog._lock:
+            self.assertTrue(binlog.last_seq > 0)
+            last_seq = binlog.last_seq
 
-        self.assertEqual(last_seq, int(binlog.get_last_key()))
-        binlog.add_log("test", "666")
-        self.assertEqual(last_seq+1, binlog.last_seq)
+            self.assertEqual(last_seq, int(binlog.get_last_key()))
+            binlog.add_log("test", "666")
+            self.assertEqual(last_seq+1, binlog.last_seq)
 
     def test_db_index_no_user(self):
         dbutil.register_table("index_test", "索引测试")

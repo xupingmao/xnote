@@ -1,0 +1,68 @@
+<div class="nav-left">
+  <!-- 侧边菜单栏 -->
+  <div class="nav-left-block">
+    <ul class="navMenu">
+      {% if _has_login %}
+      <!-- 登录状态 -->
+      <li><a href="{{HOME_PATH}}">{{T("我的笔记")}}</a></li>
+      <li><a href="/note/recent?orderby=update">{{T("笔记动态")}}</a></li>
+      <li><a href="/note/taglist">{{T("笔记标签")}}</a></li>
+      <li><a href="/search/history">{{T("搜索笔记")}}</a></li>
+      {% end %}
+    </ul>
+  </div>
+
+  <div class="nav-left-block">
+    <ul class="navMenu">
+      <li><a href="/note/public">{{T("分享中心")}}</a></li>
+      <li><a href="/plugins_list">{{T("插件中心")}}</a></li>
+      <li><a href="/system/settings">{{T("系统设置")}}</a></li>
+
+      {% if _is_admin %}
+      <li><a href="/fs_list">{{T("文件管理")}}</a></li>
+      <li><a href="/system/admin">{{T("后台管理")}}</a></li>
+      {% end %}
+
+      {% if not _has_login %}
+      <!-- 未登录状态 -->
+      <li><a href="/note/public">公开笔记</a></li>
+      <li><a href="/login" class="afinve"><span>登陆系统</span></a></li>
+      {% end %}
+
+    </ul>
+    <div id="poweredBy">
+      Powered by <a href="/code/wiki/README.md">Xnote</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .nav-left {
+    display: block;
+    float: left;
+    top: 0px;
+    height: 100%;
+    position: fixed;
+    padding-top: 50px;
+    background-color: gray;
+  }
+
+  .nav-left li {
+    display: block;
+    color: white;
+  }
+
+  .nav-left li>a {
+    color: white;
+    line-height: 25px;
+  }
+
+  #poweredBy,
+  #poweredBy>a {
+    color: white;
+  }
+</style>
+
+<script>
+  $(".nav-left").width(xnote.device.leftNavWidth);
+</script>

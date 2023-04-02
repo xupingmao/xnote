@@ -90,10 +90,18 @@
   // 这里动态生成<style>不会导致闪烁
   (function () {
     function loadStyle() {
+      var navStyle = "{{_user_config.nav_style}}";
       var contentWidth = parseInt("{{CONTENT_WIDTH}}");
       var winWidth = $(window).width();
+      var leftNavWidth = 0;
 
-      var marginLeft = (winWidth - contentWidth) / 2;
+      if (navStyle == "left") {
+        leftNavWidth = 180;
+        xnote.device.leftNavWidth = leftNavWidth;
+      }
+
+      var bodyWidth = winWidth - leftNavWidth;
+      var marginLeft = (bodyWidth - contentWidth) / 2 + leftNavWidth;
       // 设置最小的高度
       var rootMinHeight = $(window).height() - 39;
 

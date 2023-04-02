@@ -17,6 +17,7 @@ if (window.xnote === undefined) {
         contentLeftWidth: 0, // 左侧的宽度
         isMobile: false, // 是否是移动端
         isDesktop: true, // 默认是桌面端
+        leftNavWidth: 0, // 左侧导航宽度
         end: 0
     };
 

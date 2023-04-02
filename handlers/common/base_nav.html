@@ -13,31 +13,11 @@
 </div>
 {% end %}
 
-{% if show_menu and show_nav %}
-<div class="nav">
-  <!-- 保持对称 -->
-  <div class="nav-container">
-    <div class="menu-box float-left">
-      <ul class="nav-ul">
-        {% for nav in _nav_list %}
-          {% if nav.is_visible() %}
-            <li class="nav-item {{nav.css_class}}">
-              <a href="{{nav.url}}">{{T(nav.text)}}</a>
-            </li>
-          {% end %}
-        {% end %}
-      </ul>
-    </div>
-
-    <div class="nav-search">
-      <form id="searchForm" method="GET" action="{{search_action}}">
-        {% include common/search_box.html %}
-      </form>
-    </div>
-  </div>
-</div>
+{% if _user_config.nav_style == "left" and _is_desktop %}
+  {% include common/nav/base_nav_left.html %}
+{% else %}
+  {% include common/nav/base_nav_top.html %}
 {% end %}
-
 
 <div class="toolbar homepage hide">
   <div class="action">

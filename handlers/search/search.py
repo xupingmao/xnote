@@ -384,7 +384,7 @@ class SearchHistoryHandler:
         kw.html_title = "Search"
         kw.recent = self.fetch_recent_logs(raw_history_list)
         kw.hot_logs = self.fetch_hot_logs(raw_history_list)
-        kw.search_type = "note"
+        kw.search_type = "default"
 
         return xtemplate.render("search/page/search_history.html", **kw)
 

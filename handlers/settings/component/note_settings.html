@@ -73,6 +73,19 @@
 </div>
 
 <div class="settings-row">
+    <div class="settings-key">{{T("导航风格")}}</div>
+    <div class="settings-value">
+        <select name="nav_style"
+                data-p="user"
+                data-type="str"
+                value="{{_user_config.nav_style}}">
+            <option value="top">顶部导航</option>
+            <option value="left">左侧导航</option>
+        </select>
+    </div>
+</div>
+
+<div class="settings-row">
     <div class="settings-key">{{T("展示侧边栏")}}</div>
     <div class="settings-value">
         <select name="show_sidebar"

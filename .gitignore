@@ -8,6 +8,7 @@ __pycache__
 *.log
 *.jar
 .DS_Store
+.python-version
 /static/exe
 /static/logs
 /lib/bs4/
