@@ -3,12 +3,12 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-02 13:05:11
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-02 13:05:36
-@FilePath     : /xnote/handlers/common/search/search_box_hook.html
+@LastEditTime : 2023-04-02 21:43:14
+@FilePath     : /xnote/handlers/common/hook/search_box_hook.html
 @Description  : 描述
  #} -->
-{% if _user_config.nav_style == "left" %}
-    <div class="card">
+{% if _user_config.nav_style == "left" and _is_desktop %}
+    <div class="search-out-box">
         <form id="searchForm" method="GET" action="{{search_action}}">
             {% include common/search_box.html %}
         </form>
