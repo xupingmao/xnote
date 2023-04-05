@@ -1,3 +1,44 @@
+<style>
+  .nav-left {
+    display: block;
+    float: left;
+    top: 0px;
+    height: 100%;
+    position: fixed;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    background-color: gray;
+  }
+
+  .nav-scroll {
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .nav-left li {
+    display: block;
+    color: white;
+  }
+
+  .nav-left li>a {
+    color: white;
+    line-height: 25px;
+  }
+
+  #poweredBy {
+    padding-left: 40px;
+  }
+
+  #poweredBy,
+  #poweredBy a {
+    color: white;
+  }
+
+  #poweredBy a {
+    text-decoration: underline;
+  }
+</style>
+
 <div class="nav-left">
   <div class="nav-scroll">
     <!-- 侧边菜单栏 -->
@@ -57,44 +98,3 @@
   $(".nav-left").width(xnote.device.leftNavWidth);
 })();
 </script>
-
-<style>
-  .nav-left {
-    display: block;
-    float: left;
-    top: 0px;
-    height: 100%;
-    position: fixed;
-    padding-top: 50px;
-    padding-bottom: 50px;
-    background-color: gray;
-  }
-
-  .nav-scroll {
-    height: 100%;
-    overflow-y: auto;
-  }
-
-  .nav-left li {
-    display: block;
-    color: white;
-  }
-
-  .nav-left li>a {
-    color: white;
-    line-height: 25px;
-  }
-
-  #poweredBy {
-    padding-left: 40px;
-  }
-
-  #poweredBy,
-  #poweredBy a {
-    color: white;
-  }
-
-  #poweredBy a {
-    text-decoration: underline;
-  }
-</style>
