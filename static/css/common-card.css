@@ -99,13 +99,3 @@ body {
     border: 1px solid #ccc;
     box-shadow: none;
 }
-
-/** 移动端样式放在最后 **/
-@media screen and (max-width: 1000px) {
-    /** mobile **/
-    .main-content {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-}
-

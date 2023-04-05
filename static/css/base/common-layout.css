@@ -71,19 +71,6 @@
     line-height: 25px;
 }
 
-#poweredBy {
-    padding-left: 40px;
-}
-
-#poweredBy,
-#poweredBy a {
-    color: white;
-}
-
-#poweredBy a {
-    text-decoration: underline;
-}
-
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 800px) {
     /** mobile **/
