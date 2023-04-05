@@ -7,13 +7,24 @@
     display: none;
 }
 
-@media screen and (max-width: 800px) {
+</style>
+
+{% if _user_config.nav_style == "left" %}
+<style>
     .mobile-search {
         display: block;
     }
-}
-
 </style>
+{% else %}
+<style>
+    @media screen and (max-width: 800px) {
+        .mobile-search {
+            display: block;
+        }
+    }
+</style>
+{% end %}
+
 
 {% init show_nav = True %}
 {% init show_menu = True %}

@@ -127,13 +127,16 @@
 
       var leftRatio = 0.7;
       if (contentWidth>=xnote.MOBILE_MAX_WIDTH) {
+        // 桌面版
         leftRatio = 0.7;
         styleText += ".content-left { width:70%; }";
         styleText += ".content-right { width:30%; }";
       } else {
+        // 移动版
         leftRatio = 1.0;
         styleText += ".content-left { width: 100%; }";
         styleText += ".content-right { display: none; }";
+        styleText += ".nav {display: block;}";
       }
 
       // 设备大小信息

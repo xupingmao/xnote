@@ -1481,7 +1481,11 @@ def list_search_history(user, limit=1000, orderby="time_desc"):
         return []
     result = []
     for value in _search_history_db.list(limit = limit, reverse=True, where = dict(user=user)):
+        if value.ctime == None:
+            value.ctime = ""
         result.append(value)
+    
+    result.sort(key = lambda x:x.ctime, reverse = True)
     return result
 
 
