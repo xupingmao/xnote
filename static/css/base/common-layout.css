@@ -44,6 +44,46 @@
     display: inline-block;
 }
 
+.nav-left {
+    display: block;
+    float: left;
+    top: 0px;
+    width: 180px;
+    height: 100%;
+    position: fixed;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    background-color: #515865;
+}
+
+.nav-scroll {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.nav-left li {
+    display: block;
+    color: white;
+}
+
+.nav-left li>a {
+    color: white;
+    line-height: 25px;
+}
+
+#poweredBy {
+    padding-left: 40px;
+}
+
+#poweredBy,
+#poweredBy a {
+    color: white;
+}
+
+#poweredBy a {
+    text-decoration: underline;
+}
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 800px) {
     /** mobile **/
