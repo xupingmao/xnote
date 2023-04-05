@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-07 19:09:56
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-07 21:46:17
+@LastEditTime : 2023-04-05 19:59:15
 @FilePath     : /xnote/handlers/common/base_footer.html
 @Description  : 描述
  #} -->
@@ -13,7 +13,7 @@
 {% init _show_footer = show_nav %}
 
 {% if xconfig.DEV_MODE %}
-<div class="x-center">
+<div class="x-center dev-info">
     <div class="card">
         <span>SQL信息 - ({{len(_debug_info.sql_logs)}})</span>
         <textarea class="row" rows="{{len(_debug_info.sql_logs)}}">{{"\n".join(_debug_info.sql_logs)}}</textarea>

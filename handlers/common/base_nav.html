@@ -6,17 +6,17 @@
 
 {% if _is_admin and show_menu and show_nav and xconfig.get_system_config("node_role") == "follower" %}
 <div class="row warn">
-  <div class="x-center">
+  <div class="x-center dev-info">
     当前系统以从节点身份运行，请勿编辑
     <a href="/system/sync?p=home">查看同步状态</a>
   </div>
 </div>
 {% end %}
 
+{% include common/nav/base_nav_top.html %}
+
 {% if _user_config.nav_style == "left" and _is_desktop %}
-  {% include common/nav/base_nav_left.html %}
-{% else %}
-  {% include common/nav/base_nav_top.html %}
+  {% include common/nav/base_nav_left.html %} 
 {% end %}
 
 <div class="toolbar homepage hide">

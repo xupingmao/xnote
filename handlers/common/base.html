@@ -19,12 +19,6 @@
 
         <!-- 主体部分（内容） -->
         <div class="x-body">
-            <div class="nav-left-search">
-                <form id="searchForm2" method="GET" action="{{search_action}}">
-                    {% include common/search/search_box.html %}
-                </form>
-            </div>
-
             <div class="main-content">
                 <div class="col-md-12">
                     {% if warn != "" and warn != None %}
@@ -33,6 +27,7 @@
                     </pre>
                     {% end %}
 
+                    <!-- 移动端搜索 -->
                     {% include common/search/search_mobile.html %}
 
                     <!-- 标题栏 -->

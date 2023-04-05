@@ -355,13 +355,14 @@ li.menu-item:hover {
     float: left;
     width: 100%;
     background-color: #515865;
-    /*border-bottom: 5px solid orange;*/
 }
 
 .nav-container {
     float: left;
     width: 1000px;
     margin-left: calc(50% - 500px);
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .nav-left {
@@ -370,6 +371,11 @@ li.menu-item:hover {
 
 .x-center {
     /* 具体样式由 base_layout.html 脚本动态调整 */
+}
+
+.x-center.dev-info {
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .x-left {
