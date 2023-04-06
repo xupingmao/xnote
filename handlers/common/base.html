@@ -28,16 +28,14 @@
                     {% end %}
 
                     <!-- 标题栏 -->
-                    {% block body_top %} {% end %}
-
-                    <!-- 经典居中布局 -->
-                    {% block body %} {% end %}
+                    {% block body_top %} {% end %}                    
                     
                     <!-- 主要内容 -->
                     <div class="content-left">
                         <!-- 移动端搜索 -->
                         {% include common/search/search_mobile.html %}
 
+                        {% block body %} {% end %}
                         {% block body_left %} {% end %}
                     </div>
 

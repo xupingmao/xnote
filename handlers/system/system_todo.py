@@ -4,7 +4,9 @@ import xtemplate
 HTML = """
 {% extends base %}
 
-{% block body %}
+{% block body_left %}
+    {% include common/layout/wide_left.html %}
+
     <div class="card">
         <p class="align-center">功能开发中</p>
         <p class="align-center">{%include common/button/back_button.html%}</p>
