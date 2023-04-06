@@ -1,6 +1,8 @@
 {% extends base %}
 
-{% block body_top %}
+{% block body_left %}
+
+{% include common/layout/wide_left.html %}
 
 <div class="card">
     <div class="card-title">
@@ -10,10 +12,6 @@
         </div>
     </div>
 </div>
-
-{% end %}
-
-{% block body %}
 
 <div class="card">
     <div class="x-tab-box" data-tab-default="public" data-tab-key="tab">

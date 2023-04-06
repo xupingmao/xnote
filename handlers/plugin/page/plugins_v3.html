@@ -1,6 +1,8 @@
 {% extends base %}
 
-{% block body %}
+{% block body_left %}
+
+{% include common/layout/wide_left.html %}
 
 {% init plugins_status = "done" %}
 {% include plugin/header/plugin_header_normal.html %}

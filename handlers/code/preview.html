@@ -22,10 +22,11 @@
 </style>
 {% end %}
 
-{% block body %}
+{% block body_left %}
     {% init path = "" %}
     {% init error = "" %}
     {% init embed = False %}
+    {% include common/layout/wide_left.html %}
 
     {% if error != "" %}
     <div class="col-md-12 error">
