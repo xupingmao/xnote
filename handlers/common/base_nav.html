@@ -12,9 +12,11 @@
 
 {% if _is_admin and show_menu and show_nav and xconfig.get_system_config("node_role") == "follower" %}
 <div class="row warn">
-  <div class="x-center dev-info">
-    当前系统以从节点身份运行，请勿编辑
-    <a href="/system/sync?p=home">查看同步状态</a>
+  <div class="x-center">
+    <div class="dev-info">
+      当前系统以从节点身份运行，请勿编辑
+      <a href="/system/sync?p=home">查看同步状态</a>
+    </div>
   </div>
 </div>
 {% end %}

@@ -360,7 +360,6 @@ li.menu-item:hover {
 .nav-container {
     float: left;
     width: 1000px;
-    margin-left: calc(50% - 500px);
     padding-left: 10px;
     padding-right: 10px;
 }
