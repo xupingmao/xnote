@@ -75,6 +75,8 @@ class TextParserBase(object):
 
     # 调试的开关
     debug_flag = False
+    # 空白字符
+    blank_chars = " \t\n\r"
 
     def init(self, text):
         text = text.replace("\r", "")
@@ -109,7 +111,7 @@ class TextParserBase(object):
             self.i += 1
         return None
 
-    def next(self):
+    def predict_next(self):
         """读取下一个字符，如果没有返回None，不改变当前索引下标"""
         if self.i < self.max_index:
             return self.text[self.i+1]
@@ -139,7 +141,7 @@ class TextParserBase(object):
         i = self.i
         for i in range(self.i, self.length):
             c = self.text[i]
-            if c in " \t\n\r":
+            if c in self.blank_chars:
                 return i
 
         return -1
@@ -156,7 +158,9 @@ class TextParserBase(object):
         self.str_token = ""
 
     def read_before_blank(self):
-        """从当前字符开始，找到空白字符为止，返回内容不包含空白字符,读取后{i}位于第一个空白字符"""
+        """从当前字符开始，找到空白字符为止，返回内容不包含空白字符,读取后{i}位于第一个空白字符
+        读取完成后 current() 返回空白字符或者None
+        """
         end = self.find_blank()
         if end < 0:
             found = self.text[self.i:]
@@ -167,7 +171,7 @@ class TextParserBase(object):
             # 位于第一个空白字符
             self.i = end
         return found
-
+    
     def read_till_target_char(self, char_list, start_index = None):
         """包含目标{char_list},读取后索引{i}位于any之后的字符"""
         if start_index is None:
@@ -259,7 +263,7 @@ class TextParser(TextParserBase):
     # 搜索转换器
     search_translator = None
 
-    def init2(self, text):
+    def init_ext(self, text):
         self.keywords = set()
 
     def set_topic_marker(self, topic_marker):
@@ -370,7 +374,35 @@ class TextParser(TextParserBase):
 
         # 记录关键字
         self.record_keyword(key)
+    
+    def handle_img_list(self, href):
+        hrefs = []
+        restore_index = self.i
 
+        while True:
+            restore_index = self.i
+            hrefs.append(href)
+
+            while self.current() != None and self.current() in self.blank_chars:
+                self.read_next()
+
+            if self.startswith("file://"):
+                href = self.read_before_blank()
+                href = href[7:]
+                if not is_img_file(href):
+                    self.i = restore_index
+                    break
+                # else continue
+            else:
+                self.i = restore_index
+                break
+                
+        for href in hrefs:
+            if len(hrefs) > 1:
+                token = '<div class="msg-img-box multi"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
+            else:
+                token = '<div class="msg-img-box"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
+            self.tokens.append(token)
 
     def mark_file(self):
         self.profile("mark_file")
@@ -379,8 +411,7 @@ class TextParser(TextParserBase):
         href = self.read_before_blank()
         href = href[7:]
         if is_img_file(href):
-            token = '<div class="msg-img-box"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
-            self.tokens.append(token)
+            self.handle_img_list(href)
         else:
             name = href[href.rfind("/")+1:]
             # 尝试urldecode名称
@@ -390,7 +421,7 @@ class TextParser(TextParserBase):
 
     def parse(self, text):
         self.init(text)
-        self.init2(text)
+        self.init_ext(text)
 
         c = self.current()
         while c != None:

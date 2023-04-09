@@ -69,6 +69,7 @@ tools/git-push.sh
 config/boot/boot.local.*
 config/boot/boot.winxp.properties
 config/boot/*.local.properties
+boot.local.*
 
 # 锁文件
 pid.lock
