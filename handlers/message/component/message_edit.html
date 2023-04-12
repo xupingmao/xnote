@@ -9,7 +9,7 @@
             <input type="hidden" id="messageEditId" value="{{!detail.id}}"/>
             <input type="hidden" id="messageEditTag" value="{{!detail.tag}}"/>
 
-            <div class="msg-edit-btn-box">
+            <div class="msg-dialog-bottom-bar">
                 <input type="button" class="send-button btn btn-default" 
                     onclick="xnote.action.message.showTopicDialog(this);" value="#标签">
                 <input type="button" id="filePickerBtn" class="send-button btn btn-default" 
@@ -40,6 +40,13 @@
             {{!each itemList msg}}
                 <a onclick="xnote.action.message.selectTopic(this);" class="list-item topic-item">{{!msg.content}}</a>
             {{!/each}}
+        </div>
+
+        <div class="msg-dialog-bottom-bar">
+            <div class="float-right">
+                <input type="button" class="send-button btn btn-default"
+                onclick="xnote.action.message.closeTopicDiloag();" value="关闭">
+            </div>
         </div>
     </div>
 </script>

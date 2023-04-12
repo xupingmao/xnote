@@ -271,6 +271,16 @@
     padding-right: 10px;
 }
 
+.msg-dialog-bottom-bar {
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    position: absolute;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    background-color: #fff;
+}
+
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 360px) {
