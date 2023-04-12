@@ -244,10 +244,36 @@
 }
 
 
+.layui-layer-content .msg-edit-box {
+    position: absolute;
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
+    top: 0px;
+    width: unset;
+    height: unset;
+}
+
+.layui-layer-content .msg-edit-box textarea {
+    position: absolute;
+    bottom: 40px;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+.layui-layer-content .msg-edit-btn-box {
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    position: absolute;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 360px) {
     /** mobile **/
 
 }
-
-

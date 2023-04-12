@@ -36,6 +36,8 @@ if (window.xnote === undefined) {
     xnote.action = {};
     // 事件相关接口
     xnote.events = {};
+    // resize事件回调
+    xnote.events.resizeHooks = [];
     // 表格模块
     xnote.table = {};
     // 编辑器模块

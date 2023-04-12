@@ -1,20 +1,27 @@
 <script type="text/template" id="msg-edit-tpl">
     <div class="card">
         <!-- 编辑器 -->
-        <div class="card">
+        <div class="card msg-edit-box">
             <textarea id="messageEditContent" 
-                class="col-md-12 edit-box" rows=20
+                class="col-md-12 edit-box"
                 placeholder="请输入内容...">{{!detail.content}}</textarea>
 
             <input type="hidden" id="messageEditId" value="{{!detail.id}}"/>
             <input type="hidden" id="messageEditTag" value="{{!detail.tag}}"/>
 
-            <input type="button" class="send-button btn btn-default" 
-                onclick="xnote.action.message.showTopicDialog(this);" value="#标签">
-            <input type="button" id="filePickerBtn" class="send-button btn btn-default" 
-                onclick="xnote.action.message.upload(this);" value="添加附件"/>
-            <input type="button" id="updateMessageBtn" class="send-button btn"
-                onclick="xnote.action.message.saveMessage(this);" value="{{!submitBtnText}}">
+            <div class="msg-edit-btn-box">
+                <input type="button" class="send-button btn btn-default" 
+                    onclick="xnote.action.message.showTopicDialog(this);" value="#标签">
+                <input type="button" id="filePickerBtn" class="send-button btn btn-default" 
+                    onclick="xnote.action.message.upload(this);" value="添加附件"/>
+                <input type="button" id="updateMessageBtn" class="send-button btn"
+                    onclick="xnote.action.message.saveMessage(this);" value="{{!submitBtnText}}">
+
+                <div class="float-right">
+                    <input type="button" class="send-button btn btn-default"
+                    onclick="xnote.action.message.closeEdit(this);" value="关闭">
+                </div>
+            </div>
         </div>
     </div>
 </script>

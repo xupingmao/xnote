@@ -138,6 +138,10 @@
 
       // 居中的样式
       $("#layout-css").html(styleText);
+
+      for (var i = 0; i < xnote.events.resizeHooks.length; i++) {
+        xnote.events.resizeHooks[i]();
+      }
     };
 
     loadStyle();

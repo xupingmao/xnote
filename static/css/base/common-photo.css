@@ -11,15 +11,14 @@
     top: 0px;
     text-align: left;
     font-size: 14px;
-    /* padding-right: 5px; */
-    /* padding-left: 5px; */
-    background-color: rgba(0,0,0,0.8);
+    background-color: rgba(100,100,100,0.7);
     z-index: 1;
     position: fixed;
 }
 
 .layui-layer-imgbar.imgbar-bottom {
     position: fixed;
+    background-color: rgba(100,100,100,0.7);
 }
 
 .layui-layer-imgbar .clickable {

@@ -335,3 +335,9 @@ $("body").on("keyup", ".nav-search-input", function (e) {
     var inputText = $(e.target).val();
     MessageView.searchTopic(inputText);
 });
+
+$("body").on("focus", ".msg-edit-box textarea", function (e) {
+    if (xnote.device.isIphone) {
+        $(".layui-layer-content").height("50%");
+    }
+})
