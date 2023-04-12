@@ -252,6 +252,7 @@
     top: 0px;
     width: unset;
     height: unset;
+    margin-bottom: 0px;
 }
 
 .layui-layer-content .msg-edit-box textarea {
@@ -277,6 +278,7 @@
     right: 0px;
     position: absolute;
     padding: 10px;
+    padding-top: 5px;
     border-top: 1px solid #ccc;
     background-color: #fff;
 }
