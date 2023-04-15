@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 00:19:47
+@LastEditTime : 2023-04-15 14:20:41
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -70,12 +70,8 @@ class TopicTranslator:
         key = key.rstrip("")
         quoted_key = textutil.quote(key)
         value = textutil.escape_html(key0)
-        p = "all"
-        if self.tag in ("task", "done", "log"):
-            p = self.tag
-
+        p = "all" # 默认展示全部，系统处理排序的问题
         fmt = "<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={p}\">{value}</a>"
-
         return fmt.format(quoted_key=quoted_key, value=value, p=p)
 
 
