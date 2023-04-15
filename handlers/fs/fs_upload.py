@@ -111,6 +111,8 @@ def try_fix_orientation(fpath):
 
 # 业务上用到的函数
 
+def get_user_upload_dir(user):
+    return os.path.join(xconfig.UPLOAD_DIR, user)
 
 def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=False):
     """生成上传文件名"""
@@ -147,7 +149,6 @@ class UploadHandler:
     @xauth.login_required()
     def POST(self):
         file = xutils.get_argument("file", {})
-        dirname = xutils.get_argument("dirname")
         prefix = xutils.get_argument("prefix")
         name = xutils.get_argument("name")
         note_id = xutils.get_argument("note_id")
@@ -156,18 +157,19 @@ class UploadHandler:
         if file.filename != None:            
             filename = get_safe_file_name(file.filename)
             if file.filename == "":
-                return dict(code="fail", message="filename is empty")
+                return dict(code="400", message="filename is empty")
+            
             basename, ext = os.path.splitext(filename)
             if name == "auto":
                 # iOS上传文件截图文件固定是image.png
                 filename = generate_filename(None, prefix, ext)
-            # xutils.makedirs(dirname)
+
             filepath, webpath = get_upload_file_path(user_name, filename)
-            # filename = xutils.quote(os.path.basename(x.file.filename))
+
             with open(filepath, "wb") as fout:
-                # fout.write(x.file.file.read())
                 for chunk in file.file:
                     fout.write(chunk)
+            
             xmanager.fire("fs.upload", dict(
                 user=user_name, path=filepath, fpath=filepath))
 
@@ -265,7 +267,13 @@ class RangeUploadHandler:
                 dirname = os.path.dirname(filepath)
                 filename = os.path.basename(filepath)
             else:
-                # TODO check permission.
+                # check permission.
+                if xauth.current_role() != "admin":
+                    # 普通用户操作
+                    user_upload_dir = get_user_upload_dir(user_name)
+                    if not fsutil.is_parent_dir(user_upload_dir, dirname):
+                        return dict(code="403", message="无权操作")
+
                 filepath = os.path.join(dirname, filename)
             
             if self.is_fixed_name(origin_name):
