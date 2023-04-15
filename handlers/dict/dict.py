@@ -180,6 +180,15 @@ class UpdateAjaxHandler:
         dict_dao.update(id, value)
         return dict(code="success")
 
+
+class DeleteAjaxHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        id = xutils.get_argument_int("id")
+        dict_dao.delete(id)
+        return dict(code="success")
+
 xutils.register_func("dict.search", search_dict)
 
 xurls = (
@@ -192,4 +201,5 @@ xurls = (
 
     r"/api/dict/create", CreateAjaxHandler,
     r"/api/dict/update", UpdateAjaxHandler,
+    r"/api/dict/delete", DeleteAjaxHandler,
 )

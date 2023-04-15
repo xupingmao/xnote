@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-15 14:39:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-15 15:02:30
+@LastEditTime : 2023-04-15 15:38:19
 @FilePath     : /xnote/handlers/dict/dict_dao.py
 @Description  : 描述
 """
@@ -36,3 +36,8 @@ def update(id, value):
     assert isinstance(id, int), "id必须为数字"
     table = xtables.get_dict_table()
     return table.update(value = value, where = dict(id = id))
+
+def delete(id):
+    table = xtables.get_dict_table()
+    return table.delete(where = dict(id = id))
+

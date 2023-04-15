@@ -13,26 +13,30 @@
     <h3 class="card-title">
         <a class="path-link" href="/note/dict">词典</a>&nbsp;/&nbsp;编辑
         <div class="float-right">
+            <a class="btn btn-default" href="/dict/add">新增</a>
             {% include common/button/back_button.html %}
         </div>
     </h3>
 </div>
 
 <div class="card">
-    <div style="max-width: 400px">
+    <div style="max-width: 600px">
         <table class="table no-border-table">
             <tr>
                 <td>名称</td>
-                <td><input type="text" class="mid-text col-md-12" name="name" value="{{name}}" disabled /></td>
+                <td><input type="text" class="mid-text col-md-12 dict-key" name="name" value="{{name}}" disabled /></td>
             </tr>
             <tr>
                 <td>解释</td>
-                <td><textarea name="value" rows=5 class="row">{{value}}</textarea></td>
+                <td><textarea name="value" rows=10 class="row">{{value}}</textarea></td>
             </tr>
             {% if _is_admin %}
                 <tr>
                     <td></td>
-                    <td><button class="save-btn">保存</button></td>
+                    <td>
+                        <button class="save-btn">保存</button>
+                        <button class="delete-btn btn danger">删除</button>
+                    </td>
                 </tr>
             {% end %}
         </table>
@@ -54,10 +58,30 @@
             xnote.toast("请求失败:" + err);
         })
     });
+
+    // 删除
+    $(".delete-btn").click(function (e) {
+        var key = $(".dict-key").val();
+        var confirmText = "确认删除[" + key + "]吗?";
+        xnote.confirm(confirmText, function (result) {
+            var params = {};
+            params.id = xnote.getUrlParam("id");
+            $.post("/api/dict/delete", params, function (resp) {
+                if (resp.code == "success") {
+                    xnote.toast("删除成功");
+                    window.location.href = "/dict/list";
+                } else {
+                    xnote.toast("删除失败:" + resp.message);
+                }
+            }).fail(function (err) {
+                xnote.toast("请求失败:" + err);
+            });
+        });
+    });
 </script>
 
 {% end %}
 
-{% block aside %}
-    {% include note/component/mod_aside.html %}
+{% block body_right %}
+    {% include dict/component/dict_sidebar.html %}
 {% end %}
