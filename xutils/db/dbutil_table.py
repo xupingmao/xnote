@@ -28,6 +28,7 @@ register_table("_max_id", "最大ID")
 register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
 register_table("_idx_version", "索引版本")
+register_table("_cache", "数据库缓持久化存")
 db = register_table("_repair_error", "修复错误记录")
 db.register_index("ctime")
 

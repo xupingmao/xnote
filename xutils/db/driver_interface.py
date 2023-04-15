@@ -12,7 +12,7 @@ class DBInterface:
     """KV存储的数据库接口"""
 
     def __init__(self, *args, **kw):
-        raise NotImplementedError("__init__")
+        pass
 
     def Get(self, key):
         # type: (bytes) -> bytes
@@ -104,3 +104,17 @@ class BatchInterface:
 
     def commit(self, sync=False, retries=0):
         raise NotImplementedError("待子类实现")
+
+
+class CacheInterface:
+    """缓存接口"""
+
+    def get(self, key):
+        return None
+    
+    def put(self, key, value, expire = -1, expire_random = 600):
+        return None
+
+
+empty_db = DBInterface()
+empty_cache = CacheInterface()

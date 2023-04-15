@@ -37,6 +37,7 @@ from xutils import Storage
 from xutils import mem_util
 from xutils.mem_util import log_mem_info_deco
 from xutils.lockutil import FileLock
+from xutils.db import dbutil_cache
 from autoreload import AutoReloadThread
 
 import os
@@ -152,6 +153,7 @@ def try_init_kv_db():
             config_dict.sqlite_journal_mode = xconfig.get_system_config(
                 "sqlite_journal_mode")
             db_instance = SqliteKV(db_file, config_dict=config_dict)
+            db_instance.debug = xconfig.get_system_config("db_debug")
 
         if db_driver == "leveldbpy":
             from xutils.db.driver_leveldbpy import LevelDBProxy
@@ -209,10 +211,12 @@ def try_init_kv_db():
         binlog=xconfig.get_system_config("binlog")
         assert isinstance(binlog, bool)
 
+        db_cache = dbutil_cache.CacheImpl() # 持久化缓存
+
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR,
                     db_instance=db_instance,
-                    db_cache=cacheutil._global_cache,
+                    db_cache=db_cache,
                     binlog=binlog,
                     binlog_max_size=xconfig.get_system_config("binlog_max_size"))
     except:

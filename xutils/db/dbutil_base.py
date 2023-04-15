@@ -55,6 +55,7 @@ from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json
 from .driver_interface import DBInterface, BatchInterface
 from .dbutil_id_gen import TimeSeqId
+from . import driver_interface
 
 try:
     import leveldb
@@ -64,7 +65,7 @@ except ImportError:
 
 DEFAULT_BLOCK_CACHE_SIZE = 8 * (2 << 20)  # 16M
 DEFAULT_WRITE_BUFFER_SIZE = 2 * (2 << 20)  # 4M
-DEFAULT_CACHE_EXPIRE = 60 * 60  # 1小时
+DEFAULT_CACHE_EXPIRE = 60 * 60 * 24  # 1天
 
 _write_lock = threading.RLock()
 
@@ -80,9 +81,10 @@ LDB_TABLE_DICT = dict()
 WRITE_ONLY = False
 
 # leveldb的全局实例
-_leveldb = None  # type: DBInterface
+_leveldb = driver_interface.empty_db
+
 # 缓存对象（拥有put/get两个方法）
-_cache = None # type: xutils.cacheutil.Cache
+_cache = driver_interface.empty_cache
 _driver_name = None 
 
 
@@ -750,10 +752,10 @@ def count_table(table_name, use_cache=False):
     assert table_name != None
     assert table_name != ""
 
+    cache_key = "table_count:%s" % table_name
+
     if table_name[-1] != ":":
         table_name += ":"
-
-    cache_key = "table_count:%s" % table_name
 
     if use_cache and _cache != None:
         value = _cache.get(cache_key)
