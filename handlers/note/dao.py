@@ -50,6 +50,7 @@ _search_history_db = dbutil.get_table("search_history")
 
 _note_history_db = dbutil.get_hash_table("note_history")
 _note_history_index_db = dbutil.get_hash_table("note_history_index")
+_public_db = dbutil.get_table("note_public")
 
 DB_PATH = xconfig.DB_PATH
 MAX_STICKY_SIZE = 1000
@@ -166,7 +167,7 @@ def get_archived_group():
     return group
 
 def get_note_public_table():
-    return dbutil.get_table("note_public")
+    return _public_db
 
 
 def get_note_tiny_table(user_name):
@@ -1052,16 +1053,22 @@ def list_public(offset, limit, orderby="ctime_desc"):
     else:
         index_name = "share_time"
 
-    db = dbutil.get_table("note_public")
-    notes = db.list_by_index(index_name,
+    notes = _public_db.list_by_index(index_name,
                              offset=offset, limit=limit, reverse=True)
 
     build_note_list_info(notes)
+
+    note_ids = []
+    for note in notes:
+        note_ids.append(note.id)
+
+    batch_result = _index_db.batch_get_by_id(note_ids)
+
     for note in notes:
         assert isinstance(note, Storage)
-        if note.is_deleted:
+        if note.is_deleted or batch_result.get(note.id) == None:
             logging.warning("笔记已删除:%s,name:%s", note.id, note.name)
-            db.delete_by_id(note.id)
+            _public_db.delete_by_id(note.id)
 
     return notes
 
