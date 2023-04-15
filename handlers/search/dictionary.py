@@ -29,6 +29,7 @@ def wrap_results(dicts, origin_key):
         f.raw = f0["value"].replace("\\n", "\n")
         f.url = "#"
         f.icon = "hide"
+        f.id = f0.id
         files.append(f)
     return files
 
@@ -61,7 +62,7 @@ def do_translate(ctx):
             vars = dict(key = word + '%'))
     else:
         dicts = table.select(where="value LIKE $value", 
-            vars = dict(value = '%' + word + '%', user = user_name))
+            vars = dict(value = '%' + word + '%'))
     ctx.dicts += wrap_results(dicts, "key")
 
 @xmanager.searchable(r".+")
@@ -71,7 +72,7 @@ def do_translate_strict(ctx):
 
     user_name = ctx.user_name
     db = xtables.get_dictionary_table()
-    results = db.select(where="key = $key AND (user=$user OR user='')", vars=dict(key=ctx.input_text, user=user_name))
+    results = db.select(where="key = $key", vars=dict(key=ctx.input_text))
     for item in results:
         value = item.value.replace("\\n", "\n")
 
@@ -82,6 +83,7 @@ def do_translate_strict(ctx):
         result.url = "#"
         result.icon = "icon-dict"
         result.category = "dict"
+        result.id = item.id
 
         ctx.dicts.append(result)
 
@@ -93,7 +95,7 @@ def translate_english(ctx):
 
     user_name = ctx.user_name
     db = xtables.get_dictionary_table()
-    results = db.select(where="key like $key AND (user=$user OR user='')", vars=dict(key=ctx.input_text + "%", user=user_name))
+    results = db.select(where="key like $key", vars=dict(key=ctx.input_text + "%"))
     for item in results:
         value = item.value.replace("\\n", "\n")
 
@@ -103,6 +105,7 @@ def translate_english(ctx):
         result.raw = value
         result.url = "#"
         result.category = "dict"
+        result.id = item.id
 
         ctx.dicts.append(result)
 

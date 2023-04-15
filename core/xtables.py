@@ -346,7 +346,6 @@ def init_dict_table():
     with TableManager(dbpath, "dictionary") as manager:
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
-        manager.add_column("user",  "text", "")
         manager.add_column("key", "text", "")
         manager.add_column("value", "text", "")
         manager.add_index("key")

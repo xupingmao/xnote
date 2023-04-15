@@ -1,0 +1,63 @@
+{% extends base %}
+
+{% block head %}
+<style type="text/css">
+</style>
+{% end %}
+
+{% block body_left %}
+{% init name = "" %}
+{% init value = "" %}
+
+<div class="card">
+    <h3 class="card-title">
+        <a class="path-link" href="/note/dict">词典</a>&nbsp;/&nbsp;新增
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </h3>
+</div>
+
+<div class="card">
+    <div style="max-width: 400px">
+        <table class="table no-border-table">
+            <tr>
+                <td>名称</td>
+                <td><input type="text" class="mid-text col-md-12" name="name" value="{{name}}"/></td>
+            </tr>
+            <tr>
+                <td>解释</td>
+                <td><textarea name="value" rows=5 class="row">{{value}}</textarea></td>
+            </tr>
+            {% if _is_admin %}
+                <tr>
+                    <td></td>
+                    <td><button class="save-btn">保存</button></td>
+                </tr>
+            {% end %}
+        </table>
+    </div>
+</div>
+
+<script>
+    $(".save-btn").click(function (e) {
+        var params = {};
+        params.key = $("[name=name]").val();
+        params.value = $("[name=value]").val();
+        $.post("/api/dict/create", params, function (resp) {
+            if (resp.code == "success") {
+                xnote.toast("添加成功");
+                window.location.href = resp.data.url;
+            } else if (resp.code == "302") {
+                xnote.toast("添加失败:" + resp.message);
+                window.location.href = resp.data.url;
+            } else {
+                xnote.toast("添加失败:" + resp.message);
+            }
+        }).fail(function (err) {
+            xnote.toast("请求失败:" + err);
+        })
+    });
+</script>
+
+{% end %}

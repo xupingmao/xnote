@@ -12,6 +12,8 @@ import math
 from xutils import Storage, encode_uri_component
 from xutils.imports import is_str
 
+from . import dict_dao
+
 PAGE_SIZE = xconfig.PAGE_SIZE
 
 def escape_sqlite_text(text):
@@ -40,7 +42,7 @@ def convert_dict_func(item):
     v.summary = item.value
     v.mtime = item.mtime
     v.ctime = item.ctime
-    v.url = "/dict/edit/%s" % item.key
+    v.url = "/dict/update?id=%s" % item.id
     v.priority = 0
     v.show_next = True
     return v
@@ -129,11 +131,65 @@ class DictHandler:
             page_url   = "/note/dict?page=",
             search_type = "dict")
 
+class DictAddHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        return xtemplate.render("dict/page/dict_add.html")
+
+class DictUpdateHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        item_id = xutils.get_argument_int("id")
+        item = dict_dao.get_by_id(item_id)
+        kw = Storage()
+        if item != None:
+            kw.name = item.key
+            kw.value = item.value
+        return xtemplate.render("dict/page/dict_update.html", **kw)
+
+class CreateAjaxHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        key = xutils.get_argument("key", "")
+        value = xutils.get_argument("value", "")
+        if key == "":
+            return dict(code="400", message="key不能为空")
+
+        if value == "":
+            return dict(code="400", message="value不能为空")
+
+        key   = xutils.unquote(key)
+        table = xtables.get_dict_table()
+        item  = table.select_first(where=dict(key=key))
+        if item != None:
+            return dict(code="302", message="记录已经存在，请前往更新", data = dict(url = "/dict/update?id=%s" % item.id))
+        else:
+            id = table.insert(key = key, value = value)
+            return dict(code="success", data = dict(url = "/dict/update?id=%s" % id))
+
+
+class UpdateAjaxHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        id = xutils.get_argument_int("id")
+        value = xutils.get_argument_str("value")
+        dict_dao.update(id, value)
+        return dict(code="success")
+
 xutils.register_func("dict.search", search_dict)
 
 xurls = (
+    r"/dict/add", DictAddHandler,
     r"/dict/edit/(.+)", DictEditHandler,
+    r"/dict/update",    DictUpdateHandler,
     r"/dict/search",    DictSearchHandler,
     r"/dict/list",      DictHandler,
     r"/note/dict",      DictHandler,
+
+    r"/api/dict/create", CreateAjaxHandler,
+    r"/api/dict/update", UpdateAjaxHandler,
 )

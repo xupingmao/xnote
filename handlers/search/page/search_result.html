@@ -69,7 +69,7 @@
 
                 {# 词典 #}
                 {% if _is_admin and file.category == "dict" %}
-                    <a class="item-option" href="/dict/edit/{{file.key}}">编辑</a>
+                    <a class="item-option" href="/dict/update?id={{file.id}}">编辑</a>
                 {% end %}
 
                 {% if file.show_more_link %}
