@@ -79,7 +79,8 @@
     left: 0px; 
     right: 0px; 
     padding: 15px; 
-    padding-left: 40px;
+    padding-left: 0px;
+    padding-right: 0px;
     border-top: 1px solid #ccc;
 }
 
