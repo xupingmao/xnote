@@ -36,7 +36,10 @@ def get_mem_info_by_tasklist():
     str_list          = mem_usage.split(",")
     pattern           = re.compile(r"[0-9,]+ [kK]")
     mem_list          = pattern.findall(mem_usage)
-    formated_mem_size = mem_list[-1]
+    if len(mem_list) > 0:
+        formated_mem_size = mem_list[-1]
+    else:
+        formated_mem_size = "-1"
     return Storage(mem_used = formated_mem_size, sys_mem_used = "-1", sys_mem_total = "-1")
 
 def get_mem_info():
@@ -66,6 +69,7 @@ def log_mem_info_deco(name, log_args = False, group = "default"):
 
         def handle(*args, **kw):
             args0 = ""
+            before = 0
             
             try:
                 before = get_mem_info().mem_used

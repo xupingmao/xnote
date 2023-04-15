@@ -22,7 +22,7 @@ import xauth
 from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
 from handlers.note import dao_comment
 from handlers.note import dao_delete
-
+from handlers.note import html_importer
 from xutils import Storage
 from xutils import textutil
 
@@ -501,7 +501,7 @@ class TestMain(BaseTestCase):
             <p>Text</p>
         </body>
         </html>"""
-        result = NOTE_DAO.import_from_html(html)
+        result = html_importer.import_from_html(html)
 
         print(result)
 

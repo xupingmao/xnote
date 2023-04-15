@@ -124,14 +124,16 @@ class UpdateHandler(object):
         user_name = xauth.current_name()
 
         if content == "" or path == "":
-            raise web.seeother("/fs/")
+            # raise web.seeother("/fs/")
+            return dict(code="400", message="path不能为空")
         else:
             content = content.replace("\r\n", "\n")
             xutils.savetofile(path, content)
 
             # 发送通知刷新文件索引
             xmanager.fire("fs.update", dict(user=user_name, fpath=path))
-            raise web.seeother("/code/edit?path=" + xutils.quote(path))
+            # raise web.seeother("/code/edit?path=" + xutils.quote(path))
+            return dict(code="success")
 
 
 xurls = (

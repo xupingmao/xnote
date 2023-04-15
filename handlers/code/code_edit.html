@@ -127,7 +127,7 @@
 
         <div class="col-md-12 bottom-offset-1">
             {% if not readonly %}
-                <input type="submit" value="保存">
+                <input type="button" value="保存" class="save-btn">
                 <input type="button" id="rename" class="btn rename-btn" value="重命名"/>
             {% end %}
             <input id="execute" type="button" class="btn hide" value="执行"/>
@@ -170,8 +170,7 @@
         $(".rename-btn").click(function (event) {
             var name     = $("[name=basename]").val();
             var dirname  = $("[name=dirname]").val();
-            var new_name = prompt("重命名为", name);
-            if (new_name) {
+            xnote.prompt("重命名为", name, function (new_name) {
                 $.post("/fs_api/rename", 
                     {dirname: dirname, old_name: name, new_name: new_name}, 
                     function (resp) {
@@ -185,7 +184,23 @@
                     console.log(e);
                     alert("重命名失败");
                 });
-            }
+            });
+        });
+
+        // 保存
+        $(".save-btn").click(function (e) {
+            var params = {};
+            params.path = $("[name=path]").val();
+            params.content = $("[name=content]").val();
+            $.post("/code/update", params, function (resp) {
+                if (resp.code == "success") {
+                    xnote.toast("保存成功");
+                } else {
+                    xnote.toast("保存失败: " + resp.message);
+                }
+            }).fail(function (err) {
+                xnote.toast("保存失败:" + err);
+            })
         });
     });
 </script>
