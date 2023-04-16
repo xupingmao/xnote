@@ -11,7 +11,7 @@ import xauth
 import xmanager
 import web
 import copy
-import hooks
+import xnote_hooks
 
 from xtemplate import T
 from xutils import Storage
@@ -137,7 +137,7 @@ def get_category_name_by_code(code):
     # 如果没有定义，就返回code
     return code
 
-hooks.get_category_name_by_code = get_category_name_by_code
+xnote_hooks.get_category_name_by_code = get_category_name_by_code
 
 def get_category_by_code(code):
     for item in PLUGIN_CATEGORY_LIST:

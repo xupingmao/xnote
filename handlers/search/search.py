@@ -12,7 +12,7 @@ import xconfig
 import xauth
 import xmanager
 import xtemplate
-import hooks
+import xnote_hooks
 import handlers.note.dao as note_dao
 from xutils import textutil, u
 from xutils import Storage
@@ -49,7 +49,7 @@ def get_search_handler(search_type) -> Storage:
     return SEARCH_TYPE_DICT.get("default")
 
 # 注册到xtemplate的实现
-hooks.get_search_handler = get_search_handler
+xnote_hooks.get_search_handler = get_search_handler
 
 class BaseRule:
 

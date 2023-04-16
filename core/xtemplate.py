@@ -26,7 +26,7 @@ from xutils import Storage
 from xutils import textutil
 from six.moves.urllib.parse import quote
 import x_trace
-import hooks
+import xnote_hooks
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(
@@ -284,7 +284,7 @@ def render_search(kw):
         return
 
     search_type = kw.get("search_type")
-    handler = hooks.get_search_handler(search_type)
+    handler = xnote_hooks.get_search_handler(search_type)
     if handler != None:
         kw["search_action"] = handler.action
         kw["search_placeholder"] = handler.placeholder
@@ -605,7 +605,7 @@ class BasePlugin:
         output = u("")
         try:
             self.page = self.get_page()
-            self.category_name = hooks.get_category_name_by_code(
+            self.category_name = xnote_hooks.get_category_name_by_code(
                 self.category)
             output = self.handle(input) or u("")
             if self.get_format() == "text":

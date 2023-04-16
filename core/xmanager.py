@@ -46,6 +46,15 @@ _manager = None # type: HandlerManager
 _event_manager = None # type: EventManager
 
 
+class HandlerLocal(threading.local):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.handler_class = None
+
+
+handler_local = HandlerLocal()
+
 def do_wrap_handler(pattern, handler_clz):
     # Python2中自定义类不是type类型
     # 这里只能处理类，不处理字符串
@@ -81,18 +90,18 @@ def do_wrap_handler(pattern, handler_clz):
             x_trace.start_trace()
             start_time = time.time()
             WrappedHandler.visited_count += 1.0
-            threading.current_thread().handler_class = self.target
+            handler_local.handler_class = self.target
             result = wrap_result(self.target.GET(*args), start_time)
-            threading.current_thread().handler_class = None
+            handler_local.handler_class = None
             return result
 
         def POST(self, *args):
             """常用于提交HTML FORM表单、新增资源等"""
             x_trace.start_trace()
             WrappedHandler.visited_count += 1.0
-            threading.current_thread().handler_class = self.target
+            handler_local.handler_class = self.target
             result = wrap_result(self.target.POST(*args))
-            threading.current_thread().handler_class = None
+            handler_local.handler_class = None
             return result
 
         def HEAD(self, *args):
@@ -616,6 +625,7 @@ class EventHandler:
         else:
             # 同步执行
             try:
+                start = 0.0
                 if self.profile:
                     start = time.time()
                 self.func(ctx)
