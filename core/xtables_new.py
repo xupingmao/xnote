@@ -44,6 +44,9 @@ def init():
     db = dbutil.register_table("plugin_visit", "插件访问日志")
     db.register_index("k_url", columns=["user", "url"])
 
+    # 操作日志
+    dbutil.register_table("user_op_log", "用户操作日志表", user_attr="user_name")
+
     # 月度计划
     db = dbutil.register_table("month_plan", "月度计划")
     db.register_index("user_month", columns = ["user", "month"])

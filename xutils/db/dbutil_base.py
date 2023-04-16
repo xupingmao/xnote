@@ -85,8 +85,7 @@ _leveldb = driver_interface.empty_db
 
 # 缓存对象（拥有put/get两个方法）
 _cache = driver_interface.empty_cache
-_driver_name = None 
-
+_driver_name = ""
 
 def print_debug_info(fmt, *args):
     new_args = [dateutil.format_time(), "[dbutil]"]
@@ -126,9 +125,6 @@ class WriteBatchProxy(BatchInterface):
         @param {object} val
         """
         check_before_write(key, check_table)
-
-        if hasattr(val, "to_storage"):
-            val = val.to_storage()
 
         key_bytes = key.encode("utf-8")
         val_bytes = convert_object_to_json(val).encode("utf-8")
@@ -405,17 +401,21 @@ def _register_table_inner(table_name,
                           user_attr=None):
     if not re.match(r"^[0-9a-z_\$]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
+    
+    if user_attr != None:
+        check_user = True
 
     old_table = TableInfo.get_by_name(table_name)
     if old_table != None:
+        # 检查结构是否一致，不能注册不一致的结构
+        assert old_table.check_user == check_user, "conflict table registry: %s" % table_name
+        assert old_table.user_attr == user_attr, "confilct table registry: %s" % table_name
         # 已经注册
         return old_table
 
     info = TableInfo.register(table_name, description, category)
     info.check_user = check_user
     info.user_attr = user_attr
-    if user_attr != None:
-        info.check_user = True
 
     return info
 

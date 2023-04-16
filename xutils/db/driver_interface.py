@@ -83,7 +83,9 @@ class DBLockInterface:
         raise NotImplementedError("Refresh")
 
 class RecordInterface:
-    """数据库记录的接口"""
+    """数据库记录的接口
+    @deprecated 使用 xutils.Storage 就可以了
+    """
 
     def from_storage(self, dict_value: dict):
         """从数据库记录转为领域模型"""

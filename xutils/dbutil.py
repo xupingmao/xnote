@@ -8,7 +8,6 @@ from xutils.db.dbutil_table import *
 from xutils.db.dbutil_hash import *
 from xutils.db.dbutil_sortedset import *
 from xutils.db.binlog import BinLog
-from xutils.db.driver_interface import RecordInterface
 
 def _get_table_no_lock(table_name):
     table = LDB_TABLE_DICT.get(table_name)

@@ -37,9 +37,7 @@ db.register_index("name")
 db.register_index("age")
 
 dbutil.register_table("test_user_db1", "测试数据库用户版v1")
-
-dbutil.register_table("test_user_db", "测试数据库用户版", check_user=True)
-dbutil.register_table_user_attr("test_user_db", "user")
+dbutil.register_table("test_user_db", "测试数据库用户版", user_attr="user")
 
 BinLog.set_enabled(True)
 
@@ -537,6 +535,7 @@ class TestMain(BaseTestCase):
     def test_binlog_init(self):
         binlog = BinLog.get_instance()
         binlog.add_log("test", "666")
+        binlog.log_debug = False
 
         with binlog._lock:
             self.assertTrue(binlog.last_seq > 0)
@@ -682,6 +681,7 @@ class TestMain(BaseTestCase):
             binlog.add_log("put", "test_binlog_clear", "test")
 
         binlog.delete_expired()
+        binlog.log_debug = False
 
         self.assertEqual(10, len(binlog.list(0, limit=20)))
 

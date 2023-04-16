@@ -194,7 +194,7 @@ class LogHandler(BasePlugin):
                        trace_log_path=get_log_path(date, "TRACE"))
 
 
-class UvRecord(dbutil.RecordInterface):
+class UvRecord(Storage):
 
     def __init__(self) -> None:
         self.ip = ""
@@ -216,13 +216,14 @@ class LogVisitHandler:
             record.date = date
             record.site = site
             record.ip = ip
-            uv_db.insert(record.to_storage())
+            uv_db.insert(record)
         else:
+            assert isinstance(db_record, dict)
             record = UvRecord()
-            record.from_storage(db_record)
+            record.update(db_record)
             record.count+=1
             record.ip = ip
-            uv_db.update(record.to_storage())
+            uv_db.update(record)
         return "console.log('log visit success');"
 
 

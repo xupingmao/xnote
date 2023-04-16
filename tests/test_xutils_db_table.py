@@ -28,9 +28,7 @@ db.register_index("name")
 db.register_index("age")
 
 dbutil.register_table("test_user_db1", "测试数据库用户版v1")
-
-dbutil.register_table("test_user_db", "测试数据库用户版", check_user=True)
-dbutil.register_table_user_attr("test_user_db", "user")
+dbutil.register_table("test_user_db", "测试数据库用户版", user_attr="user")
 
 
 

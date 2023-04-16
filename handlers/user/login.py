@@ -9,9 +9,6 @@ from xutils import Storage
 from xutils import webutil
 
 RETRY_LIMIT = 3
-
-dbutil.register_table("user_op_log", "用户操作日志表",
-                      check_user=True, user_attr="user_name")
 _user_log_db = dbutil.get_table("user_op_log")
 _login_failed_count = cacheutil.PrefixedCache("login_failed_count:")
 
