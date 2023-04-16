@@ -9,11 +9,9 @@ import os
 import xauth
 import xutils
 import xconfig
-from xutils import fsutil
 
-
-PLUGIN_TEMPLATE      = fsutil.readfile("./config/plugin/plugin.tpl.py")
-FORM_PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/form_plugin.tpl.py")
+PLUGIN_TEMPLATE      = xconfig.load_config_as_text("./config/plugin/plugin.tpl.py")
+FORM_PLUGIN_TEMPLATE = xconfig.load_config_as_text("./config/plugin/form_plugin.tpl.py")
 
 class BaseAddFileHandler:
 

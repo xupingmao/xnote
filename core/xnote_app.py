@@ -45,9 +45,7 @@ import xauth
 import web
 
 FILE_LOCK = FileLock("pid.lock")
-core_dir = os.path.dirname(__file__)
-xnote_dir = os.path.dirname(core_dir)
-DEFAULT_CONFIG_FILE = os.path.join(xnote_dir, "./config/boot/boot.default.properties")
+DEFAULT_CONFIG_FILE = xconfig.resolve_config_path("./config/boot/boot.default.properties")
 
 class XnoteApp:
 

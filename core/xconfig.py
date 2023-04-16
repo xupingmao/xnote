@@ -45,7 +45,11 @@ __contributors__ = []
 def resolve_config_path(fpath):
     core_dir = os.path.dirname(__file__)
     xnote_root = os.path.dirname(core_dir)
-    return os.path.join(xnote_root, fpath)
+    # print("xnote_root", xnote_root)
+    result = os.path.join(xnote_root, fpath)
+    result = os.path.abspath(result)
+    # print("result", result)
+    return result
 
 # 系统错误信息
 errors = []
@@ -472,6 +476,9 @@ def load_config_as_dict(fpath):
     text = fsutil.readfile(fpath)
     return textutil.parse_config_text_to_dict(text)
 
+def load_config_as_text(fpath):
+    fpath = resolve_config_path(fpath)
+    return fsutil.readfile(fpath)
 
 def load_file_type_config():
     global FS_TEXT_EXT_LIST

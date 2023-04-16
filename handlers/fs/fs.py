@@ -385,7 +385,8 @@ class StaticFileHandler(FileSystemHandler):
         if not path.startswith("static"):
             newpath = os.path.join(data_prefix, path)
         else:
-            newpath = path
+            # /static/xxx 文件
+            newpath = xconfig.resolve_config_path(path)
             # 兼容static目录数据
             if not os.path.exists(newpath):
                 # len("static/") = 7

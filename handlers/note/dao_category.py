@@ -13,6 +13,7 @@ from xutils import Storage, dateutil
 from xutils import fsutil
 from xutils import dbutil, cacheutil
 import xutils
+import xconfig
 
 from .dao import list_group
 
@@ -20,7 +21,7 @@ dbutil.register_table("note_category", "笔记类目", category="note",
                       check_user=True, user_attr="user_name")
 
 _db = dbutil.get_table("note_category")
-_cat_config = fsutil.load_prop_config("config/note/category.properties")
+_cat_config = xconfig.load_config_as_dict("config/note/category.properties")
 _cat_cache = cacheutil.PrefixedCache("note_category:")
 
 def upsert_category(user_name, category):

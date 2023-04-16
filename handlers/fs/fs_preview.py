@@ -10,7 +10,7 @@ import xauth
 import xconfig
 from xutils import fsutil
 
-preview_dict = fsutil.load_prop_config("./config/file/preview.properties")
+preview_dict = xconfig.load_config_as_dict("./config/file/preview.properties")
 
 class SidebarHandler:
 
