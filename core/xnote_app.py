@@ -45,7 +45,15 @@ import xauth
 import web
 
 FILE_LOCK = FileLock("pid.lock")
-DEFAULT_CONFIG_FILE = "./config/boot/boot.default.properties"
+core_dir = os.path.dirname(__file__)
+xnote_dir = os.path.dirname(core_dir)
+DEFAULT_CONFIG_FILE = os.path.join(xnote_dir, "./config/boot/boot.default.properties")
+
+class XnoteApp:
+
+    def __init__(self) -> None:
+        self.web_app = web.application()
+        self.handler_manager = None
 
 # 配置日志模块
 logging.basicConfig(
@@ -230,9 +238,9 @@ def init_autoreload():
     def register_watch(autoreload_thread):
         """监控文件夹及文件的变更"""
         autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
-        autoreload_thread.watch_dir("static/js", recursive=True)
-        autoreload_thread.watch_dir("static/css", recursive=True)
-        autoreload_thread.watch_file("core/xtemplate.py")
+        autoreload_thread.watch_dir(xconfig.resolve_config_path("static/js"), recursive=True)
+        autoreload_thread.watch_dir(xconfig.resolve_config_path("static/css"), recursive=True)
+        autoreload_thread.watch_file(xconfig.resolve_config_path("core/xtemplate.py"))
 
     def reload_callback():
         xnote_code_builder.build()
@@ -268,7 +276,10 @@ def init_web_app():
 
     # 初始化主管理器，包括用户及权限、定时任务、各功能模块
     xmanager.init(app, var_env)
-    return app
+    xnote_app = XnoteApp()
+    xnote_app.web_app = app
+    xnote_app.handler_manager = xmanager.get_handler_manager()
+    return xnote_app
 
 
 def print_env_info():
@@ -375,7 +386,7 @@ def main(boot_config_kw=None):
             # 执行钩子函数
             run_init_hooks(app)
             # 监听端口
-            app.run()
+            app.web_app.run()
             logging.info("服务器已关闭")
             wait_thread_exit()
             sys.exit(xconfig.EXIT_CODE)

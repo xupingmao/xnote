@@ -21,6 +21,8 @@ import xutils
 import xauth
 import threading
 import x_trace
+import logging
+import xnote_hooks
 from collections import deque
 from threading import Thread
 from xutils import Storage
@@ -263,8 +265,11 @@ class HandlerManager:
 
         # 重新加载HTTP处理器
         # 先全部卸载，然后全部加载，否则可能导致新的module依赖旧的module
-        self.load_model_dir(xconfig.HANDLERS_DIR, unload=True)
-        self.load_model_dir(xconfig.HANDLERS_DIR, load=True)
+        self.load_model_dir(xconfig.HANDLERS_DIR, unload=True, mod_name="handlers")
+        self.load_model_dir(xconfig.HANDLERS_DIR, load=True, mod_name="handlers")
+
+        for reload_func in xnote_hooks.get_reload_hooks():
+            reload_func(self)
 
         self.mapping += self.basic_mapping
         self.mapping += self.last_mapping
@@ -281,20 +286,24 @@ class HandlerManager:
             mod = getattr(mod, name)
         return mod
 
-    def load_model_dir(self, parent=xconfig.HANDLERS_DIR, unload=False, load=False):
+    def load_model_dir(self, parent=xconfig.HANDLERS_DIR, unload=False, load=False, mod_name="handlers"):
+        if parent.startswith("./"):
+            parent = parent[2:] 
         dirname = parent.replace(".", "/")
         if not os.path.exists(dirname):
+            logging.error("model_dir not found:%s", dirname)
+            sys.exit(1)
             return
         for filename in os.listdir(dirname):
             filepath = os.path.join(dirname, filename)
             try:
                 if os.path.isdir(filepath):
                     self.load_model_dir(
-                        parent + "." + filename, unload=unload, load=load)
+                        parent + "." + filename, unload=unload, load=load, mod_name=mod_name+"."+filename)
                     continue
                 name, ext = os.path.splitext(filename)
                 if os.path.isfile(filepath) and ext == ".py":
-                    modname = parent + "." + name
+                    modname = mod_name + "." + name
                     old_mod = sys.modules.get(modname)
                     if old_mod is not None:
                         if hasattr(old_mod, "unload"):
@@ -523,7 +532,7 @@ class CronTaskManager:
 
     def load_system_cron_task(self):
         # 系统默认的任务
-        task_config = fsutil.load_json_config("config/cron/cron.json")
+        task_config = xconfig.load_cron_config()
         for task in task_config:
             self.task_list.append(Storage(**task))
 

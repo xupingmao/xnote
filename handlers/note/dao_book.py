@@ -13,6 +13,7 @@ import xmanager
 from xutils import Storage
 from xutils import dateutil, dbutil, fsutil
 import xutils
+import xconfig
 from . import dao as note_dao
 from .dao import get_by_id, create_note, update_note, list_default_notes, move_note
 
@@ -100,7 +101,8 @@ class SmartGroupService:
 
     @staticmethod
     def load_smart_groups_template():
-        config = fsutil.load_ini_config("config/note/smart_group.ini")
+        fpath = xconfig.resolve_config_path("./config/note/smart_group.ini")
+        config = fsutil.load_ini_config(fpath)
         result = []
         for key in config.sections:
             item = config.items[key]

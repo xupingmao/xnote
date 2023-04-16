@@ -8,11 +8,17 @@ from xutils import Storage
 
 class HookStore:
     init_hooks = []
+    reload_hooks = []
 
     @classmethod
     def add_init_hook(cls, func):
         if func not in cls.init_hooks:
             cls.init_hooks.append(func)
+    
+    @classmethod
+    def add_reload_hook(cls, func):
+        if func not in cls.reload_hooks:
+            cls.reload_hooks.append(func)
 
 
 def get_search_handler(search_type: str) -> Storage:
@@ -28,6 +34,6 @@ def get_category_name_by_code(code) -> str:
 def get_init_hooks():
     return HookStore.init_hooks
 
+def get_reload_hooks():
+    return HookStore.reload_hooks
 
-def add_init_hook(func):
-    HookStore.add_init_hook(func)

@@ -675,13 +675,12 @@ class TestMain(BaseTestCase):
         BinLog.set_max_size(10)
 
         binlog = BinLog.get_instance()
-        binlog.log_debug = True
+        # binlog.log_debug = True
 
         for i in range(20):
             binlog.add_log("put", "test_binlog_clear", "test")
 
         binlog.delete_expired()
-        binlog.log_debug = False
 
         self.assertEqual(10, len(binlog.list(0, limit=20)))
 

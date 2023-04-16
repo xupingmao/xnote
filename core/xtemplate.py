@@ -42,6 +42,11 @@ NAV_LIST = []
 LOAD_TIME = int(time.time())
 
 
+class TemplateConfig:
+    """模板配置"""
+    ext_handlers_dir = "./ext_handlers"
+
+
 def load_languages():
     """加载系统语言配置"""
     global _lang_dict
@@ -145,13 +150,21 @@ class XnoteLoader(Loader):
         """
         # 处理默认的模板，这里hack掉
         if name == "base":
-            return xconfig.BASE_TEMPLATE
-        return name
+            return os.path.join(xconfig.HANDLERS_DIR, xconfig.BASE_TEMPLATE)
+
+        if name.startswith("$ext/"):
+            relative_path = name[len("$ext/"):]
+            return os.path.join(TemplateConfig.ext_handlers_dir, relative_path)
+
+        if name.endswith(".str"):
+            return name
+
+        return os.path.join(xconfig.HANDLERS_DIR, name)
 
     def _create_template(self, name):
         if name.endswith(".str"):
             return Template(name, name=name, loader=self)
-        path = os.path.join(self.root, name)
+        path = name
         with open(path, "rb") as f:
             template = Template(f.read(), name=name, loader=self)
             return template

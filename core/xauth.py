@@ -616,8 +616,8 @@ def init():
 
     session_db = dbutil.get_table("session")
 
-    INVALID_NAMES = fsutil.load_set_config("./config/user/invalid_names.list")
-    USER_CONFIG_PROP = fsutil.load_prop_config("./config/user/user_config.default.properties")
+    INVALID_NAMES = xconfig.load_invalid_names()
+    USER_CONFIG_PROP = xconfig.load_user_config_properties()
     MAX_SESSION_SIZE = xconfig.get_system_config("auth_max_session_size")
 
     BUILTIN_USER_DICT = dict()

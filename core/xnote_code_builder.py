@@ -7,6 +7,7 @@
 import os
 import shutil
 import threading
+from . import xconfig
 
 try:
     import termcolor
@@ -29,13 +30,14 @@ def red_text(text):
 class FileBuilder:
 
     def __init__(self, fpath):
-        self.target_path = fpath
+        self.target_path = xconfig.resolve_config_path(fpath)
         self.source_path_list = []
 
     def close(self):
         pass
 
     def append(self, fpath):
+        fpath = xconfig.resolve_config_path(fpath)
         self.source_path_list.append(fpath)
 
     def __enter__(self):

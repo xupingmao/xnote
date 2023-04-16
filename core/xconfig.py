@@ -31,6 +31,7 @@ TODO: 系统配置需要注册之后才能使用
 '''
 import os
 import time
+import json
 import xutils
 from xutils import textutil
 from xutils import fsutil
@@ -40,6 +41,11 @@ __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
 __copyright__ = "(C) 2016-2023 xupingmao. GNU GPL 3."
 __contributors__ = []
+
+def resolve_config_path(fpath):
+    core_dir = os.path.dirname(__file__)
+    xnote_root = os.path.dirname(core_dir)
+    return os.path.join(xnote_root, fpath)
 
 # 系统错误信息
 errors = []
@@ -105,11 +111,11 @@ FS_OPTIONS = []
 # 存储目录配置项
 ##################################
 # 请求处理器目录
-HANDLERS_DIR = "handlers"
+HANDLERS_DIR = resolve_config_path("handlers")
 # 工具目录
-TOOLS_DIR = "handlers/tools"
+TOOLS_DIR = resolve_config_path("handlers/tools")
 # 语言配置目录
-LANG_DIR = "config/lang"
+LANG_DIR = resolve_config_path("config/lang")
 DB_ENGINE = "leveldb"
 
 WORKING_DIR = os.path.dirname(__file__)
@@ -199,6 +205,24 @@ RUNTIME_ID = None
 EXIT_CODE = 0
 
 
+def read_properties_file(fpath):
+    fpath = resolve_config_path(fpath)
+    return fsutil.readfile(fpath)
+
+
+def load_invalid_names():
+    fpath = resolve_config_path("./config/user/invalid_names.list")
+    return fsutil.load_list_config(fpath)
+
+def load_user_config_properties():
+    fpath = resolve_config_path("./config/user/user_config.default.properties")
+    return fsutil.load_prop_config(fpath)
+
+def load_cron_config():
+    fpath = resolve_config_path("./config/cron/cron.json")
+    text = fsutil.readfile(fpath)
+    return json.loads(text)
+
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -237,6 +261,7 @@ def init(boot_config_file=None, boot_config_kw = None):
     global RUNTIME_ID
     global FILE_EXT_PATH
     global CACHE_DIR
+    global CONFIG_DIR
 
     if boot_config_file != None:
         # 初始化启动配置
@@ -300,14 +325,14 @@ def init(boot_config_file=None, boot_config_kw = None):
     # 初始化系统版本配置
     init_system_version()
 
-    PLUGIN_TEMPLATE = fsutil.readfile("./config/plugin/plugin.tpl.py")
+    PLUGIN_TEMPLATE = read_properties_file("./config/plugin/plugin.tpl.py")
 
     RUNTIME_ID = textutil.generate_uuid()
 
 
 def load_default_boot_config():
     # type: () -> dict
-    text = fsutil.readfile("config/boot/boot.default.properties")
+    text = read_properties_file("./config/boot/boot.default.properties")
     return textutil.parse_config_text_to_dict(text)
 
 
@@ -417,7 +442,8 @@ def init_db_config():
 
 def init_system_version():
     from xutils import fsutil
-    system_version = fsutil.readfile("./config/version.txt", limit=1000)
+    fpath = resolve_config_path("./config/version.txt")
+    system_version = fsutil.readfile(fpath, limit=1000)
     if system_version != None:
         system_version = system_version.strip()
     set_global_config("system.version", system_version)
@@ -430,6 +456,7 @@ def mark_started():
 
 def load_file_type_config0(fpath):
     from xutils import fsutil, textutil
+    fpath = resolve_config_path(fpath)
     text = fsutil.readfile(fpath)
     ext_set = hashset()
     ext_type_dict = textutil.parse_config_text_to_dict(text)
@@ -441,6 +468,7 @@ def load_file_type_config0(fpath):
 def load_config_as_dict(fpath):
     # type: (str) -> dict
     from xutils import fsutil, textutil
+    fpath = resolve_config_path(fpath)
     text = fsutil.readfile(fpath)
     return textutil.parse_config_text_to_dict(text)
 
