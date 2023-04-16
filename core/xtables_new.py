@@ -42,7 +42,7 @@ def init():
     dbutil.register_table("user_stat", "用户数据统计")
 
     db = dbutil.register_table("plugin_visit", "插件访问日志")
-    db.register_index("uk_url", columns=["user", "url"])
+    db.register_index("k_url", columns=["user", "url"])
 
     # 月度计划
     db = dbutil.register_table("month_plan", "月度计划")
@@ -141,6 +141,7 @@ def rebuild_index():
     dbutil.get_table("note_index").rebuild_index("v5")
     dbutil.get_table("note_tiny").rebuild_index("v3")
     dbutil.get_table("plugin_visit_log").rebuild_index("v2")
+    dbutil.get_table("plugin_visit").rebuild_index("v2")
     dbutil.get_table("note_public").rebuild_index("v1")
     dbutil.get_table("comment").rebuild_index("v1")
     dbutil.get_table("uv").rebuild_index("v1")

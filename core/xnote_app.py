@@ -18,33 +18,31 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from __future__ import print_function
-from core.a import *
-import web
-import xauth
-import xutils
-import xconfig
-import xtables
-import xmanager
-import xtemplate
-import xtables_new
-import x_trace
-import signal
-import threading
-from . import xnote_code_builder, xnote_hooks
-from xutils import dbutil
-from xutils import Storage
-from xutils import mem_util
-from xutils.mem_util import log_mem_info_deco
-from xutils.lockutil import FileLock
-from xutils.db import dbutil_cache
-from autoreload import AutoReloadThread
-
-import os
-import sys
-import time
-import logging
+from . import xnote_pathfix
 import argparse
-
+import logging
+import time
+import sys
+import os
+from .autoreload import AutoReloadThread
+from xutils.db import dbutil_cache
+from xutils.lockutil import FileLock
+from xutils.mem_util import log_mem_info_deco
+from xutils import mem_util
+from xutils import Storage
+from xutils import dbutil
+from . import xnote_code_builder, xnote_hooks
+import threading
+import signal
+import x_trace
+import xtables_new
+import xtemplate
+import xmanager
+import xtables
+import xconfig
+import xutils
+import xauth
+import web
 
 FILE_LOCK = FileLock("pid.lock")
 DEFAULT_CONFIG_FILE = "./config/boot/boot.default.properties"
@@ -54,13 +52,16 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)d|%(message)s')
 
+
 def get_bool_by_sys_arg(value):
     return value == "yes" or value == "true"
+
 
 def get_int_by_sys_arg(value):
     if value is None:
         return value
     return int(value)
+
 
 def handle_args_and_init_config(boot_config_kw=None):
     parser = argparse.ArgumentParser()
@@ -96,7 +97,7 @@ def handle_args_and_init_config(boot_config_kw=None):
     xconfig.USE_CACHE_SEARCH = get_bool_by_sys_arg(args.useCacheSearch)
     xconfig.USE_URLENCODE = get_bool_by_sys_arg(args.useUrlencode)
     xconfig.IS_TEST = get_bool_by_sys_arg(args.test)
-    
+
     if xconfig.DEBUG:
         web.config.debug = xconfig.DEBUG
 
@@ -182,7 +183,7 @@ def try_init_kv_db():
 
             sql_logger = x_trace.SqlLogger()
             db_instance = MySQLKV(host=host, user=user, password=password,
-                                  database=database, sql_logger=sql_logger, 
+                                  database=database, sql_logger=sql_logger,
                                   pool_size=pool_size)
             db_instance.init()
             logging.info("use mysql as db engine")
@@ -205,12 +206,12 @@ def try_init_kv_db():
                     sys.exit(1)
 
         dbutil.set_driver_name(db_driver)
-        
+
         # 是否开启binlog
-        binlog=xconfig.get_system_config("binlog")
+        binlog = xconfig.get_system_config("binlog")
         assert isinstance(binlog, bool)
 
-        db_cache = dbutil_cache.CacheImpl() # 持久化缓存
+        db_cache = dbutil_cache.CacheImpl()  # 持久化缓存
 
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR,
@@ -274,10 +275,12 @@ def print_env_info():
     cwd = os.getcwd()
     print("当前工作目录:", os.path.abspath(cwd))
 
+
 def init_debug():
     mem_util.ignore_log_mem_info_deco("db.Get")
     mem_util.ignore_log_mem_info_deco("db.Write")
     mem_util.ignore_log_mem_info_deco("sync_by_binlog_step")
+
 
 def init_app_no_lock(boot_config_kw=None):
     global app
@@ -355,9 +358,11 @@ def wait_thread_exit():
         else:
             return
 
+
 def run_init_hooks(app):
     for func in xnote_hooks.get_init_hooks():
         func(app)
+
 
 def main(boot_config_kw=None):
     global app

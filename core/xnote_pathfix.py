@@ -11,12 +11,14 @@
 import sys
 import os
 
-core_dir = os.path.dirname(__file__)
-project_root = os.path.dirname(core_dir)
-lib_dir = os.path.join(project_root, "lib")
+def fix():
+    core_dir = os.path.dirname(__file__)
+    project_root = os.path.dirname(core_dir)
+    lib_dir = os.path.join(project_root, "lib")
 
-# insert after working dir
-sys.path.insert(1, lib_dir)
-sys.path.insert(1, core_dir)
+    # insert after working dir
+    sys.path.insert(1, lib_dir)
+    sys.path.insert(1, core_dir)
 
 
+fix()

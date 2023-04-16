@@ -29,7 +29,7 @@ def do_upgrade_plugin_log():
         assert isinstance(item, Storage)
         user = item.user
         url = item.url
-        record = new_db.first_by_index("uk_url", where = dict(user=user, url=url))
+        record = new_db.first_by_index("k_url", where = dict(user=user, url=url))
         if record == None:
             record = item
             new_db.insert(record)

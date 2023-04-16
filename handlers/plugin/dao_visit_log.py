@@ -16,12 +16,12 @@ from xutils import Storage
 _log_db = dbutil.get_table("plugin_visit")
 
 def list_visit_logs(user_name, offset = 0, limit = -1):
-    logs = _log_db.list_by_index("uk_url", where = dict(user=user_name), offset = offset, limit = limit, reverse = True)
+    logs = _log_db.list_by_index("k_url", where = dict(user=user_name), offset = offset, limit = limit, reverse = True)
     logs.sort(key = lambda x: x.time, reverse = True)
     return logs
 
 def find_visit_log(user_name, url):
-    return _log_db.first_by_index("uk_url", where = dict(user = user_name, url=url))
+    return _log_db.first_by_index("k_url", where = dict(user = user_name, url=url))
 
 
 def update_visit_log(log, name):
