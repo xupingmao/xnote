@@ -35,6 +35,7 @@ __pycache__
 
 /data/
 /data_follower/
+/data_sqlite/
 /testdata/
 /log/
 /tmp/
