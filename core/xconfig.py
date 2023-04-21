@@ -518,6 +518,11 @@ def get_global_config(name, default_value=None, type=None):
 def get_system_config(name, default_value=None):
     return get_global_config("system." + name, default_value)
 
+def get_system_config_int(name, default_value = 0):
+    value = get_system_config(name, default_value = default_value)
+    assert isinstance(value, int)
+    return value
+
 def get(key, default_value=None):
     return get_global_config(key, default_value)
 

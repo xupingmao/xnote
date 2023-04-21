@@ -562,13 +562,14 @@ class SyncTaskThread(Thread):
 
     def __init__(self, name="SyncTaskThread"):
         super(SyncTaskThread, self).__init__()
-        self.setName(name)
-        self.setDaemon(True)
+        self.name = name
+        self.daemon = True
 
     def run(self):
         while True:
             fire("sync.step")
-            quick_sleep(3)
+            sleep_seconds = xconfig.get_system_config_int("sync_interval_seconds", 3)
+            quick_sleep(sleep_seconds)
 
 
 class WorkerThread(Thread):

@@ -41,11 +41,11 @@ from xutils.webutil import *
 from xutils.exeutil import *
 from xutils.func_util import *
 
-FS_IMG_EXT_LIST = None
-FS_TEXT_EXT_LIST = None
-FS_AUDIO_EXT_LIST = None
-FS_CODE_EXT_LIST = None
-IS_TEST = False
+FS_IMG_EXT_LIST = []
+FS_TEXT_EXT_LIST = []
+FS_AUDIO_EXT_LIST = []
+FS_CODE_EXT_LIST = []
+IS_TEST = []
 
 #################################################################
 
@@ -320,7 +320,8 @@ class RecordList:
     def most(self, count):
         return []
 
-def init(config):
+
+def init(config, pool_size = 2000, thread_size = 5):
     global FS_IMG_EXT_LIST
     global FS_TEXT_EXT_LIST
     global FS_AUDIO_EXT_LIST
@@ -334,4 +335,4 @@ def init(config):
     IS_TEST           = config.IS_TEST
     
     xutils.webutil.init_webutil_env(is_test = IS_TEST)
-
+    logutil.init_async_pool(pool_size=pool_size, thread_size=thread_size)

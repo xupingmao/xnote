@@ -31,30 +31,46 @@ def _format_time():
     tf_base = time.strftime('%Y-%m-%d %H:%M:%S', st)
     return "%s,%03d" % (tf_base, msecs)
 
-class AsyncThreadBase(threading.Thread):
-    
-    MAX_TASK_QUEUE = 200
-
-    def __init__(self, name="AsyncThread"):
-        super(AsyncThreadBase, self).__init__()
-        self.setDaemon(True)
-        self.setName(name)
+class TaskPool:
+    def __init__(self, max_task_queue = 200):
+        self.MAX_TASK_QUEUE = max_task_queue
         self.task_queue = deque()
 
     def put_task(self, func, *args, **kw):
         if len(self.task_queue) > self.MAX_TASK_QUEUE:
-            print(_format_time(), "Too many log task")
+            print(_format_time(), "Too many log task, queue_size:", len(self.task_queue))
             func(*args, **kw)
         else:
             self.task_queue.append([func, args, kw])
+        
+    def popleft(self):
+        return self.task_queue.popleft()
+    
+    def size(self):
+        return len(self.task_queue)
+
+    def print_task_queue(self):
+        for item in self.task_queue:
+            print(item)
+
+
+empty_pool = TaskPool(0)
+
+class AsyncThreadBase(threading.Thread):
+    
+    def __init__(self, name="AsyncThread", task_pool = empty_pool):
+        super(AsyncThreadBase, self).__init__()
+        self.daemon = True
+        self.name = name
+        self.task_pool = task_pool
 
     def run(self):
         while True:
             # queue.Queue默认是block模式
             # 但是deque没有block模式，popleft可能抛出IndexError异常
             try:
-                if self.task_queue:
-                    func, args, kw = self.task_queue.popleft()
+                if self.task_pool.size() > 0:
+                    func, args, kw = self.task_pool.popleft()
                     func(*args, **kw)
                 else:
                     time.sleep(0.01)
@@ -73,17 +89,24 @@ class LogThread(AsyncThreadBase):
 class AsyncThread(AsyncThreadBase):
     pass
 
-LOG_THREAD = LogThread()
-LOG_THREAD.start()
+default_pool = TaskPool(200)
 
-ASYNC_THREAD = AsyncThread()
-ASYNC_THREAD.start()
+def init_async_pool(pool_size = 200, thread_size = 5):
+    global default_pool
+    default_pool = TaskPool(pool_size)
+
+    for i in range(thread_size):
+        suffix = str(i+1)
+        thread = AsyncThread(name = "AsyncThread-" + suffix, task_pool=default_pool)
+        thread.start()
+
 
 def async_func_deco():
     """同步调用转化成异步调用的装饰器"""
     def deco(func):
         def handle(*args, **kw):
-            ASYNC_THREAD.put_task(func, *args, **kw)
+            global default_pool
+            default_pool.put_task(func, *args, **kw)
         return handle
     return deco
 
