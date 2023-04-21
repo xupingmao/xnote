@@ -580,8 +580,8 @@ class WorkerThread(Thread):
 
     def __init__(self, name="WorkerThread"):
         super(WorkerThread, self).__init__()
-        self.setDaemon(True)
-        self.setName(name)
+        self.daemon = True
+        self.name = name
 
     def run(self):
         while True:
