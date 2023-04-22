@@ -25,7 +25,7 @@ from xutils import tojson
 from xutils import Storage
 from xutils import textutil
 from six.moves.urllib.parse import quote
-import x_trace
+import xnote_trace
 import xnote_hooks
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
@@ -225,7 +225,7 @@ def render_before_kw(kw: dict):
     kw["FONT_SCALE"] = xconfig.get_user_config(user_name, "FONT_SCALE")
     kw["HOME_PATH"] = xconfig.get_user_config(user_name, "HOME_PATH")
     kw["THEME"] = xconfig.get_user_config(user_name, "THEME")
-    kw["_debug_info"] = x_trace.get_debug_info()
+    kw["_debug_info"] = xnote_trace.get_debug_info()
 
     if hasattr(web.ctx, "env"):
         kw["HOST"] = web.ctx.env.get("HTTP_HOST")
@@ -243,7 +243,7 @@ def render_after_kw(kw):
     """后置渲染，可以覆盖前面的数据"""
     render_search(kw)
 
-    kw["_cost_time"] = x_trace.get_cost_time()
+    kw["_cost_time"] = xnote_trace.get_cost_time()
 
 
 def get_mobile_template(name):

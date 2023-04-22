@@ -45,11 +45,11 @@
       <div class="navMenu">
         {% if _has_login %}
         <!-- 登录状态 -->
-        <a href="/note/index">{{T("我的笔记")}}</a>
-        <a href="/note/recent?orderby=update">{{T("笔记动态")}}</a>
-        <a href="/note/taglist">{{T("笔记标签")}}</a>
-        <a href="/search/history">{{T("搜索笔记")}}</a>
-        <a href="/note/public">{{T("分享中心")}}</a>
+        <a href="/note/index">{{T("首页")}}</a>
+        <a href="/note/recent?orderby=update">{{T("动态")}}</a>
+        <a href="/note/taglist">{{T("标签")}}</a>
+        <a href="/search/history">{{T("搜索")}}</a>
+        <a href="/note/public">{{T("分享")}}</a>
         {% end %}
       </div>
     </div>
@@ -58,7 +58,7 @@
       <div class="navMenu">
         {% if _has_login %}
         <!-- 登录状态 -->
-        <a href="/message?tag=task">{{T("待办任务")}}</a>
+        <a href="/message?tag=task">{{T("待办")}}</a>
         <a href="/message?tag=log">{{T("随手记")}}</a>
         {% end %}
       </div>
@@ -67,20 +67,20 @@
     <div class="nav-left-block">
       <div class="navMenu">
         {% if _has_login %}
-        <a href="/system/index">{{T("应用列表")}}</a>
-        <a href="/plugins_list">{{T("插件中心")}}</a>
-        <a href="/system/settings">{{T("系统设置")}}</a>
+        <a href="/system/index">{{T("应用")}}</a>
+        <a href="/plugins_list">{{T("插件")}}</a>
+        <a href="/system/settings">{{T("设置")}}</a>
         {% end %}
 
         {% if _is_admin %}
-        <a href="/fs_list">{{T("文件管理")}}</a>
-        <a href="/system/admin">{{T("后台管理")}}</a>
+        <a href="/fs_list">{{T("文件")}}</a>
+        <a href="/system/admin">{{T("后台")}}</a>
         {% end %}
 
         {% if not _has_login %}
         <!-- 未登录状态 -->
-        <a href="/note/public">公开笔记</a>
-        <a href="/login" class="afinve"><span>登陆系统</span></a>
+        <a href="/note/public">分享</a>
+        <a href="/login" class="afinve"><span>登录</span></a>
         {% end %}
 
       </div>

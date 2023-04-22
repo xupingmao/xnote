@@ -20,7 +20,7 @@ import xconfig
 import xutils
 import xauth
 import threading
-import x_trace
+import xnote_trace
 import logging
 import xnote_hooks
 from collections import deque
@@ -89,7 +89,7 @@ def do_wrap_handler(pattern, handler_clz):
             self.pattern = pattern
 
         def GET(self, *args):
-            x_trace.start_trace()
+            xnote_trace.start_trace()
             start_time = time.time()
             WrappedHandler.visited_count += 1.0
             handler_local.handler_class = self.target
@@ -99,7 +99,7 @@ def do_wrap_handler(pattern, handler_clz):
 
         def POST(self, *args):
             """常用于提交HTML FORM表单、新增资源等"""
-            x_trace.start_trace()
+            xnote_trace.start_trace()
             WrappedHandler.visited_count += 1.0
             handler_local.handler_class = self.target
             result = wrap_result(self.target.POST(*args))

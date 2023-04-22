@@ -886,8 +886,8 @@ class PluginGridHandler:
 class LoadPluginHandler:
 
     def resolve_force_reload(self):
-        reload = xutils.get_argument("_reload", "")
-        return xconfig.DEBUG and reload == "true"
+        reload = xutils.get_argument_bool("_reload", False)
+        return xauth.is_admin() and reload == "true"
 
     def load_plugin(self, name, force_reload=False):
         context = xconfig.PLUGINS_DICT.get(name)

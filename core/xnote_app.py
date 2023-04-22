@@ -34,7 +34,7 @@ from xutils import dbutil
 from . import xnote_code_builder, xnote_hooks
 import threading
 import signal
-import x_trace
+import xnote_trace
 import xtables_new
 import xtemplate
 import xmanager
@@ -187,7 +187,7 @@ def try_init_kv_db():
                 password = os.environ["MYSQL_PASS"]
                 database = os.environ["MYSQL_DB"]
 
-            sql_logger = x_trace.SqlLogger()
+            sql_logger = xnote_trace.SqlLogger()
             db_instance = MySQLKV(host=host, user=user, password=password,
                                   database=database, sql_logger=sql_logger,
                                   pool_size=pool_size)
