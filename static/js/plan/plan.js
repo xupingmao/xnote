@@ -81,11 +81,11 @@ PlanView.searchNote = function() {
     }
     $.get(api, function (resp) {
         if (resp.code != "success") {
-            xnote.alert(resp.message);
+            xnote.toast(resp.message);
         } else {
             PlanView.renderNoteList(resp.data);
         }
     }).fail(function (err) {
-        xnote.alert("调用接口失败");
+        xnote.toast("调用接口失败");
     });
 }

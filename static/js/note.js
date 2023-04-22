@@ -164,7 +164,7 @@ noteAPI.bindTag = function (cmd) {
             xnote.alert("系统繁忙，请稍后重试");
         })
     });
-}
+};
 
 
 var NoteView = {};
@@ -194,14 +194,76 @@ NoteView.editNoteTag = function (target) {
     })
 };
 
-
-NoteView.renderNoteList = function (itemList) {
-    var html = $("#select-note-tpl").render({
-        itemList: itemList
+NoteView.searchNote = function() {
+    var self = this;
+    var searchText = $("#note-search-text").val();
+    var api = "";
+    if (searchText == "") {
+        api = "/note/api/timeline?type=all&limit=100";
+    } else {
+        api = "/note/api/timeline?type=search&key=" + searchText;
+    }
+    $.get(api, function (resp) {
+        if (resp.code != "success") {
+            xnote.toast(resp.message);
+        } else {
+            var templateText = self.getSelectNoteItemListTemplate();
+            var html = template.render(templateText, {
+                itemList: resp.data
+            });
+            $(".note-search-dialog-body").html(html);
+        }
+    }).fail(function (err) {
+        xnote.toast("调用接口失败");
     });
-    $("#select-note-dialog-body").html(html);
 };
 
+NoteView.getSelectNoteItemListTemplate = function () {
+    var text = "";
+    text += "{{if itemList.length == 0 }}";
+    text += "    <p class=\"align-center\">空空如也~</p>";
+    text += "{{/if}}";
+    text += "{{each itemList item}}";
+    text += "<h3 class=\"card-title-2\">{{item.title}}</h3>";
+    text += "";
+    text += "    {{each item.children subItem }}";
+    text += "    <p class=\"card-row share-dialog-row\">";
+    text += "        <i class=\"fa {{subItem.icon}}\"></i>";
+    text += "        <a href=\"{{subItem.url}}\">{{subItem.name}}</a>";
+    text += "        <input type=\"checkbox\"";
+    text += "            class=\"select-note-checkbox float-right\" ";
+    text += "            data-id=\"{{subItem.id}}\">";
+    text += "    <p>";
+    text += "    {{/each}}";
+    text += "{{/each}}";
+    return text;
+}
+
+NoteView.getSelectNoteDialogTemplate = function () {
+    var text = "";
+    text += "<div class=\"card\">";
+    text += "<div class=\"row\">";
+    text += "    <input type=\"text\" class=\"nav-search-input\" id=\"note-search-text\" placeholder=\"搜索笔记\" ";
+    text += "        value=\"{{searchText}}\" onkeyup=\"xnote.action.note.searchNote(this);\">";
+    text += "    <button class=\"nav-search-btn btn-default\" onclick=\"xnote.action.note.searchNote(this)\">";
+    text += "        <i class=\"fa fa-search\"></i>";
+    text += "    </button>";
+    text += "</div>";
+    text += "<div class=\"row note-search-dialog-body\" style=\"padding-top: 10px;\">";
+    text += this.getSelectNoteItemListTemplate();
+    text += "</div>";
+    text += "</div>";
+    return text;
+};
+
+
+NoteView.renderNoteList = function (itemList) {
+    var templateText = this.getSelectNoteDialogTemplate();
+    var html = template.render(templateText, {
+        itemList: itemList
+    });
+    return html;
+};
 
 NoteView.openDialogToAddNote = function (event) {
     $.get("/note/api/timeline?type=all&limit=100",  function (resp) {
@@ -209,12 +271,21 @@ NoteView.openDialogToAddNote = function (event) {
             xnote.alert(resp.message);
         } else {
             var html = NoteView.renderNoteList(resp.data);
-            var dialogEle = $("#select-note-dialog").html(html);
-            xnote.openDialog("选择笔记", dialogEle, ["确定", "取消"], function () {
+            xnote.openDialog("选择笔记", html, ["确定", "取消"], function () {
                 NoteView.addNoteToTag();
             });
         }
     });
+};
+
+NoteView.addNoteToTag = function () {
+    var selectedIds = [];
+    $(".select-note-checkbox:checked").each(function (idx, ele) {
+        var noteId = $(ele).attr("data-id");
+        selectedIds.push(noteId);
+    });
+    console.log(selectedIds);
+    xnote.toast("待实现，敬请期待~");
 };
 
 // 选择笔记本-平铺视图

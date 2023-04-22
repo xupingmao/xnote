@@ -33,6 +33,9 @@
             {% include common/button/back_button.html %}
         </div>
     </h3>
+</div>
+
+<div class="card">
     <div class="col-md-12 error hide" id="error"></div>
 
     <div class="container col-md-6">
@@ -272,10 +275,12 @@ function buildLinesResult(items) {
     return items.join("\n");
 }
 
+// 转换成多行字符串
 function buildStringResult(items) {
     var text = "text = \"\";";
     for (var i = 0; i < items.length; i++) {
         var itemValue = items[i];
+        itemValue = itemValue.replace(/"/gi, "\\\"");
         text += "\ntext += \"" + itemValue + "\";";
     }
     return text;
