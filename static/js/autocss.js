@@ -12,4 +12,4 @@
         link.href="/css/home.css";
     }
     document.head.appendChild(link);
-}) ()
+}) ();

@@ -8,10 +8,10 @@
 
 xnote.EXT_DICT = {};
 
-window.xnote.getExtFunc = function (funcName) {
+xnote.getExtFunc = function (funcName) {
     return xnote.EXT_DICT[funcName];
 };
 
-window.xnote.setExtFunc = function (funcName, func) {
+xnote.setExtFunc = function (funcName, func) {
     xnote.EXT_DICT[funcName] = func;
 };

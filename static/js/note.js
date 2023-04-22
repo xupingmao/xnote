@@ -225,7 +225,6 @@ NoteView.getSelectNoteItemListTemplate = function () {
     text += "{{/if}}";
     text += "{{each itemList item}}";
     text += "<h3 class=\"card-title-2\">{{item.title}}</h3>";
-    text += "";
     text += "    {{each item.children subItem }}";
     text += "    <p class=\"card-row share-dialog-row\">";
     text += "        <i class=\"fa {{subItem.icon}}\"></i>";

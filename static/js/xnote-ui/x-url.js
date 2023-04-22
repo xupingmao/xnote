@@ -1,4 +1,9 @@
-
+/**
+ * 解析URL参数
+ * @param {string} src 输入的URL
+ * @param {boolean} doDecode 是否进行decode操作
+ * @returns {object} 解析之后的对象
+ */
 xnote.parseUrl = function(src, doDecode) {
     // URL的完整格式如下
     // 协议://用户名:密码@子域名.域名.顶级域名:端口号/目录/文件名.文件后缀?参数=值#标志
