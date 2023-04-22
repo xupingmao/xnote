@@ -78,6 +78,7 @@ class PreviewHandler:
 
         basename = os.path.basename(path)
         op = xutils.get_argument("op")
+        path = xconfig.resolve_config_path(path)
         path = xutils.get_real_path(path)
         kw = Storage()
 
