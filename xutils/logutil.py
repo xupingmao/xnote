@@ -100,6 +100,9 @@ def init_async_pool(pool_size = 200, thread_size = 5):
         thread = AsyncThread(name = "AsyncThread-" + suffix, task_pool=default_pool)
         thread.start()
 
+def wait_task_done():
+    while default_pool.size() > 0:
+        time.sleep(0.1) # 等待任务完成
 
 def async_func_deco():
     """同步调用转化成异步调用的装饰器"""

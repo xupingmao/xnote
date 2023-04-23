@@ -5,19 +5,24 @@
 # @filename reset-password.py
 
 """重置admin用户密码"""
-
 import sys
 sys.path.append(".")
 
-import app
-app.init_app()
+def main():
+    from core import xnote_app
+    xnote_app.init_app()
 
-import xauth
+    import xauth
 
-print("===== Before =====")
-print(xauth.get_user_by_name("admin"))
+    print("===== Before =====")
+    print(xauth.get_user_by_name("admin"))
 
-xauth.update_user("admin", dict(password = "123456"))
+    xauth.update_user("admin", dict(password = "123456"))
 
-print("===== After =====")
-print(xauth.get_user_by_name("admin"))
+    print("===== After =====")
+    print(xauth.get_user_by_name("admin"))
+
+if __name__ == "__main__":
+    main()
+
+# usage: python tools\reset-password.py --config <config_file_path>

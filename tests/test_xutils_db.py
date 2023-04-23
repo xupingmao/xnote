@@ -10,10 +10,10 @@ from xutils import Storage
 from xutils import dbutil
 from xutils import textutil
 from xutils import netutil
+from xutils import logutil
 from xutils.db.binlog import BinLog
 from xutils.db.dbutil_deque import DequeTable
 from xutils.db.encode import decode_id
-from xutils.logutil import ASYNC_THREAD
 
 import pdb
 import logging
@@ -131,7 +131,7 @@ def run_range_test(test, db):
 
 def run_test_db_engine(test, db):
     # 等待异步任务完成
-    ASYNC_THREAD.wait_task_done()
+    logutil.wait_task_done()
 
     for key in db.RangeIter(include_value=False):
         db.Delete(key)
