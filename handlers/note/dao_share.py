@@ -15,8 +15,10 @@ from xutils import logutil
 
 from .dao import sort_notes, batch_query_list
 
+_note_share_db = dbutil.get_table("note_share")
+
 def get_share_db():
-    return dbutil.get_table("note_share")
+    return _note_share_db
 
 def check_not_empty(value, method_name):
     if value == None or value == "":

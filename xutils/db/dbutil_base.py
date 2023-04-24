@@ -110,6 +110,7 @@ class WriteBatchProxy(BatchInterface):
             db_instance = get_instance()
 
         self.db_instance = db_instance  # type: DBInterface
+        self.debug = False
 
     def check_and_put(self, key, val):
         old_val = get(key)
@@ -155,19 +156,25 @@ class WriteBatchProxy(BatchInterface):
 
     def size(self):
         return len(self._puts) + len(self._deletes)
+    
+    def _print_log(self, fmt="", *args):
+        if self.debug:
+            new_args = [dateutil.format_time(), "[dbutil]"]
+            new_args.append(fmt.format(*args))
+            print(*new_args)
 
     def log_debug_info(self):
         # 没有更新直接返回
         if self.size() == 0:
             return
 
-        print_debug_info("----- batch.begin -----")
+        self._print_log("----- batch.begin -----")
         for key in self._puts:
             value = self._puts[key]
-            print_debug_info("batch.put key={}, value={}", key, value)
+            self._print_log("batch.put key={}, value={}", key, value)
         for key in self._deletes:
-            print_debug_info("batch.delete key={}", key)
-        print_debug_info("-----  batch.end  -----")
+            self._print_log("batch.delete key={}", key)
+        self._print_log("-----  batch.end  -----")
 
     def commit(self, sync=False, retries=0):
         self.log_debug_info()

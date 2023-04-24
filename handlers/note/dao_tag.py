@@ -260,10 +260,10 @@ def batch_get_tags_by_notes(notes):
 
 
 class TagInfo(Storage):
-    def __init__(self, **kw) -> None:
-        self.name = kw.get("name", "")
-        self.code = kw.get("code", "")
-        self.amount = kw.get("amount", 0)
+    def __init__(self, name = "", code = "", amount = 0) -> None:
+        self.name = name
+        self.code = code
+        self.amount = amount
 
 
 def list_tag(user):

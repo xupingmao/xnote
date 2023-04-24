@@ -277,6 +277,7 @@ class LdbTable:
         if self._need_check_user:
             user_name = obj.get(self.user_attr)
 
+        new_id = "1"
         with get_write_lock(self.table_name):
             # TODO 优化加锁逻辑
             for i in range(try_times):
@@ -291,7 +292,7 @@ class LdbTable:
 
                 self._put_obj(key, obj)
                 return new_id
-        raise Exception("insert conflict")
+        raise Exception("insert conflict, id=%s" % new_id)
 
     def insert_by_user(self, user_name, obj, id_type="auto_increment"):
         """@deprecated 定义user_attr之后使用insert即可满足
@@ -671,17 +672,7 @@ class PrefixedDb(LdbTable):
 def insert(table_name, obj_value, sync=False):
     """往指定表里面插入一条新记录"""
     db = LdbTable(table_name)
-    with get_write_lock(table_name):
-        for i in range(10):
-            new_id = db.id_gen.create_increment_id(start_id=1)
-            old_value = db.get_by_id(new_id)
-            if old_value != None:
-                logging.warning("id conflict, table:%s, id:%s",
-                                table_name, new_id)
-                continue
-            db.update_by_id(new_id, obj_value)
-            return new_id
-        raise DBException("insert conflict")
+    return db.insert(obj_value)
 
 
 def prefix_iter_batch(prefix,  # type: str

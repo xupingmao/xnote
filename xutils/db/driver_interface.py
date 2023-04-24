@@ -8,6 +8,8 @@
 PS: 接口是以Leveldb的接口为模板定义的
 """
 
+import warnings
+
 class DBInterface:
     """KV存储的数据库接口"""
 
@@ -95,7 +97,6 @@ class RecordInterface:
         """从领域模型转为数据库记录"""
         return self.__dict__
 
-
 class BatchInterface:
 
     def check_and_delete(self, key: str):
@@ -116,6 +117,9 @@ class CacheInterface:
     
     def put(self, key, value, expire = -1, expire_random = 600):
         return None
+    
+    def delete(self, key):
+        warnings.warn("CacheInterface.delete is not implemented")
 
 
 empty_db = DBInterface()

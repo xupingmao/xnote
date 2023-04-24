@@ -51,6 +51,7 @@ _search_history_db = dbutil.get_table("search_history")
 _note_history_db = dbutil.get_hash_table("note_history")
 _note_history_index_db = dbutil.get_hash_table("note_history_index")
 _public_db = dbutil.get_table("note_public")
+_token_db = dbutil.get_table("token")
 
 DB_PATH = xconfig.DB_PATH
 MAX_STICKY_SIZE = 1000
@@ -461,7 +462,7 @@ def get_by_id_creator(id, creator, db=None):
 
 
 def get_by_token(token):
-    token_info = dbutil.get("token:%s" % token)
+    token_info = _token_db.get_by_id(token)
     if token_info != None and token_info.type == "note":
         return get_by_id(token_info.id)
     return None
