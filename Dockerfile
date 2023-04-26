@@ -2,7 +2,7 @@ FROM python:3.7.2
 
 COPY config/requirements.txt ./
 
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip -i https://pypi.douban.com/simple
 
 # install required packages
 RUN pip install -r requirements.txt -i https://pypi.douban.com/simple
