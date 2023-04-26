@@ -919,8 +919,8 @@ class LoadPluginHandler:
                 # 渲染页面
                 return plugin.clazz().render()
             else:
-                # 加载插件失败，删除日志
-                delete_visit_log(user_name, name, url)
+                # 加载插件失败，删除日志，插件开发过程中出现误删，先不处理
+                # delete_visit_log(user_name, name, url)
                 return xtemplate.render("error.html",
                                         error="插件[%s]不存在!" % name)
         except:

@@ -15,6 +15,14 @@ from xutils import Storage
 
 _log_db = dbutil.get_table("plugin_visit")
 
+class LogModel(Storage):
+    def __init__(self):
+        self.name = "test"
+        self.url = "/test"
+        self.args = "name=1&age=2"
+        self.user = ""
+        self.time = dateutil.format_datetime()
+
 def list_visit_logs(user_name, offset = 0, limit = -1):
     logs = _log_db.list_by_index("k_url", where = dict(user=user_name), offset = offset, limit = limit, reverse = True)
     logs.sort(key = lambda x: x.time, reverse = True)
