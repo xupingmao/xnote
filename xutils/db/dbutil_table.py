@@ -608,7 +608,7 @@ class LdbTable:
 
         prefix = self._get_index_prefix_by_value(index_name, index_value, where = where, user_name=user_name)
         map_func = self.create_index_map_func(
-            filter_func, index_type=index_info.index_type)
+            filter_func, index_type=index_info.index_type, where = where)
         return prefix_count_batch(prefix, map_func=map_func)
     
     def list_by_index(self, index_name, filter_func=None,

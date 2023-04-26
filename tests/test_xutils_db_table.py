@@ -167,3 +167,14 @@ class TestMain(BaseTestCase):
         }
         result = db.list(where = where, limit = 20)
         self.assertEqual(2, len(result))
+    
+    def test_where_count(self):
+        db = dbutil.get_table("test")
+        for item in db.iter(limit=-1):
+            db.delete(item)
+        
+        db.insert(dict(name = "name-1", age = 15))
+        db.insert(dict(name = "name-2", age = 15))
+
+        name_index_count = db.count_by_index("age", where = dict(name = "name-1", age = 15))
+        self.assertEqual(1, name_index_count)
