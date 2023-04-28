@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 23:02:07
+@LastEditTime : 2023-04-28 20:59:39
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -46,6 +46,7 @@ class TableIndex:
         self.prefix = IndexInfo.build_prefix(self.table_name, index_name)
         self.index_type = index_type
         self.index_info = index_info
+        self.debug = False
 
         if check_user and user_attr == None:
             raise Exception("user_attr没有注册, table_name:%s" % table_name)
@@ -131,8 +132,9 @@ class TableIndex:
         need_update = self.index_type == "copy" or index_changed
 
         if not need_update:
-            logging.debug("index value unchanged, index_name:(%s), value:(%s)",
-                          index_name, old_index_key)
+            if self.debug:
+                logging.debug("index value unchanged, index_name:(%s), value:(%s)",
+                            index_name, old_index_key)
             if not force_update:
                 return
 
@@ -184,6 +186,7 @@ class TableIndexRepair:
     def __init__(self, db, error_db):
         self.db = db
         self.repair_error_db = error_db
+        self.debug = False
     
     def current_time(self):
         return time.strftime('%Y-%m-%d %H:%M:%S')
@@ -242,7 +245,8 @@ class TableIndexRepair:
             delete_index_count_cache(db.table_name, name)
 
     def do_delete(self, key):
-        logging.info("Delete {%s}", key)
+        if self.debug:
+            logging.info("Delete {%s}", key)
 
         if not key.startswith("_index$"):
             logging.warning("Invalid index key:(%s)", key)

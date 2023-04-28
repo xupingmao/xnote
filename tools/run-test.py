@@ -46,6 +46,11 @@ def run_test(args):
 		py_exec("-m coverage html")
 		return
 	
+	if target == "xutils_sqldb":
+		py_exec("-m pytest tests/test_xutils_sqldb.py --doctest-modules --cov xutils.sqldb --cov handlers.system.db_index --capture no")
+		py_exec("-m coverage html")
+		return
+	
 	if target == "xutils_cache":
 		os.system("python3 -m pytest tests/test_xutils_cache.py --doctest-modules --cov xutils.cacheutil --capture no")
 		os.system("python3 -m coverage html")
