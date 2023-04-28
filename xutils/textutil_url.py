@@ -4,7 +4,7 @@
 # @modified 2022/04/16 08:51:27
 # @filename textutil_url.py
 
-from urllib.parse import quote
+from six.moves.urllib.parse import quote
 
 def add_url_param(url, param_key, param_value):
     """给URL增加参数，返回新的URL

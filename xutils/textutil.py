@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-04-17 17:04:15
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-25 21:09:49
+@LastEditTime : 2023-04-28 22:05:11
 @FilePath     : /xnote/xutils/textutil.py
 @Description  : 文本处理工具
 """
@@ -435,7 +435,7 @@ def random_string(length, chars=ALPHA_NUM):
 def parse_config_text(text, ret_type = 'list'):
     return parse_prop_text(text, ret_type)
 
-def parse_config_text_to_dict(text) -> dict:
+def parse_config_text_to_dict(text):
     result = parse_prop_text(text, "dict")
     assert isinstance(result, dict)
     return result

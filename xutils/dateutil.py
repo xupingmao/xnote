@@ -110,7 +110,7 @@ def format_time_only(seconds=None):
         st = time.localtime(seconds)
         return time.strftime('%H:%M:%S', st)
 
-def format_wday(date_str, fmt = None) -> str:
+def format_wday(date_str, fmt = None):
     if fmt is None:
         fmt = "%Y-%m-%d"
     
@@ -240,7 +240,7 @@ def get_current_mday():
     tm = time.localtime()
     return tm.tm_mday
 
-def current_wday() -> str:
+def current_wday():
     tm = time.localtime()
     wday = str(tm.tm_wday + 1)
     return WDAY_DICT.get(wday) or ""

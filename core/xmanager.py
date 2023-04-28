@@ -50,7 +50,7 @@ _event_manager = None # type: EventManager
 
 class HandlerLocal(threading.local):
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.handler_class = None
 

@@ -68,7 +68,7 @@ class UserModel:
 
 class SessionInfo(Storage):
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.user_name = ""
         self.sid = ""
         self.token = ""
@@ -375,7 +375,7 @@ def get_current_name():
 def current_name():
     return get_current_name()
 
-def current_name_str() -> str:
+def current_name_str():
     name = get_current_name()
     if name == None:
         name = "public"

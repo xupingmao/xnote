@@ -231,7 +231,7 @@ class ImportNoteHandler:
 
 class MarkdownImageParser(TextParserBase):
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.check_only = False
         self._has_external_image = False

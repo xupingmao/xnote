@@ -17,7 +17,6 @@ except ImportError:
 
 # 非标准库
 import xutils
-from xutils import fsutil
 from xutils.imports import u
 
 
@@ -150,6 +149,7 @@ def get_logger(name):
 
 def get_log_path(level = "INFO"):
     import xconfig
+    from xutils import fsutil
     date_time = time.strftime("%Y-%m")
     dirname = os.path.join(xconfig.LOG_DIR, date_time)
     fsutil.makedirs(dirname)

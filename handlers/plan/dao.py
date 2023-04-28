@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2023-02-12 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-01-22 00:07:43
-@FilePath     : /xnote/handlers/note/note_helper.py
+@LastEditTime : 2023-04-28 22:06:32
+@FilePath     : /xnote/handlers/plan/dao.py
 @Description  : 计划管理
 """
 import time
@@ -14,7 +14,7 @@ db = dbutil.get_table("month_plan")
 
 class MonthPlanRecord:
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.user = ""
         self.month = ""
         self.notes = []

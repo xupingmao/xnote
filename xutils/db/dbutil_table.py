@@ -449,7 +449,7 @@ class LdbTable:
             result.append(value)
         return result
 
-    def get_first(self, filter_func=None, *, where = None, user_name=None):
+    def get_first(self, filter_func=None, where = None, user_name=None):
         """读取第一个满足条件的数据"""
         result = self.list(limit=1, filter_func=filter_func, where = where,
                            user_name=user_name)
@@ -458,7 +458,7 @@ class LdbTable:
         else:
             return None
     
-    def get_last(self, filter_func=None, *, user_name=None):
+    def get_last(self, filter_func=None, user_name=None):
         """读取最后一个满足条件的数据"""
         result = self.list(limit=1, reverse=True,
                            filter_func=filter_func, user_name=user_name)
@@ -612,7 +612,7 @@ class LdbTable:
         return prefix_count_batch(prefix, map_func=map_func)
     
     def list_by_index(self, index_name, filter_func=None,
-                      offset=0, limit=20, *, reverse=False,
+                      offset=0, limit=20, reverse=False,
                       index_value=None, user_name=None, where = None):
         """通过索引查询结果列表
         @param {str}  index_name 索引名称

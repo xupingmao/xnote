@@ -36,7 +36,7 @@
 
 """
 # 先加载标准库
-from __future__ import print_function, with_statement
+from __future__ import print_function, with_statement, absolute_import
 import re
 import time
 import threading
@@ -54,7 +54,6 @@ from xutils.imports import is_str
 from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json
 from .driver_interface import DBInterface, BatchInterface
-from .dbutil_id_gen import TimeSeqId
 from . import driver_interface
 
 try:
@@ -223,6 +222,7 @@ def timeseq(value=None):
     @param {float|None} value 时间序列，单位是秒，可选
     @return {string}    20位的时间序列
     """
+    from .dbutil_id_gen import TimeSeqId
     return TimeSeqId.create(value)
 
 
@@ -332,7 +332,7 @@ class TableInfo:
     def get_index_names(self):
         return IndexInfo.get_table_index_names(self.name)
 
-    def register_index(self, index_name, *, columns = [], comment="", index_type="ref"):
+    def register_index(self, index_name, columns = [], comment="", index_type="ref"):
         register_table_index(self.name, index_name, columns = columns,
                              comment = comment, index_type=index_type)
         return self
@@ -388,7 +388,6 @@ class IndexInfo:
 
 def register_table(table_name,
                    description,
-                   *,
                    category="default",
                    check_user=False,
                    user_attr=None):  # type: (...)->TableInfo
@@ -614,7 +613,6 @@ def prefix_iter(prefix,  # type: str
                 limit=-1,  # type: int
                 reverse=False,
                 include_key=False,
-                *,
                 key_from=None, key_to=None, map_func=None,
                 fill_cache=False, parse_json=True, scan_db=False):
     """通过前缀迭代查询

@@ -21,12 +21,12 @@ class HookStore:
             cls.reload_hooks.append(func)
 
 
-def get_search_handler(search_type: str) -> Storage:
+def get_search_handler(search_type: str):
     """获取搜索处理器"""
     raise NotImplementedError("待search实现")
 
 
-def get_category_name_by_code(code) -> str:
+def get_category_name_by_code(code):
     """通过编码获取插件类目名称"""
     raise NotImplementedError("待plugin实现")
 

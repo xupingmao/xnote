@@ -232,10 +232,10 @@ class SortedSet:
     def zrange(self, start_index, stop_index):
         pass
 
-def listremove(list: list, obj) -> None:
+def listremove(list, obj):
     return remove_list_item(list, obj)
 
-def remove_list_item(list: list, obj):
+def remove_list_item(list, obj):
     """删除列表中的所有元素,list自带的remove方法只删除一个，而且如果不包含目标对象会抛出异常"""
     if list is None:
         return

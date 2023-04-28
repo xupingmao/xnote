@@ -2,11 +2,18 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2021/01/17 10:51:22
 # @modified 2021/11/07 12:53:19
+from __future__ import print_function
+from __future__ import absolute_import
 
-from http.server import BaseHTTPRequestHandler
+try:
+    from http.server import BaseHTTPRequestHandler
+except ImportError:
+    from BaseHTTPServer import BaseHTTPRequestHandler
+
 import profile
 import time
 import web
+from xutils import six
 from xutils.six import BytesIO
 from web import utils
 
@@ -84,19 +91,19 @@ def get_argument(key, default_value=None, type = None, strip=False):
     
     return value
 
-def get_argument_str(key: str, default_value = "") -> str:
+def get_argument_str(key, default_value = ""):
     """获取字符串参数"""
     value = get_argument(key, default_value, type = str, strip = True)
     assert isinstance(value, str)
     return value
 
-def get_argument_int(key: str, default_value = 0) -> int:
+def get_argument_int(key, default_value = 0):
     """获取int参数"""
     value = get_argument(key, default_value=default_value, type = int, strip = True)
     assert isinstance(value, int)
     return value
 
-def get_argument_bool(key: str, default_value = False) -> bool:
+def get_argument_bool(key, default_value = False):
     """获取bool参数"""
     value = get_argument(key, default_value=default_value, type = bool, strip = True)
     assert isinstance(value, bool)

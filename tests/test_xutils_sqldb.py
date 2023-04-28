@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:04:36
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 21:24:29
+@LastEditTime : 2023-04-28 22:06:41
 @FilePath     : /xnote/tests/test_xutils_sqldb.py
 @Description  : 描述
 """
@@ -39,4 +39,6 @@ class TestMain(test_base.BaseTestCase):
         self.assertEqual("test-1", age10.name)
 
 
-
+    def test_mysql_example(self):
+        pass
+    

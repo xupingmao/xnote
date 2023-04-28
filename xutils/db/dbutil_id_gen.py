@@ -4,18 +4,24 @@
 @email        : 578749341@qq.com
 @Date         : 2022-10-03 22:51:40
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-03 22:59:06
+@LastEditTime : 2023-04-28 22:19:53
 @FilePath     : /xnote/xutils/db/dbutil_id_gen.py
 @Description  : id生成
 """
+from __future__ import print_function
+from __future__ import absolute_import
+
 import time
 import xutils
-from xutils.db import dbutil_base as base
+try:
+    from xutils.db import dbutil_base as base
+except ImportError:
+    import dbutil_base as base
 from xutils.db.encode import encode_id
 
 class IdGenerator:
 
-    def __init__(self, table_name) -> None:
+    def __init__(self, table_name):
         self.table_name = table_name
 
     def create_increment_id(self, start_id=None):

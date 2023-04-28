@@ -125,7 +125,7 @@ def encode_list(value):
         result.append(encode_index_value(item))
     return ",".join(result)
 
-def encode_index_value(value) -> str:
+def encode_index_value(value):
     if value is None:
         return chr(0)
     if isinstance(value, str):

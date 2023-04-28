@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2023-01-22 00:50:55
+@LastEditTime : 2023-04-28 22:09:04
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -200,7 +200,7 @@ def http_get_by_requests(url, charset = None):
     resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
     return resp.text
 
-def build_query_string(params, *, skip_empty_value=False):
+def build_query_string(params, skip_empty_value=False):
     temp = []
     for key in params:
         value = params[key]
@@ -210,7 +210,7 @@ def build_query_string(params, *, skip_empty_value=False):
 
     return "&".join(temp)
 
-def _join_url_and_params(url, params, *, skip_empty_value=False):
+def _join_url_and_params(url, params, skip_empty_value=False):
     if params is None:
         return url
 

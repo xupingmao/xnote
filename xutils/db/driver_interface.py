@@ -68,7 +68,7 @@ class DBInterface:
     def Write(self, batch_proxy, sync = False):
         raise NotImplementedError("Write")
 
-    def Count(self, key_from:bytes, key_to:bytes)->int:
+    def Count(self, key_from, key_to):
         raise NotImplementedError("待子类实现")
 
 
@@ -92,7 +92,7 @@ class RecordInterface:
     @deprecated 使用 xutils.Storage 就可以了
     """
 
-    def from_storage(self, dict_value: dict):
+    def from_storage(self, dict_value):
         """从数据库记录转为领域模型"""
         self.__dict__.update(dict_value)
 
@@ -102,10 +102,10 @@ class RecordInterface:
 
 class BatchInterface:
 
-    def check_and_delete(self, key: str):
+    def check_and_delete(self, key):
         raise NotImplementedError("待子类实现")
     
-    def check_and_put(self, key:str, value):
+    def check_and_put(self, key, value):
         raise NotImplementedError("待子类实现")
 
     def commit(self, sync=False, retries=0):

@@ -49,7 +49,7 @@ DEFAULT_CONFIG_FILE = xconfig.resolve_config_path("./config/boot/boot.default.pr
 
 class XnoteApp:
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.web_app = web.application()
         self.handler_manager = None
 
