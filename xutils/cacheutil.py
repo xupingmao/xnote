@@ -96,15 +96,12 @@ class Cache:
         return obj
 
     def get(self, key, default_value=None):
-        assert isinstance(key, str), key
+        assert isinstance(key, six.string_types), key
         value = self.dict.get(key)
         if value != None:
             if self.is_alive(key):
-                self.dict.move_to_end(key, last=False) # 移动到最前面
-                if isinstance(value, bytes):
-                    obj = value
-                else:
-                    obj = json.loads(value)
+                self.dict[key] = value # 移动到最后面
+                obj = json.loads(value)
                 return self._fix_storage(obj)
             else:
                 self.delete(key)
@@ -116,11 +113,7 @@ class Cache:
     def put(self, key, value, expire=60*5, random_range=60*5):
         assert expire > 0
         with self.lock:
-            if isinstance(value, bytes):
-                self.dict[key] = value
-            else:
-                self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
-            self.dict.move_to_end(key, last=False) # 移动到最前面
+            self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
             self.expire_dict[key] = time.time() + expire + random.randint(0, random_range)
             
             if self.max_size > 0:
@@ -142,7 +135,7 @@ class Cache:
             return
 
         while len(self.dict) > self.max_size:
-            key, value = self.dict.popitem(last=True) # 弹出第一个
+            key, value = self.dict.popitem(last=False) # 弹出第一个
             self.delete(key)
     
     def get_expire(self, key):

@@ -41,7 +41,7 @@ def get_real_path(path):
     import xconfig
     """获取真实的path信息，如果配置了urlencode，强制进行urlencode，否则先按原路径检查，如果文件不存在，再进行urlencode
     之所以要这样做，主要是为了兼容从不支持unicode文件名的服务器同步到本地的文件"""
-    assert isinstance(path, str)
+    assert isinstance(path, six.string_types)
     if path == "":
         return path
     if xconfig.USE_URLENCODE:

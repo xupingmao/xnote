@@ -23,7 +23,10 @@ class HookStore:
 
 def get_search_handler(search_type):
     """获取搜索处理器"""
-    raise NotImplementedError("待search实现")
+    default_handler = Storage()
+    default_handler.action = "/search"
+    default_handler.placeholder = u"综合搜索"
+    return default_handler
 
 
 def get_category_name_by_code(code):

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-20 00:11:56
+@LastEditTime : 2023-04-28 23:24:59
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -104,7 +104,7 @@ class TagMetaDao:
         tag_meta_db.delete(tag_info)
 
     @staticmethod
-    def create(tag_info: Storage):
+    def create(tag_info):
         assert tag_info.user != ""
         assert tag_info.tag_name != ""
         assert tag_info.tag_type != ""

@@ -30,7 +30,8 @@ from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
 from .dao_api import NoteDao
-from . import dao_log
+
+xconfig.check_and_init()
 
 def register_note_table(name, description, check_user=False, user_attr=None):
     dbutil.register_table(name, description, category="note",
@@ -106,6 +107,9 @@ class NoteSchema:
     orderby = "排序方式"
     hot_index = "热门指数"
 
+def get_log_dao():
+    from . import dao_log
+    return dao_log
 
 def format_note_id(id):
     return str(id)
@@ -619,11 +623,11 @@ def create_token(type, id):
 
 
 def add_create_log(note):
-    dao_log.add_create_log(note.creator, note)
+    get_log_dao().add_create_log(note.creator, note)
 
 
 def add_visit_log(user_name, note):
-    dao_log.add_visit_log(user_name, note)
+    get_log_dao().add_visit_log(user_name, note)
 
 
 def remove_virtual_fields(note):
@@ -1083,7 +1087,6 @@ def list_by_parent(creator, parent_id, offset=0, limit=1000,
                    orderby="name",
                    skip_group=False,
                    include_public=True,
-                   *,
                    tags=None):
     """通过父级节点ID查询笔记列表"""
     if parent_id is None:
@@ -1458,14 +1461,14 @@ def list_by_func(creator, list_func, offset, limit):
 
 class SearchHistory(Storage):
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.user = ""
         self.key = ""
         self.category = "default"
         self.cost_time = 0.0
         self.ctime = dateutil.format_datetime()
 
-def add_search_history(user, search_key: str, category="default", cost_time=0.0):
+def add_search_history(user, search_key, category="default", cost_time=0.0):
     if user == None:
         user = "public"
     
@@ -1553,7 +1556,7 @@ def get_empty_note_stat():
     return stat
 
 
-def get_note_stat(user_name) -> Storage:
+def get_note_stat(user_name):
     if user_name == None:
         return get_empty_note_stat()
     stat = dbutil.get("user_stat:%s:note" % user_name)

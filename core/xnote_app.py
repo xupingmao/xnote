@@ -31,6 +31,7 @@ from xutils.mem_util import log_mem_info_deco
 from xutils import mem_util
 from xutils import Storage
 from xutils import dbutil
+from xutils import py2fix
 from . import xnote_code_builder, xnote_hooks
 import threading
 import signal
@@ -90,6 +91,7 @@ def handle_args_and_init_config(boot_config_kw=None):
         sys.exit(1)
 
     # 处理Data目录，创建各种目录
+    py2fix.boot_config_file = args.config
     xconfig.init(args.config, boot_config_kw=boot_config_kw)
 
     # 延迟加载，避免定时任务重复执行

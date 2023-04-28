@@ -34,7 +34,7 @@ import time
 import json
 import xutils
 from xutils import textutil
-from xutils import fsutil, six
+from xutils import fsutil, six, py2fix
 from xutils.base import Storage
 
 __version__ = "1.0"
@@ -208,6 +208,7 @@ RUNTIME_ID = None
 # 退出的编码
 EXIT_CODE = 0
 
+_has_init = False
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
@@ -266,6 +267,7 @@ def init(boot_config_file=None, boot_config_kw = None):
     global FILE_EXT_PATH
     global CACHE_DIR
     global CONFIG_DIR
+    global _has_init
 
     if boot_config_file != None:
         # 初始化启动配置
@@ -332,6 +334,8 @@ def init(boot_config_file=None, boot_config_kw = None):
     PLUGIN_TEMPLATE = read_properties_file("./config/plugin/plugin.tpl.py")
 
     RUNTIME_ID = textutil.generate_uuid()
+
+    _has_init = True
 
 
 def load_default_boot_config():
@@ -613,8 +617,12 @@ def get_current_user_config(key, default_value=None):
     """默认值参考DEFAULT_USER_CONFIG"""
     return get_user_config(xauth.current_name(), key, default_value)
 
+def check_and_init():
+    if not _has_init:
+        init(py2fix.boot_config_file)
 
 def get_system_dir(name):
+    check_and_init()
     if name == "files":
         return UPLOAD_DIR
 

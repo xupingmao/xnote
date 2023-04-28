@@ -155,7 +155,14 @@ def create_uuid():
 def is_session_expired(session_info):
     return time.time() > session_info.expire_time
 
+def get_or_init_session_db():
+    if session_db == None:
+        init()
+        return session_db
+    return session_db
+
 def get_valid_session_by_id(sid):
+    session_db = get_or_init_session_db()
     if sid == None or sid == "":
         return None
     record = session_cache.get(sid)
