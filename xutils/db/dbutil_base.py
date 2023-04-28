@@ -51,7 +51,7 @@ except ImportError:
 # 加载第三方的库
 import xutils
 from xutils.imports import is_str
-from xutils import dateutil
+from xutils import dateutil, six
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json
 from .driver_interface import DBInterface, BatchInterface
 from . import driver_interface
@@ -484,7 +484,7 @@ def db_get(key, default_value=None):
         if key == "" or key == None:
             return None
         
-        if not isinstance(key, str):
+        if not isinstance(key, six.string_types):
             # print("key=%r", key)
             raise TypeError("expect str but see %r" % type(key))
 

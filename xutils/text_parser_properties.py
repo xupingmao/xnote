@@ -14,7 +14,7 @@ parse_prop_text(text:str, ret_type="dict") -> {dict|list}
 
 """
 
-def parse_prop_text_to_pairs(text: str) -> list:
+def parse_prop_text_to_pairs(text):
     """解析key/value格式的配置文本
     @param {string} text 配置文本内容
     @param {string} ret_type 返回的格式，包含list, dict

@@ -51,7 +51,7 @@ _event_manager = None # type: EventManager
 class HandlerLocal(threading.local):
 
     def __init__(self):
-        super().__init__()
+        super(HandlerLocal, self).__init__()
         self.handler_class = None
 
 
@@ -238,16 +238,20 @@ class HandlerManager:
         finally:
             pass
 
+    def unload_module(self, modname):
+        if modname in sys.modules:
+            del sys.modules[modname]
+
     def do_reload_inner_modules(self):
-        del sys.modules['xtemplate']
+        self.unload_module("xtemplate")
         import xtemplate
         xtemplate.reload()
 
-        del sys.modules["xauth"]
+        self.unload_module("xauth")
         import xauth
         xauth.init()
 
-        del sys.modules["xtables_new"]
+        self.unload_module("xtables_new")
         import xtables_new
         xtables_new.init()
 

@@ -1,6 +1,10 @@
 # encoding=utf-8
 # @author xupingmao
 # @modified 2021/08/21 09:31:27
+
+from __future__ import print_function
+from __future__ import absolute_import
+
 import os
 import re
 import xauth

@@ -2,6 +2,8 @@
 # @author xupingmao
 # @since 2016/12/09
 # @modified 2022/04/16 08:53:48
+from __future__ import absolute_import, print_function
+
 import logging
 import time
 import inspect

@@ -255,7 +255,8 @@ class FileSystemHandler:
         if data != None:
             yield data
         else:
-            yield from self.read_all(path, blocksize)
+            for data in self.read_all(path, blocksize):
+                yield data
     
     def set_cache_control(self, mtime, etag, expire_days=30):
         # 如果Edge浏览器没有按照cache-control的建议执行，将浏览器设置重置

@@ -9,7 +9,7 @@
 @Description  : 数据库表-API
 """
 
-from urllib.parse import quote
+from six.moves.urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
 from xutils.db.dbutil_table_index import TableIndex, TableIndexRepair

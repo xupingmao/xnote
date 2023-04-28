@@ -56,7 +56,7 @@ class LdbHashTable:
             p += ":" + encode_str(sub_key)
         return p
 
-    def put(self, key, value, batch = None, *, sub_key=None):
+    def put(self, key, value, batch = None, sub_key=None):
         """通过key来设置value，这个key是hash的key，不是ldb的key
         @param {string} key hash的key
         @param {object} value hash的value

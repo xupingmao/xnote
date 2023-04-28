@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-01 11:22:35
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-21 23:55:51
+@LastEditTime : 2023-04-28 22:31:19
 @FilePath     : /xnote/handlers/dict/dao_relevant.py
 """
 import xutils
@@ -16,7 +16,7 @@ dbutil.register_table("dict_relevant", "相关词词库")
 _db = dbutil.get_hash_table("dict_relevant")
 
 class RelevantWord:
-    def __init__(self, word, others) -> None:
+    def __init__(self, word, others):
         self.word = word
         self.others = others
 

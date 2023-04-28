@@ -198,7 +198,7 @@ def get_nav_list():
     return NAV_LIST
 
 
-def render_before_kw(kw: dict):
+def render_before_kw(kw):
     """模板引擎预处理过程"""
     user_name = xauth.current_name() or ""
     user_role = xauth.current_role() or ""

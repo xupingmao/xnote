@@ -12,7 +12,7 @@ import web
 import os
 import xutils
 import xconfig
-from urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse
 from xutils import netutil
 from xutils import dbutil
 from .fs import FileSystemHandler
@@ -28,7 +28,8 @@ class ImageCacheHandler:
 		url = xutils.get_argument("url")
 		if url == "" or url == None:
 			return dict(code = "fail")
-		
+	
+	def get_cache_data(self, url):
 		# TODO 缓存数据
 		# 需要考虑安全性问题，最好是根据白名单缓存
 		# 1. host不能是内网地址
@@ -57,7 +58,8 @@ class ImageCacheHandler:
 		if os.path.exists(destpath) and content_type != None:
 			# TODO 注意越权问题 host不能是内部地址
 			fs_handler = FileSystemHandler()
-			yield from fs_handler.handle_get(destpath, content_type=content_type)
+			for data in fs_handler.handle_get(destpath, content_type=content_type):
+				yield data
 			return 
 		
 		xutils.makedirs(os.path.join(cache_dir, host))

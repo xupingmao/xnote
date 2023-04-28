@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 17:38:18
+@LastEditTime : 2023-04-28 22:23:07
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -30,7 +30,7 @@ class BinLog:
     log_debug = False
     logger = logging.getLogger("binlog")
 
-    def __init__(self) -> None:
+    def __init__(self):
         """正常要使用单例模式使用"""
         with self._lock:
             if self._instance != None:
@@ -87,7 +87,7 @@ class BinLog:
         else:
             db_put(key, log_body)
 
-    def add_log(self, optype, key, value=None, batch=None, old_value=None, *, record_value=False):
+    def add_log(self, optype, key, value=None, batch=None, old_value=None, record_value=False):
         if not self._is_enabled:
             return
 

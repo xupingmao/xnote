@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 20:59:39
+@LastEditTime : 2023-04-28 22:22:24
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -33,7 +33,7 @@ from .driver_interface import BatchInterface
 
 class TableIndex:
 
-    def __init__(self, index_info: IndexInfo, user_attr=None, check_user=False,index_type="ref"):
+    def __init__(self, index_info, user_attr=None, check_user=False,index_type="ref"):
         table_name = index_info.table_name
         index_name = index_info.index_name
 
@@ -88,7 +88,7 @@ class TableIndex:
         else:
             return None
     
-    def get_index_key(self, obj: dict):
+    def get_index_key(self, obj):
         assert obj != None
         assert isinstance(obj, dict)
 
@@ -99,7 +99,7 @@ class TableIndex:
         index_key = index_prefix + ":" + encoded_value + ":" + encoded_id
         return index_key, encoded_value
     
-    def get_index_value(self, obj) -> str:
+    def get_index_value(self, obj):
         if len(self.index_info.columns) > 1:
             result = []
             for colname in self.index_info.columns:
@@ -111,7 +111,7 @@ class TableIndex:
             value = obj.get(index_attr)
             return encode_index_value(value)
 
-    def update_index(self, old_obj, new_obj: dict, batch: BatchInterface, force_update=False):
+    def update_index(self, old_obj, new_obj, batch, force_update=False):
         index_name = self.index_name
         assert isinstance(new_obj, dict), "new_obj must be dict"
 

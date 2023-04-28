@@ -410,7 +410,7 @@ class DbScanHandler(BasePlugin):
             return META_HTML
         return SCAN_HTML
 
-    def is_visible(self, table_info: dbutil.TableInfo, show_delete):
+    def is_visible(self, table_info, show_delete):
         if show_delete:
             return table_info.is_deleted
         else:

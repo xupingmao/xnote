@@ -4,19 +4,19 @@
 @email        : 578749341@qq.com
 @Date         : 2023-03-17 23:32:09
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-20 00:08:42
+@LastEditTime : 2023-04-28 22:23:25
 @FilePath     : /xnote/xutils/db/filters.py
 @Description  : 描述
 """
 
 _valid_op_set = set(["$prefix", "$contains"])
 
-def check_complex_query(q: dict):
+def check_complex_query(q):
     for key in q:
         if key not in _valid_op_set:
             raise Exception("invalid query operator: %s" % key)
 
-def create_func_by_where(where: dict, user_filter_func):
+def create_func_by_where(where, user_filter_func):
     def filter_func_complex(key, value):
         for query_key in where:
             query_val = where.get(query_key)

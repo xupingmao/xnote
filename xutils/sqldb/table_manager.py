@@ -4,14 +4,16 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 21:54:22
+@LastEditTime : 2023-04-28 22:47:52
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
 
+from __future__ import print_function, absolute_import
+
 import sqlite3
 import xutils
-
+from xutils import six
 
 class ColumnInfo:
 
@@ -126,7 +128,7 @@ class SqliteTableManager(BaseTableManager):
 
     def connect(self):
         dbpath = self.kw.get("dbpath")
-        assert isinstance(dbpath, str)
+        assert isinstance(dbpath, six.string_types)
         self.db = sqlite3.connect(dbpath)
 
     def create_table(self):

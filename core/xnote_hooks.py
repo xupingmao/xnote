@@ -21,7 +21,7 @@ class HookStore:
             cls.reload_hooks.append(func)
 
 
-def get_search_handler(search_type: str):
+def get_search_handler(search_type):
     """获取搜索处理器"""
     raise NotImplementedError("待search实现")
 

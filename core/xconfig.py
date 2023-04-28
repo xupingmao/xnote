@@ -34,7 +34,7 @@ import time
 import json
 import xutils
 from xutils import textutil
-from xutils import fsutil
+from xutils import fsutil, six
 from xutils.base import Storage
 
 __version__ = "1.0"
@@ -272,7 +272,7 @@ def init(boot_config_file=None, boot_config_kw = None):
         init_boot_config(boot_config_file, boot_config_kw=boot_config_kw)
 
     path = get_system_config("data")
-    assert isinstance(path, str)
+    assert isinstance(path, six.string_types)
     DATA_PATH = os.path.abspath(path)
     DATA_DIR = os.path.abspath(path)
 

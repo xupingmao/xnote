@@ -45,7 +45,7 @@ def db_execute(db, sql, *args):
 
 class Holder(threading.local):
     def __init__(self):
-        self.db: sqlite3.Connection = None
+        self.db = None
 
     def __del__(self):
         if self.db != None:
@@ -193,7 +193,8 @@ class SqliteKV(driver_interface.DBInterface):
                 raise e
 
     def RangeIter(self, *args, **kw):
-        yield from self.RangeIterNoLock(*args, **kw)
+        for data in self.RangeIterNoLock(*args, **kw):
+            yield data
 
     def RangeIterNoLock(self, key_from=None, key_to=None,
                         reverse=False, include_value=True, fill_cache=False):
