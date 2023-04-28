@@ -4,12 +4,13 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-15 14:39:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-15 15:38:19
+@LastEditTime : 2023-04-28 18:53:06
 @FilePath     : /xnote/handlers/dict/dict_dao.py
 @Description  : 描述
 """
 import xtables
 from xutils import Storage
+from xutils import dateutil
 
 class DictItem(Storage):
 
@@ -31,11 +32,15 @@ def get_by_id(id):
     item = table.select_first(where=dict(id=id))
     return dict_to_obj(item)
 
+def create(dict_item):
+    table = xtables.get_dict_table()
+    return table.insert(**dict_item)
 
 def update(id, value):
     assert isinstance(id, int), "id必须为数字"
     table = xtables.get_dict_table()
-    return table.update(value = value, where = dict(id = id))
+    now = dateutil.format_datetime()
+    return table.update(value = value, mtime = now, where = dict(id = id))
 
 def delete(id):
     table = xtables.get_dict_table()

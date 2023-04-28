@@ -17,7 +17,7 @@
 ---- | ------------------|---------------------------
 案例1 | <表名:用户名:主键>  | note:admin:0001
 案例2 | <表名:标签:主键>    | note_public:tag1:0001
-案例3 | <表名:属性名>       |  system_config:config1
+案例3 | <表名:属性名>       | system_config:config1
 案例4 | <表名:用户名:属性名> | user_config:user01:config1
 
 注意：读写数据前要先调用register_table来注册表，不然会失败！
@@ -696,8 +696,14 @@ def count(key_from=None, key_to=None, filter_func=None):
 
     if key_from:
         key_from = key_from.encode("utf-8")
+    else:
+        key_from = b''
+
     if key_to:
         key_to = key_to.encode("utf-8")
+    else:
+        key_to = b'0xff'
+        
     iterator = _leveldb.RangeIter(key_from, key_to, include_value=True)
 
     count = 0

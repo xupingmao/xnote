@@ -57,7 +57,10 @@ class DBInterface:
         @param {bool}   fill_cache     是否填充缓存
         """
         assert key_from <= key_to
-        raise NotImplementedError("RangeIter")
+        if include_value:
+            yield b'test-key', b'test-value'
+        else:
+            yield b'test-key'
 
     def CreateSnapshot(self):
         raise NotImplementedError("CreateSnapshot")

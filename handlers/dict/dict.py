@@ -9,7 +9,7 @@ import xauth
 import xconfig
 import xmanager
 import math
-from xutils import Storage, encode_uri_component
+from xutils import Storage, encode_uri_component, dateutil
 from xutils.imports import is_str
 
 from . import dict_dao
@@ -153,8 +153,8 @@ class CreateAjaxHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        key = xutils.get_argument("key", "")
-        value = xutils.get_argument("value", "")
+        key = xutils.get_argument_str("key", "")
+        value = xutils.get_argument_str("value", "")
         if key == "":
             return dict(code="400", message="key不能为空")
 
@@ -167,7 +167,12 @@ class CreateAjaxHandler:
         if item != None:
             return dict(code="302", message="记录已经存在，请前往更新", data = dict(url = "/dict/update?id=%s" % item.id))
         else:
-            id = table.insert(key = key, value = value)
+            new_record = dict_dao.DictItem()
+            new_record.key = key
+            new_record.value = value
+            new_record.ctime = dateutil.format_datetime()
+            new_record.mtime = dateutil.format_datetime()
+            id = dict_dao.create(new_record)
             return dict(code="success", data = dict(url = "/dict/update?id=%s" % id))
 
 
