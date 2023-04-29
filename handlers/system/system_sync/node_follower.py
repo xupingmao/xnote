@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 19:19:59
+@LastEditTime : 2023-04-29 18:41:22
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -15,19 +15,21 @@ import xconfig
 
 from xutils import Storage
 from xutils import textutil
-from xutils import dbutil
+from xutils import dbutil, six
 import xutils
 from xutils.db.binlog import BinLog
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
-from .system_sync_proxy import HttpClient
+from .system_sync_proxy import HttpClient, empty_http_client
 from xutils.mem_util import log_mem_info_deco
+
+fs_sync_index_db = dbutil.get_hash_table("fs_sync_index")
 
 
 def filter_result(result, offset):
     data = []
-    offset = "fs_sync_index:" + offset
+    offset = fs_sync_index_db.get(offset)
     for item in result.data:
         if item.get("_key", "") == offset:
             # logging.debug("跳过offset:%s", offset)
@@ -54,7 +56,7 @@ class Follower(NodeManagerBase):
         # 同步完成的时间
         self.fs_sync_done_time = -1
         self._debug = False
-        self.file_syncer = FileSyncer()
+        self.file_syncer = FileSyncer(self.get_client())
         self.db_syncer = DBSyncer(file_syncer = self.file_syncer)
 
     def create_http_client(self):
@@ -257,8 +259,8 @@ class Follower(NodeManagerBase):
 
 class FileSyncer:
     """文件同步器"""
-    def __init__(self, http_client = None):
-        self.http_client = http_client # type: HttpClient
+    def __init__(self, http_client = empty_http_client):
+        self.http_client = http_client
 
     def handle_file_binlog(self, key, value):
         if value == None:
@@ -269,16 +271,17 @@ class FileSyncer:
     def sync_file(self, item):
         self.http_client.download_file(item)
 
+empty_file_syncer = FileSyncer()
 
 class DBSyncer:
 
     MAX_LOOPS = 1000 # 最大循环次数
     FULL_SYNC_MAX_LOOPS = 10000 # 全量同步最大循环次数
 
-    def __init__(self, *, debug = True, file_syncer = None):
+    def __init__(self, *, debug = True, file_syncer = empty_file_syncer):
         self._binlog = BinLog.get_instance()
         self.debug = debug
-        self.file_syncer = file_syncer # type: FileSyncer
+        self.file_syncer = file_syncer
     
     def get_table_by_key(self, key):
         table_name = key.split(":")[0]
@@ -287,7 +290,10 @@ class DBSyncer:
         return None
     
     def get_binlog_last_seq(self):
-        return CONFIG.get("follower_binlog_last_seq", 0)
+        value = CONFIG.get("follower_binlog_last_seq", 0)
+        if isinstance(value, int):
+            return value
+        return 0
 
     def put_binlog_last_seq(self, last_seq):
         return CONFIG.put("follower_binlog_last_seq", last_seq)
@@ -299,9 +305,11 @@ class DBSyncer:
         assert state in ("full", "binlog")
         CONFIG.put("follower_db_sync_state", state)
     
-    def get_db_last_key(self) -> str:
+    def get_db_last_key(self):
         # 全量同步使用，按照key进行遍历
-        return CONFIG.get("follower_db_last_key", "")
+        value = CONFIG.get("follower_db_last_key", "")
+        assert isinstance(value, six.string_types)
+        return value
 
     def put_db_last_key(self, last_key):
         CONFIG.put("follower_db_last_key", last_key)
@@ -342,8 +350,7 @@ class DBSyncer:
             batch.commit()
     
     @log_mem_info_deco("follower.sync_db")
-    def sync_db(self, proxy): # type: (HttpClient) -> any
-        self.file_syncer.http_client = proxy
+    def sync_db(self, proxy):
         sync_state = self.get_db_sync_state()
         if sync_state == "binlog":
             # 增量同步
@@ -391,12 +398,10 @@ class DBSyncer:
                 logging.debug("list binlog result=%s" % result_obj)
 
             code = result_obj.get("code")
-            data_list = result_obj.get("data")
-            has_next = result_obj.get("has_next")
+            has_next = result_obj.get("has_next", False)
 
             if code == "success":
                 self.sync_by_binlog_step(result_obj)
-                has_next = len(data_list) > 1 # 请求的时候以最后一条记录开始的
             elif code == "sync_broken":
                 logging.error("同步binlog异常, 重新全量同步...")
                 self.put_binlog_last_seq(0)

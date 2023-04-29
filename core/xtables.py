@@ -254,6 +254,19 @@ def init_search_rule_table():
         manager.add_column("expression", "text", "")
         manager.add_index("user")
 
+class DBPool:
+
+    sqlite_pool = {}
+
+    @classmethod
+    def get_sqlite_db(cls, fname=""):
+        assert fname != ""
+        if fname in cls.sqlite_pool:
+            return cls.sqlite_pool.get(fname)
+        fpath = os.path.join(xconfig.FileConfig.sqlite_dir, fname)
+        db = web.db.SqliteDB(db = fpath)
+        cls.sqlite_pool[fname] = db
+        return db
 
 class MockedDB():
     """
@@ -331,7 +344,7 @@ def get_storage_table():
 
 
 def get_dict_table():
-    db = web.db.SqliteDB(db = xconfig.DICT_FILE)
+    db = DBPool.get_sqlite_db("dictionary.db")
     return TableProxy(db, "dictionary")
 
 def get_search_rule_table():

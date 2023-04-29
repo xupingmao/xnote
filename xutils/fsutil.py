@@ -307,9 +307,10 @@ def _try_readfile(path, mode="r", limit=-1, encoding='utf-8'):
                 content = fp.read(limit)
             else:
                 content = fp.read()
+            assert isinstance(content, bytes)
             return content.decode(encoding)
     else:
-        with open(path, encoding=encoding) as fp:
+        with open(path, mode=mode, encoding=encoding) as fp:
             if limit > 0:
                 content = fp.read(limit)
             else:

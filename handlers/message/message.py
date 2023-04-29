@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-02 16:56:32
+@LastEditTime : 2023-04-29 18:46:03
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -20,6 +20,7 @@ import xauth
 import xconfig
 import xmanager
 import xtemplate
+import logging
 from xutils import BaseRule, Storage, functions, u, SearchResult
 from xutils import dateutil
 from xtemplate import T
@@ -118,8 +119,7 @@ def update_keyword_amount(message, user_name, key):
         msg_dao.delete_keyword(user_name, key)
     else:
         MessageDao.update(message)
-    xutils.log("[message.refresh] user:%s,key:%s,amount:%s" %
-               (user_name, key, amount))
+    logging.info("user:%s,key:%s,amount:%s", user_name, key, amount)
 
 
 @xutils.timeit(name="message.refresh", logfile=True)
