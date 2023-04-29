@@ -268,35 +268,6 @@ class DBPool:
         cls.sqlite_pool[fname] = db
         return db
 
-class MockedDB():
-    """
-    模拟的空数据库接口
-    """
-
-    def select(self, *args, **kw):
-        from web.utils import IterBetter
-        return IterBetter(iter([]))
-
-    def select_first(self, *args, **kw):
-        return None
-
-    def update(self, *args, **kw):
-        return 0
-
-    def insert(self, *args, **kw):
-        return None
-
-    def query(self, *args, **kw):
-        from web.utils import IterBetter
-        return IterBetter(iter([]))
-
-    def count(self, *args, **kw):
-        return 0
-
-    def delete(self, *args, **kw):
-        return
-
-
 def DBWrapper(dbpath, tablename):
     db = web.db.SqliteDB(db = dbpath)
     return TableProxy(db, tablename)

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-29 19:54:53
+@LastEditTime : 2023-04-29 20:51:39
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -82,8 +82,7 @@ def init_note_tables():
                           category="note", user_attr="user")
     dbutil.register_table("note_draft", "笔记草稿", category="note")
     dbutil.register_table("note_lock", "笔记编辑锁", category="note")
-
-    dbutil.register_table("note_full", "笔记的完整信息")
+    dbutil.register_table("note_full", "笔记的完整信息", category="note")
 
     # ID维度笔记索引
     db = dbutil.register_table(
