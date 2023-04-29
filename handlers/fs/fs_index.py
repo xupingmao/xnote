@@ -17,6 +17,7 @@ import xconfig
 import xmanager
 import xutils
 from xutils import Storage
+from xutils.dbutil import LdbTable
 
 from .fs_helper import get_index_dirs, get_index_db
 
@@ -41,7 +42,8 @@ class IndexBuilder:
         return size
 
 
-    def calc_size(self, db, fpath, depth=1000): # type: (any, str, int) -> int
+    def calc_size(self, db, fpath, depth=1000): 
+        # type: (LdbTable, str, int) -> int
         if depth <= 0:
             logging.error("too deep depth")
             return 0
@@ -116,7 +118,7 @@ class IndexHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/fs_index")
         path = self.get_arg_path()
         page = xutils.get_argument("p")
@@ -140,6 +142,7 @@ class IndexHandler:
         action = xutils.get_argument("action")
         path = self.get_arg_path()
         err = ""
+        index_size = 0
 
         try:
             if action == "reindex":
@@ -172,7 +175,7 @@ class IndexHandler:
         return kw
     
     def get_arg_path(self):
-        path = xutils.get_argument("path", "")
+        path = xutils.get_argument_str("path", "")
         if path != "":
             return os.path.abspath(path)
         return path

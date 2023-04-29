@@ -25,13 +25,18 @@ class TextHandler:
         
         return xtemplate.render("fs/page/fs_text.html")
 
+    def get_table(self, user_name):
+        assert len(user_name) > 0
+        return _db.sub_table(user_name)
+
     def get_bookmark(self):
         path = xutils.get_argument("path", "")
         if path == "":
             return dict(code="400", message="path不能为空")
         
         user_name = xauth.current_name()
-        bookmark = _db.get(user_name, sub_key=path)
+        db = self.get_table(user_name)
+        bookmark = db.get(path)
         if bookmark == None or bookmark.contents == None or bookmark.version != TXT_INFO_VER:
             bookmark = self.build_bookmark(user_name, path)
 
@@ -69,15 +74,17 @@ class TextHandler:
         txt_info.file_size = fsutil.get_file_size(fpath)
         txt_info.current_offset = 0
 
-        _db.put(user_name, txt_info, sub_key = fpath)
+        db = self.get_table(user_name)
+        db.put(fpath, txt_info)
         return txt_info
     
     def read_page(self):
         user_name = xauth.current_name()
-        offset = xutils.get_argument("offset", 0, type=int)
-        path = xutils.get_argument("path", "")
+        offset = xutils.get_argument_int("offset", 0)
+        path = xutils.get_argument_str("path", "")
 
-        txt_info = _db.get(user_name, sub_key = path)
+        db = self.get_table(user_name)
+        txt_info = db.get(path)
         if txt_info == None:
             return dict(code="400", message="txt信息不存在,请重试")
 
@@ -85,7 +92,8 @@ class TextHandler:
             return dict(code="500", message="没有更多内容了")
 
         txt_info.current_offset = offset
-        _db.put(user_name, txt_info, sub_key = path)
+        db.put(path, txt_info)
+
         with open(path, encoding=txt_info.encoding, errors="ignore") as fp:
             fp.seek(offset)
             page_data = fp.read(txt_info.pagesize)

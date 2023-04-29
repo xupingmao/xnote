@@ -749,7 +749,7 @@ def delete_table_count_cache(table_name):
     if _cache == None:
         return
 
-    cache_key = "table_count:%s:" % table_name
+    cache_key = "table_count:%s" % table_name
     _cache.delete(cache_key)
 
 def delete_index_count_cache(table_name, index_name):
@@ -757,7 +757,7 @@ def delete_index_count_cache(table_name, index_name):
         return
 
     index_prefix = IndexInfo.build_prefix(table_name, index_name)
-    cache_key = "table_count:%s:" % index_prefix
+    cache_key = "table_count:%s" % index_prefix
     _cache.delete(cache_key)
 
 
