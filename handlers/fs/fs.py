@@ -370,13 +370,16 @@ class StaticFileHandler(FileSystemHandler):
     allowed_prefix = ["static", "img", "app", "files", "tmp", "scripts"]
 
     def is_path_allowed(self, path):
+        if ".." in path:
+            return False
         for prefix in self.allowed_prefix:
             if path.startswith(prefix):
                 return True
         return False
 
     """外置数据的静态文件支持"""
-    def GET(self, path):
+    def GET(self, path = ""):
+        origin_path = path
         path = xutils.unquote(path)
         if not self.is_path_allowed(path):
             xauth.check_login("admin")
@@ -389,14 +392,14 @@ class StaticFileHandler(FileSystemHandler):
             newpath = xconfig.resolve_config_path(path)
             # 兼容static目录数据
             if not os.path.exists(newpath):
-                # len("static/") = 7
-                newpath = os.path.join(data_prefix, newpath[7:])
+                static_prefix_len = len("static/")
+                newpath = os.path.join(data_prefix, path[static_prefix_len:])
 
         path = xutils.get_real_path(newpath)
         if not os.path.isfile(path):
             # 静态文件不允许访问文件夹
             web.ctx.status = "404 Not Found"
-            return "Invalid File Path: %s" % path
+            return "Invalid File Path: %s" % origin_path
         return self.handle_get(path)
 
 class RemoveAjaxHandler:

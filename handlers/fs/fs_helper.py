@@ -15,7 +15,7 @@ import xconfig
 import os
 from xutils import dbutil
 from xutils import format_size
-from xutils import fsutil
+from xutils import fsutil, six
 from xutils.dbutil import LdbTable
 from xutils.fsutil import FileItem
 
@@ -69,6 +69,7 @@ def get_parent_file_object(path, name = ""):
 
 def get_index_dirs():
     index_dirs = xauth.get_user_config("admin", "fs_index_dirs")
+    assert isinstance(index_dirs, six.string_types)
     return index_dirs.split("\n")
 
 def get_file_thumbnail(fpath):
@@ -86,7 +87,7 @@ def get_file_download_link(fpath):
         relative_path = fsutil.get_relative_path(fpath, xconfig.DATA_DIR)
         fpath = relative_path
         encoded_path = xutils.encode_uri_component(fpath)
-        return "/static/%s?type=blob" % encoded_path
+        return "/data/%s?type=blob" % encoded_path
     encoded_path = xutils.encode_uri_component(fpath)
     download_link = "/fs/%s?type=blob" % encoded_path
     return download_link
