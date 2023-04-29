@@ -23,6 +23,7 @@ import threading
 import xnote_trace
 import logging
 import xnote_hooks
+import xnote_migrate
 from collections import deque
 from threading import Thread
 from xutils import Storage
@@ -740,6 +741,9 @@ def init(app, vars, last_mapping=None):
 
     # 同步任务线程
     SyncTaskThread().start()
+
+    # 数据库升级相关
+    xnote_migrate.migrate()
 
     return _manager
 

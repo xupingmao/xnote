@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2023-03-18 14:27:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 15:34:46
-@FilePath     : /xnote/handlers/upgrade/upgrade_011.py
+@LastEditTime : 2023-04-29 19:44:10
+@FilePath     : /xnote/core/xnote_migrate/upgrade_011.py
 @Description  : 迁移pulgin_visit表
 """
 

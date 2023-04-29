@@ -6,10 +6,9 @@
 
 """user_note_log日志重建"""
 
-import xmanager
 import xutils
 from xutils import dbutil
-from handlers.upgrade.upgrade_main import log_info
+from .base import log_info
 
 dbutil.register_table("note_migrate_log", "笔记迁移日志")
 NOTE_DAO = xutils.DAO("note")

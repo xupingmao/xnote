@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 15:27:56
+@LastEditTime : 2023-04-29 19:54:53
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -32,6 +32,7 @@ def init():
     dbutil.register_table("fs_map", "文件映射")
     dbutil.register_table("fs_ctype", "缓存的Content-Type")
     dbutil.register_table("txt_info", "txt文件信息")
+    dbutil.register_table("fs_sync_index", "文件同步索引信息")
 
     # 用户信息
     dbutil.register_table("user", "用户信息表")

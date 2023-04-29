@@ -9,8 +9,7 @@
 @Description  : 描述
 """
 
-from handlers.upgrade.upgrade_main import is_upgrade_done
-from handlers.upgrade.upgrade_main import mark_upgrade_done
+from .base import is_upgrade_done, mark_upgrade_done
 
 def do_upgrade():
     upgrade_key = "upgrade_008"
