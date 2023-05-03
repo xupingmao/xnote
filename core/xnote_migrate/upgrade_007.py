@@ -12,8 +12,7 @@
 
 import logging
 from xutils import dbutil
-from handlers.upgrade.upgrade_main import is_upgrade_done
-from handlers.upgrade.upgrade_main import mark_upgrade_done
+from .base import is_upgrade_done, mark_upgrade_done
 from handlers.note.dao_comment import fix_comment, drop_comment_table
 
 def do_upgrade():

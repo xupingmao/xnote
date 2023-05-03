@@ -9,8 +9,8 @@
 @Description  : 描述
 """
 from xutils import dbutil
-from handlers.upgrade.base import is_upgrade_done
-from handlers.upgrade.base import mark_upgrade_done
+from .base import is_upgrade_done
+from .base import mark_upgrade_done
 from handlers.note.dao import add_history_index
 
 def do_upgrade():

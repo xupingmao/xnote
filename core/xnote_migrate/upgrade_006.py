@@ -8,8 +8,7 @@ import logging
 
 import xutils
 from xutils import dbutil
-from handlers.upgrade.upgrade_main import is_upgrade_done
-from handlers.upgrade.upgrade_main import mark_upgrade_done
+from .base import is_upgrade_done, mark_upgrade_done
 from handlers.note.dao import update_children_count
 
 def do_upgrade():

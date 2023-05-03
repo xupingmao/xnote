@@ -20,8 +20,8 @@ class BaseAddFileHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        path = xutils.get_argument("path", "")
-        filename = xutils.get_argument("filename", "")
+        path = xutils.get_argument_str("path", "")
+        filename = xutils.get_argument_str("filename", "")
         if path == "":
             return dict(code="fail", message="path is empty")
         if xconfig.USE_URLENCODE:
@@ -67,7 +67,7 @@ class AddPluginFileHandler(BaseAddFileHandler):
         return path
 
     def create_file(self, path):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         code = self.get_plugin_template()
         code = code.replace("$since", xutils.format_datetime())
         code = code.replace("$author", user_name)

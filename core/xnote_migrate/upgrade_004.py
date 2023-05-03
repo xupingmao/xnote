@@ -7,9 +7,7 @@
 """note_public索引重建"""
 
 from xutils import dbutil
-from handlers.upgrade.upgrade_main import log_info
-from handlers.upgrade.upgrade_main import is_upgrade_done
-from handlers.upgrade.upgrade_main import mark_upgrade_done
+from .base import log_info, is_upgrade_done, mark_upgrade_done
 
 def do_upgrade():
     if is_upgrade_done("upgrade_004.2"):

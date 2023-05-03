@@ -5,7 +5,12 @@
 # @filename dbutil_hash.py
 
 from xutils import Storage
-from xutils.db.dbutil_base import *
+from xutils.db.dbutil_base import (
+    db_get, db_put, db_delete, 
+    check_table_name, 
+    get_table_info, TableInfo, 
+    count_table, prefix_iter
+)
 from xutils.db.encode import encode_str, decode_str
 
 class LdbHashTable:
@@ -15,17 +20,19 @@ class LdbHashTable:
     get -> LdbTable.get_by_id
     """
 
-    def __init__(self, table_name, user_name = None, key_name = "_key"):
-        check_table_name(table_name)
+    def __init__(self, table_name = "", user_name = None, key_name = "_key"):
+        first_table = table_name.split(":")[0]
+        check_table_name(first_table)
 
-        table_info = get_table_info(table_name)
+        table_info = get_table_info(first_table)
         assert isinstance(table_info, TableInfo)
         
         self.table_name = table_name
         self.key_name = key_name
         self.user_name = user_name
-
         self.prefix = table_name
+        self.first_table = first_table
+
         if user_name != None and user_name != "":
             self.prefix += ":" + user_name
         
@@ -37,11 +44,17 @@ class LdbHashTable:
             self.prefix += ":"
     
     def with_user(self, user_name):
+        """请使用 sub_table 方法
+        """
         assert user_name != ""
         assert user_name != None
         assert self.user_name == None
 
         return LdbHashTable(self.table_name, user_name = user_name)
+
+    def sub_table(self, sub_table=""):
+        assert sub_table != ""
+        return LdbHashTable(self.table_name + ":" + encode_str(sub_table))
 
     def _check_key(self, key):
         if not isinstance(key, str):
@@ -50,13 +63,10 @@ class LdbHashTable:
     def _check_value(self, obj):
         pass
 
-    def build_key(self, key, sub_key=None):
-        p = self.prefix + encode_str(key)
-        if sub_key != None:
-            p += ":" + encode_str(sub_key)
-        return p
+    def build_key(self, key):
+        return self.prefix + encode_str(key)
 
-    def put(self, key, value, batch = None, sub_key=None):
+    def put(self, key, value, batch = None):
         """通过key来设置value，这个key是hash的key，不是ldb的key
         @param {string} key hash的key
         @param {object} value hash的value
@@ -64,20 +74,20 @@ class LdbHashTable:
         self._check_key(key)
         self._check_value(value)
 
-        row_key = self.build_key(key, sub_key=sub_key)
+        row_key = self.build_key(key)
         
         if batch != None:
             batch.put(row_key, value)
         else:
-            put(row_key, value)
+            db_put(row_key, value)
 
-    def get(self, key, default_value = None, sub_key = None):
+    def get(self, key, default_value = None):
         """通过key来查询value，这个key是hash的key，不是ldb的key
         @param {string} key hash的key
         @param {object} default_value 如果值不存在，返回默认值
         """
-        row_key = self.build_key(key, sub_key=sub_key)
-        return get(row_key, default_value)
+        row_key = self.build_key(key)
+        return db_get(row_key, default_value)
 
     def iter(self, offset = 0, limit = 20, reverse = False, filter_func = None):
         """hash表的迭代器
@@ -103,7 +113,7 @@ class LdbHashTable:
         if batch != None:
             batch.delete(row_key)
         else:
-            delete(row_key)
+            db_delete(row_key)
 
     def count(self, prefix = None):
         if prefix != None:

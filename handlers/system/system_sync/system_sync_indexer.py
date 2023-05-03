@@ -20,8 +20,6 @@ from xutils import dateutil
 from xutils import fsutil
 from xutils import textutil
 
-dbutil.register_table("fs_sync_index", "文件同步索引信息")
-
 _fs_index_db = dbutil.get_table("fs_sync_index")
 _binlog = dbutil.BinLog.get_instance()
 

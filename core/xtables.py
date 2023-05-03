@@ -254,35 +254,19 @@ def init_search_rule_table():
         manager.add_column("expression", "text", "")
         manager.add_index("user")
 
+class DBPool:
 
-class MockedDB():
-    """
-    模拟的空数据库接口
-    """
+    sqlite_pool = {}
 
-    def select(self, *args, **kw):
-        from web.utils import IterBetter
-        return IterBetter(iter([]))
-
-    def select_first(self, *args, **kw):
-        return None
-
-    def update(self, *args, **kw):
-        return 0
-
-    def insert(self, *args, **kw):
-        return None
-
-    def query(self, *args, **kw):
-        from web.utils import IterBetter
-        return IterBetter(iter([]))
-
-    def count(self, *args, **kw):
-        return 0
-
-    def delete(self, *args, **kw):
-        return
-
+    @classmethod
+    def get_sqlite_db(cls, fname=""):
+        assert fname != ""
+        if fname in cls.sqlite_pool:
+            return cls.sqlite_pool.get(fname)
+        fpath = os.path.join(xconfig.FileConfig.sqlite_dir, fname)
+        db = web.db.SqliteDB(db = fpath)
+        cls.sqlite_pool[fname] = db
+        return db
 
 def DBWrapper(dbpath, tablename):
     db = web.db.SqliteDB(db = dbpath)
@@ -331,7 +315,7 @@ def get_storage_table():
 
 
 def get_dict_table():
-    db = web.db.SqliteDB(db = xconfig.DICT_FILE)
+    db = DBPool.get_sqlite_db("dictionary.db")
     return TableProxy(db, "dictionary")
 
 def get_search_rule_table():

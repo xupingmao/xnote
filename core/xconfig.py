@@ -210,6 +210,28 @@ EXIT_CODE = 0
 
 _has_init = False
 
+class FileConfig:
+
+    data_dir = ""
+    sqlite_dir = ""
+    backup_dir = ""
+    backup_db_dir = ""
+
+    @classmethod
+    def init(cls, data_dir):
+        cls.data_dir = os.path.abspath(data_dir)
+        makedirs(cls.data_dir)
+
+        cls.sqlite_dir = os.path.join(data_dir, "db", "sqlite")
+        makedirs(cls.sqlite_dir)
+
+        cls.backup_dir = os.path.join(data_dir, "backup")
+        makedirs(cls.backup_dir)
+
+        cls.backup_db_dir = os.path.join(cls.backup_dir, "db")
+        makedirs(cls.backup_db_dir)
+
+
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
     return fsutil.readfile(fpath)
@@ -283,6 +305,9 @@ def init(boot_config_file=None, boot_config_kw = None):
 
     # 数据库地址
     init_db_config()
+
+    # 初始化文件配置
+    FileConfig.init(DATA_DIR)
 
     # 备份数据地址
     BACKUP_DIR = make_data_dir("backup")

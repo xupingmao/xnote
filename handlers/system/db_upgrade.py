@@ -13,40 +13,20 @@
 2. 升级文件中的入口为`do_upgrade`
 3. 升级文件需要自己处理幂等逻辑，这里提供了幂等表`upgrade_log`
 """
-import os
-import xmanager
 import xutils
 import xauth
-import logging
-from xutils import six
-from xutils import dateutil
+import xnote_migrate
+from xutils import dateutil, dbutil
 from xutils import Storage
-from .base import *
 
-@xmanager.listen("sys.reload")
-def check_upgrade(ctx = None):
-    logging.info("check_upgrade...")
-    dirname = os.path.dirname(__file__)
-
-    for fname in sorted(os.listdir(dirname)):
-        if not fname.startswith("upgrade_"):
-            continue
-        if fname.startswith("upgrade_main"):
-            continue
-        basename, ext = os.path.splitext(fname)
-        mod_name = "handlers.upgrade." + basename
-        mod = six._import_module(mod_name)
-        logging.info("执行升级: %s", mod_name)
-        mod.do_upgrade()
-
-    logging.info("check_upgrade done")
+sys_log_db = dbutil.get_table("sys_log")
 
 class UpgradeHandler:
 
     @xauth.login_required("admin")
     def GET(self):
         try:
-            check_upgrade()
+            xnote_migrate.migrate()
             return "success"
         except:
             err_msg = xutils.print_exc()
@@ -59,9 +39,6 @@ class UpgradeHandler:
 
             sys_log_db.insert(err_log)
 
-xutils.register_func("upgrade.is_upgrade_done", is_upgrade_done)
-xutils.register_func("upgrade.mark_upgrade_done", mark_upgrade_done)
-xutils.register_func("upgrade.main", check_upgrade)
 
 xurls = (
     r"/upgrade/main", UpgradeHandler
