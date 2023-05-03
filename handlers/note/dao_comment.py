@@ -56,7 +56,7 @@ def count_comments_by_user(*args, **kw):
     return handle_comments_by_user("count", *args, **kw)
 
 
-def get_comment(comment_id:str):
+def get_comment(comment_id = ""):
     """通过comment_id实际上是key)获取comment"""
     value = _comment_db.get_by_key(comment_id)
     if value != None:
@@ -105,7 +105,7 @@ def count_comment_by_note(note_id):
     return _comment_db.count_by_index("note_id", index_value=note_id)
 
 
-def search_comment(user_name, *, keywords, offset=0, limit=xconfig.PAGE_SIZE, note_id=None):
+def search_comment(user_name, keywords, offset=0, limit=xconfig.PAGE_SIZE, note_id=None):
     assert user_name != None, "user_name can not be None"
 
     def search_comment_filter(key, value):

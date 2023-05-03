@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 23:24:59
+@LastEditTime : 2023-05-03 22:15:16
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -122,7 +122,7 @@ class TagMetaDao:
 
     @classmethod
     @xutils.async_func_deco()
-    def update_amount_async(cls, user_name: str, tag_names: list, tag_type: str, parent_id=None):
+    def update_amount_async(cls, user_name, tag_names, tag_type, parent_id=None):
         for tag_name in tag_names:
             tag_info = get_tag_meta_by_name(
                 user_name, tag_name, tag_type=tag_type, group_id=parent_id)
@@ -133,7 +133,7 @@ class TagMetaDao:
 
     @classmethod
     @xutils.async_func_deco()
-    def update_global_amount_async(cls, user_name: str, tag_names: list):
+    def update_global_amount_async(cls, user_name, tag_names):
         for tag_name in tag_names:
             tag_info = cls.get_by_name(
                 user_name = user_name, tag_name = tag_name, tag_type="global")
@@ -165,7 +165,7 @@ def get_tag_meta_by_name(user_name, tag_name, tag_type="group", group_id=None):
     return None
 
 
-def list_tag_meta(user_name, *, limit=1000, tag_type="group", tag_name=None, group_id=None):
+def list_tag_meta(user_name, limit=1000, tag_type="group", tag_name=None, group_id=None):
     if tag_type == "note":
         assert group_id != None, "group_id不能为空"
 
@@ -260,7 +260,7 @@ def batch_get_tags_by_notes(notes):
 
 
 class TagInfo(Storage):
-    def __init__(self, name = "", code = "", amount = 0) -> None:
+    def __init__(self, name = "", code = "", amount = 0):
         self.name = name
         self.code = code
         self.amount = amount
