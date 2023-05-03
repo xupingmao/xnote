@@ -276,9 +276,6 @@ def log_deco(message, log_args = False, args_convert_func = None):
 
 def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False, switch_func=None):
     """简单的计时装饰器，可以指定执行次数"""
-    from xutils import dbutil
-    dbutil.register_table("log_timeit", "耗时统计日志")
-
     def deco(func):
         def handle(*args, **kw):
             if switch_func != None:
@@ -290,6 +287,7 @@ def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False, s
                 return func(*args, **kw)
 
             t1 = time.time()
+            ret = None
             for i in range(repeat):
                 ret = func(*args, **kw)
             t2 = time.time()
@@ -311,7 +309,7 @@ def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False, s
             if logfile:
                 trace(message, int((t2-t1)*1000))
             else:
-                print("[timeit]", message, "cost time: ", int((t2-t1)*1000), "ms")
+                logging.info("[timeit] %s, cost time: %s ms", message, int((t2-t1)*1000))
             return ret
         return handle
     return deco

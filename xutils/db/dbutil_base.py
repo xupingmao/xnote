@@ -341,6 +341,13 @@ class TableInfo:
         # TODO 记录删除的索引
         return self
 
+    def rebuild_index(self, version="v1"):
+        from . import dbutil_table
+        db = dbutil_table.LdbTable(self.name)
+        db.rebuild_index(version)
+    
+    def delete_table(self):
+        self.is_deleted = True
 
 class IndexInfo:
 
