@@ -28,7 +28,7 @@ import xauth
 import pdb
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
-from xutils import cacheutil
+from xutils import cacheutil, six
 from .dao_api import NoteDao
 
 xconfig.check_and_init()
@@ -127,7 +127,7 @@ def get_root(creator=None):
 
     assert creator != None
     root = Storage()
-    root.name = "根目录"
+    root.name = u"根目录"
     root.type = "group"
     root.size = None
     root.id = "0"
@@ -370,13 +370,16 @@ def build_note_info(note, orderby=None):
         note.dtime = note.mtime
 
     if orderby == "hot_index":
-        note.badge_info = "热度: %s" % note.hot_index
+        note.badge_info = u"热度: %s" % note.hot_index
 
     if note.badge_info is None:
         note.badge_info = note.create_date
 
     if note.type == "group":
         _build_book_default_info(note)
+
+    if six.PY2 and isinstance(note.name, bytes):
+        note.name = note.name.decode("utf-8")
 
     return note
 
@@ -640,7 +643,7 @@ def remove_virtual_fields(note):
 def put_note_to_db(note_id, note):
     creator = note.creator
     # 增加编辑日志
-    dao_log.add_edit_log(creator, note)
+    get_log_dao().add_edit_log(creator, note)
 
     # 删除不需要持久化的数据
     remove_virtual_fields(note)
@@ -988,6 +991,7 @@ def list_group_with_count(creator=None,
 
     notes = _book_db.list(
         user_name=creator, filter_func=list_group_func, limit=limit)
+    build_note_list_info(notes)
     sort_notes(notes, orderby)
     result = notes[offset:offset + limit]
 

@@ -23,7 +23,7 @@ import time
 from xutils import textutil, dbutil, fsutil
 from xutils import Storage
 from xutils import logutil
-from xutils import cacheutil
+from xutils import cacheutil, six
 from xutils.functions import listremove
 
 session_db = None # type: dbutil.LdbTable
@@ -386,7 +386,7 @@ def current_name_str():
     name = get_current_name()
     if name == None:
         name = "public"
-    assert isinstance(name, str)
+    assert isinstance(name, six.string_types)
     return name
 
 def get_current_role():

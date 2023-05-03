@@ -1,3 +1,4 @@
+# encoding=utf-8
 
 import xutils
 from xutils import Storage

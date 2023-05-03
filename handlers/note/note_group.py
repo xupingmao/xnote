@@ -260,7 +260,7 @@ class GroupListHandler:
         if orderby == "hot_desc":
             for note in notes:
                 note.hot_index = note.hot_index or 0
-                note.badge_info = "热度(%s)" % note.hot_index
+                note.badge_info = u"热度(%s)" % note.hot_index
             notes.sort(key=lambda x: x.hot_index, reverse=True)
 
         if orderby == "size_desc":
@@ -291,9 +291,7 @@ class GroupListHandler:
 
     @xauth.login_required()
     def do_get(self):
-        user_name = xauth.current_name()
-        assert isinstance(user_name, str)
-
+        user_name = xauth.current_name_str()
         orderby_default = xconfig.get_user_config(
             user_name, "group_list_order_by", "name_asc")
         logging.debug("orderby_default:%s", orderby_default)
@@ -878,9 +876,9 @@ class NoteIndexHandler:
 
     def find_class(self):
         user_name = xauth.current_name()
-        home_path = xconfig.get_user_config(user_name, "HOME_PATH")
+        home_path = xconfig.get_user_config(user_name, "HOME_PATH", default_value="")
         if xutils.is_mobile_client():
-            home_path = xconfig.get_user_config(user_name, "HOME_PATH_MOBILE")
+            home_path = xconfig.get_user_config(user_name, "HOME_PATH_MOBILE", default_value="")
         clazz = xutils.lookup_func("url:" + home_path)
         if clazz is None:
             return GroupListHandler

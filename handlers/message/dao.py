@@ -212,7 +212,7 @@ def has_tag_fast(content):
     return content.find("#") >= 0 or content.find("@") >= 0
 
 
-def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_tag=None, count_only=False, date=""):
+def search_message(user_name, key, offset=0, limit=20, search_tags=None, no_tag=None, count_only=False, date=""):
     """搜索短信
     @param {string} user_name 用户名
     @param {string} key 要搜索的关键字
@@ -292,7 +292,7 @@ def count_message(user, status):
     return kv_count_message(user, status)
 
 
-def get_message_by_id(full_key) -> Storage:
+def get_message_by_id(full_key):
     # type: (str) -> object
     check_param_id(full_key)
     if full_key.startswith("message:"):

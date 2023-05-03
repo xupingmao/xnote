@@ -72,7 +72,7 @@ def fire_rename_event(note):
 
 def create_log_func(note, ctx):
     method   = ctx.method
-    date_str: str = ctx.date
+    date_str = ctx.date
 
     if method != "POST":
         # GET请求直接返回

@@ -29,6 +29,7 @@ from threading import Thread
 from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, cacheutil, u, dbutil, fsutil
+from xutils import py2fix
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -734,6 +735,10 @@ def init(app, vars, last_mapping=None):
     global _manager
     global _event_manager
 
+    py2fix.app = app
+    py2fix.vars = vars
+    py2fix.last_mapping = last_mapping
+
     _event_manager = EventManager()
     _manager = HandlerManager(app, vars, last_mapping=last_mapping)
 
@@ -807,6 +812,9 @@ def get_handler_manager():
 
 def get_event_manager():
     # type: () -> EventManager
+    global _event_manager
+    if _event_manager == None:
+        init(py2fix.app, py2fix.vars, py2fix.last_mapping)
     return _event_manager
 
 def load_tasks():

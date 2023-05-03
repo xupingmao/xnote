@@ -4,14 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-15 23:08:49
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-10 23:18:13
+@LastEditTime : 2023-05-03 22:32:03
 @FilePath     : /xnote/handlers/note/dao_category.py
 @Description  : 描述
 """
 
 from xutils import Storage, dateutil
 from xutils import fsutil
-from xutils import dbutil, cacheutil
+from xutils import dbutil, cacheutil, six
 import xutils
 import xconfig
 
@@ -41,7 +41,7 @@ def upsert_category(user_name, category):
 
 def list_category(user_name):
     assert user_name != None
-    assert isinstance(user_name, str)
+    assert isinstance(user_name, six.string_types)
 
     return []
 
