@@ -9,8 +9,7 @@
 import xutils
 from xutils import dbutil
 from .base import log_info, is_upgrade_done, mark_upgrade_done
-
-NOTE_DAO = xutils.DAO("note")
+from handlers.note import dao as note_dao
 
 def do_upgrade_book():
     count = 0
@@ -26,7 +25,7 @@ def do_upgrade_book():
         key_id = key.split(":")[-1]
         if key_id != str(value.id):
             log_info("无效索引: {!r} note_id:{!r}", key_id, note_id)
-            NOTE_DAO.update_index(value)
+            note_dao.update_index(value)
             if value.creator != None:
                 db.delete_by_key(key, user_name = value.creator)
             else:
@@ -56,7 +55,7 @@ def do_upgrade():
         key_id = key.split(":")[-1]
         if key_id != str(value.id):
             log_info("无效索引: {!r} note_id:{!r}", key_id, note_id)
-            NOTE_DAO.update_index(value)
+            note_dao.update_index(value)
             if value.creator != None:
                 db.delete_by_key(key, user_name = value.creator)
             else:
