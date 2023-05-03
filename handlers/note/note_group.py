@@ -473,15 +473,15 @@ def load_category(user_name, include_system=False):
         default_book_count = note_dao.count_by_parent(user_name, 0)
         if default_book_count > 0:
             sticky_groups.insert(0, SystemLink(
-                "默认分组", "/note/default", default_book_count))
+                u"默认分组", "/note/default", default_book_count))
         sticky_groups.insert(0, NoteLink(
-            "时光轴", "/note/tools/timeline", "cube"))
+            u"时光轴", "/note/tools/timeline", "cube"))
 
         groups_tuple = [
-            ("新建", system_folders),
-            ("置顶", sticky_groups),
-            ("分组", normal_groups),
-            ("已归档", archived_groups),
+            (u"新建", system_folders),
+            (u"置顶", sticky_groups),
+            (u"分组", normal_groups),
+            (u"已归档", archived_groups),
         ]
 
     return groups_tuple

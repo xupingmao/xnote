@@ -1603,7 +1603,7 @@ def get_virtual_group(user_name, name):
         files = list_by_parent(user_name, parent_id = "0", offset = 0, limit = 1000,
                                skip_group=True, include_public=False)
         group = Storage()
-        group.name = "未分类笔记"
+        group.name = u"未分类笔记"
         group.url = "/note/default"
         group.size = len(files)
         group.children_count = len(files)
