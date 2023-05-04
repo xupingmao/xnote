@@ -41,7 +41,7 @@ def register_search_handler(search_type, placeholder = None, action = None, tag 
         tag = tag
     )
 
-def get_search_handler(search_type) -> Storage:
+def get_search_handler(search_type):
     handler = SEARCH_TYPE_DICT.get(search_type)
     if handler != None:
         return handler

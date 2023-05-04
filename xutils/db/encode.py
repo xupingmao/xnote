@@ -6,7 +6,7 @@
 
 import json
 import xutils
-from xutils import Storage
+from xutils import Storage, six
 
 INT64_MAX = (1 << 63)-1
 INT32_MAX = (1 << 31)-1
@@ -128,7 +128,7 @@ def encode_list(value):
 def encode_index_value(value):
     if value is None:
         return chr(0)
-    if isinstance(value, str):
+    if isinstance(value, six.string_types):
         return encode_str_index(value)
     if isinstance(value, int):
         return encode_int(value)

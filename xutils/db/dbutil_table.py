@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 15:34:04
+@LastEditTime : 2023-05-04 23:59:35
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -320,7 +320,7 @@ class LdbTable:
         self._check_value(obj)
 
         obj_key = self._get_key_from_obj(obj)
-        assert isinstance(obj_key, str), "obj_key must be str"
+        assert isinstance(obj_key, six.string_types), "obj_key must be str"
         
         self._check_key(obj_key)
 

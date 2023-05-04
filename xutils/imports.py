@@ -137,3 +137,8 @@ def try_decode(bytes):
             exc = e
     raise exc
 
+
+def my_quote(s):
+    if isinstance(s, unicode):
+        return quote(s.encode("utf-8"))
+    return quote(s)

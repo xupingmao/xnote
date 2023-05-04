@@ -24,7 +24,7 @@ from xutils import dateutil, u
 from xutils import tojson
 from xutils import Storage
 from xutils import textutil
-from six.moves.urllib.parse import quote
+from xutils.imports import my_quote
 import xnote_trace
 import xnote_hooks
 
@@ -32,7 +32,7 @@ TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(
     format_date=dateutil.format_date,
     format_time=dateutil.format_time,
-    quote=quote
+    quote=my_quote
 )
 
 _lang_dict = dict()
