@@ -7,7 +7,7 @@ from __future__ import print_function
 
 from . import six
 from .six.moves.configparser import ConfigParser
-from .six.moves.urllib.parse import quote, unquote
+from .six.moves.urllib.parse import quote as ori_quote, unquote
 from .six.moves.urllib.request import urlopen
 from .six import StringIO
 
@@ -140,5 +140,11 @@ def try_decode(bytes):
 
 def my_quote(s):
     if isinstance(s, unicode):
-        return quote(s.encode("utf-8"))
-    return quote(s)
+        return ori_quote(s.encode("utf-8"))
+    return ori_quote(s)
+
+if six.PY2:
+    quote = my_quote
+else:
+    quote = ori_quote
+

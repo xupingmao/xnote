@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 22:22:24
+@LastEditTime : 2023-05-05 00:12:10
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -16,7 +16,7 @@
 import logging
 import xutils
 import time
-from xutils import Storage
+from xutils import Storage, six
 from xutils.db.encode import encode_index_value, clean_value_before_update, decode_str
 from xutils.db.dbutil_base import (
     db_delete, 
@@ -138,7 +138,7 @@ class TableIndex:
             if not force_update:
                 return
 
-        assert isinstance(new_index_key, str)
+        assert isinstance(new_index_key, six.string_types)
 
         # 只要有旧的记录，就要清空旧索引值
         if old_index_key != "" and index_changed:
