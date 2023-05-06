@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-06 21:33:57
+@LastEditTime : 2023-05-06 21:35:10
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -174,8 +174,8 @@ class HttpClient:
 
         fsutil.makedirs(dirname)
 
-        logging.debug("原始文件:%s", url)
-        logging.debug("目标文件:%s", dest_path)
+        logging.debug(u"原始文件:%s", url)
+        logging.debug(u"目标文件:%s", dest_path)
 
         try:
             netutil.http_download(url, dest_path)
@@ -184,7 +184,7 @@ class HttpClient:
         except:
             item.err_msg = xutils.print_exc()
             self.upsert_retry_task(item)
-            logging.error("下载文件失败:%s", dest_path)
+            logging.error(u"下载文件失败:%s", dest_path)
 
     def download_files(self, result):
         for item in result.data:

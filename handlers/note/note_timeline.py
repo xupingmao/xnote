@@ -310,7 +310,7 @@ def list_recent_edit_func(context):
     return build_date_result(rows, 'mtime')
 
 
-def default_list_func(context: Storage):
+def default_list_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']

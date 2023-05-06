@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-29 18:46:03
+@LastEditTime : 2023-05-06 21:50:25
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -24,7 +24,7 @@ import logging
 from xutils import BaseRule, Storage, functions, u, SearchResult
 from xutils import dateutil
 from xtemplate import T
-from xutils import netutil
+from xutils import netutil, six
 from xutils.functions import safe_list
 from handlers.message.message_utils import (
     list_task_tags,
@@ -197,7 +197,7 @@ class ListAjaxHandler:
         format = xutils.get_argument("format")
         offset = get_offset_from_page(page, pagesize)
 
-        assert isinstance(tag, str)
+        assert isinstance(tag, six.string_types)
 
         user_name = xauth.get_current_name()
 
@@ -250,7 +250,7 @@ class ListAjaxHandler:
         else:
             return msg_dao.list_by_tag(user_name, tag, offset, pagesize)
 
-    def do_get_html(self, msg_list, page: int, page_max: int, tag="task"):
+    def do_get_html(self, msg_list, page = 1, page_max = 10, tag="task"):
         show_todo_check = True
         show_edit_btn = True
         show_to_log_btn = False
@@ -302,8 +302,7 @@ class ListAjaxHandler:
         )
 
         if tag == "key":
-            user_name = xauth.current_name()
-            assert isinstance(user_name, str)
+            user_name = xauth.current_name_str()
             kw.top_keywords = []
             if orderby == "amount_desc" and page == 1:
                 kw.recent_keywords = self.get_recent_keywords(user_name, tag = tag)
@@ -318,7 +317,7 @@ class ListAjaxHandler:
                 result.append(item)
         return result
     
-    def get_recent_keywords(self, user_name: str, tag: str):
+    def get_recent_keywords(self, user_name = "", tag = ""):
         msg_list, amount = self.do_list_key(user_name, 0, 20, orderby = "recent")
         parser = MessageListParser(msg_list, tag=tag)
         parser.parse()
@@ -381,7 +380,7 @@ class ListAjaxHandler:
         else:
             return msg_dao.list_by_date(user_name, date, offset, pagesize)
 
-    def do_list_key(self, user_name, offset, limit, *, orderby = "amount_desc"):
+    def do_list_key(self, user_name, offset, limit, orderby = "amount_desc"):
         msg_list, amount = msg_dao.list_by_tag(
             user_name, "key", 0, MAX_LIST_LIMIT)
         p = message_utils.MessageKeyWordProcessor(msg_list)
@@ -730,7 +729,7 @@ class MessageListHandler:
         p = xutils.get_argument("p", "")
 
         # 记录日志
-        assert isinstance(user, str)
+        assert isinstance(user, six.string_types)
         xmanager.add_visit_log(user, "/message?tag=%s" % tag)
 
         if tag == "month_tags":
@@ -1163,7 +1162,7 @@ class SearchHandler:
 
         return xtemplate.render("message/page/message_search.html", **kw)
 
-    def get_ajax_data(self, *, user_name=None, key=None, offset=0,
+    def get_ajax_data(self, user_name=None, key=None, offset=0,
                       limit=20, search_tags=None, no_tag=False, date=""):
         start_time = time.time()
         chatlist, amount = dao.search_message(

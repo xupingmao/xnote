@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-02-12 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 22:06:32
+@LastEditTime : 2023-05-06 21:41:00
 @FilePath     : /xnote/handlers/plan/dao.py
 @Description  : 计划管理
 """
@@ -66,5 +66,6 @@ class MonthPlanDao:
         return MonthPlanRecord.from_dict(record)
     
     @staticmethod
-    def update(record: MonthPlanRecord):
+    def update(record):
+        # type: (MonthPlanRecord) -> None
         db.update(record.to_dict())

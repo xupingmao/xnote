@@ -14,7 +14,12 @@
 
 """
 import os
-from urllib.parse import quote, unquote
+
+try:
+    from urllib.parse import quote, unquote
+except ImportError:
+    from . import six
+    from six.moves.urllib.parse import quote, unquote
 
 IMG_EXT_SET = set([".png", ".jpg", ".gif"])
 

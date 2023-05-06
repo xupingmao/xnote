@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-15 14:20:41
+@LastEditTime : 2023-05-06 21:51:57
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -21,7 +21,7 @@ from xutils import textutil
 from xutils import dateutil
 from xutils import Storage
 from xutils import u
-from xutils import netutil
+from xutils import netutil, six
 from xutils.functions import Counter
 from xutils.textutil import quote
 from handlers.message.message_model import MessageFolder, MessageTag
@@ -49,14 +49,14 @@ def failure(message, code="fail"):
 
 
 def build_search_url(keyword):
-    key = quote(keyword)
+    key = xutils.my_quote(keyword)
     return u"/message?category=message&key=%s" % key
 
 
 def build_search_html(content, search_tag="log"):
     fmt = u'<a href="/message?tag=search&p={tag}&key={key}">{key_text}</a>'
     return fmt.format(tag=search_tag,
-                      key=xutils.encode_uri_component(content),
+                      key=xutils.my_quote(content),
                       key_text=xutils.html_escape(content))
 
 
@@ -68,10 +68,10 @@ class TopicTranslator:
     def mark(self, parser, key0):
         key = key0.lstrip("")
         key = key.rstrip("")
-        quoted_key = textutil.quote(key)
+        quoted_key = xutils.my_quote(key)
         value = textutil.escape_html(key0)
         p = "all" # 默认展示全部，系统处理排序的问题
-        fmt = "<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={p}\">{value}</a>"
+        fmt = u"<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={p}\">{value}</a>"
         return fmt.format(quoted_key=quoted_key, value=value, p=p)
 
 
@@ -339,7 +339,7 @@ def get_similar_key(key):
 
 class MessageListParser(object):
 
-    def __init__(self, chatlist: list, tag="log"):
+    def __init__(self, chatlist, tag="log"):
         self.chatlist = chatlist
         self.tag = tag
         self.search_tag = tag
@@ -361,7 +361,7 @@ class MessageListParser(object):
         if message.tag == "cron":
             message.tag = "task"
 
-    def process_message(self, message, search_tag="log") -> Storage:
+    def process_message(self, message, search_tag="log"):
         self.prehandle_message(message)
 
         message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
@@ -474,18 +474,18 @@ def sort_keywords_by_marked(msg_list):
 
 
 def list_hot_tags(user_name, limit=20):
-    assert isinstance(user_name, str)
+    assert isinstance(user_name, six.string_types)
 
     msg_list, amount = msg_dao.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
     sort_message_list(msg_list, "amount_desc")
     for msg in msg_list:
-        msg.url = "/message?tag=search&key={key}".format(
-            key=quote(msg.content))
+        msg.url = u"/message?tag=search&key={key}".format(
+            key=xutils.my_quote(msg.content))
     return msg_list[:limit]
 
 
 def list_task_tags(user_name, limit=20, offset=0):
-    assert isinstance(user_name, str)
+    assert isinstance(user_name, six.string_types)
 
     msg_list, amount = msg_dao.list_task(
         user_name, offset=0, limit=MAX_LIST_LIMIT)

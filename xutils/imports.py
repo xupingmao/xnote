@@ -140,7 +140,7 @@ def try_decode(bytes):
 
 def my_quote(s):
     if isinstance(s, unicode):
-        return ori_quote(s.encode("utf-8"))
+        return ori_quote(s.encode("utf-8")).decode("utf-8")
     return ori_quote(s)
 
 if six.PY2:
