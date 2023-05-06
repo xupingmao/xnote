@@ -325,6 +325,11 @@ def get_search_rule_table():
 get_dictionary_table = get_dict_table
 
 
+def get_all_tables():
+    return [
+        get_dict_table()
+    ]
+
 def get_table(name, dbpath=None):
     """获取数据库表，表的创建和访问不必在xtables中定义
     @since 2019/04/11

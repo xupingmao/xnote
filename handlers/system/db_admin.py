@@ -8,6 +8,9 @@ from xutils import dbutil
 from xutils import Storage
 from xtemplate import BasePlugin
 from xutils import textutil
+import xtables
+import xtemplate
+import math
 
 SCAN_HTML = """
 <style>
@@ -444,8 +447,60 @@ class DbScanHandler(BasePlugin):
         kw.show_delete = show_delete
 
 
+class SqlDBInfo:
+
+    def __init__(self):
+        self.name = ""
+        self.amount = 0
+
+class SqlDBHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        db_list = xtables.get_all_tables()
+        db_info_list = []
+        for db in db_list:
+            info = SqlDBInfo()
+            info.name = db.tablename
+            info.amount = db.count()
+            db_info_list.append(info)
+        kw = Storage()
+        kw.db_info_list = db_info_list
+        return xtemplate.render("system/page/db/sqldb_list.html", **kw)
+
+class SqlDBDetailHandler:
+
+    def get_table_by_name(self, name):
+        db_list = xtables.get_all_tables()
+        for db in db_list:
+            if db.tablename == name:
+                return db
+        return None
+
+    def GET(self):
+        name = xutils.get_argument_str("name")
+        page = xutils.get_argument_int("page", 1)
+        page_size = xutils.get_argument_int("page_size", 20)
+        db = self.get_table_by_name(name)
+        db_rows = []
+        page_max = 0
+        if db != None:
+            offset = (page-1) * page_size
+            db_rows = db.select(offset = offset, limit = page_size)
+            page_max = math.ceil(db.count() / page_size) // 1
+
+        kw = Storage()
+        kw.db_rows = db_rows
+        kw.page = page
+        kw.page_size = page_size
+        kw.page_max = page_max
+        kw.page_url = "?name={name}&page_size={page_size}&page=".format(name = name, page_size=page_size)
+        return xtemplate.render("system/page/db/sqldb_detail.html", **kw)
+
 xurls = (
     "/system/db_scan", DbScanHandler,
     "/system/db_admin", DbScanHandler,
     "/system/leveldb_admin", DbScanHandler,
+    "/system/sqldb_admin", SqlDBHandler,
+    "/system/sqldb_detail", SqlDBDetailHandler,
 )

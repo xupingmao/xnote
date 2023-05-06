@@ -1,0 +1,36 @@
+{% extends base %}
+
+{% block body_left %}
+{% include system/component/db_nav.html %}
+
+<div class="card">
+
+    <table class="table">
+        <tr>
+            <th>ID</th>
+            <th>详情</th>
+            <th>操作</th>
+        </tr>
+        {% for row in db_rows %}
+        <tr>
+            <td>{{row.id}}</td>
+            <td>{{row}}</td>
+            <td></td>
+        </tr>
+        {% end %}
+    </table>
+</div>
+
+<script type="text/javascript">
+    xnote.table.adjustWidth(".table");
+</script>
+
+<div class="card">
+    {% include common/pagination.html %}
+</div>
+
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
+{% end %}
