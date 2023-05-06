@@ -593,11 +593,15 @@ def scan(key_from=None,
     assert isinstance(key_from, (str, bytes))
     assert isinstance(key_to, (str, bytes))
 
-    if isinstance(key_from, str):
-        key_from = key_from.encode("utf-8")
+    if six.PY2:
+       assert isinstance(key_from, bytes)
+       assert isinstance(key_to, bytes) 
+    else:
+        if isinstance(key_from, str):
+            key_from = key_from.encode("utf-8")
 
-    if isinstance(key_to, str):
-        key_to = key_to.encode("utf-8")
+        if isinstance(key_to, str):
+            key_to = key_to.encode("utf-8")
 
     iterator = _leveldb.RangeIter(
         key_from, key_to,
