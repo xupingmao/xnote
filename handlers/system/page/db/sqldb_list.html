@@ -8,12 +8,14 @@
     <table class="table">
         <tr>
             <th>表名</th>
+            <th>说明</th>
             <th>记录数</th>
             <th>操作</th>
         </tr>
         {% for db in db_info_list %}
         <tr>
             <td><a href="/system/sqldb_detail?name={{db.name}}">{{db.name}}</a></td>
+            <td></td>
             <td>{{db.amount}}</td>
             <td></td>
         </tr>

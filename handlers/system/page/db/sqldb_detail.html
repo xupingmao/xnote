@@ -7,9 +7,9 @@
 
     <table class="table">
         <tr>
-            <th>ID</th>
-            <th>详情</th>
-            <th>操作</th>
+            <th style="width:20%">ID</th>
+            <th style="width:60%">详情</th>
+            <th style="width:20%">操作</th>
         </tr>
         {% for row in db_rows %}
         <tr>
@@ -20,10 +20,6 @@
         {% end %}
     </table>
 </div>
-
-<script type="text/javascript">
-    xnote.table.adjustWidth(".table");
-</script>
 
 <div class="card">
     {% include common/pagination.html %}
