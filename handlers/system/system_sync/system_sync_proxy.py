@@ -4,10 +4,11 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-29 18:40:48
+@LastEditTime : 2023-05-06 21:33:57
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
+from __future__ import print_function, absolute_import
 
 import os
 import time
@@ -178,7 +179,7 @@ class HttpClient:
 
         try:
             netutil.http_download(url, dest_path)
-            os.utime(dest_path, times=(mtime, mtime))
+            os.utime(dest_path, (mtime, mtime))
             self.delete_retry_task(item)
         except:
             item.err_msg = xutils.print_exc()
@@ -204,7 +205,7 @@ class HttpClient:
         return netutil.http_get(url, params=params)
 
     @log_mem_info_deco("proxy.list_binlog")
-    def list_binlog(self, last_seq) -> dict:
+    def list_binlog(self, last_seq):
         assert isinstance(last_seq, int)
         params = dict(last_seq=str(last_seq), include_req_seq="false")
 

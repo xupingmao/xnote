@@ -1688,6 +1688,9 @@ xutils.register_func("note.get_note_stat", get_note_stat)
 xutils.register_func("note.get_gallery_path", get_gallery_path)
 xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
 
+if xutils.get_func_by_name("note.has_external_image") == None:
+    xutils.register_func("note.has_external_image", lambda note: False)
+
 NoteDao.get_by_id = get_by_id
 NoteDao.get_by_id_creator = get_by_id_creator
 NoteDao.get_root = get_root

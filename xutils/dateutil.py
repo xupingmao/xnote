@@ -38,6 +38,7 @@ tm_yday  从每年的1月1日开始的天数 – 取值区间为[0,365]，其中
 
 import time
 import math
+from . import six
 
 SECONDS_PER_DAY = 3600 * 24
 DEFAULT_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -67,7 +68,7 @@ class DateClass:
 
 
 def is_str(s):
-    return isinstance(s, str)
+    return isinstance(s, six.string_types)
 
 def before(days=None, month=None, format=False):
     if days is not None:

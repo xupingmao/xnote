@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 19:36:27
+@LastEditTime : 2023-05-06 21:30:34
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -163,7 +163,7 @@ class Leader(NodeManagerBase):
 
         return result
 
-    def skip_db_sync(self, key:str):
+    def skip_db_sync(self, key):
         skipped_prefix_tuple = ("_binlog:", "_index$", "cluster_config:",
                                 "fs_index:", "fs_sync_index:", "fs_sync_index_copy:")
         table_name = key.split(":", 1)[0]

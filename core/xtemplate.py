@@ -317,9 +317,13 @@ def do_render_kw(kw):
 
     return nkw
 
+def check_loader():
+    if _loader == None:
+        init()
 
 @xutils.timeit_deco(name="Template.Render", logfile=True)
 def render(template_name, **kw):
+    check_loader()
     # 处理上下文渲染
     nkw = do_render_kw(kw)
 

@@ -4,8 +4,6 @@ from __future__ import print_function
 import logging
 import os
 import time
-
-from handlers.note.dao import NOTE_DAO
 import xtemplate
 import xutils
 import xauth

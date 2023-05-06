@@ -14,6 +14,7 @@
     b. 把`同步链接`配置到子节点的同步设置页面上，点击同步按钮
 4、配置完成后，系统开始同步
 """
+from __future__ import print_function, absolute_import
 
 import time
 import threading

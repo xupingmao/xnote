@@ -11,6 +11,7 @@ from xutils.db.dbutil_base import (
     get_table_info, TableInfo, 
     count_table, prefix_iter
 )
+from xutils import six
 from xutils.db.encode import encode_str, decode_str
 
 class LdbHashTable:
@@ -57,7 +58,7 @@ class LdbHashTable:
         return LdbHashTable(self.table_name + ":" + encode_str(sub_table))
 
     def _check_key(self, key):
-        if not isinstance(key, str):
+        if not isinstance(key, six.string_types):
             raise Exception("LdbHashTable_param_error: expect str key")
 
     def _check_value(self, obj):

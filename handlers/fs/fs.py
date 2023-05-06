@@ -581,8 +581,7 @@ class Bookmark:
 class BookmarkHandler:
     @xauth.login_required("admin")
     def GET(self):
-        user_name = xauth.current_name()
-        assert isinstance(user_name, str)
+        user_name = xauth.current_name_str()
 
         xmanager.add_visit_log(user_name, "/fs_bookmark")
 

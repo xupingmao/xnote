@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-04 23:59:35
+@LastEditTime : 2023-05-06 21:23:00
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -198,7 +198,7 @@ class LdbTable:
             batch.commit(sync)
 
     def is_valid_key(self, key=None, user_name=None):
-        assert isinstance(key, str)
+        assert isinstance(key, six.string_types)
         if user_name is None:
             return key.startswith(self.prefix)
         else:

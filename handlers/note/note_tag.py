@@ -88,8 +88,7 @@ class TagListHandler:
 
     def GET(self):
         if xauth.has_login():
-            user_name = xauth.get_current_name()
-            assert isinstance(user_name, str)
+            user_name = xauth.current_name_str()
 
             tag_list = dao_tag.list_tag(user_name)
             xmanager.add_visit_log(user_name, "/note/taglist")
