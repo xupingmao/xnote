@@ -196,7 +196,7 @@ class LogHandler(BasePlugin):
 
 class UvRecord(Storage):
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.ip = ""
         self.site = ""
         self.date = ""
