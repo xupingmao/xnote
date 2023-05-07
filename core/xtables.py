@@ -9,20 +9,19 @@ import os
 import xutils
 import xconfig
 import web.db
-import sqlite3
 from xutils.sqldb import TableManagerFacade as TableManager
 from xutils.sqldb import TableProxy
 
 def init_test_table():
     """测试数据库"""
     path = os.path.join(xconfig.DATA_DIR, "test.db")
-    with TableManager("test", dbpath = path) as manager:
-        manager.add_column("id1", "integer", 0)
-        manager.add_column("int_value", "int", 0)
-        manager.add_column("float_value", "float")
-        manager.add_column("text_value", "text", "")
-        manager.add_column("name", "text", "test")
-        manager.add_column("check", "text", "aaa'bbb")
+    db = get_db_instance(dbpath=path)
+    with TableManager("test", db = db) as manager:
+        manager.add_column("int_value", "int", default_value=0)
+        manager.add_column("float_value", "float", default_value=0.0)
+        manager.add_column("text_value", "text", default_value="")
+        manager.add_column("name", "text", default_value="test")
+        manager.add_column("check", "text", default_value="aaa'bbb")
         manager.add_index("check")
 
 
@@ -352,5 +351,5 @@ def get_table(name, dbpath=None):
 
 @xutils.log_init_deco("xtables")
 def init():
-    # web.db.config.debug_sql = False
+    web.db.config.debug_sql = False
     init_dict_table()

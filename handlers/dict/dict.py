@@ -109,14 +109,14 @@ class DictSearchHandler:
 class DictHandler:
 
     def GET(self):
-        page = xutils.get_argument("page", 1, type=int)
+        page = xutils.get_argument_int("page", 1)
         db = xtables.get_dict_table()
         items = db.select(order="id", limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
         items = map(convert_dict_func, items)
         count = db.count()
         page_max = math.ceil(count / PAGE_SIZE)
 
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/note/dict")
 
         return xtemplate.render("dict/page/dict_list.html", 

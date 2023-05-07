@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-07 17:16:36
+@LastEditTime : 2023-05-07 18:18:54
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -23,12 +23,9 @@ class ColumnInfo:
 class BaseTableManager:
     """检查数据库字段，如果不存在就自动创建"""
 
-    def __init__(self, tablename, db = empty_db, pk_name="", pk_type="", no_pk=False, **kw):
+    def __init__(self, tablename, db = empty_db, **kw):
         self.tablename = tablename
         self.kw = kw
-        self.pk_name = pk_name
-        self.pk_type = pk_name
-        self.no_pk = no_pk
         self.debug = kw.pop("debug", False)
         self.connect()
         self.db = db
@@ -120,10 +117,7 @@ class MySQLTableManager(BaseTableManager):
         pass
 
     def create_table(self):
-        no_pk = self.no_pk
         tablename = self.tablename
-        pkName = self.pk_name
-        pkType = self.pk_type
         sql = "CREATE TABLE IF NOT EXISTS `%s` (id bigint unsigned primary key auto_increment) CHARACTER SET utf8mb4;" % tablename
         self.db.query(sql)
 
@@ -151,21 +145,8 @@ class SqliteTableManager(BaseTableManager):
         pass
 
     def create_table(self):
-        no_pk = self.no_pk
         tablename = self.tablename
-        pkName = self.pk_name
-        pkType = self.pk_type
-        
-        if no_pk:
-            # 没有主键，创建一个占位符
-            sql = "CREATE TABLE IF NOT EXISTS `%s` (_id int);" % tablename
-        elif pkName is None:
-            # 只有integer允许AUTOINCREMENT
-            sql = "CREATE TABLE IF NOT EXISTS `%s` (id integer primary key autoincrement);" % tablename
-        else:
-            # sqlite允许主键重复，允许空值
-            sql = "CREATE TABLE IF NOT EXISTS `%s` (`%s` %s primary key);" % (
-                tablename, pkName, pkType)
+        sql = "CREATE TABLE IF NOT EXISTS `%s` (id integer primary key autoincrement);" % tablename
         self.execute(sql)
 
     def execute(self, sql):
@@ -216,9 +197,9 @@ class SqliteTableManager(BaseTableManager):
 class TableManagerFacade:
 
     def __init__(self, tablename, db = empty_db, **kw):
-        self.manager = MySQLTableManager(tablename, db = db, **kw)
-        if db.dbname == "sqlite":
-            self.manager = SqliteTableManager(tablename, db = db, **kw)
+        self.manager = SqliteTableManager(tablename, db = db, **kw)
+        if db.dbname == "mysql":
+            self.manager = MySQLTableManager(tablename, db = db, **kw)
 
         self.add_column = self.manager.add_column
         self.add_index = self.manager.add_index

@@ -4,15 +4,16 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:04:36
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 21:24:29
+@LastEditTime : 2023-05-07 17:23:47
 @FilePath     : /xnote/tests/test_xutils_sqldb.py
 @Description  : 描述
 """
 
 from . import test_base
-from xutils.sqldb import SqliteTableManager, TableProxy
+from xutils.sqldb import TableManagerFacade, TableProxy
 import xconfig
 import os
+import xtables
 import web.db
 
 app = test_base.init()
@@ -24,11 +25,11 @@ class TestMain(test_base.BaseTestCase):
 
     def test_db_example(self):
         dbpath = os.path.join(xconfig.DB_DIR, "test.db")
-        with SqliteTableManager("test", dbpath = dbpath) as table:
-            table.add_column("name", "text")
-            table.add_column("age", "int")
+        db = xtables.get_db_instance(dbpath)
+        with TableManagerFacade("test", db = db) as table:
+            table.add_column("name", "text", default_value="")
+            table.add_column("age", "int", default_value=0)
 
-        db = web.db.SqliteDB(db = dbpath)
         table = TableProxy(db, "test")
         self.clear_table(table)
         
