@@ -162,8 +162,7 @@ class CreateAjaxHandler:
             return dict(code="400", message="value不能为空")
 
         key   = xutils.unquote(key)
-        table = xtables.get_dict_table()
-        item  = table.select_first(where=dict(key=key))
+        item  = dict_dao.get_by_key(key)
         if item != None:
             return dict(code="302", message="记录已经存在，请前往更新", data = dict(url = "/dict/update?id=%s" % item.id))
         else:

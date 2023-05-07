@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2022-12-10 23:28:34
+@LastEditTime : 2023-05-07 11:21:47
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -96,7 +96,7 @@ class MySQLKV:
         self.scan_limit = 200  # 扫描的分页大小
         self.pool = deque()
         self.pool_size = 0
-        self.debug_pool = True
+        self.debug_pool = False
 
         try:
             self.init()

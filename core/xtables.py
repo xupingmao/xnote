@@ -10,7 +10,7 @@ import xutils
 import xconfig
 import web.db
 import sqlite3
-from xutils.sqldb import SqliteTableManager as TableManager
+from xutils.sqldb import TableManagerFacade as TableManager
 from xutils.sqldb import TableProxy
 
 def init_test_table():
@@ -228,13 +228,25 @@ def init_storage_table():
         manager.add_column("value", "text", "")
         manager.add_index("key")
 
+def get_db_instance(dbpath = ""):
+    assert dbpath != ""
+    db_driver = xconfig.get_system_config("db_driver")
+    if db_driver == "mysql":
+        db_host = xconfig.get_system_config("mysql_host")
+        db_name = xconfig.get_system_config("mysql_database")
+        db_user = xconfig.get_system_config("mysql_user")
+        db_pw = xconfig.get_system_config("mysql_password")
+        db_port = xconfig.get_system_config("mysql_port")
+        return web.db.MySQLDB(host = db_host, database = db_name, 
+                              user = db_user, pw = db_pw, port = db_port)
+    return web.db.SqliteDB(db = dbpath)
 
 def init_dict_table():
     """词典，和主库隔离
     @since 2018/01/14
     """
-    dbpath = xconfig.DICT_FILE
-    with TableManager("dictionary", dbpath = dbpath) as manager:
+    db = get_db_instance(dbpath = xconfig.DICT_FILE)
+    with TableManager("dictionary", db = db) as manager:
         manager.add_column("ctime", "text", "")
         manager.add_column("mtime", "text", "")
         manager.add_column("key", "text", "")
@@ -315,7 +327,7 @@ def get_storage_table():
 
 
 def get_dict_table():
-    db = DBPool.get_sqlite_db("dictionary.db")
+    db = get_db_instance(dbpath=xconfig.DICT_FILE)
     return TableProxy(db, "dictionary")
 
 def get_search_rule_table():
@@ -340,9 +352,5 @@ def get_table(name, dbpath=None):
 
 @xutils.log_init_deco("xtables")
 def init():
-    if sqlite3 is None:
-        xconfig.errors.append("sqlite3依赖丢失,部分功能不可用")
-        return
-
-    web.db.config.debug_sql = False
+    # web.db.config.debug_sql = False
     init_dict_table()

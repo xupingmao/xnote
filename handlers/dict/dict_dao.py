@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-15 14:39:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 18:53:06
+@LastEditTime : 2023-05-07 16:53:54
 @FilePath     : /xnote/handlers/dict/dict_dao.py
 @Description  : 描述
 """
@@ -26,6 +26,11 @@ def dict_to_obj(item):
     result = DictItem()
     result.update(item)
     return result
+
+def get_by_key(key):
+    table = xtables.get_dict_table()
+    item = table.select_first(where=dict(key=key))
+    return dict_to_obj(item)
 
 def get_by_id(id):
     table = xtables.get_dict_table()

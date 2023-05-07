@@ -4,14 +4,15 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-28 21:54:22
+@LastEditTime : 2023-05-07 17:16:36
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
 
-import sqlite3
 import xutils
+import web.db
 
+empty_db = web.db.DB(None, {})
 
 class ColumnInfo:
 
@@ -22,14 +23,15 @@ class ColumnInfo:
 class BaseTableManager:
     """检查数据库字段，如果不存在就自动创建"""
 
-    def __init__(self, tablename, pkName=None, pkType=None, no_pk=False, **kw):
+    def __init__(self, tablename, db = empty_db, pk_name="", pk_type="", no_pk=False, **kw):
         self.tablename = tablename
         self.kw = kw
-        self.pk_name = pkName
-        self.pk_type = pkType
+        self.pk_name = pk_name
+        self.pk_type = pk_name
         self.no_pk = no_pk
         self.debug = kw.pop("debug", False)
         self.connect()
+        self.db = db
         self.create_table()
 
     def __enter__(self):
@@ -39,7 +41,8 @@ class BaseTableManager:
         self.close()
 
     def create_table(self):
-        pass
+        if self.db.dbname == "sqlite":
+            pass
 
     def connect(self):
         pass
@@ -58,7 +61,7 @@ class BaseTableManager:
         return [demo]
 
     def add_column(self, colname, coltype,
-                   default_value=None, not_null=False):
+                   default_value=None, not_null=True):
         """添加字段，如果已经存在则跳过，名称相同类型不同抛出异常"""
         sql = "ALTER TABLE `%s` ADD COLUMN `%s` %s" % (
             self.tablename, colname, coltype)
@@ -110,24 +113,42 @@ class BaseTableManager:
     def close(self):
         pass
 
-
 class MySQLTableManager(BaseTableManager):
     # TODO 待实现测试
 
     def connect(self):
-        import pymysql
-        pymysql.connect()
+        pass
 
+    def create_table(self):
+        no_pk = self.no_pk
+        tablename = self.tablename
+        pkName = self.pk_name
+        pkType = self.pk_type
+        sql = "CREATE TABLE IF NOT EXISTS `%s` (id bigint unsigned primary key auto_increment) CHARACTER SET utf8mb4;" % tablename
+        self.db.query(sql)
+
+    
     def desc_columns(self):
         sql = "DESC `%s`" % self.tablename
-        return self.execute(sql)
+        columns = list(self.db.query(sql))
+        if self.debug:
+            print("desc %s, columns=%s" % (self.tablename, columns))
+        result = []
+        for col in columns:
+            item = ColumnInfo()
+            item.type = col["Type"]
+            item.name = col["Field"]
+            result.append(item)
+        return result
+    
+    def execute(self, sql):
+        return self.db.query(sql)
+
 
 class SqliteTableManager(BaseTableManager):
 
     def connect(self):
-        dbpath = self.kw.get("dbpath")
-        assert isinstance(dbpath, str)
-        self.db = sqlite3.connect(dbpath)
+        pass
 
     def create_table(self):
         no_pk = self.no_pk
@@ -148,26 +169,15 @@ class SqliteTableManager(BaseTableManager):
         self.execute(sql)
 
     def execute(self, sql):
-        cursorobj = self.db.cursor()
         try:
             if self.debug:
                 xutils.log(sql)
-            cursorobj.execute(sql)
-            kv_result = []
-            result = cursorobj.fetchall()
-            for single in result:
-                resultMap = {}
-                for i, desc in enumerate(cursorobj.description):
-                    name = desc[0]
-                    resultMap[name] = single[i]
-                kv_result.append(resultMap)
-            self.db.commit()
-            return kv_result
+            return self.db.query(sql)
         except Exception:
             raise
 
     def close(self):
-        self.db.close()
+        pass
 
     def generate_migrate_sql(self, dropped_names):
         """生成迁移字段的SQL（本质上是迁移）"""
@@ -202,3 +212,19 @@ class SqliteTableManager(BaseTableManager):
             item.name = col["name"]
             result.append(item)
         return result
+
+class TableManagerFacade:
+
+    def __init__(self, tablename, db = empty_db, **kw):
+        self.manager = MySQLTableManager(tablename, db = db, **kw)
+        if db.dbname == "sqlite":
+            self.manager = SqliteTableManager(tablename, db = db, **kw)
+
+        self.add_column = self.manager.add_column
+        self.add_index = self.manager.add_index
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.manager.close()
