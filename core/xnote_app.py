@@ -129,13 +129,9 @@ def handle_signal(signum, frame):
 
 
 @log_mem_info_deco("try_init_sqlite")
-def try_init_sqlite():
-    try:
-        # 初始化数据库
-        xtables.init()
-    except:
-        xutils.print_exc()
-        xconfig.errors.append("初始化sqlite失败")
+def try_init_sql_db():
+    # 初始化数据库
+    xtables.init()
 
 
 @log_mem_info_deco("try_init_kv_db")
@@ -308,7 +304,7 @@ def init_app_no_lock(boot_config_kw=None):
     init_debug()
 
     # 初始化数据库
-    try_init_sqlite()
+    try_init_sql_db()
     try_init_kv_db()
     xtables_new.init()
 

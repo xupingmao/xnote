@@ -219,6 +219,7 @@ class FileConfig:
 
     @classmethod
     def init(cls, data_dir):
+        data_dir = os.path.abspath(data_dir)
         cls.data_dir = os.path.abspath(data_dir)
         makedirs(cls.data_dir)
 

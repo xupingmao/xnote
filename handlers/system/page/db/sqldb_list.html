@@ -1,0 +1,33 @@
+{% extends base %}
+
+{% block body_left %}
+{% include system/component/db_nav.html %}
+
+<div class="card">
+
+    <table class="table">
+        <tr>
+            <th>表名</th>
+            <th>说明</th>
+            <th>记录数</th>
+            <th>操作</th>
+        </tr>
+        {% for db in db_info_list %}
+        <tr>
+            <td><a href="/system/sqldb_detail?name={{db.name}}">{{db.name}}</a></td>
+            <td></td>
+            <td>{{db.amount}}</td>
+            <td></td>
+        </tr>
+        {% end %}
+    </table>
+</div>
+
+<script type="text/javascript">
+    xnote.table.adjustWidth(".table");
+</script>
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
+{% end %}

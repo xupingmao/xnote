@@ -1,0 +1,32 @@
+{% extends base %}
+
+{% block body_left %}
+{% include system/component/db_nav.html %}
+
+<div class="card">
+
+    <table class="table">
+        <tr>
+            <th style="width:20%">ID</th>
+            <th style="width:60%">详情</th>
+            <th style="width:20%">操作</th>
+        </tr>
+        {% for row in db_rows %}
+        <tr>
+            <td>{{row.id}}</td>
+            <td>{{row}}</td>
+            <td></td>
+        </tr>
+        {% end %}
+    </table>
+</div>
+
+<div class="card">
+    {% include common/pagination.html %}
+</div>
+
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
+{% end %}

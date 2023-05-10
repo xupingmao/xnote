@@ -109,14 +109,14 @@ class DictSearchHandler:
 class DictHandler:
 
     def GET(self):
-        page = xutils.get_argument("page", 1, type=int)
+        page = xutils.get_argument_int("page", 1)
         db = xtables.get_dict_table()
         items = db.select(order="id", limit=PAGE_SIZE, offset=(page-1)*PAGE_SIZE)
         items = map(convert_dict_func, items)
         count = db.count()
         page_max = math.ceil(count / PAGE_SIZE)
 
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/note/dict")
 
         return xtemplate.render("dict/page/dict_list.html", 
@@ -162,8 +162,7 @@ class CreateAjaxHandler:
             return dict(code="400", message="value不能为空")
 
         key   = xutils.unquote(key)
-        table = xtables.get_dict_table()
-        item  = table.select_first(where=dict(key=key))
+        item  = dict_dao.get_by_key(key)
         if item != None:
             return dict(code="302", message="记录已经存在，请前往更新", data = dict(url = "/dict/update?id=%s" % item.id))
         else:
