@@ -5,6 +5,7 @@ autoreload会自动搜索指定目录下的文件
 一旦修改时间发生变化会立即触发回调函数
 """
 
+from __future__ import print_function, absolute_import
 from threading import Thread
 import time
 import sys

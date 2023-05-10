@@ -8,7 +8,7 @@
  * CronTaskManager 定时任务注册和执行
  * EventManager 事件管理器
 """
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os
 import sys
 import re

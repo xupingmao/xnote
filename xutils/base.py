@@ -2,6 +2,7 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2020/11/28 23:23:13
 # @modified 2022/04/16 22:47:23
+from __future__ import print_function, absolute_import
 import copy
 import sys
 import traceback
