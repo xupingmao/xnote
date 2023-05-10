@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-03 16:30:06
+@LastEditTime : 2023-05-10 20:30:22
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -124,7 +124,7 @@ def init_note_tables():
     db = dbutil.register_table("note_public", "公共笔记", category="note")
     db.register_index("hot_index")
     db.register_index("share_time")
-    db.register_index("v1")
+    db.rebuild_index("v1")
 
     # 操作日志
     db = dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True, user_attr="user")
