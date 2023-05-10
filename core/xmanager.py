@@ -30,6 +30,7 @@ from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, cacheutil, u, dbutil, fsutil
 from xutils import py2fix
+from xutils import print_exc as xutils_print_exc
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -604,7 +605,7 @@ class WorkerThread(Thread):
                 else:
                     time.sleep(0.01)
             except Exception as e:
-                err = xutils.print_exc()
+                err = xutils_print_exc()
                 _async_logger.log("exception: %s", err)
 
     @staticmethod
