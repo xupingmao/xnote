@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-14 16:23:48
+@LastEditTime : 2023-05-14 16:57:27
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -221,7 +221,7 @@ class TableManagerFacade:
     def get_table_info(cls, tablename=""):
         return cls.table_dict.get(tablename)
 
-    def __init__(self, tablename, db = empty_db, is_backup=False, **kw):
+    def __init__(self, tablename, db = empty_db, is_backup = False, **kw):
         self.manager = SqliteTableManager(tablename, db = db, **kw)
         if db.dbname == "mysql":
             self.manager = MySQLTableManager(tablename, db = db, **kw)

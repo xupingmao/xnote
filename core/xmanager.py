@@ -550,7 +550,7 @@ class CronTaskThread(Thread):
     def __init__(self, func, *args):
         super(CronTaskThread, self).__init__(name="CronTaskDispatcher")
         # 守护线程，防止卡死
-        self.setDaemon(True)
+        self.daemon = True
         self.func = func
         self.args = args
 

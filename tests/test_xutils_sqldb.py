@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:04:36
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-07 17:23:47
+@LastEditTime : 2023-05-14 16:59:52
 @FilePath     : /xnote/tests/test_xutils_sqldb.py
 @Description  : 描述
 """
@@ -26,11 +26,11 @@ class TestMain(test_base.BaseTestCase):
     def test_db_example(self):
         dbpath = os.path.join(xconfig.DB_DIR, "test.db")
         db = xtables.get_db_instance(dbpath)
-        with TableManagerFacade("test", db = db) as table:
+        with TableManagerFacade("unit_test", db = db) as table:
             table.add_column("name", "text", default_value="")
             table.add_column("age", "int", default_value=0)
 
-        table = TableProxy(db, "test")
+        table = TableProxy(db, "unit_test")
         self.clear_table(table)
         
         table.insert(name = "test-1", age = 10)

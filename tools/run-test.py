@@ -27,7 +27,7 @@ def check_and_install_pkg(py_module, pip_version = ""):
 	except ImportError:
 		print("准备安装:", pip_version)
 		cmd = sys.executable
-		os.system("%s -m pip install %r" % (cmd, pip_version))
+		os.system("%s -m pip install \"%s\"" % (cmd, pip_version))
 
 def py_exec(cmd_line):
 	os.system("%s %s" % (sys.executable, cmd_line))
@@ -95,6 +95,7 @@ def run_test(args):
 	check_and_install_pkg("pytest_cov", "pytest-cov>=2.7.1")
 	check_and_install_pkg("coveralls", "python-coveralls>=2.9.3")
 	check_and_install_pkg("coverage", "coverage==4.5.4")
+	check_and_install_pkg("bs4", "beautifulsoup4==4.12.2")
 	os.system("%s -m pip install lmdb" % executable)
 	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --ff" % executable)
 	os.system("%s -m coverage html" % executable)
