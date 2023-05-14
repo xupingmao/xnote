@@ -341,15 +341,30 @@ def get_all_tables():
         get_dict_table()
     ]
 
-def get_table(name, dbpath=None):
+def init_backup_table(tablename, db):
+    table_info = TableManager.get_table_info(tablename)
+    if table_info == None:
+        raise Exception("table not defined: %s" % tablename)
+    
+    with TableManager(tablename, db = db, is_backup=True) as manager:
+        for args, kw in table_info.columns:
+            manager.add_column(*args, **kw)
+        
+        for args, kw in table_info.indexes:
+            manager.add_index(*args, **kw)
+    
+    return TableProxy(db, tablename)
+    
+def get_table(tablename, dbpath=None):
     """获取数据库表，表的创建和访问不必在xtables中定义
     @since 2019/04/11
     """
     if dbpath is None:
         dbpath = xconfig.DB_FILE
-    return DBWrapper(dbpath, name)
+    return DBWrapper(dbpath, tablename)
 
 @xutils.log_init_deco("xtables")
 def init():
+    TableManager.clear_table_dict()
     web.db.config.debug_sql = False
     init_dict_table()

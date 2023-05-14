@@ -16,10 +16,13 @@ import xutils
 import xconfig
 import xauth
 import xtemplate
+import web.db
+
 from xutils import Storage
 from xutils import dbutil
 from xutils import fsutil, logutil
 from xutils.db.driver_sqlite import SqliteKV
+import xtables
 
 config = xconfig
 
@@ -114,6 +117,32 @@ class DBBackup:
         return logutil.get_mem_logger("backup_db", size = 20, ttl = -1)
 
     def dump_db(self):
+        count = 0
+        count = self.backup_kv_store()
+        self.backup_sql_tables()
+        return count
+    
+    def backup_sql_tables(self):
+        logger = self.get_backup_logger()
+        db = web.db.SqliteDB(db = self.db_backup_file)
+        try:
+            for table in xtables.get_all_tables():
+                backup_table = xtables.init_backup_table(table.tablename, db)
+                count = table.count()
+                logger.info("backup table:%s count:%d", table.tablename, count)
+                start_time = time.time()
+                for record in table.iter():
+                    # 只更新结构包含的字段
+                    new_record = table.filter_record(record)
+                    backup_table.insert(**new_record)
+                cost_time = time.time() - start_time
+                logger.info("backup table:%s done! cost_time:(%.2fs)", table.tablename, cost_time)
+        finally:
+            db.ctx.db.close()
+            del db
+
+
+    def backup_kv_store(self):
         logger = self.get_backup_logger()
 
         total_count = dbutil.count_all()
@@ -161,6 +190,7 @@ class DBBackup:
             DBBackup._count = -1
             DBBackup._progress = 0.0
         return count
+
 
     def execute(self):
         logger = self.get_backup_logger()

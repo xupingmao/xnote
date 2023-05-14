@@ -4,11 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-07 17:06:38
+@LastEditTime : 2023-05-14 16:29:32
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
 
+from . import table_manager
 
 class TableProxy:
     """基于web.db的装饰器
@@ -19,6 +20,7 @@ class TableProxy:
         self.tablename = tablename
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         self.db = db
+        self.table_info = None
 
     def fix_sql_keywords(self, where):
         # 兼容关键字
@@ -67,4 +69,26 @@ class TableProxy:
     
     def transaction(self):
         return self.db.transaction()
+    
+    def iter(self):
+        last_id = 0
+        while True:
+            records = list(self.select(where = "id > $last_id", vars = dict(last_id = last_id), limit = 20, order="id"))
+            for record in records:
+                yield record
+            if len(records) == 0:
+                break
+            last_id = records[-1].id
+    
+    def get_table_info(self):
+        if self.table_info == None:
+            self.table_info = table_manager.TableManagerFacade.get_table_info(self.tablename)
+        return self.table_info
 
+    def filter_record(self, record):
+        # type: (dict) -> dict
+        result = {}
+        table_info = self.get_table_info()
+        for colname in table_info.column_names:
+            result[colname] = record.get(colname)
+        return result

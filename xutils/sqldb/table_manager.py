@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-07 18:18:54
+@LastEditTime : 2023-05-14 16:23:48
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -194,15 +194,54 @@ class SqliteTableManager(BaseTableManager):
             result.append(item)
         return result
 
+class TableInfo:
+
+    def __init__(self, tablename = ""):
+        self.tablename = tablename
+        self.column_names = []
+        self.columns = []
+        self.indexes = []
+    
+    def add_column(self, colname, *args, **kw):
+        self.column_names.append(colname)
+        self.columns.append([(colname, ) + args, kw])
+    
+    def add_index(self, *args, **kw):
+        self.indexes.append([args, kw])
+
 class TableManagerFacade:
 
-    def __init__(self, tablename, db = empty_db, **kw):
+    table_dict = {}
+
+    @classmethod
+    def clear_table_dict(cls):
+        cls.table_dict = {}
+    
+    @classmethod
+    def get_table_info(cls, tablename=""):
+        return cls.table_dict.get(tablename)
+
+    def __init__(self, tablename, db = empty_db, is_backup=False, **kw):
         self.manager = SqliteTableManager(tablename, db = db, **kw)
         if db.dbname == "mysql":
             self.manager = MySQLTableManager(tablename, db = db, **kw)
 
-        self.add_column = self.manager.add_column
-        self.add_index = self.manager.add_index
+        if not is_backup:
+            if tablename in self.table_dict:
+                raise Exception("table already defined: %s" % tablename)
+        
+        self.table_info = TableInfo(tablename)
+        if not is_backup:
+            self.table_dict[tablename] = self.table_info
+    
+    def add_column(self, colname, coltype,
+                   default_value=None, not_null=True):
+        self.table_info.add_column(colname, coltype, default_value, not_null)
+        self.manager.add_column(colname, coltype, default_value, not_null)
+
+    def add_index(self, colname, is_unique=False):
+        self.table_info.add_index(colname, is_unique)
+        self.manager.add_index(colname, is_unique)
 
     def __enter__(self):
         return self
