@@ -53,7 +53,9 @@ def get_argument(key, default_value=None, type = None, strip=False):
     @param {bool} strip 是否过滤空白字符
     """
     if not hasattr(web.ctx, "env"):
-        return default_value or None
+        if default_value != None:
+            return default_value
+        return None
     ctx_key = "_xnote.input"
     if isinstance(default_value, (dict, list)):
         return web.input(**{key: default_value}).get(key)

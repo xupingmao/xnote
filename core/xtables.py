@@ -155,17 +155,19 @@ def init_history_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    with TableManager("user", dbpath = xconfig.DB_PATH) as manager:
+    db = get_db_instance(dbpath = xconfig.FileConfig.user_db_file)
+    with TableManager("user", db = db) as manager:
         manager.add_column("name",       "varchar(64)", "")
         manager.add_column("password",   "varchar(64)", "")
         manager.add_column("salt",       "varchar(64)", "")
-        # 额外的访问权限
-        manager.add_column("privileges", "text", "")
         manager.add_column("ctime",      "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime",      "datetime", "1970-01-01 00:00:00")
         manager.add_column("token",      "varchar(32)", "")
         manager.add_column("login_time", "datetime", "1970-01-01 00:00:00")
         manager.add_index("name")
+        manager.add_index("token")
+        # 删除的字段
+        manager.drop_column("privileges", "text", "")
 
 
 def init_message_table():
@@ -297,20 +299,15 @@ def get_schedule_table():
 
 
 def get_user_table():
-    return DBWrapper(xconfig.DB_PATH, "user")
+    return get_table_by_name("user")
 
 
 def get_message_table():
-    return DBWrapper(xconfig.DB_PATH, "message")
+    return get_table_by_name("message")
 
 
 def get_record_table():
-    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
-    return DBWrapper(dbpath, "record")
-
-
-def get_storage_table():
-    return DBWrapper(xconfig.DB_PATH, "storage")
+    return get_table_by_name("record")
 
 
 def get_dict_table():
@@ -319,9 +316,10 @@ def get_dict_table():
 get_dictionary_table = get_dict_table
 
 def get_table_by_name(table_name=""):
+    # type: (str) -> TableProxy
     table_info = TableManager.get_table_info(table_name)
     if table_info == None:
-        return None
+        raise Exception("table not found: %s" % table_name)
     db = get_db_instance(dbpath=table_info.dbpath)
     return TableProxy(db, table_name)
 
@@ -362,3 +360,4 @@ def init():
     web.db.config.debug_sql = False
     init_dict_table()
     init_record_table()
+    init_user_table()

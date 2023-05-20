@@ -5,6 +5,7 @@ import xauth
 import xtemplate
 import xmanager
 import xutils
+import math
 from xutils import textutil
 from xutils import Storage
 from xutils import dbutil
@@ -33,11 +34,21 @@ class ListHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        user_dict = get_user_dict()
+        page = xutils.get_argument_int("page", 1)
+        page_size = xutils.get_argument_int("page_size", 10)
+        offset = (page-1) * page_size
+        assert offset >= 0
+
+        total = xauth.UserModel.count()
+
         kw = Storage()
         kw.user_info = None
         kw.show_aside = False
-        kw.user_dict = user_dict
+        kw.user_list = xauth.UserModel.list(offset = offset, limit = page_size)
+        kw.page = page
+        kw.page_size = page_size
+        kw.page_max = math.ceil(total/page_size)//1
+
         return xtemplate.render("user/page/user_list.html", **kw)
 
     @xauth.login_required("admin")
@@ -91,8 +102,8 @@ class RemoveHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        name = xutils.get_argument("name")
-        xauth.delete_user(name)
+        user_id = xutils.get_argument_int("user_id")
+        xauth.UserModel.delete_by_id(user_id)
         return dict(code="success")
 
 

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-10 20:30:22
+@LastEditTime : 2023-05-20 23:50:03
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -35,8 +35,10 @@ def init():
     dbutil.register_table("txt_info", "txt文件信息")
     dbutil.register_table("fs_sync_index", "文件同步索引信息")
 
-    # 用户信息
-    dbutil.register_table("user", "用户信息表")
+    # 用户信息，迁移到了sql-db
+    db = dbutil.register_table("user", "用户信息表")
+    db.delete_table()
+    
     dbutil.register_table("user_config", "用户配置表")
     db = dbutil.register_table("session", "用户会话信息")
     db.register_index("user", columns=["user_name"])

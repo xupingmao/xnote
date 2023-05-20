@@ -216,6 +216,7 @@ class FileConfig:
     backup_dir = ""
     backup_db_dir = ""
     record_db_file = ""
+    user_db_file = ""
 
     @classmethod
     def init(cls, data_dir):
@@ -233,6 +234,7 @@ class FileConfig:
         makedirs(cls.backup_db_dir)
 
         cls.record_db_file = os.path.join(cls.sqlite_dir, "record.db")
+        cls.user_db_file = cls.get_db_path("user")
 
     @classmethod
     def get_db_path(cls, dbname=""):

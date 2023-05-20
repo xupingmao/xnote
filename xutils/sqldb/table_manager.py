@@ -272,6 +272,10 @@ class TableManagerFacade:
                    default_value=None, not_null=True):
         self.table_info.add_column(colname, coltype, default_value, not_null)
         self.manager.add_column(colname, coltype, default_value, not_null)
+    
+    def drop_column(self, colname, coltype,
+                   default_value=None, not_null=True):
+        pass
 
     def add_index(self, colname, is_unique=False):
         self.table_info.add_index(colname, is_unique)

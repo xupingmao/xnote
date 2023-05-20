@@ -47,14 +47,15 @@
             <th>上次登录</th>
             <th>操作</th>
         </tr>
-        {% for index, name in enumerate(sorted(user_dict)) %}
+        {% for user_info in user_list %}
         <tr>
-            <td class="index-td">{{index+1}}</td>
-            <td><a class="link edit-btn" href="/system/user?name={{name}}">{{name}}</a></td>
-            <td>{{user_dict[name].login_time}}</td>
+            <td class="index-td">{{user_info.id}}</td>
+            <td><a class="link edit-btn" href="/system/user?name={{user_info.name}}">{{user_info.name}}</a></td>
+            <td>{{user_info.login_time}}</td>
             <td>
-                {% if name != "admin" %}
-                    <a data-name="{{name}}" class="btn danger delete-user-btn">删除</a>
+                {% if user_info.name != "admin" %}
+                    <a data-name="{{user_info.name}}" data-id="{{user_info.id}}" 
+                        class="btn danger delete-user-btn">删除</a>
                 {% end %}
             </td>
         </tr>
@@ -96,6 +97,10 @@
 </div>
 
 {% include user/component/user_script.html %}
+
+<div class="card">
+    {% include common/pagination.html %}
+</div>
 
 <script type="text/javascript">
 $(function () {
