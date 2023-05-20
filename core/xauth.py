@@ -59,12 +59,12 @@ def get_user_config_db(name):
 
 class UserModel:
     # TODO 用户模型
-    name = "登录名"
-    password = "密码"
-    token = "授权令牌"
-    ctime = "创建时间"
-    mtime = "修改时间"
-    login_time = "登录时间"
+    name = ""
+    password = ""
+    token = ""
+    ctime = ""
+    mtime = ""
+    login_time = ""
 
     @classmethod
     def get_by_name(cls, name=""):
@@ -74,12 +74,23 @@ class UserModel:
         
         user = user_cache.get(name)
         if user == None:
-            user = _get_user_from_db(name)
+            user = cls.get_user_from_db(name)
         
         if user != None:
             user_cache.put(name, user, expire=DEFAULT_CACHE_EXPIRE)
             return user
         return _get_builtin_user(name)
+
+    @classmethod
+    def get_user_from_db(cls, name=""):
+        db = get_user_db()
+        return db.get(name)
+
+    @classmethod
+    def get_by_token(cls, token=""):
+        db = get_user_db()
+        key, user_info = db.first(where = dict(token=token))
+        return user_info
     
     @classmethod
     def create(cls, user):
@@ -243,10 +254,6 @@ def delete_user_session_by_id(sid):
     session_db.delete_by_id(sid)
     session_cache.delete(sid)
 
-def _get_user_from_db(name):
-    db = get_user_db()
-    return db.get(name)
-
 def _get_builtin_user(name):
     assert BUILTIN_USER_DICT != None
     return BUILTIN_USER_DICT.get(name)
@@ -323,7 +330,7 @@ def select_first(filter_func):
 def get_user_from_token():
     token = xutils.get_argument("token")
     if token != None and token != "":
-        return select_first(lambda x: x.token == token)
+        return UserModel.get_by_token(token)
 
 def get_user_password(name):
     user = get_user_by_name(name)
