@@ -215,6 +215,7 @@ class FileConfig:
     sqlite_dir = ""
     backup_dir = ""
     backup_db_dir = ""
+    record_db_file = ""
 
     @classmethod
     def init(cls, data_dir):
@@ -230,6 +231,15 @@ class FileConfig:
 
         cls.backup_db_dir = os.path.join(cls.backup_dir, "db")
         makedirs(cls.backup_db_dir)
+
+        cls.record_db_file = os.path.join(cls.sqlite_dir, "record.db")
+
+    @classmethod
+    def get_db_path(cls, dbname=""):
+        """dbname: sqlite数据库的文件名称"""
+        if not dbname.endswith(".db"):
+            dbname += ".db"
+        return os.path.join(cls.sqlite_dir, dbname)
 
 
 def read_properties_file(fpath):
@@ -703,3 +713,6 @@ class SystemConfig:
     def get_bool(self, name, default_value=False):
         value = get_system_config(name, default_value)
         return bool(value)
+
+
+system_config = SystemConfig()

@@ -155,7 +155,7 @@ def try_init_kv_db():
             config_dict.sqlite_journal_mode = xconfig.get_system_config(
                 "sqlite_journal_mode")
             db_instance = SqliteKV(db_file, config_dict=config_dict)
-            db_instance.debug = xconfig.get_system_config("db_debug")
+            db_instance.debug = xconfig.system_config.get_bool("db_debug")
 
         if db_driver == "leveldbpy":
             from xutils.db.driver_leveldbpy import LevelDBProxy

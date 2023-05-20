@@ -9,6 +9,8 @@
 @Description  : 迁移pulgin_visit表
 """
 
+from xutils import dbutil
+import xtables
 from . import base
 from xutils import dbutil, Storage
 
@@ -16,6 +18,7 @@ from xutils import dbutil, Storage
 def do_upgrade():
     do_upgrade_plugin_log()
     do_upgrade_search_log_20230325()
+    # do_upgrade_note_tag_20230520()
 
 def do_upgrade_plugin_log():
     upgrade_key = "upgrade_011"
@@ -53,3 +56,12 @@ def do_upgrade_search_log_20230325():
         db.update(item)
 
     base.mark_upgrade_done(upgrade_key)
+
+def do_upgrade_note_tag_20230520():
+    key = "upgrade_011.d"
+
+    def upgrade_func():
+        db_old = dbutil.get_table("note_tags")
+        target_db = xtables.get_note_tag_bind_table()
+
+    base.execute_upgrade(key, upgrade_func)

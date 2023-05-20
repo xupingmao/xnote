@@ -124,7 +124,7 @@ class DBBackup:
     
     def backup_sql_tables(self):
         logger = self.get_backup_logger()
-        db = web.db.SqliteDB(db = self.db_backup_file)
+        db = xtables.MySqliteDB(db = self.db_backup_file)
         try:
             for table in xtables.get_all_tables():
                 backup_table = xtables.init_backup_table(table.tablename, db)

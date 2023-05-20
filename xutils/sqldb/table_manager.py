@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-20 11:04:23
+@LastEditTime : 2023-05-20 13:52:18
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -225,6 +225,7 @@ class TableInfo:
         self.column_names = []
         self.columns = []
         self.indexes = []
+        self.dbpath = "" # sqlite文件路径
     
     def add_column(self, colname, *args, **kw):
         self.column_names.append(colname)
@@ -244,13 +245,19 @@ class TableManagerFacade:
     @classmethod
     def get_table_info(cls, tablename=""):
         return cls.table_dict.get(tablename)
+    
+    @classmethod
+    def get_table_info_dict(cls):
+        return cls.table_dict
 
     def __init__(self, tablename, db = empty_db, is_backup = False, **kw):
+        self.table_info = TableInfo(tablename)
 
         if db.dbname == "mysql":
             self.manager = MySQLTableManager(tablename, db = db, **kw)
         else:
             self.manager = SqliteTableManager(tablename, db = db, **kw)
+            self.table_info.dbpath = db.dbpath
         
         self.manager.create_table()
 
@@ -258,7 +265,6 @@ class TableManagerFacade:
             if tablename in self.table_dict:
                 raise Exception("table already defined: %s" % tablename)
         
-        self.table_info = TableInfo(tablename)
         if not is_backup:
             self.table_dict[tablename] = self.table_info
     

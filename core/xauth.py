@@ -24,7 +24,7 @@ from xutils import textutil, dbutil, fsutil
 from xutils import Storage
 from xutils import logutil
 from xutils import cacheutil
-from xutils.functions import listremove
+from xutils import six
 
 session_db = None # type: dbutil.LdbTable
 session_cache = cacheutil.PrefixedCache(prefix="session:")
@@ -65,6 +65,33 @@ class UserModel:
     ctime = "创建时间"
     mtime = "修改时间"
     login_time = "登录时间"
+
+    @classmethod
+    def get_by_name(cls, name=""):
+        # type: (str) -> Storage | None
+        if name is None or name == "":
+            return None
+        
+        user = user_cache.get(name)
+        if user == None:
+            user = _get_user_from_db(name)
+        
+        if user != None:
+            user_cache.put(name, user, expire=DEFAULT_CACHE_EXPIRE)
+            return user
+        return _get_builtin_user(name)
+    
+    @classmethod
+    def create(cls, user):
+        name = user.name
+        assert isinstance(name, six.string_types)
+        assert name != ""
+        
+        db = get_user_db()
+        db.put(name, user)
+        xutils.trace("UserAdd", name)
+        event = Storage(user_name = name)
+        xmanager.fire("user.create", event)
 
 class SessionInfo(Storage):
 
@@ -125,10 +152,6 @@ def get_users():
     warnings.warn("get_users已经过时，请停止使用", DeprecationWarning)
     return copy.deepcopy(_get_users())
 
-def list_user_names():
-    users = _get_users()
-    return list(users.keys())
-
 def iter_user(limit = 20):
     db = get_user_db()
     for user_name, user_info in db.iter(limit = limit):
@@ -146,7 +169,7 @@ def get_user(name):
     return find_by_name(name)
 
 def get_user_by_name(user_name):
-    return find_by_name(user_name)
+    return UserModel.get_by_name(user_name)
 
 def create_uuid():
     import uuid
@@ -229,18 +252,7 @@ def _get_builtin_user(name):
     return BUILTIN_USER_DICT.get(name)
 
 def find_by_name(name):
-    # type: (str) -> Storage | None
-    if name is None:
-        return None
-    
-    user = user_cache.get(name)
-    if user == None:
-        user = _get_user_from_db(name)
-    
-    if user != None:
-        user_cache.put(name, user, expire=DEFAULT_CACHE_EXPIRE)
-        return user
-    return _get_builtin_user(name)
+    return UserModel.get_by_name(name)
 
 @cacheutil.cache_deco(prefix = "user_config_dict", expire = 600)
 def get_user_config_dict(name):
@@ -446,19 +458,14 @@ def create_user(name, password):
     if found is not None:
         return dict(code = "fail", message = "用户已存在")
     else:
-        db = get_user_db()
         user = Storage(name=name,
             password=password,
             token=gen_new_token(),
             ctime=xutils.format_time(),
             salt=textutil.random_string(6),
             mtime=xutils.format_time())
-        db.put(name, user)
 
-        xutils.trace("UserAdd", name)
-        event = Storage(user_name = name)
-        xmanager.fire("user.create", event)
-
+        UserModel.create(user)
         return dict(code = "success", message = "create success")
 
 def _check_password(password):
