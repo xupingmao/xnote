@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-14 16:57:27
+@LastEditTime : 2023-05-20 11:04:23
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -29,7 +29,6 @@ class BaseTableManager:
         self.debug = kw.pop("debug", False)
         self.connect()
         self.db = db
-        self.create_table()
 
     def __enter__(self):
         return self
@@ -80,21 +79,7 @@ class BaseTableManager:
         self.execute(sql)
 
     def add_index(self, colname, is_unique=False):
-        # sqlite的索引和table是一个级别的schema
-        if isinstance(colname, list):
-            idx_name = "idx_" + self.tablename
-            for name in colname:
-                idx_name += "_" + name
-            colname_str = ",".join(colname)
-            sql = "CREATE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (
-                idx_name, self.tablename, colname_str)
-        else:
-            sql = "CREATE INDEX IF NOT EXISTS idx_%s_%s ON `%s` (`%s`)" % (
-                self.tablename, colname, self.tablename, colname)
-        try:
-            self.execute(sql)
-        except Exception:
-            xutils.print_exc()
+        raise Exception("not implemented")
 
     def drop_index(self, col_name):
         sql = "DROP INDEX idx_%s_%s" % (self.tablename, col_name)
@@ -118,7 +103,10 @@ class MySQLTableManager(BaseTableManager):
 
     def create_table(self):
         tablename = self.tablename
-        sql = "CREATE TABLE IF NOT EXISTS `%s` (id bigint unsigned primary key auto_increment) CHARACTER SET utf8mb4;" % tablename
+        sql = """CREATE TABLE IF NOT EXISTS `%s` (
+            id bigint unsigned not null auto_increment,
+            PRIMARY KEY (`id`)
+        ) CHARACTER SET utf8mb4;""" % tablename
         self.db.query(sql)
 
     
@@ -137,6 +125,28 @@ class MySQLTableManager(BaseTableManager):
     
     def execute(self, sql):
         return self.db.query(sql)
+    
+    def add_index(self, colname, is_unique=False):
+        index_name = ""
+        colname_str = ""
+
+        if isinstance(colname, list):
+            index_name = "idx_" + self.tablename
+            for name in colname:
+                index_name += "_" + name
+            colname_str = ",".join(colname)
+        else:
+            index_name = "idx_" + colname
+            colname_str = colname
+        
+
+        sql = "ALTER TABLE `%s` ADD INDEX `%s` (`%s`)" % (
+                self.tablename, index_name, colname_str)
+        try:
+            self.execute(sql)
+        except Exception:
+            # TODO 后面优化下判断索引是否存在
+            xutils.print_exc()
 
 
 class SqliteTableManager(BaseTableManager):
@@ -194,6 +204,20 @@ class SqliteTableManager(BaseTableManager):
             result.append(item)
         return result
 
+    def add_index(self, colname, is_unique=False):
+        # sqlite的索引和table是一个级别的schema
+        if isinstance(colname, list):
+            idx_name = "idx_" + self.tablename
+            for name in colname:
+                idx_name += "_" + name
+            colname_str = ",".join(colname)
+            sql = "CREATE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (
+                idx_name, self.tablename, colname_str)
+        else:
+            sql = "CREATE INDEX IF NOT EXISTS idx_%s_%s ON `%s` (`%s`)" % (
+                self.tablename, colname, self.tablename, colname)
+        self.execute(sql)
+
 class TableInfo:
 
     def __init__(self, tablename = ""):
@@ -222,9 +246,13 @@ class TableManagerFacade:
         return cls.table_dict.get(tablename)
 
     def __init__(self, tablename, db = empty_db, is_backup = False, **kw):
-        self.manager = SqliteTableManager(tablename, db = db, **kw)
+
         if db.dbname == "mysql":
             self.manager = MySQLTableManager(tablename, db = db, **kw)
+        else:
+            self.manager = SqliteTableManager(tablename, db = db, **kw)
+        
+        self.manager.create_table()
 
         if not is_backup:
             if tablename in self.table_dict:

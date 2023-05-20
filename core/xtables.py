@@ -236,8 +236,10 @@ def get_db_instance(dbpath = ""):
         db_user = xconfig.get_system_config("mysql_user")
         db_pw = xconfig.get_system_config("mysql_password")
         db_port = xconfig.get_system_config("mysql_port")
-        return web.db.MySQLDB(host = db_host, database = db_name, 
+        db = web.db.MySQLDB(host = db_host, database = db_name, 
                               user = db_user, pw = db_pw, port = db_port)
+        db.dbname = "mysql"
+        return db
     return web.db.SqliteDB(db = dbpath)
 
 def init_dict_table():
@@ -246,9 +248,9 @@ def init_dict_table():
     """
     db = get_db_instance(dbpath = xconfig.DICT_FILE)
     with TableManager("dictionary", db = db) as manager:
-        manager.add_column("ctime", "text", "")
-        manager.add_column("mtime", "text", "")
-        manager.add_column("key", "text", "")
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("key", "varchar(100)", "")
         manager.add_column("value", "text", "")
         manager.add_index("key")
 

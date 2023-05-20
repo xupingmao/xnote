@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-07 11:21:47
+@LastEditTime : 2023-05-20 11:29:30
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -14,8 +14,8 @@ MySQL驱动
 import logging
 import threading
 import time
-import mysql.connector
 from collections import deque
+from . import driver_interface
 
 from xutils.base import Storage
 
@@ -40,15 +40,18 @@ class ConnectionWrapper:
 
     def __init__(self, db, pool):
         self.start_time = time.time()
-        self.db = db  # type: mysql.connector.MySQLConnection
+        self.db = db 
         self.is_closed = False
         self.pool = pool
+        self.driver = ""
 
     def __enter__(self):
-        return self.db
+        return self
 
     def cursor(self, prepared=True):
-        return self.db.cursor(prepared=prepared)
+        if self.driver == "mysql.connector":
+            return self.db.cursor(prepared=True)
+        return self.db.cursor()
 
     def commit(self):
         return self.db.commit()
@@ -73,7 +76,7 @@ class ConnectionWrapper:
         self.close()        
 
 
-class MySQLKV:
+class MySQLKV(driver_interface.DBInterface):
 
     holder = Holder()
     lock = threading.RLock()
@@ -97,6 +100,8 @@ class MySQLKV:
         self.pool = deque()
         self.pool_size = 0
         self.debug_pool = False
+        self.driver = ""
+        self.driver_type = "mysql"
 
         try:
             self.init()
@@ -131,6 +136,7 @@ class MySQLKV:
 
                 con = self.do_get_connection()
                 db = ConnectionWrapper(con, self.pool)
+                db.driver = self.driver
 
                 if self.debug_pool:
                     logging.debug("创建新连接:%s", db.db)
@@ -140,14 +146,28 @@ class MySQLKV:
 
     def do_get_connection(self):
         kw = Storage()
+        kw.host = self.db_host
         kw.port = self.db_port
         kw.user = self.db_user
         kw.passwd = self.db_password
         kw.database = self.db_database
-        if self.db_pool_size > 0:
-            # 使用MySQL连接池
-            kw.pool_size = self.db_pool_size
-        return mysql.connector.connect(host=self.db_host, **kw)
+        mod = self.import_driver(["pymysql", "mysql.connector"])
+
+        if self.driver == "mysql.connector":
+            if self.db_pool_size > 0:
+                # 使用MySQL连接池
+                kw.pool_size = self.db_pool_size
+        
+        return mod.connect(**kw)
+
+    def import_driver(self, drivers):
+        for d in drivers:
+            try:
+                self.driver = d
+                return __import__(d, None, None, ["x"])
+            except ImportError:
+                pass
+        raise ImportError("Unable to import " + " or ".join(drivers))
 
     def close_cursor(self, cursor):
         cursor.close()
@@ -165,7 +185,7 @@ class MySQLKV:
         # print("db_database=%s" % self.db_database)
 
         with self.get_connection() as con:
-            cursor = con.cursor()
+            cursor = con.cursor(prepared=True)
             try:
                 # tinyblob 最大长度 255
                 # KEY索引长度并不对key的长度做限制，只是索引最多使用200字节
@@ -202,8 +222,9 @@ class MySQLKV:
         assert cursor != None
 
         start_time = time.time()
+        sql = "SELECT value FROM kv_store WHERE `key`=%s"
+        
         try:
-            sql = "SELECT value FROM kv_store WHERE `key`=%s"
             cursor.execute(sql, (key, ))
             for result in cursor.fetchall():
                 return self.mysql_to_py(result[0])
@@ -485,14 +506,16 @@ class RdbSortedSet:
     db_instance = None  # type: MySQLKV
 
     @classmethod
-    def init_class(cls, db_instance=None):
+    def init_class(cls, db_instance):
         cls.db_instance = db_instance
 
-    def __init__(self, table_name=None):
+    def __init__(self, table_name=""):
         self.table_name = table_name
 
     def mysql_to_str(self, value):
-        return bytes(value).decode("utf-8")
+        if isinstance(value, bytearray):
+            return bytes(value).decode("utf-8")
+        return value
 
     def mysql_to_float(self, value):
         return float(value)

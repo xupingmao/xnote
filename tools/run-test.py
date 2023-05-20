@@ -34,6 +34,8 @@ def py_exec(cmd_line):
 
 def run_test(args):
 	target = args.target
+	if args.test_mysql:
+		args.skip_mysql_test = False
 	os.environ["skip_mysql_test"] = str(args.skip_mysql_test)
 	os.environ["mysql_host"] = str(args.mysql_host)
 	os.environ["mysql_password"] = str(args.mysql_password)
@@ -104,6 +106,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("target", default="all", nargs="?")
 	parser.add_argument("--skip_mysql_test", action="store_true", default=True)
+	parser.add_argument("--test_mysql", action="store_true", default=False)
 	parser.add_argument("--mysql_host", default="192.168.50.153")
 	parser.add_argument("--mysql_user", default="root")
 	parser.add_argument("--mysql_password", default="root")
