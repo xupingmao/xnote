@@ -164,7 +164,7 @@ def init_user_table():
         manager.add_column("mtime",      "datetime", "1970-01-01 00:00:00")
         manager.add_column("token",      "varchar(32)", "")
         manager.add_column("login_time", "datetime", "1970-01-01 00:00:00")
-        manager.add_index("name")
+        manager.add_index("name", is_unique=True)
         manager.add_index("token")
         # 删除的字段
         manager.drop_column("privileges", "text", "")
