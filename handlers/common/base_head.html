@@ -50,6 +50,7 @@
 <script type="text/javascript">
   xnote.state.system.isAdmin = Boolean("{{_is_admin}}");
   xnote.state.system.nodeRole = '{{xconfig.get_system_config("node_role")}}';
+  xnote.config.serverHome = "{{_server_home}}";
 </script>
 
 {% block head %} {% end %}

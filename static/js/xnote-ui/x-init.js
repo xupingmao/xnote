@@ -21,6 +21,9 @@ if (window.xnote === undefined) {
         end: 0
     };
 
+    // 配置信息
+    xnote.config = {};
+
     // 内部属性
     xnote._dialogIdStack = [];
 
