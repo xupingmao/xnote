@@ -116,10 +116,12 @@ class DBBackup:
     def get_backup_logger(self):
         return logutil.get_mem_logger("backup_db", size = 20, ttl = -1)
 
-    def dump_db(self):
+    def dump_db(self, backup_kv = True, backup_sql=True):
         count = 0
-        count = self.backup_kv_store()
-        self.backup_sql_tables()
+        if backup_kv:
+            count = self.backup_kv_store()
+        if backup_sql:
+            self.backup_sql_tables()
         return count
     
     def backup_sql_tables(self):
@@ -137,6 +139,9 @@ class DBBackup:
                     backup_table.insert(**new_record)
                 cost_time = time.time() - start_time
                 logger.info("backup table:%s done! cost_time:(%.2fs)", table.tablename, cost_time)
+        except:
+            err_info = xutils.print_exc()
+            logger.info("backup failed: %s" % err_info)
         finally:
             db.ctx.db.close()
             del db
@@ -192,13 +197,13 @@ class DBBackup:
         return count
 
 
-    def execute(self):
+    def execute(self, backup_kv=True):
         logger = self.get_backup_logger()
         got_lock = False
         try:
             if _backup_lock.acquire(blocking = False):
                 got_lock = True
-                self.do_execute()
+                self.do_execute(backup_kv=backup_kv)
             else:
                 logger.log("backup is busy")
                 return "backup is busy"
@@ -206,13 +211,13 @@ class DBBackup:
             if got_lock:
                 _backup_lock.release()
 
-    def do_execute(self):
+    def do_execute(self, backup_kv=True):
         # 先做清理工作
         self.clean()
 
         start_time = time.time()
         # 执行备份
-        count = self.dump_db()
+        count = self.dump_db(backup_kv=backup_kv)
 
         cost_time = (time.time() - start_time) * 1000.0
         logging.info("数据库记录总数:%s", count)
@@ -344,6 +349,11 @@ class BackupHandler:
         if p == "import_db":
             path = xutils.get_argument("path", "")
             return import_db(path)
+
+        if p == "backup_sql":
+            backup = DBBackup()
+            backup.execute(backup_kv=False)
+            return 
 
         # 备份所有的
         chk_db_backup()

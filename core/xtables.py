@@ -212,7 +212,6 @@ class MySqliteDB(web.db.SqliteDB):
     dbpath = ""
 
 def get_db_instance(dbpath = ""):
-    assert dbpath != ""
     db_driver = xconfig.get_system_config("db_driver")
     if db_driver == "mysql":
         db_host = xconfig.get_system_config("mysql_host")
@@ -224,6 +223,7 @@ def get_db_instance(dbpath = ""):
                               user = db_user, pw = db_pw, port = db_port)
         db.dbname = "mysql"
         return db
+    assert dbpath != ""
     db = MySqliteDB(db = dbpath)
     db.dbpath = dbpath
     return db
