@@ -631,11 +631,13 @@ def get_user_data_dir(user_name, mkdirs = False):
 
 def login_user_by_name(user_name, login_ip = ""):
     assert user_name != None
-    session_id = create_user_session(user_name, login_ip = login_ip).sid
+    session_info = create_user_session(user_name, login_ip=login_ip)
+    session_id = session_info.sid
     _setcookie("sid", session_id)
 
     # 更新最近的登录时间
-    update_user(user_name, dict(login_time=xutils.format_datetime()))   
+    update_user(user_name, dict(login_time=xutils.format_datetime()))
+    return session_info
 
 def logout_current_user():
     sid = get_session_id_from_cookie()
