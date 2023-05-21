@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-06-18 08:24:00
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-03 15:14:30
+@LastEditTime : 2023-05-21 15:31:46
 @FilePath     : /xnote/handlers/system/component/admin_nav.html
 @Description  : 描述
  #} -->
@@ -28,7 +28,7 @@
 <div class="card list">
 
     {% for item in data_list %}
-        <a class="list-link" href="{{item.url}}">
+        <a class="list-link" href="{{_server_home}}{{item.url}}">
             <span>{{item.name}}</span>
             <div class="float-right">
                 <i class="fa fa-chevron-right"></i>
