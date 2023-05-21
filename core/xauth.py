@@ -86,6 +86,11 @@ class UserModel:
     def get_by_token(cls, token=""):
         db = get_user_db()
         return db.select_first(where = dict(token=token))
+
+    @classmethod
+    def get_by_id(cls, user_id = 0):
+        db = get_user_db()
+        return db.select_first(where = dict(id = user_id))
     
     @classmethod
     def list(cls, offset=0, limit=20):
@@ -103,11 +108,12 @@ class UserModel:
         assert name != ""
         
         db = get_user_db()
-        db.insert(**user)
+        user_id = db.insert(**user)
         xutils.trace("UserAdd", name)
         if fire_event:
             event = Storage(user_name = name)
             xmanager.fire("user.create", event)
+        return user_id
 
     @classmethod
     def update(cls, user_info):
@@ -474,6 +480,20 @@ def get_user_cookie(name):
 def gen_new_token():
     import uuid
     return uuid.uuid4().hex
+
+
+def create_quick_user():
+    """创建快速用户，用于第三方授权登录"""
+    name = xutils.create_uuid()
+    password = xutils.create_uuid()
+    user = Storage(name=name,
+        password=password,
+        token=gen_new_token(),
+        ctime=xutils.format_time(),
+        salt=textutil.random_string(6),
+        mtime=xutils.format_time())
+    user_id = UserModel.create(user)
+    return UserModel.get_by_id(user_id)
 
 def create_user(name, password, fire_event = True, check_username = True):
     if name == "" or name == None:
