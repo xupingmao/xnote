@@ -23,7 +23,7 @@
             <div class="settings-key">{{item.name}}</div>
             <div class="settings-value">
                 {% if item.link != "" %}
-                    <a class="btn btn-default" href="{{item.link}}">{{item.value}}</a>
+                    <a class="btn btn-default" href="{{_server_home}}{{item.link}}">{{item.value}}</a>
                 {% else %}
                     {{item.value}}
                 {% end %}
@@ -45,7 +45,7 @@ $(function () {
     var loadingIndex;
 
     function checkSystemStatus() {
-        $.post("/system/reload?runtime_id={{runtime_id}}", function (resp) {
+        $.post("{{_server_home}}/system/reload?runtime_id={{runtime_id}}", function (resp) {
             console.log(resp)
             if (resp.code == "success") {
                 xnote.toast("重启成功!");
@@ -61,7 +61,7 @@ $(function () {
     function doRestart() {
         xnote.toast("重启中，请等待2-5分钟...")
         loadingIndex = layer.load(1);
-        $.post("/system/reload?runtime_id={{runtime_id}}", function (resp) {
+        $.post("{{_server_home}}/system/reload?runtime_id={{runtime_id}}", function (resp) {
             console.log(resp);
             setTimeout(checkSystemStatus, checkInterval)
         }).fail(function () {
