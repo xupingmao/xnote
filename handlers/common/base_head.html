@@ -18,33 +18,33 @@
 
 <title>Xnote{%if html_title%} | {{T(html_title)}}{%end%}</title>
 
-<link rel="shortcut icon" href="/static/favicon.ico"/>
-<link rel="bookmark" href="/static/favicon.ico"/>
-<link rel="stylesheet" href="/static/css/app.build.css?ts={{_ts}}"/>
-<link rel="stylesheet" href="/static/css/common-card.css?ts={{_ts}}"/>
+<link rel="shortcut icon" href="{{_app_dir}}/static/favicon.ico"/>
+<link rel="bookmark" href="{{_app_dir}}/static/favicon.ico"/>
+<link rel="stylesheet" href="{{_app_dir}}/static/css/app.build.css?ts={{_ts}}"/>
+<link rel="stylesheet" href="{{_app_dir}}/static/css/common-card.css?ts={{_ts}}"/>
 
-<script type="text/javascript" src="/static/lib/jquery/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="{{_app_dir}}/static/lib/jquery/jquery-1.12.4.min.js"></script>
 <!-- 弹层组件 -->
-<script type="text/javascript" src="/static/lib/layer/layer.js"></script>
+<script type="text/javascript" src="{{_app_dir}}/static/lib/layer/layer.js"></script>
 <!-- 模板引擎 -->
-<script type="text/javascript" src="/static/lib/art-template/template-web-4.13.2.js"></script>
+<script type="text/javascript" src="{{_app_dir}}/static/lib/art-template/template-web-4.13.2.js"></script>
 <!-- 应用JS脚本,优先级更高，所以放在后面 -->
-<script type="text/javascript" src="/static/js/app.build.js?ts={{_ts}}"></script>
+<script type="text/javascript" src="{{_app_dir}}/static/js/app.build.js?ts={{_ts}}"></script>
 
 {% include common/layout/base_layout.html %}
 
 {% if xconfig.RECORD_LOCATION %}
-<script type="text/javascript" src="/system/stats"></script>
+<script type="text/javascript" src="{{_app_dir}}/system/stats"></script>
 {% end %}
 
 {# 自定义的样式 #}
 {% if xconfig.USER_CSS != None %}
-  <link rel="stylesheet" type="text/css" href="/system/user.css?ts={{_ts}}">
+  <link rel="stylesheet" type="text/css" href="{{_app_dir}}/system/user.css?ts={{_ts}}">
 {% end %}
 
 {# 自定义脚本 #}
 {% if xconfig.USER_JS != None %}
-  <script type="text/javascript" src="/system/user.js?ts={{_ts}}" async="true"></script>
+  <script type="text/javascript" src="{{_app_dir}}/system/user.js?ts={{_ts}}" async="true"></script>
 {% end %}
 
 <script type="text/javascript">

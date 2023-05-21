@@ -244,6 +244,15 @@ class FileConfig:
         return os.path.join(cls.sqlite_dir, dbname)
 
 
+
+class WebConfig:
+
+    app_dir = ""
+
+    @classmethod
+    def init(cls):
+        cls.app_dir = get_system_config("app_dir", "")
+
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
     return fsutil.readfile(fpath)
@@ -319,6 +328,8 @@ def init(boot_config_file=None, boot_config_kw = None):
 
     # 初始化文件配置
     FileConfig.init(DATA_DIR)
+    # 初始化web配置
+    WebConfig.init()
 
     # 备份数据地址
     BACKUP_DIR = make_data_dir("backup")

@@ -59,6 +59,20 @@ logging.basicConfig(
     format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)d|%(message)s')
 
 
+class XnoteFound(web.Redirect):
+    """A `302 Found` redirect."""
+    def __init__(self, url, absolute=True):
+        web.Redirect.__init__(self, url, '302 Found', absolute=absolute)
+
+class XnoteSeeOther(web.Redirect):
+    """A `303 See Other` redirect."""
+    def __init__(self, url, absolute=True):
+        web.Redirect.__init__(self, url, '303 See Other', absolute=absolute)
+
+# redirect转换成绝对uri
+web.found = XnoteFound
+web.seeother = XnoteSeeOther
+
 def get_bool_by_sys_arg(value):
     return value == "yes" or value == "true"
 

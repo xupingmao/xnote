@@ -204,6 +204,7 @@ def render_before_kw(kw: dict):
     user_role = xauth.current_role() or ""
 
     kw["math"] = math
+    kw["_app_dir"] = xconfig.WebConfig.app_dir
     kw["_is_admin"] = xauth.is_admin()
     kw["_has_login"] = xauth.has_login()
     kw["_user_name"] = user_name
