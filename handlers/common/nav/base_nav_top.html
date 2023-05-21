@@ -8,7 +8,7 @@
         {% for nav in _nav_list %}
           {% if nav.is_visible() %}
             <li class="nav-item {{nav.css_class}}">
-              <a href="{{nav.url}}">{{T(nav.text)}}</a>
+              <a href="{{_server_home}}{{nav.url}}">{{T(nav.text)}}</a>
             </li>
           {% end %}
         {% end %}
@@ -16,7 +16,7 @@
     </div>
 
     <div class="nav-search">
-      <form id="searchForm" method="GET" action="{{search_action}}">
+      <form id="searchForm" method="GET" action="{{server_home}}{{search_action}}">
         {% include common/search_box.html %}
       </form>
     </div>
