@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-21 10:55:44
+@LastEditTime : 2023-05-22 00:27:30
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -104,5 +104,7 @@ class TableProxy:
         result = {}
         table_info = self.get_table_info()
         for colname in table_info.column_names:
-            result[colname] = record.get(colname)
+            col_value = record.get(colname)
+            if col_value != None:
+                result[colname] = col_value
         return result
