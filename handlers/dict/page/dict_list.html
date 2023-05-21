@@ -22,7 +22,7 @@
         {% end %}
 
         {% for item in files %}
-            <a class="dialog-link" href="{{item.url}}">
+            <a class="dialog-link" href="{{_server_home}}{{item.url}}">
                 <div class="book-item">
                     <span>{{item.name}}</span>
                     <span class="dict-list-value">{{item.value}}</span>

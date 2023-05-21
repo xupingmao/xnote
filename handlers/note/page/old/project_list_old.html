@@ -15,7 +15,7 @@
         </h3>
 
         {% for item in tools %}
-            <a href="{{item.url}}" class="fixed-book">
+            <a href="{{_server_home}}{{item.url}}" class="fixed-book">
                 <div class="book-item fixed-book-item">
                     <i class="fa {{item.icon}} orange"></i>
                     {% if item.priority > 0 %}
@@ -42,7 +42,7 @@
             </h3>
 
             {% for item in fixed_books %}
-                <a href="{{item.url}}">
+                <a href="{{_server_home}}{{item.url}}">
                 <div class="book-item">
                     {% if item.type == "system" %}
                         <i class="icon-folder-system"></i>
@@ -69,7 +69,7 @@
         <div class="grid-row card book-list">
             <h3 class="card-title">{{T("分组")}}</h3>
             {% for item in files %}
-                <a href="{{item.url}}">
+                <a href="{{_server_home}}{{item.url}}">
                 <div class="book-item">
                     {% if item.type == "system" %}
                         <i class="icon-folder-system"></i>

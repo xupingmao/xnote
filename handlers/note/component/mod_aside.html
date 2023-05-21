@@ -84,7 +84,7 @@
     <div class="aside-content">
         {% for item in recommended_notes %}
             {% if "url" in item %}
-                <li><a class="link" href="{{item.url}}">{{item.name}}</a></li>
+                <li><a class="link" href="{{_server_home}}{{item.url}}">{{item.name}}</a></li>
             {% else %}
                 <li><a class="link" href="{{_server_home}}/note/view?id={{item.id}}">{{item.name}}</a></li>
             {% end %}
