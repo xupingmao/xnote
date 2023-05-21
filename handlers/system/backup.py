@@ -353,7 +353,7 @@ class BackupHandler:
         if p == "backup_sql":
             backup = DBBackup()
             backup.execute(backup_kv=False)
-            return 
+            return "backup_sql"
 
         # 备份所有的
         chk_db_backup()
