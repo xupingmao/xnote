@@ -151,6 +151,7 @@ class SessionInfo(Storage):
         self.sid = ""
         self.token = ""
         self.expire_time = 0.0
+        self.login_ip = ""
         self.login_time = 0.0
 
 def dict_to_session_info(dict_value):
@@ -257,7 +258,8 @@ def list_user_session_detail(user_name):
         result.append(dict_to_session_info(item))
     return result
 
-def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
+def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = ""):
+    # type: (str, int, str) -> SessionInfo
     user_detail = get_user_by_name(user_name)
     if user_detail is None:
         raise Exception("user not found: %s" % user_name)
@@ -273,19 +275,18 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
         delete_user_session_by_id(oldest.sid)
 
     # 保存会话信息
-    session_info = Storage(user_name = user_name, 
-        sid   = session_id,
-        token = user_detail.token, 
-        login_time  = time.time(),
-        login_ip = login_ip,
-        expire_time = time.time() + expires)
+    session_info = SessionInfo()
+    session_info.user_name = user_name
+    session_info.sid  = session_id
+    session_info.token = user_detail.token
+    session_info.login_time  = time.time()
+    session_info.login_ip = login_ip
+    session_info.expire_time = time.time() + expires
 
     session_db.update_by_id(session_id, session_info)
     session_cache.delete(session_id)
     
-    print("session_info:", session_info)
-
-    return session_id
+    return session_info
 
 def delete_user_session_by_id(sid):
     # 登录的时候会自动清理无效的sid关系
@@ -463,7 +464,7 @@ def encode_password(password, salt):
     return pswd_md5.hexdigest()
 
 def write_cookie(user_name):
-    session_id = create_user_session(user_name)
+    session_id = create_user_session(user_name).sid
     _setcookie("sid", session_id, expires=24*3600*30)
 
 
@@ -471,7 +472,7 @@ def get_user_cookie(name):
     session_list = list_user_session_detail(name)
 
     if len(session_list) == 0:
-        sid = create_user_session(name, login_ip = "system")
+        sid = create_user_session(name, login_ip = "system").sid
     else:
         sid = session_list[0].sid
 
@@ -628,9 +629,9 @@ def get_user_data_dir(user_name, mkdirs = False):
         fsutil.makedirs(fpath)
     return fpath
 
-def login_user_by_name(user_name, login_ip = None):
+def login_user_by_name(user_name, login_ip = ""):
     assert user_name != None
-    session_id = create_user_session(user_name, login_ip = login_ip)
+    session_id = create_user_session(user_name, login_ip = login_ip).sid
     _setcookie("sid", session_id)
 
     # 更新最近的登录时间
