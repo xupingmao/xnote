@@ -38,18 +38,18 @@ select {
         <tr class="user-visible">
             <td class="key">关于系统</td>
             <td>
-                <a href="/code/wiki/README.md">查看</a>
+                <a href="{{_server_home}}/code/wiki/README.md">查看</a>
             </td>
         </tr>
 
         <tr class="admin-visible">
             <td class="key">后台管理</td>
-            <td><a href="/system/index">进入</a></td>
+            <td><a href="{{_server_home}}/system/index">进入</a></td>
         </tr>
 
         <tr class="admin-visible">
             <td class="key">文件管理</td>
-            <td><a href="/fs_list">进入</a></td>
+            <td><a href="{{_server_home}}/fs_list">进入</a></td>
         </tr>   
 
         <tr class="admin-visible">
@@ -64,43 +64,43 @@ select {
         <tr class="user-visible hide">
             <td class="key">数据管理</td>
             <td>
-                <a href="/note/stat">数据统计</a> |
-                <a href="/fs_upload">上传管理</a>
+                <a href="{{_server_home}}/note/stat">数据统计</a> |
+                <a href="{{_server_home}}/fs_upload">上传管理</a>
             </td>
         </tr>
 
         <tr class="admin-visible hide">
             <td class="key">任务管理</td>
             <td>
-                <a href="/system/crontab">定时任务</a> |
-                <a href="/system/event">系统事件</a>
+                <a href="{{_server_home}}/system/crontab">定时任务</a> |
+                <a href="{{_server_home}}/system/event">系统事件</a>
             </td>
         </tr>
 
         <tr class="admin-visible hide">
             <td class="key">数据管理</td>
             <td>
-                <a href="/system/user/list">用户管理</a> |
-                <a href="/tools/sql">{{T("sqlite管理")}}</a> |
-                <a href="/system/db_scan">leveldb管理</a> |
-                <a href="/system/db_migrate">数据迁移</a> |
-                <a href="/tools/shell">Shell</a>
+                <a href="{{_server_home}}/system/user/list">用户管理</a> |
+                <a href="{{_server_home}}/tools/sql">{{T("sqlite管理")}}</a> |
+                <a href="{{_server_home}}/system/db_scan">leveldb管理</a> |
+                <a href="{{_server_home}}/system/db_migrate">数据迁移</a> |
+                <a href="{{_server_home}}/tools/shell">Shell</a>
             </td>
         </tr>
 
         <tr class="admin-visible hide">
             <td class="key">日志监控</td>
             <td>
-                <a href="/system/log">系统日志</a> | 
-                <a href="/system/clipboard-monitor">剪切板监控</a>
+                <a href="{{_server_home}}/system/log">系统日志</a> | 
+                <a href="{{_server_home}}/system/clipboard-monitor">剪切板监控</a>
             </td>
         </tr>
 
         <tr class="admin-visible hide">
             <td class="key">目录管理</td>
             <td>
-                <a href="/fs_link/home">Home</a> |
-                <a href="/fs_list">Data</a>
+                <a href="{{_server_home}}/fs_link/home">Home</a> |
+                <a href="{{_server_home}}/fs_list">Data</a>
             </td>
         </tr>
 
@@ -267,7 +267,7 @@ select {
             <td class="key">高级配置</td>
             <td>
                 <a href="{{init_script_url}}">启动脚本</a> |
-                <a href="/code/edit?type=script&path=user.css">CSS配置</a>
+                <a href="{{_server_home}}/code/edit?type=script&path=user.css">CSS配置</a>
             </td>
         </tr>
         

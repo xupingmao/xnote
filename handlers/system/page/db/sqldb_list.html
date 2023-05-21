@@ -14,7 +14,7 @@
         </tr>
         {% for db in db_info_list %}
         <tr>
-            <td><a href="/system/sqldb_detail?name={{db.name}}">{{db.name}}</a></td>
+            <td><a href="{{_server_home}}/system/sqldb_detail?name={{db.name}}">{{db.name}}</a></td>
             <td></td>
             <td>{{db.amount}}</td>
             <td></td>

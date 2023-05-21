@@ -23,7 +23,7 @@
 
 <div class="grid-row note-list">
     {% if _has_login and show_parent_link and file.id != 0 %}
-        <a class="dialog-link" href="/note/{{file.parent_id}}">
+        <a class="dialog-link" href="{{_server_home}}/note/{{file.parent_id}}">
             <div class="book-item">
                 <i class="fa fa-mail-reply black"></i>
                 

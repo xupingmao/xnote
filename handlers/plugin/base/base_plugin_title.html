@@ -15,7 +15,7 @@
             <span>{{title}}</span>
             <span class="float-right">
                 {% if _is_admin and model.editable %}
-                    <a class="btn" href="/code/edit?path={{fpath}}">编辑</a>
+                    <a class="btn" href="{{_server_home}}/code/edit?path={{fpath}}">编辑</a>
                 {% end %}
                 <a class="btn btn-default" href="javascript:history.back();">返回</a>
             </span>

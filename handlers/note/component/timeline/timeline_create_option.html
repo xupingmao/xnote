@@ -13,9 +13,9 @@
 
 {% if type in CREATE_BTN_TEXT_DICT.keys() %}
     <!-- 分类节点 -->
-    <a class="btn" href="/note/add?type={{type}}">{{CREATE_BTN_TEXT_DICT[type]}}</a>
+    <a class="btn" href="{{_server_home}}/note/add?type={{type}}">{{CREATE_BTN_TEXT_DICT[type]}}</a>
 {% else %}
-    <a class="btn" href="/note/create?parent_id={{parent_id}}">新建笔记</a>
+    <a class="btn" href="{{_server_home}}/note/create?parent_id={{parent_id}}">新建笔记</a>
 {% end %}
 
 {% include note/component/script/create_script.html %}

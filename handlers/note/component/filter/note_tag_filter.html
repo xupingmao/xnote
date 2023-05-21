@@ -15,7 +15,7 @@
         <a class="tag lightgray large {%if q_tag=='' %}active{%end%}" href="?">全部</a>
         {% for tag in tag_meta_list %}
             <a class="tag lightgray large meta {% if tag.tag_name == q_tag %}active{%end%}" 
-                href="/note/{{note_id}}?tag={{quote(tag.tag_name)}}">{{tag.tag_name}}</a>
+                href="{{_server_home}}/note/{{note_id}}?tag={{quote(tag.tag_name)}}">{{tag.tag_name}}</a>
         {% end %}
     </div>
 </div>

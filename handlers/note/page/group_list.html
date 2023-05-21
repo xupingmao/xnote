@@ -9,8 +9,8 @@
         <div class="card-title">
             <span>{{title}}</span>
             <div class="float-right">
-                <a class="btn btn-default" href="/note/group/manage">管理笔记本</a>
-                <a class="btn btn-default" href="/note/tools?category=note">工具</a>
+                <a class="btn btn-default" href="{{_server_home}}/note/group/manage">管理笔记本</a>
+                <a class="btn btn-default" href="{{_server_home}}/note/tools?category=note">工具</a>
                 {% if show_back %}
                     {% include common/button/back_button.html %}
                 {% end %}

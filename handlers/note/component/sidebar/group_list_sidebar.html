@@ -19,7 +19,7 @@
     <div class="card">
         <div class="list-box">
             {% for t_cat in category_list %}
-                <a href="/note/group_list?note_category={{t_cat.code}}" class="list-item">
+                <a href="{{_server_home}}/note/group_list?note_category={{t_cat.code}}" class="list-item">
                     <i class="fa fa-th-large"></i>
                     <span>{{t_cat.name}}</span>
                     <div class="float-right">

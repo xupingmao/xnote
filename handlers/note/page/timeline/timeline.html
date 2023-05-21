@@ -46,15 +46,15 @@
         {% end %}
 
         {% if show_create_btn %}
-          <a class="btn" href="/note/create?parent_id={{parent_id}}">新建笔记</a>
+          <a class="btn" href="{{_server_home}}/note/create?parent_id={{parent_id}}">新建笔记</a>
         {% end %}
 
         {% if show_group_btn %}
-          <a href="/note/timeline?type=group_list&orderby=name" class="btn btn-default">笔记本</a>
+          <a href="{{_server_home}}/note/timeline?type=group_list&orderby=name" class="btn btn-default">笔记本</a>
         {% end %}
 
         {% if show_recent_btn %}
-          <a href="/note/timeline/recent" class="btn btn-default">最新笔记</a>
+          <a href="{{_server_home}}/note/timeline/recent" class="btn btn-default">最新笔记</a>
         {% end %}
 
         {% if type == "default" %}

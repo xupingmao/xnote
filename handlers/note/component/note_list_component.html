@@ -19,7 +19,7 @@
 {% init sticky_position = "left" %} 
 
 {% if False %}
-    <a class="dialog-link" href="/note/{{file.parent_id}}">
+    <a class="dialog-link" href="{{_server_home}}/note/{{file.parent_id}}">
         <div class="book-item">
             <i class="fa fa-mail-reply black"></i>
             
@@ -79,7 +79,7 @@
 
         <div class="float-right">
             {% if item.is_deleted %}
-                <span class="tag gray" href="/note/removed">删除</span>
+                <span class="tag gray" href="{{_server_home}}/note/removed">删除</span>
             {% end %}
 
             {% comment 新的角标统一使用badge_info %}

@@ -29,13 +29,13 @@
         <div class="grid-title">
             最近更新
             <div class="float-right">
-                <a href="/note/recent_edit">{{T("More")}}</a>
+                <a href="{{_server_home}}/note/recent_edit">{{T("More")}}</a>
             </div>
         </div>
         <div class="row" style="padding:5px;">
             {% for item in notes %}
                 <div class="recent">
-                    <a href="/note/view?id={{item.id}}">
+                    <a href="{{_server_home}}/note/view?id={{item.id}}">
                         {% if item.priority > 0 %}[{{T("Sticky")}}]{% end %}
                         {{xutils.short_text(item.name, 18)}}
                     </a>
@@ -48,7 +48,7 @@
     <div class="col-md-12 bottom-offset-1 box">
         <div class="grid-title">
             工具库
-            <a class="link float-right" href="/more?type=tool">更多</a>
+            <a class="link float-right" href="{{_server_home}}/more?type=tool">更多</a>
         </div>
         <div class="grid-row">
             {% for item in tools %}
@@ -70,7 +70,7 @@
         <h3>标签列表</h3>
         {% for tag_info in tags %}
         <span class="tag-span">
-            <a href="/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
+            <a href="{{_server_home}}/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
             {{tag_info.amount}}
         </span>
         {% end %}

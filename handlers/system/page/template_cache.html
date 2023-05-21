@@ -16,7 +16,7 @@
 
 <ul>
 {% for tname in templates %}
-    <li><a href="/system/template_cache?name={{tname}}">{{tname}}</a></li>
+    <li><a href="{{_server_home}}/system/template_cache?name={{tname}}">{{tname}}</a></li>
 {% end %}
 </ul>
 

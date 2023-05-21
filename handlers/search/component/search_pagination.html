@@ -18,8 +18,8 @@
 
                     {% if _has_login %}
                         <div class="top-offset-1">推荐操作:
-                            <a class="suggest-link" href="/search?key={{key}}&category=content">全文搜索</a>
-                            <a class="suggest-link" href="/note/create?default_name={{key}}&parent_id={{create_parent_id}}">创建笔记</a>
+                            <a class="suggest-link" href="{{_server_home}}/search?key={{key}}&category=content">全文搜索</a>
+                            <a class="suggest-link" href="{{_server_home}}/note/create?default_name={{key}}&parent_id={{create_parent_id}}">创建笔记</a>
                         </div>
                     {% end %}
                 </div>

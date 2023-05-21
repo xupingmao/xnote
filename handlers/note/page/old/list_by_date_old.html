@@ -35,7 +35,7 @@
         <div class="float-right">
             <a class="default-path-link" href="{{link_by_month(year, month, -1)}}">上个月</a>
             <a class="default-path-link" href="{{link_by_month(year, month, 1)}}">下个月</a>
-            <a class="default-path-link" href="/note/index">索引</a>
+            <a class="default-path-link" href="{{_server_home}}/note/index">索引</a>
         </div>
     </div>
 
@@ -51,11 +51,11 @@
             <tr>
                 <td>
                     <i class="fa {{note.icon}}"></i>
-                    <a href="/note/{{note.id}}">{{note.name}}</a>
+                    <a href="{{_server_home}}/note/{{note.id}}">{{note.name}}</a>
                 </td>
                 <td class="option-td hide">
                     {% if str(note.parent_id) != "0" %}
-                        <a href="/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
+                        <a href="{{_server_home}}/note/view?id={{note.parent_id}}">{{note.parent_name}}</a>
                     {% end %}
                 </td>
                 <td class="date-td">

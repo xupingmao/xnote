@@ -45,11 +45,11 @@
       <div class="navMenu">
         {% if _has_login %}
         <!-- 登录状态 -->
-        <a href="/note/index">{{T("首页")}}</a>
-        <a href="/note/recent?orderby=update">{{T("动态")}}</a>
-        <a href="/note/taglist">{{T("标签")}}</a>
-        <a href="/search/history">{{T("搜索")}}</a>
-        <a href="/note/public">{{T("分享")}}</a>
+        <a href="{{_server_home}}/note/index">{{T("首页")}}</a>
+        <a href="{{_server_home}}/note/recent?orderby=update">{{T("动态")}}</a>
+        <a href="{{_server_home}}/note/taglist">{{T("标签")}}</a>
+        <a href="{{_server_home}}/search/history">{{T("搜索")}}</a>
+        <a href="{{_server_home}}/note/public">{{T("分享")}}</a>
         {% end %}
       </div>
     </div>
@@ -58,8 +58,8 @@
       <div class="navMenu">
         {% if _has_login %}
         <!-- 登录状态 -->
-        <a href="/message?tag=task">{{T("待办")}}</a>
-        <a href="/message?tag=log">{{T("随手记")}}</a>
+        <a href="{{_server_home}}/message?tag=task">{{T("待办")}}</a>
+        <a href="{{_server_home}}/message?tag=log">{{T("随手记")}}</a>
         {% end %}
       </div>
     </div>
@@ -67,26 +67,26 @@
     <div class="nav-left-block">
       <div class="navMenu">
         {% if _has_login %}
-        <a href="/system/index">{{T("应用")}}</a>
-        <a href="/plugins_list">{{T("插件")}}</a>
-        <a href="/system/settings">{{T("设置")}}</a>
+        <a href="{{_server_home}}/system/index">{{T("应用")}}</a>
+        <a href="{{_server_home}}/plugins_list">{{T("插件")}}</a>
+        <a href="{{_server_home}}/system/settings">{{T("设置")}}</a>
         {% end %}
 
         {% if _is_admin %}
-        <a href="/fs_list">{{T("文件")}}</a>
-        <a href="/system/admin">{{T("后台")}}</a>
+        <a href="{{_server_home}}/fs_list">{{T("文件")}}</a>
+        <a href="{{_server_home}}/system/admin">{{T("后台")}}</a>
         {% end %}
 
         {% if not _has_login %}
         <!-- 未登录状态 -->
-        <a href="/note/public">分享</a>
-        <a href="/login" class="afinve"><span>登录</span></a>
+        <a href="{{_server_home}}/note/public">分享</a>
+        <a href="{{_server_home}}/login" class="afinve"><span>登录</span></a>
         {% end %}
 
       </div>
 
       <div id="poweredBy">
-        <div><a href="/code/wiki/README.md">关于Xnote</a></div>
+        <div><a href="{{_server_home}}/code/wiki/README.md">关于Xnote</a></div>
       </div>
     </div>
   </div>

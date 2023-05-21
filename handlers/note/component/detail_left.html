@@ -7,7 +7,7 @@
     <div class="x-left-title">
         目录
         {% if _has_login %}
-            <a class="float-right" href="/note/add?parent_id={{file.parent_id}}">{{T("Create")}}</a>
+            <a class="float-right" href="{{_server_home}}/note/add?parent_id={{file.parent_id}}">{{T("Create")}}</a>
         {% end %}
     </div>
     <div class="x-left-content">
@@ -18,7 +18,7 @@
                 {%if item.priority>0%}
                     <i class="fa fa-thumb-tack black"></i>
                 {%end%}
-                <a class="link" href="/note/{{item.id}}?dir_type={{dir_type}}&tags={{tags}}">
+                <a class="link" href="{{_server_home}}/note/{{item.id}}?dir_type={{dir_type}}&tags={{tags}}">
                     {{item.name}}
                 </a>
             </li>

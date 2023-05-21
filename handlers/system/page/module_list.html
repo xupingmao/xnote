@@ -33,7 +33,7 @@
     {% for index, mod in enumerate(modules) %}
         <tr>
             <td class="index-td">{{index}}</td>
-            <td><a href="/system/module_detail?name={{mod.sysname}}">{{mod.sysname}}</a></td>
+            <td><a href="{{_server_home}}/system/module_detail?name={{mod.sysname}}">{{mod.sysname}}</a></td>
             <!-- <td>{{mod.info}}</td> -->
         </tr>
     {% end %}

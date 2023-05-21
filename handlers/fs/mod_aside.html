@@ -9,14 +9,14 @@
     </div>
     <div class="aside-content">
         <ul>
-            <li><a class="link" href="/fs/{{path}}">{{ T('List Mode') }}</a></li>
-            <li><a class="link" href="/fs/{{path}}?mode=grid">{{ T('Grid Mode') }}</a></li>
-            <li><a class="link" href="/fs/{{path}}?mode=sidebar">侧边模式</a></li>
-            <li><a class="link" href="/fs/{{path}}?mode=shell">{{ T('Cmd Mode') }}</a></li>
-            <li><a class="link" href="/fs_recent">{{ T('最近上传') }}</a></li>
-            <li><a class="link" href="/code/lines?path={{path}}&recursive=on">代码统计</a></li>
+            <li><a class="link" href="{{_server_home}}/fs/{{path}}">{{ T('List Mode') }}</a></li>
+            <li><a class="link" href="{{_server_home}}/fs/{{path}}?mode=grid">{{ T('Grid Mode') }}</a></li>
+            <li><a class="link" href="{{_server_home}}/fs/{{path}}?mode=sidebar">侧边模式</a></li>
+            <li><a class="link" href="{{_server_home}}/fs/{{path}}?mode=shell">{{ T('Cmd Mode') }}</a></li>
+            <li><a class="link" href="{{_server_home}}/fs_recent">{{ T('最近上传') }}</a></li>
+            <li><a class="link" href="{{_server_home}}/code/lines?path={{path}}&recursive=on">代码统计</a></li>
             {% for p in file_plugins %}
-                <li><a class="link" href="/plugins/{{p.name}}?path={{path}}">{{p.title}}</a></li>
+                <li><a class="link" href="{{_server_home}}/plugins/{{p.name}}?path={{path}}">{{p.title}}</a></li>
             {% end %}
         </ul>
     </div>

@@ -23,7 +23,7 @@
 
 {% if tag == "todo" or tag == "task" %}
     <div class="card">
-        <a class="list-link" href="/message/done">
+        <a class="list-link" href="{{_server_home}}/message/done">
             <span>已完成任务</span>
             <div class="float-right">
                 <span class="book-size-span">{{message_stat.done_count}}</span>

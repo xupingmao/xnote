@@ -28,13 +28,13 @@
             {% if i == 0 %}
             <td rowspan="{{len(index.index_names)}}">
                 <span><a
-                        href="/system/db_admin?prefix={{index.table_name}}&reverse=true">{{index.table_name}}</a></span>
+                        href="{{_server_home}}/system/db_admin?prefix={{index.table_name}}&reverse=true">{{index.table_name}}</a></span>
                 <br />
                 <span>表记录数: {{count_table(index.table_name)}}</span>
             </td>
             {% end %}
             <td><a
-                    href="/system/db_admin?prefix={{get_index_table_name(index.table_name, index_name)}}&reverse=true">{{index_name}}</a>
+                    href="{{_server_home}}/system/db_admin?prefix={{get_index_table_name(index.table_name, index_name)}}&reverse=true">{{index_name}}</a>
             </td>
             <td>
                 <span>索引数: {{count_index(index.table_name, index_name)}}</span>

@@ -27,7 +27,7 @@
     <div class="row">
         {% for tag_info in system_tag_list %}
             <span class="tag-span">
-                <a class="tag-link" href="/note/tagname/{{tag_info.code}}">{{tag_info.name}}</a>
+                <a class="tag-link" href="{{_server_home}}/note/tagname/{{tag_info.code}}">{{tag_info.name}}</a>
                 {{tag_info.amount}}
             </span>
         {% end %}
@@ -43,7 +43,7 @@
 
         {% for tag_info in tag_list %}
             <span class="tag-span">
-                <a class="tag-link" href="/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
+                <a class="tag-link" href="{{_server_home}}/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
                 {{tag_info.amount}}
             </span>
         {% end %}

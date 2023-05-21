@@ -38,17 +38,17 @@
     <a class="tab tab-link x-tab" href="{{baseurl}}?category=system">系统</a>
 
     {% if _is_admin %}
-        <!-- <a class="inline-btn float-right" href="/plugins_new">新增</a> -->
-        <a class="inline-btn float-right" href="/fs_link/scripts/plugins">管理</a>
+        <!-- <a class="inline-btn float-right" href="{{_server_home}}/plugins_new">新增</a> -->
+        <a class="inline-btn float-right" href="{{_server_home}}/fs_link/scripts/plugins">管理</a>
     {% end %}
 </div> 
 
 
 {% if not show_aside %}
 <div class="card hide">
-    <a class="link" href="/plugins_new">新增插件</a>|
-    <a class="link" href="/fs_link/scripts/plugins">插件管理</a>|
-    <a class="link" href="/fs_api/download/plugins">打包下载</a>
+    <a class="link" href="{{_server_home}}/plugins_new">新增插件</a>|
+    <a class="link" href="{{_server_home}}/fs_link/scripts/plugins">插件管理</a>|
+    <a class="link" href="{{_server_home}}/fs_api/download/plugins">打包下载</a>
 
     <div class="float-right">插件数: {{len(plugins)}}</div>
 </div>
@@ -81,10 +81,10 @@
     </div>
     <div class="aside-content">
         <ul>
-            <li><a class="link" href="/plugins_new">{{T("New Plugin")}}</a></li>
-            <li><a class="link" href="/plugins_new/command">{{T("New Command")}}</a></li>
-            <li><a href="/fs_link/scripts/plugins" class="link">插件管理</a></li>
-            <li><a href="/fs_api/download/plugins" class="link">打包下载</a></li>
+            <li><a class="link" href="{{_server_home}}/plugins_new">{{T("New Plugin")}}</a></li>
+            <li><a class="link" href="{{_server_home}}/plugins_new/command">{{T("New Command")}}</a></li>
+            <li><a href="{{_server_home}}/fs_link/scripts/plugins" class="link">插件管理</a></li>
+            <li><a href="{{_server_home}}/fs_api/download/plugins" class="link">打包下载</a></li>
         </ul>
     </div>
 </div>
@@ -95,12 +95,12 @@
     </div>
     <div class="aside-content">
         <ul>
-            <li><a href="/plugins_list" class="link">全部</a></li>
-            <li><a href="/plugins_list?category=system" class="link">系统</a></li>
-            <li><a href="/plugins_list?category=note" class="link">笔记</a></li>
-            <li><a href="/plugins_list?category=dir" class="link">文件</a></li>
-            <li><a href="/plugins_list?category=network" class="link">网络</a></li>
-            <li><a href="/plugins_list?category=None" class="link">其他</a></li>
+            <li><a href="{{_server_home}}/plugins_list" class="link">全部</a></li>
+            <li><a href="{{_server_home}}/plugins_list?category=system" class="link">系统</a></li>
+            <li><a href="{{_server_home}}/plugins_list?category=note" class="link">笔记</a></li>
+            <li><a href="{{_server_home}}/plugins_list?category=dir" class="link">文件</a></li>
+            <li><a href="{{_server_home}}/plugins_list?category=network" class="link">网络</a></li>
+            <li><a href="{{_server_home}}/plugins_list?category=None" class="link">其他</a></li>
         </ul>
     </div>
 </div>

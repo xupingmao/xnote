@@ -247,11 +247,11 @@ class FileConfig:
 
 class WebConfig:
 
-    app_dir = ""
+    server_home = ""
 
     @classmethod
     def init(cls):
-        cls.app_dir = get_system_config("app_dir", "")
+        cls.server_home = get_system_config("server_home", "")
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)

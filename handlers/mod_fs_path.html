@@ -19,7 +19,7 @@
 
 {% if show_fake_path %}
 <div class="fs-path">
-    <a href="/fs//">Home</a> /
+    <a href="{{_server_home}}/fs//">Home</a> /
     <a href="{{fake_path_url}}">{{fake_path_name}}</a>
     {% if fs_path_option %}
         {% raw fs_path_option %}

@@ -30,7 +30,7 @@
             <td>
                 <div style="word-wrap: break-word;">
                     {% if task.protocol == "script" %}
-                        <a href="/code/edit?path={{task.script_name}}&type=script">{{task.script_name}}</a>
+                        <a href="{{_server_home}}/code/edit?path={{task.script_name}}&type=script">{{task.script_name}}</a>
                     {% else %}
                         {{task.display_name}}
                     {% end %}
@@ -42,9 +42,9 @@
                     <input class="dialog-btn" type="button" value="编辑" 
                         dialog-url="/system/crontab/edit?id={{task.id}}"
                         dialog-title="编辑任务"
-                        href="/system/crontab/edit?id={{task.id}}" />
+                        href="{{_server_home}}/system/crontab/edit?id={{task.id}}" />
                     <input type="button" class="link-btn btn-danger" value="删除" 
-                        href="/system/crontab/remove?id={{task.id}}" 
+                        href="{{_server_home}}/system/crontab/remove?id={{task.id}}" 
                         confirm-message="确认删除 {{task.display_name}} ?">
                 {% end %}
             </td>

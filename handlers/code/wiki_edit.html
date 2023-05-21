@@ -2,11 +2,11 @@
 
 {% block head %}
 <script src="/static/lib/codemirror/codemirror.min.js"></script>
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/theme/monokai.min.css">
 <script type="text/javascript" src="/static/lib/codemirror/mode/markdown.js"></script>
 
-<link rel="stylesheet" type="text/css" href="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css">
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.css">
 <script type="text/javascript" src="/static/lib/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
 <script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
 <script type="text/javascript" src="/static/lib/marked/marked.js"></script>
@@ -38,7 +38,7 @@
                     {% if child.type == "dir" %}
                         <img src="/static/image/folder.gif"/>
                     {% end %}
-                    <a href="/wiki{{child.path}}">{{ child.name }}</a>
+                    <a href="{{_server_home}}/wiki{{child.path}}">{{ child.name }}</a>
                 </li>
             {% end %}
         </div>

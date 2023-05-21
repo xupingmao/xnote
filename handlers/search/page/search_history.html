@@ -14,7 +14,7 @@
             <span>搜索历史</span>
 
             <div class="float-right">
-                <a class="btn btn-default" href="/system/settings?category=search">搜索设置</a>
+                <a class="btn btn-default" href="{{_server_home}}/system/settings?category=search">搜索设置</a>
                 {% include common/button/back_button.html %}
             </div>
         </div>
@@ -28,7 +28,7 @@
         {% if len(hot_logs) > 0 %}
             <h3 class="card-title">最近常搜</h3>
             {% for value, count in hot_logs %}
-                <a class="tag-span" href="/search?key={{quote(value)}}">
+                <a class="tag-span" href="{{_server_home}}/search?key={{quote(value)}}">
                     <span>{{value}}</span>
                     <span class="black">{{count}}</span>
                 </a>
@@ -38,7 +38,7 @@
         {% if len(recent) > 0 %}
             <h3 class="card-title">最近搜索</h3>
             {% for value in recent %}
-                <a class="tag-span" href="/search?key={{quote(value)}}">{{value}}</a>
+                <a class="tag-span" href="{{_server_home}}/search?key={{quote(value)}}">{{value}}</a>
             {% end %}
         {% end %}
 

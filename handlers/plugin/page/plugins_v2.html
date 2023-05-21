@@ -10,10 +10,10 @@
 
         {% if _is_admin %}
             <div class="float-right">
-                <a class="btn btn-default" href="/plugins_new">新增</a>
-                <a class="btn btn-default" href="/fs_link/scripts/plugins">管理</a>
-                <a class="btn btn-default" href="/fs_api/download/plugins">下载</a>
-                <a class="btn btn-default" href="/plugins_list_old">旧版工具箱</a>
+                <a class="btn btn-default" href="{{_server_home}}/plugins_new">新增</a>
+                <a class="btn btn-default" href="{{_server_home}}/fs_link/scripts/plugins">管理</a>
+                <a class="btn btn-default" href="{{_server_home}}/fs_api/download/plugins">下载</a>
+                <a class="btn btn-default" href="{{_server_home}}/plugins_list_old">旧版工具箱</a>
             </div>
         {% end %}
 
@@ -25,12 +25,12 @@
     <div class="transparent-card card hide">
         <h3 class="card-title">操作</h3>
 
-        <a class="btn" href="/plugins_new">新增</a>
-        <a class="btn" href="/fs_link/scripts/plugins">管理</a>
-        <a class="btn" href="/fs_api/download/plugins">下载</a>
+        <a class="btn" href="{{_server_home}}/plugins_new">新增</a>
+        <a class="btn" href="{{_server_home}}/fs_link/scripts/plugins">管理</a>
+        <a class="btn" href="{{_server_home}}/fs_api/download/plugins">下载</a>
         
         <div class="float-right">
-            <a class="btn" href="/plugins_list_old">返回旧版</a>
+            <a class="btn" href="{{_server_home}}/plugins_list_old">返回旧版</a>
         </div>
     </div>
 {% end %}

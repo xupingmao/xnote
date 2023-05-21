@@ -4,7 +4,7 @@
     <div class="card-title">
         <span>最近更新</span>
         <div class="float-right">
-            <a class="btn btn-default" href="/note/recent?orderby=update">更多</a>
+            <a class="btn btn-default" href="{{_server_home}}/note/recent?orderby=update">更多</a>
         </div>
     </div>
 
@@ -28,7 +28,7 @@
             <span>{{item.name}}</span>
             
             {% if item.is_deleted %}
-                <span class="gray-tag-span" href="/note/removed">删除</span>
+                <span class="gray-tag-span" href="{{_server_home}}/note/removed">删除</span>
             {% end %}
             
             <div class="float-right">

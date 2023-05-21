@@ -9,7 +9,7 @@
     <div class="card">
 
 {% if show_task_tag_entry %}
-    <a class="list-link" href="/message?tag=task&p=taglist">
+    <a class="list-link" href="{{_server_home}}/message?tag=task&p=taglist">
         <span>任务标签</span>
         <div class="float-right">
             <span class="book-size-span"></span>
@@ -19,7 +19,7 @@
 {% end %}
 
 {% if show_task_create_entry %}
-    <a class="list-link" href="/message?tag=task&p=create">
+    <a class="list-link" href="{{_server_home}}/message?tag=task&p=create">
         <span>创建待办任务</span>
         <div class="float-right">
             <span class="list-item-badge">{{message_stat.task_count}}</span>
@@ -29,7 +29,7 @@
 {% end %}
 
 {% if show_task_done_entry %}
-    <a class="list-item" href="/message?tag=task&p=done">
+    <a class="list-item" href="{{_server_home}}/message?tag=task&p=done">
         <span>查看已完成任务</span>
         <div class="float-right">
             <span class="list-item-badge">{{message_stat.done_count}}</span>
@@ -41,14 +41,14 @@
 {% if tag == "calendar" and show_sub_link %}
     <!-- 日期视图 -->
     <div class="card">
-        <a id="viewByDayLink" href="/message/list_by_day?date={{date}}" class="list-link">
+        <a id="viewByDayLink" href="{{_server_home}}/message/list_by_day?date={{date}}" class="list-link">
             <span>按天查看</span>
             <div class="float-right">
                 <i class="fa fa-chevron-right"></i>
             </div>
         </a>
 
-        <a class="list-link" href="/message?tag=month_tags&date={{date}}&displayTag=date">
+        <a class="list-link" href="{{_server_home}}/message?tag=month_tags&date={{date}}&displayTag=date">
             <span>按标签查看</span>
             <div class="float-right">
                 <span class="book-size-span"></span>

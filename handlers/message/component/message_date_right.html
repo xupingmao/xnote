@@ -2,21 +2,21 @@
     {% include note/component/group_special_folder.html %}
 
     <div class="card hide">
-        <a id="viewByMonthLink" href="/message/calendar" class="list-link">
+        <a id="viewByMonthLink" href="{{_server_home}}/message/calendar" class="list-link">
             <span>按月查看</span>
             <div class="float-right">
                 <i class="fa fa-chevron-right"></i>
             </div>
         </a>
 
-        <a id="viewByDayLink" href="/message/list_by_day?date={{date}}" class="list-link">
+        <a id="viewByDayLink" href="{{_server_home}}/message/list_by_day?date={{date}}" class="list-link">
             <span>按天查看</span>
             <div class="float-right">
                 <i class="fa fa-chevron-right"></i>
             </div>
         </a>
 
-        <a class="list-link" href="/message?tag=month_tags&date={{date}}&displayTag=date">
+        <a class="list-link" href="{{_server_home}}/message?tag=month_tags&date={{date}}&displayTag=date">
             <span>按标签查看</span>
             <div class="float-right">
                 <span class="book-size-span"></span>

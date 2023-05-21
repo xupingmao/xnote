@@ -50,7 +50,7 @@
         {% for user_info in user_list %}
         <tr>
             <td class="index-td">{{user_info.id}}</td>
-            <td><a class="link edit-btn" href="/system/user?name={{user_info.name}}">{{user_info.name}}</a></td>
+            <td><a class="link edit-btn" href="{{_server_home}}/system/user?name={{user_info.name}}">{{user_info.name}}</a></td>
             <td>{{user_info.login_time}}</td>
             <td>
                 {% if user_info.name != "admin" %}

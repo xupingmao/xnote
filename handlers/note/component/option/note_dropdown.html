@@ -4,11 +4,11 @@
 {% if file != None and _user_name == file.creator and op == "view" %}
 
 {% if file.type == "gallery" %}
-    <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">管理文件</a>
+    <a class="btn btn-default" href="{{_server_home}}/note/management?parent_id={{file.id}}">管理文件</a>
 {% elif file.show_edit == False %}
     <!-- nothing here -->
 {% else %}
-    <a class="btn" href="/note/edit?id={{file.id}}&is_iframe={{is_iframe}}">编辑</a>
+    <a class="btn" href="{{_server_home}}/note/edit?id={{file.id}}&is_iframe={{is_iframe}}">编辑</a>
 {% end %}
 
 <script type="text/javascript">
@@ -31,21 +31,21 @@ xnote.state.note = {
         <a class="dropdown-option copy-btn link">复制</a>
 
         {% if file.priority > 0 %}
-            <a class="dropdown-option link" href="/note/stick?id={{file.id}}&level=0">取消置顶</a>
+            <a class="dropdown-option link" href="{{_server_home}}/note/stick?id={{file.id}}&level=0">取消置顶</a>
         {% else %}
-            <a class="dropdown-option link" href="/note/stick?id={{file.id}}&level=1">置顶</a>
+            <a class="dropdown-option link" href="{{_server_home}}/note/stick?id={{file.id}}&level=1">置顶</a>
         {% end %}
 
         {% if file.archived %}
-            <a class="dropdown-option link" href="/note/unarchive?id={{file.id}}">取消归档</a>
+            <a class="dropdown-option link" href="{{_server_home}}/note/unarchive?id={{file.id}}">取消归档</a>
         {% end %}
 
         {% if _is_admin and file.type == "gallery" %}
-            <a class="dropdown-option link" href="/fs/{{file.path}}">管理文件</a>
+            <a class="dropdown-option link" href="{{_server_home}}/fs/{{file.path}}">管理文件</a>
         {% end %}
 
-        <a class="dropdown-option link" href="/note/history?id={{file_id}}">{{T("历史")}}</a>
-        <a class="dropdown-option link" href="/note/print?id={{file.id}}" target="_blank">打印</a>
+        <a class="dropdown-option link" href="{{_server_home}}/note/history?id={{file_id}}">{{T("历史")}}</a>
+        <a class="dropdown-option link" href="{{_server_home}}/note/print?id={{file.id}}" target="_blank">打印</a>
         {% if _is_admin and xutils.call("note.has_external_image", file) %}
             <a class="dropdown-option cache-external-option link">缓存外部资源</a>
         {% end %}
