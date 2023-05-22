@@ -127,25 +127,43 @@ class DBBackup:
     def backup_sql_tables(self):
         logger = self.get_backup_logger()
         db = xtables.MySqliteDB(db = self.db_backup_file)
+        batch_size = 100
+
         try:
             for table in xtables.get_all_tables():
                 backup_table = xtables.init_backup_table(table.tablename, db)
-                count = table.count()
-                logger.info("backup table:%s count:%d", table.tablename, count)
+                total_count = table.count()
+                logger.info("backup table:(%s) count:(%d)", table.tablename, total_count)
                 start_time = time.time()
+                batch = []
+                count = 0
                 for record in table.iter():
-                    # 只更新结构包含的字段
                     new_record = table.filter_record(record)
-                    backup_table.insert(**new_record)
+                    batch.append(new_record)
+                    count += 1
+                    if len(batch) >= batch_size:
+                        # 只更新结构包含的字段
+                        self.multiple_insert(backup_table, batch)
+                        batch = []
+                        cost_time = time.time() - start_time
+                        qps = calc_qps(count, cost_time)
+                        logger.log("table:(%s), proceed:(%d/%d), qps:(%.2f)" % (backup_table.tablename, count, total_count, qps))
+                if len(batch) > 0:
+                    self.multiple_insert(backup_table, batch)
+                    batch = []
                 cost_time = time.time() - start_time
-                logger.info("backup table:%s done! cost_time:(%.2fs)", table.tablename, cost_time)
+                logger.info("backup table:(%s) done! cost_time:(%.2fs)", table.tablename, cost_time)
         except:
             err_info = xutils.print_exc()
-            logger.info("backup failed: %s" % err_info)
+            logger.info("backup failed: (%s)" % err_info)
         finally:
             db.ctx.db.close()
             del db
 
+    def multiple_insert(self, db, batch):
+        with db.transaction():
+            for value in batch:
+                db.insert(**value)
 
     def backup_kv_store(self):
         logger = self.get_backup_logger()

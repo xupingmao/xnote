@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-22 00:27:30
+@LastEditTime : 2023-05-22 23:15:12
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -42,6 +42,13 @@ class TableProxy:
         self.fix_sql_keywords(values)
         # TODO 记录binlog
         return self.db.insert(self.tablename, seqname, _test, **values)
+    
+    def _multiple_insert(self, values, seqname=None, _test=False):
+        # sqlite不支持
+        for value in values:
+            self.fix_sql_keywords(value)
+        # TODO 记录binlog
+        return self.db.multiple_insert(self.tablename, values, seqname, _test)
 
     def select(self, vars=None, what='*', where=None, order=None, group=None,
                limit=None, offset=None, _test=False):
