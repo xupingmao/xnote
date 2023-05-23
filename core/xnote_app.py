@@ -61,12 +61,14 @@ logging.basicConfig(
 
 class XnoteFound(web.Redirect):
     """A `302 Found` redirect."""
-    def __init__(self, url, absolute=True):
+    def __init__(self, url, absolute=False):
+        url = xconfig.WebConfig.server_home + url
         web.Redirect.__init__(self, url, '302 Found', absolute=absolute)
 
 class XnoteSeeOther(web.Redirect):
     """A `303 See Other` redirect."""
-    def __init__(self, url, absolute=True):
+    def __init__(self, url, absolute=False):
+        url = xconfig.WebConfig.server_home + url
         web.Redirect.__init__(self, url, '303 See Other', absolute=absolute)
 
 # redirect转换成绝对uri

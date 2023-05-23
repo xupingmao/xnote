@@ -164,7 +164,7 @@ class Cache:
         return self.expire_dict.get(key)
 
     def keys(self):
-        return self.dict.keys()
+        return list(self.dict.keys())
     
     def clear_expired(self):
         """清理失效的缓存"""
