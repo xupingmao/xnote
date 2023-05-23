@@ -16,6 +16,7 @@ class DBInterface:
     def __init__(self, *args, **kw):
         self.driver_type = ""
         self.debug = False
+        self.log_debug = False
 
     def Get(self, key):
         # type: (bytes) -> bytes

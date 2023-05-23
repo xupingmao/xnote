@@ -43,6 +43,7 @@ import xconfig
 import xutils
 import xauth
 import web
+import atexit
 
 FILE_LOCK = FileLock("pid.lock")
 DEFAULT_CONFIG_FILE = xconfig.resolve_config_path("./config/boot/boot.default.properties")
@@ -128,18 +129,10 @@ def handle_args_and_init_config(boot_config_kw=None):
     xconfig.set_global_config("system.start_time", start_time)
 
 
-def handle_signal(signum, frame):
-    """处理系统消息（只适用于Posix系统）
-    @param {int} signum
-    @param {frame} current stack frame
-    """
-    xutils.log("Signal received: %s" % signum)
-    if signum == signal.SIGALRM:
-        # 时钟信号
-        return
+def handle_exit():
     # 优雅下线
+    logging.info("准备优雅下线")
     xmanager.fire("sys.exit")
-    sys.exit(0)
 
 
 @log_mem_info_deco("try_init_sqlite")
@@ -342,13 +335,7 @@ def init_app_no_lock(boot_config_kw=None):
 
     # 注册信号响应
     # 键盘终止信号
-    if not xutils.is_windows():
-        signal.signal(signal.SIGINT, handle_signal)
-        # kill终止信号
-        signal.signal(signal.SIGTERM, handle_signal)
-        # 时钟信号
-        # signal.signal(signal.SIGALRM, handle_signal)
-        # signal.alarm(5)
+    atexit.register(handle_exit)
 
     # 记录已经启动
     xconfig.mark_started()
