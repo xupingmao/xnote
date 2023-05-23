@@ -485,16 +485,23 @@ def gen_new_token():
 
 def create_quick_user():
     """创建快速用户，用于第三方授权登录"""
-    name = xutils.create_uuid()
-    password = xutils.create_uuid()
-    user = Storage(name=name,
-        password=password,
-        token=gen_new_token(),
-        ctime=xutils.format_time(),
-        salt=textutil.random_string(6),
-        mtime=xutils.format_time())
-    user_id = UserModel.create(user)
-    return UserModel.get_by_id(user_id)
+    num_length = 5
+    for i in range(10):
+        name = "u" + xutils.random_number_str(num_length)
+        with dbutil.get_write_lock(name):
+            if UserModel.get_by_name(name) != None:
+                num_length += 1
+                continue
+            password = xutils.create_uuid()
+            user = Storage(name=name,
+                password=password,
+                token=gen_new_token(),
+                ctime=xutils.format_time(),
+                salt=textutil.random_string(6),
+                mtime=xutils.format_time())
+            user_id = UserModel.create(user)
+            return UserModel.get_by_id(user_id)
+    raise Exception("create user name conflict")
 
 def create_user(name, password, fire_event = True, check_username = True):
     if name == "" or name == None:

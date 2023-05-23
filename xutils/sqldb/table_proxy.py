@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-22 23:15:12
+@LastEditTime : 2023-05-24 00:13:07
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -65,7 +65,7 @@ class TableProxy:
         return None
 
     def query(self, *args, **kw):
-        return self.db.query(*args, **kw)
+        return list(self.db.query(*args, **kw))
 
     def count(self, where=None, sql=None, vars=None):
         self.fix_sql_keywords(where)
@@ -92,13 +92,18 @@ class TableProxy:
         return self.db.transaction()
     
     def iter(self):
-        last_id = 0
-        while True:
-            records = list(self.select(where = "id > $last_id", vars = dict(last_id = last_id), limit = 20, order="id"))
+        for records in self.iter_batch():
             for record in records:
                 yield record
+
+
+    def iter_batch(self, batch_size=20):
+        last_id = 0
+        while True:
+            records = self.select(where = "id > $last_id", vars = dict(last_id = last_id), limit = batch_size, order="id")
             if len(records) == 0:
                 break
+            yield records
             last_id = records[-1].id
     
     def get_table_info(self):

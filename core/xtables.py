@@ -12,6 +12,13 @@ import web.db
 from xutils.sqldb import TableManagerFacade as TableManager
 from xutils.sqldb import TableProxy
 
+
+def create_table_manager(table_name=""):
+    assert table_name != ""
+    dbpath = xconfig.FileConfig.get_db_path(table_name)
+    db = get_db_instance(dbpath)
+    return TableManager(table_name, db=db)
+
 def init_test_table():
     """测试数据库"""
     path = os.path.join(xconfig.DATA_DIR, "test.db")
@@ -25,8 +32,8 @@ def init_test_table():
         manager.add_index("check")
 
 
-def init_file_table():
-    with TableManager("file", dbpath = xconfig.DB_PATH) as manager:
+def init_note_index_table():
+    with create_table_manager("note_index") as manager:
         manager.add_column("name",    "text", "")
         # 纯文本，用于搜索, 已废弃，移动到note_content
         manager.add_column("content", "text", "")
@@ -38,13 +45,11 @@ def init_file_table():
         manager.add_column("version",  "int", 0)
         # 类型, markdown, post, mailist, file
         # 类型为file时，content值为文件的web路径
-        manager.add_column("type", "text", "")
+        manager.add_column("type", "varchar(32)", "")
 
         # 关联关系
         # 上级目录
         manager.add_column("parent_id", "int", 0)
-        # 使用file_tag表,兼容老代码,这里作为一个关键词存储，支持搜索
-        manager.add_column("related", "text", "")
         # 创建时间ctime
         manager.add_column("ctime", "text", "")
         # 修改时间mtime
@@ -55,15 +60,8 @@ def init_file_table():
         manager.add_column("visited_cnt", "int", 0)
         # 逻辑删除标记
         manager.add_column("is_deleted", "int", 0)
-        # 是否公开
-        manager.add_column("is_public", "int", 0)
-        # 权限相关
         # 创建者
         manager.add_column("creator", "text", "")
-        # 修改者
-        # manager.add_column("modifier", "text", "")
-        # 可以访问的角色, 如果是公开的则为public, 删除的为deleted
-        manager.add_column("role", "text", "")
         # 置顶顺序
         manager.add_column("priority", "int", 0)
 
@@ -94,15 +92,6 @@ def init_note_history_table():
         manager.add_column("mtime",   "text", "")
         manager.add_column("version", "int", 0)
         manager.add_index(["note_id", "version"])
-
-
-def init_marked_file_table():
-    # @since 2018/03/02
-    with TableManager("marked_file", dbpath = xconfig.DB_PATH) as manager:
-        manager.add_column("user", "text", "")
-        manager.add_column("file_id", "int", 0)
-        manager.add_column("name",  "text", "")
-        manager.add_column("ctime", "text", "")
 
 
 def init_tag_table():
@@ -155,8 +144,7 @@ def init_history_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    db = get_db_instance(dbpath = xconfig.FileConfig.user_db_file)
-    with TableManager("user", db = db) as manager:
+    with create_table_manager("user") as manager:
         manager.add_column("name",       "varchar(64)", "")
         manager.add_column("password",   "varchar(64)", "")
         manager.add_column("salt",       "varchar(64)", "")
@@ -187,7 +175,7 @@ def init_message_table():
         # IP地址
         manager.add_column("ip", "varchar(32)", "")
         # 地址信息
-        manager.add_column("location", "text", "")
+        manager.add_column("location", "varchar(255)", "")
         # 索引
         manager.add_index(["user", "ctime", "status"])
         manager.add_index(["user", "status"])
@@ -195,8 +183,7 @@ def init_message_table():
 
 def init_record_table():
     # 日志库和主库隔离开
-    db = get_db_instance(dbpath = xconfig.FileConfig.record_db_file)
-    with TableManager("record", db = db) as manager:
+    with create_table_manager("record") as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
         manager.add_column("cdate", "date", "1970-01-01")
@@ -232,8 +219,7 @@ def init_dict_table():
     """词典，和主库隔离
     @since 2018/01/14
     """
-    db = get_db_instance(dbpath = xconfig.DICT_FILE)
-    with TableManager("dictionary", db = db) as manager:
+    with create_table_manager("dictionary") as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("key", "varchar(100)", "")

@@ -431,6 +431,8 @@ def random_string(length, chars=ALPHA_NUM):
         value += chars[randint(0, max_int)]
     return value
 
+def random_number_str(length):
+    return random_string(length, "0123456789")
 
 def parse_config_text(text, ret_type = 'list'):
     return parse_prop_text(text, ret_type)
