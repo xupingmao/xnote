@@ -1,7 +1,7 @@
 <div class="settings-row">
     <div class="settings-key">我的账号</div>
     <div class="settings-value">
-        <a href="/user/info">{{_user_name}}</a>
+        <a href="{{_server_home}}/user/info">{{_user_name}}</a>
         <i class="fa fa-chevron-right"></i>
     </div>
 </div>
@@ -9,21 +9,21 @@
 <div class="settings-row">
     <div class="settings-key">关于系统</div>
     <div class="settings-value">
-        <a class="btn btn-default" href="/code/wiki/README.md">查看</a>
+        <a class="btn btn-default" href="{{_server_home}}/code/wiki/README.md">查看</a>
     </div>
 </div>
 
 <div class="settings-row admin-visible mobile-only">
     <div class="settings-key">文件管理</div>
     <div class="settings-value">
-        <a class="btn btn-default" href="/fs_list">进入</a>
+        <a class="btn btn-default" href="{{_server_home}}/fs_list">进入</a>
     </div>
 </div>
 
 <div class="settings-row admin-visible mobile-only">
     <div class="settings-key">插件管理</div>
     <div class="settings-value">
-        <a class="btn btn-default" href="/plugins_list">进入</a>
+        <a class="btn btn-default" href="{{_server_home}}/plugins_list">进入</a>
     </div>
 </div>
 
@@ -128,7 +128,7 @@
 <div class="settings-row">
     <div class="settings-key">搜索设置</div>
     <div class="settings-value">
-        <a class="btn btn-default" href="/system/settings?category=search">进入</a>
+        <a class="btn btn-default" href="{{_server_home}}/system/settings?category=search">进入</a>
     </div>
 </div>
 
@@ -136,7 +136,7 @@
     <div class="settings-row">
         <div class="settings-key">管理员设置</div>
         <div class="settings-value">
-            <a class="btn btn-default" href="/system/settings?category=admin">进入</a>
+            <a class="btn btn-default" href="{{_server_home}}/system/settings?category=admin">进入</a>
         </div>
     </div>
 {% end %}

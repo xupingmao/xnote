@@ -96,10 +96,10 @@
             </div>
             <div class="col-md-12">
                 {% for link in category_temp.children %}
-                    <a class="item" href="{{link.url}}"> 
+                    <a class="item" href="{{_server_home}}{{link.url}}"> 
                         {% if link.img_src != None %}
                             <div class="app-icon img-box">
-                                <img src="{{link.img_src}}">
+                                <img src="{{_server_home}}{{link.img_src}}">
                             </div>
                         {% else %}
                             <div class="app-icon">
@@ -121,11 +121,11 @@
     <div class="col-md-12 grid-card">
         <div class="grid-title">
             其他
-            <a href="/system/storage?key=tools" class="float-right link">{{T("Edit")}}</a>
+            <a href="{{_server_home}}/system/storage?key=tools" class="float-right link">{{T("Edit")}}</a>
         </div>
         <div class="col-md-12">
             {% for link in customized_items %}
-                <a href="{{link.url}}">    
+                <a href="{{_server_home}}{{link.url}}">    
                     <span>{{T(link.name)}}</span>
                 </a>
             {% end %}

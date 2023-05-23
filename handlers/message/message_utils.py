@@ -54,7 +54,7 @@ def build_search_url(keyword):
 
 
 def build_search_html(content, search_tag="log"):
-    fmt = u'<a href="/message?tag=search&p={tag}&key={key}">{key_text}</a>'
+    fmt = u'<a href="{{_server_home}}/message?tag=search&p={tag}&key={key}">{key_text}</a>'
     return fmt.format(tag=search_tag,
                       key=xutils.my_quote(content),
                       key_text=xutils.html_escape(content))

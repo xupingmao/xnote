@@ -11,9 +11,9 @@
             <span>: {{category_name}}</span>
         {% end %}
         <div class="float-right">
-            <a class="btn btn-default mobile-only" href="/plugin_category_list">分类</a>
+            <a class="btn btn-default mobile-only" href="{{_server_home}}/plugin_category_list">分类</a>
             {% if _is_admin %}
-                <a class="btn btn-default" href="/fs_link/scripts/plugins">管理</a>
+                <a class="btn btn-default" href="{{_server_home}}/fs_link/scripts/plugins">管理</a>
             {% end %}
 
             {% if show_back == "true" %}

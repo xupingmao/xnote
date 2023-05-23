@@ -30,8 +30,8 @@
         <div class="card-title">
             <span>综合搜索</span>
             <div class="float-right">
-                <a class="btn btn-default" href="/system/settings?category=search">设置</a>
-                <a class="btn btn-default" href="/search/history">搜索历史</a>
+                <a class="btn btn-default" href="{{_server_home}}/system/settings?category=search">设置</a>
+                <a class="btn btn-default" href="{{_server_home}}/search/history">搜索历史</a>
                 {% include common/button/back_button.html %}
             </div>
         </div>
@@ -69,7 +69,7 @@
 
                 {# 词典 #}
                 {% if _is_admin and file.category == "dict" %}
-                    <a class="item-option" href="/dict/update?id={{file.id}}">编辑</a>
+                    <a class="item-option" href="{{_server_home}}/dict/update?id={{file.id}}">编辑</a>
                 {% end %}
 
                 {% if file.show_more_link %}
@@ -113,7 +113,7 @@
 
                     {% if file.parent_name != None %}
                         <span class="tag lightgray">
-                            <a class="link" href="/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
+                            <a class="link" href="{{_server_home}}/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
                         </span>
                     {% end %}
 

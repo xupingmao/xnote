@@ -33,6 +33,8 @@ PS: 标准库 functools提供了缓存的方法， 参考 https://docs.python.or
 """
 import threading
 import random
+import datetime
+from xutils import dateutil
 from collections import OrderedDict, deque
 from xutils.imports import *
 
@@ -109,11 +111,28 @@ class Cache:
     
     def get_raw(self, key):
         return self.dict.get(key)
+    
+    def format_value(self, value):
+        if isinstance(value, dict):
+            result = dict()
+            for key in value:
+                item_value = value.get(key)
+                if isinstance(item_value, datetime.datetime):
+                    result[key] = dateutil.format_datetime(item_value)
+                else:
+                    result[key] = item_value
+            return result
+        return value
 
     def put(self, key, value, expire=60*5, random_range=60*5):
         assert expire > 0
         with self.lock:
-            self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
+            if isinstance(value, bytes):
+                self.dict[key] = value
+            else:
+                value = self.format_value(value)
+                self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
+            self.dict.move_to_end(key, last=False) # 移动到最前面
             self.expire_dict[key] = time.time() + expire + random.randint(0, random_range)
             
             if self.max_size > 0:
@@ -142,7 +161,7 @@ class Cache:
         return self.expire_dict.get(key)
 
     def keys(self):
-        return self.dict.keys()
+        return list(self.dict.keys())
     
     def clear_expired(self):
         """清理失效的缓存"""

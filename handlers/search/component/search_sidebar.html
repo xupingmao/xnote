@@ -17,7 +17,7 @@
     <div class="card-title">
         <span>相关搜索</span>
         <div class="float-right">
-            <a class="btn btn-default" href="/dict/relevant/list">编辑词库</a>
+            <a class="btn btn-default" href="{{_server_home}}/dict/relevant/list">编辑词库</a>
         </div>
     </div>
 
@@ -26,7 +26,7 @@
             <a class="list-item" href="#">暂无相关搜索</a>
         {% end %}
         {% for word in relevant_words %}
-        <a class="list-item" href="/search?key={{quote(word)}}&search_type={{search_type}}">
+        <a class="list-item" href="{{_server_home}}/search?key={{quote(word)}}&search_type={{search_type}}">
             {{word}}
         </a>
         {% end %}

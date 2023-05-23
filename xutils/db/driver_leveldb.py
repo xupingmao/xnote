@@ -7,7 +7,9 @@
 import leveldb
 import logging
 
-class LevelDBImpl:
+from . import driver_interface
+
+class LevelDBImpl(driver_interface.DBInterface):
 
     log_debug = False
 
@@ -15,6 +17,7 @@ class LevelDBImpl:
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
         self._db = leveldb.LevelDB(path, **kw)
         self.config_dict = config_dict
+        self.driver_type = "sqlite"
 
     def Get(self, key):
         try:

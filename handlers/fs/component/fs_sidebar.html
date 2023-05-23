@@ -10,7 +10,7 @@
 <div class="card list">
 
     {% for item in data_list %}
-        <a class="list-link" href="{{item.url}}">
+        <a class="list-link" href="{{_server_home}}{{item.url}}">
             <span>{{item.name}}</span>
             <div class="float-right">
                 <i class="fa fa-chevron-right"></i>

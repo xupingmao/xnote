@@ -7,7 +7,7 @@
 import lmdb
 import logging
 import threading
-
+from . import driver_interface
 from xutils import textutil
 from xutils.base import Storage
 from xutils.db.encode import convert_bytes_dict_to_bytes, convert_bytes_to_dict, convert_bytes_to_object, convert_object_to_bytes, encode_int8_to_bytes
@@ -16,12 +16,13 @@ from xutils.db.encode import convert_bytes_dict_to_bytes, convert_bytes_to_dict,
 # 用于写操作的加锁，所以在多进程或者分布式环境中写操作是不安全的
 _lock = threading.RLock()
 
-class LmdbKV:
+class LmdbKV(driver_interface.DBInterface):
 
     def __init__(self, db_dir, debug=True, map_size=1024**3, config_dict=None):
         self.env = lmdb.open(db_dir, map_size=map_size)
         self.debug = debug
         self.config_dict = config_dict
+        self.driver_type = "lmdb"
 
     def Get(self, key):
         # type: (bytes) -> bytes

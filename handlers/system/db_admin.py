@@ -237,7 +237,7 @@ META_HTML = """
         {% for category, key, description, value in admin_stat_list %}
             <tr>
                 <td>{{category}}</td>
-                <td><a href="/system/db_scan?prefix={{key}}&reverse=true">{{key}}</a></td>
+                <td><a href="{{_server_home}}/system/db_scan?prefix={{key}}&reverse=true">{{key}}</a></td>
                 <td>{{description}}</td>
                 <td>{{value}}</td>
             </tr>

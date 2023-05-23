@@ -78,6 +78,23 @@ class TestXauth(BaseTestCase):
 
         xauth.delete_user("u123456")
 
+    def test_get_user_by_token(self):
+        user_name = "u123456"
+        result = xauth.create_user(user_name, "123456")
+        print(result)
+
+        datetime = dateutil.format_time()
+        token = "token123456"
+        user_info = Storage(login_time = datetime)
+        user_info.token = token
+
+        xauth.update_user("u123456", user_info)
+
+        found = xauth.UserModel.get_by_token(token)
+        self.assertEqual(user_name, found.name)
+
+        xauth.delete_user("u123456")
+
     def test_user_config(self):
         user_name = "u123456"
         result = xauth.create_user(user_name, user_name)
@@ -94,4 +111,8 @@ class TestXauth(BaseTestCase):
         xauth.delete_user(user_name)
 
 
+    def test_create_quick_user(self):
+        user_info = xauth.create_quick_user()
+        self.assertTrue(user_info != None)
+        xauth.delete_user(user_info.name)
 

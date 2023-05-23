@@ -5,7 +5,10 @@
 """Description here"""
 
 import re
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    bs4 = None
 import xutils
 import xtables
 import xconfig

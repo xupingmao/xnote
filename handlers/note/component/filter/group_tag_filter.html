@@ -15,7 +15,7 @@
         <a class="tag lightgray large {%if len(q_tags)==0 %}active{%end%}" href="?">全部</a>
         {% for tag in tag_meta_list %}
             <a class="tag lightgray large meta {% if tag.tag_name in q_tags%}active{%end%}" 
-                href="/note/group?tag_name={{quote(tag.tag_name)}}">{{tag.tag_name}}</a>
+                href="{{_server_home}}/note/group?tag_name={{quote(tag.tag_name)}}">{{tag.tag_name}}</a>
         {% end %}
     </div>
 </div>

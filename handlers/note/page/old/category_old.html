@@ -9,7 +9,7 @@
                     {% for item in groups %}
                         <span class="tag-span">
                             <i class="fa {{item.icon}} fa-{{item.icon}}"></i>
-                            <a href="{{item.url}}">{{item.name}}</a>
+                            <a href="{{_server_home}}{{item.url}}">{{item.name}}</a>
                             {% if item.size != None %}<span>{{item.size}}</span>{% end %}
                         </span>
                     {% end %}

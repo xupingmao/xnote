@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-29 18:57:21
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-29 19:15:48
+@LastEditTime : 2023-05-20 22:45:02
 @FilePath     : /xnote/tests/test_xutils_db_hash_table.py
 @Description  : 描述
 """
@@ -58,4 +58,8 @@ class TestMain(test_base.BaseTestCase):
         found = table.get("admin")
         self.assertEqual("admin", found.name)
         self.assertEqual(20, found.age)
+
+        key, first = table.first(where=dict(age=20))
+        self.assertEqual("admin", first.name)
+        self.assertEqual(20, first.age)
 

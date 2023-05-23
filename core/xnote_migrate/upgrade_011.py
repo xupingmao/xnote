@@ -4,11 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2023-03-18 14:27:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-29 19:44:10
+@LastEditTime : 2023-05-20 22:54:27
 @FilePath     : /xnote/core/xnote_migrate/upgrade_011.py
 @Description  : 迁移pulgin_visit表
 """
 
+from xutils import dbutil
 from . import base
 from xutils import dbutil, Storage
 

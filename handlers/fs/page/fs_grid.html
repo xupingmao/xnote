@@ -107,7 +107,7 @@
                             <img class="fs-icon" src="/static/image/file2.png">
                         {% end %}
                     </div>
-                    <a href="/fs/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
+                    <a href="{{_server_home}}/fs/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
                 </div>
             {% end %}
         {% end %}

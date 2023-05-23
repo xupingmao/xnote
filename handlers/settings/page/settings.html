@@ -12,7 +12,7 @@
         <span>{{html_title}}</span>
         <div class="float-right">
             {% if show_admin_btn %}
-                <a class="btn btn-default" href="/system/admin">后台管理</a>
+                <a class="btn btn-default" href="{{_server_home}}/system/admin">后台管理</a>
             {% end %}
 
             {% if show_back_btn %}
@@ -41,7 +41,7 @@
 
 <script type="text/javascript">
     function updateSetting(key, value, type, p) {
-        $.post("/system/config", 
+        $.post("{{_server_home}}/system/config", 
             {key: key, value: value, type: type, p:p}, 
             function (data) {
                 if (data.code == "success") {

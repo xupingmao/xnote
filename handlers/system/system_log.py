@@ -39,13 +39,13 @@ OPTION_HTML = '''
 
             <div class="row">
                 <span>直接查看文件</span>
-                <a href="/code/edit?path={{info_log_path}}">INFO日志</a>
+                <a href="{{_server_home}}/code/edit?path={{info_log_path}}">INFO日志</a>
                 <span>|</span>
-                <a href="/code/edit?path={{warn_log_path}}">WARN日志</a>
+                <a href="{{_server_home}}/code/edit?path={{warn_log_path}}">WARN日志</a>
                 <span>|</span>
-                <a href="/code/edit?path={{error_log_path}}">ERROR日志</a>
+                <a href="{{_server_home}}/code/edit?path={{error_log_path}}">ERROR日志</a>
                 <span>|</span>
-                <a href="/code/edit?path={{trace_log_path}}">TRACE日志</a>
+                <a href="{{_server_home}}/code/edit?path={{trace_log_path}}">TRACE日志</a>
             </div>
         {% end %}
 

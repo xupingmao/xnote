@@ -20,18 +20,16 @@ import xutils
 import xmanager
 import warnings
 import time
-from xutils import textutil, dbutil, fsutil
+import xtables
+from xutils import textutil, dbutil, fsutil, dateutil
 from xutils import Storage
 from xutils import logutil
-from xutils import cacheutil, six
-from xutils.functions import listremove
+from xutils import cacheutil
+from xutils import six
 
 session_db = None # type: dbutil.LdbTable
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
-
-# 用户表
-USER_TABLE = None
 
 DEFAULT_CACHE_EXPIRE = 60 * 5
 
@@ -47,9 +45,7 @@ SESSION_EXPIRE   = 24 * 3600 * 7
 PRINT_DEBUG_LOG  = False
 
 def get_user_db():
-    global USER_TABLE
-    assert USER_TABLE != None
-    return USER_TABLE
+    return xtables.get_user_table()
 
 def get_user_config_db(name):
     assert name != None
@@ -59,12 +55,94 @@ def get_user_config_db(name):
 
 class UserModel:
     # TODO 用户模型
-    name = "登录名"
-    password = "密码"
-    token = "授权令牌"
-    ctime = "创建时间"
-    mtime = "修改时间"
-    login_time = "登录时间"
+    name = ""
+    password = ""
+    token = ""
+    ctime = ""
+    mtime = ""
+    login_time = ""
+
+    @classmethod
+    def get_by_name(cls, name=""):
+        # type: (str) -> Storage | None
+        if name is None or name == "":
+            return None
+        
+        user = user_cache.get(name)
+        if user == None:
+            user = cls.get_user_from_db(name)
+        
+        if user != None:
+            user_cache.put(name, user, expire=DEFAULT_CACHE_EXPIRE)
+            return user
+        return user
+
+    @classmethod
+    def get_user_from_db(cls, name=""):
+        db = get_user_db()
+        return db.select_first(where = dict(name = name))
+
+    @classmethod
+    def get_by_token(cls, token=""):
+        db = get_user_db()
+        return db.select_first(where = dict(token=token))
+
+    @classmethod
+    def get_by_id(cls, user_id = 0):
+        db = get_user_db()
+        return db.select_first(where = dict(id = user_id))
+    
+    @classmethod
+    def list(cls, offset=0, limit=20):
+        db = get_user_db()
+        return list(db.select(offset=offset, limit=limit))
+    
+    @classmethod
+    def count(cls):
+        return get_user_db().count()
+    
+    @classmethod
+    def create(cls, user, fire_event = True):
+        name = user.name
+        assert isinstance(name, six.string_types)
+        assert name != ""
+        
+        db = get_user_db()
+        user_id = db.insert(**user)
+        xutils.trace("UserAdd", name)
+        if fire_event:
+            event = Storage(user_name = name)
+            xmanager.fire("user.create", event)
+        return user_id
+
+    @classmethod
+    def update(cls, user_info):
+        assert isinstance(user_info.id, int)
+        db = get_user_db()
+        db.update(where = dict(id=user_info.id), **user_info)
+        user_cache.delete(user_info.name)
+        xutils.trace("UserUpdate", user_info)
+        # 刷新完成之后再发送消息
+        xmanager.fire("user.update", dict(user_name = user_info.name))
+
+    @classmethod
+    def delete(cls, user_info):
+        db = get_user_db()
+        db.delete(where = dict(id=user_info.id))
+
+    @classmethod
+    def delete_by_name(cls, name=""):
+        if name == "admin":
+            return
+        name = name.lower()
+        db = get_user_db()
+        db.delete(where = dict(name = name))
+        user_cache.delete(name)
+    
+    @classmethod
+    def delete_by_id(cls, id=0):
+        get_user_db().delete(where = dict(id=id))
+        
 
 class SessionInfo(Storage):
 
@@ -73,6 +151,7 @@ class SessionInfo(Storage):
         self.sid = ""
         self.token = ""
         self.expire_time = 0.0
+        self.login_ip = ""
         self.login_time = 0.0
 
 def dict_to_session_info(dict_value):
@@ -100,12 +179,10 @@ def validate_password_error(password):
         return "密码不能少于6位"
     return None
 
-def _create_temp_user(temp_users, user_name):
-    temp_users[user_name] = Storage(name = user_name, 
-        password = "123456",
-        salt = "",
-        mtime = "",
-        token = gen_new_token())
+def _create_temp_user(user_name):
+    user_info = UserModel.get_by_name(user_name)
+    if user_info == None:
+        create_user(user_name, "123456", fire_event=False, check_username=False)
 
     upload_dirname = xconfig.get_upload_dir(user_name)
     fsutil.makedirs(upload_dirname)
@@ -125,13 +202,9 @@ def get_users():
     warnings.warn("get_users已经过时，请停止使用", DeprecationWarning)
     return copy.deepcopy(_get_users())
 
-def list_user_names():
-    users = _get_users()
-    return list(users.keys())
-
 def iter_user(limit = 20):
     db = get_user_db()
-    for user_name, user_info in db.iter(limit = limit):
+    for user_info in db.select(limit = limit):
         yield user_info
 
 def count_user():
@@ -146,7 +219,7 @@ def get_user(name):
     return find_by_name(name)
 
 def get_user_by_name(user_name):
-    return find_by_name(user_name)
+    return UserModel.get_by_name(user_name)
 
 def create_uuid():
     import uuid
@@ -192,7 +265,8 @@ def list_user_session_detail(user_name):
         result.append(dict_to_session_info(item))
     return result
 
-def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
+def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = ""):
+    # type: (str, int, str) -> SessionInfo
     user_detail = get_user_by_name(user_name)
     if user_detail is None:
         raise Exception("user not found: %s" % user_name)
@@ -208,51 +282,31 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = None):
         delete_user_session_by_id(oldest.sid)
 
     # 保存会话信息
-    session_info = Storage(user_name = user_name, 
-        sid   = session_id,
-        token = user_detail.token, 
-        login_time  = time.time(),
-        login_ip = login_ip,
-        expire_time = time.time() + expires)
+    session_info = SessionInfo()
+    session_info.user_name = user_name
+    session_info.sid  = session_id
+    session_info.token = user_detail.token
+    session_info.login_time  = time.time()
+    session_info.login_ip = login_ip
+    session_info.expire_time = time.time() + expires
 
     session_db.update_by_id(session_id, session_info)
     session_cache.delete(session_id)
     
-    print("session_info:", session_info)
-
-    return session_id
+    return session_info
 
 def delete_user_session_by_id(sid):
     # 登录的时候会自动清理无效的sid关系
     session_db.delete_by_id(sid)
     session_cache.delete(sid)
 
-def _get_user_from_db(name):
-    db = get_user_db()
-    return db.get(name)
-
-def _get_builtin_user(name):
-    assert BUILTIN_USER_DICT != None
-    return BUILTIN_USER_DICT.get(name)
-
 def find_by_name(name):
-    # type: (str) -> Storage | None
-    if name is None:
-        return None
-    
-    user = user_cache.get(name)
-    if user == None:
-        user = _get_user_from_db(name)
-    
-    if user != None:
-        user_cache.put(name, user, expire=DEFAULT_CACHE_EXPIRE)
-        return user
-    return _get_builtin_user(name)
+    return UserModel.get_by_name(name)
 
 @cacheutil.cache_deco(prefix = "user_config_dict", expire = 600)
 def get_user_config_dict(name):
     if name is None or name == "":
-        return None
+        return Storage(**USER_CONFIG_PROP)
 
     db = get_user_config_db(name)
     config_dict = Storage(**USER_CONFIG_PROP)
@@ -262,12 +316,7 @@ def get_user_config_dict(name):
         config_dict.update(db_records)
         return config_dict
 
-    user = get_user_by_name(name)
-    if user != None:
-        if isinstance(user.config, dict):
-            config_dict.update(user.config)
-        return config_dict
-    return None
+    return Storage(**USER_CONFIG_PROP)
 
 def get_user_config_valid_keys():
     return USER_CONFIG_PROP.keys()
@@ -316,9 +365,9 @@ def select_first(filter_func):
             return item
 
 def get_user_from_token():
-    token = xutils.get_argument("token")
+    token = xutils.get_argument_str("token")
     if token != None and token != "":
-        return select_first(lambda x: x.token == token)
+        return UserModel.get_by_token(token)
 
 def get_user_password(name):
     user = get_user_by_name(name)
@@ -328,7 +377,7 @@ def get_user_password(name):
 
 
 def get_user_password_md5(user_name, use_salt = True):
-    user     = get_user(user_name)
+    user     = UserModel.get_by_name(user_name)
     password = user.password
     salt     = user.salt
 
@@ -422,7 +471,7 @@ def encode_password(password, salt):
     return pswd_md5.hexdigest()
 
 def write_cookie(user_name):
-    session_id = create_user_session(user_name)
+    session_id = create_user_session(user_name).sid
     _setcookie("sid", session_id, expires=24*3600*30)
 
 
@@ -430,7 +479,7 @@ def get_user_cookie(name):
     session_list = list_user_session_detail(name)
 
     if len(session_list) == 0:
-        sid = create_user_session(name, login_ip = "system")
+        sid = create_user_session(name, login_ip = "system").sid
     else:
         sid = session_list[0].sid
 
@@ -440,12 +489,26 @@ def gen_new_token():
     import uuid
     return uuid.uuid4().hex
 
-def create_user(name, password):
+
+def create_quick_user():
+    """创建快速用户，用于第三方授权登录"""
+    name = xutils.create_uuid()
+    password = xutils.create_uuid()
+    user = Storage(name=name,
+        password=password,
+        token=gen_new_token(),
+        ctime=xutils.format_time(),
+        salt=textutil.random_string(6),
+        mtime=xutils.format_time())
+    user_id = UserModel.create(user)
+    return UserModel.get_by_id(user_id)
+
+def create_user(name, password, fire_event = True, check_username = True):
     if name == "" or name == None:
         return dict(code = "PARAM_ERROR", message = "name为空")
     if password == "" or password == None:
         return dict(code = "PARAM_ERROR", message = "password为空")
-    if not is_valid_username(name):
+    if check_username and not is_valid_username(name):
         return dict(code = "INVALID_NAME", message="非法的用户名")
 
     name  = name.lower()
@@ -453,19 +516,14 @@ def create_user(name, password):
     if found is not None:
         return dict(code = "fail", message = "用户已存在")
     else:
-        db = get_user_db()
         user = Storage(name=name,
             password=password,
             token=gen_new_token(),
             ctime=xutils.format_time(),
             salt=textutil.random_string(6),
             mtime=xutils.format_time())
-        db.put(name, user)
 
-        xutils.trace("UserAdd", name)
-        event = Storage(user_name = name)
-        xmanager.fire("user.create", event)
-
+        UserModel.create(user, fire_event=fire_event)
         return dict(code = "success", message = "create success")
 
 def _check_password(password):
@@ -495,21 +553,10 @@ def update_user(name, user):
         mem_user.salt = textutil.random_string(6)
         mem_user.token = gen_new_token()
 
-    db = get_user_db()
-    db.put(name, mem_user)
-    user_cache.delete(name)
-
-    xutils.trace("UserUpdate", mem_user)
-
-    # 刷新完成之后再发送消息
-    xmanager.fire("user.update", dict(user_name = name))
+    UserModel.update(mem_user)
 
 def delete_user(name):
-    if name == "admin":
-        return
-    name = name.lower()
-    dbutil.delete("user:%s" % name)
-    user_cache.delete(name)
+    return UserModel.delete_by_name(name)
     
 
 def has_login_by_cookie(name = None):
@@ -589,13 +636,15 @@ def get_user_data_dir(user_name, mkdirs = False):
         fsutil.makedirs(fpath)
     return fpath
 
-def login_user_by_name(user_name, login_ip = None):
+def login_user_by_name(user_name, login_ip = ""):
     assert user_name != None
-    session_id = create_user_session(user_name, login_ip = login_ip)
+    session_info = create_user_session(user_name, login_ip=login_ip)
+    session_id = session_info.sid
     _setcookie("sid", session_id)
 
     # 更新最近的登录时间
-    update_user(user_name, dict(login_time=xutils.format_datetime()))   
+    update_user(user_name, dict(login_time=xutils.format_datetime()))
+    return session_info
 
 def logout_current_user():
     sid = get_session_id_from_cookie()
@@ -614,7 +663,6 @@ def check_old_password(user_name, password):
         raise Exception("旧的密码不匹配")
 
 def init():
-    global BUILTIN_USER_DICT
     global USER_TABLE
     global INVALID_NAMES
     global USER_CONFIG_PROP
@@ -627,11 +675,9 @@ def init():
     USER_CONFIG_PROP = xconfig.load_user_config_properties()
     MAX_SESSION_SIZE = xconfig.get_system_config("auth_max_session_size")
 
-    BUILTIN_USER_DICT = dict()
-    _create_temp_user(BUILTIN_USER_DICT, "admin")
-    _create_temp_user(BUILTIN_USER_DICT, "test")
+    _create_temp_user("admin")
+    _create_temp_user("test")
 
-    USER_TABLE = dbutil.get_hash_table("user")
     # 检查配置项的有效性
     for key in USER_CONFIG_PROP:
         if "." in key:

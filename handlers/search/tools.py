@@ -95,6 +95,6 @@ def show_addr_qrcode(ctx):
     r.html = """<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
     <div id='qrcode'></div>
     <script>$("#qrcode").qrcode('{addr}');</script>
-    <div class="top-offset-1">相关工具: <a href="/tools/qrcode">二维码生成器</a></div>""".format(addr = addr)
+    <div class="top-offset-1">相关工具: <a href="{{_server_home}}/tools/qrcode">二维码生成器</a></div>""".format(addr = addr)
     ctx.commands.append(r)
 

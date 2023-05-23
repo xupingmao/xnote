@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-19 15:16:04
 @LastEditors  : xupingmao
-@LastEditTime : 2023-01-21 18:02:33
+@LastEditTime : 2023-05-22 00:19:14
 @FilePath     : /xnote/handlers/note/dao_api.py
 @Description  : DAO接口定义
 """
@@ -41,7 +41,8 @@ class NoteDao:
     def count_tag(user_name):
         # type: (str)->int
         """统计标签数量"""
-        raise NotImplementedError()
+        from . import dao_tag
+        return dao_tag.count_tag(user_name)
     
     @staticmethod
     def count_comment(user_name):

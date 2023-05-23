@@ -17,10 +17,10 @@
         <ul>
             {% if _has_login %}
                 <!-- 笔记选项 -->
-                <li><a href="/note/recent_created">{{T("Recent Created")}}</a></li>
-                <li><a href="/note/recent_edit">{{T("Recent Updated")}}</a></li>
-                <li><a href="/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
-                <li><a href="/note/tools/timeline">{{T("笔记时光")}}</a></li>
+                <li><a href="{{_server_home}}/note/recent_created">{{T("Recent Created")}}</a></li>
+                <li><a href="{{_server_home}}/note/recent_edit">{{T("Recent Updated")}}</a></li>
+                <li><a href="{{_server_home}}/note/recent_viewed">{{T("Recent Viewed")}}</a></li>
+                <li><a href="{{_server_home}}/note/tools/timeline">{{T("笔记时光")}}</a></li>
             {% end %}
         </ul>
     </div>
@@ -39,7 +39,7 @@
     </div>
     <div class="aside-content">
         {% for item in groups %}
-            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}({{item.size}})</a></li>
+            <li><a class="link" href="{{_server_home}}/note/view?id={{item.id}}">{{item.name}}({{item.size}})</a></li>
         {% end %}
     </div>
 </div>
@@ -53,7 +53,7 @@
     </div>
     <div class="aside-content">
         {% for item in recent_created %}
-            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
+            <li><a class="link" href="{{_server_home}}/note/view?id={{item.id}}">{{item.name}}</a></li>
         {% end %}
     </div>
 </div>
@@ -68,7 +68,7 @@
     </div>
     <div class="aside-content">
         {% for item in most_visited %}
-            <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
+            <li><a class="link" href="{{_server_home}}/note/view?id={{item.id}}">{{item.name}}</a></li>
         {% end %}
     </div>
 </div>
@@ -84,9 +84,9 @@
     <div class="aside-content">
         {% for item in recommended_notes %}
             {% if "url" in item %}
-                <li><a class="link" href="{{item.url}}">{{item.name}}</a></li>
+                <li><a class="link" href="{{_server_home}}{{item.url}}">{{item.name}}</a></li>
             {% else %}
-                <li><a class="link" href="/note/view?id={{item.id}}">{{item.name}}</a></li>
+                <li><a class="link" href="{{_server_home}}/note/view?id={{item.id}}">{{item.name}}</a></li>
             {% end %}
         {% end %}
     </div>
@@ -105,7 +105,7 @@
         {% set tm = time.localtime() %}
         {% for delta in range(12) %}
             {% set y, m, d = dateutil.date_add(tm, months = -delta) %}
-            <li><a href="/note/date?year={{y}}&month={{m}}">{{"%s-%02d" % (y, m)}}</a></li>
+            <li><a href="{{_server_home}}/note/date?year={{y}}&month={{m}}">{{"%s-%02d" % (y, m)}}</a></li>
         {% end %}
     </div>
 </div>

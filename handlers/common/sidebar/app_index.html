@@ -1,7 +1,16 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2023-03-04 14:34:27
+@LastEditors  : xupingmao
+@LastEditTime : 2023-05-20 22:34:49
+@FilePath     : /xnote/handlers/common/sidebar/app_index.html
+@Description  : 描述
+ #} -->
 {% init show_app_index_icon = True %}
-<div class="card">
+<div class="card desktop-only">
     <div class="list-box">
-        <a href="/system/index?show_back=true" class="list-item">
+        <a href="{{_server_home}}/system/index?show_back=true" class="list-item">
             {% if show_app_index_icon %}
                 <i class="fa fa-th-large"></i>
             {% end %}

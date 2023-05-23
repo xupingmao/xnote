@@ -13,13 +13,13 @@
 <div class="card">    
     <div class="card-title btn-line-height">
         <span class="x-tab-box" data-tab-key="tag" data-tab-default="log">
-            <a class="x-tab" href="/message?tag=log" data-tab-value="log">{{T("随手记")}}</a>
-            <a class="x-tab" href="/message?tag=task" data-tab-value="task">{{T("待办任务")}}</a>
+            <a class="x-tab" href="{{_server_home}}/message?tag=log" data-tab-value="log">{{T("随手记")}}</a>
+            <a class="x-tab" href="{{_server_home}}/message?tag=task" data-tab-value="task">{{T("待办任务")}}</a>
         </span>
         <div class="float-right">
             {% if HOME_PATH == "/message/log" and not show_back_btn %}
-                <a class="btn btn-default" href="/note/group">笔记</a>
-                <a class="btn btn-default" href="/note/tools">工具</a>
+                <a class="btn btn-default" href="{{_server_home}}/note/group">笔记</a>
+                <a class="btn btn-default" href="{{_server_home}}/note/tools">工具</a>
             {% else %}
                 {% include common/button/back_button.html %}
             {% end %}

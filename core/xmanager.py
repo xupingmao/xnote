@@ -336,6 +336,8 @@ class HandlerManager:
                 _error_logger.log("Model traceback (most recent call last):")
                 err_msg = xutils.print_exc()
                 _error_logger.log(err_msg)
+                # 严格校验模式，直接阻断启动
+                raise e
 
         self.report_failed()
 

@@ -13,6 +13,7 @@ from xutils.db.dbutil_base import (
 )
 from xutils import six
 from xutils.db.encode import encode_str, decode_str
+from . import filters
 
 class LdbHashTable:
     """基于leveldb的哈希表结构
@@ -90,10 +91,14 @@ class LdbHashTable:
         row_key = self.build_key(key)
         return db_get(row_key, default_value)
 
-    def iter(self, offset = 0, limit = 20, reverse = False, filter_func = None):
+    def iter(self, offset = 0, limit = 20, reverse = False, filter_func = None, where=None):
         """hash表的迭代器
         @yield key, value
         """
+
+        if where != None:
+            filter_func = filters.create_func_by_where(where, filter_func)
+
         prefix_len = len(self.prefix)
         for key, value in prefix_iter(self.prefix, filter_func = filter_func, 
                 offset = offset, limit = limit, reverse = reverse, include_key = True):
@@ -124,9 +129,9 @@ class LdbHashTable:
 
         return count_table(key_prefix)
     
-    def first(self):
-        # type: () -> tuple[str|None, object]
-        records = self.list(limit=1)
+    def first(self, where = None):
+        # type: (None|dict) -> tuple[str|None, object]
+        records = self.list(limit=1, where = where)
         if len(records) > 0:
             return records[0]
         return None, None

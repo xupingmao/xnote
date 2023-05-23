@@ -46,14 +46,14 @@ HTML = """
 {% init plain_text = "" %}
 
 {% if embed == "true" %}
-    <a class="btn btn-default" href="/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
+    <a class="btn btn-default" href="{{_server_home}}/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
 {% else %}
     <div class="card">
         <div class="card-title btn-line-height">
             <span>二进制查看</span>
             
             <div class="float-right">
-                <a class="btn btn-default" href="/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
+                <a class="btn btn-default" href="{{_server_home}}/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
                 {% include common/button/back_button.html %}
             </div>
         </div>

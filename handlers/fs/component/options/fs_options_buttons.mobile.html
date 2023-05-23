@@ -30,9 +30,9 @@
         <div class="dropdown">
             <span class="dropdown-btn link btn">更多▾</span>
             <div class="dropdown-content">
-                <a class="dropdown-option" href="/code/search?path={{xutils.quote(path)}}&recursive=on">高级搜索</a>
-                <a class="dropdown-option" href="/code/lines?path={{xutils.quote(path)}}&recursive=on">代码统计</a>
-                <a class="dropdown-option" href="/fs/{{path}}?show_hidden_files=true">显示隐藏文件</a>
+                <a class="dropdown-option" href="{{_server_home}}/code/search?path={{xutils.quote(path)}}&recursive=on">高级搜索</a>
+                <a class="dropdown-option" href="{{_server_home}}/code/lines?path={{xutils.quote(path)}}&recursive=on">代码统计</a>
+                <a class="dropdown-option" href="{{_server_home}}/fs/{{path}}?show_hidden_files=true">显示隐藏文件</a>
                 <a class="dropdown-option" id="addToBookmarkBtn">收藏</a>
                 <a class="dropdown-option rebuild-index-option">重建索引</a>
             </div>

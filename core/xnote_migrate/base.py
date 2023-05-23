@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2023-02-05 16:19:20
 @LastEditors  : xupingmao
-@LastEditTime : 2023-02-05 16:19:40
-@FilePath     : /xnote/handlers/upgrade/base.py
+@LastEditTime : 2023-05-20 14:33:48
+@FilePath     : /xnote/core/xnote_migrate/base.py
 @Description  : 描述
 """
 
@@ -34,3 +34,10 @@ def log_error(fmt, *args):
 
 def log_warn(fmt, *args):
     print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
+
+
+def execute_upgrade(key = "", fn = lambda:None):
+    if is_upgrade_done(key):
+        return
+    fn()
+    mark_upgrade_done(key)

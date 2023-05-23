@@ -6,14 +6,14 @@
 
 <!-- 桌面版菜单 -->
 <div class="card x-tab-box message-tab" data-tab-key="p" data-tab-default="task">
-    <a class="x-tab" href="/message?tag=task" data-tab-value="task">
+    <a class="x-tab" href="{{_server_home}}/message?tag=task" data-tab-value="task">
         待办(<span class="task-count">{{message_stat.task_count}}</span>)
     </a>
 
-    <a class="x-tab" href="/message?tag=task&p=done&displayTag=done" data-tab-value="done">
+    <a class="x-tab" href="{{_server_home}}/message?tag=task&p=done&displayTag=done" data-tab-value="done">
         已完成(<span class="done-count">{{message_stat.done_count}}</span>)
     </a>
-    <a class="x-tab" href="/message?tag=task&p=taglist&displayTag=taglist" data-tab-value="taglist">
+    <a class="x-tab" href="{{_server_home}}/message?tag=task&p=taglist&displayTag=taglist" data-tab-value="taglist">
         标签
     </a>
 </div>

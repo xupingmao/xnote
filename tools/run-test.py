@@ -27,13 +27,15 @@ def check_and_install_pkg(py_module, pip_version = ""):
 	except ImportError:
 		print("准备安装:", pip_version)
 		cmd = sys.executable
-		os.system("%s -m pip install %r" % (cmd, pip_version))
+		os.system("%s -m pip install \"%s\"" % (cmd, pip_version))
 
 def py_exec(cmd_line):
 	os.system("%s %s" % (sys.executable, cmd_line))
 
 def run_test(args):
 	target = args.target
+	if args.test_mysql:
+		args.skip_mysql_test = False
 	os.environ["skip_mysql_test"] = str(args.skip_mysql_test)
 	os.environ["mysql_host"] = str(args.mysql_host)
 	os.environ["mysql_password"] = str(args.mysql_password)
@@ -95,6 +97,7 @@ def run_test(args):
 	check_and_install_pkg("pytest_cov", "pytest-cov>=2.7.1")
 	check_and_install_pkg("coveralls", "python-coveralls>=2.9.3")
 	check_and_install_pkg("coverage", "coverage==4.5.4")
+	check_and_install_pkg("bs4", "beautifulsoup4==4.12.2")
 	os.system("%s -m pip install lmdb" % executable)
 	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --ff" % executable)
 	os.system("%s -m coverage html" % executable)
@@ -103,6 +106,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("target", default="all", nargs="?")
 	parser.add_argument("--skip_mysql_test", action="store_true", default=True)
+	parser.add_argument("--test_mysql", action="store_true", default=False)
 	parser.add_argument("--mysql_host", default="192.168.50.153")
 	parser.add_argument("--mysql_user", default="root")
 	parser.add_argument("--mysql_password", default="root")

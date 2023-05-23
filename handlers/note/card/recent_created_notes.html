@@ -2,7 +2,7 @@
     <div class="card-title">
         <span>最近创建</span>
         <div class="float-right">
-            <a class="btn btn-default" href="/note/recent?orderby=create">更多</a>
+            <a class="btn btn-default" href="{{_server_home}}/note/recent?orderby=create">更多</a>
         </div>
     </div>
 {% for item in recent_created_notes %}
@@ -11,7 +11,7 @@
         {% continue %}
     {% end %}
 
-    <a class="list-link" href="{{item.url}}">
+    <a class="list-link" href="{{_server_home}}{{item.url}}">
         {% if item.priority>0 %}
             <i class="fa fa-thumb-tack black"></i>
         {% end %}
@@ -21,7 +21,7 @@
         <span>{{item.name}}</span>
         
         {% if item.is_deleted %}
-            <span class="gray-tag-span" href="/note/removed">删除</span>
+            <span class="gray-tag-span" href="{{_server_home}}/note/removed">删除</span>
         {% end %}
         
         <div class="float-right">

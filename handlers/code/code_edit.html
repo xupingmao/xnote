@@ -2,11 +2,11 @@
 
 {% block head %}
 
-    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/5.65.12/codemirror.css">
-    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/xq-light.css">
-    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/addon/dialog/dialog.css">
-    <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/addon/hint/show-hint.css">
+    <link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/5.65.12/codemirror.css">
+    <link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/theme/monokai.min.css">
+    <link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/theme/xq-light.css">
+    <link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/addon/dialog/dialog.css">
+    <link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/addon/hint/show-hint.css">
 
     <script type="text/javascript" src="/static/lib/codemirror/5.65.12/codemirror.js"></script>
     <script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
@@ -94,7 +94,7 @@
         <span>文本编辑</span>
         <div class="float-right">
             {% if show_preview %}
-                <a class="btn" href="/code/wiki/{{path}}?embed={{embed}}">{{T("Preview")}}</a>
+                <a class="btn" href="{{_server_home}}/code/wiki/{{path}}?embed={{embed}}">{{T("Preview")}}</a>
             {% end %}
             <a class="btn btn-default" href="javascript:history.back();">返回</a>
         </div>
@@ -132,10 +132,10 @@
             {% end %}
             <input id="execute" type="button" class="btn hide" value="执行"/>
             {% if show_preview %}
-                <a class="btn" href="/code/wiki/{{path}}?embed={{embed}}">{{T("Preview")}}</a>
+                <a class="btn" href="{{_server_home}}/code/wiki/{{path}}?embed={{embed}}">{{T("Preview")}}</a>
             {% end %}
             {% if path.find("/plugins/") >= 0 or path.find("\\plugins\\") >= 0 %}
-                <input type="button" class="link-btn" href="/plugins/{{plugin_name}}?embed={{embed}}&_reload=true" value="预览"/>
+                <input type="button" class="link-btn" href="{{_server_home}}/plugins/{{plugin_name}}?embed={{embed}}&_reload=true" value="预览"/>
             {% end %}
             <span>注意不会自动保存</span>
         </div>

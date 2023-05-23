@@ -15,7 +15,7 @@
     <span>{{title}}</span>
     <div class="float-right">
         {% if show_create_option %}
-            <a class="btn" href="/note/create?parent_id={{parent_id}}&type={{create_type}}">{{create_text}}</a>
+            <a class="btn" href="{{_server_home}}/note/create?parent_id={{parent_id}}&type={{create_type}}">{{create_text}}</a>
         {% end %}
         {% include note/component/option/group_option.html %}
     </div>

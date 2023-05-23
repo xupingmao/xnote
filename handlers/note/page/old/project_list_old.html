@@ -10,12 +10,12 @@
         <h3 class="card-title">{{T("常用")}}
             <div class="float-right">
                 <a class="inline-btn add-group-btn">+分组</a>
-                <a class="inline-btn" href="/note/add">+笔记</a>
+                <a class="inline-btn" href="{{_server_home}}/note/add">+笔记</a>
             </div>
         </h3>
 
         {% for item in tools %}
-            <a href="{{item.url}}" class="fixed-book">
+            <a href="{{_server_home}}{{item.url}}" class="fixed-book">
                 <div class="book-item fixed-book-item">
                     <i class="fa {{item.icon}} orange"></i>
                     {% if item.priority > 0 %}
@@ -37,12 +37,12 @@
             <h3 class="card-title">{{T("置顶")}}
                 <div class="float-right">
                     <a class="inline-btn add-group-btn">+分组</a>
-                    <a class="inline-btn" href="/note/add">+笔记</a>
+                    <a class="inline-btn" href="{{_server_home}}/note/add">+笔记</a>
                 </div>
             </h3>
 
             {% for item in fixed_books %}
-                <a href="{{item.url}}">
+                <a href="{{_server_home}}{{item.url}}">
                 <div class="book-item">
                     {% if item.type == "system" %}
                         <i class="icon-folder-system"></i>
@@ -69,7 +69,7 @@
         <div class="grid-row card book-list">
             <h3 class="card-title">{{T("分组")}}</h3>
             {% for item in files %}
-                <a href="{{item.url}}">
+                <a href="{{_server_home}}{{item.url}}">
                 <div class="book-item">
                     {% if item.type == "system" %}
                         <i class="icon-folder-system"></i>

@@ -504,9 +504,11 @@ def db_get(key, default_value=None):
     except KeyError:
         return default_value
 
-
-def _db_batch_get_mysql(key_list, default_value=None):
+def db_batch_get(key_list, default_value=None):
     # type: (list[str], object) -> dict[str, object]
+    """批量查询"""
+    check_leveldb()
+    
     key_bytes_list = []
     for key in key_list:
         key_bytes_list.append(key.encode("utf-8"))
@@ -520,19 +522,6 @@ def _db_batch_get_mysql(key_list, default_value=None):
             object = default_value
         result[key.decode("utf-8")] = object
     return result
-
-
-def db_batch_get(key_list, default_value=None):
-    # type: (list[str], object) -> dict[str, object]
-    """批量查询"""
-    check_leveldb()
-    if _driver_name == "mysql":
-        return _db_batch_get_mysql(key_list, default_value)
-    else:
-        batch_result = dict()
-        for key in key_list:
-            batch_result[key] = db_get(key, default_value)
-        return batch_result
 
 
 def db_put(key, obj_value, sync=False, check_table=True):
@@ -788,16 +777,7 @@ def count_table(table_name, use_cache=False):
 
     key_from = table_name.encode("utf-8")
     key_to = table_name.encode("utf-8") + b'\xff'
-    if _driver_name == "mysql":
-        count = _leveldb.Count(key_from, key_to)
-    else:
-        iterator = check_get_leveldb().RangeIter(
-            key_from, key_to, include_value=False, fill_cache=False)
-
-        count = 0
-        for key in iterator:
-            count += 1
-
+    count = _leveldb.Count(key_from, key_to)
     if _cache != None:
         _cache.put(cache_key, count, expire=DEFAULT_CACHE_EXPIRE)
     return count

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-09-12 20:41:26
 @LastEditors  : xupingmao
-@LastEditTime : 2022-09-16 22:31:39
+@LastEditTime : 2023-05-21 21:46:00
 @FilePath     : /xnote/handlers/system/cache_admin.py
 @Description  : 缓存管理
 """
@@ -56,7 +56,6 @@ class CacheHandler:
         kw.cache_size = xutils.format_size(cache_size)
         kw.page_totalsize = len(keys)
         kw.page_size = limit
-        kw.page_url = "/system/cache?page="
 
         return xtemplate.render("system/page/cache_admin.html", **kw)
 

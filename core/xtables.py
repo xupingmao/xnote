@@ -155,16 +155,19 @@ def init_history_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    with TableManager("user", dbpath = xconfig.DB_PATH) as manager:
-        manager.add_column("name",       "text", "")
-        manager.add_column("password",   "text", "")
-        manager.add_column("salt",       "text", "")
-        # 额外的访问权限
-        manager.add_column("privileges", "text", "")
-        manager.add_column("ctime",      "text", "")
-        manager.add_column("mtime",      "text", "")
-        manager.add_column("token",      "text", "")
-        manager.add_column("login_time", "text", "")
+    db = get_db_instance(dbpath = xconfig.FileConfig.user_db_file)
+    with TableManager("user", db = db) as manager:
+        manager.add_column("name",       "varchar(64)", "")
+        manager.add_column("password",   "varchar(64)", "")
+        manager.add_column("salt",       "varchar(64)", "")
+        manager.add_column("ctime",      "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime",      "datetime", "1970-01-01 00:00:00")
+        manager.add_column("token",      "varchar(32)", "")
+        manager.add_column("login_time", "datetime", "1970-01-01 00:00:00")
+        manager.add_index("name", is_unique=True)
+        manager.add_index("token")
+        # 删除的字段
+        manager.drop_column("privileges", "text", "")
 
 
 def init_message_table():
@@ -174,15 +177,15 @@ def init_message_table():
     - 2017/05/29
     """
     with TableManager("message", dbpath = xconfig.DB_PATH) as manager:
-        manager.add_column("ctime", "text", "")
-        manager.add_column("mtime", "text", "")
-        manager.add_column("user",  "text", "")
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("user",  "varchar(64)", "")
         # 用一个状态可以拍成一排
         # 消息的状态 0关注 50挂起 100已完成
         manager.add_column("status", "int", 0)
         manager.add_column("content", "text", "")
         # IP地址
-        manager.add_column("ip", "text", "")
+        manager.add_column("ip", "varchar(32)", "")
         # 地址信息
         manager.add_column("location", "text", "")
         # 索引
@@ -190,45 +193,25 @@ def init_message_table():
         manager.add_index(["user", "status"])
 
 
-def init_collection_table():
-    # 2017/12/09
-    # 通用的收藏数据结构，基于file的收藏只能收藏file而且不能支持多用户
-    with TableManager("collection", dbpath = xconfig.DB_PATH) as manager:
-        manager.add_column("user", "text", "")
-        manager.add_column("name", "text", "")
-        manager.add_column("link", "text", "")
-        manager.add_column("type", "text", "")
-
-
 def init_record_table():
     # 日志库和主库隔离开
-    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
-    with TableManager("record", dbpath = dbpath) as manager:
-        manager.add_column("ctime", "text", "")
+    db = get_db_instance(dbpath = xconfig.FileConfig.record_db_file)
+    with TableManager("record", db = db) as manager:
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
-        manager.add_column("cdate", "text", "")
-        manager.add_column("type",  "text", "")
+        manager.add_column("cdate", "date", "1970-01-01")
+        manager.add_column("type",  "varchar(64)", "")
         # 自己把所有条件都组装到key里
-        manager.add_column("key",  "text", "")
+        manager.add_column("key",  "varchar(100)", "")
         manager.add_column("value", "text", "")
         # 索引
         manager.add_index(["type", "ctime"])
 
 
-def init_storage_table():
-    """通用的配置对象, 比词典多一个type，用来存储个人的一些设置之类的"""
-    dbpath = xconfig.DB_PATH
-    with TableManager("storage", dbpath = dbpath) as manager:
-        manager.add_column("ctime", "text", "")
-        manager.add_column("mtime", "text", "")
-        manager.add_column("user",  "text", "")
-        manager.add_column("type",  "text", "")
-        manager.add_column("key",   "text", "")
-        manager.add_column("value", "text", "")
-        manager.add_index("key")
+class MySqliteDB(web.db.SqliteDB):
+    dbpath = ""
 
 def get_db_instance(dbpath = ""):
-    assert dbpath != ""
     db_driver = xconfig.get_system_config("db_driver")
     if db_driver == "mysql":
         db_host = xconfig.get_system_config("mysql_host")
@@ -236,9 +219,14 @@ def get_db_instance(dbpath = ""):
         db_user = xconfig.get_system_config("mysql_user")
         db_pw = xconfig.get_system_config("mysql_password")
         db_port = xconfig.get_system_config("mysql_port")
-        return web.db.MySQLDB(host = db_host, database = db_name, 
+        db = web.db.MySQLDB(host = db_host, database = db_name, 
                               user = db_user, pw = db_pw, port = db_port)
-    return web.db.SqliteDB(db = dbpath)
+        db.dbname = "mysql"
+        return db
+    assert dbpath != ""
+    db = MySqliteDB(db = dbpath)
+    db.dbpath = dbpath
+    return db
 
 def init_dict_table():
     """词典，和主库隔离
@@ -246,24 +234,26 @@ def init_dict_table():
     """
     db = get_db_instance(dbpath = xconfig.DICT_FILE)
     with TableManager("dictionary", db = db) as manager:
-        manager.add_column("ctime", "text", "")
-        manager.add_column("mtime", "text", "")
-        manager.add_column("key", "text", "")
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("key", "varchar(100)", "")
         manager.add_column("value", "text", "")
         manager.add_index("key")
 
-
-def init_search_rule_table():
-    """搜索规则（智能文件夹）
-    @since 2019/02/18
+def init_note_tag_bind_table():
+    """笔记标签绑定
+    @since 2023/05/20
     """
-    with TableManager("search_rule", dbpath = xconfig.DB_PATH) as manager:
-        manager.add_column("ctime", "text", "")
-        manager.add_column("mtime", "text", "")
-        manager.add_column("user",  "text", "")
-        manager.add_column("name", "text", "")
-        manager.add_column("expression", "text", "")
-        manager.add_index("user")
+    table_name = "note_tag_bind"
+    dbpath = xconfig.FileConfig.get_db_path(table_name)
+    db = get_db_instance(dbpath=dbpath)
+    with TableManager(table_name, db = db) as manager:
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("user", "varchar(64)", "")
+        manager.add_column("note_id", "bigint", default_value=0)
+        manager.add_column("tag_name", "varchar(64)", "")
+        manager.add_index(["user", "tag_name"])
 
 class DBPool:
 
@@ -275,12 +265,12 @@ class DBPool:
         if fname in cls.sqlite_pool:
             return cls.sqlite_pool.get(fname)
         fpath = os.path.join(xconfig.FileConfig.sqlite_dir, fname)
-        db = web.db.SqliteDB(db = fpath)
+        db = MySqliteDB(db = fpath)
         cls.sqlite_pool[fname] = db
         return db
 
 def DBWrapper(dbpath, tablename):
-    db = web.db.SqliteDB(db = dbpath)
+    db = MySqliteDB(db = dbpath)
     return TableProxy(db, tablename)
 
 def get_file_table():
@@ -309,47 +299,65 @@ def get_schedule_table():
 
 
 def get_user_table():
-    return DBWrapper(xconfig.DB_PATH, "user")
+    return get_table_by_name("user")
 
 
 def get_message_table():
-    return DBWrapper(xconfig.DB_PATH, "message")
+    return get_table_by_name("message")
 
 
 def get_record_table():
-    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
-    return DBWrapper(dbpath, "record")
-
-
-def get_storage_table():
-    return DBWrapper(xconfig.DB_PATH, "storage")
+    return get_table_by_name("record")
 
 
 def get_dict_table():
-    db = get_db_instance(dbpath=xconfig.DICT_FILE)
-    return TableProxy(db, "dictionary")
-
-def get_search_rule_table():
-    return DBWrapper(xconfig.DB_PATH, "search_rule")
-
+    return get_table_by_name("dictionary")
 
 get_dictionary_table = get_dict_table
 
+def get_table_by_name(table_name=""):
+    # type: (str) -> TableProxy
+    table_info = TableManager.get_table_info(table_name)
+    if table_info == None:
+        raise Exception("table not found: %s" % table_name)
+    db = get_db_instance(dbpath=table_info.dbpath)
+    return TableProxy(db, table_name)
 
 def get_all_tables():
-    return [
-        get_dict_table()
-    ]
+    """获取所有的sql-数据库代理实例"""
+    result = []
+    table_dict = TableManager.get_table_info_dict()
+    for table_name in table_dict:
+        proxy = get_table_by_name(table_name)
+        result.append(proxy)
+    return result
 
-def get_table(name, dbpath=None):
+def init_backup_table(tablename, db):
+    table_info = TableManager.get_table_info(tablename)
+    if table_info == None:
+        raise Exception("table not defined: %s" % tablename)
+    
+    with TableManager(tablename, db = db, is_backup=True) as manager:
+        for args, kw in table_info.columns:
+            manager.add_column(*args, **kw)
+        
+        for args, kw in table_info.indexes:
+            manager.add_index(*args, **kw)
+    
+    return TableProxy(db, tablename)
+    
+def get_table(tablename, dbpath=None):
     """获取数据库表，表的创建和访问不必在xtables中定义
     @since 2019/04/11
     """
     if dbpath is None:
         dbpath = xconfig.DB_FILE
-    return DBWrapper(dbpath, name)
+    return DBWrapper(dbpath, tablename)
 
 @xutils.log_init_deco("xtables")
 def init():
+    TableManager.clear_table_dict()
     web.db.config.debug_sql = False
     init_dict_table()
+    init_record_table()
+    init_user_table()

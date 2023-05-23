@@ -21,7 +21,7 @@
 <div class="card">
 
     <h3 class="card-title btn-line-height">
-        <a class="link2" href="/system/user/list">用户管理</a>&nbsp;/&nbsp;<span>编辑</span>
+        <a class="link2" href="{{_server_home}}/system/user/list">用户管理</a>&nbsp;/&nbsp;<span>编辑</span>
         {% include common/back.html %}
     </h3>
 
@@ -54,7 +54,7 @@
             <td>{{user_info.token}}</td>
         </tr>
         <tr>
-            <td class="label">上次更新</td>
+            <td class="label">最近更新</td>
             <td>{{user_info.mtime}}</td>
         </tr>
         <tr>

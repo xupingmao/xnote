@@ -39,6 +39,7 @@ tm_yday  从每年的1月1日开始的天数 – 取值区间为[0,365]，其中
 import time
 import math
 from . import six
+import datetime
 
 SECONDS_PER_DAY = 3600 * 24
 DEFAULT_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -86,16 +87,19 @@ def days_before(days, format=False):
     return time.localtime(seconds)
 
 
-def format_datetime(seconds=None):
+def format_datetime(value=None):
     """格式化日期时间
     >>> format_datetime(0)
     '1970-01-01 08:00:00'
     """
-    if seconds == None:
-        return time.strftime('%Y-%m-%d %H:%M:%S')
+    format = '%Y-%m-%d %H:%M:%S'
+    if value == None:
+        return time.strftime(format)
+    elif isinstance(value, datetime.datetime):
+        return value.strftime(format)
     else:
-        st = time.localtime(seconds)
-        return time.strftime('%Y-%m-%d %H:%M:%S', st)
+        st = time.localtime(value)
+        return time.strftime(format, st)
 
 def format_time(seconds = None):
     return format_datetime(seconds)

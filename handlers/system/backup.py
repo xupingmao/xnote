@@ -16,10 +16,13 @@ import xutils
 import xconfig
 import xauth
 import xtemplate
+import web.db
+
 from xutils import Storage
 from xutils import dbutil
 from xutils import fsutil, logutil
 from xutils.db.driver_sqlite import SqliteKV
+import xtables
 
 config = xconfig
 
@@ -113,7 +116,56 @@ class DBBackup:
     def get_backup_logger(self):
         return logutil.get_mem_logger("backup_db", size = 20, ttl = -1)
 
-    def dump_db(self):
+    def dump_db(self, backup_kv = True, backup_sql=True):
+        count = 0
+        if backup_kv:
+            count = self.backup_kv_store()
+        if backup_sql:
+            self.backup_sql_tables()
+        return count
+    
+    def backup_sql_tables(self):
+        logger = self.get_backup_logger()
+        db = xtables.MySqliteDB(db = self.db_backup_file)
+        batch_size = 100
+
+        try:
+            for table in xtables.get_all_tables():
+                backup_table = xtables.init_backup_table(table.tablename, db)
+                total_count = table.count()
+                logger.info("backup table:(%s) count:(%d)", table.tablename, total_count)
+                start_time = time.time()
+                batch = []
+                count = 0
+                for record in table.iter():
+                    new_record = table.filter_record(record)
+                    batch.append(new_record)
+                    count += 1
+                    if len(batch) >= batch_size:
+                        # 只更新结构包含的字段
+                        self.multiple_insert(backup_table, batch)
+                        batch = []
+                        cost_time = time.time() - start_time
+                        qps = calc_qps(count, cost_time)
+                        logger.log("table:(%s), proceed:(%d/%d), qps:(%.2f)" % (backup_table.tablename, count, total_count, qps))
+                if len(batch) > 0:
+                    self.multiple_insert(backup_table, batch)
+                    batch = []
+                cost_time = time.time() - start_time
+                logger.info("backup table:(%s) done! cost_time:(%.2fs)", table.tablename, cost_time)
+        except:
+            err_info = xutils.print_exc()
+            logger.info("backup failed: (%s)" % err_info)
+        finally:
+            db.ctx.db.close()
+            del db
+
+    def multiple_insert(self, db, batch):
+        with db.transaction():
+            for value in batch:
+                db.insert(**value)
+
+    def backup_kv_store(self):
         logger = self.get_backup_logger()
 
         total_count = dbutil.count_all()
@@ -162,13 +214,14 @@ class DBBackup:
             DBBackup._progress = 0.0
         return count
 
-    def execute(self):
+
+    def execute(self, backup_kv=True):
         logger = self.get_backup_logger()
         got_lock = False
         try:
             if _backup_lock.acquire(blocking = False):
                 got_lock = True
-                self.do_execute()
+                self.do_execute(backup_kv=backup_kv)
             else:
                 logger.log("backup is busy")
                 return "backup is busy"
@@ -176,13 +229,13 @@ class DBBackup:
             if got_lock:
                 _backup_lock.release()
 
-    def do_execute(self):
+    def do_execute(self, backup_kv=True):
         # 先做清理工作
         self.clean()
 
         start_time = time.time()
         # 执行备份
-        count = self.dump_db()
+        count = self.dump_db(backup_kv=backup_kv)
 
         cost_time = (time.time() - start_time) * 1000.0
         logging.info("数据库记录总数:%s", count)
@@ -314,6 +367,11 @@ class BackupHandler:
         if p == "import_db":
             path = xutils.get_argument("path", "")
             return import_db(path)
+
+        if p == "backup_sql":
+            backup = DBBackup()
+            backup.execute(backup_kv=False)
+            return "backup_sql"
 
         # 备份所有的
         chk_db_backup()

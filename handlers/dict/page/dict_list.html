@@ -5,10 +5,10 @@
 
 <div class="card">
     <div class="card-title">
-        <a class="path-link" href="/note/dict">词典</a>
+        <a class="path-link" href="{{_server_home}}/note/dict">词典</a>
 
         <div class="float-right">
-            <a class="btn btn-default" href="/dict/add">新增</a>
+            <a class="btn btn-default" href="{{_server_home}}/dict/add">新增</a>
             {% include common/button/back_button.html %}
         </div>
     </div>
@@ -22,7 +22,7 @@
         {% end %}
 
         {% for item in files %}
-            <a class="dialog-link" href="{{item.url}}">
+            <a class="dialog-link" href="{{_server_home}}{{item.url}}">
                 <div class="book-item">
                     <span>{{item.name}}</span>
                     <span class="dict-list-value">{{item.value}}</span>

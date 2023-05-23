@@ -17,7 +17,7 @@
 
     <div class="pad5 group-detail-btn-box">
         <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
-        <a class="btn btn-default" href="/note/management?parent_id={{file.id}}">批量管理</a>
+        <a class="btn btn-default" href="{{_server_home}}/note/management?parent_id={{file.id}}">批量管理</a>
         <a class="btn btn-default" onclick="xnote.onMoveNoteClick(this);" data-id="{{file.id}}">移动</a>
     </div>
 </div>
@@ -26,7 +26,7 @@
     <div class="card-title">
         <span>简介</span>
         <div class="float-right">
-            <a href="/note/edit?id={{file.id}}">编辑</a>
+            <a href="{{_server_home}}/note/edit?id={{file.id}}">编辑</a>
         </div>
     </div>
     {% if file.content == None or file.content == "" %}

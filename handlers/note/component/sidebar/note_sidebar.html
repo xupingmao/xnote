@@ -5,7 +5,7 @@
 {% init special_groups = xutils.call("page.list_special_groups") %}
 <div class="card">
     {% for item in special_groups %}
-        <a class="list-link" href="{{item.url}}">
+        <a class="list-link" href="{{_server_home}}{{item.url}}">
             
             {% if item.priority>0 %}
                 <i class="fa fa-thumb-tack black"></i>
@@ -31,7 +31,7 @@
     </div>
     <div class="note-sidebar-contents">
     {% for item in xutils.call("note.list_by_parent", _user_name, file.parent_id, orderby = "db") %}
-        <a class="list-item" href="{{item.url}}" 
+        <a class="list-item" href="{{_server_home}}{{item.url}}" 
             {% if item.id == file_id %}
                 data-current=true
             {% end %}>

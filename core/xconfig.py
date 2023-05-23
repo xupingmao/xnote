@@ -216,6 +216,8 @@ class FileConfig:
     sqlite_dir = ""
     backup_dir = ""
     backup_db_dir = ""
+    record_db_file = ""
+    user_db_file = ""
 
     @classmethod
     def init(cls, data_dir):
@@ -232,6 +234,25 @@ class FileConfig:
         cls.backup_db_dir = os.path.join(cls.backup_dir, "db")
         makedirs(cls.backup_db_dir)
 
+        cls.record_db_file = os.path.join(cls.sqlite_dir, "record.db")
+        cls.user_db_file = cls.get_db_path("user")
+
+    @classmethod
+    def get_db_path(cls, dbname=""):
+        """dbname: sqlite数据库的文件名称"""
+        if not dbname.endswith(".db"):
+            dbname += ".db"
+        return os.path.join(cls.sqlite_dir, dbname)
+
+
+
+class WebConfig:
+
+    server_home = ""
+
+    @classmethod
+    def init(cls):
+        cls.server_home = get_system_config("server_home", "")
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
@@ -309,6 +330,8 @@ def init(boot_config_file=None, boot_config_kw = None):
 
     # 初始化文件配置
     FileConfig.init(DATA_DIR)
+    # 初始化web配置
+    WebConfig.init()
 
     # 备份数据地址
     BACKUP_DIR = make_data_dir("backup")
@@ -711,3 +734,6 @@ class SystemConfig:
     def get_bool(self, name, default_value=False):
         value = get_system_config(name, default_value)
         return bool(value)
+
+
+system_config = SystemConfig()

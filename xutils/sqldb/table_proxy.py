@@ -4,11 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-07 17:06:38
+@LastEditTime : 2023-05-22 23:15:12
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
 
+from . import table_manager
 
 class TableProxy:
     """基于web.db的装饰器
@@ -19,6 +20,7 @@ class TableProxy:
         self.tablename = tablename
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         self.db = db
+        self.table_info = None
 
     def fix_sql_keywords(self, where):
         # 兼容关键字
@@ -26,20 +28,41 @@ class TableProxy:
             key = where.pop("key", None)
             if key != None:
                 where["`key`"] = key
+    
+    def handle_result_set(self, result_set):
+        # TODO 转换类型用于序列化
+        result = []
+        for item in result_set:
+            # for attr in item:
+            #     value = item.get(attr)
+            result.append(item)
+        return result
 
     def insert(self, seqname=None, _test=False, **values):
         self.fix_sql_keywords(values)
         # TODO 记录binlog
         return self.db.insert(self.tablename, seqname, _test, **values)
+    
+    def _multiple_insert(self, values, seqname=None, _test=False):
+        # sqlite不支持
+        for value in values:
+            self.fix_sql_keywords(value)
+        # TODO 记录binlog
+        return self.db.multiple_insert(self.tablename, values, seqname, _test)
 
     def select(self, vars=None, what='*', where=None, order=None, group=None,
                limit=None, offset=None, _test=False):
         self.fix_sql_keywords(where)
-        return self.db.select(self.tablename, vars=vars, what=what, where=where, order=order, group=group,
+        result_set = self.db.select(self.tablename, vars=vars, what=what, where=where, order=order, group=group,
                               limit=limit, offset=offset, _test=_test)
+        records = list(result_set)
+        return records
 
     def select_first(self, *args, **kw):
-        return self.select(self.tablename, *args, **kw).first()
+        records = self.select(self.tablename, *args, **kw)
+        if len(records) > 0:
+            return records[0]
+        return None
 
     def query(self, *args, **kw):
         return self.db.query(*args, **kw)
@@ -67,4 +90,28 @@ class TableProxy:
     
     def transaction(self):
         return self.db.transaction()
+    
+    def iter(self):
+        last_id = 0
+        while True:
+            records = list(self.select(where = "id > $last_id", vars = dict(last_id = last_id), limit = 20, order="id"))
+            for record in records:
+                yield record
+            if len(records) == 0:
+                break
+            last_id = records[-1].id
+    
+    def get_table_info(self):
+        if self.table_info == None:
+            self.table_info = table_manager.TableManagerFacade.get_table_info(self.tablename)
+        return self.table_info
 
+    def filter_record(self, record):
+        # type: (dict) -> dict
+        result = {}
+        table_info = self.get_table_info()
+        for colname in table_info.column_names:
+            col_value = record.get(colname)
+            if col_value != None:
+                result[colname] = col_value
+        return result

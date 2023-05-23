@@ -14,7 +14,7 @@
         {% if item.need_admin and not _is_admin %}
             {% continue %}
         {% end %}
-        <a class="list-link" href="{{item.url}}">
+        <a class="list-link" href="{{_server_home}}{{item.url}}">
             <span>{{item.name}}</span>
             <div class="float-right">
                 <i class="fa fa-chevron-right"></i>

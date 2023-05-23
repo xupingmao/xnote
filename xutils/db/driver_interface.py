@@ -14,7 +14,9 @@ class DBInterface:
     """KV存储的数据库接口"""
 
     def __init__(self, *args, **kw):
-        pass
+        self.driver_type = ""
+        self.debug = False
+        self.log_debug = False
 
     def Get(self, key):
         # type: (bytes) -> bytes
@@ -26,7 +28,10 @@ class DBInterface:
     
     def BatchGet(self, keys):
         """批量get操作"""
-        raise NotImplementedError("BatchGet")
+        result = dict()
+        for key in keys:
+            result[key] = self.Get(key)
+        return result
 
     def Put(self, key, value, sync = False):
         # type: (bytes,bytes,bool) -> None
@@ -69,7 +74,12 @@ class DBInterface:
         raise NotImplementedError("Write")
 
     def Count(self, key_from, key_to):
-        raise NotImplementedError("待子类实现")
+        iterator = self.RangeIter(
+            key_from, key_to, include_value=False, fill_cache=False)
+        count = 0
+        for key in iterator:
+            count += 1
+        return count
 
 
 class DBLockInterface:

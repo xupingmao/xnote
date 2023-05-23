@@ -15,10 +15,10 @@
             <div class="float-right">
 
                 {% if show_create_option %}
-                    <a class="btn" href="/note/create?parent_id={{parent_id}}&type={{create_type}}">{{create_text}}</a>
+                    <a class="btn" href="{{_server_home}}/note/create?parent_id={{parent_id}}&type={{create_type}}">{{create_text}}</a>
                 {% end %}
 
-                <a class="btn btn-default" href="/note/tools">工具</a>
+                <a class="btn btn-default" href="{{_server_home}}/note/tools">工具</a>
 
                 {% if show_back %}
                     {% include common/button/back_button.html %}

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-03 22:15:16
+@LastEditTime : 2023-05-23 23:10:14
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -168,17 +168,18 @@ def get_tag_meta_by_name(user_name, tag_name, tag_type="group", group_id=None):
 def list_tag_meta(user_name, limit=1000, tag_type="group", tag_name=None, group_id=None):
     if tag_type == "note":
         assert group_id != None, "group_id不能为空"
+    
+    where = {
+        "tag_type": tag_type,
+    }
 
-    def list_tag_meta_func(key, value):
-        if value.tag_type != tag_type:
-            return False
-        if tag_name != None and value.tag_name != tag_name:
-            return False
-        if group_id != None and value.group_id != group_id:
-            return False
-        return True
+    if tag_name != None:
+        where["tag_name"] = tag_name
+    if group_id != None:
+        where["group_id"] = group_id
+    
     result = tag_meta_db.list(
-        limit=limit, filter_func=list_tag_meta_func, user_name=user_name)
+        limit=limit, where = where, user_name=user_name)
     result.sort(key=lambda x: x.amount or 0, reverse=True)
     return result
 

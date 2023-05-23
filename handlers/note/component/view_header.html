@@ -19,9 +19,9 @@
 
         <div class="float-right">
             {% if group_type == "gallery" %}
-                <a class="btn" href="/note/add?type=gallery">创建相册</a>
+                <a class="btn" href="{{_server_home}}/note/add?type=gallery">创建相册</a>
             {% elif group_type == "list" %}
-                <a class="btn" href="/note/add?type=list">创建清单</a>
+                <a class="btn" href="{{_server_home}}/note/add?type=list">创建清单</a>
             {% else %}
                 {# 其他普通笔记 #}
                 {% include note/component/option/note_dropdown.html %}

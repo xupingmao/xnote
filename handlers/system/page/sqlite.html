@@ -2,8 +2,8 @@
 
 {% block head %}
 <script src="/static/lib/codemirror/codemirror.min.js"></script>
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/codemirror.min.css">
-<link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.min.css">
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/codemirror.min.css">
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/theme/monokai.min.css">
 <script type="text/javascript" src="/static/lib/codemirror/mode/sql.min.js"></script>
 <style>
 .CodeMirror {
@@ -95,7 +95,7 @@ $(function () {
 
     $(".import-btn").click(function () {
         xnote.confirm("导入数据会覆盖现有数据，确认执行?", function (resp) {
-            $.get("/system/backup?p=import_db&path={{path}}")
+            $.get("/system/backup?p=import_db&path={{quote(path)}}")
             xnote.alert("执行中... <a target=\"_blank\" href=\"/system/log?log_type=mem&log_name=import_db\">查看执行日志</a>")
         })
     });
