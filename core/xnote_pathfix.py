@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-07 21:03:13
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-23 22:59:59
+@LastEditTime : 2023-05-23 23:25:21
 @FilePath     : /xnote/core/xnote_pathfix.py
 @Description  : 描述
 """
@@ -35,6 +35,8 @@ def fix():
     _add_to_sys_path(core_dir)
 
     Fixer.fixed = True
+
+    fix_core()
 
 def fix_core():
     from . import xmanager, xauth, xconfig

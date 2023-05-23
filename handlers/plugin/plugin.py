@@ -12,6 +12,7 @@ import xmanager
 import web
 import copy
 import xnote_hooks
+from xutils import six
 
 from xtemplate import T
 from xutils import Storage
@@ -981,9 +982,14 @@ def reload_plugins_by_config(ctx=None):
     global CONFIG_TOOLS
     parser = ConfigParser()
 
-    fpath = "config/plugin/plugins.ini"
-    sections = parser.read(fpath, encoding="utf-8")
+    if six.PY2:
+        # TODO 待兼容
+        return
 
+    fpath = "config/plugin/plugins.ini"
+
+    parser.read(fpath, encoding="utf-8")
+    
     tmp_tools = []
     for section in parser.sections():
         name = parser.get(section, "name", fallback=None)
