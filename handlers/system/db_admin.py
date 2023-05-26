@@ -11,6 +11,7 @@ from xutils import textutil
 import xtables
 import xtemplate
 import math
+from xutils.sqldb import TableProxy
 
 SCAN_HTML = """
 <style>
@@ -471,11 +472,8 @@ class SqlDBHandler:
 class SqlDBDetailHandler:
 
     def get_table_by_name(self, name):
-        db_list = xtables.get_all_tables()
-        for db in db_list:
-            if db.tablename == name:
-                return db
-        return None
+        # type: (str) -> TableProxy
+        return xtables.get_table_by_name(name)
 
     def GET(self):
         name = xutils.get_argument_str("name")
@@ -486,7 +484,7 @@ class SqlDBDetailHandler:
         page_max = 0
         if db != None:
             offset = (page-1) * page_size
-            db_rows = db.select(offset = offset, limit = page_size)
+            db_rows = db.select(offset = offset, limit = page_size, order = "id desc")
             page_max = math.ceil(db.count() / page_size) // 1
 
         kw = Storage()
