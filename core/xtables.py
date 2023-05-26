@@ -241,6 +241,20 @@ def init_note_tag_bind_table():
         manager.add_column("tag_name", "varchar(64)", "")
         manager.add_index(["user", "tag_name"])
 
+def init_file_info():
+    """文件信息
+    @since 2023/05/26
+    """
+    table_name = "file_info"
+    with create_table_manager(table_name) as manager:
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("fpath", "text", "")
+        manager.add_column("ftype", "varchar(32)", "")
+        manager.add_column("fsize", "bigint", 0)
+        manager.add_index("fpath")
+        manager.add_index(["ftype", "fpath"])
+
 class DBPool:
 
     sqlite_pool = {}
@@ -301,6 +315,9 @@ def get_dict_table():
 
 get_dictionary_table = get_dict_table
 
+def get_file_info_table():
+    return get_table_by_name("file_info")
+
 def get_table_by_name(table_name=""):
     # type: (str) -> TableProxy
     table_info = TableManager.get_table_info(table_name)
@@ -347,3 +364,4 @@ def init():
     init_dict_table()
     init_record_table()
     init_user_table()
+    init_file_info()

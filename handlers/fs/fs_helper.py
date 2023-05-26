@@ -13,16 +13,35 @@ import xconfig
 import xauth
 import xconfig
 import os
+import xtables
 from xutils import dbutil
 from xutils import format_size
 from xutils import fsutil, six
 from xutils.dbutil import LdbTable
 from xutils.fsutil import FileItem
+from xutils.sqldb import TableProxy
 
-_index_db = dbutil.get_table("fs_index")
-_index_db.set_binlog_enabled(False)
+_index_db = xtables.get_table_by_name("file_info")
 
-def get_index_db(): # type: ()-> LdbTable
+class FileInfoModel:
+
+    @classmethod
+    def get_by_fpath(cls, fpath = ""):
+        return _index_db.select_first(where = dict(fpath = fpath))
+    
+    @classmethod
+    def upsert(cls, info):
+        old = cls.get_by_fpath(info.fpath)
+        if old == None:
+            return _index_db.insert(**info)
+        else:
+            _index_db.update(**info, where = dict(fpath=info.fpath))
+
+    @classmethod
+    def prefix_count(cls, fpath):
+        return _index_db.count(where = "fpath LIKE $fpath", vars = dict(fpath = fpath + "%"))
+
+def get_index_db(): # type: ()-> TableProxy
     return _index_db
 
 def handle_file_item(item):
@@ -94,12 +113,11 @@ def get_file_download_link(fpath):
 
 
 def sort_files_by_size(filelist):
-    db = get_index_db()
     for file in filelist:
         fpath = file.path
         fpath = os.path.abspath(fpath)
         realpath = os.path.realpath(fpath)
-        info = db.get_by_id(realpath)
+        info = FileInfoModel.get_by_fpath(realpath)
         if info != None and hasattr(info, "fsize"):
             file.fsize = info.fsize
             size_str = format_size(info.fsize)

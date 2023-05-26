@@ -17,9 +17,9 @@ import xconfig
 import xmanager
 import xutils
 from xutils import Storage
-from xutils.dbutil import LdbTable
+from xutils.sqldb import TableProxy
 
-from .fs_helper import get_index_dirs, get_index_db
+from .fs_helper import get_index_dirs, get_index_db, FileInfoModel
 
 class IndexBuilder:
 
@@ -38,12 +38,12 @@ class IndexBuilder:
             xutils.print_exc()
 
         info = Storage(fsize = size, fpath = dirname)
-        db.update_by_id(dirname, info)
+        FileInfoModel.upsert(info)
         return size
 
 
     def calc_size(self, db, fpath, depth=1000): 
-        # type: (LdbTable, str, int) -> int
+        # type: (TableProxy, str, int) -> int
         if depth <= 0:
             logging.error("too deep depth")
             return 0
@@ -60,16 +60,18 @@ class IndexBuilder:
         try:
             st = os.stat(fpath)
             info = Storage(fsize = st.st_size, fpath = fpath)
+            info.ctime = xutils.format_datetime(st.st_ctime)
+            info.mtime = xutils.format_datetime(st.st_mtime)
             if xutils.is_text_file(fpath):
                 info.ftype = "text"
             elif xutils.is_img_file(fpath):
                 info.ftype = "img"
-            db.update_by_id(fpath, info)
+            FileInfoModel.upsert(info)
             return st.st_size
         except:
             xutils.print_exc()
             info = Storage(fsize = -1, fpath = fpath)
-            db.update_by_id(fpath, info)
+            FileInfoModel.upsert(info)
             return 0
 
     @classmethod
@@ -127,7 +129,7 @@ class IndexHandler:
             return self.get_rebuild_page()
 
         tpl = "fs/page/fs_index.html"
-        index_size = get_index_db().count(id_prefix = path)
+        index_size = FileInfoModel.prefix_count(path)
         return xtemplate.render(tpl, 
             index_dirs = get_index_dirs(),
             index_size = index_size)
@@ -151,7 +153,7 @@ class IndexHandler:
             if action == "config":
                 return self.do_config()
             
-            index_size = get_index_db().count(id_prefix = path)
+            index_size = FileInfoModel.prefix_count(path)
         except Exception as e:
             xutils.print_exc()
             err = str(e)
@@ -200,12 +202,10 @@ class IndexHandler:
     
     def get_rebuild_page(self):
         path = self.get_arg_path()
-        db = get_index_db()
-
         kw = self.create_kw()
         kw.path = path
         kw.show_index_dirs = False
-        kw.index_size = db.count(id_prefix = path)
+        kw.index_size = FileInfoModel.prefix_count(path)
 
         return xtemplate.render("fs/page/fs_index.html", **kw)
 

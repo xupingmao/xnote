@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-20 23:50:03
+@LastEditTime : 2023-05-26 22:48:41
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -29,6 +29,8 @@ def init():
     # 文件相关
     db = dbutil.register_table("fs_index", "文件索引")
     db.register_index("ftype", comment = "类型索引")
+    db.delete_table()
+    
     # 网络文件映射到本地文件
     dbutil.register_table("fs_map", "文件映射")
     dbutil.register_table("fs_ctype", "缓存的Content-Type")

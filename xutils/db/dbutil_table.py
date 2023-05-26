@@ -23,12 +23,15 @@ from xutils.db.dbutil_id_gen import IdGenerator
 from xutils.db.binlog import BinLog
 from xutils.db import filters
 
-register_table("_id", "系统ID表")
+db = register_table("_id", "系统ID表")
+db.delete_table()
+
 register_table("_max_id", "最大ID")
 register_table("_index", "通用索引")
 register_table("_meta", "表元信息")
 register_table("_idx_version", "索引版本")
 register_table("_cache", "数据库持久化缓存")
+
 db = register_table("_repair_error", "修复错误记录")
 db.register_index("ctime")
 
