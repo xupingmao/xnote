@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-14 17:17:50
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 15:49:27
+@LastEditTime : 2023-05-27 13:33:36
 @FilePath     : /xnote/tests/test_xutils_db_table.py
 @Description  : table测试
 """
@@ -178,3 +178,14 @@ class TestMain(BaseTestCase):
 
         name_index_count = db.count_by_index("age", where = dict(name = "name-1", age = 15))
         self.assertEqual(1, name_index_count)
+
+    def test_drop_table(self):
+        info = dbutil.register_table("drop_test", "删除测试")
+        db = dbutil.get_table(info.name)
+        db.insert(dict(name="test-1"))
+        db.insert(dict(name="test-2"))
+
+        info.delete_table()
+        test_base.json_request("/system/db/drop_table", method="POST", data=dict(table_name=info.name))
+        
+        self.assertEqual(0, dbutil.count_table(info.name))

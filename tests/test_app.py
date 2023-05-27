@@ -401,3 +401,4 @@ class Main:
 
     def test_add_visit_log(self):
         xmanager.add_visit_log(None, "/index")
+
