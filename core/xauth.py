@@ -20,6 +20,7 @@ import xutils
 import xmanager
 import warnings
 import time
+import datetime
 import xtables
 from xutils import textutil, dbutil, fsutil, dateutil
 from xutils import Storage
@@ -27,7 +28,6 @@ from xutils import logutil
 from xutils import cacheutil
 from xutils import six
 
-session_db = None # type: dbutil.LdbTable
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
 
@@ -142,17 +142,67 @@ class UserModel:
     @classmethod
     def delete_by_id(cls, id=0):
         get_user_db().delete(where = dict(id=id))
-        
 
 class SessionInfo(Storage):
 
     def __init__(self) -> None:
         self.user_name = ""
+        self.user_id = 0
         self.sid = ""
         self.token = ""
-        self.expire_time = 0.0
+        self.expire_time = 0.0 # 时间
         self.login_ip = ""
-        self.login_time = 0.0
+        self.login_time = 0.0 # 时间
+
+class SessionModel:
+
+    @classmethod
+    def init(cls):
+        cls.db = dbutil.get_table("session")
+
+    @classmethod
+    def get_by_sid(cls, sid=""):
+        if sid == None or sid == "":
+            return None
+        record = session_cache.get(sid)
+        if record == None:
+            record = cls.db.get_by_id(sid)
+            if record != None:
+                session_cache.put(sid, record, expire = DEFAULT_CACHE_EXPIRE)
+
+        if record == None or session_cache.is_empty(record):
+            return None
+
+        session_info = dict_to_session_info(record)
+        if session_info.user_name is None:
+            delete_user_session_by_id(sid)
+            return None
+
+        if time.time() > session_info.expire_time:
+            delete_user_session_by_id(sid)
+            return None
+
+        return session_info
+    
+    @classmethod
+    def create(cls, session_info):
+        assert isinstance(session_info, SessionInfo)
+        new_id = cls.db.update_by_id(session_info.sid, session_info)
+        session_cache.delete(session_info.sid)
+        return new_id
+    
+    @classmethod
+    def list_by_user_name(cls, user_name=""):
+        records = cls.db.list_by_index("user", index_value = user_name)
+        result = []
+        for item in records:
+            result.append(dict_to_session_info(item))
+        return result
+    
+    @classmethod
+    def delete_by_sid(cls, sid=""):
+        cls.db.delete_by_id(sid)
+        session_cache.delete(sid)
 
 def dict_to_session_info(dict_value):
     info = SessionInfo()
@@ -229,34 +279,10 @@ def is_session_expired(session_info):
     return time.time() > session_info.expire_time
 
 def get_valid_session_by_id(sid):
-    if sid == None or sid == "":
-        return None
-    record = session_cache.get(sid)
-    if record == None:
-        record = session_db.get_by_id(sid)
-        if record != None:
-            session_cache.put(sid, record, expire = DEFAULT_CACHE_EXPIRE)
-
-    if record == None or session_cache.is_empty(record):
-        return None
-
-    session_info = dict_to_session_info(record)
-    if session_info.user_name is None:
-        delete_user_session_by_id(sid)
-        return None
-
-    if time.time() > session_info.expire_time:
-        delete_user_session_by_id(sid)
-        return None
-
-    return session_info
+    return SessionModel.get_by_sid(sid)
 
 def list_user_session_detail(user_name):
-    records = session_db.list_by_index("user", index_value = user_name)
-    result = []
-    for item in records:
-        result.append(dict_to_session_info(item))
-    return result
+    return SessionModel.list_by_user_name(user_name)
 
 def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = ""):
     # type: (str, int, str) -> SessionInfo
@@ -266,32 +292,31 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = ""):
 
     session_id = create_uuid()
 
-    session_id_list = list_user_session_detail(user_name)
-    session_id_list.sort(key = lambda x:x.expire_time)
+    session_list = list_user_session_detail(user_name)
+    session_list.sort(key = lambda x:x.expire_time)
 
-    if len(session_id_list) > MAX_SESSION_SIZE:
+    if len(session_list) > MAX_SESSION_SIZE:
         # 踢出最早的登录
-        oldest = session_id_list[0]
+        oldest = session_list[0]
         delete_user_session_by_id(oldest.sid)
 
     # 保存会话信息
     session_info = SessionInfo()
     session_info.user_name = user_name
+    session_info.user_id = user_detail.id
     session_info.sid  = session_id
     session_info.token = user_detail.token
     session_info.login_time  = time.time()
     session_info.login_ip = login_ip
     session_info.expire_time = time.time() + expires
 
-    session_db.update_by_id(session_id, session_info)
-    session_cache.delete(session_id)
+    SessionModel.create(session_info)
     
     return session_info
 
 def delete_user_session_by_id(sid):
     # 登录的时候会自动清理无效的sid关系
-    session_db.delete_by_id(sid)
-    session_cache.delete(sid)
+    SessionModel.delete_by_sid(sid)
 
 def find_by_name(name):
     return UserModel.get_by_name(name)
@@ -666,14 +691,13 @@ def init():
     global USER_TABLE
     global INVALID_NAMES
     global USER_CONFIG_PROP
-    global session_db
     global MAX_SESSION_SIZE
-
-    session_db = dbutil.get_table("session")
 
     INVALID_NAMES = xconfig.load_invalid_names()
     USER_CONFIG_PROP = xconfig.load_user_config_properties()
     MAX_SESSION_SIZE = xconfig.get_system_config("auth_max_session_size")
+
+    SessionModel.init()
 
     _create_temp_user("admin")
     _create_temp_user("test")

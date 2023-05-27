@@ -13,17 +13,58 @@ from xutils.sqldb import TableManagerFacade as TableManager
 from xutils.sqldb import TableProxy
 
 
+class MySqliteDB(web.db.SqliteDB):
+    dbpath = ""
+
 def create_table_manager(table_name=""):
     assert table_name != ""
     dbpath = xconfig.FileConfig.get_db_path(table_name)
     db = get_db_instance(dbpath)
     return TableManager(table_name, db=db)
 
+def get_db_instance(dbpath = ""):
+    db_driver = xconfig.get_system_config("db_driver")
+    if db_driver == "mysql":
+        db_host = xconfig.get_system_config("mysql_host")
+        db_name = xconfig.get_system_config("mysql_database")
+        db_user = xconfig.get_system_config("mysql_user")
+        db_pw = xconfig.get_system_config("mysql_password")
+        db_port = xconfig.get_system_config("mysql_port")
+        db = web.db.MySQLDB(host = db_host, database = db_name, 
+                              user = db_user, pw = db_pw, port = db_port)
+        db.dbname = "mysql"
+        return db
+    assert dbpath != ""
+    db = MySqliteDB(db = dbpath)
+    db.dbpath = dbpath
+    return db
+
+def get_table_by_name(table_name=""):
+    # type: (str) -> TableProxy
+    table_info = TableManager.get_table_info(table_name)
+    if table_info == None:
+        raise Exception("table not found: %s" % table_name)
+    db = get_db_instance(dbpath=table_info.dbpath)
+    return TableProxy(db, table_name)
+
+def get_all_tables():
+    """获取所有的sql-数据库代理实例"""
+    result = []
+    table_dict = TableManager.get_table_info_dict()
+    for table_name in table_dict:
+        proxy = get_table_by_name(table_name)
+        result.append(proxy)
+    return result
+
+
+################################################
+#  表定义
+################################################
+
 def init_test_table():
     """测试数据库"""
-    path = os.path.join(xconfig.DATA_DIR, "test.db")
-    db = get_db_instance(dbpath=path)
-    with TableManager("test", db = db) as manager:
+    table_name = "test"
+    with create_table_manager(table_name) as manager:
         manager.add_column("int_value", "int", default_value=0)
         manager.add_column("float_value", "float", default_value=0.0)
         manager.add_column("text_value", "text", default_value="")
@@ -74,26 +115,6 @@ def init_note_index_table():
         # 虽然不能加速匹配过程，但是可以加速全表扫描
         manager.add_index("name")
 
-
-def init_note_content_table():
-    with TableManager("note_content", dbpath = xconfig.DB_PATH) as manager:
-        # 纯文本，用于搜索
-        manager.add_column("content", "text", "")
-        # 原始的数据，比如带标签的HTML，还有图片等的base64数据
-        manager.add_column("data", "text", "")
-
-
-def init_note_history_table():
-    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
-    with TableManager("note_history", dbpath = dbpath) as manager:
-        manager.add_column("note_id", "int", 0)
-        manager.add_column("name",    "text", "")
-        manager.add_column("content", "text", "")
-        manager.add_column("mtime",   "text", "")
-        manager.add_column("version", "int", 0)
-        manager.add_index(["note_id", "version"])
-
-
 def init_tag_table():
     # 标签表，可以用于一些特征的标记
     # 2017/04/18
@@ -129,18 +150,6 @@ def init_schedule_table():
         manager.add_column("webpage", "int", 0)  # 是否网页提醒
 
 
-def init_history_table():
-    # 2017/05/21
-    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
-    with TableManager("history", dbpath = dbpath) as manager:
-        manager.add_column("type", "text", "")
-        manager.add_column("key",  "text", "")
-        manager.add_column("user", "text", "")
-        manager.add_column("ctime", "text", "")
-        # 耗时
-        manager.add_column("rt", "int", 0)
-
-
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
@@ -157,14 +166,14 @@ def init_user_table():
         # 删除的字段
         manager.drop_column("privileges", "text", "")
 
-
 def init_message_table():
     """
     用来存储比较短的消息,消息和资料库的主要区别是消息存储较短的单一信息
     - 消息支持状态
     - 2017/05/29
     """
-    with TableManager("message", dbpath = xconfig.DB_PATH) as manager:
+    table_name = "message"
+    with create_table_manager(table_name) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("user",  "varchar(64)", "")
@@ -194,27 +203,6 @@ def init_record_table():
         # 索引
         manager.add_index(["type", "ctime"])
 
-
-class MySqliteDB(web.db.SqliteDB):
-    dbpath = ""
-
-def get_db_instance(dbpath = ""):
-    db_driver = xconfig.get_system_config("db_driver")
-    if db_driver == "mysql":
-        db_host = xconfig.get_system_config("mysql_host")
-        db_name = xconfig.get_system_config("mysql_database")
-        db_user = xconfig.get_system_config("mysql_user")
-        db_pw = xconfig.get_system_config("mysql_password")
-        db_port = xconfig.get_system_config("mysql_port")
-        db = web.db.MySQLDB(host = db_host, database = db_name, 
-                              user = db_user, pw = db_pw, port = db_port)
-        db.dbname = "mysql"
-        return db
-    assert dbpath != ""
-    db = MySqliteDB(db = dbpath)
-    db.dbpath = dbpath
-    return db
-
 def init_dict_table():
     """词典，和主库隔离
     @since 2018/01/14
@@ -231,9 +219,7 @@ def init_note_tag_bind_table():
     @since 2023/05/20
     """
     table_name = "note_tag_bind"
-    dbpath = xconfig.FileConfig.get_db_path(table_name)
-    db = get_db_instance(dbpath=dbpath)
-    with TableManager(table_name, db = db) as manager:
+    with create_table_manager(table_name) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("user", "varchar(64)", "")
@@ -274,7 +260,7 @@ def DBWrapper(dbpath, tablename):
     return TableProxy(db, tablename)
 
 def get_file_table():
-    return DBWrapper(xconfig.DB_PATH, "file")
+    return get_table_by_name("file")
 
 
 def get_note_table():
@@ -317,23 +303,6 @@ get_dictionary_table = get_dict_table
 
 def get_file_info_table():
     return get_table_by_name("file_info")
-
-def get_table_by_name(table_name=""):
-    # type: (str) -> TableProxy
-    table_info = TableManager.get_table_info(table_name)
-    if table_info == None:
-        raise Exception("table not found: %s" % table_name)
-    db = get_db_instance(dbpath=table_info.dbpath)
-    return TableProxy(db, table_name)
-
-def get_all_tables():
-    """获取所有的sql-数据库代理实例"""
-    result = []
-    table_dict = TableManager.get_table_info_dict()
-    for table_name in table_dict:
-        proxy = get_table_by_name(table_name)
-        result.append(proxy)
-    return result
 
 def init_backup_table(tablename, db):
     table_info = TableManager.get_table_info(tablename)
