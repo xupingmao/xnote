@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-29 18:40:48
+@LastEditTime : 2023-05-27 12:58:37
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -95,6 +95,7 @@ class HttpClient:
 
         content = netutil.http_get(url)
         result = textutil.parse_json(content, ignore_error = True)
+        
         if result is None:
             error = Storage()
             error.url = url

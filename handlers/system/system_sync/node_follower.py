@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-29 18:41:22
+@LastEditTime : 2023-05-27 13:01:08
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -29,10 +29,9 @@ fs_sync_index_db = dbutil.get_hash_table("fs_sync_index")
 
 def filter_result(result, offset):
     data = []
-    offset = fs_sync_index_db.get(offset)
     for item in result.data:
-        if item.get("_key", "") == offset:
-            # logging.debug("跳过offset:%s", offset)
+        if item.get("_id", "") == offset:
+            logging.debug("跳过offset:%s", offset)
             continue
         data.append(item)
 
@@ -171,6 +170,7 @@ class Follower(NodeManagerBase):
 
         logging.debug("offset:%s", offset)
         result = client.list_files(offset)
+        logging.debug("list files result=(%s), offset=(%s)", result, offset)
 
         if result is None:
             logging.error("返回结果为空")
