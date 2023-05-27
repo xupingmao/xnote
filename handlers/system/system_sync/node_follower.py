@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-27 13:01:08
+@LastEditTime : 2023-05-27 20:34:48
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -369,7 +369,7 @@ class DBSyncer:
             steps+=1
 
     def _sync_db_full_step(self, proxy, last_key):
-        # type: (HttpClient, str) -> None
+        # type: (HttpClient, str) -> int
         result = proxy.list_db(last_key)
 
         if self.debug:
@@ -378,6 +378,7 @@ class DBSyncer:
         result_obj = textutil.parse_json(result)
         assert isinstance(result_obj, dict)
         count = self._sync_db_full_step_work(result_obj, last_key)
+        return count
 
     @log_mem_info_deco("sync_by_binlog")
     def sync_by_binlog(self, proxy): # type: (HttpClient) -> object
