@@ -198,10 +198,8 @@ class DbScanHandler:
                     continue
                 if not self.is_visible(table_info, show_delete):
                     continue
-                admin_stat_list.append([table_info.category,
-                                        table_info.name,
-                                        table_info.description,
-                                        dbutil.count_table(name, use_cache=True)])
+                table_count = dbutil.count_table(name, use_cache=True)
+                admin_stat_list.append([table_info, table_count])
 
         kw.admin_stat_list = admin_stat_list
         kw.show_delete = show_delete
@@ -254,10 +252,27 @@ class SqlDBDetailHandler:
         kw.page_url = "?name={name}&page_size={page_size}&page=".format(name = name, page_size=page_size)
         return xtemplate.render("system/page/db/sqldb_detail.html", **kw)
 
+
+class DropTableHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        table_name = xutils.get_argument_str("table_name")
+        db = dbutil.get_table(table_name)
+        if not db.table_info.is_deleted:
+            return dict(code="400", message="只能清空删除的表")
+        
+        for item in db.iter(limit=-1):
+            db.delete(item)
+        
+        dbutil.count_table(table_name, use_cache=False)
+        return dict(code="success")
+
 xurls = (
     "/system/db_scan", DbScanHandler,
     "/system/db_admin", DbScanHandler,
     "/system/leveldb_admin", DbScanHandler,
     "/system/sqldb_admin", SqlDBHandler,
     "/system/sqldb_detail", SqlDBDetailHandler,
+    "/system/db/drop_table", DropTableHandler,
 )

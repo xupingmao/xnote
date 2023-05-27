@@ -3,7 +3,7 @@
 {% block body_left %}
 <style>
     .key { width: 75%; }
-    .admin-stat-th { width: 25% }
+    .admin-stat-th { width: 20% }
 </style>
 
 {% include system/component/db_nav.html %}
@@ -33,17 +33,39 @@
             <th class="admin-stat-th">项目</th>
             <th class="admin-stat-th">说明</th>
             <th class="admin-stat-th">数量</th>
+            <th class="admin-stat-th">操作</th>
         </tr>
-        {% for cat, key, description, value in admin_stat_list %}
+        {% for table_info, table_count in admin_stat_list %}
             <tr>
-                <td>{{cat}}</td>
-                <td><a href="{{_server_home}}/system/db_scan?prefix={{key}}&reverse=true">{{key}}</a></td>
-                <td>{{description}}</td>
-                <td>{{value}}</td>
+                <td>{{table_info.category}}</td>
+                <td><a href="{{_server_home}}/system/db_scan?prefix={{table_info.name}}&reverse=true">{{table_info.name}}</a></td>
+                <td>{{table_info.description}}</td>
+                <td>{{table_count}}</td>
+                <td>{% if table_info.is_deleted %}<button class="btn danger" data-name="{{table_info.name}}" 
+                    onclick="xnote.action.clearTable(event)">清空</button>{% end %}</td>
             </tr>
         {% end %}
     </table>
 </div>
+
+<script>
+xnote.action.clearTable = function(event) {
+    var tableName = $(event.target).attr("data-name");
+    xnote.confirm("确定要清空表" + tableName + "吗?", function () {
+        var params = {
+            table_name: tableName
+        };
+        $.post(xnote.config.serverHome + "/system/db/drop_table", params, function (resp) {
+            if (resp.code=="success") {
+                xnote.toast("清空完成");
+                window.location.reload();
+            } else {
+                xnote.toast("清空失败:" + resp.message);
+            }
+        });
+    });
+};
+</script>
 
 {% end %}
 
