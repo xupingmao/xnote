@@ -49,12 +49,24 @@ _manager = None # type: HandlerManager
 _event_manager = None # type: EventManager
 
 
-class HandlerLocal(threading.local):
+class HandlerLocal:
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.handler_class = None
+    handle_class_dict = {}
 
+    @property
+    def handler_class(self):
+        tid = id(threading.current_thread())
+        return self.handle_class_dict.get(tid)
+    
+    @handler_class.setter
+    def handler_class(self, value):
+        tid = id(threading.current_thread())
+        self.handle_class_dict[tid] = value
+
+    @classmethod
+    def get_handler_class_by_thread(cls, thread):
+        tid = id(thread)
+        return cls.handle_class_dict.get(tid)
 
 handler_local = HandlerLocal()
 
@@ -64,7 +76,7 @@ def do_wrap_handler(pattern, handler_clz):
     if not inspect.isclass(handler_clz):
         return handler_clz
 
-    def wrap_result(result, start_time=-1):
+    def wrap_result(result, start_time=0.0):
         try:
             if isinstance(result, (list, dict)):
                 web.header("Content-Type", "application/json")

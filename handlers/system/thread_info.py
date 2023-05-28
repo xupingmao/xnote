@@ -6,6 +6,7 @@ import xauth
 import threading
 import xtemplate
 import xutils
+import xmanager
 from xutils import MyStdout
 
 def get_thread_log(thread):
@@ -14,13 +15,20 @@ def get_thread_log(thread):
         return "[无]"
     return xutils.mark_text("".join(records))
 
+def get_handler_name(thread):
+    handler_class = xmanager.handler_local.get_handler_class_by_thread(thread)
+    if handler_class != None:
+        return handler_class
+    return None
+
 class ThreadInfoHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        return xtemplate.render("system/page/thread_info.html", 
-            show_aside = False,
-            thread_list = threading.enumerate())
+        kw = xutils.Storage()
+        kw.thread_list = threading.enumerate()
+        kw.get_handler_name = get_handler_name
+        return xtemplate.render("system/page/thread_info.html", **kw)
 
 xurls = (
     r"/system/thread_info", ThreadInfoHandler,

@@ -16,6 +16,19 @@ from xutils.sqldb import TableProxy
 class MySqliteDB(web.db.SqliteDB):
     dbpath = ""
 
+class DBPool:
+
+    sqlite_pool = {} # type: dict[str, MySqliteDB]
+
+    @classmethod
+    def get_sqlite_db(cls, dbpath=""):
+        # type: (str) -> MySqliteDB
+        assert dbpath != ""
+        db = cls.sqlite_pool.get(dbpath)
+        if db == None:
+            db = MySqliteDB(db=dbpath)
+            cls.sqlite_pool[dbpath] = db
+        return db
 
 def create_table_manager(table_name=""):
     assert table_name != ""
@@ -37,7 +50,7 @@ def get_db_instance(dbpath=""):
         db.dbname = "mysql"
         return db
     assert dbpath != ""
-    db = MySqliteDB(db=dbpath)
+    db = DBPool.get_sqlite_db(dbpath=dbpath)
     db.dbpath = dbpath
     return db
 
@@ -105,7 +118,7 @@ def init_note_index_table():
         manager.add_column("creator", "varchar(64)", "")
         # 置顶顺序
         manager.add_column("priority", "int", 0)
-        
+
         # 各种索引
         manager.add_index(["parent_id", "name"])
         manager.add_index(["creator", "mtime", "type", "is_deleted"])
@@ -249,21 +262,6 @@ def init_file_info():
         manager.add_column("fsize", "bigint", 0)
         manager.add_index("fpath")
         manager.add_index(["ftype", "fpath"])
-
-
-class DBPool:
-
-    sqlite_pool = {}
-
-    @classmethod
-    def get_sqlite_db(cls, fname=""):
-        assert fname != ""
-        if fname in cls.sqlite_pool:
-            return cls.sqlite_pool.get(fname)
-        fpath = os.path.join(xconfig.FileConfig.sqlite_dir, fname)
-        db = MySqliteDB(db=fpath)
-        cls.sqlite_pool[fname] = db
-        return db
 
 
 def DBWrapper(dbpath, tablename):

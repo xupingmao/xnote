@@ -33,7 +33,7 @@
         <tr>       
             <td>{{idx+1}}</td>
             <td>{{thread.getName()}}</td> 
-            <td>{{thread.__dict__.get("handler_class")}}</td>
+            <td>{{get_handler_name(thread)}}</td>
             <td>
                 <a class="view-detail" data-value="{{thread.__dict__}}">详情</a>
             </td>

@@ -657,6 +657,8 @@ xurls = (
     r"/fs_download", DownloadHandler,
     r"/fs_get"     , GetFileHandler,
     r"/(static/.*)", StaticFileHandler,
+    # `/static/.*` 路径是`web.py`自带的中间件处理的，优先级更高，所以这里加了一个前缀用以区分
+    r"/_(static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
     r"/(app/.*)", StaticFileHandler,
     r"/(tmp/.*)", StaticFileHandler,

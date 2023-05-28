@@ -114,7 +114,7 @@ def init_webdav_config():
 
 
 def is_webdav_enabled():
-    return xconfig.get_global_config("system.webdav") == True
+    return xconfig.get_system_config("webdav") == True
 
 def add_user_mapping(path, user_name, roles):
     global WEBDAV_CONFIG
