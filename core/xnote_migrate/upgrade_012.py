@@ -4,18 +4,19 @@
 @email        : 578749341@qq.com
 @Date         : 2023-05-20 22:54:35
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-22 00:04:16
+@LastEditTime : 2023-05-28 14:52:18
 @FilePath     : /xnote/core/xnote_migrate/upgrade_012.py
 @Description  : 描述
 """
 
-from xutils import dbutil, dateutil, Storage
+from xutils import dbutil, Storage
 from . import base
 import xauth
-
+import xtables
 
 def do_upgrade():
     base.execute_upgrade("012.1", migrate_user_20230520)
+    base.execute_upgrade("012.uv", migrate_uv_log_20230528)
 
 def migrate_user_20230520():
     old_db = dbutil.get_table("user")
@@ -42,3 +43,15 @@ def migrate_user_20230520():
         else:
             record.update(user_info)
             xauth.UserModel.update(record)
+
+def migrate_uv_log_20230528():
+    old_db = dbutil.get_table("uv")
+    new_db = xtables.get_table_by_name("site_visit_log")
+
+    for item in old_db.iter(limit=-1):
+        uv_record = Storage()
+        uv_record.date = item.get("date", "1970-01-01")
+        uv_record.ip = item.get("ip", "")
+        uv_record.site = item.get("site", "")
+        uv_record.count = item.get("count", 0)
+        new_db.insert(**uv_record)

@@ -90,7 +90,7 @@ NOTE_TOOLS = [
 ]
 
 DATA_TOOLS = [
-    admin_link("数据库", "/system/db_admin?p=sqldb", "database"),
+    admin_link("数据库", "/system/sqldb_admin?p=sqldb", "database"),
     admin_link("缓存管理", "/system/cache", "database"),
     admin_link("消息队列", "/system/todo", "database"),
 ]

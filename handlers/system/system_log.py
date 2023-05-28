@@ -11,6 +11,7 @@ import xauth
 import xutils
 import xconfig
 import xmanager
+import xtables
 from xutils import logutil, dbutil, webutil, dateutil
 from xutils.imports import *
 from xtemplate import BasePlugin
@@ -197,6 +198,7 @@ class LogHandler(BasePlugin):
 class UvRecord(Storage):
 
     def __init__(self) -> None:
+        self.id = 0
         self.ip = ""
         self.site = ""
         self.date = ""
@@ -205,10 +207,12 @@ class UvRecord(Storage):
 class LogVisitHandler:
 
     def GET(self):
+        uv_db = xtables.get_table_by_name("site_visit_log")
+
         site = xutils.get_argument_str("site", "xnote")
         ip = webutil.get_real_ip()
         date = dateutil.format_date()
-        db_record = uv_db.first_by_index("date_ip", where = dict(date = date, ip = ip, site = site))
+        db_record = uv_db.select_first(where = dict(date = date, ip = ip, site = site))
 
         if db_record == None:
             record = UvRecord()
@@ -216,14 +220,14 @@ class LogVisitHandler:
             record.date = date
             record.site = site
             record.ip = ip
-            uv_db.insert(record)
+            uv_db.insert(**record)
         else:
             assert isinstance(db_record, dict)
             record = UvRecord()
             record.update(db_record)
             record.count+=1
             record.ip = ip
-            uv_db.update(record)
+            uv_db.update(where=dict(id=record.id), **record)
         return "console.log('log visit success');"
 
 

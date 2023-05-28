@@ -264,6 +264,18 @@ def init_file_info():
         manager.add_index(["ftype", "fpath"])
 
 
+def init_site_visit_log():
+    """站点访问日志
+    @since 2023/05/28
+    """
+    table_name = "site_visit_log"
+    with create_table_manager(table_name) as manager:
+        manager.add_column("date", "date", "1970-01-01")
+        manager.add_column("site", "varchar(64)", "")
+        manager.add_column("ip", "varchar(64)", "")
+        manager.add_column("count", "bigint", 0)
+        manager.add_index(["date", "ip"])
+
 def DBWrapper(dbpath, tablename):
     db = MySqliteDB(db=dbpath)
     return TableProxy(db, tablename)
@@ -347,3 +359,4 @@ def init():
     init_record_table()
     init_user_table()
     init_file_info()
+    init_site_visit_log()
