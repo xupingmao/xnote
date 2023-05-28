@@ -4,12 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 17:38:18
+@LastEditTime : 2023-05-28 15:07:47
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
 from xutils.db.dbutil_base import count_table, prefix_iter
-from xutils.db.dbutil_table import db_put, prefix_list, db_delete, register_table
+from xutils.db.dbutil_table import db_put, prefix_list, db_delete, register_table, create_write_batch
 
 import threading
 import logging
@@ -118,8 +118,22 @@ class BinLog:
             with self._delete_lock:
                 limit = size - self._max_size
                 self.logger.info("limit size: %s", size)
+                keys = []
+                batch_size = 100
+
                 key_from = self._table_name + ":" + _format_log_id(start_seq)
                 for key, value in prefix_iter(self._table_name, key_from=key_from, limit=limit, include_key=True):
-                    if self.log_debug:
-                        self.logger.info("Delete %s", key)
-                    db_delete(key)
+                    keys.append(key)
+                    if len(keys) >= batch_size:
+                        self.delete_batch(keys)
+                        keys = []
+                self.delete_batch(keys)
+    
+    def delete_batch(self, keys):
+        if len(keys) == 0:
+            return
+        if self.log_debug:
+            self.logger.info("Delete keys: %s", keys)
+        with create_write_batch() as batch:
+            for key in keys:
+                batch.delete(key)
