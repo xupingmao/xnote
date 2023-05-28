@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-26 22:48:41
+@LastEditTime : 2023-05-28 14:57:27
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -23,23 +23,13 @@ def init():
     init_note_tables()
     init_message_tables()
     # 初始化一些废弃的表，防止覆盖老版本数据
-    init_old_table()
-
-
-    # 文件相关
-    db = dbutil.register_table("fs_index", "文件索引")
-    db.register_index("ftype", comment = "类型索引")
-    db.delete_table()
+    init_deleted_table()
     
     # 网络文件映射到本地文件
     dbutil.register_table("fs_map", "文件映射")
     dbutil.register_table("fs_ctype", "缓存的Content-Type")
     dbutil.register_table("txt_info", "txt文件信息")
     dbutil.register_table("fs_sync_index", "文件同步索引信息")
-
-    # 用户信息，迁移到了sql-db
-    db = dbutil.register_table("user", "用户信息表")
-    db.delete_table()
     
     dbutil.register_table("user_config", "用户配置表")
     db = dbutil.register_table("session", "用户会话信息")
@@ -58,12 +48,7 @@ def init():
     db = dbutil.register_table("month_plan", "月度计划")
     db.register_index("user_month", columns = ["user", "month"])
 
-    # uv统计
-    db = dbutil.register_table("uv", "uv访问统计")
-    db.register_index("date_ip", columns = ["date", "ip"])
-    db.rebuild_index("v1")
-
-def init_old_table():
+def init_deleted_table():
     # 统计数据
     db = dbutil.register_table("plugin_visit_log", "插件访问日志", user_attr="user", check_user = True)
     db.register_index("url", comment = "页面URL")
@@ -77,6 +62,21 @@ def init_old_table():
     db.delete_table()
 
     db = dbutil.register_table("msg_task_idx", "待办索引")
+    db.delete_table()
+
+    # 用户信息，迁移到了sql-db
+    db = dbutil.register_table("user", "用户信息表")
+    db.delete_table()
+
+    # uv统计
+    db = dbutil.register_table("uv", "uv访问统计")
+    db.register_index("date_ip", columns = ["date", "ip"])
+    db.rebuild_index("v1")
+    db.delete_table()
+
+    # 文件相关，废弃，新的使用sql-db
+    db = dbutil.register_table("fs_index", "文件索引")
+    db.register_index("ftype", comment = "类型索引")
     db.delete_table()
 
 def init_note_tables():
