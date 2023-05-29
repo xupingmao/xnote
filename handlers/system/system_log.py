@@ -206,11 +206,8 @@ class UvRecord(Storage):
     
 class LogVisitHandler:
 
-    def GET(self):
+    def do_get(self, site="", ip=""):
         uv_db = xtables.get_table_by_name("site_visit_log")
-
-        site = xutils.get_argument_str("site", "xnote")
-        ip = webutil.get_real_ip()
         date = dateutil.format_date()
         db_record = uv_db.select_first(where = dict(date = date, ip = ip, site = site))
 
@@ -220,6 +217,7 @@ class LogVisitHandler:
             record.date = date
             record.site = site
             record.ip = ip
+            record.pop("id")
             uv_db.insert(**record)
         else:
             assert isinstance(db_record, dict)
@@ -229,6 +227,11 @@ class LogVisitHandler:
             record.ip = ip
             uv_db.update(where=dict(id=record.id), **record)
         return "console.log('log visit success');"
+    
+    def GET(self):
+        site = xutils.get_argument_str("site", "xnote")
+        ip = webutil.get_real_ip()
+        return self.do_get(site=site, ip=ip)
 
 
 xurls = (

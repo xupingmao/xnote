@@ -402,3 +402,8 @@ class Main:
     def test_add_visit_log(self):
         xmanager.add_visit_log(None, "/index")
 
+
+    def test_system_log(self):
+        from handlers.system.system_log import LogVisitHandler
+        handler = LogVisitHandler()
+        handler.do_get("test", "127.0.0.1")
