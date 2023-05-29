@@ -406,4 +406,7 @@ class Main:
     def test_system_log(self):
         from handlers.system.system_log import LogVisitHandler
         handler = LogVisitHandler()
+        # insert
+        handler.do_get("test", "127.0.0.1")
+        # update
         handler.do_get("test", "127.0.0.1")

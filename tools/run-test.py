@@ -100,7 +100,7 @@ def run_test(args):
 	check_and_install_pkg("bs4", "beautifulsoup4==4.12.2")
 	os.system("%s -m pip install lmdb" % executable)
 	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --ff" % executable)
-	os.system("%s -m coverage html" % executable)
+	os.system("%s -m coverage html -i" % executable)
 
 def main():
 	parser = argparse.ArgumentParser()
