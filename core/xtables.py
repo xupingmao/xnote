@@ -17,6 +17,7 @@ class MySqliteDB(web.db.SqliteDB):
     dbpath = ""
 
 class DBPool:
+    # TODO 池化会导致资源无法释放
 
     sqlite_pool = {} # type: dict[str, MySqliteDB]
 
@@ -50,7 +51,7 @@ def get_db_instance(dbpath=""):
         db.dbname = "mysql"
         return db
     assert dbpath != ""
-    db = DBPool.get_sqlite_db(dbpath=dbpath)
+    db = MySqliteDB(db=dbpath)
     db.dbpath = dbpath
     return db
 
