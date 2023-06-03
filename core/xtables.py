@@ -6,6 +6,7 @@
     考虑清楚你需要的是数据还是配置，如果是配置建议通过扩展脚本配置xconfig
 """
 import os
+import threading
 import xutils
 import xconfig
 import web.db
@@ -14,7 +15,21 @@ from xutils.sqldb import TableProxy
 
 
 class MySqliteDB(web.db.SqliteDB):
+    _lock = threading.RLock()
+    _instances = set()
     dbpath = ""
+
+    def __init__(self, **keywords):
+        super().__init__(**keywords)
+        with self._lock:
+            MySqliteDB._instances.add(self)
+
+    def __del__(self):
+        with self._lock:
+            MySqliteDB._instances.remove(self)
+
+    def __hash__(self):
+        return id(self)
 
 class DBPool:
     # TODO 池化会导致资源无法释放
@@ -51,7 +66,8 @@ def get_db_instance(dbpath=""):
         db.dbname = "mysql"
         return db
     assert dbpath != ""
-    db = MySqliteDB(db=dbpath)
+    # db = MySqliteDB(db=dbpath)
+    db = DBPool.get_sqlite_db(dbpath=dbpath)
     db.dbpath = dbpath
     return db
 

@@ -136,7 +136,7 @@ class DBBackup:
                 logger.info("backup table:(%s) count:(%d)", table.tablename, total_count)
                 start_time = time.time()
                 count = 0
-                for records in table.iter_batch(batch_size=100):
+                for records in table.iter_batch(batch_size=batch_size):
                     batch = []
                     for record in records:
                         new_record = table.filter_record(record)

@@ -9,6 +9,7 @@ import sys
 import platform
 import xconfig
 import os
+import xtables
 from xutils import dateutil
 from xutils import fsutil
 from xutils import mem_util
@@ -57,6 +58,11 @@ class SystemInfoItem:
         self.value = value
         self.link = link
 
+def get_db_info():
+    return Storage(
+        sqlite_instance_count = len(xtables.MySqliteDB._instances)
+    )
+
 def get_sys_info_detail():
     if psutil is None:
         return Storage(error = "psutil is None")
@@ -95,6 +101,7 @@ def get_sys_info_detail():
             free = xutils.format_size(swap_memory.free),
             percent = swap_memory.percent,
         ),
+        db_info = get_db_info(),
     )
 
 class InfoHandler:
