@@ -215,8 +215,10 @@ class FileConfig:
     sqlite_dir = ""
     backup_dir = ""
     backup_db_dir = ""
-    record_db_file = ""
-    user_db_file = ""
+
+    record_db_file = "" # 记录日志等非核心表
+    user_db_file = "" # 记录用户数据
+    dict_db_file = "" # 记录词典
 
     @classmethod
     def init(cls, data_dir):
@@ -233,8 +235,9 @@ class FileConfig:
         cls.backup_db_dir = os.path.join(cls.backup_dir, "db")
         makedirs(cls.backup_db_dir)
 
-        cls.record_db_file = os.path.join(cls.sqlite_dir, "record.db")
+        cls.record_db_file = cls.get_db_path("record")
         cls.user_db_file = cls.get_db_path("user")
+        cls.dict_db_file = cls.get_db_path("dictionary")
 
     @classmethod
     def get_db_path(cls, dbname=""):

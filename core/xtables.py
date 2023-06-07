@@ -46,9 +46,10 @@ class DBPool:
             cls.sqlite_pool[dbpath] = db
         return db
 
-def create_table_manager(table_name=""):
+def create_table_manager(table_name="", dbpath=""):
     assert table_name != ""
-    dbpath = xconfig.FileConfig.get_db_path(table_name)
+    if dbpath == "":
+        dbpath = xconfig.FileConfig.get_db_path(table_name)
     db = get_db_instance(dbpath)
     return TableManager(table_name, db=db)
 
@@ -228,7 +229,8 @@ def init_message_table():
 
 def init_record_table():
     # 日志库和主库隔离开
-    with create_table_manager("record") as manager:
+    dbpath = xconfig.FileConfig.record_db_file
+    with create_table_manager("record", dbpath=dbpath) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
         manager.add_column("cdate", "date", "1970-01-01")
@@ -244,7 +246,8 @@ def init_dict_table():
     """词典，和主库隔离
     @since 2018/01/14
     """
-    with create_table_manager("dictionary") as manager:
+    dbpath = xconfig.FileConfig.dict_db_file
+    with create_table_manager("dictionary", dbpath=dbpath) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("key", "varchar(100)", "")
@@ -271,7 +274,8 @@ def init_file_info():
     @since 2023/05/26
     """
     table_name = "file_info"
-    with create_table_manager(table_name) as manager:
+    dbpath = xconfig.FileConfig.record_db_file
+    with create_table_manager(table_name, dbpath=dbpath) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("fpath", "text", "")
@@ -285,8 +289,9 @@ def init_site_visit_log():
     """站点访问日志
     @since 2023/05/28
     """
+    dbpath = xconfig.FileConfig.record_db_file
     table_name = "site_visit_log"
-    with create_table_manager(table_name) as manager:
+    with create_table_manager(table_name, dbpath=dbpath) as manager:
         manager.add_column("date", "date", "1970-01-01")
         manager.add_column("site", "varchar(64)", "")
         manager.add_column("ip", "varchar(64)", "")
