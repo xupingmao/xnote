@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-05-20 22:54:35
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-28 14:52:18
+@LastEditTime : 2023-06-10 11:01:40
 @FilePath     : /xnote/core/xnote_migrate/upgrade_012.py
 @Description  : 描述
 """
@@ -13,10 +13,45 @@ from xutils import dbutil, Storage
 from . import base
 import xauth
 import xtables
+import xconfig
+import os
+from xutils import sqldb
 
 def do_upgrade():
     base.execute_upgrade("012.1", migrate_user_20230520)
     base.execute_upgrade("012.uv", migrate_uv_log_20230528)
+    base.execute_upgrade("012.dict", migrate_dict_20230610)
+
+def get_old_dict_table():
+    dbpath = xconfig.FileConfig.get_db_path("dictionary")
+    db = xtables.get_db_instance(dbpath)
+    table_name = "dictionary"
+    with xtables.TableManager("dictionary", db = db, is_backup=True) as manager:
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("key", "varchar(100)", "")
+        manager.add_column("value", "text", "")
+        manager.add_index("key")
+    return sqldb.TableProxy(db, table_name)
+
+def migrate_dict_20230610():
+    dbpath = xconfig.FileConfig.get_db_path("dictionary")
+    if not os.path.exists(dbpath):
+        return
+    old_db = get_old_dict_table()
+    new_db = xtables.get_dict_table()
+    count = 0
+    for batch in old_db.iter_batch():
+        with new_db.transaction():
+            for item in batch:
+                old = new_db.select_first(where=dict(id=item.id))
+                if old == None:
+                    item = new_db.filter_record(item)
+                    new_db.insert(**item)
+                    count += 1
+            print("migrate dict: %d" % count)
+
+    # xtables.move_sqlite_to_backup("dictionary")
 
 def migrate_user_20230520():
     old_db = dbutil.get_table("user")
@@ -27,16 +62,10 @@ def migrate_user_20230520():
         user_info.name = item.name
         user_info.password = item.password
         user_info.salt = item.salt
-
-        if item.login_time != None:
-            user_info.login_time = item.login_time
-
-        if item.mtime != None:
-            user_info.mtime = item.mtime
+        user_info.login_time = item.get("login_time", "1970-01-01 00:00:00")
+        user_info.mtime = item.get("mtime", "1970-01-01 00:00:00")
+        user_info.ctime = item.get("ctime", "1970-01-01 00:00:00")
         
-        if item.ctime != None:
-            user_info.ctime = item.mtime
-
         record = xauth.UserModel.get_by_name(item.name)
         if record == None:
             xauth.UserModel.create(user_info)

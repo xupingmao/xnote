@@ -393,13 +393,31 @@ def readbytes(path):
         bytes = fp.read()
     return bytes
 
+class MoveFileHandler:
 
-def mvfile(from_path, to_path):
-    if not os.path.exists(from_path):
-        return
-    to_dirname = os.path.dirname(to_path)
-    makedirs(to_dirname)
-    os.rename(from_path, to_path)
+    @classmethod
+    def move(cls, from_path, to_path, rename_on_conflict=False):
+        if not os.path.exists(from_path):
+            return
+        to_dirname = os.path.dirname(to_path)
+        makedirs(to_dirname)
+
+        if os.path.exists(to_path):
+            if rename_on_conflict:
+                to_path = cls.find_target_path(to_path)
+        os.rename(from_path, to_path)
+    
+    @classmethod
+    def find_target_path(cls, to_path):
+        name, ext = os.path.splitext(to_path)
+        for suffix in range(10):
+            tempfile = name + "-" + str(suffix+1)
+            if not os.path.exists(tempfile):
+                return tempfile
+        raise Exception("target path not found")
+
+
+mvfile = MoveFileHandler.move
 
 
 def rename_file(srcname, dstname):

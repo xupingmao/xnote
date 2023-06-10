@@ -12,7 +12,7 @@ import xconfig
 import web.db
 from xutils.sqldb import TableManagerFacade as TableManager
 from xutils.sqldb import TableProxy
-
+from xutils import fsutil
 
 class MySqliteDB(web.db.SqliteDB):
     _lock = threading.RLock()
@@ -49,7 +49,8 @@ class DBPool:
 def create_table_manager(table_name="", dbpath=""):
     assert table_name != ""
     if dbpath == "":
-        dbpath = xconfig.FileConfig.get_db_path(table_name)
+        # 默认使用 record.db
+        dbpath = xconfig.FileConfig.record_db_file
     db = get_db_instance(dbpath)
     return TableManager(table_name, db=db)
 
@@ -189,7 +190,7 @@ def init_schedule_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    with create_table_manager("user") as manager:
+    with create_table_manager("user", dbpath=xconfig.FileConfig.user_db_file) as manager:
         manager.add_column("name",       "varchar(64)", "")
         manager.add_column("password",   "varchar(64)", "")
         manager.add_column("salt",       "varchar(64)", "")
@@ -246,7 +247,7 @@ def init_dict_table():
     """词典，和主库隔离
     @since 2018/01/14
     """
-    dbpath = xconfig.FileConfig.dict_db_file
+    dbpath = xconfig.FileConfig.record_db_file
     with create_table_manager("dictionary", dbpath=dbpath) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
@@ -372,6 +373,12 @@ def get_table(table_name, dbpath=None):
     """
     return get_table_by_name(table_name)
 
+def move_sqlite_to_backup(db_name=""):
+    source_path = xconfig.FileConfig.get_db_path(db_name)
+    if not os.path.exists(source_path):
+        return
+    target_path = xconfig.FileConfig.get_backup_db_path(db_name)
+    fsutil.mvfile(source_path, target_path, rename_on_conflict=True)
 
 @xutils.log_init_deco("xtables")
 def init():
