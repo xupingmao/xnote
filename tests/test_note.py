@@ -21,8 +21,10 @@ import xauth
 
 from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
 from handlers.note import dao_comment
-from handlers.note import dao_delete
+from handlers.note import dao_delete, dao_tag
 from handlers.note import html_importer
+from handlers.note import dao as note_dao
+
 from xutils import Storage
 from xutils import textutil
 
@@ -42,11 +44,10 @@ def get_default_group_id():
         return note.id
     return create_note_for_test("group", name)
 
-def create_note_for_test(type, name, *, content = "", tags=None) -> str:
+def create_note_for_test(type, name, *, content = "", tags="") -> str:
     assert type != None, "type cannot be None"
     assert name != None, "name cannot be None"
-    if tags != None:
-        assert isinstance(tags, str), "tags must be str"
+    assert isinstance(tags, str), "tags must be str"
 
     data = dict(name = name, type = type, content = content, tags=tags)
 
@@ -595,3 +596,11 @@ class TestMain(BaseTestCase):
         
         dao_delete.delete_note(note_id)
         
+
+    def test_append_tag(self):
+        note_id = create_note_for_test("md", "bind-tag-test")
+        dao_tag.append_tag(note_id, "$todo$")
+        note_info = note_dao.get_by_id(note_id)
+        assert isinstance(note_info.tags, list)
+        self.assertEqual(note_info.tags, ["$todo$"])
+        delete_note_for_test("bind-tag-test")
