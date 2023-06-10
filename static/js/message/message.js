@@ -181,6 +181,7 @@ MessageView.edit = function (target) {
     });
 };
 
+// 展示选择标签对话框
 MessageView.showTopicDialog = function (target) {
     $.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
         if (resp.code != "success") {
@@ -311,7 +312,13 @@ MessageView.searchTopic = function(inputText) {
     });
 
     if (showCount == 0) {
-        $(".empty-item").text("#" + inputText + "#").show();
+        var showText = "";
+        if (inputText == "") {
+            showText = "#请输入标签#";
+        } else {
+            showText = "#" + inputText + "#";
+        }
+        $(".empty-item").text(showText).show();
     }
 }
 

@@ -48,12 +48,12 @@ class DBPool:
 
 def create_table_manager(table_name="", dbpath=""):
     assert table_name != ""
-    if dbpath == "":
-        # 默认使用 record.db
-        dbpath = xconfig.FileConfig.record_db_file
+    assert dbpath != ""
     db = get_db_instance(dbpath)
     return TableManager(table_name, db=db)
 
+def create_record_table_manager(table_name=""):
+    return create_table_manager(table_name, xconfig.FileConfig.record_db_file)
 
 def get_db_instance(dbpath=""):
     db_driver = xconfig.get_system_config("db_driver")
@@ -100,7 +100,7 @@ def get_all_tables():
 def init_test_table():
     """测试数据库"""
     table_name = "test"
-    with create_table_manager(table_name) as manager:
+    with create_record_table_manager(table_name) as manager:
         manager.add_column("int_value", "int", default_value=0)
         manager.add_column("float_value", "float", default_value=0.0)
         manager.add_column("text_value", "text", default_value="")
@@ -190,7 +190,8 @@ def init_schedule_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    with create_table_manager("user", dbpath=xconfig.FileConfig.user_db_file) as manager:
+    dbpath = xconfig.FileConfig.user_db_file
+    with create_table_manager("user", dbpath=dbpath) as manager:
         manager.add_column("name",       "varchar(64)", "")
         manager.add_column("password",   "varchar(64)", "")
         manager.add_column("salt",       "varchar(64)", "")
@@ -261,7 +262,7 @@ def init_note_tag_bind_table():
     @since 2023/05/20
     """
     table_name = "note_tag_bind"
-    with create_table_manager(table_name) as manager:
+    with create_record_table_manager(table_name) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("user", "varchar(64)", "")

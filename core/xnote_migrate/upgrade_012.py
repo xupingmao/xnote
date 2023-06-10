@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-05-20 22:54:35
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-10 11:01:40
+@LastEditTime : 2023-06-10 22:23:12
 @FilePath     : /xnote/core/xnote_migrate/upgrade_012.py
 @Description  : 描述
 """
@@ -26,7 +26,7 @@ def get_old_dict_table():
     dbpath = xconfig.FileConfig.get_db_path("dictionary")
     db = xtables.get_db_instance(dbpath)
     table_name = "dictionary"
-    with xtables.TableManager("dictionary", db = db, is_backup=True) as manager:
+    with xtables.TableManager(table_name, db = db, is_backup=True) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("key", "varchar(100)", "")
