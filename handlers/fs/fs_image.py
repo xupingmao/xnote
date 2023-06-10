@@ -4,6 +4,8 @@ import traceback
 import sys
 import subprocess
 import base64
+import xconfig
+import os
 
 from io import BytesIO
 from xutils import cacheutil
@@ -60,7 +62,8 @@ def do_create_thumbnail(path, debug=False):
     else:
         logging.info("path=%s", path)
         # multiprocessing在Windows和Mac的性能比较差，因为他们默认使用新线程而不是fork的方式创建线程，
-        args = [sys.executable, "tools/image-thumbnail.py", path]
+        script_path = os.path.join(xconfig.FileConfig.source_root_dir, "tools/image-thumbnail.py")
+        args = [sys.executable, script_path, path]
         with subprocess.Popen(args, stdout=subprocess.PIPE) as proc:
             assert proc.stdout != None
             buf = proc.stdout.read()

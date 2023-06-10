@@ -218,9 +218,12 @@ class FileConfig:
 
     record_db_file = "" # 记录日志等非核心表
     user_db_file = "" # 记录用户数据
+    source_root_dir = "" # 源码根目录
 
     @classmethod
     def init(cls, data_dir):
+        core_dir = os.path.dirname(__file__)
+        cls.source_root_dir = os.path.dirname(core_dir)
         data_dir = os.path.abspath(data_dir)
         cls.data_dir = os.path.abspath(data_dir)
         makedirs(cls.data_dir)

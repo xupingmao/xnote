@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-10 23:07:11
+@LastEditTime : 2023-06-10 23:28:58
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -217,11 +217,11 @@ def delete_tags(creator, note_id):
     tag_bind_db.delete_by_id(note_id, user_name=creator)
 
 
-def list_by_tag(user, tagname, limit = 1000):
+def list_by_tag(user="", tagname = "", limit = 1000):
     # TODO 优化查询性能
-    if user is None:
+    if user == "":
         user = "public"
-
+        
     def list_func(key, value):
         if value.tags is None:
             return False
@@ -337,6 +337,7 @@ def handle_tag_for_note(note_info):
 
 
 def append_tag(note_id="", tag_code=""):
+    """向笔记追加标签"""
     note_info = note_dao.get_by_id(note_id)
     if note_info == None:
         raise Exception("笔记不存在")
