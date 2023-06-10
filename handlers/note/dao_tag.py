@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-20 14:52:15
+@LastEditTime : 2023-06-10 23:07:11
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -334,6 +334,16 @@ def handle_tag_for_note(note_info):
 
         tag_info_list.append(tag_info)
     note.tag_info_list = tag_info_list
+
+
+def append_tag(note_id="", tag_code=""):
+    note_info = note_dao.get_by_id(note_id)
+    if note_info == None:
+        raise Exception("笔记不存在")
+    tags = note_info.tags
+    assert isinstance(tags, list)
+    tags.append(tag_code)
+    bind_tags(note_info.creator, note_id, tags)
 
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_by_tag", list_by_tag)

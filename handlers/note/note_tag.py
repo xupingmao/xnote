@@ -221,12 +221,27 @@ class BindTagAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
+        action = xutils.get_argument_str("action", "")
         tag_type = xutils.get_argument("tag_type", "")
+        if action == "add_note_to_tag":
+            return self.add_note_to_tag()
         if tag_type == "group":
             return self.bind_group_tag()
         if tag_type == "note":
             return self.bind_note_tag()
         return dict(code="400", message="无效的tag_type")
+
+    def add_note_to_tag(self):
+        tag_code = xutils.get_argument_str("tag_code")
+        if tag_code == "":
+            return dict(code="400", message="tag_code不存在")
+        note_ids_str = xutils.get_argument_str("note_ids")
+        note_ids = note_ids_str.split(",")
+        if len(note_ids) == 0:
+            return dict(code="400", message="note_ids参数无效")
+        for note_id in note_ids:
+            dao_tag.append_tag(note_id, tag_code)
+        return dict(code="success")
 
 xurls = (
     # ajax

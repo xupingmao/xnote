@@ -265,26 +265,42 @@ NoteView.renderNoteList = function (itemList) {
 };
 
 NoteView.openDialogToAddNote = function (event) {
+    var tagCode = $(event.target).attr("data-code");
     $.get("/note/api/timeline?type=all&limit=100",  function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
         } else {
             var html = NoteView.renderNoteList(resp.data);
             xnote.openDialog("选择笔记", html, ["确定", "取消"], function () {
-                NoteView.addNoteToTag();
+                NoteView.addNoteToTag(tagCode);
             });
         }
     });
 };
 
-NoteView.addNoteToTag = function () {
+NoteView.addNoteToTag = function (tagCode) {
     var selectedIds = [];
     $(".select-note-checkbox:checked").each(function (idx, ele) {
         var noteId = $(ele).attr("data-id");
         selectedIds.push(noteId);
     });
     console.log(selectedIds);
-    xnote.toast("待实现，敬请期待~");
+
+    var params = {
+        action: "add_note_to_tag",
+        tag_code: tagCode,
+        note_ids: selectedIds.join(",")
+    };
+    $.post("/note/tag/bind", params, function(resp) {
+        if (resp.code != "success") {
+            xnote.alert(resp.message);
+        } else {
+            xnote.toast("添加成功");
+            location.reload();
+        }
+    }).fail(function () {
+        xnote.toast("调用接口失败，请稍后重试~");
+    });
 };
 
 // 选择笔记本-平铺视图
