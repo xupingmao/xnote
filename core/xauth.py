@@ -386,6 +386,10 @@ def get_user_from_token():
     token = xutils.get_argument_str("token")
     if token != None and token != "":
         return UserModel.get_by_token(token)
+    
+    sid = xutils.get_argument_str("__sid")
+    if sid != "":
+        return get_user_by_sid(sid)
 
 def get_user_password(name):
     user = get_user_by_name(name)
@@ -406,11 +410,15 @@ def get_user_password_md5(user_name, use_salt = True):
 
 def get_session_id_from_cookie():
     cookies = web.cookies()
-    return cookies.get("sid")
+    return cookies.get("sid", "")
+
 
 def get_user_from_cookie():
-    session_id = get_session_id_from_cookie()
-    if session_id == None:
+    sid = get_session_id_from_cookie()
+    return get_user_by_sid(sid)
+
+def get_user_by_sid(session_id=""):
+    if session_id == None or session_id == "":
         return None
     session_info = get_valid_session_by_id(session_id)
 
