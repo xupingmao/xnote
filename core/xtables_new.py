@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-28 14:57:27
+@LastEditTime : 2023-06-11 14:17:01
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -34,6 +34,7 @@ def init():
     dbutil.register_table("user_config", "用户配置表")
     db = dbutil.register_table("session", "用户会话信息")
     db.register_index("user", columns=["user_name"])
+    dbutil.register_table("sys_config", "系统配置表")
     
     dbutil.register_table("user_stat", "用户数据统计")
 

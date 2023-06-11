@@ -3,16 +3,9 @@
 # @since 2017/02/19
 # @modified 2021/05/23 19:33:48
 import web
-import xtables
 import xtemplate
 import xauth
 import xutils
-import os
-import xuserconfig
-import xconfig
-import time
-from xutils import Storage, cacheutil
-from xutils.dateutil import Timer
 
 INDEX_HTML = """
 {% extends base %}
