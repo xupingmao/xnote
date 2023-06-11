@@ -112,27 +112,6 @@
             </div>
         </div>
     {% end %}
-
-{% end %}
-
-{% if _has_login %}
-
-    {#
-    <div class="col-md-12 grid-card">
-        <div class="grid-title">
-            其他
-            <a href="{{_server_home}}/system/storage?key=tools" class="float-right link">{{T("Edit")}}</a>
-        </div>
-        <div class="col-md-12">
-            {% for link in customized_items %}
-                <a href="{{_server_home}}{{link.url}}">    
-                    <span>{{T(link.name)}}</span>
-                </a>
-            {% end %}
-        </div>
-    </div>
-    #}
-
 {% end %}
 
 {% end %}

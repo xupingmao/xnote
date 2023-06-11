@@ -16,12 +16,13 @@ from xutils import webutil
 
 class AppLink:
     def __init__(self):
-        self.name = None # type: str|None
-        self.url = None
-        self.user = None
+        self.name = ""
+        self.url = ""
+        self.user = ""
         self.is_admin = False
         self.is_user = False
         self.is_guest = False
+        self.is_public = False
         self.icon = None # type: str|None
         self.img_src = None
 
@@ -30,7 +31,13 @@ def link(name, url, user=None, icon="cube"):
 
 
 def admin_link(name, url, icon="cube"):
-    return link(name, url, "admin", icon)
+    link = AppLink()
+    link.name = name
+    link.url = url
+    link.icon = icon
+    link.is_admin = True
+    link.user = "admin"
+    return link
 
 
 def user_link(name, url, icon="cube", img_src = None):
@@ -43,11 +50,21 @@ def user_link(name, url, icon="cube", img_src = None):
 
 
 def guest_link(name, url, icon="cube"):
-    return Storage(name=name, url=url, link=url, user=None, is_guest=True, icon=icon)
+    link = AppLink()
+    link.name = name
+    link.url = url
+    link.icon = icon
+    link.is_guest = True
+    return link
 
 
 def public_link(name, url, icon="cube"):
-    return Storage(name=name, url=url, link=url, user=None, is_public=True, icon=icon)
+    link = AppLink()
+    link.name = name
+    link.url = url
+    link.icon = icon
+    link.is_public = True
+    return link
 
 
 SYS_TOOLS = [
@@ -133,7 +150,7 @@ class IndexHandler:
                 return user_name is None
             if link.is_user:
                 return user_name != None
-            if link.user is None:
+            if link.user == "":
                 return True
             return link.user == user_name
 
