@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-20 13:52:18
+@LastEditTime : 2023-06-11 10:56:54
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -130,18 +130,26 @@ class MySQLTableManager(BaseTableManager):
         index_name = ""
         colname_str = ""
 
+        index_prefix = "idx_"
+        if is_unique:
+            index_prefix = "uk_"
+
         if isinstance(colname, list):
-            index_name = "idx_" + self.tablename
+            index_name = index_prefix + self.tablename
             for name in colname:
                 index_name += "_" + name
             colname_str = ",".join(colname)
         else:
-            index_name = "idx_" + colname
+            index_name = index_prefix + colname
             colname_str = colname
-        
 
-        sql = "ALTER TABLE `%s` ADD INDEX `%s` (`%s`)" % (
-                self.tablename, index_name, colname_str)
+        if is_unique:
+            sql = "ALTER TABLE `%s` ADD UNIQUE `%s` (`%s`)" % (
+                    self.tablename, index_name, colname_str)
+        else:
+            sql = "ALTER TABLE `%s` ADD INDEX `%s` (`%s`)" % (
+                    self.tablename, index_name, colname_str)
+
         try:
             self.execute(sql)
         except Exception:
@@ -206,16 +214,25 @@ class SqliteTableManager(BaseTableManager):
 
     def add_index(self, colname, is_unique=False):
         # sqlite的索引和table是一个级别的schema
+        index_prefix = "idx_"
+        if is_unique:
+            index_prefix = "uk_"
+
+        colname_str = colname
+        
         if isinstance(colname, list):
-            idx_name = "idx_" + self.tablename
-            for name in colname:
-                idx_name += "_" + name
+            idx_name = index_prefix + self.tablename + "_" + "_".join(colname)
             colname_str = ",".join(colname)
-            sql = "CREATE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (
+        else:
+            idx_name = index_prefix + self.tablename + "_" + colname
+                            
+        if is_unique:
+            sql = "CREATE UNIQUE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (
                 idx_name, self.tablename, colname_str)
         else:
-            sql = "CREATE INDEX IF NOT EXISTS idx_%s_%s ON `%s` (`%s`)" % (
-                self.tablename, colname, self.tablename, colname)
+            sql = "CREATE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (
+                idx_name, self.tablename, colname_str)
+            
         self.execute(sql)
 
 class TableInfo:

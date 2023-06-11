@@ -105,8 +105,9 @@ def init_test_table():
         manager.add_column("float_value", "float", default_value=0.0)
         manager.add_column("text_value", "text", default_value="")
         manager.add_column("name", "text", default_value="test")
-        manager.add_column("check", "text", default_value="aaa'bbb")
-        manager.add_index("check")
+        manager.add_column("uuid", "varchar(32)", default_value="")
+        manager.add_index("name")
+        manager.add_index("uuid", is_unique=True)
 
 
 def init_note_index_table():
