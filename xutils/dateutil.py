@@ -86,12 +86,11 @@ def days_before(days, format=False):
     return time.localtime(seconds)
 
 
-def format_datetime(value=None):
+def format_datetime(value=None, format='%Y-%m-%d %H:%M:%S'):
     """格式化日期时间
     >>> format_datetime(0)
     '1970-01-01 08:00:00'
     """
-    format = '%Y-%m-%d %H:%M:%S'
     if value == None:
         return time.strftime(format)
     elif isinstance(value, datetime.datetime):
