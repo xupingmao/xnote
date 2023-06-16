@@ -9,6 +9,15 @@ PS: 接口是以Leveldb的接口为模板定义的
 """
 
 import warnings
+import threading
+
+_write_lock = threading.RLock()
+
+def get_write_lock(key=""):
+    # type: (str) -> threading.RLock
+    """获取全局独占的写锁，可重入"""
+    global _write_lock
+    return _write_lock
 
 class DBInterface:
     """KV存储的数据库接口"""
@@ -80,6 +89,24 @@ class DBInterface:
         for key in iterator:
             count += 1
         return count
+    
+    def Increase(self, key=b'', increment=1, start_id=1):
+        """自增方法
+        """
+        assert len(key) > 0, "key can not be empty"
+        
+        key_str = key.decode("utf-8")
+        with get_write_lock(key_str):
+            value = self.Get(key)
+            if value == None:
+                value_int = start_id
+            else:
+                value_int = int(value)
+                value_int += increment
+
+            value_bytes = str(value_int).encode("utf-8")
+            self.Put(key, value_bytes)
+            return value_int
 
 
 class DBLockInterface:

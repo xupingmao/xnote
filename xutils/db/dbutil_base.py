@@ -39,7 +39,6 @@
 from __future__ import print_function, with_statement
 import re
 import time
-import threading
 import logging
 
 try:
@@ -67,8 +66,6 @@ DEFAULT_BLOCK_CACHE_SIZE = 8 * (2 << 20)  # 16M
 DEFAULT_WRITE_BUFFER_SIZE = 2 * (2 << 20)  # 4M
 DEFAULT_CACHE_EXPIRE = 60 * 60 * 24  # 1天
 
-_write_lock = threading.RLock()
-
 # 注册的数据库表名，如果不注册，无法进行写操作
 TABLE_INFO_DICT = dict()
 # 表的索引信息 dict[str] -> set[str]
@@ -78,7 +75,7 @@ INDEX_INFO_DICT = dict()
 LDB_TABLE_DICT = dict()
 
 # 只读模式
-WRITE_ONLY = False
+READ_ONLY = False
 
 # leveldb的全局实例
 _leveldb = driver_interface.empty_db
@@ -86,6 +83,8 @@ _leveldb = driver_interface.empty_db
 # 缓存对象（拥有put/get两个方法）
 _cache = driver_interface.empty_cache
 _driver_name = ""
+
+get_write_lock = driver_interface.get_write_lock
 
 def print_debug_info(fmt, *args):
     new_args = [dateutil.format_time(), "[dbutil]"]
@@ -196,10 +195,10 @@ class WriteBatchProxy(BatchInterface):
 
 
 def config(**kw):
-    global WRITE_ONLY
+    global READ_ONLY
 
-    if "write_only" in kw:
-        WRITE_ONLY = kw["write_only"]
+    if "read_only" in kw:
+        READ_ONLY = kw["read_only"]
 
 
 def get_instance():
@@ -211,12 +210,6 @@ def check_not_empty(value, message):
     if value == None or value == "":
         raise Exception(message)
 
-
-def get_write_lock(key=None):
-    # type: (str|None) -> threading.RLock
-    """获取全局独占的写锁，可重入"""
-    global _write_lock
-    return _write_lock
 
 def timeseq(value=None):
     """生成一个时间序列
@@ -236,8 +229,8 @@ def check_leveldb():
 
 
 def check_write_state():
-    if WRITE_ONLY:
-        raise Exception("write_only mode!")
+    if READ_ONLY:
+        raise Exception("read_only mode!")
 
 
 def check_before_write(key, check_table=True):

@@ -113,8 +113,8 @@ def format_time_only(seconds=None):
         st = time.localtime(seconds)
         return time.strftime('%H:%M:%S', st)
 
-def format_wday(date_str, fmt = None) -> str:
-    if fmt is None:
+def format_wday(date_str, fmt = "") -> str:
+    if fmt == "":
         fmt = "%Y-%m-%d"
     
     tm = time.strptime(date_str, fmt)
