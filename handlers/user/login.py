@@ -7,6 +7,7 @@ import xtemplate
 from xutils import cacheutil, dbutil
 from xutils import Storage
 from xutils import webutil
+import json
 
 RETRY_LIMIT = 3
 _user_log_db = dbutil.get_table("user_op_log")
@@ -67,8 +68,13 @@ class LoginHandler:
                                 password="",
                                 error="")
 
-    def do_login(self, name, pswd, count=0):
+    def do_login(self, name, pswd,count=0 ):
         target = xutils.get_argument("target", "")
+        return self.do_login_with_redirect(name,pswd,target,False)
+
+
+    def do_login_with_redirect(self,name, pswd, target,redirect, count=0):
+
         user = xauth.get_user_by_name(name)
         error = ""
 
@@ -85,9 +91,12 @@ class LoginHandler:
                 except Exception as e:
                     xutils.print_exc()
                     return str(e)
-                if target == "":
-                    raise web.found("/")
-                raise web.found(target)
+                if redirect :
+                    if target == "":
+                        raise web.found("/")
+                    raise web.found(target)
+                else:
+                    return error
             else:
                 error = "用户名或密码错误"
                 save_login_info(name, pswd, error)
@@ -95,6 +104,42 @@ class LoginHandler:
         return error
 
 
+
+class LoginAjaxHandler:
+    def POST(self):
+        print("enter the login ajax")
+        print("the web data is :"+ str(web.data()))
+        request_data = str(web.data(),'UTF-8')
+        request_json = json.loads(request_data)
+        name = request_json["username"]
+        pswd = request_json["password"]
+
+        error = ""
+        count = _login_failed_count.get(name, 0)
+        assert isinstance(count, int)
+
+        name = name.strip()
+        pswd = pswd.strip()
+
+        if name == "":
+            error = "请输入登录名"
+        elif pswd == "":
+            error = "请输入密码"
+        elif count >= RETRY_LIMIT:
+            error = "重试次数过多"
+        else:
+            hander = LoginHandler()
+            error = hander.do_login_with_redirect(name,pswd,None,False)
+
+        response = {}
+        if ( error == ""):
+            response['success'] = True
+        else:
+            response['success']  = False
+            response['error']  = error
+        return json.dumps(response)
+
 xurls = (
-    r"/login", LoginHandler
+    r"/login", LoginHandler,
+    r"/login_ajax", LoginAjaxHandler
 )
