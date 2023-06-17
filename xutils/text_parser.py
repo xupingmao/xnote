@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-01-10 14:36:09
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-17 11:11:13
+@LastEditTime : 2023-06-17 11:36:40
 @FilePath     : /xnote/xutils/text_parser.py
 @Description  : 描述
 """
@@ -228,7 +228,7 @@ class TextParserBase(object):
         if end < 0:
             return ""
         else:
-            key = self.text[self.i:end+1]
+            key = self.text[self.i:end+len(target)]
             # 包含 target
             self.i = end + len(target)
         return key
@@ -383,11 +383,18 @@ class TextParser(TextParserBase):
         # 记录关键字
         self.record_keyword(word)
     
-    def mark_strong(self):
-        return self.mark_tag_single("*", 
-                                    record_keyword=False, 
-                                    exclude_tag=True,
-                                    build_html_tag_func=self.build_strong_tag)
+    def mark_strong(self, tag="**"):
+        tag_len = len(tag)
+        self.save_str_token()
+        key = self.read_till_target(tag)
+        if key == "":
+            self.tokens.append(self.text[self.i:self.i+tag_len])
+            self.i += len(tag)
+            return
+        key = key[tag_len:len(key)-tag_len]
+        token = self.build_strong_tag(key)
+        self.tokens.append(token)
+
 
     def mark_book_single(self):
         return self.mark_tag_single(">")
@@ -481,7 +488,7 @@ class TextParser(TextParserBase):
                 self.mark_book()
             elif c == '@':
                 self.mark_at()
-            elif c == "*":
+            elif self.startswith("**"):
                 self.mark_strong()
             elif self.mark_book_single_flag and c == '<':
                 self.mark_book_single()

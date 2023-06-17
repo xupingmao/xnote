@@ -431,7 +431,7 @@ class TestMain(unittest.TestCase):
 
 
     def test_mark_text_tag(self):
-        text = "test*mark*end"
+        text = "test**mark**end"
         from xutils.text_parser import TextParser
         parser = TextParser()
         tokens = parser.parse(text)
