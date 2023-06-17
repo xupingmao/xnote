@@ -11,6 +11,7 @@
 
 {% include common/script/load_vue.html %}
 {% include note/component/script/group_select_script.html %}
+{% include note/component/script/tag_script.html %}
 
 <div id="vueApp">
     <div class="card note-list">
@@ -62,13 +63,14 @@
                 </div>
                 <div class="row">
                     <span>标签</span>
-                    {% if item.tags != None %}
-                        {% for tag in item.tags %}
-                            <a class="tag lightgray">{{tag}}</a>
-                        {% end %}
+                    {% for tag in item.tag_info_list %}
+                        <a class="tag lightgray">{{tag.name}}</a>
                     {% end %}
                     <button class="btn-default bind-tag-btn" 
-                        data-id="{{item.id}}" data-tags="{{item.tags_json}}">+标签</button>
+                        data-parent-id="{{item.parent_id}}"
+                        data-id="{{item.id}}"
+                        data-tags="{{item.tags_json}}"
+                        onclick="xnote.action.note.editNoteTag(this);">+标签</button>
                 </div>
             </div>
         {% end %}

@@ -373,7 +373,7 @@ class GroupManageHandler:
 
         notes, total = note_dao.list_group_with_count(user_name, orderby=orderby, offset=offset,
                                            limit=limit, **list_group_kw)
-
+        
         kw.parent_note = parent_note
         kw.notes = notes
         kw.page_totalsize = total

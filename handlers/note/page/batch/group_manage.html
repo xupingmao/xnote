@@ -12,15 +12,16 @@
 {% init show_note_path = True %}
 {% init note_tags = dict() %}
 {% include note/component/script/create_script.html %}
+{% include note/component/script/tag_script.html %}
 
 <!-- 顶层控制区域的模板 -->
 <script type="text/template" id="tagTopTemplate">
     <div class="card btn-line-height">
         <div class="row">
             <span>标签</span>
-            <a href="?" class="tag lightgray large {% if len(q_tags) == 0 %}active{%end%}">全部</a>
+            <a href="?" class="tag lightgray large {% if len(q_tags) == 0 %}active{%end%}" onclick="onClickTagFilter(this);">全部</a>
             {{! each tagList tag }}
-                <a class="tag lightgray meta large {{!tag.active}}">{{! tag.tag_name }}</a>
+                <a class="tag lightgray meta large {{!tag.active}}" onclick="onClickTagFilter(this);">{{! tag.tag_name }}</a>
             {{!/each}}
         </div>
 
@@ -36,18 +37,6 @@
     <div class="card btn-line-height">
         {{! each tagList tag }}
         <a class="tag lightgray for-dialog large delete" data-id="{{!tag._id}}">
-            {{! tag.tag_name }}
-        </a>
-        {{!/each}}
-    </div>
-</script>
-
-<!-- 绑定标签的模板 -->
-<script type="text/template" id="bindTagTemplate">
-    <div class="card btn-line-height">
-        {{! each tagList tag }}
-        <a class="tag lightgray for-dialog large bind {{! selectedNames.indexOf(tag.tag_name)>=0 ? "active":"" }}" 
-            data-id="{{!tag._id}}" data-name="{{!tag.tag_name}}">
             {{! tag.tag_name }}
         </a>
         {{!/each}}
@@ -100,10 +89,16 @@
 
             <div class="row">
                 <span>标签</span>
-                {% for tag in note_tags.get(item.id, []) %}
-                    <a class="tag lightgray">{{tag}}</a>
+                {% for tag in item.tag_info_list %}
+                    <a class="tag lightgray">{{tag.name}}</a>
                 {% end %}
-                <button class="btn btn-default bind-tag-btn" data-id="{{item.id}}" data-tags="{{item.tags_json}}">+标签</button>
+                <button class="btn btn-default bind-tag-btn"
+                    data-parent-id="{{item.parent_id}}"
+                    data-tag-type="group"
+                    data-id="{{item.id}}"
+                    data-tags="{{item.tags_json}}"
+                    onclick="xnote.action.note.editNoteTag(this);">+标签</button>
+                
             </div>
         </div>
     {% end %}
@@ -148,8 +143,8 @@
 
     refreshTagTop();
 
-    $("body").on("click", ".tag", function(e) {
-        var me = $(this);
+    window.onClickTagFilter = function(target) {
+        var me = $(target);
         var tagName = me.text();
         var tagId = me.attr("data-id");
 
@@ -162,7 +157,7 @@
             location.href = xnote.addUrlParam(location.href, "tags", JSON.stringify(filterTags));
         }
 
-    });
+    };
 
     $(".update-category").change(function (e) {
         var noteId = $(this).attr("data-id");
@@ -181,7 +176,7 @@
         window.location.href = url;
     });
 
-    $(".bind-tag-btn").click(function (e) {
+    $(".bind-tag-btn-old").click(function (e) {
         var selectedNameList = JSON.parse($(e.target).attr("data-tags"));
         var html = $("#bindTagTemplate").render({
             tagList: tagList,

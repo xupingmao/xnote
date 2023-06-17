@@ -12,7 +12,7 @@
         <div class="row">
             {{! each globalTagList tag }}
             <a class="tag lightgray for-dialog large bind  {{! selectedNames.indexOf(tag.tag_code)>=0 ? "active":"" }}" 
-                data-code="{{!tag.tag_code}}">
+                data-code="{{!tag.tag_code}}" onclick="xnote.action.note.onTagClick(this);">
                 {{! tag.tag_name }}
             </a>
             {{!/each}}
@@ -28,7 +28,7 @@
         <div class="row">
             {{! each tagList tag }}
             <a class="tag lightgray for-dialog large bind {{! selectedNames.indexOf(tag.tag_name)>=0 ? "active":"" }}" 
-                data-id="{{!tag._id}}" data-code="{{!tag.tag_name}}">
+                data-id="{{!tag._id}}" data-code="{{!tag.tag_name}}" onclick="xnote.action.note.onTagClick(this);">
                 {{! tag.tag_name }}
             </a>
             {{!/each}}
@@ -38,12 +38,4 @@
             <span>暂无标签</span>
         {{!/if}}
     </div>
-</script>
-
-<script type="text/javascript">
-
-$("body").on("click", ".tag", function(e) {
-    $(e.target).toggleClass("active");
-});
-
 </script>

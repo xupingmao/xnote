@@ -15,6 +15,7 @@
         <button class="btn btn-default tag-edit-btn"
             data-parent-id="{{file.parent_id}}"
             data-id="{{file.id}}"
+            data-tags="{{file.tags_json}}"
             onclick="xnote.action.note.editNoteTag(this);">编辑</button>
     {% end %}
 </div>
@@ -61,4 +62,3 @@
 
 {% include note/component/script/tag_script.html %}
 
-<input type="hidden" id="noteTagJson" value="{{file.tags_json}}"/>

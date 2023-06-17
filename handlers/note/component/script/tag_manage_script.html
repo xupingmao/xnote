@@ -6,7 +6,7 @@
             <a href="{{!linkOfTagAll}}" class="tag lightgray large {{! if selectedTags.length==0 }}active{{!/if}}">全部</a>
             {{! each tagList tag }}
                 <a class="tag lightgray meta large {{!tag.active}}" 
-                    data-name="{{! tag.tag_name }}">{{! tag.tag_name }}({{!tag.amount}})</a>
+                    data-name="{{! tag.tag_name }}" onclick="onTagFilterClick(this);">{{! tag.tag_name }}({{!tag.amount}})</a>
             {{!/each}}
         </div>
 
@@ -22,18 +22,6 @@
     <div class="card btn-line-height">
         {{! each tagList tag }}
         <a class="tag lightgray for-dialog large delete" data-id="{{!tag._id}}">
-            {{! tag.tag_name }}
-        </a>
-        {{!/each}}
-    </div>
-</script>
-
-<!-- 绑定标签的模板 -->
-<script type="text/template" id="bindTagTemplate">
-    <div class="card btn-line-height">
-        {{! each tagList tag }}
-        <a class="tag lightgray for-dialog large bind {{! selectedNames.indexOf(tag.tag_name)>=0 ? "active":"" }}" 
-            data-id="{{!tag._id}}" data-name="{{!tag.tag_name}}">
             {{! tag.tag_name }}
         </a>
         {{!/each}}
@@ -94,8 +82,8 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
 
     refreshTagTop();
 
-    $("body").on("click", ".tag", function(e) {
-        var me = $(this);
+    window.onTagFilterClick = function(target) {
+        var me = $(target);
         var tagName = me.attr("data-name");
         var tagId = me.attr("data-id");
 
@@ -107,44 +95,7 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
             var filterTags = [tagName];
             location.href = xnote.addUrlParam(location.href, "tags", JSON.stringify(filterTags));
         }
-    });
-
-    // 绑定标签
-    $(".bind-tag-btn").click(function (e) {
-        var selectedNameList = JSON.parse($(e.target).attr("data-tags"));
-        var html = $("#bindTagTemplate").render({
-            tagList: tagList,
-            selectedNames: selectedNameList
-        });
-
-        var dataId = $(e.target).attr("data-id");
-
-        console.log("bind-tag-dialog", html);
-
-        xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
-            var selectedNames = [];
-            $(".tag.bind.active").each(function (idx, ele) {
-                var tagName = $(ele).attr("data-name");
-                selectedNames.push(tagName);
-            });
-
-            var bindParams = {
-                tag_type: tagType,
-                group_id: dataId,
-                note_id: dataId,
-                tag_names: JSON.stringify(selectedNames),
-            };
-
-            $.post("/note/tag/bind", bindParams, function (resp) {
-                if (resp.code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    xnote.toast("添加标签成功");
-                }
-                location.reload();
-            });
-        });
-    });
+    };
 
     // 创建标签    
     $("body").on("click", ".create-tag-btn", function (e) {

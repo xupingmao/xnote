@@ -374,6 +374,9 @@ def build_note_info(note, orderby=None):
     if note.type == "group":
         _build_book_default_info(note)
 
+    from . import dao_tag
+    dao_tag.handle_tag_for_note(note)
+
     return note
 
 

@@ -161,8 +161,8 @@ noteAPI.bindTag = function (cmd) {
             location.reload();
         }).fail(function (err) {
             console.error(err);
-            xnote.alert("系统繁忙，请稍后重试");
-        })
+            xnote.toast("系统繁忙，请稍后重试");
+        });
     });
 };
 
@@ -170,27 +170,35 @@ noteAPI.bindTag = function (cmd) {
 var NoteView = {};
 xnote.action.note = NoteView;
 
+NoteView.onTagClick = function(target) {
+    $(target).toggleClass("active");
+}
+
 // 编辑笔记的标签
 NoteView.editNoteTag = function (target) {
     var parentId = $(target).attr("data-parent-id");
     var noteId = $(target).attr("data-id");
+    var tagsJson = $(target).attr("data-tags");
+    var tagType = $(target).attr("data-tag-type");
+    if (xnote.isEmpty(tagType)) {
+        tagType = "note";
+    }
 
     var listParams = {
-        tag_type:"note",
+        tag_type:tagType,
         group_id:parentId,
     };
 
     $.get("/note/tag/list", listParams, function (resp) {
-        var tagsJson = $("#noteTagJson").val();
         var cmd = {
-            tagType: "note",
+            tagType: "note", // 绑定类型始终是note
             currentTags: JSON.parse(tagsJson),
             noteId: noteId,
             manageLink: "/note/manage?parent_id=" + parentId,
         };
         cmd.tagList = resp.data;
         // 调用绑定标签组件
-        xnote.api.note.bindTag(cmd);
+        noteAPI.bindTag(cmd);
     })
 };
 
