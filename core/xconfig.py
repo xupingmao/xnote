@@ -216,8 +216,7 @@ class FileConfig:
     backup_dir = ""
     backup_db_dir = ""
 
-    record_db_file = "" # 记录日志等非核心表
-    user_db_file = "" # 记录用户数据
+    record_db_file = "" # 默认的sqlite数据库
     source_root_dir = "" # 源码根目录
 
     @classmethod
@@ -238,7 +237,6 @@ class FileConfig:
         makedirs(cls.backup_db_dir)
 
         cls.record_db_file = cls.get_db_path("record")
-        cls.user_db_file = cls.get_db_path("user")
 
     @classmethod
     def get_db_path(cls, dbname=""):
@@ -261,6 +259,14 @@ class WebConfig:
     @classmethod
     def init(cls):
         cls.server_home = get_system_config("server_home", "")
+
+class DatabaseConfig:
+
+    driver_name=""
+
+    @classmethod
+    def init(cls):
+        cls.driver_name = get_system_config("driver_name")
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
@@ -339,6 +345,8 @@ def init(boot_config_file=None, boot_config_kw = None):
     FileConfig.init(DATA_DIR)
     # 初始化web配置
     WebConfig.init()
+    # 初始化数据库配置
+    DatabaseConfig.init()
 
     # 备份数据地址
     BACKUP_DIR = make_data_dir("backup")

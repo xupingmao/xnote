@@ -127,6 +127,8 @@ class DBBackup:
     def backup_sql_tables(self):
         logger = self.get_backup_logger()
         db = xtables.MySqliteDB(db = self.db_backup_file)
+        # 备份可以关闭同步，加快速度
+        db.query("PRAGMA synchronous = OFF")
         batch_size = 100
 
         try:

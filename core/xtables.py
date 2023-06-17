@@ -53,6 +53,7 @@ def create_table_manager(table_name="", dbpath=""):
     return TableManager(table_name, db=db)
 
 def create_record_table_manager(table_name=""):
+    """默认使用 record.db 文件"""
     return create_table_manager(table_name, xconfig.FileConfig.record_db_file)
 
 def get_db_instance(dbpath=""):
@@ -191,8 +192,7 @@ def init_schedule_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    dbpath = xconfig.FileConfig.user_db_file
-    with create_table_manager("user", dbpath=dbpath) as manager:
+    with create_record_table_manager("user") as manager:
         manager.add_column("name",       "varchar(64)", "")
         manager.add_column("password",   "varchar(64)", "")
         manager.add_column("salt",       "varchar(64)", "")

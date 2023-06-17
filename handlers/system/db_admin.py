@@ -96,6 +96,9 @@ class DbScanHandler:
             has_next = True
 
         return dict(code="success", data=result, has_next=has_next, next_cursor=next_cursor, scanned=scanned)
+    
+    def POST(self):
+        return self.GET()
 
     @xauth.login_required("admin")
     def GET(self):

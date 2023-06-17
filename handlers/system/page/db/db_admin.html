@@ -104,7 +104,9 @@ $(function () {
             var params = {key: key};
             $.post("?action=delete", params, function (resp) {
                 search();
-            });
+            }).fail(function () {
+                xnote.toast("删除失败，请稍后重试~");
+            })
         });
     }); 
 
