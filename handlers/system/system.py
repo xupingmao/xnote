@@ -78,7 +78,6 @@ SYS_TOOLS = [
     admin_link("线程管理", "/system/thread_info"),
     admin_link("Menu_User",   "/system/user/list", "users"),
     admin_link("Menu_Log",    "/system/log"),
-    admin_link("Menu_Refresh",  "/system/reload", "refresh"),
     admin_link("Menu_Modules",  "/system/modules_info"),
     admin_link("Shell",    "/tools/shell", "terminal"),
     admin_link("集群管理", "/system/sync?p=home", "server"),

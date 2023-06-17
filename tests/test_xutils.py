@@ -430,5 +430,13 @@ class TestMain(unittest.TestCase):
         self.assertEqual("5d41402abc4b2a76b9719d911017c592", textutil.md5_hex(input_text))
 
 
+    def test_mark_text_tag(self):
+        text = "test*mark*end"
+        from xutils.text_parser import TextParser
+        parser = TextParser()
+        tokens = parser.parse(text)
+        self.assertEqual(tokens[0], "test")
+        self.assertEqual(tokens[1], "<span class=\"msg-strong\">mark</span>")
+        self.assertEqual(tokens[2], "end")
 
         

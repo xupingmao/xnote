@@ -1,7 +1,13 @@
 # -*- coding:utf-8 -*-
-# @author xupingmao <578749341@qq.com>
-# @since 2021/01/10 14:36:09
-# @modified 2022/04/09 13:42:24
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2021-01-10 14:36:09
+@LastEditors  : xupingmao
+@LastEditTime : 2023-06-17 11:11:13
+@FilePath     : /xnote/xutils/text_parser.py
+@Description  : 描述
+"""
 
 """标记文本解析
 
@@ -51,6 +57,7 @@ def escape_html(text):
     text = text.replace("'", "&#39;")
     text = text.replace("\n", "<br/>")
     return text
+
 
 class TextParserBase(object):
 
@@ -200,6 +207,7 @@ class TextParserBase(object):
 
     def read_number(self):
         """读取后{i}位于第一个非数字位"""
+        i = 0
         for i in range(self.i, self.length):
             c = self.text[i]
             if not c.isdigit():
@@ -218,12 +226,32 @@ class TextParserBase(object):
         """返回值包含target，索引{i}移动到target之后"""
         end = self.text.find(target, self.i+1)
         if end < 0:
-            key = self.text[self.i:]
-            self.i = self.max_index
+            return ""
         else:
             key = self.text[self.i:end+1]
             # 包含 target
             self.i = end + len(target)
+        return key
+    
+    def read_till_any_target(self, target_list):
+        """返回值包含target，索引{i}移动到target之后"""
+        pos_list = []
+        target_map = {}
+        for target in target_list:
+            end = self.text.find(target, self.i+1)
+            if end >= 0:
+                pos_list.append(end)
+                target_map[end] = target
+        
+        if len(pos_list) > 0:
+            end = min(pos_list)
+            key = self.text[self.i:end+1]
+            target = target_map[end]
+            # 包含 target
+            self.i = end + len(target)
+            return key
+        key = self.text[self.i:]
+        self.i = self.length
         return key
     
     def append_token(self, token):
@@ -284,6 +312,10 @@ class TextParser(TextParserBase):
         key = quote(keyword)
         value = escape_html(keyword)
         return "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (key, value)
+    
+    def build_strong_tag(self, keyword):
+        value = escape_html(keyword)
+        return "<span class=\"msg-strong\">%s</span>" % value
 
     def translate_topic(self, key0):
         if self.topic_translator != None:
@@ -350,6 +382,12 @@ class TextParser(TextParserBase):
 
         # 记录关键字
         self.record_keyword(word)
+    
+    def mark_strong(self):
+        return self.mark_tag_single("*", 
+                                    record_keyword=False, 
+                                    exclude_tag=True,
+                                    build_html_tag_func=self.build_strong_tag)
 
     def mark_book_single(self):
         return self.mark_tag_single(">")
@@ -363,17 +401,29 @@ class TextParser(TextParserBase):
         self.tokens.append(token)
         return token
 
-    def mark_tag_single(self, end_char):
+    def mark_tag_single(self, end_char, record_keyword=True, build_html_tag_func=None, exclude_tag=False):
         self.profile("mark_tag_single")
 
         self.save_str_token()
         
-        key   = self.read_till_target(end_char)
-        token = self.build_search_link(key)
+        key = self.read_till_target(end_char)
+        if key == "":
+            self.tokens.append(self.text[self.i])
+            self.i += 1
+            return
+
+        if exclude_tag:
+            key = key[1:-1]
+
+        if build_html_tag_func == None:
+            build_html_tag_func = self.build_search_link
+
+        token = build_html_tag_func(key)
         self.tokens.append(token)
 
         # 记录关键字
-        self.record_keyword(key)
+        if record_keyword:
+            self.record_keyword(key)
     
     def handle_img_list(self, href):
         hrefs = []
@@ -431,6 +481,8 @@ class TextParser(TextParserBase):
                 self.mark_book()
             elif c == '@':
                 self.mark_at()
+            elif c == "*":
+                self.mark_strong()
             elif self.mark_book_single_flag and c == '<':
                 self.mark_book_single()
             elif self.mark_number_flag and c.isdigit():

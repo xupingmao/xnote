@@ -175,6 +175,11 @@
     color: #666;
 }
 
+.msg-strong {
+    color: red;
+    font-weight: bold;
+}
+
 
 /* 侧边栏的tab样式 */
 .sidebar-btn-style>.x-tab-item {
