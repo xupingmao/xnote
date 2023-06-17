@@ -161,6 +161,10 @@ class CacheInterface:
     def delete(self, key):
         warnings.warn("CacheInterface.delete is not implemented")
 
+class SqlLoggerInterface:
+
+    def append(self, sql):
+        pass
 
 empty_db = DBInterface()
 empty_cache = CacheInterface()

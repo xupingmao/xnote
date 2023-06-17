@@ -262,11 +262,11 @@ class WebConfig:
 
 class DatabaseConfig:
 
-    driver_name=""
+    db_driver=""
 
     @classmethod
     def init(cls):
-        cls.driver_name = get_system_config("driver_name")
+        cls.db_driver = get_system_config("db_driver")
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)

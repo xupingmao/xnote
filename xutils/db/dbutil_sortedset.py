@@ -28,6 +28,7 @@ class RankTable:
             self.prefix += ":"
 
     def _format_score(self, score: float) -> str:
+        # TODO 处理负数?
         assert isinstance(score, float)
         buf = struct.pack(">d", score)
         return buf.hex()

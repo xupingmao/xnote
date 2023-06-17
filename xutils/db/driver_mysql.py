@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-20 11:29:30
+@LastEditTime : 2023-06-17 23:37:42
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -16,9 +16,9 @@ import threading
 import time
 from collections import deque
 from . import driver_interface
-
+from .driver_interface import SqlLoggerInterface
 from xutils.base import Storage
-
+import web.db
 
 class Holder(threading.local):
     db = None
@@ -26,13 +26,6 @@ class Holder(threading.local):
     def __del__(self):
         if self.db != None:
             self.db.close()
-
-
-class SqlLoggerInterface:
-
-    def append(self, sql):
-        pass
-
 
 class ConnectionWrapper:
 
@@ -81,9 +74,12 @@ class MySQLKV(driver_interface.DBInterface):
     holder = Holder()
     lock = threading.RLock()
 
-    def __init__(self, *, host=None, port=3306, user=None,
-                 password=None, database=None, pool_size=5, sql_logger=None):
+    def __init__(self, *, db_instance=None, host=None, port=3306, user=None,
+                 password=None, database=None, pool_size=5, sql_logger=SqlLoggerInterface()):
         assert pool_size > 0
+        assert isinstance(db_instance, web.db.MySQLDB)
+
+        self.db = db_instance
         self.db_host = host
         self.db_user = user
         self.db_port = port
@@ -109,8 +105,13 @@ class MySQLKV(driver_interface.DBInterface):
         except Exception as e:
             logging.error("mysql driver init failed, host=%s, port=%s, database=%s", self.db_host, self.db_port, self.db_database)
             raise e
-
+        
     def get_connection(self):
+        con = self.get_connection_no_check()
+        assert isinstance(con, ConnectionWrapper)
+        return con
+
+    def get_connection_no_check(self):
         # 如果不缓存起来, 每次connect和close都会产生网络请求
         wait_con = True
         while wait_con:
@@ -134,7 +135,7 @@ class MySQLKV(driver_interface.DBInterface):
                     time.sleep(0.001)
                     continue
 
-                con = self.do_get_connection()
+                con = self.do_connect()
                 db = ConnectionWrapper(con, self.pool)
                 db.driver = self.driver
 
@@ -144,7 +145,7 @@ class MySQLKV(driver_interface.DBInterface):
                 self.pool_size += 1
                 return db
 
-    def do_get_connection(self):
+    def do_connect(self):
         kw = Storage()
         kw.host = self.db_host
         kw.port = self.db_port
@@ -178,56 +179,42 @@ class MySQLKV(driver_interface.DBInterface):
         return obj
 
     def init(self):
-        # print("db_host=%s" % self.db_host)
-        # print("db_port=%s" % self.db_port)
-        # print("db_user=%s" % self.db_user)
-        # print("db_password=%s" % self.db_password)
-        # print("db_database=%s" % self.db_database)
+        # tinyblob 最大长度 255
+        # KEY索引长度并不对key的长度做限制，只是索引最多使用200字节
+        # 但是如果索引前缀是相同的，会报主键冲突的错误
+        # 比如索引长度为5, 存在12345A，插入12345B会报错，插入12346A可以成功
+        # 一个CHAR占用3个字节，索引最多用1000个字节
+        
+        self.db.query("""CREATE TABLE IF NOT EXISTS `kv_store` (
+            `key` blob not null comment '键值对key', 
+            value blob comment '键值对value',
+            version int not null default 0 comment '版本',
+            PRIMARY KEY (`key`(200))
+        ) COMMENT '键值对存储';
+        """)
+        self.db.query("""CREATE TABLE IF NOT EXISTS `zset` (
+            `key` varchar(512) not null comment '键值对key',
+            `member` varchar(512) not null comment '成员',
+            `score` decimal(40,20) not null comment '分数',
+            `version` int not null default 0 comment '版本',
+            PRIMARY KEY (`key`(100), `member`(100)) ,
+            KEY idx_score(`score`)
+        ) COMMENT '有序集合';
+        """)
 
-        with self.get_connection() as con:
-            cursor = con.cursor(prepared=True)
-            try:
-                # tinyblob 最大长度 255
-                # KEY索引长度并不对key的长度做限制，只是索引最多使用200字节
-                # 但是如果索引前缀是相同的，会报主键冲突的错误
-                # 比如索引长度为5, 存在12345A，插入12345B会报错，插入12346A可以成功
-                # 一个CHAR占用3个字节，索引最多用1000个字节
-                cursor.execute("""CREATE TABLE IF NOT EXISTS `kv_store` (
-                    `key` blob not null comment '键值对key', 
-                    value blob comment '键值对value',
-                    version int not null default 0 comment '版本',
-                    PRIMARY KEY (`key`(200))
-                ) COMMENT '键值对存储';
-                """)
-                cursor.execute("""CREATE TABLE IF NOT EXISTS `zset` (
-                    `key` varchar(512) not null comment '键值对key',
-                    `member` varchar(512) not null comment '成员',
-                    `score` decimal(40,20) not null comment '分数',
-                    `version` int not null default 0 comment '版本',
-                    PRIMARY KEY (`key`(100), `member`(100)) ,
-                    KEY idx_score(`score`)
-                ) COMMENT '有序集合';
-                """)
-                con.commit()
-            finally:
-                self.close_cursor(cursor)
-            logging.info("mysql connection: %s", con)
-
-    def doGet(self, key, cursor):
+    def doGet(self, key, cursor=None):
         # type: (bytes, ) -> bytes
         """通过key读取Value
         @param {bytes} key
         @return {bytes|None} value
         """
-        assert cursor != None
-
         start_time = time.time()
-        sql = "SELECT value FROM kv_store WHERE `key`=%s"
+        sql = "SELECT value FROM kv_store WHERE `key`=$key"
         
         try:
-            cursor.execute(sql, (key, ))
-            for result in cursor.fetchall():
-                return self.mysql_to_py(result[0])
+            result_list = list(self.db.query(sql, vars=dict(key=key)))
+            for result in result_list:
+                return self.mysql_to_py(result.value)
             return None
         finally:
             cost_time = time.time() - start_time
@@ -235,17 +222,12 @@ class MySQLKV(driver_interface.DBInterface):
                 logging.debug("GET (%s) cost %.2fms", key, cost_time*1000)
 
             if self.sql_logger != None:
-                log_info = sql % key + " [%.2fms]" % (cost_time*1000)
+                sql_info = "sql=(%s), key=(%r)" % (sql, key)
+                log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
 
     def Get(self, key):
-        con = self.get_connection()
-        with con:
-            cursor = con.cursor(prepared=True)
-            try:
-                return self.doGet(key, cursor=cursor)
-            finally:
-                self.close_cursor(cursor)
+        return self.doGet(key)
 
     def BatchGet(self, key_list):
         # type: (list[bytes]) -> dict[bytes, bytes]
@@ -253,32 +235,30 @@ class MySQLKV(driver_interface.DBInterface):
             return {}
 
         start_time = time.time()
-        con = self.get_connection()
-        with con:
-            cursor = con.cursor(prepared=True)
-            try:
-                result = dict()
-                sql = "SELECT `key`, value FROM kv_store WHERE `key` IN (%s)"
-                # mysql.connector不支持传入列表,需要自己处理下
-                sql_args = ["%s" for i in key_list]
-                sql = sql % ",".join(sql_args)
-                cursor.execute(sql, key_list)
-                for item in cursor.fetchall():
-                    key = self.mysql_to_py(item[0])
-                    value = self.mysql_to_py(item[1])
-                    result[key] = value
-                return result
-            finally:
-                cost_time = time.time() - start_time
-                if self.log_get_profile:
-                    logging.debug("BatchGet (%s) cost %.2fms",
-                                  key_list, cost_time*1000)
 
-                if self.sql_logger != None:
-                    log_info = sql + " [%.2fms]" % (cost_time*1000)
-                    self.sql_logger.append(log_info)
+        sql = ""
+        try:
+            result = dict()
+            sql = "SELECT `key`, value FROM kv_store WHERE `key` IN $key_list"
+            # mysql.connector不支持传入列表,需要自己处理下
+            # sql_args = ["%s" for i in key_list]
+            # sql = sql % ",".join(sql_args)
+            result_iter = self.db.query(sql, vars=dict(key_list=key_list))
+            for item in result_iter:
+                key = self.mysql_to_py(item.key)
+                value = self.mysql_to_py(item.value)
+                result[key] = value
+            return result
+        finally:
+            cost_time = time.time() - start_time
+            if self.log_get_profile:
+                logging.debug("BatchGet (%s) cost %.2fms",
+                                key_list, cost_time*1000)
 
-                self.close_cursor(cursor)
+            if self.sql_logger != None:
+                sql_info = "sql=(%s), key_list=%s" % (sql, key_list)
+                log_info = sql_info + " [%.2fms]" % (cost_time*1000)
+                self.sql_logger.append(log_info)
     
     def log_sql(self, sql, params, start_time, key):
         assert isinstance(params, tuple)
@@ -288,26 +268,23 @@ class MySQLKV(driver_interface.DBInterface):
 
         if self.sql_logger:
             cost_time = time.time() - start_time
-            log_info = sql % ("?", key) + \
-                " [%.2fms]" % (cost_time*1000)
+            log_info = sql + " [%.2fms]" % (cost_time*1000)
             self.sql_logger.append(log_info)
 
-    def doPut(self, key, value, cursor=None):
-        # type: (bytes,bytes,mysql.connector.connection.MySQLCursor) -> None
-        assert cursor != None
-
+    def doPut(self, key, value):
+        # type: (bytes,bytes) -> None
         start_time = time.time()
-        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES (%s, %s, 0)"
-        update_sql = "UPDATE kv_store SET value=%s, version=version+1 WHERE `key` = %s"
-        params = (value, key)
+        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"
+        update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key"
 
-        cursor.execute(update_sql, params)
-        if cursor.rowcount == 0:
+        rowcount = self.db.query(update_sql, vars=dict(key=key,value=value))
+        params = ()
+        
+        if rowcount == 0:
             # 数据不存在,执行插入动作
             # 如果这里冲突了，按照默认规则抛出异常
-            params = (key, value)
-            cursor.execute(insert_sql, params)
-            self.log_sql(insert_sql, params, start_time=start_time, key=key)
+            self.db.query(insert_sql, vars=dict(key=key,value=value))
+            # self.log_sql(insert_sql, params, start_time=start_time, key=key)
         else:
             self.log_sql(update_sql, params, start_time=start_time, key=key)
 
@@ -320,48 +297,33 @@ class MySQLKV(driver_interface.DBInterface):
 
         start_time = time.time()
 
-        if cursor != None:
-            return self.doPut(key, value, cursor=cursor)
-
-        con = self.get_connection()
-        with con:
-            cursor = con.cursor(prepared=True)
-            try:
-                self.doPut(key, value, cursor=cursor)
-                con.commit()
-            finally:
-                cost_time = time.time() - start_time
-                if self.log_put_profile:
-                    logging.debug("Put (%s) cost %.2fms", key, cost_time*1000)
-                self.close_cursor(cursor)
+        try:
+            self.doPut(key, value)
+        finally:
+            cost_time = time.time() - start_time
+            if self.log_put_profile:
+                logging.debug("Put (%s) cost %.2fms", key, cost_time*1000)
 
     def doDeleteRaw(self, key, sync=False, cursor=None):
-        # type: (bytes, bool, any) -> None
+        # type: (bytes, bool, object) -> None
         """删除Key-Value键值对
         @param {bytes} key
         """
-        sql = "DELETE FROM kv_store WHERE `key` = %s;"
+        sql = "DELETE FROM kv_store WHERE `key` = $key;"
         if self.debug:
             logging.debug("SQL:%s, params:%s", sql, (key, ))
 
         if self.sql_logger:
-            self.sql_logger.append(sql % (key,))
+            sql_info = "sql=(%s), key=(%s)" % (sql, key)
+            self.sql_logger.append(sql_info)
 
-        cursor.execute(sql, (key, ))
+        self.db.query(sql, vars=dict(key=key))
 
     def doDelete(self, key, sync=False, cursor=None):
-        assert cursor != None
         return self.doDeleteRaw(key, sync, cursor)
 
     def Delete(self, key, sync=False):
-        con = self.get_connection()
-        with con:
-            cursor = con.cursor(prepared=True)
-            try:
-                self.doDelete(key, cursor=cursor)
-                con.commit()
-            finally:
-                self.close_cursor(cursor)
+        self.doDelete(key)
 
     def RangeIterRaw(self,
                      key_from=None,
@@ -379,77 +341,66 @@ class MySQLKV(driver_interface.DBInterface):
         """
 
         # 优化成轮询的短查询
-        con = self.get_connection()
         limit = self.scan_limit
 
-        with con:
-            cursor = con.cursor(prepared=True)
-            try:
-                sql_builder = []
+        sql_builder = []
+
+        if include_value:
+            sql_builder.append("SELECT `key`, value FROM kv_store")
+        else:
+            # 只包含key
+            sql_builder.append("SELECT `key` FROM kv_store")
+
+        sql_builder.append("WHERE `key` >= $key_from AND `key` <= $key_to")
+        if reverse:
+            sql_builder.append("ORDER BY `key` DESC")
+        else:
+            sql_builder.append("ORDER BY `key` ASC")
+
+        sql_builder.append("LIMIT %d;" % (limit + 1))
+        sql = " ".join(sql_builder)
+
+        has_next = True
+        while has_next:
+            params = []
+            if key_from == None:
+                key_from = b''
+
+            if key_to == None:
+                key_to = b'\xff'
+
+            if self.debug:
+                logging.debug("SQL:%s (%s)", sql, params)
+
+            time_before_execute = time.time()
+            result_iter = self.db.query(sql, vars=dict(key_from=key_from, key_to=key_to))
+            result = list(result_iter)
+
+            if self.sql_logger:
+                cost_time = time.time() - time_before_execute
+                sql_info = "sql=(%s), key_from=(%r), key_to=(%r)" % (sql, key_from, key_to)
+                log_info = sql_info + " [%.2fms]" % (cost_time*1000)
+                self.sql_logger.append(log_info)
+
+            for item in result[:limit]:
+                # logging.debug("include_value(%s), item:%s", include_value, item)
+                key = self.mysql_to_py(item.key)
 
                 if include_value:
-                    sql_builder.append("SELECT `key`, value FROM kv_store")
+                    if item.value == None:
+                        continue
+                    yield key, self.mysql_to_py(item.value)
                 else:
-                    # 只包含key
-                    sql_builder.append("SELECT `key` FROM kv_store")
+                    yield key
 
-                sql_builder.append("WHERE `key` >= %s AND `key` <= %s")
-                if reverse:
-                    sql_builder.append("ORDER BY `key` DESC")
-                else:
-                    sql_builder.append("ORDER BY `key` ASC")
+            if len(result) <= limit:
+                break
 
-                sql_builder.append("LIMIT %d;" % (limit + 1))
-                sql = " ".join(sql_builder)
-
-                has_next = True
-                while has_next:
-                    params = []
-                    if key_from != None:
-                        params.append(key_from)
-                    else:
-                        params.append(b'')
-
-                    if key_to != None:
-                        params.append(key_to)
-                    else:
-                        params.append(b'\xff')
-
-                    if self.debug:
-                        logging.debug("SQL:%s (%s)", sql, params)
-
-                    time_before_execute = time.time()
-                    cursor.execute(sql, tuple(params))
-                    result = cursor.fetchall()
-
-                    if self.sql_logger:
-                        cost_time = time.time() - time_before_execute
-                        log_info = sql % tuple(
-                            params) + " [%.2fms]" % (cost_time*1000)
-                        self.sql_logger.append(log_info)
-
-                    for item in result[:limit]:
-                        # logging.debug("include_value(%s), item:%s", include_value, item)
-                        key = self.mysql_to_py(item[0])
-
-                        if include_value:
-                            if item[1] == None:
-                                continue
-                            yield key, self.mysql_to_py(item[1])
-                        else:
-                            yield key
-
-                    if len(result) <= limit:
-                        break
-
-                    last_key = self.mysql_to_py(result[-1][0])
-                    if reverse:
-                        key_to = last_key
-                    else:
-                        key_from = last_key
-
-            finally:
-                self.close_cursor(cursor)
+            last_key = self.mysql_to_py(result[-1].key)
+            if reverse:
+                key_to = last_key
+            else:
+                key_from = last_key
 
     def RangeIter(self, *args, **kw):
         yield from self.RangeIterRaw(*args, **kw)
@@ -458,47 +409,31 @@ class MySQLKV(driver_interface.DBInterface):
         raise NotImplementedError("CreateSnapshot")
 
     def Write(self, batch, sync=False):
-        con = self.get_connection()
-        with con:
-            cursor = con.cursor(prepared=False)
-            try:
-                cursor.execute("begin;")
-                for key in batch._puts:
-                    value = batch._puts[key]
-                    self.doPut(key, value, cursor=cursor)
+        with self.db.transaction():
+            for key in batch._puts:
+                value = batch._puts[key]
+                self.doPut(key, value)
 
-                for key in batch._deletes:
-                    self.doDelete(key, cursor=cursor)
-                cursor.execute("commit;")
-            except Exception as e:
-                cursor.execute("rollback;")
-                raise e
-            finally:
-                self.close_cursor(cursor)
+            for key in batch._deletes:
+                self.doDelete(key)
 
     def Count(self, key_from=b'', key_to=b'\xff'):
-        sql = "SELECT COUNT(*) FROM kv_store WHERE `key` >= %s AND `key` <= %s"
-        params = (key_from, key_to)
-
+        sql = "SELECT COUNT(*) AS amount FROM kv_store WHERE `key` >= $key_from AND `key` <= $key_to"
         start_time = time.time()
-        con = self.get_connection()
-        with con:
-            cursor = con.cursor()
-            try:
-                cursor.execute(sql, params)
-                for row in cursor.fetchall():
-                    return self.mysql_to_py(row[0])
-                return 0
-            finally:
-                self.close_cursor(cursor)
-                if self.debug:
-                    logging.debug("SQL:%s, params:%s", sql, params)
+        try:
+            result_iter = self.db.query(sql, vars=dict(key_from=key_from, key_to=key_to))
+            for row in result_iter:
+                return self.mysql_to_py(row.amount)
+            return 0
+        finally:
+            if self.debug:
+                logging.debug("SQL:%s, key_from=(%r), key_to=(%r)", sql, key_from, key_to)
 
-                if self.sql_logger:
-                    cost_time = time.time() - start_time
-                    log_info = sql % params + \
-                        " [%.2fms]" % (cost_time*1000)
-                    self.sql_logger.append(log_info)
+            if self.sql_logger:
+                cost_time = time.time() - start_time
+                sql_info = "sql=(%s), key_from=(%r), key_to=(%r)" % (sql, key_from, key_to)
+                log_info = sql_info + " [%.2fms]" % (cost_time*1000)
+                self.sql_logger.append(log_info)
 
 
 class RdbSortedSet:
@@ -524,27 +459,23 @@ class RdbSortedSet:
         assert isinstance(score, float)
 
         key = self.table_name + prefix
-        with self.db_instance.get_connection() as con:
-            cursor = con.cursor(prepared=True)
-            params = (score, key, member)
-            cursor.execute(
-                "UPDATE zset SET `score`=%s, version=version+1 WHERE `key`=%s AND member=%s", params)
-            if cursor.rowcount == 0:
-                cursor.execute(
-                    "INSERT INTO zset (score, `key`, member, version) VALUES(%s,%s,%s,0)", params)
+        vars=dict(key=key,member=member,score=score)
+        rowcount = self.db_instance.db.query(
+            "UPDATE zset SET `score`=$score, version=version+1 WHERE `key`=$key AND member=$member", vars=vars)
+        if rowcount == 0:
+            self.db_instance.db.query(
+                "INSERT INTO zset (score, `key`, member, version) VALUES($score,$key,$member,0)", vars=vars)
 
     def get(self, member, prefix=""):
         key = self.table_name + prefix
-        with self.db_instance.get_connection() as con:
-            cursor = con.cursor(prepared=True)
-            sql = "SELECT score FROM zset WHERE `key`=%s AND member=%s LIMIT 1"
-            cursor.execute(sql, (key, member))
-            for item in cursor.fetchall():
-                return self.mysql_to_float(item[0])
-            return None
+        sql = "SELECT score FROM zset WHERE `key`=$key AND member=$member LIMIT 1"
+        result_iter = self.db_instance.db.query(sql, vars=dict(key=key,member=member))
+        for item in result_iter:
+            return self.mysql_to_float(item.score)
+        return None
 
     def list_by_score(self, offset=0, limit=20, *, reverse=False, prefix=""):
-        sql = "SELECT member, score FROM zset WHERE `key` = %s"
+        sql = "SELECT member, score FROM zset WHERE `key` = $key"
         if reverse:
             sql += " ORDER BY score DESC"
         else:
@@ -552,13 +483,11 @@ class RdbSortedSet:
 
         key = self.table_name + prefix
         sql += " LIMIT %s OFFSET %s" % (limit, offset)
-        with self.db_instance.get_connection() as con:
-            cursor = con.cursor(prepared=True)
-            cursor.execute(sql, (key, ))
-            result = []
-            for item in cursor.fetchall():
-                member = self.mysql_to_str(item[0])
-                score = self.mysql_to_float(item[1])
-                result.append((member, score))
+        result_iter = self.db_instance.db.query(sql, vars=dict(key=key))
+        result = []
+        for item in result_iter:
+            member = self.mysql_to_str(item.member)
+            score = self.mysql_to_float(item.score)
+            result.append((member, score))
 
         return result

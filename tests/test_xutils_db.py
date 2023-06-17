@@ -24,6 +24,7 @@ import time
 import xutils
 import xconfig
 import json
+import web.db
 
 from . import test_base
 
@@ -228,12 +229,12 @@ class TestMain(BaseTestCase):
         host = os.environ.get("mysql_host")
         user = os.environ.get("mysql_user")
         password = os.environ.get("mysql_password")
-        database = "test2"
+        database = os.environ.get("mysql_database")
 
         print("host=%s, user=%s, password=%s" % (host, user, password))
 
-        db = MySQLKV(host=host, user=user,
-                     password=password, database=database)
+        db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database)
+        db = MySQLKV(db_instance = db_instance)
         return db
 
     def test_dbutil_mysql(self):
@@ -257,10 +258,10 @@ class TestMain(BaseTestCase):
         host = os.environ.get("mysql_host")
         user = os.environ.get("mysql_user")
         password = os.environ.get("mysql_password")
-        database = "test3"
+        database = os.environ.get("mysql_database")
 
-        db = EnhancedMySQLKV(host=host, user=user,
-                     password=password, database=database)
+        db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database)
+        db = EnhancedMySQLKV(db_instance=db_instance)
         self.do_test_lmdb_large_key(db)
 
     def triggle_database_locked(self):

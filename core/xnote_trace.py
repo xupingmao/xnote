@@ -12,6 +12,7 @@
 import time
 import threading
 from xutils import Storage
+from xutils.db.driver_interface import SqlLoggerInterface
 
 class TraceInfo(threading.local):
 
@@ -28,7 +29,7 @@ def start_trace():
 def get_cost_time():
     return time.time() - _trace_info.start_time
 
-class SqlLogger:
+class SqlLogger(SqlLoggerInterface):
 
     def append(self, sql):
         _trace_info.sql_logs.append(sql)

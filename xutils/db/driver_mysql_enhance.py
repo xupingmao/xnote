@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-10-01 21:15:02
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-01 21:18:32
+@LastEditTime : 2023-06-17 23:25:36
 @FilePath     : /xnote/xutils/db/driver_mysql_enhance.py
 @Description  : 支持长key
 """
@@ -20,7 +20,7 @@ class EnhancedMySQLKV(MySQLKV):
 
     def doPutRaw(self, key, value, cursor=None):
         assert len(key) <= self.max_key_len
-        return super().doPut(key, value, cursor)
+        return super().doPut(key, value)
 
     def RangeIter(self, *args, **kw):
         include_value = kw.get("include_value", True)
@@ -60,8 +60,6 @@ class EnhancedMySQLKV(MySQLKV):
                 short_key, encode.convert_bytes_dict_to_bytes(data_dict), cursor)
 
     def doDelete(self, key, sync=False, cursor=None):
-        assert cursor != None
-
         if len(key) >= self.max_key_len:
             with self.lock:
                 self.doDeleteLongNoLock(key, cursor)

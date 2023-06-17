@@ -135,14 +135,14 @@ def handle_exit():
     xmanager.fire("sys.exit")
 
 
-@log_mem_info_deco("try_init_sqlite")
-def try_init_sql_db():
+@log_mem_info_deco("init_sql_db")
+def init_sql_db():
     # 初始化数据库
     xtables.init()
 
 
-@log_mem_info_deco("try_init_kv_db")
-def try_init_kv_db():
+@log_mem_info_deco("init_kv_db")
+def init_kv_db():
     try:
         block_cache_size = xconfig.get_global_config("system.block_cache_size")
         write_buffer_size = xconfig.get_global_config(
@@ -193,9 +193,7 @@ def try_init_kv_db():
                 database = os.environ["MYSQL_DB"]
 
             sql_logger = xnote_trace.SqlLogger()
-            db_instance = MySQLKV(host=host, user=user, password=password,
-                                  database=database, sql_logger=sql_logger,
-                                  pool_size=pool_size)
+            db_instance = MySQLKV(db_instance = xtables.get_db_instance(), sql_logger=sql_logger)
             db_instance.init()
             logging.info("use mysql as db engine")
 
@@ -311,8 +309,8 @@ def init_app_no_lock(boot_config_kw=None):
     init_debug()
 
     # 初始化数据库
-    try_init_sql_db()
-    try_init_kv_db()
+    init_sql_db()
+    init_kv_db()
     xtables_new.init()
 
     # 初始化工具箱

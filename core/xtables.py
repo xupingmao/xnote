@@ -35,6 +35,7 @@ class DBPool:
     # TODO 池化会导致资源无法释放
 
     sqlite_pool = {} # type: dict[str, MySqliteDB]
+    mysql_instance = None # type: web.db.MySQLDB
 
     @classmethod
     def get_sqlite_db(cls, dbpath=""):
@@ -57,17 +58,19 @@ def create_record_table_manager(table_name=""):
     return create_table_manager(table_name, xconfig.FileConfig.record_db_file)
 
 def get_db_instance(dbpath=""):
-    db_driver = xconfig.get_system_config("db_driver")
+    db_driver = xconfig.DatabaseConfig.db_driver
     if db_driver == "mysql":
-        db_host = xconfig.get_system_config("mysql_host")
-        db_name = xconfig.get_system_config("mysql_database")
-        db_user = xconfig.get_system_config("mysql_user")
-        db_pw = xconfig.get_system_config("mysql_password")
-        db_port = xconfig.get_system_config("mysql_port")
-        db = web.db.MySQLDB(host=db_host, database=db_name,
-                            user=db_user, pw=db_pw, port=db_port)
-        db.dbname = "mysql"
-        return db
+        if DBPool.mysql_instance == None:
+            db_host = xconfig.get_system_config("mysql_host")
+            db_name = xconfig.get_system_config("mysql_database")
+            db_user = xconfig.get_system_config("mysql_user")
+            db_pw = xconfig.get_system_config("mysql_password")
+            db_port = xconfig.get_system_config("mysql_port")
+            db = web.db.MySQLDB(host=db_host, database=db_name,
+                                user=db_user, pw=db_pw, port=db_port)
+            db.dbname = "mysql"
+            DBPool.mysql_instance = db
+        return DBPool.mysql_instance
     assert dbpath != ""
     # db = MySqliteDB(db=dbpath)
     db = DBPool.get_sqlite_db(dbpath=dbpath)

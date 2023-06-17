@@ -254,8 +254,13 @@ def get_users():
 
 def iter_user(limit = 20):
     db = get_user_db()
-    for user_info in db.select(limit = limit):
-        yield user_info
+    if limit < 0:
+        for batch in db.iter_batch():
+            for item in batch:
+                yield item
+    else:
+        for user_info in db.select(limit = limit):
+            yield user_info
 
 def count_user():
     db = get_user_db()
