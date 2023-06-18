@@ -102,7 +102,7 @@ class Cache:
         value = self.dict.get(key)
         if value != None:
             if self.is_alive(key):
-                self.dict.move_to_end(key, last=False) # 移动到最前面
+                self.dict[key] = value # 移到最后面
                 if isinstance(value, bytes):
                     obj = value
                 else:
@@ -135,7 +135,6 @@ class Cache:
             else:
                 value = self.format_value(value)
                 self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
-            self.dict.move_to_end(key, last=False) # 移动到最前面
             self.expire_dict[key] = time.time() + expire + random.randint(0, random_range)
             
             if self.max_size > 0:
@@ -146,18 +145,22 @@ class Cache:
         return value > time.time()
     
     def delete(self, key):
+        has_delete = False
         with self.lock:
             if key in self.dict:
                 del self.dict[key]
+                has_delete = True
             if key in self.expire_dict:
                 del self.expire_dict[key]
+                has_delete = True
+        return has_delete
 
     def check_size_and_clear(self):
         if self.max_size <= 0:
             return
 
         while len(self.dict) > self.max_size:
-            key, value = self.dict.popitem(last=True) # 弹出第一个
+            key, value = self.dict.popitem(last=False) # 弹出第一个
             self.delete(key)
     
     def get_expire(self, key):
@@ -350,17 +353,15 @@ def cache_deco(key=None, prefix=None, expire=600):
             else:
                 cache_key = "%s%s" % (prefix, args)
 
-            obj = get_cache_obj(cache_key)
-            if obj is not None:
-                return obj.value
+            cache_value = _global_cache.get(key=cache_key)
+            if cache_value is not None:
+                return cache_value
             value = func(*args)
             if value is None:
-                delete(cache_key)
+                _global_cache.delete(key=cache_key)
                 return None
 
-            cache_obj = CacheObj(cache_key, value, expire)
-            cache_obj.func = func
-            cache_obj.args = args
+            _global_cache.put(key=cache_key, value=value, expire=expire)
             return value
         return handle
     return deco
@@ -375,23 +376,14 @@ def put(key, value=None, expire=-1):
     @param {object} value value对象必须可以json序列化，如果value为None，会删除key对应的对象
     @param {integer} expire 失效时间，单位秒，如果小于等于0认为不失效，会持久化到文件
     """
-    if key is None:
-        raise ValueError("key can not be None")
-    if value is None:
-        delete(key)
-        return True
-    CacheObj(key, value, expire)
-    return True
+    return _global_cache.put(key, value=value, expire=expire)
 
 
 def get(key, default_value=None):
     """读取缓存对象
     @param {object} default_value 如果缓存对象不存在，返回default_value
     """
-    obj = get_cache_obj(key)
-    if obj is None:
-        return default_value
-    return obj.get_value()
+    return _global_cache.get(key=key, default_value=default_value)
 
 
 def delete(key=None, prefix=None, args=None):
@@ -401,23 +393,14 @@ def delete(key=None, prefix=None, args=None):
     """
     if key == None:
         key = "%s%s" % (prefix, args)
-    obj = get_cache_obj(key)
-    if obj != None:
-        obj.clear()
-        return True
-    return False
+    return _global_cache.delete(key=key)
 
 
 def prefix_del(prefix):
     """使用前缀删除"""
-    keys = []
-    for key in _cache_dict:
+    for key in _global_cache.dict:
         if key.startswith(prefix):
-            keys.append(key)
-    for key in keys:
-        obj = get_cache_obj(key)
-        if obj != None:
-            obj.clear()
+            _global_cache.delete(key)
 
 
 # 方法别名

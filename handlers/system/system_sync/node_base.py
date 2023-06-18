@@ -5,7 +5,7 @@
 # @filename node_base.py
 
 
-from xutils import dbutil
+from xutils import dbutil, cacheutil
 from xutils import Storage
 import xconfig
 
@@ -34,11 +34,15 @@ def convert_follower_dict_to_list(follower_dict):
 
 class NodeManagerBase:
 
+    @cacheutil.cache_deco("sync.leader_token")
     def get_leader_token(self):
         return CONFIG.get("leader.token")
 
     def get_ping_error(self):
         return None
+    
+    def get_follower_list(self):
+        raise NotImplementedError()
 
     def get_follower_info_by_url(self, url):
         for info in self.get_follower_list():

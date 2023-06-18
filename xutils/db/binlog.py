@@ -4,12 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-28 15:07:47
+@LastEditTime : 2023-06-18 11:13:04
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
 from xutils.db.dbutil_base import count_table, prefix_iter
-from xutils.db.dbutil_table import db_put, prefix_list, db_delete, register_table, create_write_batch
+from xutils.db.dbutil_table import db_put, prefix_list, register_table, create_write_batch
 
 import threading
 import logging

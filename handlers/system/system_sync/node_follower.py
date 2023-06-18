@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-27 20:34:48
+@LastEditTime : 2023-06-18 10:33:29
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -14,7 +14,7 @@ import logging
 import xconfig
 
 from xutils import Storage
-from xutils import textutil
+from xutils import textutil, cacheutil
 from xutils import dbutil, six
 import xutils
 from xutils.db.binlog import BinLog
@@ -133,6 +133,7 @@ class Follower(NodeManagerBase):
     def get_follower_list(self):
         return self.follower_list
 
+    @cacheutil.cache_deco("sync.leader_host")
     def get_leader_url(self):
         return CONFIG.get("leader.host")
     

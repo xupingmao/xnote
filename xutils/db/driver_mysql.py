@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-17 23:37:42
+@LastEditTime : 2023-06-18 11:28:04
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -69,17 +69,14 @@ class ConnectionWrapper:
         self.close()        
 
 
-class MySQLKV(driver_interface.DBInterface):
-
+class MySQLKVOld:
     holder = Holder()
     lock = threading.RLock()
 
-    def __init__(self, *, db_instance=None, host=None, port=3306, user=None,
-                 password=None, database=None, pool_size=5, sql_logger=SqlLoggerInterface()):
+    def __init__(self, host=None, port=3306, user=None,
+                 password=None, database=None, pool_size=5, 
+                 db_instance=None, sql_logger=SqlLoggerInterface()):
         assert pool_size > 0
-        assert isinstance(db_instance, web.db.MySQLDB)
-
-        self.db = db_instance
         self.db_host = host
         self.db_user = user
         self.db_port = port
@@ -87,6 +84,8 @@ class MySQLKV(driver_interface.DBInterface):
         self.db_database = database
         self.db_pool_size = pool_size
         self.db_auth_plugin = "mysql_native_password"
+        self.db_pool_size = pool_size
+        self.pool = deque()
 
         self.debug = True
         self.log_get_profile = True
@@ -98,14 +97,7 @@ class MySQLKV(driver_interface.DBInterface):
         self.debug_pool = False
         self.driver = ""
         self.driver_type = "mysql"
-
-        try:
-            self.init()
-            RdbSortedSet.init_class(db_instance=self)
-        except Exception as e:
-            logging.error("mysql driver init failed, host=%s, port=%s, database=%s", self.db_host, self.db_port, self.db_database)
-            raise e
-        
+       
     def get_connection(self):
         con = self.get_connection_no_check()
         assert isinstance(con, ConnectionWrapper)
@@ -170,6 +162,35 @@ class MySQLKV(driver_interface.DBInterface):
                 pass
         raise ImportError("Unable to import " + " or ".join(drivers))
 
+class MySQLKV(driver_interface.DBInterface):
+
+    holder = Holder()
+    lock = threading.RLock()
+
+    def __init__(self, *, host=None, port=3306, user=None,
+                 password=None, database=None, pool_size=5, 
+                 db_instance=None, sql_logger=SqlLoggerInterface()):
+        assert isinstance(db_instance, web.db.MySQLDB)
+        self.db = db_instance
+        
+        self.debug = True
+        self.log_get_profile = True
+        self.log_put_profile = True
+        self.sql_logger = sql_logger  # type: SqlLoggerInterface
+        self.scan_limit = 200  # 扫描的分页大小
+        self.pool = deque()
+        self.pool_size = 0
+        self.debug_pool = False
+        self.driver = ""
+        self.driver_type = "mysql"
+
+        try:
+            self.init()
+            RdbSortedSet.init_class(db_instance=self)
+        except Exception as e:
+            logging.error("mysql driver init failed, host=%s, port=%s, database=%s", host, port, database)
+            raise e
+
     def close_cursor(self, cursor):
         cursor.close()
 
@@ -203,7 +224,7 @@ class MySQLKV(driver_interface.DBInterface):
         """)
 
     def doGet(self, key, cursor=None):
-        # type: (bytes, ) -> bytes
+        # type: (bytes, object) -> bytes|None
         """通过key读取Value
         @param {bytes} key
         @return {bytes|None} value

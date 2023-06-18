@@ -105,14 +105,15 @@ def run_test(args):
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("target", default="all", nargs="?")
-	parser.add_argument("--run_mysql_test", action="store_true", default=False)
+	parser.add_argument("--run_mysql_test", default=True)
 	parser.add_argument("--test_mysql", action="store_true", default=False)
 	parser.add_argument("--mysql_host", default="192.168.50.96")
 	parser.add_argument("--mysql_user", default="test")
 	parser.add_argument("--mysql_password", default="gR4!KTO@9q")
 	parser.add_argument("--mysql_database", default="test")
 	args = parser.parse_args()
-	args.skip_mysql_test = not args.run_mysql_test
+
+	args.skip_mysql_test = (args.run_mysql_test == "False")
 
 	do_clean()
 

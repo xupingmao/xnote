@@ -60,8 +60,6 @@ class LoginHandler:
 
     def do_login_with_redirect(self,name, pswd, target=""):
         error = self.do_login_with_error(name, pswd)
-        print("target", target)
-        print("err=%r" % error)
         if error == "":
             if target == "":
                 target = "/"
