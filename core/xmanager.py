@@ -450,6 +450,7 @@ class CronTaskManager:
 
     def __init__(self, app):
         self.task_list = []
+        self.ext_task_list = [] # 扩展任务
         self.app = app
         self.thread_started = False
 
@@ -558,6 +559,9 @@ class CronTaskManager:
         # 系统默认的任务
         task_config = xconfig.load_cron_config()
         for task in task_config:
+            self.task_list.append(Storage(**task))
+        
+        for task in self.ext_task_list:
             self.task_list.append(Storage(**task))
 
     def save_tasks(self):
