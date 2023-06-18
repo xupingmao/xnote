@@ -281,6 +281,12 @@ class HandlerManager:
         self.load_model_dir(xconfig.HANDLERS_DIR, unload=True, mod_name="handlers")
         self.load_model_dir(xconfig.HANDLERS_DIR, load=True, mod_name="handlers")
 
+        # 重新加载定时任务
+        self.load_tasks()
+
+        # 清空缓存
+        cacheutil.clear_temp()
+
         for reload_func in xnote_hooks.get_reload_hooks():
             reload_func(self)
 
@@ -290,6 +296,9 @@ class HandlerManager:
 
         # set 404 page
         self.app.notfound = notfound
+
+        load_init_script()
+        fire("sys.reload")
 
     def get_mod(self, module, name):
         namelist = name.split(".")
@@ -770,17 +779,8 @@ def instance():
 @xutils.log_init_deco("xmanager.reload")
 def reload():    
     with LOCK:
-        get_event_manager().remove_handlers()
-
         # 重载处理器
         get_handler_manager().reload()
-
-        # 重新加载定时任务
-        get_handler_manager().load_tasks()
-
-        cacheutil.clear_temp()
-        load_init_script()
-        fire("sys.reload")
 
 
 def load_init_script():
