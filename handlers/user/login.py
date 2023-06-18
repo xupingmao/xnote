@@ -38,22 +38,7 @@ class LoginHandler:
     def POST(self):
         name = xutils.get_argument_str("username", "")
         pswd = xutils.get_argument_str("password", "")
-        error = ""
-        count = _login_failed_count.get(name, 0)
-        assert isinstance(count, int)
-
-        name = name.strip()
-        pswd = pswd.strip()
-
-        if name == "":
-            error = "请输入登录名"
-        elif pswd == "":
-            error = "请输入密码"
-        elif count >= RETRY_LIMIT:
-            error = "重试次数过多"
-        else:
-            error = self.do_login(name, pswd, count)
-
+        error = self.do_login(name, pswd)
         return xtemplate.render("user/page/login.html",
                                 show_aside=False,
                                 username=name,
@@ -68,35 +53,54 @@ class LoginHandler:
                                 password="",
                                 error="")
 
-    def do_login(self, name, pswd,count=0 ):
-        target = xutils.get_argument("target", "")
-        return self.do_login_with_redirect(name,pswd,target,False)
+    def do_login(self, name, pswd):
+        target = xutils.get_argument_str("target")
+        return self.do_login_with_redirect(name,pswd,target)
 
 
-    def do_login_with_redirect(self,name, pswd, target,redirect, count=0):
-
-        user = xauth.get_user_by_name(name)
+    def do_login_with_redirect(self,name, pswd, target=""):
+        error = self.do_login_with_error(name, pswd)
+        print("target", target)
+        print("err=%r" % error)
+        if error == "":
+            if target == "":
+                target = "/"
+            raise web.found(target)
+        return error
+    
+    def do_login_with_error(self, name, pswd, count=0):
+        name = name.strip()
+        pswd = pswd.strip()
+        count = _login_failed_count.get(name, 0)
+        assert isinstance(count, int)
         error = ""
+        if name == "":
+            error = "请输入登录名"
+        elif pswd == "":
+            error = "请输入密码"
+        elif count >= RETRY_LIMIT:
+            error = "重试次数过多"
+        
+        if error != "":
+            return error
+        
+        user = xauth.get_user_by_name(name)
 
         if user == None:
             error = "用户名或密码错误"
             save_login_info(name, pswd, error)
             save_login_error_count(name, count + 1)
+            return error
         else:
             if pswd == user["password"]:
                 save_login_info(name, "success")
 
                 try:
                     xauth.login_user_by_name(name, login_ip=get_real_ip())
+                    return "" # 登录成功
                 except Exception as e:
                     xutils.print_exc()
                     return str(e)
-                if redirect :
-                    if target == "":
-                        raise web.found("/")
-                    raise web.found(target)
-                else:
-                    return error
             else:
                 error = "用户名或密码错误"
                 save_login_info(name, pswd, error)
@@ -114,22 +118,8 @@ class LoginAjaxHandler:
         name = request_json["username"]
         pswd = request_json["password"]
 
-        error = ""
-        count = _login_failed_count.get(name, 0)
-        assert isinstance(count, int)
-
-        name = name.strip()
-        pswd = pswd.strip()
-
-        if name == "":
-            error = "请输入登录名"
-        elif pswd == "":
-            error = "请输入密码"
-        elif count >= RETRY_LIMIT:
-            error = "重试次数过多"
-        else:
-            hander = LoginHandler()
-            error = hander.do_login_with_redirect(name,pswd,None,False)
+        hander = LoginHandler()
+        error = hander.do_login_with_error(name,pswd)
 
         response = {}
         if ( error == ""):
