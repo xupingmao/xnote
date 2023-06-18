@@ -64,7 +64,7 @@ def display_time_rule(task):
 
     if task.tm_min == "*":
         minute = "每分钟"
-    if task.tm_min == "mod5":
+    elif task.tm_min == "mod5":
         minute = "每5分钟"
     else:
         minute = "%s分" % task.tm_min
