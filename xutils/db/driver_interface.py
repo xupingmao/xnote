@@ -19,6 +19,13 @@ def get_write_lock(key=""):
     global _write_lock
     return _write_lock
 
+
+class DatabaseException(Exception):
+
+    def __init__(self, code=0, message="") -> None:
+        super().__init__(message)
+
+
 class DBInterface:
     """KV存储的数据库接口"""
 

@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-18 11:28:04
+@LastEditTime : 2023-06-18 13:11:33
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -166,6 +166,7 @@ class MySQLKV(driver_interface.DBInterface):
 
     holder = Holder()
     lock = threading.RLock()
+    max_value_length = 1024 * 1024 * 5 # 5MB
 
     def __init__(self, *, host=None, port=3306, user=None,
                  password=None, database=None, pool_size=5, 
@@ -208,7 +209,7 @@ class MySQLKV(driver_interface.DBInterface):
         
         self.db.query("""CREATE TABLE IF NOT EXISTS `kv_store` (
             `key` blob not null comment '键值对key', 
-            value blob comment '键值对value',
+            value longblob comment '键值对value',
             version int not null default 0 comment '版本',
             PRIMARY KEY (`key`(200))
         ) COMMENT '键值对存储';
@@ -229,16 +230,26 @@ class MySQLKV(driver_interface.DBInterface):
         @param {bytes} key
         @return {bytes|None} value
         """
+
+        assert isinstance(key, bytes)
+        
         start_time = time.time()
         sql = "SELECT value FROM kv_store WHERE `key`=$key"
+        vars = dict(key=key)
         
         try:
-            result_list = list(self.db.query(sql, vars=dict(key=key)))
-            for result in result_list:
-                return self.mysql_to_py(result.value)
+            result_iter = self.db.query(sql, vars=vars)
+            for item in result_iter:
+                return self.mysql_to_py(item.value)
             return None
+        except Exception as e:
+            del self.db.ctx.db # 尝试重新连接
+            real_sql = self.db.query(sql, vars=vars, _test=True)
+            logging.error("SQL:%s", real_sql)
+            raise e
         finally:
             cost_time = time.time() - start_time
+            
             if self.log_get_profile:
                 logging.debug("GET (%s) cost %.2fms", key, cost_time*1000)
 
@@ -285,7 +296,7 @@ class MySQLKV(driver_interface.DBInterface):
         assert isinstance(params, tuple)
 
         if self.debug:
-            logging.debug("SQL:%s, params:%s", sql, params)
+            logging.debug("SQL:%s, key:%s", sql, key)
 
         if self.sql_logger:
             cost_time = time.time() - start_time
@@ -294,6 +305,10 @@ class MySQLKV(driver_interface.DBInterface):
 
     def doPut(self, key, value):
         # type: (bytes,bytes) -> None
+
+        if len(value) > self.max_value_length:
+            raise driver_interface.DatabaseException(code=400, message="value too long")
+
         start_time = time.time()
         insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"
         update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key"
