@@ -28,24 +28,68 @@ from xutils import Storage
 
 NOTE_DAO = xutils.DAO("note")
 
+class NoteLockDO(Storage):
+    def __init__(self):
+        self.token = ""
+        self.note_id = ""
+        self.expire_time = 0.0
+
+    @classmethod
+    def from_dict(cls, dict_value):
+        if dict_value == None:
+            return None
+        result = NoteLockDO()
+        result.update(dict_value)
+        return result
+
+class NoteLockDao:
+    db = dbutil.get_hash_table("note_lock")
+
+    @classmethod
+    def get_by_note_id(cls, note_id=""):
+        lock_dict = cls.db.get(note_id)
+        return NoteLockDO.from_dict(lock_dict)
+    
+    @staticmethod
+    def is_valid_token(lock_info):
+        return lock_info.expire_time > time.time()
+
+    @classmethod
+    def lock_for_edit(cls, note_id, token):
+        assert isinstance(note_id, str)
+        assert isinstance(token, str)
+        lock_info = cls.get_by_note_id(note_id)
+        if lock_info == None or not cls.is_valid_token(lock_info):
+            return True
+        return token == lock_info.token
+
+    @classmethod
+    def steal_edit_lock(cls, note_id, token, expire_time):
+        assert isinstance(note_id, str)
+        assert isinstance(token, str)
+        assert isinstance(expire_time, float)
+
+        lock_info = Storage(token = token, expire_time = expire_time)
+        cls.db.put(note_id, lock_info)
+    
+    @classmethod
+    def refresh_edit_lock(cls, note_id, token, expire_time):
+        # 应用层需要加锁
+        if cls.lock_for_edit(note_id, token):
+            cls.steal_edit_lock(note_id, token, expire_time)
+            return True
+        else:
+            return False
+
 def get_note_draft_db():
     return dbutil.get_hash_table("note_draft")
 
 def get_note_lock_db():
-    return dbutil.get_hash_table("note_lock")
+    return NoteLockDao.db
 
-def is_valid_token(lock_info):
-    return lock_info.expire_time > time.time()
 
 def lock_for_edit(note_id, token):
-    assert isinstance(note_id, str)
-    assert isinstance(token, str)
-
-    db = get_note_lock_db()
-    lock_info = db.get(note_id)
-    if lock_info == None or not is_valid_token(lock_info):
-        return True
-    return token == lock_info.token
+    return NoteLockDao.lock_for_edit(note_id, token)
 
 def save_draft(note_id, content):
     """
@@ -56,7 +100,10 @@ def save_draft(note_id, content):
     assert isinstance(content, str)
 
     db = get_note_draft_db()
-    db.put(note_id, content)
+    if content=="":
+        db.delete(note_id)
+    else:
+        db.put(note_id, content)
 
 def get_draft(note_id):
     assert isinstance(note_id, str)
@@ -65,21 +112,10 @@ def get_draft(note_id):
     return db.get(note_id)
 
 def steal_edit_lock(note_id, token, expire_time):
-    assert isinstance(note_id, str)
-    assert isinstance(token, str)
-    assert isinstance(expire_time, float)
-
-    lock_info = Storage(token = token, expire_time = expire_time)
-    db = get_note_lock_db()
-    db.put(note_id, lock_info)
+    return NoteLockDao.steal_edit_lock(note_id, token, expire_time)
 
 def refresh_edit_lock(note_id, token, expire_time):
-    # 应用层需要加锁
-    if lock_for_edit(note_id, token):
-        steal_edit_lock(note_id, token, expire_time)
-        return True
-    else:
-        return False
+    return NoteLockDao.refresh_edit_lock(note_id, token, expire_time)
 
 xutils.register_func("note.save_draft", save_draft)
 xutils.register_func("note.get_draft", get_draft)

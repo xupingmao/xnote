@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-10 23:28:58
+@LastEditTime : 2023-06-21 22:36:55
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -30,12 +30,13 @@ class TagBind(Storage):
         self.tags = []
         self.parent_id = ""
 
-def dict_to_tag_bind(dict_value):
-    if dict_value == None:
-        return None
-    bind = TagBind()
-    bind.update(**dict_value)
-    return bind
+    @classmethod
+    def from_dict(cls, dict_value):
+        if dict_value == None:
+            return None
+        bind = TagBind()
+        bind.update(dict_value)
+        return bind
 
 class TagMeta(Storage):
     """标签元信息"""
@@ -65,7 +66,7 @@ class TagBindDao:
     @staticmethod
     def get_by_note_id(user_name, note_id):
         record = tag_bind_db.get_by_id(note_id, user_name=user_name)
-        return dict_to_tag_bind(record)
+        return TagBind.from_dict(record)
 
     @staticmethod
     def count_user_tag(user_name = "", tag_name = "", parent_id=None):
