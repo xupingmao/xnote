@@ -12,7 +12,7 @@
 import time
 import threading
 from xutils import Storage
-from xutils.db.driver_interface import SqlLoggerInterface
+from xutils.interfaces import SqlLoggerInterface
 
 class TraceInfo(threading.local):
 

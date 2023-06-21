@@ -159,7 +159,7 @@ class BatchInterface:
 class CacheInterface:
     """缓存接口"""
 
-    def get(self, key):
+    def get(self, key, default_value=None):
         return None
     
     def put(self, key, value, expire = -1, expire_random = 600):

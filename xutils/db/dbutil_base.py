@@ -52,9 +52,9 @@ import xutils
 from xutils.imports import is_str
 from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json
-from .driver_interface import DBInterface, BatchInterface
+from ..interfaces import DBInterface, BatchInterface
 from .dbutil_id_gen import TimeSeqId
-from . import driver_interface
+from .. import interfaces
 
 try:
     import leveldb
@@ -78,13 +78,13 @@ LDB_TABLE_DICT = dict()
 READ_ONLY = False
 
 # leveldb的全局实例
-_leveldb = driver_interface.empty_db
+_leveldb = interfaces.empty_db
 
 # 缓存对象（拥有put/get两个方法）
-_cache = driver_interface.empty_cache
+_cache = interfaces.empty_cache
 _driver_name = ""
 
-get_write_lock = driver_interface.get_write_lock
+get_write_lock = interfaces.get_write_lock
 
 def print_debug_info(fmt, *args):
     new_args = [dateutil.format_time(), "[dbutil]"]

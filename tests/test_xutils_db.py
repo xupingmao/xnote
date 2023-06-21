@@ -811,3 +811,33 @@ class TestMain(BaseTestCase):
         self.assertEqual(30, len(result))
         self.assertEqual("030", result[-1]._id)
 
+
+    def test_key_decoder(self):
+        from xutils.db.encode import KeyDecoder
+        decoder = KeyDecoder("a:b:c")
+        a = decoder.pop_left()
+        b = decoder.pop_left()
+        c = decoder.pop_left()
+        d = decoder.pop_left()
+
+        self.assertEqual(a, "a")
+        self.assertEqual(b, "b")
+        self.assertEqual(c, "c")
+        self.assertEqual(d, "")
+
+    def test_key_decoder_rest(self):
+        from xutils.db.encode import KeyDecoder
+        decoder = KeyDecoder("a:b:c")
+        a = decoder.pop_left()
+        rest = decoder.rest()
+        self.assertEqual(a, "a")
+        self.assertEqual(rest, "b:c")
+
+    def test_db_cache(self):
+        from xutils.db.dbutil_cache import DatabaseCache
+        cache = DatabaseCache()
+        cache.delete("test")
+        self.assertIsNone(cache.get("test"))
+        cache.put("test", 1, expire=100)
+        self.assertEqual(cache.get("test"), 1)
+

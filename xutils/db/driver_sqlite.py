@@ -10,7 +10,7 @@ import sqlite3
 import threading
 import logging
 from xutils.mem_util import log_mem_info_deco
-from . import driver_interface
+from .. import interfaces
 
 class FreeLock:
 
@@ -51,7 +51,7 @@ class Holder(threading.local):
         if self.db != None:
             self.db.close()
 
-class SqliteKV(driver_interface.DBInterface):
+class SqliteKV(interfaces.DBInterface):
 
     _lock = threading.RLock()
 

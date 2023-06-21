@@ -7,9 +7,9 @@
 import leveldb
 import logging
 
-from . import driver_interface
+from .. import interfaces
 
-class LevelDBImpl(driver_interface.DBInterface):
+class LevelDBImpl(interfaces.DBInterface):
 
     log_debug = False
 

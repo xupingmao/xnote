@@ -220,7 +220,7 @@ def init_kv_db():
         binlog = xconfig.get_system_config("binlog")
         assert isinstance(binlog, bool)
 
-        db_cache = dbutil_cache.CacheImpl()  # 持久化缓存
+        db_cache = dbutil_cache.DatabaseCache()  # 持久化缓存
 
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR,

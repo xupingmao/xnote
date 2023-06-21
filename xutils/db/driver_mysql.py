@@ -15,8 +15,8 @@ import logging
 import threading
 import time
 from collections import deque
-from . import driver_interface
-from .driver_interface import SqlLoggerInterface
+from .. import interfaces
+from ..interfaces import SqlLoggerInterface
 from xutils.base import Storage
 import web.db
 
@@ -162,7 +162,7 @@ class MySQLKVOld:
                 pass
         raise ImportError("Unable to import " + " or ".join(drivers))
 
-class MySQLKV(driver_interface.DBInterface):
+class MySQLKV(interfaces.DBInterface):
 
     holder = Holder()
     lock = threading.RLock()
@@ -307,7 +307,7 @@ class MySQLKV(driver_interface.DBInterface):
         # type: (bytes,bytes) -> None
 
         if len(value) > self.max_value_length:
-            raise driver_interface.DatabaseException(code=400, message="value too long")
+            raise interfaces.DatabaseException(code=400, message="value too long")
 
         start_time = time.time()
         insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"

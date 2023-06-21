@@ -5,9 +5,9 @@
 # @filename driver_leveldbpy.py
 
 import leveldbpy
-from . import driver_interface
+from .. import interfaces
 
-class LevelDBProxy(driver_interface.DBInterface):
+class LevelDBProxy(interfaces.DBInterface):
 
     def __init__(self, path=None, snapshot=None,
                  max_open_files=1000,

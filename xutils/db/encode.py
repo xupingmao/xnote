@@ -250,3 +250,19 @@ def convert_bytes_dict_to_bytes(bytes_dict):
         value = bytes_dict[key]
         data[key.decode("utf-8")] = value.decode("utf-8")
     return convert_object_to_bytes(data)
+
+
+class KeyDecoder:
+    """针对key进行解码"""
+    def __init__(self, key=""):
+        self.parts = key.split(":")
+        self.index = 0
+    
+    def pop_left(self):
+        if self.index < len(self.parts):
+            self.index += 1
+            return self.parts[self.index-1]
+        return ""
+    
+    def rest(self):
+        return ":".join(self.parts[self.index:])

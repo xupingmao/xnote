@@ -78,8 +78,8 @@ class AsyncThreadBase(threading.Thread):
                 xutils.print_exc()
     
     def wait_task_done(self):
-        while len(self.task_queue) > 0:
-            func, args, kw = self.task_queue.popleft()
+        while self.task_pool.size() > 0:
+            func, args, kw = self.task_pool.popleft()
             func(*args, **kw)
 
 class LogThread(AsyncThreadBase):

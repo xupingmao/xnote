@@ -37,6 +37,7 @@ import datetime
 from xutils import dateutil
 from collections import OrderedDict, deque
 from xutils.imports import *
+from xutils import interfaces
 
 _cache_dict = dict()
 _cache_queue = deque()
@@ -78,7 +79,7 @@ def log_error(msg):
     print(msg)
 
 
-class Cache:
+class Cache(interfaces.CacheInterface):
     """缓存实现,一般情况下不要直接用它,优先使用 PrefixedCache, 这样便于迁移到Redis之类的分布式缓存"""
 
     def __init__(self, max_size = -1):
@@ -194,24 +195,28 @@ _global_cache = Cache(max_size=1000)
 
 class PrefixedCache:
 
-    def __init__(self, prefix=""):
+    def __init__(self, prefix="", cache_engine=interfaces.empty_cache):
         self.prefix = prefix
+        if cache_engine == interfaces.empty_cache:
+            self.cache = _global_cache
+        else:
+            self.cache = cache_engine
     
     def get(self, key, default_value=None):
-        return _global_cache.get(self.prefix + key, default_value=default_value)
+        return self.cache.get(self.prefix + key, default_value=default_value)
     
     def put(self, key, value, expire=60*5):
-        return _global_cache.put(self.prefix+key, value, expire)
+        return self.cache.put(self.prefix+key, value, expire)
     
     def put_empty(self, key, expire=5):
         """针对空值的特殊处理"""
-        return _global_cache.put(self.prefix+key, "$empty", expire)
+        return self.cache.put(self.prefix+key, "$empty", expire)
     
     def is_empty(self, value):
         return value == "$empty"
     
     def delete(self, key):
-        return _global_cache.delete(self.prefix + key)
+        return self.cache.delete(self.prefix + key)
 
 def get_global_cache():
     return _global_cache
