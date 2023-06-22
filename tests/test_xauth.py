@@ -117,3 +117,16 @@ class TestXauth(BaseTestCase):
         assert len(user_info.password_md5) > 0
         xauth.delete_user(user_info.name)
 
+
+    def test_change_password(self):
+        user_name = "change_pass_test"
+        password = "123456"
+        xauth.delete_user(user_name)
+        resp = xauth.create_user(user_name, password)
+        assert resp.get("code") == "success"
+        xauth.check_old_password(user_name, password)
+        try:
+            xauth.check_old_password(user_name, password + "2")
+            self.fail("expect exception")
+        except:
+            pass
