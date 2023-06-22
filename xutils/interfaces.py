@@ -22,7 +22,8 @@ def get_write_lock(key=""):
 
 class DatabaseException(Exception):
 
-    def __init__(self, code=0, message="") -> None:
+    def __init__(self, code=0, message=""):
+        self.code = code
         super().__init__(message)
 
 
@@ -98,8 +99,7 @@ class DBInterface:
         return count
     
     def Increase(self, key=b'', increment=1, start_id=1):
-        """自增方法
-        """
+        """自增方法"""
         assert len(key) > 0, "key can not be empty"
         
         key_str = key.decode("utf-8")
@@ -145,6 +145,7 @@ class RecordInterface:
         return self.__dict__
 
 class BatchInterface:
+    """批量操作"""
 
     def check_and_delete(self, key: str):
         raise NotImplementedError("待子类实现")

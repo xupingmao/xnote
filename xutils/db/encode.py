@@ -78,7 +78,9 @@ def encode_int8_to_bytes(int_val):
     return bytes([int_val])
 
 def encode_float(value):
-    """把浮点数编码成字符串
+    """把浮点数编码成字符串, IEEE浮点数编码没有顺序, 一些开源的系统编码方式如下
+    - ssdb的zset实现, 没有支持float64, 而是支持int64的score
+    - pika的zset实现, 通过自定义的Comparator实现了float64编码的排序
     >>> encode_float(10.5) > encode_float(5.5)
     True
     >>> encode_float(10.5) > encode_float(-10.5)

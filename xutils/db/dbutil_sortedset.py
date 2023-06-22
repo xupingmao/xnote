@@ -11,9 +11,9 @@
 如果使用了LdbTable的索引功能，其实就不需要这个了
 """
 
-import struct
 from xutils.db.dbutil_base import *
 from xutils.db.dbutil_hash import LdbHashTable
+from xutils.db.encode import encode_float
 
 register_table("_rank", "排名表")
 
@@ -28,10 +28,8 @@ class RankTable:
             self.prefix += ":"
 
     def _format_score(self, score: float) -> str:
-        # TODO 处理负数?
         assert isinstance(score, float)
-        buf = struct.pack(">d", score)
-        return buf.hex()
+        return encode_float(score)
 
     def put(self, member, score, batch = None):
         score_str = self._format_score(score)

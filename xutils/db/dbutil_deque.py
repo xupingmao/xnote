@@ -4,14 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-01-25 22:37:52
 @LastEditors  : xupingmao
-@LastEditTime : 2022-06-25 18:50:38
+@LastEditTime : 2023-06-22 10:15:34
 @FilePath     : /xnote/xutils/db/dbutil_deque.py
 @Description  : 基于Key-Value数据库的双端队列
 """
 
 import threading
 from xutils import Storage
-from xutils.db.dbutil_base import create_write_batch, db_get, db_put, get_write_lock, prefix_list
+from xutils.db.dbutil_base import create_write_batch, db_get, db_put
 from xutils.db.encode import encode_index_value
 
 

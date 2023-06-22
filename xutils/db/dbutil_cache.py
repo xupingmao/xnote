@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-15 16:25:49
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-21 21:38:49
+@LastEditTime : 2023-06-22 09:10:02
 @FilePath     : /xnote/xutils/db/dbutil_cache.py
 @Description  : 数据库缓存
 
@@ -93,8 +93,8 @@ class DatabaseCache(interfaces.CacheInterface):
         ttl_key = self.ttl_prefix + encode.encode_int(expire_int) + ":" + key
         return db_delete(ttl_key)
 
-    def run_expire_job(self):
-        for key, value in prefix_iter(self.ttl_prefix, limit=100, include_key=True):
+    def clear_expired(self, limit=100):
+        for key, value in prefix_iter(self.ttl_prefix, limit=limit, include_key=True):
             decoder = encode.KeyDecoder(key)
             ttl_prefix = decoder.pop_left()
             expire = decoder.pop_left()

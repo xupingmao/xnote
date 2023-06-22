@@ -7,10 +7,8 @@
 import lmdb
 import logging
 import threading
-from .. import interfaces
-from xutils import textutil
-from xutils.base import Storage
-from xutils.db.encode import convert_bytes_dict_to_bytes, convert_bytes_to_dict, convert_bytes_to_object, convert_object_to_bytes, encode_int8_to_bytes
+from xutils import interfaces
+from xutils.db.encode import convert_bytes_dict_to_bytes, convert_bytes_to_dict
 
 
 # 用于写操作的加锁，所以在多进程或者分布式环境中写操作是不安全的
@@ -158,7 +156,7 @@ class LmdbKV(interfaces.DBInterface):
     def Stat(self):
         return self.env.stat()
 
-class LmdbEnhancedKV:
+class LmdbEnhancedKV(interfaces.DBInterface):
 
     """Lmdb增强版，用于解决key长度限制的问题，之所以不重新编译是基于以下考虑
     1. 直接在上层封装使用起来更方便
@@ -200,7 +198,7 @@ class LmdbEnhancedKV:
             return self.doPut(tx, key, value, sync)
 
     def doPut(self, tx, key, value, sync=False): 
-        # type: (any, bytes, bytes, bool) -> any
+        # type: (object, bytes, bytes, bool) -> object
         if len(key) >= self.max_key_size:
             logging.warning("key长度(%d)超过限制(%d)", len(key), self.max_key_size)
             prefix = self.get_large_key_prefix(key)
@@ -212,7 +210,7 @@ class LmdbEnhancedKV:
         return tx.put(key, value)
 
     def doDelete(self, tx, key, sync=False):
-        # type: (any, bytes, bool) -> any
+        # type: (object, bytes, bool) -> object
         if len(key) >= self.max_key_size:
             prefix = self.get_large_key_prefix(key)
             with _lock:

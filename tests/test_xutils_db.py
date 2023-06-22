@@ -14,6 +14,7 @@ from xutils import logutil
 from xutils.db.binlog import BinLog
 from xutils.db.dbutil_deque import DequeTable
 from xutils.db.encode import decode_id
+from xutils import interfaces
 
 import pdb
 import logging
@@ -129,6 +130,15 @@ def run_range_test(test, db):
     print("data_list:", data_list)
     test.assertEqual(b"test6:2", data_list[0])
 
+def run_increase_test(test, db):
+    assert isinstance(db, interfaces.DBInterface)
+    counter_key = b'counter'
+    db.Delete(counter_key)
+    result = db.Increase(counter_key)
+    assert result == 1
+    result = db.Increase(counter_key)
+    assert result == 2
+
 
 def run_test_db_engine(test, db):
     # 等待异步任务完成
@@ -166,6 +176,8 @@ def run_test_db_engine(test, db):
     run_range_test(test, db)
 
     run_range_test_from_None(test, db)
+
+    run_increase_test(test, db)
 
 
 def run_snapshot_test(test, db):

@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-18 13:11:33
+@LastEditTime : 2023-06-22 09:45:15
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -224,8 +224,8 @@ class MySQLKV(interfaces.DBInterface):
         ) COMMENT '有序集合';
         """)
 
-    def doGet(self, key, cursor=None):
-        # type: (bytes, object) -> bytes|None
+    def get_with_version(self, key):
+        # type: (bytes) -> tuple[bytes|None, int]
         """通过key读取Value
         @param {bytes} key
         @return {bytes|None} value
@@ -234,14 +234,14 @@ class MySQLKV(interfaces.DBInterface):
         assert isinstance(key, bytes)
         
         start_time = time.time()
-        sql = "SELECT value FROM kv_store WHERE `key`=$key"
+        sql = "SELECT value, version FROM kv_store WHERE `key`=$key"
         vars = dict(key=key)
         
         try:
             result_iter = self.db.query(sql, vars=vars)
             for item in result_iter:
-                return self.mysql_to_py(item.value)
-            return None
+                return self.mysql_to_py(item.value), item.version
+            return None, 0
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             real_sql = self.db.query(sql, vars=vars, _test=True)
@@ -258,8 +258,13 @@ class MySQLKV(interfaces.DBInterface):
                 log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
 
+    def doGet(self, key, cursor=None):
+        value, version = self.get_with_version(key)
+        return value
+    
     def Get(self, key):
-        return self.doGet(key)
+        value, version = self.get_with_version(key)
+        return value
 
     def BatchGet(self, key_list):
         # type: (list[bytes]) -> dict[bytes, bytes]
@@ -339,6 +344,26 @@ class MySQLKV(interfaces.DBInterface):
             cost_time = time.time() - start_time
             if self.log_put_profile:
                 logging.debug("Put (%s) cost %.2fms", key, cost_time*1000)
+    
+    def put_with_version(self, key=b'', value=b'', version=0):
+        # type: (bytes,bytes,int) -> int
+        start_time = time.time()
+        if len(value) > self.max_value_length:
+            raise interfaces.DatabaseException(code=400, message="value too long")
+        update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key AND version=$version"
+        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"
+        rowcount = self.db.query(update_sql, vars=dict(key=key,value=value,version=version))
+        assert isinstance(rowcount, int), "expect int rowcount"
+        if rowcount == 0:
+            # 数据不存在,执行插入动作
+            # 如果这里冲突了，按照默认规则抛出异常
+            if version != 0:
+                return 0
+            self.db.query(insert_sql, vars=dict(key=key,value=value))
+            return 1
+        else:
+            self.log_sql(update_sql, (key,), start_time=start_time, key=key)
+        return rowcount
 
     def doDeleteRaw(self, key, sync=False, cursor=None):
         # type: (bytes, bool, object) -> None
@@ -470,7 +495,23 @@ class MySQLKV(interfaces.DBInterface):
                 sql_info = "sql=(%s), key_from=(%r), key_to=(%r)" % (sql, key_from, key_to)
                 log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
+    
+    def Increase(self, key=b'', increment=1, start_id=1):
+        """自增方法"""
+        assert len(key) > 0, "key can not be empty"
+        for retry in range(10):
+            value, version = self.get_with_version(key)
+            if value == None:
+                value_int = start_id
+            else:
+                value_int = int(value)
+                value_int += increment
 
+            value_bytes = str(value_int).encode("utf-8")
+            rowcount = self.put_with_version(key, value_bytes, version=version)
+            if rowcount > 0:
+                return value_int
+        raise Exception("too many retry")
 
 class RdbSortedSet:
 

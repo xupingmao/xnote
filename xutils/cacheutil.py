@@ -79,7 +79,7 @@ def log_error(msg):
     print(msg)
 
 
-class Cache(interfaces.CacheInterface):
+class MemoryCache(interfaces.CacheInterface):
     """缓存实现,一般情况下不要直接用它,优先使用 PrefixedCache, 这样便于迁移到Redis之类的分布式缓存"""
 
     def __init__(self, max_size = -1):
@@ -191,7 +191,10 @@ class DummyCache:
     def delete(self, key):
         pass
 
-_global_cache = Cache(max_size=1000)
+class Cache(MemoryCache):
+    pass
+
+_global_cache = MemoryCache(max_size=1000)
 
 class PrefixedCache:
 
