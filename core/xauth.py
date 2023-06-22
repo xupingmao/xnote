@@ -72,11 +72,13 @@ class UserDO(xutils.Storage):
             return None
         result = UserDO()
         result.update(dict_value)
-        # Fix md5
-        if result.password != "" and result.password_md5 == "":
-            result.password_md5 = encode_password(result.password, result.salt)
+        result.build()
         return result
-
+    
+    def build(self):
+        # Fix md5
+        if self.password != "" and self.password_md5 == "":
+            self.password_md5 = encode_password(self.password, self.salt)
 
 class UserDao:
     @classmethod
@@ -122,6 +124,7 @@ class UserDao:
     
     @classmethod
     def create(cls, user, fire_event = True):
+        assert isinstance(user, UserDO)
         name = user.name
         assert isinstance(name, six.string_types)
         assert name != ""
@@ -588,12 +591,14 @@ def create_user(name, password, fire_event = True, check_username = True):
     if found is not None:
         return dict(code = "fail", message = "用户已存在")
     else:
-        user = Storage(name=name,
-            password=password,
-            token=gen_new_token(),
-            ctime=xutils.format_time(),
-            salt=textutil.random_string(6),
-            mtime=xutils.format_time())
+        user = UserDO()
+        user.name = name
+        user.password = password
+        user.salt = textutil.random_string(6)
+        user.token = gen_new_token()
+        user.ctime = xutils.format_time()
+        user.mtime = xutils.format_time()
+        user.build()
 
         UserModel.create(user, fire_event=fire_event)
         return dict(code = "success", message = "create success")

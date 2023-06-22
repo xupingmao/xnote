@@ -113,6 +113,7 @@ class TestXauth(BaseTestCase):
 
     def test_create_quick_user(self):
         user_info = xauth.create_quick_user()
-        self.assertTrue(user_info != None)
+        assert user_info != None
+        assert len(user_info.password_md5) > 0
         xauth.delete_user(user_info.name)
 

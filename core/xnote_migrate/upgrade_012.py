@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-05-20 22:54:35
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-10 22:23:12
+@LastEditTime : 2023-06-22 17:57:52
 @FilePath     : /xnote/core/xnote_migrate/upgrade_012.py
 @Description  : 描述
 """
@@ -57,20 +57,21 @@ def migrate_user_20230520():
     old_db = dbutil.get_table("user")
 
     for item in old_db.iter(limit=-1):
-        user_info = Storage()
+        user_dict = Storage()
 
-        user_info.name = item.name
-        user_info.password = item.password
-        user_info.salt = item.salt
-        user_info.login_time = item.get("login_time", "1970-01-01 00:00:00")
-        user_info.mtime = item.get("mtime", "1970-01-01 00:00:00")
-        user_info.ctime = item.get("ctime", "1970-01-01 00:00:00")
+        user_dict.name = item.name
+        user_dict.password = item.password
+        user_dict.salt = item.salt
+        user_dict.login_time = item.get("login_time", "1970-01-01 00:00:00")
+        user_dict.mtime = item.get("mtime", "1970-01-01 00:00:00")
+        user_dict.ctime = item.get("ctime", "1970-01-01 00:00:00")
         
         record = xauth.UserModel.get_by_name(item.name)
         if record == None:
-            xauth.UserModel.create(user_info)
+            new_user = xauth.UserDO.from_dict(user_dict)
+            xauth.UserModel.create(new_user)
         else:
-            record.update(user_info)
+            record.update(user_dict)
             xauth.UserModel.update(record)
 
 def migrate_uv_log_20230528():
