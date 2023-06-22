@@ -90,7 +90,7 @@ class LoginHandler:
             save_login_error_count(name, count + 1)
             return error
         else:
-            if pswd == user["password"]:
+            if xauth.encode_password(pswd, user.salt) == user.password_md5:
                 save_login_info(name, "success")
 
                 try:

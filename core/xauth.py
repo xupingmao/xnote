@@ -53,18 +53,35 @@ def get_user_config_db(name):
     return dbutil.get_hash_table("user_config", user_name = name)
 
 
-class UserModel:
-    # TODO 用户模型
-    name = ""
-    password = ""
-    token = ""
-    ctime = ""
-    mtime = ""
-    login_time = ""
+class UserDO(xutils.Storage):
 
+    def __init__(self):
+        self.id = 0
+        self.name = ""
+        self.password = ""
+        self.password_md5 = ""
+        self.token = ""
+        self.ctime = ""
+        self.mtime = ""
+        self.login_time = ""
+        self.salt = ""
+    
+    @classmethod
+    def from_dict(cls, dict_value):
+        if dict_value == None:
+            return None
+        result = UserDO()
+        result.update(dict_value)
+        # Fix md5
+        if result.password != "" and result.password_md5 == "":
+            result.password_md5 = encode_password(result.password, result.salt)
+        return result
+
+
+class UserDao:
     @classmethod
     def get_by_name(cls, name=""):
-        # type: (str) -> Storage | None
+        # type: (str) -> UserDO | None
         if name is None or name == "":
             return None
         
@@ -74,23 +91,25 @@ class UserModel:
         
         if user != None:
             user_cache.put(name, user, expire=DEFAULT_CACHE_EXPIRE)
-            return user
-        return user
+        return UserDO.from_dict(user)
 
     @classmethod
     def get_user_from_db(cls, name=""):
         db = get_user_db()
-        return db.select_first(where = dict(name = name))
+        user_dict = db.select_first(where = dict(name = name))
+        return UserDO.from_dict(user_dict)
 
     @classmethod
     def get_by_token(cls, token=""):
         db = get_user_db()
-        return db.select_first(where = dict(token=token))
+        user_dict = db.select_first(where = dict(token=token))
+        return UserDO.from_dict(user_dict)
 
     @classmethod
     def get_by_id(cls, user_id = 0):
         db = get_user_db()
-        return db.select_first(where = dict(id = user_id))
+        user_dict = db.select_first(where = dict(id = user_id))
+        return UserDO.from_dict(user_dict)
     
     @classmethod
     def list(cls, offset=0, limit=20):
@@ -107,6 +126,7 @@ class UserModel:
         assert isinstance(name, six.string_types)
         assert name != ""
         
+        user.pop("id")
         db = get_user_db()
         user_id = db.insert(**user)
         xutils.trace("UserAdd", name)
@@ -117,8 +137,13 @@ class UserModel:
 
     @classmethod
     def update(cls, user_info):
-        assert isinstance(user_info.id, int)
+        assert isinstance(user_info, UserDO)
         db = get_user_db()
+
+        if user_info.password != "":
+            user_info.password_md5 = encode_password(user_info.password, user_info.salt)
+            user_info.password = ""
+
         db.update(where = dict(id=user_info.id), **user_info)
         user_cache.delete(user_info.name)
         xutils.trace("UserUpdate", user_info)
@@ -142,6 +167,10 @@ class UserModel:
     @classmethod
     def delete_by_id(cls, id=0):
         get_user_db().delete(where = dict(id=id))
+
+
+class UserModel(UserDao):
+    pass
 
 class SessionInfo(Storage):
 
@@ -294,9 +323,13 @@ def create_user_session(user_name, expires = SESSION_EXPIRE, login_ip = ""):
     user_detail = get_user_by_name(user_name)
     if user_detail is None:
         raise Exception("user not found: %s" % user_name)
+    return create_session_by_user(user_detail, expires, login_ip)
+
+def create_session_by_user(user_detail, expires = SESSION_EXPIRE, login_ip = ""):
+    assert isinstance(user_detail, UserDO)
+    user_name = user_detail.name
 
     session_id = create_uuid()
-
     session_list = list_user_session_detail(user_name)
     session_list.sort(key = lambda x:x.expire_time)
 
@@ -527,18 +560,19 @@ def create_quick_user():
     for i in range(10):
         name = "u" + xutils.random_number_str(num_length)
         with dbutil.get_write_lock(name):
-            if UserModel.get_by_name(name) != None:
+            if UserDao.get_by_name(name) != None:
                 num_length += 1
                 continue
             password = xutils.create_uuid()
-            user = Storage(name=name,
-                password=password,
-                token=gen_new_token(),
-                ctime=xutils.format_time(),
-                salt=textutil.random_string(6),
-                mtime=xutils.format_time())
-            user_id = UserModel.create(user)
-            return UserModel.get_by_id(user_id)
+            new_user = UserDO()
+            new_user.name = name
+            new_user.password = password
+            new_user.ctime = xutils.format_time()
+            new_user.mtime = xutils.format_time()
+            new_user.token = gen_new_token()
+            new_user.salt = textutil.random_string(6)
+            user_id = UserDao.create(new_user)
+            return UserDao.get_by_id(user_id)
     raise Exception("create user name conflict")
 
 def create_user(name, password, fire_event = True, check_username = True):
@@ -569,29 +603,30 @@ def _check_password(password):
     if error != None:
         raise Exception(error)
 
-def update_user(name, user):
+def update_user(name, update_dict):
     if name == "" or name == None:
         return
     name = name.lower()
 
-    mem_user = find_by_name(name)
-    if mem_user is None:
+    user_info = find_by_name(name)
+    if user_info is None:
         raise Exception("user not found")
 
-    password_new = user.get("password")
-    password_old = mem_user.get("password")
+    password_new = update_dict.get("password")
+    md5_new = None
+    md5_old = user_info.password_md5
+    if password_new != None:
+        md5_new = encode_password(password_new, user_info.salt)
 
-    if password_new != None and password_new != password_old:
-        _check_password(password_new)
-    
-    mem_user.update(user)
-    mem_user.mtime = xutils.format_time()
-    if password_new != None and password_old != password_new:
+    if md5_new != None and md5_new != md5_old:
         # 修改密码
-        mem_user.salt = textutil.random_string(6)
-        mem_user.token = gen_new_token()
-
-    UserModel.update(mem_user)
+        _check_password(password_new)
+        user_info.salt = textutil.random_string(6)
+        user_info.token = gen_new_token()
+    
+    user_info.update(update_dict)
+    user_info.mtime = xutils.format_time()
+    UserModel.update(user_info)
 
 def delete_user(name):
     return UserModel.delete_by_name(name)
@@ -676,12 +711,20 @@ def get_user_data_dir(user_name, mkdirs = False):
 
 def login_user_by_name(user_name, login_ip = ""):
     assert user_name != None
-    session_info = create_user_session(user_name, login_ip=login_ip)
+    user_info = UserDao.get_by_name(user_name)
+    if user_info == None:
+        raise Exception("用户不存在")
+    
+    session_info = create_session_by_user(user_info, login_ip=login_ip)
     session_id = session_info.sid
     _setcookie("sid", session_id)
 
     # 更新最近的登录时间
-    update_user(user_name, dict(login_time=xutils.format_datetime()))
+    update_kw = dict(login_time=xutils.format_datetime())
+    if user_info.password_md5 == "":
+        update_kw["password"] = user_info.password
+
+    update_user(user_name, update_kw)
     return session_info
 
 def logout_current_user():

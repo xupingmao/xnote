@@ -198,6 +198,7 @@ def init_user_table():
     with create_record_table_manager("user") as manager:
         manager.add_column("name",       "varchar(64)", "")
         manager.add_column("password",   "varchar(64)", "")
+        manager.add_column("password_md5", "varchar(64)", "")
         manager.add_column("salt",       "varchar(64)", "")
         manager.add_column("ctime",      "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime",      "datetime", "1970-01-01 00:00:00")
