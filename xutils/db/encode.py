@@ -87,6 +87,8 @@ def encode_float(value):
     True
     >>> encode_float(-0.5) > encode_float(-1.5)
     True
+    >>> encode_float(123456789.11) > encode_float(100.5)
+    True
     """
     if abs(value) > FLOAT64_MANTISSA_MAX:
         raise Exception("float value must between [-%d,%d]" % (FLOAT64_MANTISSA_MAX, FLOAT64_MANTISSA_MAX))
