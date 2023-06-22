@@ -65,10 +65,10 @@ def encode_int(int_val):
 
     ## int64
     if INT32_MAX < int_val <= INT64_MAX:
-        return "A%08X" % int_val
+        return "A%16X" % int_val
     
     if -INT64_MAX <= int_val < -INT32_MAX:
-        return "5%08X" % (int_val + INT64_MAX)
+        return "5%16X" % (int_val + INT64_MAX)
 
     raise Exception("encode_int: invalid value(%d)" % int_val)
     
@@ -93,9 +93,11 @@ def encode_float(value):
     
     if value < 0:
         value += FLOAT64_MANTISSA_MAX
-        return "A%016.10f" % value
+        prefix = "A"
     else:
-        return "B%016.10f" % value
+        prefix = "B"
+    # 16位整数+小数点+6位小数
+    return prefix + "%023.6f" % value
 
 def encode_str(value):
     """编码字符串

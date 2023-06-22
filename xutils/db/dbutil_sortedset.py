@@ -60,6 +60,7 @@ class LdbSortedSet:
         # key-value的映射
         self.member_dict = LdbHashTable(table_name)
         # score的排名
+        # TODO 考虑把排序放在内存里面
         self.rank = RankTable(table_name)
 
     def put(self, member, score):
