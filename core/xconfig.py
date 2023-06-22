@@ -258,7 +258,7 @@ class WebConfig:
 
     @classmethod
     def init(cls):
-        cls.server_home = get_system_config("server_home", "")
+        cls.server_home = SystemConfig.get_str("server_home", "")
 
 class DatabaseConfig:
 
@@ -731,16 +731,19 @@ def get_system_files():
 
 class SystemConfig:
 
-    def get_int(self, name, default_value=0):
+    @classmethod
+    def get_int(cls, name, default_value=0):
         value = get_system_config(name, default_value)
         assert isinstance(value, int)
         return value
     
-    def get_str(self, name, default_value=""):
+    @classmethod
+    def get_str(cls, name, default_value=""):
         value = get_system_config(name, default_value)
         return str(value)
 
-    def get_bool(self, name, default_value=False):
+    @classmethod
+    def get_bool(cls, name, default_value=False):
         value = get_system_config(name, default_value)
         return bool(value)
 

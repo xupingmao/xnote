@@ -5,7 +5,7 @@
 {% set-global search_action = '/fs_find' %}
 {% set-global search_placeholder = '搜索文件' %}
 
-<script type="text/javascript" src="/static/js/fs/fs.js"></script>
+<script type="text/javascript" src="{{_server_home}}/static/js/fs/fs.js"></script>
 
 {% end %}
 
@@ -45,7 +45,7 @@
             {% end %}
             
             <a class="list-item {{_item.css_class}}" href="{{_item.url}}" 
-                data-src="/fs/~{{_item.encoded_path}}">
+                data-src="{{_item.data_url}}">
 
                 <i class="fa {{_item.icon}}"></i>
                 <span>{{_item.name}}</span>

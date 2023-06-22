@@ -77,6 +77,8 @@ def handle_file_url(item):
         item.url = server_home + "/fs/~%s" % item.encoded_path
     else:
         item.url = server_home + "/fs_preview?path=%s&embed=false" % item.encoded_path
+    
+    item.data_url = server_home + "/fs/~" + item.encoded_path
 
 def get_parent_file_object(path, name = ""):
     path = os.path.abspath(path)
