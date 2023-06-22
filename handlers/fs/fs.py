@@ -189,7 +189,7 @@ class FileSystemHandler:
         return get_fs_page_by_mode(mode, kw)
 
     def list_root(self):
-        raise web.seeother("/fs//")
+        raise web.seeother("/fs/~/")
 
     def read_range(self, path, http_range, blocksize):
         xutils.trace("Download", "==> HTTP_RANGE %s" % http_range)

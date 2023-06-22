@@ -85,8 +85,8 @@ class TestMain(BaseTestCase):
         self.check_200("/dict/edit/test")
 
     def test_fs(self):
-        self.check_200("/fs//")
-        self.check_200("/fs//?_format=json")
+        self.check_200("/fs/~/")
+        self.check_200("/fs/~/?_format=json")
         # self.check_200("/data/data.db")
 
     def test_fs_partial_content(self):
@@ -115,7 +115,7 @@ class TestMain(BaseTestCase):
         self.check_OK("/fs_api/clear_clip")
 
     def test_fs_shell(self):
-        self.check_OK("/fs//?mode=shell")
+        self.check_OK("/fs/~/?mode=shell")
 
     def test_fs_upload(self):
         self.check_OK("/fs_upload")

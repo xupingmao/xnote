@@ -19,12 +19,12 @@ class TestMain(BaseTestCase):
     def test_fs_view_mode(self):
         cwd = os.getcwd()
 
-        self.check_OK("/fs/{cwd}".format(cwd=cwd))
-        self.check_OK("/fs/{cwd}?mode=grid".format(cwd=cwd))
+        self.check_OK("/fs/~{cwd}".format(cwd=cwd))
+        self.check_OK("/fs/~{cwd}?mode=grid".format(cwd=cwd))
 
     def test_fs_hex(self):
-        self.check_OK("/fs/fs_hex")
-        self.check_OK("/fs/fs_hex?path=./README.md")
+        self.check_OK("/fs_hex")
+        self.check_OK("/fs_hex?path=./README.md")
 
     def test_fs_tools(self):
         self.check_OK("/fs_tools")
