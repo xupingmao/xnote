@@ -653,7 +653,7 @@ xurls = (
     r"/fs_list/?",   UserHomeHandler,
     r"/fs_bookmark", BookmarkHandler,
 
-    r"/fs/(.*)", FileSystemHandler,
+    r"/fs/~(.*)", FileSystemHandler,
     r"/fs_download", DownloadHandler,
     r"/fs_get"     , GetFileHandler,
     r"/(static/.*)", StaticFileHandler,

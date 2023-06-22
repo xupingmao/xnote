@@ -69,12 +69,12 @@ def handle_file_url(item):
     item.css_class = ""
     server_home = xconfig.WebConfig.server_home
     if item.type == "dir":
-        item.url = server_home + "/fs/%s" % item.encoded_path
+        item.url = server_home + "/fs/~%s" % item.encoded_path
     elif xutils.is_img_file(item.path):
         item.url = "#"
         item.css_class = "x-photo"
     elif xutils.is_audio_file(item.path):
-        item.url = server_home + "/fs/%s" % item.encoded_path
+        item.url = server_home + "/fs/~%s" % item.encoded_path
     else:
         item.url = server_home + "/fs_preview?path=%s&embed=false" % item.encoded_path
 
