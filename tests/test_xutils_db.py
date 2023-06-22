@@ -852,4 +852,5 @@ class TestMain(BaseTestCase):
         self.assertIsNone(cache.get("test"))
         cache.put("test", 1, expire=100)
         self.assertEqual(cache.get("test"), 1)
-
+        count = cache.clear_expired()
+        assert count > 0

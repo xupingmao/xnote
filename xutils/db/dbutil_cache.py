@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-15 16:25:49
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-22 09:10:02
+@LastEditTime : 2023-06-22 23:54:58
 @FilePath     : /xnote/xutils/db/dbutil_cache.py
 @Description  : 数据库缓存
 
@@ -25,9 +25,7 @@ ttl的几种方案
 """
 import time
 import random
-import logging
 from .dbutil_base import db_get, db_put, db_delete, register_table, prefix_iter
-from . import encode
 from .. import interfaces
 
 register_table("_ttl", "有效期")
@@ -35,8 +33,10 @@ register_table("_ttl", "有效期")
 class DatabaseCache(interfaces.CacheInterface):
 
     prefix = "_cache:"
-    ttl_prefix = "_ttl:"
     MAX_KEY_LEN = 200
+
+    def __init__(self):
+        self.last_scan_key = ""
 
     def _get_dict_value(self, key):
         cache_key = self.prefix + key
@@ -58,7 +58,6 @@ class DatabaseCache(interfaces.CacheInterface):
         if expire < time.time():
             # 已失效
             db_delete(self.prefix + key)
-            self.delete_ttl(expire, key)
             return default_value
         
         return result.get("value")
@@ -68,7 +67,7 @@ class DatabaseCache(interfaces.CacheInterface):
         assert expire > 0
         expire = int(time.time() + expire)
         expire += random.randint(0, expire_random)
-        self.put_ttl(expire, key)
+        # TODO 失效信息记录到内存中
         obj = dict(value = value, expire = expire)
         return db_put(self.prefix + key, obj)
     
@@ -78,31 +77,21 @@ class DatabaseCache(interfaces.CacheInterface):
         value_dict = self._get_dict_value(key)
         if value_dict == None:
             return
-        self.delete_ttl(value_dict.get("expire",-1), key)
         return db_delete(self.prefix + key)
-    
-    def put_ttl(self, expire, key):
-        expire_int = int(expire)
-        ttl_key = self.ttl_prefix + encode.encode_int(expire_int) + ":" + key
-        db_put(ttl_key, expire)
-    
-    def delete_ttl(self, expire, key):
-        if expire < 0:
-            return
-        expire_int = int(expire)
-        ttl_key = self.ttl_prefix + encode.encode_int(expire_int) + ":" + key
-        return db_delete(ttl_key)
 
-    def clear_expired(self, limit=100):
-        for key, value in prefix_iter(self.ttl_prefix, limit=limit, include_key=True):
-            decoder = encode.KeyDecoder(key)
-            ttl_prefix = decoder.pop_left()
-            expire = decoder.pop_left()
-            user_key = decoder.rest()
-            expire_int = int(value)
-            if expire_int >= time.time():
-                # 还未超时
-                break
-            # if user_key != "":
-            #     self.delete(user_key)
-            logging.info("Delete: (%s)", user_key)
+    def clear_expired(self, limit=1000):
+        key_from = None
+        if self.last_scan_key != "":
+            key_from = self.last_scan_key
+        
+        count = 0
+        for key, value in prefix_iter(self.prefix, limit=limit, include_key=True, key_from=key_from):
+            self.get(key)
+            self.last_scan_key = key
+            count += 1
+        
+        if count < limit:
+            # 扫描完成, 重置last_scan_key
+            self.last_scan_key = ""
+        
+        return count
