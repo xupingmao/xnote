@@ -440,7 +440,8 @@ def update_user_config(user_name, key, value):
 
 
 def update_user_config_dict(name, config_dict):
-    user = get_user(name)
+    assert isinstance(config_dict, dict)
+    user = UserDao.get_by_name(name)
     if user is None:
         return
 
@@ -467,6 +468,7 @@ def get_user_from_token():
 
 
 def get_user_password(name):
+    # TODO webdav需要用到密码
     user = get_user_by_name(name)
     if user != None:
         return user.password
@@ -683,7 +685,7 @@ def update_user(name, update_dict):
 
     user_info.update(update_dict)
     user_info.mtime = xutils.format_time()
-    UserModel.update(user_info)
+    UserDao.update(user_info)
 
 
 def delete_user(name):
@@ -693,6 +695,9 @@ def delete_user(name):
 def has_login_by_cookie(name=None):
     cookies = web.cookies()
     session_id = cookies.get("sid")
+    return has_login_by_sid(name, session_id)
+
+def has_login_by_sid(name, session_id):
     session_info = get_valid_session_by_id(session_id)
 
     if session_info is None:
@@ -775,7 +780,7 @@ def get_user_data_dir(user_name, mkdirs=False):
     return fpath
 
 
-def login_user_by_name(user_name, login_ip=""):
+def login_user_by_name(user_name, login_ip="", write_cookie=True):
     assert user_name != None
     user_info = UserDao.get_by_name(user_name)
     if user_info == None:
@@ -783,7 +788,8 @@ def login_user_by_name(user_name, login_ip=""):
 
     session_info = create_session_by_user(user_info, login_ip=login_ip)
     session_id = session_info.sid
-    _setcookie("sid", session_id)
+    if write_cookie:
+        _setcookie("sid", session_id)
 
     # 更新最近的登录时间
     update_kw = dict(login_time=xutils.format_datetime())

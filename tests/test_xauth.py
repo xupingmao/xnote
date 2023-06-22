@@ -130,3 +130,8 @@ class TestXauth(BaseTestCase):
             self.fail("expect exception")
         except:
             pass
+
+    def test_login(self):
+        user_name = "test"
+        session_info = xauth.login_user_by_name(user_name, write_cookie=False)
+        assert xauth.has_login_by_sid(user_name, session_info.sid)

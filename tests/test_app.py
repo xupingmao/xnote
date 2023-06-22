@@ -352,9 +352,11 @@ class Main:
         self.check_OK("/system/log?log_type=mem")
 
     def test_login_success(self):
-        password = xauth.get_user_by_name("test").password
+        user_name = "test"
+        password = "123456"
+        xauth.update_user(user_name, dict(password=password))
         params = dict(
-            username="test",
+            username=user_name,
             password=password
         )
 
@@ -403,7 +405,7 @@ class Main:
         xmanager.add_visit_log(None, "/index")
 
 
-    def test_system_log(self):
+    def test_system_log2(self):
         from handlers.system.system_log import LogVisitHandler
         handler = LogVisitHandler()
         # insert
