@@ -87,6 +87,7 @@ def about_link():
     link.name = "关于"
     link.url = xconfig.WebConfig.about_url
     link.icon = "info-circle"
+    link.is_public = True
     return link
 
 
