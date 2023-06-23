@@ -83,7 +83,7 @@ SYS_TOOLS = [
     admin_link("集群管理", "/system/sync?p=home", "server"),
 
     user_link("Menu_Plugin",   "/plugins_list?show_back=true", "cogs"),    
-    public_link("关于", "/code/wiki/README.md", "info-circle"),
+    public_link("关于", xconfig.WebConfig.about_url, "info-circle"),
 ]
 
 NOTE_TOOLS = [

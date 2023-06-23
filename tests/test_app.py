@@ -128,7 +128,7 @@ class TestMain(BaseTestCase):
     def test_code_lines(self):
         self.check_OK("/code/lines?count=on&path=./handlers")
 
-    def test_sys(self):
+    def test_system_tools(self):
         self.check_200("/system/sys")
         self.check_200("/system/user/list")
         self.check_200("/system/crontab")

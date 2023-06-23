@@ -27,6 +27,7 @@ OPTION_HTML = '''
         <div class="x-tab-box row" data-tab-key="log_type" data-tab-default="file">
             <a class="x-tab" data-tab-value="file">文件日志</a>
             <a class="x-tab" data-tab-value="mem">内存日志</a>
+            <a class="x-tab" data-tab-value="clip" href="/system/clipboard-monitor">剪切板</a>
         </div>
     </div>
 

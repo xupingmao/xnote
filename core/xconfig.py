@@ -255,14 +255,16 @@ class FileConfig:
 class WebConfig:
 
     server_home = ""
+    about_url = "" # 关于系统的链接
 
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
+        cls.about_url = SystemConfig.get_str("about_url", "/code/wiki/README.md")
 
 class DatabaseConfig:
 
-    db_driver=""
+    db_driver="" # sqlite/leveldb/mysql/lmdb
 
     @classmethod
     def init(cls):

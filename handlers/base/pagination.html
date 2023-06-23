@@ -3,7 +3,11 @@
 {% init page_url = "?page=" %}
 
 {% if "page_totalsize" in globals() %}
-    {% set-global page_max = int(math.ceil(page_totalsize/page_size)) %}
+    {% set-global page_total = page_totalsize %}
+{% end %}
+
+{% if "page_total" in globals() %}
+    {% set-global page_max = int(math.ceil(page_total/page_size)) %}
 {% end %}
 
 {% if page_max >= 0 %}
