@@ -256,11 +256,13 @@ class WebConfig:
 
     server_home = ""
     about_url = "" # 关于系统的链接
+    about_text = ""
 
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
         cls.about_url = SystemConfig.get_str("about_url", "/code/wiki/README.md")
+        cls.about_text = SystemConfig.get_str("about_text", "关于Xnote")
 
 class DatabaseConfig:
 
