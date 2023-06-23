@@ -337,9 +337,10 @@ class DBImporter:
                         logger.log("table:(%s), proceed:(%d/%d), qps:(%.2f)" % (backup_table.tablename, count, total_count, qps))
                 cost_time = time.time() - start_time
                 logger.info("import table:(%s) done! cost_time:(%.2fs)", table.tablename, cost_time)
-        except:
+        except Exception as e:
             err_info = xutils.print_exc()
             logger.info("import failed: (%s)" % err_info)
+            raise e
 
     def import_kv(self, db_file):
         count = 0
