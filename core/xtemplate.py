@@ -50,6 +50,7 @@ class TemplateConfig:
     def init(cls):
         # 加载菜单
         cls.nav_list = xconfig.WebConfig.load_nav_list()
+        cls.load_languages()
 
     @classmethod
     def load_languages(cls):
