@@ -1,4 +1,14 @@
 # -*- coding:utf-8 -*-
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2023-04-06 12:04:41
+@LastEditors  : xupingmao
+@LastEditTime : 2023-06-23 20:50:40
+@FilePath     : /xnote/handlers/system/system_log.py
+@Description  : 描述
+"""
+# -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/03/03 12:46:20
 # @modified 2022/04/20 22:50:10
@@ -22,14 +32,8 @@ uv_db = dbutil.get_table("uv")
 OPTION_HTML = '''
 <div class="row">
     <script src="{{_server_home}}/_static/js/base/jq-ext.js"></script>
-
-    <div class="card">
-        <div class="x-tab-box row" data-tab-key="log_type" data-tab-default="file">
-            <a class="x-tab" data-tab-value="file">文件日志</a>
-            <a class="x-tab" data-tab-value="mem">内存日志</a>
-            <a class="x-tab" data-tab-value="clip" href="{{_server_home}}/system/clipboard-monitor">剪切板</a>
-        </div>
-    </div>
+    
+    {% include system/component/system_log_tab.html %}
 
     <div class="card">
         {% if log_type == "file" %}

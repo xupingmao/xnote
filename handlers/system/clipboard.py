@@ -2,13 +2,11 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2019/07/18 22:55:08
 # @modified 2019/07/20 22:42:44
-import os
-import xconfig
 import xutils
 import xmanager
 from xtemplate import BasePlugin
 from xutils import dateutil
-from xutils import fsutil, dbutil
+from xutils import dbutil
 
 HTML = """
 <!-- Html -->
@@ -17,9 +15,22 @@ HTML = """
     with: 30%;
 }
 .th-content {
-    width: 70%;
+    width: 60%;
+}
+.th-op {
+    width: 10%;
+}
+.value-detail {
+    position: absolute;
+    width:100%;
+    top: 0px;
+    bottom: 30px;
+    overflow-y: auto;
 }
 </style>
+
+{% include system/component/system_log_tab.html %}
+
 <div class="card">
     {% if len(records) == 0 %}
         {% include common/text/empty_text.html %}
@@ -28,11 +39,13 @@ HTML = """
             <tr>
                 <th class="th-time">时间</th>
                 <th class="th-content">内容</th>
+                <th class="th-op">操作</th>
             </tr>
         {% for r in records %}
             <tr>
                 <td>{{r.create_time}}</td>
                 <td>{{r.content}}</td>
+                <td><button data-id="{{r._id}}" onclick="xnoteOpenClipDetail(this)">查看</button></td>
             </tr>
         {% end %}
         </table>
@@ -42,6 +55,24 @@ HTML = """
 <div class="card">
     {% include common/pagination.html %}
 </div>
+
+<script>
+function xnoteOpenClipDetail(target) {
+    var id = $(target).attr("data-id");
+    var params = {};
+    params.id = id;
+
+    $.get("?op=detail", params, function (resp) {
+        var value = resp.data;
+        var content = "";
+        if (value) {
+            content = value.content;
+        }
+        var text = $("<textarea>").text(content).addClass("value-detail");
+        xnote.showDialog("数据详情", text.prop("outerHTML"), ["确定"]);
+    });
+};
+</script>
 """
 
 dbutil.register_table("clip_log", "剪切板历史")
@@ -91,6 +122,10 @@ class ClipLogDao:
         return cls.db.list(reverse=True, limit=limit)
     
     @classmethod
+    def get_by_id(cls, id=""):
+        return cls.db.get_by_id(id)
+    
+    @classmethod
     def count(cls):
         return cls.db.count()
 
@@ -105,7 +140,7 @@ class Main(BasePlugin):
     # 访问权限
     required_role = "admin"
     # 插件分类 {note, dir, system, network}
-    category = 'note'
+    category = "system"
 
     editable = False
     
@@ -114,9 +149,13 @@ class Main(BasePlugin):
         watch_clipboard()
         self.rows = 0
         self.btn_text = '添加'
+        op = xutils.get_argument_str("op")
         page = xutils.get_argument_int("page", 1)
         page_size = 20
         offset = (page-1) * page_size
+
+        if op == "detail":
+            return self.handle_detail()
 
         kw = xutils.Storage()
         kw.page = page
@@ -125,24 +164,25 @@ class Main(BasePlugin):
         kw.records = ClipLogDao.list_recent(offset=offset, limit=page_size)
         self.writehtml(HTML, **kw)
 
+    def handle_detail(self):
+        id = xutils.get_argument_str("id")
+        return dict(
+            code = "success",
+            data = ClipLogDao.get_by_id(id)
+        )
+
     def on_init(self, context=None):
         # 插件初始化操作
         pass
 
 @xmanager.listen("cron.minute")
 def watch_clipboard(ctx=None):
-    global last_paste
-    if xutils.is_mac():
-        # MAC下面通过定时来简单实现
-        content = os.popen("pbpaste").read()
+    try:
+        import pyperclip
+        content = pyperclip.paste()
         ClipLogDao.add_log(content)
-    else:
-        try:
-            import pyperclip
-            content = pyperclip.paste()
-            ClipLogDao.add_log(content)
-        except:
-            pass
+    except:
+        pass
 
 
 xurls = (
