@@ -8,7 +8,6 @@ import xtemplate
 import xutils
 import xauth
 import xmanager
-import xtables
 import web
 from xutils import Storage
 from xutils import webutil
@@ -18,16 +17,28 @@ class AppLink:
     def __init__(self):
         self.name = ""
         self.url = ""
-        self.user = ""
+        self.user = None  # type: str|None
         self.is_admin = False
         self.is_user = False
         self.is_guest = False
         self.is_public = False
-        self.icon = None # type: str|None
+        self.icon = None  # type: str|None
         self.img_src = None
 
+    def build(self):
+        self.url = xconfig.WebConfig.server_home + self.url
+        if self.img_src != None:
+            self.img_src = xconfig.WebConfig.server_home + self.img_src
+
+
 def link(name, url, user=None, icon="cube"):
-    return Storage(name=name, url=url, link=url, user=user, icon=icon)
+    result = AppLink()
+    result.name = name
+    result.url = url
+    result.user = user
+    result.icon = icon
+    result.build()
+    return result
 
 
 def admin_link(name, url, icon="cube"):
@@ -37,15 +48,17 @@ def admin_link(name, url, icon="cube"):
     link.icon = icon
     link.is_admin = True
     link.user = "admin"
+    link.build()
     return link
 
 
-def user_link(name, url, icon="cube", img_src = None):
+def user_link(name, url, icon="cube", img_src=None):
     link = AppLink()
     link.name = name
     link.url = url
     link.icon = icon
     link.img_src = img_src
+    link.build()
     return link
 
 
@@ -55,6 +68,7 @@ def guest_link(name, url, icon="cube"):
     link.url = url
     link.icon = icon
     link.is_guest = True
+    link.build()
     return link
 
 
@@ -64,6 +78,14 @@ def public_link(name, url, icon="cube"):
     link.url = url
     link.icon = icon
     link.is_public = True
+    link.build()
+    return link
+
+def about_link():
+    link = AppLink()
+    link.name = "关于"
+    link.url = xconfig.WebConfig.about_url
+    link.icon = "info-circle"
     return link
 
 
@@ -82,8 +104,9 @@ SYS_TOOLS = [
     admin_link("Shell",    "/tools/shell", "terminal"),
     admin_link("集群管理", "/system/sync?p=home", "server"),
 
-    user_link("Menu_Plugin",   "/plugins_list?show_back=true", "cogs"),    
-    public_link("关于", xconfig.WebConfig.about_url, "info-circle"),
+    user_link("Menu_Plugin",   "/plugins_list?show_back=true", "cogs"),
+    # 关于链接，支持外链
+    about_link(),
 ]
 
 NOTE_TOOLS = [
@@ -93,12 +116,12 @@ NOTE_TOOLS = [
     user_link("标签列表", "/note/taglist", "tags"),
 
     # 笔记
-    user_link("最近更新",      "/note/recent?orderby=update", "edit"),
-    user_link("最近创建",      "/note/recent?orderby=create", "plus"),
-    user_link("最近查看",       "/note/recent?orderby=view", "eye"),
+    user_link("最近更新", "/note/recent?orderby=update", "edit"),
+    user_link("最近创建", "/note/recent?orderby=create", "plus"),
+    user_link("最近查看", "/note/recent?orderby=view", "eye"),
     user_link("常用笔记", "/note/recent?orderby=myhot", "star-o"),
     user_link("时光轴", "/note/timeline?type=all"),
-    user_link("词典", "/note/dict", img_src = "/static/image/icon_dict.svg"),
+    user_link("词典", "/note/dict", img_src="/static/image/icon_dict.svg"),
     user_link("搜索历史", "/search", "search"),
     user_link("上传管理", "/fs_upload", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
@@ -129,13 +152,6 @@ xconfig.NOTE_OPTIONS = [
 ]
 
 
-@xutils.cache(expire=60)
-def get_tools_config(user):
-    db = xtables.get_storage_table()
-    user_config = db.select_first(where=dict(key="tools", user=user))
-    return user_config
-
-
 class IndexHandler:
 
     def GET(self):
@@ -164,7 +180,6 @@ class IndexHandler:
         kw.Storage = Storage
         kw.user = xauth.get_current_user()
         kw.menu_list = menu_list
-        kw.customized_items = []
         kw.html_title = "系统"
         kw.show_back = arg_show_back
         kw.show_menu = arg_show_menu

@@ -96,10 +96,10 @@
             </div>
             <div class="col-md-12">
                 {% for link in category_temp.children %}
-                    <a class="item" href="{{_server_home}}{{link.url}}"> 
+                    <a class="item" href="{{link.url}}"> 
                         {% if link.img_src != None %}
                             <div class="app-icon img-box">
-                                <img src="{{_server_home}}{{link.img_src}}">
+                                <img src="{{link.img_src}}">
                             </div>
                         {% else %}
                             <div class="app-icon">
