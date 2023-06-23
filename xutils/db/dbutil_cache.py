@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-15 16:25:49
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-22 23:54:58
+@LastEditTime : 2023-06-23 10:54:46
 @FilePath     : /xnote/xutils/db/dbutil_cache.py
 @Description  : 数据库缓存
 
@@ -25,8 +25,10 @@ ttl的几种方案
 """
 import time
 import random
+import logging
 from .dbutil_base import db_get, db_put, db_delete, register_table, prefix_iter
-from .. import interfaces
+from xutils.db import encode
+from xutils import interfaces
 
 register_table("_ttl", "有效期")
 
@@ -86,7 +88,10 @@ class DatabaseCache(interfaces.CacheInterface):
         
         count = 0
         for key, value in prefix_iter(self.prefix, limit=limit, include_key=True, key_from=key_from):
-            self.get(key)
+            key_decoder = encode.KeyDecoder(key)
+            key_decoder.pop_left() # _cache: 前缀
+            biz_key = key_decoder.rest()
+            self.get(biz_key)
             self.last_scan_key = key
             count += 1
         
@@ -94,4 +99,5 @@ class DatabaseCache(interfaces.CacheInterface):
             # 扫描完成, 重置last_scan_key
             self.last_scan_key = ""
         
+        logging.info("count=%s, last_scan_key=%s", count, self.last_scan_key)
         return count
