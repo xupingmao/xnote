@@ -752,7 +752,7 @@ class PluginListHandler:
         context.header = header
         context.show_back = show_back
 
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         xmanager.add_visit_log(
             user_name, "/plugin_list?category=%s" % category)
 

@@ -1,3 +1,12 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2021-10-01 18:27:00
+@LastEditors  : xupingmao
+@LastEditTime : 2023-06-23 12:47:24
+@FilePath     : /xnote/handlers/plugin/header/plugin_category.html
+@Description  : 描述
+ #} -->
 {% init plugin_category_list = xutils.call("plugin.get_category_list") %}
 {% init plugin_category = "" %}
 
@@ -5,7 +14,7 @@
     <div class="x-tab-box" data-tab-default="all" data-tab-key="category">
         {% for category_temp in plugin_category_list %}
             {% if category_temp.is_visible() %}
-                <a class="tab tab-link x-tab" href="{{category_temp.url}}" 
+                <a class="tab tab-link x-tab" href="{{_server_home}}{{category_temp.url}}" 
                     data-tab-value="{{category_temp.code}}">{{category_temp.name}}</a>
             {% end %}
         {% end %}

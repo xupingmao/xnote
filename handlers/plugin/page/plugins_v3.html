@@ -26,7 +26,7 @@
         {% end %}
 
         {% for index, link in enumerate(plugins) %}
-            <a class="list-link" href="{{link.link + link.url_query}}">
+            <a class="list-link" href="{{_server_home}}{{link.link + link.url_query}}">
                 <i class="{{link.icon_class}}"></i>
                 <span>{{link.title}}</span>
 
