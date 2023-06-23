@@ -17,7 +17,7 @@ class AppLink:
     def __init__(self):
         self.name = ""
         self.url = ""
-        self.user = None  # type: str|None
+        self.user = ""
         self.is_admin = False
         self.is_user = False
         self.is_guest = False
@@ -31,7 +31,7 @@ class AppLink:
             self.img_src = xconfig.WebConfig.server_home + self.img_src
 
 
-def link(name, url, user=None, icon="cube"):
+def link(name, url, user="", icon="cube"):
     result = AppLink()
     result.name = name
     result.url = url
@@ -58,6 +58,7 @@ def user_link(name, url, icon="cube", img_src=None):
     link.url = url
     link.icon = icon
     link.img_src = img_src
+    link.is_user = True
     link.build()
     return link
 
@@ -155,8 +156,8 @@ xconfig.NOTE_OPTIONS = [
 class IndexHandler:
 
     def GET(self):
-        arg_show_back = xutils.get_argument("show_back", type=bool)
-        arg_show_menu = xutils.get_argument("show_menu", "true", type=bool)
+        arg_show_back = xutils.get_argument_bool("show_back")
+        arg_show_menu = xutils.get_argument_bool("show_menu", default_value=True)
         user_name = xauth.current_name()
         menu_list = []
 
@@ -165,7 +166,7 @@ class IndexHandler:
                 return user_name is None
             if link.is_user:
                 return user_name != None
-            if link.user == "":
+            if link.user == "" or link.user == None:
                 return True
             return link.user == user_name
 

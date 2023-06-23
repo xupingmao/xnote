@@ -551,9 +551,10 @@ class CronTaskManager:
             return False
 
     def do_load_tasks(self):
-        tasks = dbutil.prefix_list("schedule")
-        self.task_list = list(tasks)
+        self.task_list = []
         self.load_system_cron_task()
+        tasks = dbutil.prefix_list("schedule")
+        self.task_list += list(tasks)
 
     def load_system_cron_task(self):
         # 系统默认的任务

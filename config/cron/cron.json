@@ -3,7 +3,7 @@
         "name": "[系统]系统备份",
         "url": "/system/backup",
         "tm_wday": "*",
-        "tm_hour": "11",
+        "tm_hour": "1",
         "tm_min": "0",
         "message": "",
         "sound":0,

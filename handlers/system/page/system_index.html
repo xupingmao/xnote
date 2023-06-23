@@ -85,15 +85,7 @@
 {% for index, category_temp in enumerate(menu_list) %}
 
     {% if len(category_temp.children) > 0 %}
-        <div class="col-md-12 bottom-offset-1 grid-card">
-            <div class="grid-title hide">
-                <span>{{T(category_temp.name)}}</span>
-                {% if show_back and index == 0 %}
-                    <div class="float-right">
-                        {% include common/button/back_button.html %}
-                    </div>
-                {% end %}
-            </div>
+        <div class="col-md-12 bottom-offset-1 card">
             <div class="col-md-12">
                 {% for link in category_temp.children %}
                     <a class="item" href="{{link.url}}"> 
