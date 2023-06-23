@@ -285,63 +285,109 @@ def calc_qps(count, cost_time):
     return -1
 
 
-def import_db(db_file):
-    got_lock = False
-    try:
-        if _backup_lock.acquire(blocking = False):
-            got_lock = True
-            return _import_db(db_file)
-        else:
-            logging.warning("import_db is busy")
-            return "import_db is busy"
-    except:
-        exc_info = xutils.print_exc()
-        _import_logger.info(exc_info)
-    finally:
-        if got_lock:
-            _backup_lock.release()
+class DBImporter:
 
-def _import_db(db_file):
-    count = 0
-    logger = _import_logger
-    db = sqlite3.connect(db_file)
-    total_count = list(db.execute("SELECT COUNT(1) FROM kv_store"))[0][0]
-
-    if total_count == 0:
-        logger.log("db is empty")
-        return
-
-    sql = "SELECT key, value FROM kv_store ORDER BY key"
-
-    start_time = time.time()
-    batch_size = 100
-
-    write_batch = dbutil.create_write_batch()
-    for key, value in db.execute(sql):
-        write_batch.put_bytes(key, value)
-        count += 1
-        if count % batch_size == 0:
-            write_batch.commit(retries=5)
-            write_batch = dbutil.create_write_batch()
-            cost_time = time.time() - start_time
-            progress = count/total_count*100.0
-            qps = calc_qps(count, cost_time)
-            logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
-
-    write_batch.commit(retries=5)
-
-    logger.log("import record done records:%s", count)
-    for table_name in dbutil.get_table_names():
-        logger.log("repair index for (%s)", table_name)
+    def import_db(self, db_file):
+        self.db_backup_file = db_file
+        got_lock = False
         try:
-            dbutil.get_table(table_name).repair_index()
-            logger.log("repair index done for (%s)", table_name)
+            if _backup_lock.acquire(blocking = False):
+                got_lock = True
+                self.import_sql(db_file)
+                return self.import_kv(db_file)
+            else:
+                logging.warning("import_db is busy")
+                return "import_db is busy"
         except:
-            xutils.print_exc()
-            logger.log("repair index failed for (%s)", table_name)
+            exc_info = xutils.print_exc()
+            _import_logger.info(exc_info)
+        finally:
+            if got_lock:
+                _backup_lock.release()
 
-    logger.log("import done!")
-    return "records:%s" % count
+    def get_logger(self):
+        return _import_logger
+
+    def import_sql(self, db_file):
+        logger = self.get_logger()
+        backup_db = xtables.MySqliteDB(db = db_file)
+        batch_size = 100
+
+        try:
+            for table in xtables.get_all_tables():
+                backup_table = xtables.init_backup_table(table.tablename, backup_db)
+                total_count = backup_table.count()
+                logger.info("import table:(%s) count:(%d)", table.tablename, total_count)
+                start_time = time.time()
+                count = 0
+                assert isinstance(table, xtables.TableProxy)
+                for records in backup_table.iter_batch(batch_size=batch_size):
+                    with table.transaction():
+                        for record in records:
+                            new_record = table.filter_record(record)
+                            where_dict = dict(id = record.id)
+                            old_record = table.select_first(where=where_dict)
+                            if old_record == None:
+                                table.insert(**new_record)
+                            else:
+                                table.update(where=where_dict, **new_record)
+                            count+=1
+                            cost_time = time.time() - start_time
+                            qps = calc_qps(count, cost_time)
+                        logger.log("table:(%s), proceed:(%d/%d), qps:(%.2f)" % (backup_table.tablename, count, total_count, qps))
+                cost_time = time.time() - start_time
+                logger.info("import table:(%s) done! cost_time:(%.2fs)", table.tablename, cost_time)
+        except:
+            err_info = xutils.print_exc()
+            logger.info("import failed: (%s)" % err_info)
+
+    def import_kv(self, db_file):
+        count = 0
+        logger = _import_logger
+        db = sqlite3.connect(db_file)
+        total_count = list(db.execute("SELECT COUNT(1) FROM kv_store"))[0][0]
+
+        if total_count == 0:
+            logger.log("db is empty")
+            return
+
+        sql = "SELECT key, value FROM kv_store ORDER BY key"
+
+        start_time = time.time()
+        batch_size = 100
+
+        write_batch = dbutil.create_write_batch()
+        for key, value in db.execute(sql):
+            write_batch.put_bytes(key, value)
+            count += 1
+            if count % batch_size == 0:
+                write_batch.commit(retries=5)
+                write_batch = dbutil.create_write_batch()
+                cost_time = time.time() - start_time
+                progress = count/total_count*100.0
+                qps = calc_qps(count, cost_time)
+                logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
+
+        write_batch.commit(retries=5)
+
+        logger.log("import record done records:%s", count)
+        for table_name in dbutil.get_table_names():
+            logger.log("repair index for (%s)", table_name)
+            try:
+                dbutil.get_table(table_name).repair_index()
+                logger.log("repair index done for (%s)", table_name)
+            except:
+                xutils.print_exc()
+                logger.log("repair index failed for (%s)", table_name)
+
+        logger.log("import done!")
+        return "records:%s" % count
+
+
+
+def import_db(db_file):
+    importer = DBImporter()
+    return importer.import_db(db_file)
 
 class BackupHandler:
 
