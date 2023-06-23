@@ -545,7 +545,7 @@ class LinkHandler:
             link_path = os.path.join(xconfig.DATA_DIR, name)
         
         link_path = os.path.abspath(link_path)
-        raise web.seeother("/fs/%s" % link_path)
+        raise web.seeother("/fs/~%s" % link_path)
 
 class Bookmark:
 
