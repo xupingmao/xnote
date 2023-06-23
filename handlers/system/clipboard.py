@@ -23,19 +23,20 @@ HTML = """
 <div class="card">
     {% if len(records) == 0 %}
         {% include common/text/empty_text.html %}
+    {% else %}
+        <table class="table">
+            <tr>
+                <th class="th-time">时间</th>
+                <th class="th-content">内容</th>
+            </tr>
+        {% for r in records %}
+            <tr>
+                <td>{{r.create_time}}</td>
+                <td>{{r.content}}</td>
+            </tr>
+        {% end %}
+        </table>
     {% end %}
-    <table class="table">
-        <tr>
-            <th class="th-time">时间</th>
-            <th class="th-content">内容</th>
-        </tr>
-    {% for r in records %}
-        <tr>
-            <td>{{r.create_time}}</td>
-            <td>{{r.content}}</td>
-        </tr>
-    {% end %}
-    </table>
 </div>
 
 <div class="card">
