@@ -131,6 +131,7 @@ class UserDao:
         assert isinstance(name, six.string_types)
         assert name != ""
 
+        user.login_time = "1970-01-01 00:00:00"
         user.pop("id")
         db = get_user_db()
         user_id = db.insert(**user)
