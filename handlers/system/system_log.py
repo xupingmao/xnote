@@ -21,7 +21,7 @@ uv_db = dbutil.get_table("uv")
 
 OPTION_HTML = '''
 <div class="row">
-    <script src="/static/js/base/jq-ext.js"></script>
+    <script src="{{_server_home}}/_static/js/base/jq-ext.js"></script>
 
     <div class="card">
         <div class="x-tab-box row" data-tab-key="log_type" data-tab-default="file">
