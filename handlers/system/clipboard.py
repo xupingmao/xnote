@@ -45,7 +45,7 @@ HTML = """
             <tr>
                 <td>{{r.create_time}}</td>
                 <td>{{r.content}}</td>
-                <td><button data-id="{{r._id}}" onclick="xnoteOpenClipDetail(this)">查看</button></td>
+                <td><button data-id="{{r._id}}" onclick="xnoteOpenClipDetail(this)" class="btn btn-default">查看</button></td>
             </tr>
         {% end %}
         </table>
