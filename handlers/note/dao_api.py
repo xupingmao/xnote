@@ -48,7 +48,8 @@ class NoteDao:
     def count_comment(user_name):
         # type: (str)->int
         """统计评论数量"""
-        raise NotImplementedError()
+        from . import dao_comment
+        return dao_comment.count_comment(user_name)
     
     @staticmethod
     def delete_visit_log(user_name, note_id):
