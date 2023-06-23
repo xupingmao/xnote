@@ -257,12 +257,45 @@ class WebConfig:
     server_home = ""
     about_url = "" # 关于系统的链接
     about_text = ""
+    nav_list = []
+    template_base_nav_left = "" # 左侧菜单自定义模板
+    template_base_nav_top = ""
 
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
         cls.about_url = SystemConfig.get_str("about_url", "/code/wiki/README.md")
         cls.about_text = SystemConfig.get_str("about_text", "关于Xnote")
+        cls.nav_list = cls.load_nav_list()
+        cls.template_base_nav_left = SystemConfig.get_str("template_base_nav_left", "common/nav/base_nav_left.html")
+        cls.template_base_nav_top = SystemConfig.get_str("template_base_nav_top", "common/nav/base_nav_top.html")
+    
+    @classmethod
+    def load_nav_list(cls):
+        """加载导航列表"""
+        if len(cls.nav_list) > 0:
+            return cls.nav_list
+        nav_list = []
+        nav_list.append(NavItem(text="首页", need_logout=True,
+                                need_admin=False, url="/system/index"))
+        nav_list.append(NavItem(text="首页", need_login=True,
+                        need_admin=False, url="/note/index"))
+        nav_list.append(NavItem(text="动态", need_login=True,
+                        need_admin=False, url="/note/recent?orderby=update"))
+        nav_list.append(NavItem(text="分享", need_login=False,
+                        need_admin=False, url="/note/public"))
+        nav_list.append(NavItem(text="插件", need_login=True,
+                        need_admin=False, css_class="desktop-only", url="/plugin_list"))
+        nav_list.append(NavItem(text="文件", need_login=True,
+                        need_admin=True, css_class="desktop-only", url="/fs_bookmark"))
+        nav_list.append(NavItem(text="设置", need_login=True,
+                        need_admin=False, url="/system/settings"))
+        nav_list.append(NavItem(text="后台", need_login=True,
+                        need_admin=True, css_class="desktop-only", url="/system/admin"))
+        nav_list.append(NavItem(text="登录", need_logout=True,
+                        need_admin=False, url="/login"))
+        return nav_list
+
 
 class DatabaseConfig:
 
@@ -753,3 +786,34 @@ class SystemConfig:
 
 
 system_config = SystemConfig()
+
+
+
+
+class NavItem:
+
+    def __init__(self, text="", need_login=False, need_logout=False, need_admin=False, url="", css_class=""):
+        self.text = text
+        self.need_login = need_login
+        self.need_logout = need_logout
+        self.need_admin = need_admin
+        self.url = url
+        self.css_class = css_class
+
+    def check_platform(self):
+        return True
+
+    def is_visible(self):
+        import xauth
+        # 先判断高权限的
+        if self.need_admin:
+            return xauth.is_admin() and self.check_platform()
+
+        if self.need_login:
+            return xauth.has_login() and self.check_platform()
+
+        if self.need_logout:
+            return not xauth.has_login() and self.check_platform()
+
+        return self.check_platform()
+    

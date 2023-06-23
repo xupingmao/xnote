@@ -35,89 +35,50 @@ NAMESPACE = dict(
     quote=quote
 )
 
-_lang_dict = dict()
 _mobile_name_dict = dict()
 _loader = None  # type: XnoteLoader
-NAV_LIST = []
 LOAD_TIME = int(time.time())
 
 
 class TemplateConfig:
     """模板配置"""
     ext_handlers_dir = "./ext_handlers"
+    nav_list = []
+    lang_dict = {}
 
+    @classmethod
+    def init(cls):
+        # 加载菜单
+        cls.nav_list = xconfig.WebConfig.load_nav_list()
 
-def load_languages():
-    """加载系统语言配置"""
-    global _lang_dict
+    @classmethod
+    def load_languages(cls):
+        """加载系统语言配置"""
+        lang_dict = cls.lang_dict
 
-    _lang_dict.clear()
-    dirname = xconfig.LANG_DIR
-    for fname in os.listdir(dirname):
-        name, ext = os.path.splitext(fname)
-        if ext != ".properties":
-            continue
-        fpath = os.path.join(dirname, fname)
-        content = xutils.readfile(fpath)
-        config = xutils.parse_config_text(content, ret_type='dict')
-        _lang_dict[name] = config
+        lang_dict.clear()
+        dirname = xconfig.LANG_DIR
+        for fname in os.listdir(dirname):
+            name, ext = os.path.splitext(fname)
+            if ext != ".properties":
+                continue
+            fpath = os.path.join(dirname, fname)
+            content = xutils.readfile(fpath)
+            config = xutils.parse_config_text(content, ret_type='dict')
+            lang_dict[name] = config
+        cls.lang_dict = lang_dict
 
-
-class NavItem:
-
-    def __init__(self, text="", need_login=False, need_logout=False, require_admin=False, url="", css_class=""):
-        self.text = text
-        self.need_login = need_login
-        self.need_logout = need_logout
-        self.require_admin = require_admin
-        self.url = url
-        self.css_class = css_class
-
-    def check_platform(self):
-        return True
-
-    def is_visible(self):
-        # 先判断高权限的
-        if self.require_admin:
-            return xauth.is_admin() and self.check_platform()
-
-        if self.need_login:
-            return xauth.has_login() and self.check_platform()
-
-        if self.need_logout:
-            return not xauth.has_login() and self.check_platform()
-
-        return self.check_platform()
-
-
-def load_nav_list():
-    global NAV_LIST
-    NAV_LIST = []
-    NAV_LIST.append(NavItem(text="首页", need_logout=True,
-                            require_admin=False, url="/system/index"))
-    NAV_LIST.append(NavItem(text="首页", need_login=True,
-                    require_admin=False, url="/note/index"))
-    NAV_LIST.append(NavItem(text="动态", need_login=True,
-                    require_admin=False, url="/note/recent?orderby=update"))
-    NAV_LIST.append(NavItem(text="分享", need_login=False,
-                    require_admin=False, url="/note/public"))
-    NAV_LIST.append(NavItem(text="插件", need_login=True,
-                    require_admin=False, css_class="desktop-only", url="/plugin_list"))
-    NAV_LIST.append(NavItem(text="文件", need_login=True,
-                    require_admin=True, css_class="desktop-only", url="/fs_bookmark"))
-    NAV_LIST.append(NavItem(text="设置", need_login=True,
-                    require_admin=False, url="/system/settings"))
-    NAV_LIST.append(NavItem(text="后台", need_login=True,
-                    require_admin=True, css_class="desktop-only", url="/system/admin"))
-    NAV_LIST.append(NavItem(text="登录", need_logout=True,
-                    require_admin=False, url="/login"))
-
+    @classmethod
+    def get_lang_mapping(cls, lang):
+        if lang == None:
+            lang = "zh"
+        return cls.lang_dict.get(lang)
 
 def T(text, lang=None):
     if lang is None:
         lang = xconfig.get_current_user_config("LANG")
 
-    mapping = _lang_dict.get(lang)
+    mapping = TemplateConfig.get_lang_mapping(lang)
     if mapping is None:
         return text
     else:
@@ -126,6 +87,14 @@ def T(text, lang=None):
 
 class XnoteLoader(Loader):
     """定制Template Loader"""
+
+    path_mapping = {}
+
+    def init_path_mapping(self):
+        self.path_mapping = {
+            "$base_nav_left": xconfig.WebConfig.template_base_nav_left,
+            "$base_nav_top": xconfig.WebConfig.template_base_nav_top,
+        }
 
     def resolve_path_old(self, name, parent_path=None):
         """这是默认的按照相对路径处理模板路径"""
@@ -151,6 +120,8 @@ class XnoteLoader(Loader):
         # 处理默认的模板，这里hack掉
         if name == "base":
             return os.path.join(xconfig.HANDLERS_DIR, xconfig.BASE_TEMPLATE)
+        
+        name = self.path_mapping.get(name, name)
 
         if name.startswith("$ext/"):
             relative_path = name[len("$ext/"):]
@@ -194,10 +165,6 @@ def get_message_count(user):
         return 0
 
 
-def get_nav_list():
-    return NAV_LIST
-
-
 def render_before_kw(kw: dict):
     """模板引擎预处理过程"""
     user_name = xauth.current_name() or ""
@@ -212,7 +179,7 @@ def render_before_kw(kw: dict):
     kw["_user_agent"] = get_user_agent()
     # 用于渲染其他组件
     kw["_render"] = render
-    kw["_nav_list"] = get_nav_list()
+    kw["_nav_list"] = TemplateConfig.nav_list
     kw["_is_mobile"] = is_mobile_device()
     kw["_is_desktop"] = xutils.is_desktop_client()
     kw["Storage"] = Storage
@@ -358,11 +325,10 @@ def _do_init():
     global _loader
     _loader = XnoteLoader(TEMPLATE_DIR, namespace=NAMESPACE)
     _loader.reset()
+    _loader.init_path_mapping()
 
-    # 加载语言
-    load_languages()
-    # 加载菜单
-    load_nav_list()
+    # 初始化配置
+    TemplateConfig.init()
 
 
 @xutils.log_init_deco("xtemplate.reload")

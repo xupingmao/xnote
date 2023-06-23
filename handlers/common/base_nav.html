@@ -4,10 +4,10 @@
 {% init search_action = "/search/search" %}
 {% init nav_type = "default" %}
 
-{% include common/nav/base_nav_top.html %}
+{% include $base_nav_top %}
 
 {% if _user_config.nav_style == "left" and _is_desktop %}
-  {% include common/nav/base_nav_left.html %} 
+  {% include $base_nav_left %}
 {% end %}
 
 {% if _is_admin and show_menu and show_nav and xconfig.get_system_config("node_role") == "follower" %}
