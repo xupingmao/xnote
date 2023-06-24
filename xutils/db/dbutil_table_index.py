@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 16:49:41
+@LastEditTime : 2023-06-24 19:03:59
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -28,27 +28,30 @@ from xutils.db.dbutil_base import (
     delete_index_count_cache,
     IndexInfo,
 )
-
+from xutils.db import dbutil_base
 from ..interfaces import BatchInterface
 
 class TableIndex:
 
-    def __init__(self, index_info: IndexInfo, user_attr=None, check_user=False,index_type="ref"):
+    def __init__(self, index_info: IndexInfo):
         table_name = index_info.table_name
         index_name = index_info.index_name
 
+        table_info = dbutil_base.TableInfo.get_by_name(table_name)
+        assert table_info != None
+
         self.index_info = index_info
-        self.user_attr = user_attr
+        self.user_attr = table_info.user_attr
         self.index_name = index_name
         self.table_name = table_name
         self.key_name = "_key"
-        self.check_user = check_user
+        self.check_user = table_info.check_user
         self.prefix = IndexInfo.build_prefix(self.table_name, index_name)
-        self.index_type = index_type
+        self.index_type = index_info.index_type
         self.index_info = index_info
         self.debug = False
 
-        if check_user and user_attr == None:
+        if self.check_user and self.user_attr == None:
             raise Exception("user_attr没有注册, table_name:%s" % table_name)
 
     def _get_prefix(self, user_name=None):
@@ -267,6 +270,9 @@ class TableIndexRepair:
 
     def delete_invalid_index(self, index_name, index_prefix):
         db = self.db
+        index_info = dbutil_base.IndexInfo.get_table_index_info(self.table_name, index_name)
+        assert isinstance(index_info, IndexInfo)
+        index = TableIndex(index_info)
 
         for old_key, index_object in prefix_iter(index_prefix, include_key=True):
             if isinstance(index_object, dict):
@@ -293,7 +299,7 @@ class TableIndexRepair:
                 continue
 
             user_name = None
-            index_value = self.get_record_attr(record, index_name)
+            encoded_index_value = index.get_index_value(record)
             record_id = db._get_id_from_key(record_key)
 
             if db._need_check_user:
@@ -315,7 +321,7 @@ class TableIndexRepair:
 
             prefix = db._get_index_prefix(index_name, user_name)
             new_key = db._build_key_no_prefix(
-                prefix, encode_index_value(index_value), record_id)
+                prefix, encoded_index_value, record_id)
 
             if new_key != old_key:
                 logging.debug("index dismatch, key:(%s), record_id:(%s), correct_key:(%s)",

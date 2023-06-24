@@ -89,7 +89,6 @@ def exec_python_code(
     @param {bool} do_gc 是否执行GC
     @param {dict} vars 执行的参数
     """
-    import xutils
     ret = None
     try:
         if vars is None:
@@ -108,7 +107,7 @@ def exec_python_code(
         if do_gc:
             gc.collect()
         # after_count = len(gc.get_objects())
-        if record_stdout:
+        if isinstance(sys.stdout, MyStdout):
             ret = sys.stdout.pop_record()
         # if do_gc:
         #     log("gc.objects_count %s -> %s" % (before_count, after_count))
@@ -117,7 +116,7 @@ def exec_python_code(
         xutils_print_exc()
         if raise_err:
             raise e
-        if record_stdout:
+        if isinstance(sys.stdout, MyStdout):
             ret = sys.stdout.pop_record()
         return ret
 

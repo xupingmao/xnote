@@ -46,6 +46,9 @@ class TemplateConfig:
     nav_list = []
     lang_dict = {}
 
+    template_prefix_ext = "$ext"
+    template_prefix_plugin = "$plugin"
+
     @classmethod
     def init(cls):
         # 加载菜单
@@ -86,16 +89,27 @@ def T(text, lang=None):
         return mapping.get(text, text)
 
 
+class TemplateMapping:
+
+    def __init__(self, prefix="", dirname=""):
+        self.prefix = prefix
+        self.dirname = dirname
+
 class XnoteLoader(Loader):
     """定制Template Loader"""
 
     path_mapping = {}
+    template_mapping_list = []
 
     def init_path_mapping(self):
         self.path_mapping = {
             "$base_nav_left": xconfig.WebConfig.template_base_nav_left,
             "$base_nav_top": xconfig.WebConfig.template_base_nav_top,
         }
+        self.template_mapping_list = [
+            TemplateMapping("$ext/", TemplateConfig.template_prefix_ext),
+            TemplateMapping("$plugin/", xconfig.FileConfig.plugins_dir),
+        ]
 
     def resolve_path_old(self, name, parent_path=None):
         """这是默认的按照相对路径处理模板路径"""
@@ -124,10 +138,11 @@ class XnoteLoader(Loader):
         
         name = self.path_mapping.get(name, name)
 
-        if name.startswith("$ext/"):
-            relative_path = name[len("$ext/"):]
-            return os.path.join(TemplateConfig.ext_handlers_dir, relative_path)
-
+        for template_mapping in self.template_mapping_list:
+            if name.startswith(template_mapping.prefix):
+                relative_path = name[len(template_mapping.prefix):]
+                return os.path.join(template_mapping.dirname, relative_path)
+        
         if name.endswith(".str"):
             return name
 

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 16:44:35
+@LastEditTime : 2023-06-24 19:05:06
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -77,7 +77,7 @@ class LdbTable:
         self.binlog = BinLog.get_instance()
         self.binlog_enabled = True
         # TODO 索引用一个单例管理起来
-        self.indexes = self._build_indexes(table_info) # type: list[TableIndex]
+        self.indexes = self._build_indexes() # type: list[TableIndex]
 
         if user_name != None:
             assert user_name != ""
@@ -86,15 +86,13 @@ class LdbTable:
         if self.prefix[-1] != ":":
             self.prefix += ":"
 
-    def _build_indexes(self, table_info):
+    def _build_indexes(self):
         indexes = []
         index_dict = IndexInfo.get_table_index_dict(self.table_name)
         if index_dict != None:
             for index_name in index_dict:
                 index_info = index_dict[index_name]
-                indexes.append(TableIndex(index_info, table_info.user_attr,
-                                          check_user=table_info.check_user,
-                                          index_type=index_info.index_type))
+                indexes.append(TableIndex(index_info))
         return indexes
 
     def set_binlog_enabled(self, enabled=True):

@@ -218,6 +218,7 @@ class FileConfig:
 
     record_db_file = "" # 默认的sqlite数据库
     source_root_dir = "" # 源码根目录
+    plugins_dir = "" # 插件目录
 
     db_backup_expire_days = 5
 
@@ -240,6 +241,7 @@ class FileConfig:
 
         cls.record_db_file = cls.get_db_path("record")
         cls.db_backup_expire_days = SystemConfig.get_int("db_backup_expire_days", 5)
+        cls.plugins_dir = os.path.join(cls.data_dir, "scripts", "plugins")
 
     @classmethod
     def get_db_path(cls, dbname=""):
