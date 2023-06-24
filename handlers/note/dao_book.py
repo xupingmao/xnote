@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-03 09:09:49
 @LastEditors  : xupingmao
-@LastEditTime : 2022-08-01 23:05:46
+@LastEditTime : 2023-06-24 10:53:34
 @FilePath     : /xnote/handlers/note/dao_book.py
 @Description  : 描述
 """
@@ -38,7 +38,7 @@ def check_and_create_default_book(user_name):
     with dbutil.get_write_lock():
         result = _db.list(filter_func = find_default_func, user_name = user_name)
         if len(result) == 0:
-            default_book = Storage()
+            default_book = note_dao.NoteDO()
             default_book.ctime = dateutil.format_datetime()
             default_book.mtime = dateutil.format_datetime()
             default_book.name = "默认笔记本"
@@ -58,7 +58,7 @@ def check_and_create_default_book(user_name):
             note_info = result[0]
             default_book_id = note_info.id
             
-            update_kw = Storage()
+            update_kw = note_dao.NoteDO()
             update_kw.type = "group"
             update_kw.priority = 1
             update_kw.is_default = True

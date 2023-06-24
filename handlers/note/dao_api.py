@@ -4,28 +4,27 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-19 15:16:04
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-22 00:19:14
+@LastEditTime : 2023-06-24 10:51:09
 @FilePath     : /xnote/handlers/note/dao_api.py
 @Description  : DAO接口定义
 """
-
-from xutils import Storage
 
 class NoteDao:
 
     """笔记的DAO接口"""
 
     @staticmethod
-    def create(req):
+    def create(note_dict):
         # type: (dict) -> str
         """创建笔记接口"""
-        raise NotImplementedError()
+        from . import dao
+        return dao.create_note(note_dict)
 
     @staticmethod
     def get_by_id(id, include_full=True, creator=None):
-        # type: (str, bool, str|None) -> Storage
         """通过ID查询笔记信息"""
-        raise NotImplementedError()
+        from . import dao
+        return dao.get_by_id(id, include_full, creator)
     
     @staticmethod
     def get_by_id_creator(id, creator):

@@ -75,37 +75,38 @@ NOTE_ICON_DICT = {
     "form": "fa-table",  # 开发中
 }
 
+class NoteDO(Storage):
+    def __init__(self):
+        self.id = "" # id是str
+        self.name = ""
+        self.path = ""
+        self.creator = ""
+        self.ctime = dateutil.format_datetime()
+        self.mtime = dateutil.format_datetime()
+        self.atime = dateutil.format_datetime()
+        self.type = "md"
+        self.category = "" # 废弃
+        self.size = 0
+        self.children_count = 0
+        self.parent_id = "0" # 默认挂在根目录下
+        self.content = ""
+        self.data = ""
+        self.is_deleted = 0
+        self.is_public = False
+        self.token = ""
+        self.priority = 0 # 1-正常
+        self.visited_cnt = 0
+        self.orderby = ""
+        # 热门指数
+        self.hot_index = 0
+        # 假的属性
+        self.url = ""
 
-class NoteSchema:
-    """这个类主要是说明结构"""
-
-    # 基本信息
-    id = "主键ID"
-    name = "笔记名称"
-    ctime = "创建时间"
-    mtime = "修改时间"
-    atime = "访问时间"
-    type = "类型"
-    category = "所属分类"  # 一级图书分类
-    size = "内容大小"
-    children_count = "儿子节点数量"
-    parent_id = "父级节点ID"
-    content = "纯文本内容"
-    data = "富文本内容"
-    is_deleted = "是否删除"
-    archived = "是否归档"
-
-    # 权限控制
-    creator = "创建者"
-    is_public = "是否公开"
-    token = "分享token"
-
-    # 统计信息
-    priority = "优先级"
-    visited_cnt = "访问次数"
-    orderby = "排序方式"
-    hot_index = "热门指数"
-
+    @classmethod
+    def from_dict(cls, dict_value):
+        result = NoteDO()
+        result.update(dict_value)
+        return result
 
 def format_note_id(id):
     return str(id)
@@ -122,15 +123,11 @@ def get_root(creator=None):
         creator = xauth.current_name()
 
     assert creator != None
-    root = Storage()
+    root = NoteDO()
+    root.creator = creator
     root.name = "根目录"
     root.type = "group"
-    root.size = None
-    root.id = "0"
     root.parent_id = "0"
-    root.content = ""
-    root.priority = 0
-    root.creator = creator
     build_note_info(root)
     root.url = "/note/group"
     return root
@@ -141,26 +138,22 @@ def is_root_id(id):
 
 
 def get_default_group():
-    group = Storage()
+    group = NoteDO()
     group.name = "默认分组"
     group.type = "group"
-    group.size = None
     group.id = "default"
-    group.parent_id = 0
-    group.content = ""
-    group.priority = 0
+    group.parent_id = "0"
     build_note_info(group)
     group.url = "/note/default"
     return group
 
 
 def get_archived_group():
-    group = Storage()
+    group = NoteDO()
     group.name = "归档分组"
     group.type = "group"
-    group.size = None
     group.id = "archived"
-    group.parent_id = 0
+    group.parent_id = "0"
     group.content = ""
     group.priority = 0
     build_note_info(group)
@@ -432,12 +425,17 @@ def get_by_id(id, include_full=True, creator=None):
         return get_root(creator)
 
     note_index = _index_db.get_by_id(id)
+    if note_index != None:
+        note_index = NoteDO.from_dict(note_index)
 
     if not include_full and note_index != None:
         build_note_info(note_index)
         return note_index
 
     note = get_full_by_id(id)
+    if note != None:
+        note = NoteDO.from_dict(note)
+    
     if note and not include_full:
         del note.content
         del note.data
@@ -475,6 +473,7 @@ def get_by_user_skey(user_name, skey):
     skey = skey.replace("-", "_")
     note_info = _index_db.first_by_index("skey", where = dict(creator=user_name, skey=skey))
     if note_info != None:
+        note_info = NoteDO.from_dict(note_info)
         return get_by_id(note_info.id)
     else:
         return None
@@ -924,16 +923,18 @@ def check_group_status(status):
 def list_group_with_count(creator=None,
                orderby="mtime_desc",
                skip_archived=False,
-               status="all",
-               *,
-               offset=0, limit=1000,
-               parent_id=None,
-               category=None,
-               tags=None,
-               search_name=None,
-               count_total=False,
-               count_only=False):
+               status="all", **kw):
     """查询笔记本列表"""
+
+    offset = kw.get("offset", 0)
+    limit = kw.get("limit", 100)
+    parent_id = kw.get("parent_id")
+    category = kw.get("category") 
+    tags = kw.get("tags")
+    search_name = kw.get("search_name")
+    count_total = kw.get("count_total", False)
+    count_only = kw.get("count_only", False)
+
     assert creator != None
     check_group_status(status)
 
@@ -1007,15 +1008,10 @@ def list_group(*args, **kw):
         return list, count
     return list
 
+@cacheutil.kw_cache_deco(prefix="note.count_group")
 def count_group(creator, status=None):
     check_group_status(status)
-    key = "%s#%s" % (creator, status)
-    value = _cache.get(key)
-    if value != None:
-        return value
-
     value = count_group_by_db(creator, status)
-    _cache.put(key, value, 60)
     return value
 
 
@@ -1030,7 +1026,8 @@ def count_group_by_db(creator, status=None):
 @xutils.timeit(name="NoteDao.ListRootGroup:leveldb", logfile=True)
 def list_root_group(creator=None, orderby="name"):
     def list_root_group_func(key, value):
-        return value.creator == creator and value.type == "group" and value.parent_id == 0 and value.is_deleted == 0
+        return value.creator == creator and value.type == "group" \
+            and value.parent_id in (0,"0") and value.is_deleted == 0
 
     notes = dbutil.prefix_list("notebook:%s" % creator, list_root_group_func)
     sort_notes(notes, orderby)
@@ -1046,7 +1043,7 @@ def list_default_notes(creator, offset=0, limit=1000, orderby="mtime_desc"):
             return False
         return value.creator == creator and str(value.parent_id) == "0"
 
-    notes = dbutil.prefix_list("note_tiny:", list_default_func)
+    notes = _tiny_db.list(filter_func = list_default_func)
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
 
@@ -1083,7 +1080,7 @@ def count_public():
 
 
 @xutils.timeit(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
-def list_by_parent(creator, parent_id, offset=0, limit=1000,
+def list_by_parent(creator, parent_id="", offset=0, limit=1000,
                    orderby="name",
                    skip_group=False,
                    include_public=True,
@@ -1572,7 +1569,8 @@ def get_note_stat(user_name) -> Storage:
 
 def get_gallery_path(note):
     import xconfig
-    # 新的位置, 增加一级子目录（100个，二级子目录取决于文件系统，最少的255个，最多无上限，也就是最少2.5万个相册，对于一个用户应该够用了）
+    # 新的位置, 增加一级子目录（100个，二级子目录取决于文件系统
+    # 最少的255个，最多无上限，也就是最少2.5万个相册，对于一个用户应该够用了）
     note_id = str(note.id)
     if len(note_id) < 2:
         second_dir = ("00" + note_id)[-2:]
@@ -1599,7 +1597,7 @@ def get_virtual_group(user_name, name):
     if name == "ungrouped":
         files = list_by_parent(user_name, parent_id = "0", offset = 0, limit = 1000,
                                skip_group=True, include_public=False)
-        group = Storage()
+        group = NoteDO()
         group.name = "未分类笔记"
         group.url = "/note/default"
         group.size = len(files)
@@ -1685,10 +1683,8 @@ xutils.register_func("note.get_note_stat", get_note_stat)
 xutils.register_func("note.get_gallery_path", get_gallery_path)
 xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
 
-NoteDao.get_by_id = get_by_id
 NoteDao.get_by_id_creator = get_by_id_creator
 NoteDao.get_root = get_root
 NoteDao.batch_query_list = batch_query_list
 NoteDao.add_history = add_history
-NoteDao.create = create_note
 NoteDao.get_note_stat = get_note_stat

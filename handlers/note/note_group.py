@@ -817,7 +817,8 @@ class ManagementHandler:
             raise web.notfound()
 
         notes = note_dao.list_by_parent(user_name, parent_id,
-                                        0, 200, orderby=parent_note.orderby, tags=q_tags)
+                                        offset=0, limit=200, 
+                                        orderby=parent_note.orderby, tags=q_tags)
 
         parent = Storage(url="/note/%s" % parent_id,
                          name=parent_note.name)

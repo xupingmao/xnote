@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2023-02-12 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-01-22 00:07:43
-@FilePath     : /xnote/handlers/note/note_helper.py
+@LastEditTime : 2023-06-24 10:10:33
+@FilePath     : /xnote/handlers/plan/dao.py
 @Description  : 计划管理
 """
 import time
@@ -19,6 +19,8 @@ class MonthPlanRecord:
         self.month = ""
         self.notes = []
         self.note_ids = []
+        self.create_notes = []
+        self.update_notes = []
 
     @staticmethod
     def from_dict(dict_value):

@@ -6,7 +6,6 @@ import xutils
 import xauth
 from xutils import dbutil
 from xutils import Storage
-from xtemplate import BasePlugin
 from xutils import textutil
 import xtables
 import xtemplate
@@ -97,6 +96,20 @@ class DbScanHandler:
 
         return dict(code="success", data=result, has_next=has_next, next_cursor=next_cursor, scanned=scanned)
     
+    def do_list_meta(self):
+        p2 = xutils.get_argument_str("p2")
+        kw = Storage()
+        kw.table_dict = dbutil.get_table_dict_copy()
+        kw.get_display_value = get_display_value
+        kw.table_names = dbutil.get_table_names()
+        if p2 == "delete":
+            kw.admin_stat_list = self.list_delete_table()
+        elif p2 == "sorted_set":
+            kw.admin_stat_list = self.list_table_by_type("sorted_set")
+        else:
+            self.handle_admin_stat_list(kw)
+        return self.render_html(kw)
+
     def POST(self):
         return self.GET()
 
@@ -108,12 +121,16 @@ class DbScanHandler:
         prefix = xutils.get_argument_str("prefix", "")
         reverse = xutils.get_argument("reverse", "")
         key_from = xutils.get_argument_str("key_from", "")
+        p = xutils.get_argument_str("p")
 
         if action == "delete":
             return self.do_delete()
 
         if action == "search":
             return self.do_search()
+        
+        if p == "meta":
+            return self.do_list_meta()
 
         result = []
         need_reverse = parse_bool(reverse)
@@ -207,6 +224,33 @@ class DbScanHandler:
         kw.admin_stat_list = admin_stat_list
         kw.show_delete = show_delete
 
+    def list_delete_table(self):
+        result = []
+        if xauth.is_admin():
+            table_dict = dbutil.get_table_dict_copy()
+            table_values = sorted(table_dict.values(),
+                                  key=lambda x: (x.category, x.name))
+            for table_info in table_values:
+                name = table_info.name
+                if table_info.is_deleted:
+                    table_count = dbutil.count_table(name, use_cache=True)
+                    result.append([table_info, table_count])
+
+        return result
+
+    def list_table_by_type(self, type=""):
+        result = []
+        if xauth.is_admin():
+            table_dict = dbutil.get_table_dict_copy()
+            table_values = sorted(table_dict.values(),
+                                  key=lambda x: (x.category, x.name))
+            for table_info in table_values:
+                name = table_info.name
+                if table_info.type == type:
+                    table_count = dbutil.count_table(name, use_cache=True)
+                    result.append([table_info, table_count])
+
+        return result
 
 class SqlDBInfo:
 

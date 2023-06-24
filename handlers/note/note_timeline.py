@@ -204,7 +204,7 @@ def list_search_func(context):
 
 def insert_default_project(rows, user_name):
     root_notes = note_dao.list_by_parent(
-        user_name, 0, 0, 1000, skip_group=True)
+        user_name, parent_id="0", offset=0, limit=1000, skip_group=True)
     if len(root_notes) > 0:
         rows.insert(0, DefaultProjectGroup(root_notes))
 

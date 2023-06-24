@@ -248,9 +248,7 @@ def check_get_leveldb():
 
 
 def check_table_name(table_name):
-    validate_str(table_name, "invalid table_name:{}", table_name)
-    if not TableInfo.is_registered(table_name):
-        raise DBException("table %r not registered!" % table_name)
+    TableInfo.check_table_name(table_name)
 
 
 def get_table_info(table_name):
@@ -291,9 +289,23 @@ class TableInfo:
         self.name = name
         self.description = description
         self.category = category
+        self.type = "table"  # table/sorted_set
         self.check_user = False
         self.user_attr = None
         self.is_deleted = False
+
+    def check_and_register(self):
+        if self.user_attr != None:
+            self.check_user = True
+
+        old_table = TableInfo.get_by_name(self.name)
+        if old_table != None:
+            # 检查结构是否一致，不能注册不一致的结构
+            assert old_table.check_user == self.check_user, "conflict table registry: %s" % self.name
+            assert old_table.user_attr == self.user_attr, "confilct table registry: %s" % self.name
+            # 已经注册
+            return old_table
+        self._info_dict[self.name] = self
 
     @classmethod
     def register(cls, name, description, category):
@@ -302,6 +314,12 @@ class TableInfo:
         table = TableInfo(name, description, category)
         cls._info_dict[name] = table
         return table
+    
+    @classmethod
+    def check_table_name(cls, table_name):    
+        validate_str(table_name, "invalid table_name:{}", table_name)
+        if not cls.is_registered(table_name):
+            raise DBException("table %r not registered!" % table_name)
 
     @classmethod
     def is_registered(cls, name):
@@ -386,43 +404,30 @@ class IndexInfo:
         return "%s$%s" % (table_name, index_name)
 
 
-def register_table(table_name,
-                   description,
-                   *,
-                   category="default",
-                   check_user=False,
-                   user_attr=None):  # type: (...)->TableInfo
+def register_table(table_name, description, **kw):  # type: (...)->TableInfo
+    """注册表定义
+    :param category: 表所属的类目
+    :param check_user: 是否检查用户
+    :param user_attr: 用户的属性名
+    :param type: 表的类型 {table, index, sorted_set}
+    """
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
     if not re.match(r"^[0-9a-z_]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    return _register_table_inner(table_name, description,
-                                 category, check_user, user_attr)
+    return _register_table_inner(table_name, description,**kw)
 
 
-def _register_table_inner(table_name,
-                          description,
-                          category="default",
-                          check_user=False,
-                          user_attr=None):
+def _register_table_inner(table_name, description, **kw):
     if not re.match(r"^[0-9a-z_\$]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
     
-    if user_attr != None:
-        check_user = True
-
-    old_table = TableInfo.get_by_name(table_name)
-    if old_table != None:
-        # 检查结构是否一致，不能注册不一致的结构
-        assert old_table.check_user == check_user, "conflict table registry: %s" % table_name
-        assert old_table.user_attr == user_attr, "confilct table registry: %s" % table_name
-        # 已经注册
-        return old_table
-
-    info = TableInfo.register(table_name, description, category)
-    info.check_user = check_user
-    info.user_attr = user_attr
+    info = TableInfo(table_name, description, kw.get("category", "default"))
+    info.check_user = kw.get("check_user", False)
+    info.user_attr = kw.get("user_attr")
+    info.type = kw.get("type", "table")
+    info.check_and_register()
 
     return info
 
@@ -444,7 +449,7 @@ def register_table_index(table_name, index_name, columns = [], comment="", index
     # 注册索引表
     index_table = get_index_table_name(table_name, index_name)
     description = "%s表索引" % table_name
-    _register_table_inner(index_table, description)
+    _register_table_inner(index_table, description, type="index")
 
 
 def register_table_user_attr(table_name, user_attr):

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-29 18:46:03
+@LastEditTime : 2023-06-24 11:37:15
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -152,6 +152,7 @@ def get_offset_from_page(page, pagesize=None):
 
 
 def after_message_create_or_update(msg_item):
+    assert isinstance(msg_item, dao.MessageDO)
     process_message(msg_item)
 
     if get_length(msg_item.keywords) == 0:
@@ -430,14 +431,12 @@ def update_message_content(id, user_name, content):
 def create_done_message(old_message):
     old_id = old_message['id']
 
-    new_message = Storage()
-    new_message['content'] = ''
-    new_message['ref'] = old_id
-    new_message['tag'] = 'done'
-    new_message['user'] = old_message['user']
-    new_message['ctime'] = xutils.format_datetime()
-
-    MessageDao.create(**new_message)
+    new_message = dao.MessageDO()
+    new_message.ref = old_id
+    new_message.tag = 'done'
+    new_message.user = old_message['user']
+    new_message.ctime = xutils.format_datetime()
+    MessageDao.create(new_message)
 
 
 def update_message_tag(id, tag):
@@ -587,7 +586,7 @@ def create_message(user_name, tag, content, ip):
     content = content.strip()
     ctime = xutils.format_datetime()
 
-    message = Storage()
+    message = dao.MessageDO()
     message.user = user_name
     message.tag = tag
     message.ip = ip
@@ -596,7 +595,7 @@ def create_message(user_name, tag, content, ip):
     message.mtime = ctime
     message.content = content
 
-    id = MessageDao.create(**message)
+    id = MessageDao.create(message)
 
     message.id = id
 

@@ -24,34 +24,75 @@ _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
 _debug = False
 
 class MessageDO(Storage):
-
-    id = "主键"
-    tag = "标签"
-    user = "用户名"
-
     def __init__(self):
-        pass
+        self.id = "" # 主键
+        self.tag = "" # tag标签
+        self.user = "" # 用户名
+        self.ip = ""
+        self.ref = None # 引用的id
+        self.ctime = xutils.format_datetime()  # 展示的创建时间
+        self.ctime0 = xutils.format_datetime() # 实际的创建时间
+        self.mtime = xutils.format_datetime()
+        self.date = xutils.format_date()
+        self.content = ""
+        self.version = 0
+        self.visit_cnt = 0
+        self.status = 0 # 老的结构
+        self.keywords = None
+        self.no_tag = True
+        self.amount = 0 # keyword对象的数量
+        self.done_time = None # type: str|None
 
-
-def check_before_create(kw):
-    if "id" in kw:
-        raise Exception("message.dao.create: can not set id")
+    @classmethod
+    def from_dict(cls, dict_value):
+        result = MessageDO()
+        result.update(dict_value)
+        return result
     
-    if "user" not in kw:
-        raise Exception("message.dao.create: key `user` is missing")
+    @classmethod
+    def from_dict_list(cls, dict_list):
+        result = []
+        for item in dict_list:
+            result.append(cls.from_dict(item))
+        return result
+    
+    @classmethod
+    def from_dict_or_None(cls, dict_value):
+        if dict_value == None:
+            return None
+        return cls.from_dict(dict_value)
 
-    if 'tag' not in kw:
-        raise Exception("message.dao.create: key `tag` is missing")
+    def check_before_update(self):
+        id = self.id
+        if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
+            raise Exception("[msg.update] invalid message id:%s" % id)
 
-    if "ctime" not in kw:
-        raise Exception("message.dao.create: key `ctime` is missing")
+    def fix_before_update(self):
+        if self.tag is None:
+            # 修复tag为空的情况，这种一般是之前的待办任务，只有状态没有tag
+            if self.status == 100:
+                self.tag = "done"
+            else:
+                self.tag = "task"
 
-    if "content" not in kw:
-        raise Exception("message.dao.create: key `content` is missing")
+        del_dict_key(self, "html")
+        del_dict_key(self, "tag_text")
 
-    tag = kw["tag"]
-    if tag not in VALID_TAG_SET:
-        raise Exception("message.dao.create: tag `%s` is invalid" % tag)
+    def check_before_create(self):
+        if self.id != "":
+            raise Exception("message.dao.create: can not set id")
+        
+        if self.user == "":
+            raise Exception("message.dao.create: key `user` is missing")
+
+        if self.ctime == "":
+            raise Exception("message.dao.create: key `ctime` is missing")
+
+        if self.tag != "done" and self.content == "":
+            raise Exception("message.dao.create: key `content` is missing")
+
+        if self.tag not in VALID_TAG_SET:
+            raise Exception("message.dao.create: tag `%s` is invalid" % self.tag)
 
 
 def convert_to_task_idx_key(key):
@@ -139,7 +180,7 @@ def _create_message_without_date(kw):
     return key
 
 
-def create_message(**kw):
+def create_message(message):
     """创建信息
     @param {string} user 用户名
     @param {string} tag 类型
@@ -147,38 +188,21 @@ def create_message(**kw):
     @param {string|None} date 日期，可选的
     @param {string} content 文本的内容
     """
-    check_before_create(kw)
-    kw["version"] = 0
-    tag = kw['tag']
+    assert isinstance(message, MessageDO)
+    message.check_before_create()
+    tag = message.tag
 
     if tag == "date":
-        return _create_message_with_date(kw)
+        return _create_message_with_date(message)
     else:
-        return _create_message_without_date(kw)
-
-
-def check_before_update(message):
-    id = message['id']
-    if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
-        raise Exception("[msg.update] invalid message id:%s" % id)
-
-
-def fix_before_update(message):
-    if message.tag is None:
-        # 修复tag为空的情况，这种一般是之前的待办任务，只有状态没有tag
-        if message.status == 100:
-            message.tag = "done"
-        else:
-            message.tag = "task"
-
-    del_dict_key(message, "html")
-    del_dict_key(message, "tag_text")
+        return _create_message_without_date(message)
 
 
 def update_message(message):
-    check_before_update(message)
-    fix_before_update(message)
-    id = message["id"]
+    assert isinstance(message, MessageDO)
+    message.check_before_update()
+    message.fix_before_update()
+    id = message.id
     if id.startswith("message:"):
         _msg_db.update(message)
     else:
@@ -292,17 +316,18 @@ def count_message(user, status):
     return kv_count_message(user, status)
 
 
-def get_message_by_id(full_key) -> Storage:
-    # type: (str) -> object
+def get_message_by_id(full_key):
+    # type: (str) -> MessageDO|None
     check_param_id(full_key)
     if full_key.startswith("message:"):
         value = _msg_db.get_by_key(full_key)
-        if value != None:
-            value["id"] = full_key
-        return value
     else:
-        return dbutil.get(full_key)
-
+        value = dbutil.get(full_key)
+    
+    if value != None:
+        value = MessageDO.from_dict(value)
+        value.id = full_key
+    return value
 
 def check_param_user(user_name):
     if user_name is None or user_name == "":
@@ -441,7 +466,8 @@ def get_content_filter_func(tag, content):
 def get_by_content(user, tag, content):
     if tag == "key":
         # tag是独立的表，不需要比较tag
-        return _keyword_db.get_first(where = dict(user = user, content=content))
+        value = _keyword_db.get_first(where = dict(user = user, content=content))
+        return MessageDO.from_dict_or_None(value)
     else:
         return None
 
@@ -474,6 +500,8 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
             chatlist = _msg_db.list_by_index("ctime",
                 filter_func=filter_func, offset=offset, 
                 limit=limit, reverse=True, user_name=user)
+    
+    chatlist = MessageDO.from_dict_list(chatlist)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -631,8 +659,8 @@ class MessageDao:
         return get_message_by_id(full_key)
     
     @staticmethod
-    def create(**kw):
-        return create_message(**kw)
+    def create(message):
+        return create_message(message)
     
     @staticmethod
     def update(message):

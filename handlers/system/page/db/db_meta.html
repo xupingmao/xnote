@@ -9,8 +9,15 @@
 {% include system/component/db_nav.html %}
 {% init show_delete = False %}
 
+<div class="card">
+    <div class="x-tab-box" data-tab-key="p2" data-tab-default="all">
+        <a class="x-tab" href="{{_server_home}}/system/db_admin?p=meta&p2=active" data-tab-value="active">活跃</a>
+        <a class="x-tab" href="{{_server_home}}/system/db_admin?p=meta&p2=delete" data-tab-value="delete">删除</a>
+    </div>
+</div>
+
 <div class="card admin-stat">
-    <div class="card-title"> 
+    <!-- <div class="card-title"> 
         <span>元数据</span>
 
         <div class="float-right">
@@ -19,14 +26,8 @@
             {% else %}
                 <a class="btn btn-default" href="?p=meta">查看活跃的表</a>
             {% end %}
-            
-            {% if hide_index != "true" %}
-                <a class="btn btn-default" href="?p={{p}}&hide_index=true&tab=meta">隐藏索引</a>
-            {% else %}
-                <a class="btn btn-default" href="?p={{p}}&hide_index=false&tab=meta">展示索引</a>
-            {% end %}
         </div>
-    </div>
+    </div> -->
     <table class="table">
         <tr>
             <th class="admin-stat-th">类别</th>

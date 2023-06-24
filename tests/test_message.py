@@ -222,10 +222,11 @@ class TestMain(BaseTestCase):
         logutil.wait_task_done()
 
     def test_message_keyword_delete(self):
-        user_name = xauth.current_name()
+        from handlers.message.dao import MessageDO
+        user_name = xauth.current_name_str()
         tagname = "#delete-test#"
 
-        keyword = Storage()
+        keyword = MessageDO()
         keyword.tag = "key"
         keyword.user = user_name
         keyword.content = tagname
@@ -233,7 +234,7 @@ class TestMain(BaseTestCase):
         keyword.mtime = dateutil.format_datetime()
         keyword.date = dateutil.format_date()
 
-        key = msg_dao.create_message(**keyword)
+        key = msg_dao.create_message(keyword)
 
         resp = json_request("/message/delete", method="POST", data=dict(id=key))
         self.assertEqual("success", resp["code"])

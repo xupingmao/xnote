@@ -375,6 +375,33 @@ def cache_deco(key=None, prefix=None, expire=600):
     return deco
 
 
+def kw_cache_deco(prefix="", expire=600):
+    """缓存的装饰器，会自动清理失效的缓存
+    注意：不考虑持久化，如果有持久化需要使用db实现
+    @param {str} key    指定缓存的key，也就是使用固定的key
+    @param {str} prefix 指定缓存的前缀，使用前缀+函数参数的方式，也就是动态的key
+    如果 key 和prefix 都不指定，使用函数签名+函数参数的方式，生成动态的key
+    """
+    assert prefix != ""
+
+    def deco(func):
+        # 先不支持keywords参数
+        def handle(*args, **kw):
+            cache_key = "%s(%s_%s)" % (prefix, args, kw)
+            cache_value = _global_cache.get(key=cache_key)
+            if cache_value is not None:
+                return cache_value
+            value = func(*args, **kw)
+            if value is None:
+                _global_cache.delete(key=cache_key)
+                return None
+
+            _global_cache.put(key=cache_key, value=value, expire=expire)
+            return value
+        return handle
+    return deco
+
+
 def cache(*args, **kw):
     return cache_deco(*args, **kw)
 
