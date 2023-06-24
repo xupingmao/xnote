@@ -107,7 +107,7 @@ class XnoteLoader(Loader):
             "$base_nav_top": xconfig.WebConfig.template_base_nav_top,
         }
         self.template_mapping_list = [
-            TemplateMapping("$ext/", TemplateConfig.template_prefix_ext),
+            TemplateMapping("$ext/", TemplateConfig.ext_handlers_dir),
             TemplateMapping("$plugin/", xconfig.FileConfig.plugins_dir),
         ]
 
