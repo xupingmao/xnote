@@ -58,6 +58,7 @@ class TestMain(BaseTestCase):
 
     def test_message_create_and_update(self):
         # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
+        from handlers.message.dao import MessageDao
         response = json_request(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test"))
         self.assertEqual("success", response.get("code"))
@@ -72,12 +73,15 @@ class TestMain(BaseTestCase):
         update_result = json_request("/message/save", method="POST", data=dict(id=msg_id, content="New Content"))
         self.assertEqual("success", update_result["code"])
 
-        data = dbutil.get(msg_id)
-
-        self.assertEqual("New Content", data["content"])
+        data = MessageDao.get_by_id(msg_id)
+        assert data != None
+        assert data.tag == "log"
+        assert data.status == None
+        
+        self.assertEqual("New Content", data.content)
 
         json_request("/message/delete", method="POST",
-                     data=dict(id=data.get("id")))
+                     data=dict(id=data.id))
 
     def test_message_list(self):
         json_request("/message/list")

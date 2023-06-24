@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-25 15:34:04
+@LastEditTime : 2023-06-24 13:05:40
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -208,6 +208,11 @@ class LdbTable:
             return key.startswith(self.prefix + user_name)
 
     def get_by_id(self, row_id, default_value=None, user_name=None):
+        """通过ID查询记录
+        :param row_id: 记录ID
+        :param default_value: 默认值
+        :param user_name: 用户标识
+        """
         validate_str(row_id, "invalid row_id:{!r}", row_id)
 
         if self._need_check_user:
@@ -241,6 +246,10 @@ class LdbTable:
         return result
 
     def get_by_key(self, key, default_value=None):
+        """通过key查询记录
+        :param key: kv数据库的key
+        :param default_value: 默认值
+        """
         if key == "":
             return None
         self._check_key(key)
@@ -418,11 +427,12 @@ class LdbTable:
     def iter(self, offset=0, limit=20, reverse=False, key_from=None,
              filter_func=None, where = None, fill_cache=False, user_name=None):
         """返回一个遍历的迭代器
-        @param {int} offset 返回结果下标开始
-        @param {int} limit  返回结果最大数量
-        @param {bool} reverse 返回结果是否逆序
-        @param {str} key_from 开始的key，这里是相对的key，也就是不包含table_name
-        @param {func} filter_func 过滤函数
+        :param {int} offset: 返回结果下标开始
+        :param {int} limit:  返回结果最大数量
+        :param {bool} reverse: 返回结果是否逆序
+        :param {str} key_from: 开始的key，这里是相对的key，也就是不包含table_name
+        :param {func} filter_func: 过滤函数
+        :param user_name: 用户标识
         """
         if key_from == "":
             key_from = None
@@ -447,6 +457,7 @@ class LdbTable:
             yield self._format_value(key, value)
 
     def list(self, *args, **kw):
+        """查询记录列表,参数和`iter`保持一致"""
         result = []
         for value in self.iter(*args, **kw):
             result.append(value)

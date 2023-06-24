@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 11:37:15
+@LastEditTime : 2023-06-24 14:25:33
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -603,6 +603,7 @@ def create_message(user_name, tag, content, ip):
 
     created_msg = MessageDao.get_by_id(id)
     assert created_msg != None
+    
     after_message_create_or_update(created_msg)
 
     create_event = dict(id=id, user=user_name, content=content, ctime=ctime)

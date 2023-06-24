@@ -9,13 +9,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-15 14:20:41
+@LastEditTime : 2023-06-24 14:36:59
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
 
 import xutils
 import web
+import xconfig
 from xtemplate import T
 from xutils import textutil
 from xutils import dateutil
@@ -54,8 +55,9 @@ def build_search_url(keyword):
 
 
 def build_search_html(content, search_tag="log"):
-    fmt = u'<a href="{{_server_home}}/message?tag=search&p={tag}&key={key}">{key_text}</a>'
+    fmt = u'<a href="{server_home}/message?tag=search&p={tag}&key={key}">{key_text}</a>'
     return fmt.format(tag=search_tag,
+                      server_home=xconfig.WebConfig.server_home,
                       key=xutils.encode_uri_component(content),
                       key_text=xutils.html_escape(content))
 

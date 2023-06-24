@@ -37,7 +37,7 @@ class MessageDO(Storage):
         self.content = ""
         self.version = 0
         self.visit_cnt = 0
-        self.status = 0 # 老的结构
+        self.status = None # 老的结构
         self.keywords = None
         self.no_tag = True
         self.amount = 0 # keyword对象的数量
@@ -72,7 +72,7 @@ class MessageDO(Storage):
             # 修复tag为空的情况，这种一般是之前的待办任务，只有状态没有tag
             if self.status == 100:
                 self.tag = "done"
-            else:
+            if self.status in (0, 50):
                 self.tag = "task"
 
         del_dict_key(self, "html")
@@ -182,11 +182,11 @@ def _create_message_without_date(kw):
 
 def create_message(message):
     """创建信息
-    @param {string} user 用户名
-    @param {string} tag 类型
-    @param {string} ctime 创建时间
-    @param {string|None} date 日期，可选的
-    @param {string} content 文本的内容
+    :param {string} user: 用户名
+    :param {string} tag: 类型
+    :param {string} ctime: 创建时间
+    :param {string|None} date: 日期，可选的
+    :param {string} content: 文本的内容
     """
     assert isinstance(message, MessageDO)
     message.check_before_create()

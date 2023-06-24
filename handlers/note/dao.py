@@ -99,6 +99,8 @@ class NoteDO(Storage):
         self.orderby = ""
         # 热门指数
         self.hot_index = 0
+        # 版本
+        self.version = 0
         # 假的属性
         self.url = ""
 
@@ -171,7 +173,7 @@ def get_note_tiny_table(user_name):
 def batch_query(id_list):
     result = dict()
     for id in id_list:
-        note = dbutil.get("note_index:%s" % id)
+        note = _index_db.get_by_id(id)
         if note:
             result[id] = note
             build_note_info(note)
@@ -1029,7 +1031,7 @@ def list_root_group(creator=None, orderby="name"):
         return value.creator == creator and value.type == "group" \
             and value.parent_id in (0,"0") and value.is_deleted == 0
 
-    notes = dbutil.prefix_list("notebook:%s" % creator, list_root_group_func)
+    notes = _book_db.list(user_name=creator, filter_func = list_root_group_func)
     sort_notes(notes, orderby)
     return notes
 
@@ -1079,7 +1081,7 @@ def count_public():
     return db.count()
 
 
-@xutils.timeit(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
+@xutils.timeit_deco(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
 def list_by_parent(creator, parent_id="", offset=0, limit=1000,
                    orderby="name",
                    skip_group=False,

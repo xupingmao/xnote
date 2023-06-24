@@ -612,15 +612,16 @@ def prefix_iter(prefix,  # type: str
                 key_from=None, key_to=None, map_func=None,
                 fill_cache=False, parse_json=True, scan_db=False):
     """通过前缀迭代查询
-    @param {string} prefix 遍历前缀
-    @param {function} filter_func(str, object) 过滤函数
-    @param {function} map_func(str, object)    映射函数，如果返回不为空则认为匹配
-    @param {int} offset 选择的开始下标，包含
-    @param {int} limit  选择的数据行数
-    @param {boolean} reverse 是否反向遍历
-    @param {boolean} include_key 返回的数据是否包含key，默认只有value
-    @param {boolean} scan_db 是否扫描整个数据库
-    @param {string} key_from 开始的key
+    :param {string} prefix: 遍历前缀
+    :param {function} filter_func(str, object): 过滤函数
+    :param {function} map_func(str, object): 映射函数，如果返回不为空则认为匹配
+    :param {int} offset: 选择的开始下标，包含
+    :param {int} limit:  选择的数据行数
+    :param {boolean} reverse: 是否反向遍历
+    :param {boolean} include_key: 返回的数据是否包含key，默认只有value
+    :param {boolean} scan_db: 是否扫描整个数据库
+    :param {string} key_from: 开始的key(包含)
+    :param {string} key_to: 结束的key(包含)
     """
     check_leveldb()
 
