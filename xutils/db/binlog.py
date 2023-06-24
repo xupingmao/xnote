@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-18 11:13:04
+@LastEditTime : 2023-06-24 16:32:48
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -26,7 +26,7 @@ class BinLog:
     _delete_lock = threading.RLock()
     _instance = None
     _is_enabled = False
-    _max_size = None
+    _max_size = 10000
     log_debug = False
     logger = logging.getLogger("binlog")
 

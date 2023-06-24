@@ -219,6 +219,8 @@ class FileConfig:
     record_db_file = "" # 默认的sqlite数据库
     source_root_dir = "" # 源码根目录
 
+    db_backup_expire_days = 5
+
     @classmethod
     def init(cls, data_dir):
         core_dir = os.path.dirname(__file__)
@@ -237,6 +239,7 @@ class FileConfig:
         makedirs(cls.backup_db_dir)
 
         cls.record_db_file = cls.get_db_path("record")
+        cls.db_backup_expire_days = SystemConfig.get_int("db_backup_expire_days", 5)
 
     @classmethod
     def get_db_path(cls, dbname=""):

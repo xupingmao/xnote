@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 13:05:40
+@LastEditTime : 2023-06-24 16:44:35
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -382,6 +382,7 @@ class LdbTable:
 
     def repair_index(self):
         repair = TableIndexRepair(self, LdbTable("_repair_error"))
+        repair.table_name = self.table_name
         repair.repair_index()
 
     def rebuild_index(self, version="v1"):
