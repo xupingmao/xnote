@@ -30,7 +30,9 @@ from .dbutil_base import db_get, db_put, db_delete, register_table, prefix_iter
 from xutils.db import encode
 from xutils import interfaces
 
+
 register_table("_ttl", "有效期")
+register_table("_cache", "缓存")
 
 class DatabaseCache(interfaces.CacheInterface):
 

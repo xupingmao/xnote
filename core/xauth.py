@@ -67,6 +67,7 @@ class UserDO(xutils.Storage):
         self.mtime = ""
         self.login_time = ""
         self.salt = ""
+        self.mobile = ""
 
     @classmethod
     def from_dict(cls, dict_value):
@@ -116,6 +117,12 @@ class UserDao:
         return UserDO.from_dict(user_dict)
 
     @classmethod
+    def get_by_mobile(cls, mobile=""):
+        db = get_user_db()
+        user_dict = db.select_first(where=dict(mobile=mobile))
+        return UserDO.from_dict(user_dict)
+
+    @classmethod
     def list(cls, offset=0, limit=20):
         db = get_user_db()
         return list(db.select(offset=offset, limit=limit))
@@ -153,9 +160,14 @@ class UserDao:
 
         db.update(where=dict(id=user_info.id), **user_info)
         user_cache.delete(user_info.name)
-        xutils.trace("UserUpdate", user_info)
-        # 刷新完成之后再发送消息
-        xmanager.fire("user.update", dict(user_name=user_info.name))
+        #有问题  临时加try-catch
+        try:
+            xutils.trace("UserUpdate", user_info)
+            # 刷新完成之后再发送消息
+            xmanager.fire("user.update", dict(user_name=user_info.name))
+        except:
+            pass
+
 
     @classmethod
     def delete(cls, user_info):
@@ -190,6 +202,7 @@ class SessionInfo(Storage):
         self.expire_time = 0.0  # 时间
         self.login_ip = ""
         self.login_time = 0.0  # 时间
+        self.mobile = ""
 
 
 class SessionModel:
@@ -382,6 +395,10 @@ def create_session_by_user(user_detail, expires=SESSION_EXPIRE, login_ip=""):
     session_info.login_time = time.time()
     session_info.login_ip = login_ip
     session_info.expire_time = time.time() + expires
+    if user_detail.mobile != None and user_detail.mobile != "":
+        session_info.mobile = user_detail.mobile[0:3]+"********"
+    else :
+        session_info.mobile = None
 
     SessionModel.create(session_info)
 

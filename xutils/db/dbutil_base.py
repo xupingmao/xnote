@@ -535,6 +535,9 @@ def db_put(key, obj_value, sync=False, check_table=True):
     # 注意json序列化有个问题，会把dict中数字开头的key转成字符串
     value = convert_object_to_json(obj_value)
     # print("Put %s = %s" % (key, value))
+    global _leveldb
+    print("--------------------------------the leveldb is -----------------------")
+    print(_leveldb)
     _leveldb.Put(key, value.encode("utf-8"), sync=sync)
 
 
@@ -730,10 +733,15 @@ def set_db_cache(cache):
     global _cache
     _cache = cache
 
+def get_db_cache():
+    return _cache
+
 
 def set_db_instance(db_instance):
     global _leveldb
     _leveldb = db_instance
+    print("------------------------set db instance ------------------------")
+    print(db_instance)
 
 
 def get_db_instance():
