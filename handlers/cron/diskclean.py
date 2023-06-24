@@ -73,7 +73,7 @@ class handler:
     @xauth.login_required("admin")
     def GET(self):
         # 数据库备份文件
-        db_expire_seconds = xconfig.get("system.db_backup_expire_days") * dateutil.SECONDS_PER_DAY
+        db_expire_seconds = xconfig.FileConfig.db_backup_expire_days * dateutil.SECONDS_PER_DAY
         rm_expired_files(xconfig.BACKUP_DIR, db_expire_seconds, hard=True)
         
         # 日志文件

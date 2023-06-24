@@ -258,7 +258,7 @@ def convert_bytes_dict_to_bytes(bytes_dict):
     return convert_object_to_bytes(data)
 
 
-class KeyDecoder:
+class KeyParser:
     """针对key进行解码"""
     def __init__(self, key=""):
         self.parts = key.split(":")
@@ -272,3 +272,6 @@ class KeyDecoder:
     
     def rest(self):
         return ":".join(self.parts[self.index:])
+
+class KeyDecoder(KeyParser):
+    pass

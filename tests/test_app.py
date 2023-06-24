@@ -1,6 +1,13 @@
-# encoding=utf-8
-# Created by xupingmao on 2017/05/23
-# @modified 2022/04/04 15:47:28
+# -*- coding:utf-8 -*-
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2017-05-23 00:30:19
+@LastEditors  : xupingmao
+@LastEditTime : 2023-06-24 19:48:24
+@FilePath     : /xnote/tests/test_app.py
+@Description  : 描述
+"""
 
 from .a import *
 import os
@@ -412,3 +419,18 @@ class Main:
         handler.do_get("test", "127.0.0.1")
         # update
         handler.do_get("test", "127.0.0.1")
+
+    def test_ext_handler(self):
+        dirname = os.path.dirname(__file__)
+        xtemplate.TemplateConfig.ext_handlers_dir = os.path.join(dirname, "ext_handlers")
+        xtemplate.init()
+        text = xtemplate.render("$ext/test.html")
+        assert text.strip() == b"hello"
+
+
+    def test_plugin_handler(self):
+        dirname = os.path.dirname(__file__)
+        xconfig.FileConfig.plugins_dir = os.path.join(dirname, "plugins")
+        xtemplate.init()
+        text = xtemplate.render("$plugin/test_plugin.html")
+        assert text.strip() == b"plugin"

@@ -555,7 +555,7 @@ def db_delete(key, sync=False):
     check_write_state()
 
     # 删除日志
-    print_debug_info("Delete {}", key)
+    logging.info("Delete key: %s", key)
 
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync=sync)
