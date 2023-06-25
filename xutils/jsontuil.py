@@ -3,7 +3,6 @@ import json
 import uuid
 from datetime import datetime
 from datetime import date
-import numpy as np
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -13,8 +12,6 @@ class MyEncoder(json.JSONEncoder):
             return obj.strftime('%Y-%m-%d')
         elif isinstance(obj, type(bytes)):
             return str(obj, encoding='utf-8')
-        elif isinstance(obj, type(np.ndarray)):
-            return obj.tolist()
         elif isinstance(obj,uuid):
             return obj.hex
         else:
