@@ -164,9 +164,6 @@ def init_kv_db():
             config_dict.sqlite_journal_mode = xconfig.get_system_config(
                 "sqlite_journal_mode")
             db_instance = SqliteKV(db_file, config_dict=config_dict)
-            print("------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            print("the db instance is :")
-            print(db_instance)
 
             db_instance.debug = xconfig.system_config.get_bool("db_debug")
 

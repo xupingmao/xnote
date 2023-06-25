@@ -7,3 +7,4 @@ Pillow==9.3.0
 requests==2.22.0
 wsgidav==3.1.0
 markdown==3.3.4
+numpy==9.5.1

@@ -3,3 +3,4 @@ pytest-cov==2.7.1
 python-coveralls==2.9.3
 coverage==4.5.4
 markdown==3.3.4
+numpy==9.5.1
