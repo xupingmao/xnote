@@ -536,8 +536,6 @@ def db_put(key, obj_value, sync=False, check_table=True):
     value = convert_object_to_json(obj_value)
     # print("Put %s = %s" % (key, value))
     global _leveldb
-    print("--------------------------------the leveldb is -----------------------")
-    print(_leveldb)
     _leveldb.Put(key, value.encode("utf-8"), sync=sync)
 
 

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-11 10:56:54
+@LastEditTime : 2023-06-25 23:17:18
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -125,6 +125,13 @@ class MySQLTableManager(BaseTableManager):
     
     def execute(self, sql):
         return self.db.query(sql)
+    
+    def add_column(self, colname, coltype,
+                   default_value=None, not_null=True):
+        if coltype == "text":
+            # MySQL5.7不支持默认值
+            default_value = None
+        super().add_column(colname, coltype, default_value, not_null)
     
     def add_index(self, colname, is_unique=False):
         index_name = ""

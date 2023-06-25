@@ -245,7 +245,7 @@ def init_record_table():
         manager.add_column("type",  "varchar(64)", "")
         # 自己把所有条件都组装到key里
         manager.add_column("key",  "varchar(100)", "")
-        manager.add_column("value", "text")
+        manager.add_column("value", "text", "")
         # 索引
         manager.add_index(["type", "ctime"])
 
@@ -259,7 +259,7 @@ def init_dict_table():
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("key", "varchar(100)", "")
-        manager.add_column("value", "text")
+        manager.add_column("value", "text", "")
         manager.add_index("key")
 
 
@@ -286,7 +286,7 @@ def init_file_info():
     with create_table_manager(table_name, dbpath=dbpath) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
-        manager.add_column("fpath", "text")
+        manager.add_column("fpath", "text", "")
         manager.add_column("ftype", "varchar(32)", "")
         manager.add_column("fsize", "bigint", 0)
         manager.add_index("fpath")
