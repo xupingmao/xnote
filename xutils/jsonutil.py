@@ -1,3 +1,13 @@
+# -*- coding:utf-8 -*-
+"""
+@Author       : kylen66
+@email        : kylen66
+@Date         : 2023-06-27 23:19:07
+@LastEditors  : xupingmao
+@LastEditTime : 2023-06-29 23:19:54
+@FilePath     : /xnote/xutils/jsonutil.py
+@Description  : 描述
+"""
 
 import json
 import uuid
@@ -12,7 +22,7 @@ class MyEncoder(json.JSONEncoder):
             return obj.strftime('%Y-%m-%d')
         elif isinstance(obj, type(bytes)):
             return str(obj, encoding='utf-8')
-        elif isinstance(obj,uuid):
+        elif isinstance(obj,uuid.UUID):
             return obj.hex
         else:
             return json.JSONEncoder.default(self, obj)

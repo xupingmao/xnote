@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-23 00:30:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 19:48:24
+@LastEditTime : 2023-06-29 23:09:00
 @FilePath     : /xnote/tests/test_app.py
 @Description  : 描述
 """
@@ -422,7 +422,7 @@ class Main:
 
     def test_ext_handler(self):
         dirname = os.path.dirname(__file__)
-        xtemplate.TemplateConfig.ext_handlers_dir = os.path.join(dirname, "ext_handlers")
+        xconfig.FileConfig.ext_handlers_dir = os.path.join(dirname, "ext_handlers")
         xtemplate.init()
         text = xtemplate.render("$ext/test.html")
         assert text.strip() == b"hello"

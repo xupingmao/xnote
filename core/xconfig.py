@@ -219,8 +219,12 @@ class FileConfig:
     record_db_file = "" # 默认的sqlite数据库
     source_root_dir = "" # 源码根目录
     plugins_dir = "" # 插件目录
+    ext_handlers_dir = "./ext_handlers"
 
     db_backup_expire_days = 5
+
+    template_base_nav_left = "" # 左侧菜单自定义模板
+    template_base_nav_top = ""
 
     @classmethod
     def init(cls, data_dir):
@@ -243,6 +247,9 @@ class FileConfig:
         cls.db_backup_expire_days = SystemConfig.get_int("db_backup_expire_days", 5)
         cls.plugins_dir = os.path.join(cls.data_dir, "scripts", "plugins")
 
+        cls.template_base_nav_left = SystemConfig.get_str("template_base_nav_left", "common/nav/base_nav_left.html")
+        cls.template_base_nav_top = SystemConfig.get_str("template_base_nav_top", "common/nav/base_nav_top.html")
+
     @classmethod
     def get_db_path(cls, dbname=""):
         """dbname: sqlite数据库的文件名称"""
@@ -263,8 +270,6 @@ class WebConfig:
     about_url = "" # 关于系统的链接
     about_text = ""
     nav_list = []
-    template_base_nav_left = "" # 左侧菜单自定义模板
-    template_base_nav_top = ""
 
     @classmethod
     def init(cls):
@@ -272,8 +277,6 @@ class WebConfig:
         cls.about_url = SystemConfig.get_str("about_url", "/code/wiki/README.md")
         cls.about_text = SystemConfig.get_str("about_text", "关于Xnote")
         cls.nav_list = cls.load_nav_list()
-        cls.template_base_nav_left = SystemConfig.get_str("template_base_nav_left", "common/nav/base_nav_left.html")
-        cls.template_base_nav_top = SystemConfig.get_str("template_base_nav_top", "common/nav/base_nav_top.html")
     
     @classmethod
     def load_nav_list(cls):
@@ -301,6 +304,40 @@ class WebConfig:
                         need_admin=False, url="/login"))
         return nav_list
 
+
+class TemplateConfig:
+    """模板配置"""
+    nav_list = []
+    lang_dict = {}
+
+    @classmethod
+    def init(cls):
+        # 加载菜单
+        cls.nav_list = WebConfig.load_nav_list()
+        cls.load_languages()
+
+    @classmethod
+    def load_languages(cls):
+        """加载系统语言配置"""
+        lang_dict = cls.lang_dict
+
+        lang_dict.clear()
+        dirname = LANG_DIR
+        for fname in os.listdir(dirname):
+            name, ext = os.path.splitext(fname)
+            if ext != ".properties":
+                continue
+            fpath = os.path.join(dirname, fname)
+            content = xutils.readfile(fpath)
+            config = xutils.parse_config_text(content, ret_type='dict')
+            lang_dict[name] = config
+        cls.lang_dict = lang_dict
+
+    @classmethod
+    def get_lang_mapping(cls, lang):
+        if lang == None:
+            lang = "zh"
+        return cls.lang_dict.get(lang)
 
 class DatabaseConfig:
 
@@ -389,6 +426,8 @@ def init(boot_config_file=None, boot_config_kw = None):
     WebConfig.init()
     # 初始化数据库配置
     DatabaseConfig.init()
+    # 初始化模板配置
+    TemplateConfig.init()
 
     # 备份数据地址
     BACKUP_DIR = make_data_dir("backup")

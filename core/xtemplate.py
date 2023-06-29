@@ -27,6 +27,7 @@ from xutils import textutil
 from six.moves.urllib.parse import quote
 import xnote_trace
 import xnote_hooks
+from xconfig import TemplateConfig
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(
@@ -38,45 +39,6 @@ NAMESPACE = dict(
 _mobile_name_dict = dict()
 _loader = None  # type: XnoteLoader
 LOAD_TIME = int(time.time())
-
-
-class TemplateConfig:
-    """模板配置"""
-    ext_handlers_dir = "./ext_handlers"
-    nav_list = []
-    lang_dict = {}
-
-    template_prefix_ext = "$ext"
-    template_prefix_plugin = "$plugin"
-
-    @classmethod
-    def init(cls):
-        # 加载菜单
-        cls.nav_list = xconfig.WebConfig.load_nav_list()
-        cls.load_languages()
-
-    @classmethod
-    def load_languages(cls):
-        """加载系统语言配置"""
-        lang_dict = cls.lang_dict
-
-        lang_dict.clear()
-        dirname = xconfig.LANG_DIR
-        for fname in os.listdir(dirname):
-            name, ext = os.path.splitext(fname)
-            if ext != ".properties":
-                continue
-            fpath = os.path.join(dirname, fname)
-            content = xutils.readfile(fpath)
-            config = xutils.parse_config_text(content, ret_type='dict')
-            lang_dict[name] = config
-        cls.lang_dict = lang_dict
-
-    @classmethod
-    def get_lang_mapping(cls, lang):
-        if lang == None:
-            lang = "zh"
-        return cls.lang_dict.get(lang)
 
 def T(text, lang=None):
     if lang is None:
@@ -103,11 +65,11 @@ class XnoteLoader(Loader):
 
     def init_path_mapping(self):
         self.path_mapping = {
-            "$base_nav_left": xconfig.WebConfig.template_base_nav_left,
-            "$base_nav_top": xconfig.WebConfig.template_base_nav_top,
+            "$base_nav_left": xconfig.FileConfig.template_base_nav_left,
+            "$base_nav_top": xconfig.FileConfig.template_base_nav_top,
         }
         self.template_mapping_list = [
-            TemplateMapping("$ext/", TemplateConfig.ext_handlers_dir),
+            TemplateMapping("$ext/", xconfig.FileConfig.ext_handlers_dir),
             TemplateMapping("$plugin/", xconfig.FileConfig.plugins_dir),
         ]
 
@@ -342,9 +304,6 @@ def _do_init():
     _loader = XnoteLoader(TEMPLATE_DIR, namespace=NAMESPACE)
     _loader.reset()
     _loader.init_path_mapping()
-
-    # 初始化配置
-    TemplateConfig.init()
 
 
 @xutils.log_init_deco("xtemplate.reload")
