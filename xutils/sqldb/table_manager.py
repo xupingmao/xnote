@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-30 23:36:53
+@LastEditTime : 2023-06-30 23:57:02
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -187,6 +187,7 @@ class MySQLTableManager(BaseTableManager):
         
     
     def is_index_exists(self, index_name=""):
+        assert len(self.mysql_database) > 0
         sql = "SELECT COUNT(*) as amount FROM information_schema.statistics WHERE table_schema=$database AND table_name = $table_name AND index_name = $index_name"
         first = self.db.query(sql, vars=dict(database=self.mysql_database, table_name=self.tablename, index_name=index_name)).first()
         return first.amount > 0
