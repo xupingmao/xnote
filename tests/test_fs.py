@@ -52,7 +52,7 @@ class TestMain(BaseTestCase):
         self.assertTrue(size > 0)
     
     def test_fs_index_manage_page(self):
-        path = xutils.quote("./test_data")
+        path = xutils.quote("./testdata")
         self.check_OK("/fs_index?action=reindex&path={path}".format(path=path), method="POST")
         self.check_OK("/fs_index?p=rebuild")
         self.check_OK("/fs_index")

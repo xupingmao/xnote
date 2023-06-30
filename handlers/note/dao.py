@@ -1162,14 +1162,14 @@ def count_user_note(creator):
 
 
 def count_ungrouped(creator):
-    return count_ungrouped(creator, 0)
+    return count_by_parent(creator, 0)
 
 
 @xutils.timeit(name="NoteDao.CountNoteByParent", logfile=True, logargs=True, logret=True)
 def count_by_parent(creator, parent_id):
     """统计笔记数量
     @param {string} creator 创建者
-    @param {string/number} parent_id 父级节点ID
+    @param {string|number} parent_id 父级节点ID
     """
     # TODO 添加索引优化
     parent_id_str = str(parent_id)

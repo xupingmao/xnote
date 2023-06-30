@@ -40,6 +40,7 @@ from __future__ import print_function, with_statement
 import re
 import time
 import logging
+import enum
 
 try:
     import sqlite3
@@ -66,23 +67,33 @@ DEFAULT_BLOCK_CACHE_SIZE = 8 * (2 << 20)  # 16M
 DEFAULT_WRITE_BUFFER_SIZE = 2 * (2 << 20)  # 4M
 DEFAULT_CACHE_EXPIRE = 60 * 60 * 24  # 1天
 
-# 注册的数据库表名，如果不注册，无法进行写操作
-TABLE_INFO_DICT = dict()
-# 表的索引信息 dict[str] -> set[str]
-INDEX_INFO_DICT = dict()
-
 # leveldb表的缓存
 LDB_TABLE_DICT = dict()
-
-# 只读模式
-READ_ONLY = False
 
 # leveldb的全局实例
 _leveldb = interfaces.empty_db
 
-# 缓存对象（拥有put/get两个方法）
-_cache = interfaces.empty_cache
-_driver_name = ""
+class KvDataBase:
+    """KV数据库"""
+
+    # 只读模式
+    read_only = False
+    # 驱动名称
+    driver_name = ""
+    # 缓存对象（拥有put/get两个方法）
+    cache = interfaces.empty_cache
+
+    @classmethod
+    def init(cls, kw):
+        assert isinstance(kw, dict)
+        cls.read_only = kw.get("read_only", False)
+
+
+class TableTypeEnum(enum.Enum):
+    """表类型枚举"""
+    table = "table"
+    sorted_set = "sorted_set"
+    index = "index"
 
 get_write_lock = interfaces.get_write_lock
 
@@ -195,10 +206,7 @@ class WriteBatchProxy(BatchInterface):
 
 
 def config(**kw):
-    global READ_ONLY
-
-    if "read_only" in kw:
-        READ_ONLY = kw["read_only"]
+    KvDataBase.init(kw)
 
 
 def get_instance():
@@ -229,7 +237,7 @@ def check_leveldb():
 
 
 def check_write_state():
-    if READ_ONLY:
+    if KvDataBase.read_only:
         raise Exception("read_only mode!")
 
 
@@ -525,17 +533,15 @@ def db_batch_get(key_list, default_value=None):
 
 def db_put(key, obj_value, sync=False, check_table=True):
     """往数据库中写入键值对
-    @param {string} key 数据库主键
-    @param {object} obj_value 值，会转换成JSON格式
-    @param {boolean} sync 是否同步写入，默认为False
+    :param {string} key: 数据库主键
+    :param {object} obj_value: 值，会转换成JSON格式
+    :param {boolean} sync: 是否同步写入，默认为False
     """
     check_before_write(key, check_table)
 
     key = key.encode("utf-8")
     # 注意json序列化有个问题，会把dict中数字开头的key转成字符串
     value = convert_object_to_json(obj_value)
-    # print("Put %s = %s" % (key, value))
-    global _leveldb
     _leveldb.Put(key, value.encode("utf-8"), sync=sync)
 
 
@@ -728,18 +734,15 @@ def prefix_count(*args, **kw):
 
 
 def set_db_cache(cache):
-    global _cache
-    _cache = cache
+    KvDataBase.cache = cache
 
 def get_db_cache():
-    return _cache
+    KvDataBase.cache
 
 
 def set_db_instance(db_instance):
     global _leveldb
     _leveldb = db_instance
-    print("------------------------set db instance ------------------------")
-    print(db_instance)
 
 
 def get_db_instance():
@@ -747,6 +750,7 @@ def get_db_instance():
     return _leveldb
 
 def delete_table_count_cache(table_name):
+    _cache = KvDataBase.cache
     if _cache == None:
         return
 
@@ -754,6 +758,7 @@ def delete_table_count_cache(table_name):
     _cache.delete(cache_key)
 
 def delete_index_count_cache(table_name, index_name):
+    _cache = KvDataBase.cache
     if _cache == None:
         return
 
@@ -771,8 +776,9 @@ def count_table(table_name, use_cache=False):
     if table_name[-1] != ":":
         table_name += ":"
 
-    if use_cache and _cache != None:
-        value = _cache.get(cache_key)
+    cache = KvDataBase.cache
+    if use_cache and cache != None:
+        value = cache.get(cache_key)
         if value != None:
             logging.debug("count_table by cache, table_name:(%s), count:(%s)",
                           table_name, value)
@@ -781,8 +787,8 @@ def count_table(table_name, use_cache=False):
     key_from = table_name.encode("utf-8")
     key_to = table_name.encode("utf-8") + b'\xff'
     count = _leveldb.Count(key_from, key_to)
-    if _cache != None:
-        _cache.put(cache_key, count, expire=DEFAULT_CACHE_EXPIRE)
+    if cache != None:
+        cache.put(cache_key, count, expire=DEFAULT_CACHE_EXPIRE)
     return count
 
 
@@ -801,7 +807,7 @@ def _rename_table_no_lock(old_name, new_name):
     for key, value in prefix_iter(old_name, include_key=True):
         name, rest = key.split(":", 1)
         new_key = new_name + ":" + rest
-        put(new_key, value)
+        db_put(new_key, value)
 
 
 def rename_table(old_name, new_name):
@@ -815,12 +821,11 @@ def run_test():
 
 
 def set_driver_name(driver_name):
-    global _driver_name
-    _driver_name = driver_name
+    KvDataBase.driver_name = driver_name
 
 
 def get_driver_name():
-    return _driver_name
+    return KvDataBase.driver_name
 
 
 if __name__ == "__main__":
