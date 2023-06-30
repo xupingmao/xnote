@@ -4,6 +4,6 @@ psutil==5.9.4
 objgraph==3.1.0
 leveldb==0.201
 Pillow==9.3.0
-requests==2.22.0
+requests==2.31.0
 wsgidav==3.1.0
 markdown==3.3.4
