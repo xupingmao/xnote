@@ -4,11 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-25 23:17:18
+@LastEditTime : 2023-06-30 23:36:53
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
 
+import logging
 import xutils
 import web.db
 
@@ -29,6 +30,7 @@ class BaseTableManager:
         self.debug = kw.pop("debug", False)
         self.connect()
         self.db = db
+        self.mysql_database = kw.get("mysql_database", "")
 
     def __enter__(self):
         return self
@@ -78,7 +80,7 @@ class BaseTableManager:
             sql += " NOT NULL"
         self.execute(sql)
 
-    def add_index(self, colname, is_unique=False):
+    def add_index(self, colname, is_unique=False, **kw):
         raise Exception("not implemented")
 
     def drop_index(self, col_name):
@@ -94,6 +96,12 @@ class BaseTableManager:
 
     def close(self):
         pass
+
+    
+    def quote_col(self, colname=""):
+        if "`" in colname:
+            return colname
+        return "`%s`" % colname
 
 class MySQLTableManager(BaseTableManager):
     # TODO 待实现测试
@@ -133,7 +141,7 @@ class MySQLTableManager(BaseTableManager):
             default_value = None
         super().add_column(colname, coltype, default_value, not_null)
     
-    def add_index(self, colname, is_unique=False):
+    def add_index(self, colname, is_unique=False, key_len=0, key_len_list=[], **kw):
         index_name = ""
         colname_str = ""
 
@@ -145,24 +153,44 @@ class MySQLTableManager(BaseTableManager):
             index_name = index_prefix + self.tablename
             for name in colname:
                 index_name += "_" + name
-            colname_str = ",".join(colname)
+            temp_col_list = []
+            for index, name in enumerate(colname):
+                if index < len(key_len_list):
+                    key_len = key_len_list[index]
+                else:
+                    key_len = 0
+                if key_len > 0:
+                    tmp_col_name = self.quote_col(name) + "(%d)" % key_len
+                else:
+                    tmp_col_name = self.quote_col(name)
+                temp_col_list.append(tmp_col_name)
+            colname_str = ",".join(temp_col_list)
         else:
             index_name = index_prefix + colname
-            colname_str = colname
+            colname_str = self.quote_col(colname)
+            if key_len > 0:
+                colname_str += "(%d)" % key_len
 
         if is_unique:
-            sql = "ALTER TABLE `%s` ADD UNIQUE `%s` (`%s`)" % (
+            sql = "ALTER TABLE `%s` ADD UNIQUE `%s` (%s)" % (
                     self.tablename, index_name, colname_str)
         else:
-            sql = "ALTER TABLE `%s` ADD INDEX `%s` (`%s`)" % (
+            sql = "ALTER TABLE `%s` ADD INDEX `%s` (%s)" % (
                     self.tablename, index_name, colname_str)
 
-        try:
-            self.execute(sql)
-        except Exception:
-            # TODO 后面优化下判断索引是否存在
-            xutils.print_exc()
-
+        if self.is_index_exists(index_name):
+            logging.info("index %s already exists", index_name)
+            return
+        
+        logging.info("%s", sql)
+        self.execute(sql)
+        
+    
+    def is_index_exists(self, index_name=""):
+        sql = "SELECT COUNT(*) as amount FROM information_schema.statistics WHERE table_schema=$database AND table_name = $table_name AND index_name = $index_name"
+        first = self.db.query(sql, vars=dict(database=self.mysql_database, table_name=self.tablename, index_name=index_name)).first()
+        return first.amount > 0
+    
 
 class SqliteTableManager(BaseTableManager):
 
@@ -219,7 +247,7 @@ class SqliteTableManager(BaseTableManager):
             result.append(item)
         return result
 
-    def add_index(self, colname, is_unique=False):
+    def add_index(self, colname, is_unique=False, **kw):
         # sqlite的索引和table是一个级别的schema
         index_prefix = "idx_"
         if is_unique:
@@ -301,9 +329,9 @@ class TableManagerFacade:
                    default_value=None, not_null=True):
         pass
 
-    def add_index(self, colname, is_unique=False):
+    def add_index(self, colname, is_unique=False, **kw):
         self.table_info.add_index(colname, is_unique)
-        self.manager.add_index(colname, is_unique)
+        self.manager.add_index(colname, is_unique, **kw)
 
     def __enter__(self):
         return self

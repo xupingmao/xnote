@@ -422,18 +422,18 @@ class MySQLKV(interfaces.DBInterface):
 
         has_next = True
         while has_next:
-            params = []
             if key_from == None:
                 key_from = b''
 
             if key_to == None:
                 key_to = b'\xff'
 
+            vars = dict(key_from=key_from, key_to=key_to)
             if self.debug:
-                logging.debug("SQL:%s (%s)", sql, params)
+                logging.debug("SQL:%s (%s)", sql, vars)
 
             time_before_execute = time.time()
-            result_iter = self.db.query(sql, vars=dict(key_from=key_from, key_to=key_to))
+            result_iter = self.db.query(sql, vars=vars)
             result = list(result_iter)
 
             if self.sql_logger:

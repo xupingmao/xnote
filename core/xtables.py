@@ -51,7 +51,7 @@ def create_table_manager(table_name="", dbpath=""):
     assert table_name != ""
     assert dbpath != ""
     db = get_db_instance(dbpath)
-    return TableManager(table_name, db=db)
+    return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database)
 
 def create_record_table_manager(table_name=""):
     """默认使用 record.db 文件"""
@@ -296,8 +296,8 @@ def init_file_info():
         manager.add_column("fpath", "text", "")
         manager.add_column("ftype", "varchar(32)", "")
         manager.add_column("fsize", "bigint", 0)
-        manager.add_index("fpath")
-        manager.add_index(["ftype", "fpath"])
+        manager.add_index("fpath", key_len=100)
+        manager.add_index(["ftype", "fpath"], key_len_list=[0, 100])
 
 
 def init_site_visit_log():
