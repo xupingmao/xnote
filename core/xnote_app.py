@@ -179,23 +179,10 @@ def init_kv_db():
 
         if db_driver == "mysql":
             from xutils.db.driver_mysql import MySQLKV
-            host = xconfig.get_system_config("mysql_host")
-            user = xconfig.get_system_config("mysql_user")
-            password = xconfig.get_system_config("mysql_password")
-            database = xconfig.get_system_config("mysql_database")
-            mysql_cloud_type = xconfig.get_system_config("mysql_cloud_type")
-            pool_size = xconfig.get_system_config("mysql_pool_size")
-            assert isinstance(pool_size, int)
-
-            if mysql_cloud_type == "sae":
-                host = os.environ["MYSQL_HOST"]
-                user = os.environ["MYSQL_USER"]
-                password = os.environ["MYSQL_PASS"]
-                database = os.environ["MYSQL_DB"]
-
             sql_logger = xnote_trace.SqlLogger()
             db_instance = MySQLKV(db_instance = xtables.get_db_instance(), sql_logger=sql_logger)
             db_instance.init()
+            dbutil.RdbSortedSet.init_class(db_instance=xtables.get_db_instance())
             logging.info("use mysql as db engine")
 
         # 默认使用leveldb启动

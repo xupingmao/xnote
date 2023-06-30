@@ -763,17 +763,20 @@ class TestMain(BaseTestCase):
 
         result = db.list_by_score()
         self.assertEqual(2, len(result))
-        self.assertEqual(10.5, result[0][1])
+        self.assertEqual(10.5, result[0].score)
 
         db.put("a", 30.0)
         result = db.list_by_score()
         self.assertEqual(2, len(result))
-        self.assertEqual(20.6, result[0][1])
+        self.assertEqual(20.6, result[0].score)
+
+        by_score = db.list_by_score(score=30.0)
+        assert len(by_score) == 1
+        assert by_score[0].member == "a"
 
     def test_dbutil_sortedset_mysql(self):
         print("test_dbutil_sortedset_mysql start...")
-        from xutils.db.driver_mysql import MySQLKV
-        from xutils.db.dbutil_sortedset import SortedSet
+        from xutils.db.dbutil_sortedset import RdbSortedSet
 
         skip_mysql_test = os.environ.get("skip_mysql_test")
         if skip_mysql_test == "True":
@@ -781,8 +784,9 @@ class TestMain(BaseTestCase):
             return
 
         db = self.get_mysql_db2()
-        dbutil.set_driver_name("mysql")
-        db = SortedSet("sorted_set_test")
+        RdbSortedSet.init_class(db.db)
+
+        db = RdbSortedSet("sorted_set_test")
 
         db.put("a", 10.5)
         db.put("b", 20.6)
@@ -792,12 +796,12 @@ class TestMain(BaseTestCase):
 
         result = db.list_by_score()
         self.assertEqual(2, len(result))
-        self.assertEqual(10.5, result[0][1])
+        self.assertEqual(10.5, result[0].score)
 
         db.put("a", 30.0)
         result = db.list_by_score()
         self.assertEqual(2, len(result))
-        self.assertEqual(20.6, result[0][1])
+        self.assertEqual(20.6, result[0].score)
     
     def test_range_iter_mysql(self):
         from xutils.db.driver_mysql import MySQLKV

@@ -66,6 +66,13 @@ def get_db_instance(dbpath=""):
             db_user = xconfig.get_system_config("mysql_user")
             db_pw = xconfig.get_system_config("mysql_password")
             db_port = xconfig.get_system_config("mysql_port")
+
+            if xconfig.DatabaseConfig.mysql_cloud_type == "sae":
+                db_host = os.environ["MYSQL_HOST"]
+                db_user = os.environ["MYSQL_USER"]
+                db_pw = os.environ["MYSQL_PASS"]
+                db_name = os.environ["MYSQL_DB"]
+
             db = web.db.MySQLDB(host=db_host, database=db_name,
                                 user=db_user, pw=db_pw, port=db_port)
             db.dbname = "mysql"

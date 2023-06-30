@@ -342,10 +342,12 @@ class TemplateConfig:
 class DatabaseConfig:
 
     db_driver="" # sqlite/leveldb/mysql/lmdb
+    mysql_cloud_type="" # mysql云服务类型
 
     @classmethod
     def init(cls):
         cls.db_driver = get_system_config("db_driver")
+        cls.mysql_cloud_type = SystemConfig.get_str("mysql_cloud_type")
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)

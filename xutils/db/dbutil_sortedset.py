@@ -13,7 +13,7 @@
 
 from xutils.db.dbutil_base import *
 from xutils.db.dbutil_hash import LdbHashTable
-from xutils.db.encode import encode_float
+from xutils.db.encode import encode_int
 
 register_table("_rank", "排名表")
 
@@ -22,14 +22,16 @@ class RankTable:
     def __init__(self, table_name):
         check_table_name(table_name)
         self.table_name = table_name
-
+        self.score_factor = 10**6 # float转int的乘积
         self.prefix = "_rank:" + table_name
         if self.prefix[-1] != ":":
             self.prefix += ":"
 
-    def _format_score(self, score: float) -> str:
-        assert isinstance(score, float)
-        return encode_float(score)
+    def _format_score(self, score):
+        # type: (float|int) -> str
+        assert isinstance(score, (float,int))
+        score_int = int(score * self.score_factor)
+        return encode_int(score_int)
 
     def put(self, member, score, batch = None):
         score_str = self._format_score(score)
@@ -49,14 +51,27 @@ class RankTable:
         else:
             db_delete(key)
 
-    def list(self, offset = 0, limit = 10, reverse = False):
-        return prefix_list(self.prefix, offset = offset, 
+    def list(self, score=None, offset = 0, limit = 10, reverse = False):
+        if score != None:
+            prefix = self.prefix + self._format_score(score) + ":"
+        else:
+            prefix = self.prefix
+
+        return prefix_list(prefix, offset = offset, 
             limit = limit, reverse = reverse)
 
+class SortedSetItem:
+
+    def __init__(self, member = "", score=0.0):
+        self.member = member
+        self.score = score
+
+    def __repr__(self):     
+        return dict.__repr__(self.__dict__)
 
 class LdbSortedSet:
 
-    def __init__(self, table_name, key_name = "_key"):
+    def __init__(self, table_name):
         # key-value的映射
         self.member_dict = LdbHashTable(table_name)
         # score的排名
@@ -65,7 +80,7 @@ class LdbSortedSet:
 
     def put(self, member, score):
         """设置成员分值"""
-        assert isinstance(score, float)
+        assert isinstance(score, (float, int))
 
         with get_write_lock(member):
             batch = create_write_batch()
@@ -89,16 +104,89 @@ class LdbSortedSet:
                 self.rank.delete(member, old_score, batch = batch)
             batch.commit()
 
-    def list_by_score(self, *args, **kw):
+    def list_by_score(self, **kw):
         result = []
-        for member in self.rank.list(*args, **kw):
-            item = (member, self.get(member))
-            result.append(item)
+        for member in self.rank.list(**kw):
+            score = self.get(member)
+            result.append(SortedSetItem(member=member, score=score))
+        return result
+
+
+
+class RdbSortedSet:
+
+    @classmethod
+    def init_class(cls, db_instance):
+        import web.db
+        assert isinstance(db_instance, web.db.DB)
+        cls.db_instance = db_instance
+
+    def __init__(self, table_name=""):
+        self.table_name = table_name
+
+    def mysql_to_str(self, value):
+        if isinstance(value, bytearray):
+            return bytes(value).decode("utf-8")
+        return value
+
+    def mysql_to_float(self, value):
+        return float(value)
+
+    def put(self, member, score, prefix=""):
+        assert isinstance(score, float)
+
+        key = self.table_name + prefix
+        vars=dict(key=key,member=member,score=score)
+        rowcount = self.db_instance.query(
+            "UPDATE zset SET `score`=$score, version=version+1 WHERE `key`=$key AND member=$member", vars=vars)
+        if rowcount == 0:
+            self.db_instance.query(
+                "INSERT INTO zset (score, `key`, member, version) VALUES($score,$key,$member,0)", vars=vars)
+
+    def get(self, member, prefix=""):
+        key = self.table_name + prefix
+        sql = "SELECT score FROM zset WHERE `key`=$key AND member=$member LIMIT 1"
+        result_iter = self.db_instance.query(sql, vars=dict(key=key,member=member))
+        for item in result_iter:
+            return self.mysql_to_float(item.score)
+        return None
+
+    def list_by_score(self, **kw):
+        """通过score查询列表
+        :param offset=0: 下标
+        :param limit=20: 数量
+        :param reverse=False: 是否反向查询
+        :param score=None: 指定score查询
+        """
+        prefix = kw.get("prefix", "")
+        offset = kw.get("offset", 0)
+        limit = kw.get("limit", 20)
+        reverse = kw.get("reverse", False)
+        score = kw.get("score")
+
+        if score != None:
+            sql = "SELECT member, score FROM zset WHERE `key` = $key AND score = $score"
+        else:
+            sql = "SELECT member, score FROM zset WHERE `key` = $key"
+        
+        if reverse:
+            sql += " ORDER BY score DESC"
+        else:
+            sql += " ORDER BY score ASC"
+
+        key = self.table_name + prefix
+        sql += " LIMIT %s OFFSET %s" % (limit, offset)
+        result_iter = self.db_instance.query(sql, vars=dict(key=key, score=score))
+        result = []
+        for item in result_iter:
+            member = self.mysql_to_str(item.member)
+            score = self.mysql_to_float(item.score)
+            result.append(SortedSetItem(member=member, score=score))
+
         return result
 
 
 def SortedSet(table_name):
     if get_driver_name() == "mysql":
-        from xutils.db.driver_mysql import RdbSortedSet
         return RdbSortedSet(table_name)
     return LdbSortedSet(table_name)

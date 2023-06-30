@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-22 09:45:15
+@LastEditTime : 2023-06-30 20:54:22
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -187,7 +187,6 @@ class MySQLKV(interfaces.DBInterface):
 
         try:
             self.init()
-            RdbSortedSet.init_class(db_instance=self)
         except Exception as e:
             logging.error("mysql driver init failed, host=%s, port=%s, database=%s", host, port, database)
             raise e
@@ -217,7 +216,7 @@ class MySQLKV(interfaces.DBInterface):
         self.db.query("""CREATE TABLE IF NOT EXISTS `zset` (
             `key` varchar(512) not null comment '键值对key',
             `member` varchar(512) not null comment '成员',
-            `score` decimal(40,20) not null comment '分数',
+            `score` decimal(40,6) not null comment '分数',
             `version` int not null default 0 comment '版本',
             PRIMARY KEY (`key`(100), `member`(100)) ,
             KEY idx_score(`score`)
@@ -512,59 +511,3 @@ class MySQLKV(interfaces.DBInterface):
             if rowcount > 0:
                 return value_int
         raise Exception("too many retry")
-
-class RdbSortedSet:
-
-    db_instance = None  # type: MySQLKV
-
-    @classmethod
-    def init_class(cls, db_instance):
-        cls.db_instance = db_instance
-
-    def __init__(self, table_name=""):
-        self.table_name = table_name
-
-    def mysql_to_str(self, value):
-        if isinstance(value, bytearray):
-            return bytes(value).decode("utf-8")
-        return value
-
-    def mysql_to_float(self, value):
-        return float(value)
-
-    def put(self, member, score, prefix=""):
-        assert isinstance(score, float)
-
-        key = self.table_name + prefix
-        vars=dict(key=key,member=member,score=score)
-        rowcount = self.db_instance.db.query(
-            "UPDATE zset SET `score`=$score, version=version+1 WHERE `key`=$key AND member=$member", vars=vars)
-        if rowcount == 0:
-            self.db_instance.db.query(
-                "INSERT INTO zset (score, `key`, member, version) VALUES($score,$key,$member,0)", vars=vars)
-
-    def get(self, member, prefix=""):
-        key = self.table_name + prefix
-        sql = "SELECT score FROM zset WHERE `key`=$key AND member=$member LIMIT 1"
-        result_iter = self.db_instance.db.query(sql, vars=dict(key=key,member=member))
-        for item in result_iter:
-            return self.mysql_to_float(item.score)
-        return None
-
-    def list_by_score(self, offset=0, limit=20, *, reverse=False, prefix=""):
-        sql = "SELECT member, score FROM zset WHERE `key` = $key"
-        if reverse:
-            sql += " ORDER BY score DESC"
-        else:
-            sql += " ORDER BY score ASC"
-
-        key = self.table_name + prefix
-        sql += " LIMIT %s OFFSET %s" % (limit, offset)
-        result_iter = self.db_instance.db.query(sql, vars=dict(key=key))
-        result = []
-        for item in result_iter:
-            member = self.mysql_to_str(item.member)
-            score = self.mysql_to_float(item.score)
-            result.append((member, score))
-
-        return result
