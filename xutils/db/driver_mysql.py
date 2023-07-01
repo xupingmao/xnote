@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-30 20:54:22
+@LastEditTime : 2023-07-01 16:45:43
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -253,7 +253,8 @@ class MySQLKV(interfaces.DBInterface):
                 logging.debug("GET (%s) cost %.2fms", key, cost_time*1000)
 
             if self.sql_logger != None:
-                sql_info = "sql=(%s), key=(%r)" % (sql, key)
+                sql_query = self.db.query(sql, vars=vars, _test=True)
+                sql_info = str(sql_query)
                 log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
 
@@ -273,13 +274,14 @@ class MySQLKV(interfaces.DBInterface):
         start_time = time.time()
 
         sql = ""
+        vars = dict(key_list=key_list)
         try:
             result = dict()
             sql = "SELECT `key`, value FROM kv_store WHERE `key` IN $key_list"
             # mysql.connector不支持传入列表,需要自己处理下
             # sql_args = ["%s" for i in key_list]
             # sql = sql % ",".join(sql_args)
-            result_iter = self.db.query(sql, vars=dict(key_list=key_list))
+            result_iter = self.db.query(sql, vars=vars)
             for item in result_iter:
                 key = self.mysql_to_py(item.key)
                 value = self.mysql_to_py(item.value)
@@ -292,19 +294,20 @@ class MySQLKV(interfaces.DBInterface):
                                 key_list, cost_time*1000)
 
             if self.sql_logger != None:
-                sql_info = "sql=(%s), key_list=%s" % (sql, key_list)
+                sql_query = self.db.query(sql, vars=vars, _test=True)
+                sql_info = str(sql_query)
                 log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
     
-    def log_sql(self, sql, params, start_time, key):
-        assert isinstance(params, tuple)
-
+    def log_sql(self, sql, vars, start_time, key):
         if self.debug:
-            logging.debug("SQL:%s, key:%s", sql, key)
+            sql_query = self.db.query(sql, vars=vars, _test=True)
+            logging.debug("SQL:%s", sql_query)
 
         if self.sql_logger:
+            sql_query = self.db.query(sql, vars=vars, _test=True)
             cost_time = time.time() - start_time
-            log_info = sql + " [%.2fms]" % (cost_time*1000)
+            log_info = str(sql_query) + " [%.2fms]" % (cost_time*1000)
             self.sql_logger.append(log_info)
 
     def doPut(self, key, value):
@@ -316,17 +319,17 @@ class MySQLKV(interfaces.DBInterface):
         start_time = time.time()
         insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"
         update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key"
+        vars = dict(key=key,value=value)
 
-        rowcount = self.db.query(update_sql, vars=dict(key=key,value=value))
-        params = ()
+        rowcount = self.db.query(update_sql, vars=vars)
         
         if rowcount == 0:
             # 数据不存在,执行插入动作
             # 如果这里冲突了，按照默认规则抛出异常
-            self.db.query(insert_sql, vars=dict(key=key,value=value))
-            # self.log_sql(insert_sql, params, start_time=start_time, key=key)
+            self.db.query(insert_sql, vars=vars)
+            self.log_sql(insert_sql, vars, start_time=start_time, key=key)
         else:
-            self.log_sql(update_sql, params, start_time=start_time, key=key)
+            self.log_sql(update_sql, vars, start_time=start_time, key=key)
 
     def Put(self, key, value, sync=False, cursor=None):
         # type: (bytes,bytes,bool,object) -> None
@@ -351,17 +354,18 @@ class MySQLKV(interfaces.DBInterface):
             raise interfaces.DatabaseException(code=400, message="value too long")
         update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key AND version=$version"
         insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"
-        rowcount = self.db.query(update_sql, vars=dict(key=key,value=value,version=version))
+        vars = dict(key=key,value=value,version=version)
+        rowcount = self.db.query(update_sql, vars=vars)
         assert isinstance(rowcount, int), "expect int rowcount"
         if rowcount == 0:
             # 数据不存在,执行插入动作
             # 如果这里冲突了，按照默认规则抛出异常
             if version != 0:
                 return 0
-            self.db.query(insert_sql, vars=dict(key=key,value=value))
+            self.db.query(insert_sql, vars=vars)
             return 1
         else:
-            self.log_sql(update_sql, (key,), start_time=start_time, key=key)
+            self.log_sql(update_sql, vars, start_time=start_time, key=key)
         return rowcount
 
     def doDeleteRaw(self, key, sync=False, cursor=None):
@@ -370,14 +374,18 @@ class MySQLKV(interfaces.DBInterface):
         @param {bytes} key
         """
         sql = "DELETE FROM kv_store WHERE `key` = $key;"
+        vars = dict(key=key)
+
         if self.debug:
-            logging.debug("SQL:%s, params:%s", sql, (key, ))
+            sql_query = self.db.query(sql, vars=vars, _test=True)
+            logging.debug("SQL:%s", sql_query)
 
         if self.sql_logger:
-            sql_info = "sql=(%s), key=(%s)" % (sql, key)
+            sql_query = self.db.query(sql, vars=vars, _test=True)
+            sql_info = "sql=(%s), key=(%s)" % (sql_query, key)
             self.sql_logger.append(sql_info)
 
-        self.db.query(sql, vars=dict(key=key))
+        self.db.query(sql, vars=vars)
 
     def doDelete(self, key, sync=False, cursor=None):
         return self.doDeleteRaw(key, sync, cursor)
@@ -430,15 +438,17 @@ class MySQLKV(interfaces.DBInterface):
 
             vars = dict(key_from=key_from, key_to=key_to)
             if self.debug:
-                logging.debug("SQL:%s (%s)", sql, vars)
+                sql_query = self.db.query(sql, vars=vars, _test=True)
+                logging.debug("SQL: %s", sql_query)
 
             time_before_execute = time.time()
             result_iter = self.db.query(sql, vars=vars)
             result = list(result_iter)
 
             if self.sql_logger:
+                sql_query = self.db.query(sql, vars=vars, _test=True)
                 cost_time = time.time() - time_before_execute
-                sql_info = "sql=(%s), key_from=(%r), key_to=(%r)" % (sql, key_from, key_to)
+                sql_info = str(sql_query)
                 log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
 
@@ -480,8 +490,9 @@ class MySQLKV(interfaces.DBInterface):
     def Count(self, key_from=b'', key_to=b'\xff'):
         sql = "SELECT COUNT(*) AS amount FROM kv_store WHERE `key` >= $key_from AND `key` <= $key_to"
         start_time = time.time()
+        vars = dict(key_from=key_from, key_to=key_to)
         try:
-            result_iter = self.db.query(sql, vars=dict(key_from=key_from, key_to=key_to))
+            result_iter = self.db.query(sql, vars=vars)
             for row in result_iter:
                 return self.mysql_to_py(row.amount)
             return 0
@@ -491,7 +502,8 @@ class MySQLKV(interfaces.DBInterface):
 
             if self.sql_logger:
                 cost_time = time.time() - start_time
-                sql_info = "sql=(%s), key_from=(%r), key_to=(%r)" % (sql, key_from, key_to)
+                sql_query = self.db.query(sql, vars=vars, _test=True)
+                sql_info = str(sql_query)
                 log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
     
