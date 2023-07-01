@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-15 16:25:49
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-23 10:54:46
+@LastEditTime : 2023-07-01 10:53:40
 @FilePath     : /xnote/xutils/db/dbutil_cache.py
 @Description  : 数据库缓存
 
@@ -103,3 +103,17 @@ class DatabaseCache(interfaces.CacheInterface):
         
         logging.info("count=%s, last_scan_key=%s", count, self.last_scan_key)
         return count
+
+    def get_expire(self, key):
+        dict_value = self._get_dict_value(key)
+        if dict_value == None:
+            return 0
+        return dict_value.get("expire", 0)
+    
+    def list_keys(self, offset=0, limit=20):
+        iter = prefix_iter(self.prefix, offset=offset, limit=limit, include_key=True)
+        result = []
+        for key, value in iter:
+            prefix, cache_key = key.split(":",1)
+            result.append(cache_key)
+        return result

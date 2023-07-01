@@ -108,6 +108,8 @@ class DbScanHandler:
             kw.admin_stat_list = self.list_table_by_type("index")
         elif p2 == "sorted_set":
             kw.admin_stat_list = self.list_table_by_type("sorted_set")
+        elif p2 == "set":
+            kw.admin_stat_list = self.list_table_by_type("set")
         else:
             self.handle_admin_stat_list(kw)
         return self.render_html(kw)

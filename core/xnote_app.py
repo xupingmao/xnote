@@ -31,6 +31,7 @@ from xutils.mem_util import log_mem_info_deco
 from xutils import mem_util
 from xutils import Storage
 from xutils import dbutil
+from xutils import cacheutil
 from . import xnote_code_builder, xnote_hooks
 import threading
 import signal
@@ -208,7 +209,7 @@ def init_kv_db():
         binlog = xconfig.get_system_config("binlog")
         assert isinstance(binlog, bool)
 
-        db_cache = dbutil_cache.DatabaseCache()  # 持久化缓存
+        db_cache = cacheutil.MultiLevelCache()  # 多级缓存：内存+持久化
 
         # 初始化leveldb数据库
         dbutil.init(xconfig.DB_DIR,

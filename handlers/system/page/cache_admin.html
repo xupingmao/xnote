@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-09-12 20:43:45
 @LastEditors  : xupingmao
-@LastEditTime : 2022-10-02 12:04:06
+@LastEditTime : 2023-07-01 10:28:56
 @FilePath     : /xnote/handlers/system/page/cache_admin.html
 @Description  : 描述
  #} -->
@@ -28,9 +28,16 @@
             <!-- 不推荐脚本+配置来创建定时任务，直接通过插件来设置
             <input class="dialog-btn" type="button" value="新增任务" dialog-url="/system/crontab/edit" />
             -->
-            <button class="btn-default" onclick="javascript:history.back()">返回</button>
+            {% include common/button/back_button.html %}
         </div>
     </h3>
+</div>
+
+<div class="card">
+    <div class="x-tab-box" data-tab-key="type" data-tab-default="local">
+        <a class="x-tab" href="{{_server_home}}/system/cache?type=local" data-tab-value="local">单机缓存</a>
+        <a class="x-tab" href="{{_server_home}}/system/cache?type=db" data-tab-value="db">数据库缓存</a>
+    </div>
 </div>
 
 <div class="card btn-line-height">

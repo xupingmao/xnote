@@ -38,6 +38,7 @@ from xutils import dateutil
 from collections import OrderedDict, deque
 from xutils.imports import *
 from xutils import interfaces
+from xutils.db.dbutil_cache import DatabaseCache
 
 _cache_dict = dict()
 _cache_queue = deque()
@@ -223,6 +224,35 @@ class PrefixedCache:
 
 def get_global_cache():
     return _global_cache
+
+
+class MultiLevelCache(interfaces.CacheInterface):
+    """基于内存+数据库的多级缓存"""
+
+    def __init__(self):
+        self.database_cache = DatabaseCache()
+        self.mem_cache = _global_cache
+        self.mem_cache_expire = 60
+
+    def get(self, key, default_value=None):
+        # 先查内存缓存
+        value = self.mem_cache.get(key)
+        if value == None:
+            # 如果查不到，查数据库缓存
+            value = self.database_cache.get(key)
+            if value != None:
+                self.mem_cache.put(key, value)
+        if value == None:
+            return default_value
+        return value
+    
+    def put(self, key, value, expire = -1, expire_random = 600):
+        self.database_cache.put(key, value, expire=expire, expire_random=expire_random)
+        self.mem_cache.put(key, value, expire=self.mem_cache_expire)
+    
+    def delete(self, key):
+        self.database_cache.delete(key)
+        self.mem_cache.delete(key)
 
 class CacheObj:
     """缓存对象，包含缓存的key和value，有一个公共的缓存队列
