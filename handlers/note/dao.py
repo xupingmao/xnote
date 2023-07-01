@@ -929,7 +929,7 @@ def list_group_with_count(creator=None,
     """查询笔记本列表"""
 
     offset = kw.get("offset", 0)
-    limit = kw.get("limit", 100)
+    limit = kw.get("limit", 1000)
     parent_id = kw.get("parent_id")
     category = kw.get("category") 
     tags = kw.get("tags")
