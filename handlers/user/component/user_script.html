@@ -1,19 +1,39 @@
 <script type="text/javascript">
-$(function () {
-    $(".delete-user-btn").click(function (e) {
-        var name = $(this).attr('data-name');
-        var user_id = $(this).attr("data-id");
 
-        xnote.confirm("确定删除[" + name + "]?", function (ret) {        
-            if (ret) {
-                $.post("/system/user/remove", 
-                    {user_id: user_id},
-                    function (result) {
-                        window.location = "/user/list";
-                    });
-            }
-        })
-    });  
+window.xnoteDeleteUser = function (target) {
+    var name = $(target).attr('data-name');
+    var user_id = $(target).attr("data-id");
+
+    xnote.confirm("确定删除[" + name + "]?", function (ret) {        
+        if (ret) {
+            $.post("/system/user/remove", 
+                {user_id: user_id},
+                function (result) {
+                    window.location = "/user/list";
+                });
+        }
+    });
+};
+
+xnoteResetUserPassword = function (target) {
+    var name = $(target).attr('data-name');
+    var user_id = $(target).attr("data-id");
+    var params = {};
+    params.user_name = name;
+    params.user_id = user_id;
+
+    xnote.confirm("确定要重置用户[" + name + "]的密码?", function (ret) {        
+        if (ret) {
+            $.post("/system/user/reset_password", 
+                params,
+                function (result) {
+                    xnote.alert("新密码为: " + result.data);
+                });
+        }
+    });
+};
+
+$(function () {
 
     $(".show-password-link").click(function (e) {
         var data = $(this).attr("data-value");

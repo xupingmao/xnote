@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-23 00:30:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-29 23:09:00
+@LastEditTime : 2023-07-01 16:26:58
 @FilePath     : /xnote/tests/test_app.py
 @Description  : 描述
 """
@@ -178,9 +178,20 @@ class TestMain(BaseTestCase):
         self.check_OK("/system/db_refresh")
 
     def test_user(self):
-        self.check_OK("/system/user")
         self.check_OK("/system/user/list")
         self.check_OK("/system/user?name=admin")
+    
+    def test_reset_password(self):
+        temp_user = xauth.create_quick_user()
+        assert temp_user != None
+        resp = json_request("/system/user/reset_password", method="POST", data=dict(user_name=temp_user.name))
+        assert isinstance(resp, dict)
+        assert resp["code"] == "success"
+        password = resp["data"]
+        user_info = xauth.find_by_name(temp_user.name)
+        assert user_info != None
+        assert user_info.password_md5 == xauth.encode_password(password=password, salt=user_info.salt)
+
 
     def test_tools(self):
         self.check_200("/tools/color")

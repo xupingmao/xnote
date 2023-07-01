@@ -10,23 +10,19 @@ from xutils import textutil
 from xutils import Storage
 from xutils import dbutil
 from xutils import webutil
+from . import dao
 
 OP_LOG_TABLE = dbutil.get_table("user_op_log")
 
 
 def create_op_log(user_name, op_type, detail):
-    now = xutils.format_datetime()
     ip = webutil.get_real_ip()
-    log = Storage(ctime=now, user_name=user_name,
-                  type=op_type, detail=detail, ip=ip)
-    OP_LOG_TABLE.insert(log)
-
-
-def get_user_dict():
-    result = dict()
-    for item in xauth.iter_user(limit=100):
-        result[item.name] = item
-    return result
+    log = dao.UserOpLog()
+    log.user_name = user_name
+    log.ip = ip
+    log.type = op_type
+    log.detail = detail
+    dao.UserOpLogDao.create_op_log(log)
 
 
 class ListHandler:
@@ -70,16 +66,17 @@ class UserHandler:
         user_info = None
         if name != "":
             user_info = xauth.get_user(name)
-        return xtemplate.render("user/page/user_manage.html",
-                                show_aside=False,
-                                name=name,
-                                user_info=user_info,
-                                user_dict=get_user_dict())
+        kw = Storage()
+        kw.name = name
+        kw.user_info = user_info
+        kw.log_list = OP_LOG_TABLE.list_by_user(name, reverse=True, limit=20)
+
+        return xtemplate.render("user/page/user_manage.html", **kw)
 
     @xauth.login_required("admin")
     def POST(self):
         name = xutils.get_argument("name")
-        password = xutils.get_argument("password")
+        password = xutils.get_argument_str("password")
         user_info = xauth.get_user(name)
         if user_info is None:
             raise Exception("用户不存在:%s" % name)
@@ -153,6 +150,15 @@ class ChangePasswordHandler:
 
         return self.GET(error=error)
 
+class ResetPasswordHandler:
+
+    @xauth.login_required("admin")
+    def POST(self):
+        user_name = xutils.get_argument_str("user_name")
+        new_password = xutils.random_number_str(8)
+        xauth.update_user(user_name, Storage(password=new_password))
+        create_op_log(user_name, dao.UserOpTypeEnum.reset_password.value, "重置密码")
+        return dict(code="success", data=new_password)
 
 class UserOpLogHandler:
 
@@ -174,4 +180,5 @@ xurls = (
     r"/system/user", UserHandler,
     r"/system/user/list", ListHandler,
     r"/system/user/remove", RemoveHandler,
+    r"/system/user/reset_password", ResetPasswordHandler,
 )

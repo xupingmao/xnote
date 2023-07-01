@@ -21,29 +21,18 @@
 <div class="card">
 
     <h3 class="card-title btn-line-height">
-        <a class="link2" href="{{_server_home}}/system/user/list">用户管理</a>&nbsp;/&nbsp;<span>编辑</span>
+        <a class="link2" href="{{_server_home}}/system/user/list">用户管理</a>&nbsp;/&nbsp;<span>用户信息</span>
         {% include common/back.html %}
     </h3>
 
 </div>
 
 <div class="card">
-
-<form method="POST" class="col-md-12" action="/system/user">
-
-{% if user_info != None %}
     <input type="hidden" name="name" value="{{user_info.name}}">
     <table class="table col-md-12">
         <tr>
             <td class="label">用户名</td>
             <td>{{user_info.name}}</td>
-        </tr>
-        <tr>
-            <td class="label">密码</td>
-            <td>
-                <input name="password" type="password" value="{{user_info.password}}">
-                <a class="show-password-link" data-value="{{user_info.password}}">查看</a>
-            </td>
         </tr>
         <tr>
             <td class="label">salt</td>
@@ -62,24 +51,41 @@
             <td>{{user_info.login_time}}</td>
         </tr>
     </table>
-    <input type="submit" value="更新用户">
-    {% if user_info.name != "admin" %}
-        <input class="btn-danger delete-user-btn" type="button" data-name="{{user_info.name}}" value="删除用户">
-    {% end %}
-{% else %}
-    <table class="table col-md-12">
-        <tr>
-            <td class="label">用户名</td>
-            <td><input name="name"></td>
-        </tr>
-        <tr>
-            <td class="label">密码</td>
-            <td><input name="password" value=""></td>
-        </tr>
-    </table>
-    <input type="submit" value="新增用户">
-{% end %}
 
+    {% if user_info.name != "admin" %}
+        <input class="btn danger" type="button" 
+            data-name="{{user_info.name}}" data-id="{{user_info.id}}"
+            onclick="xnoteDeleteUser(this)"
+            value="删除用户">
+        
+        <input class="btn danger" type="button" 
+            data-name="{{user_info.name}}" data-id="{{user_info.id}}"
+            onclick="xnoteResetUserPassword(this)"
+            value="重置用户密码">
+    {% end %}
+</div>
+
+<div class="card">
+    <div class="card-title">
+        <span>用户操作日志</span>    
+    </div>
+    <div class="card">
+        <table class="table op-log-table">
+            <tr>
+                <th>操作时间</th>
+                <th>操作类型</th>
+                <th>详情</th>
+            </tr>
+
+            {% for log in log_list %}
+                <tr>
+                    <td>{{log.ctime}}</td>
+                    <td>{{log.type}}</td>
+                    <td>{{log.detail}}</td>
+                </tr>
+            {% end %}
+        </table>
+    </div>
 </div>
 
 {% include user/component/user_script.html %}

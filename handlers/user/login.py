@@ -9,24 +9,27 @@ from xutils import Storage
 from xutils import webutil
 import json
 
+from . import dao as user_dao
+
 RETRY_LIMIT = 3
-_user_log_db = dbutil.get_table("user_op_log")
 _login_failed_count = cacheutil.PrefixedCache("login_failed_count:")
 
 def get_real_ip():
     return webutil.get_real_ip()
 
 
-def save_login_info(name, value, error=None):
+def save_login_info(name, error=None):
     if name != "":
         real_ip = get_real_ip()
-        now = xutils.format_datetime()
         detail = "登录IP: %s" % real_ip
         if error != None:
             detail += ",登录失败:%s" % error
-        login_log = Storage(type="login", user_name=name,
-                            ip=real_ip, ctime=now, detail=detail)
-        _user_log_db.insert_by_user(name, login_log)
+        log = user_dao.UserOpLog()
+        log.detail = detail
+        log.type = user_dao.UserOpTypeEnum.login.value
+        log.user_name = name
+        log.ip = real_ip
+        user_dao.UserOpLogDao.create_op_log(log)
 
 
 def save_login_error_count(name, count):
@@ -86,12 +89,12 @@ class LoginHandler:
 
         if user == None:
             error = "用户名或密码错误"
-            save_login_info(name, pswd, error)
+            save_login_info(name, error)
             save_login_error_count(name, count + 1)
             return error
         else:
             if xauth.encode_password(pswd, user.salt) == user.password_md5:
-                save_login_info(name, "success")
+                save_login_info(name)
 
                 try:
                     xauth.login_user_by_name(name, login_ip=get_real_ip())
@@ -101,7 +104,7 @@ class LoginHandler:
                     return str(e)
             else:
                 error = "用户名或密码错误"
-                save_login_info(name, pswd, error)
+                save_login_info(name, error)
                 save_login_error_count(name, count + 1)
         return error
 
@@ -109,8 +112,6 @@ class LoginHandler:
 
 class LoginAjaxHandler:
     def POST(self):
-        print("enter the login ajax")
-        print("the web data is :"+ str(web.data()))
         request_data = str(web.data(),'UTF-8')
         request_json = json.loads(request_data)
         name = request_json["username"]
