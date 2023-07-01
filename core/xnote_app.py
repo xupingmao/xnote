@@ -34,7 +34,6 @@ from xutils import dbutil
 from xutils import cacheutil
 from . import xnote_code_builder, xnote_hooks
 import threading
-import signal
 import xnote_trace
 import xtables_new
 import xtemplate

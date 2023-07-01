@@ -237,18 +237,17 @@ def init_dict_table():
         manager.add_index("key")
 
 
-def init_note_tag_bind_table():
-    """笔记标签绑定
-    @since 2023/05/20
+def init_note_tag_rel_table():
+    """笔记标签绑定关系
+    @since 2023/07/01
     """
-    table_name = "note_tag_bind"
-    with create_record_table_manager(table_name) as manager:
+    table_name = "note_tag_rel"
+    with create_default_table_manager(table_name) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
-        manager.add_column("user", "varchar(64)", "")
-        manager.add_column("note_id", "bigint", default_value=0)
-        manager.add_column("tag_name", "varchar(64)", "")
-        manager.add_index(["user", "tag_name"])
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("note_id", "varchar(32)", "")
+        manager.add_column("tag_code", "varchar(32)", "")
+        manager.add_index(["user_id", "tag_code"])
 
 
 def init_file_info():
@@ -368,3 +367,4 @@ def init():
     init_user_table()
     init_file_info()
     init_site_visit_log()
+    init_note_tag_rel_table()

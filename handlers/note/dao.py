@@ -101,14 +101,34 @@ class NoteDO(Storage):
         self.hot_index = 0
         # 版本
         self.version = 0
+
         # 假的属性
         self.url = ""
+        self.icon = ""
+        self.show_edit = True
+        self.badge_info = ""
+        self.create_date = ""
+        self.update_date = ""
 
     @classmethod
     def from_dict(cls, dict_value):
         result = NoteDO()
         result.update(dict_value)
         return result
+    
+    def before_save(self):
+        remove_virtual_fields(self)
+
+def remove_virtual_fields(note):
+    del_dict_key(note, "url")
+    del_dict_key(note, "icon")
+    del_dict_key(note, "show_edit")
+    del_dict_key(note, "create_date")
+    del_dict_key(note, "badge_info")
+    del_dict_key(note, "create_date")
+    del_dict_key(note, "update_date")
+    del_dict_key(note, "tag_info_list")
+
 
 def format_note_id(id):
     return str(id)
@@ -631,13 +651,6 @@ def add_create_log(note):
 
 def add_visit_log(user_name, note):
     dao_log.add_visit_log(user_name, note)
-
-
-def remove_virtual_fields(note):
-    del_dict_key(note, "url")
-    del_dict_key(note, "icon")
-    del_dict_key(note, "show_edit")
-    del_dict_key(note, "create_date")
 
 
 def put_note_to_db(note_id, note):

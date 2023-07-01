@@ -4,13 +4,16 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-01 18:09:08
+@LastEditTime : 2023-07-01 20:36:18
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
 
 import json
 import xutils
+import xtables
+import xauth
+import logging
 import handlers.note.dao as note_dao
 from xutils import functions
 from xutils import dbutil
@@ -48,6 +51,15 @@ class TagMeta(Storage):
         self.book_id = ""
         self.group_id = ""
 
+
+class NoteTagRelation(Storage):
+    """笔记和标签的关系表"""
+    def __init__(self):
+        self.ctime = xutils.format_datetime()
+        self.user_id = 0
+        self.note_id = ""
+        self.tag_code = ""
+
 def get_tags(creator, note_id):
     note_tags = tag_bind_db.get_by_id(note_id, user_name=creator)
     if note_tags:
@@ -57,11 +69,16 @@ def get_tags(creator, note_id):
 
 class TagBindDao:
     """标签绑定信息"""
+    db = xtables.get_table_by_name("note_tag_rel")
 
-    @staticmethod
-    def bind_tag(user_name, note_id, tags, parent_id=None):
+    @classmethod
+    def bind_tag(cls, user_name, note_id, tags, parent_id=None):
         tag_bind_db.update_by_id(note_id, Storage(
             note_id=note_id, user=user_name, tags=tags, parent_id=parent_id))
+        
+        user_info = xauth.get_user_by_name(user_name)
+        assert user_info != None
+        cls.update_tag_rel(user_info.id, note_id, tags)
 
     @staticmethod
     def get_by_note_id(user_name, note_id):
@@ -87,6 +104,17 @@ class TagBindDao:
     def iter_user_tag(user_name, limit=-1):
         for value in tag_bind_db.iter(user_name=user_name, limit=limit):
             yield value
+    
+    @classmethod
+    def update_tag_rel(cls, user_id=0, note_id="", new_tags=[]):
+        cls.db.delete(where=dict(user_id=user_id, note_id=note_id))
+        with cls.db.transaction():
+            for tag_code in new_tags:
+                rel = NoteTagRelation()
+                rel.user_id = user_id
+                rel.note_id = note_id
+                rel.tag_code = tag_code
+                cls.db.insert(**rel)
 
 
 class TagMetaDao:
@@ -193,8 +221,15 @@ def bind_tags(creator, note_id, tags, tag_type="group"):
     assert isinstance(tags, list)
     note = note_dao.get_by_id(note_id)
     assert note != None, "笔记不存在"
-
+    
     old_tag_bind = TagBindDao.get_by_note_id(creator, note_id)
+    old_tags = []
+    if old_tag_bind != None:
+        old_tags = old_tag_bind.tags
+    
+    if old_tags == tags:
+        logging.info("笔记标签没有变化")
+        return
 
     TagBindDao.bind_tag(creator, note_id, tags, parent_id=note.parent_id)
 
@@ -206,6 +241,7 @@ def bind_tags(creator, note_id, tags, tag_type="group"):
         for tag in functions.safe_list(old_tag_bind.tags):
             if tag not in tags:
                 tags.append(tag)
+    
     TagMetaDao.update_amount_async(
         creator, tags, tag_type, parent_id=note.parent_id)
     TagMetaDao.update_global_amount_async(creator, tags)
