@@ -63,7 +63,7 @@ class TagNameHandler:
         assert offset >= 0
 
         if xauth.has_login():
-            user_name = xauth.get_current_name()
+            user_name = xauth.current_name_str()
         else:
             user_name = ""
 
@@ -78,8 +78,8 @@ class TagNameHandler:
         kw.tags = tagname
         kw.files = files
         kw.page = page
-        kw.page_max = math.ceil(count/limit)
-        kw.show_mdate = True
+        kw.page_size = limit
+        kw.page_total = count
 
         return xtemplate.render("note/page/tagname.html", **kw)
 

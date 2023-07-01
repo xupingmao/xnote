@@ -362,6 +362,9 @@ def build_note_info(note, orderby=None):
 
     if orderby == "hot_index":
         note.badge_info = "热度: %s" % note.hot_index
+    
+    if orderby == "mtime_desc":
+        note.badge_info = format_date(note.mtime)
 
     if note.badge_info is None:
         note.badge_info = note.create_date

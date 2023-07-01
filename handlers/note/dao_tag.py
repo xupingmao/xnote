@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-21 22:36:55
+@LastEditTime : 2023-07-01 18:09:08
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -229,13 +229,13 @@ def list_by_tag(user="", tagname = "", limit = 1000):
         return tagname in value.tags
 
     tags = tag_bind_db.list(filter_func=list_func, user_name=user, limit = limit)
-    files = []
+    note_ids = []
     for tag in tags:
-        note = note_dao.get_by_id(tag.note_id)
-        if note != None:
-            files.append(note)
-    note_dao.sort_notes(files)
-    return files
+        note_ids.append(tag.note_id)
+    notes = note_dao.batch_query_list(note_ids)
+    note_dao.sort_notes(notes, orderby="mtime_desc")
+    note_dao.sort_by_ctime_priority(notes)
+    return notes
 
 
 def batch_get_tags_by_notes(notes):
