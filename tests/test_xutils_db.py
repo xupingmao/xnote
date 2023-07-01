@@ -4,7 +4,6 @@
 # @modified 2022/04/17 13:58:29
 # @filename test_xutils_db.py
 
-from xutils.db.dbutil_sortedset import SortedSet
 from .a import *
 from xutils import Storage
 from xutils import dbutil
@@ -858,3 +857,22 @@ class TestMain(BaseTestCase):
         self.assertEqual(cache.get("test"), 1)
         count = cache.clear_expired()
         assert count > 0
+
+    def test_kv_set(self):
+        from xutils.db.dbutil_set import KvSetTable
+        dbutil.register_table("set_test", "set test")
+        table = KvSetTable("set_test")
+        table.add("a")
+        table.remove("b")
+        result = table.list()
+        assert set(result) == set(["a"])
+
+        with table.batch() as batch:
+            batch.add("x1")
+            batch.add("x2")
+            batch.add("x3")
+            batch.remove("a")
+        
+        result = table.list()
+        print("set result:", result)
+        assert set(result) == set(["x1", "x2", "x3"])

@@ -14,8 +14,8 @@ from xutils.db.dbutil_base import (
 from xutils.db.encode import encode_str, decode_str
 from . import filters
 
-class LdbHashTable:
-    """基于leveldb的哈希表结构
+class KvHashTable:
+    """基于Kv存储的哈希表结构
     注: LdbTable可以覆盖LdbHashTable的功能, 如果不考虑极致的性能, 建议使用LdbTable+索引的方式
     put -> LdbTable.update_by_id
     get -> LdbTable.get_by_id
@@ -51,15 +51,15 @@ class LdbHashTable:
         assert user_name != None
         assert self.user_name == None
 
-        return LdbHashTable(self.table_name, user_name = user_name)
+        return KvHashTable(self.table_name, user_name = user_name)
 
     def sub_table(self, sub_table=""):
         assert sub_table != ""
-        return LdbHashTable(self.table_name + ":" + encode_str(sub_table))
+        return KvHashTable(self.table_name + ":" + encode_str(sub_table))
 
     def _check_key(self, key):
         if not isinstance(key, str):
-            raise Exception("LdbHashTable_param_error: expect str key")
+            raise Exception("KvHashTable_param_error: expect str key")
 
     def _check_value(self, obj):
         pass
@@ -143,3 +143,5 @@ class LdbHashTable:
         else:
             return None, None
 
+class LdbHashTable(KvHashTable):
+    pass

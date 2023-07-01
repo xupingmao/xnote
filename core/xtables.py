@@ -47,7 +47,7 @@ class DBPool:
             cls.sqlite_pool[dbpath] = db
         return db
 
-def create_table_manager(table_name="", dbpath=""):
+def create_table_manager_with_dbpath(table_name="", dbpath=""):
     assert table_name != ""
     assert dbpath != ""
     db = get_db_instance(dbpath)
@@ -55,7 +55,10 @@ def create_table_manager(table_name="", dbpath=""):
 
 def create_record_table_manager(table_name=""):
     """默认使用 record.db 文件"""
-    return create_table_manager(table_name, xconfig.FileConfig.record_db_file)
+    return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
+
+def create_default_table_manager(table_name=""):
+    return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
 
 def get_db_instance(dbpath=""):
     db_driver = xconfig.DatabaseConfig.db_driver
@@ -122,7 +125,7 @@ def init_test_table():
 
 
 def init_note_index_table():
-    with create_table_manager("note_index") as manager:
+    with create_default_table_manager("note_index") as manager:
         manager.add_column("name",    "varchar(255)", "")
         # 文本内容长度或者子页面数量
         manager.add_column("size",    "bigint", 0)
@@ -164,41 +167,6 @@ def init_note_index_table():
         manager.drop_column("data", "text", "")
 
 
-def init_tag_table():
-    # 标签表，可以用于一些特征的标记
-    # 2017/04/18
-    with TableManager("file_tag", no_pk=True, dbpath=xconfig.DB_PATH) as manager:
-        # 标签名
-        manager.add_column("name",      "text")
-        # 标签ID
-        manager.add_column("file_id",   "int", 0)
-        manager.add_column("user",      "text", "")
-        manager.add_column("is_public", "int", 0)
-        # 权限控制，标签不做用户区分, groups字段暂时废弃
-        # manager.add_column("groups",  "text", "")
-
-
-def init_schedule_table():
-    # 2017/05/24
-    # task是计划任务
-    # Job是已经触发的任务,倾向于一次性的
-    with TableManager("schedule", dbpath=xconfig.DB_PATH) as manager:
-        manager.add_column("name", "text", "")
-        manager.add_column("url", "text", "")
-        manager.add_column("ctime", "text", "")
-        manager.add_column("mtime", "text", "")
-        manager.add_column("tm_wday", "text", "")  # Week Day no-repeat 一次性任务
-        manager.add_column("tm_hour", "text", "")
-        manager.add_column("tm_min",  "text", "")
-        # 任务是否生效，用于一次性活动
-        manager.add_column("active", "int", 1)
-        manager.add_column("creator", "text", "")
-        # 2017.10.21
-        manager.add_column("message", "text", "")  # 提醒消息
-        manager.add_column("sound", "int", 0)  # 是否语音提醒
-        manager.add_column("webpage", "int", 0)  # 是否网页提醒
-
-
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
@@ -225,7 +193,7 @@ def init_message_table():
     - 2017/05/29
     """
     table_name = "message"
-    with create_table_manager(table_name) as manager:
+    with create_table_manager_with_dbpath(table_name) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("user",  "varchar(64)", "")
@@ -245,7 +213,7 @@ def init_message_table():
 def init_record_table():
     # 日志库和主库隔离开
     dbpath = xconfig.FileConfig.record_db_file
-    with create_table_manager("record", dbpath=dbpath) as manager:
+    with create_table_manager_with_dbpath("record", dbpath=dbpath) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
         manager.add_column("cdate", "date", "1970-01-01")
@@ -261,8 +229,7 @@ def init_dict_table():
     """词典，和主库隔离
     @since 2018/01/14
     """
-    dbpath = xconfig.FileConfig.record_db_file
-    with create_table_manager("dictionary", dbpath=dbpath) as manager:
+    with create_default_table_manager("dictionary") as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("key", "varchar(100)", "")
@@ -289,8 +256,7 @@ def init_file_info():
     @since 2023/05/26
     """
     table_name = "file_info"
-    dbpath = xconfig.FileConfig.record_db_file
-    with create_table_manager(table_name, dbpath=dbpath) as manager:
+    with create_default_table_manager(table_name) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("fpath", "text", "")
@@ -304,9 +270,8 @@ def init_site_visit_log():
     """站点访问日志
     @since 2023/05/28
     """
-    dbpath = xconfig.FileConfig.record_db_file
     table_name = "site_visit_log"
-    with create_table_manager(table_name, dbpath=dbpath) as manager:
+    with create_default_table_manager(table_name) as manager:
         manager.add_column("date", "date", "1970-01-01")
         manager.add_column("site", "varchar(64)", "")
         manager.add_column("ip", "varchar(64)", "")

@@ -93,6 +93,7 @@ class TableTypeEnum(enum.Enum):
     """表类型枚举"""
     table = "table"
     sorted_set = "sorted_set"
+    set = "set"
     index = "index"
 
 get_write_lock = interfaces.get_write_lock
@@ -606,6 +607,18 @@ def scan(key_from=None,
 
 
 def prefix_list(*args, **kw):
+    """通过前缀查询列表
+    :param {string} prefix: 遍历前缀
+    :param {function} filter_func(str, object): 过滤函数
+    :param {function} map_func(str, object): 映射函数，如果返回不为空则认为匹配
+    :param {int} offset: 选择的开始下标，包含
+    :param {int} limit:  选择的数据行数
+    :param {boolean} reverse: 是否反向遍历
+    :param {boolean} include_key: 返回的数据是否包含key，默认只有value
+    :param {boolean} scan_db: 是否扫描整个数据库
+    :param {string} key_from: 开始的key(包含)
+    :param {string} key_to: 结束的key(包含)
+    """
     return list(prefix_iter(*args, **kw))
 
 

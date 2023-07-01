@@ -105,6 +105,7 @@ class LdbSortedSet:
             batch.commit()
 
     def list_by_score(self, **kw):
+        # type: (dict) -> list[SortedSetItem]
         result = []
         for member in self.rank.list(**kw):
             score = self.get(member)
