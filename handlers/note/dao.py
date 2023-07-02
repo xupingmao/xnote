@@ -1359,9 +1359,6 @@ def check_and_remove_broken_notes(notes, user_name):
             db = get_note_tiny_table(note.creator)
             db.delete(note)
             has_broken = True
-
-    if has_broken:
-        refresh_note_stat(user_name)
     return result
 
 

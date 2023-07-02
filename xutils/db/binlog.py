@@ -4,21 +4,19 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 16:32:48
+@LastEditTime : 2023-07-02 14:53:15
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
 from xutils.db.dbutil_base import count_table, prefix_iter
 from xutils.db.dbutil_table import db_put, prefix_list, register_table, create_write_batch
 
+import struct
 import threading
 import logging
+import base64
 
 register_table("_binlog", "数据同步的binlog")
-
-def _format_log_id(log_id):
-    return "%020d" % log_id
-
 
 class BinLog:
     _table_name = "_binlog"
@@ -41,7 +39,17 @@ class BinLog:
         if last_key == None:
             self.last_seq = 0
         else:
-            self.last_seq = int(last_key)
+            self.last_seq = self._unpack_id(last_key)
+
+    def _format_log_id(self, log_id=0):
+        return struct.pack('>Q', log_id).hex()
+    
+    def _unpack_id(self, id_str=""):
+        if len(id_str) == 20:
+            return int(id_str)
+        
+        id_bytes = base64.b16decode(id_str.upper())
+        return struct.unpack('>Q', id_bytes)[0]
 
     @classmethod
     def get_instance(cls):
@@ -93,7 +101,7 @@ class BinLog:
 
         with self._lock:
             self.last_seq += 1
-            binlog_id = _format_log_id(self.last_seq)
+            binlog_id = self._format_log_id(self.last_seq)
             binlog_body = dict(optype=optype, key=key, old_value=old_value)
             if record_value:
                 binlog_body["value"] = value
@@ -101,7 +109,7 @@ class BinLog:
 
     def list(self, last_seq, limit, map_func=None):
         """从last_seq开始查询limit个binlog"""
-        start_id = _format_log_id(last_seq)
+        start_id = self._format_log_id(last_seq)
         key_from = self._table_name + ":" + start_id
         return prefix_list(self._table_name, key_from=key_from, limit=limit, map_func=map_func)
 
@@ -121,7 +129,7 @@ class BinLog:
                 keys = []
                 batch_size = 100
 
-                key_from = self._table_name + ":" + _format_log_id(start_seq)
+                key_from = self._table_name + ":" + self._format_log_id(start_seq)
                 for key, value in prefix_iter(self._table_name, key_from=key_from, limit=limit, include_key=True):
                     keys.append(key)
                     if len(keys) >= batch_size:

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 14:06:31
+@LastEditTime : 2023-07-02 14:27:39
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
@@ -21,7 +21,6 @@ from .dao import (
     delete_note_skey,
     refresh_note_stat,
     get_note_tiny_table,
-    NOTE_DAO,
     _full_db,
     _book_db
 )
@@ -72,9 +71,6 @@ def delete_note(id):
     # 删除访问日志
     NoteDao.delete_visit_log(note.creator, note.id)
 
-    # 更新数量统计
-    refresh_note_stat(note.creator)
-
 def recover_note(id):
     """恢复删除的笔记"""
     note = get_by_id(id)
@@ -95,8 +91,6 @@ def recover_note(id):
     
     # 更新数量
     update_children_count(note.parent_id)
-    # 更新数量统计
-    refresh_note_stat(note.creator)
 
 xutils.register_func("note.delete", delete_note)
 xutils.register_func("note.delete_physically", delete_note_physically)
