@@ -164,8 +164,7 @@ def init_kv_db():
             config_dict.sqlite_journal_mode = xconfig.get_system_config(
                 "sqlite_journal_mode")
             db_instance = SqliteKV(db_file, config_dict=config_dict)
-
-            db_instance.debug = xconfig.system_config.get_bool("db_debug")
+            db_instance.debug = xconfig.DatabaseConfig.db_debug
 
         if db_driver == "leveldbpy":
             from xutils.db.driver_leveldbpy import LevelDBProxy
@@ -182,6 +181,8 @@ def init_kv_db():
             sql_logger = xnote_trace.SqlLogger()
             db_instance = MySQLKV(db_instance = xtables.get_db_instance(), sql_logger=sql_logger)
             db_instance.init()
+            db_instance.log_debug = xconfig.DatabaseConfig.db_log_debug
+
             dbutil.RdbSortedSet.init_class(db_instance=xtables.get_db_instance())
             logging.info("use mysql as db engine")
 
@@ -190,7 +191,7 @@ def init_kv_db():
             try:
                 from xutils.db.driver_leveldb import LevelDBImpl
                 db_instance = LevelDBImpl(xconfig.DB_DIR, **leveldb_kw)
-                db_instance.log_debug = db_log_debug
+                db_instance.log_debug = xconfig.DatabaseConfig.db_log_debug
             except ImportError:
                 if xutils.is_windows():
                     logging.warning("检测到Windows环境，自动切换到leveldbpy驱动")

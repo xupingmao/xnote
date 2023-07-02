@@ -361,7 +361,7 @@ def move_sqlite_to_backup(db_name=""):
 @xutils.log_init_deco("xtables")
 def init():
     TableManager.clear_table_dict()
-    web.db.config.debug_sql = False
+    web.db.config.debug_sql = xconfig.DatabaseConfig.db_log_debug
     init_dict_table()
     init_record_table()
     init_user_table()

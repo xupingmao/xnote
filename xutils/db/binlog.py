@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 14:53:15
+@LastEditTime : 2023-07-02 19:25:50
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -41,7 +41,7 @@ class BinLog:
         else:
             self.last_seq = self._unpack_id(last_key)
 
-    def _format_log_id(self, log_id=0):
+    def _pack_id(self, log_id=0):
         return struct.pack('>Q', log_id).hex()
     
     def _unpack_id(self, id_str=""):
@@ -101,7 +101,7 @@ class BinLog:
 
         with self._lock:
             self.last_seq += 1
-            binlog_id = self._format_log_id(self.last_seq)
+            binlog_id = self._pack_id(self.last_seq)
             binlog_body = dict(optype=optype, key=key, old_value=old_value)
             if record_value:
                 binlog_body["value"] = value
@@ -109,7 +109,7 @@ class BinLog:
 
     def list(self, last_seq, limit, map_func=None):
         """从last_seq开始查询limit个binlog"""
-        start_id = self._format_log_id(last_seq)
+        start_id = self._pack_id(last_seq)
         key_from = self._table_name + ":" + start_id
         return prefix_list(self._table_name, key_from=key_from, limit=limit, map_func=map_func)
 
@@ -129,7 +129,7 @@ class BinLog:
                 keys = []
                 batch_size = 100
 
-                key_from = self._table_name + ":" + self._format_log_id(start_seq)
+                key_from = self._table_name + ":" + self._pack_id(start_seq)
                 for key, value in prefix_iter(self._table_name, key_from=key_from, limit=limit, include_key=True):
                     keys.append(key)
                     if len(keys) >= batch_size:

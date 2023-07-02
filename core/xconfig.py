@@ -267,8 +267,10 @@ class FileConfig:
 class WebConfig:
 
     server_home = ""
-    about_url = "" # 关于系统的链接
+    # 关于系统的链接
+    about_url = "" 
     about_text = ""
+    
     nav_list = []
 
     @classmethod
@@ -342,9 +344,13 @@ class TemplateConfig:
 class DatabaseConfig:
 
     db_driver="" # sqlite/leveldb/mysql/lmdb
+    user_max_log_size = 500 # 用户日志保留的最大条数
+    db_debug = False
+    db_log_debug = False
+
+    # mysql相关配置
     mysql_cloud_type="" # mysql云服务类型
     mysql_database = ""
-    user_max_log_size = 500 # 用户日志保留的最大条数
 
     @classmethod
     def init(cls):
@@ -352,6 +358,8 @@ class DatabaseConfig:
         cls.mysql_cloud_type = SystemConfig.get_str("mysql_cloud_type")
         cls.mysql_database = SystemConfig.get_str("mysql_database")
         cls.user_max_log_size = SystemConfig.get_int("user_max_log_size", 500)
+        cls.db_debug = SystemConfig.get_bool("db_debug")
+        cls.db_log_debug = SystemConfig.get_bool("db_log_debug")
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)

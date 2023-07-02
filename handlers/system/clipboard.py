@@ -4,6 +4,8 @@
 # @modified 2019/07/20 22:42:44
 import xutils
 import xmanager
+import logging
+
 from xtemplate import BasePlugin
 from xutils import dateutil
 from xutils import dbutil
@@ -87,7 +89,8 @@ class ClipLogDao:
 
     db = dbutil.get_table("clip_log")
     last_log_content = ""
-    max_log_size = 500
+    max_log_count = 500
+    max_content_size = 1024 * 1024 # 1MB
 
     @classmethod
     def init(cls):
@@ -103,6 +106,10 @@ class ClipLogDao:
         if log_content == cls.last_log_content:
             return
         
+        if len(log_content) > cls.max_content_size:
+            logging.warn("clipboard data too large")
+            log_content = log_content[:cls.max_content_size]
+        
         record = ClipLogDO()
         record.create_time = dateutil.format_datetime()
         record.content = log_content
@@ -113,7 +120,7 @@ class ClipLogDao:
     @classmethod
     def clear_old_logs(cls):
         buf_size = 10
-        if cls.db.count() > cls.max_log_size + buf_size:
+        if cls.db.count() > cls.max_log_count + buf_size:
             for record in cls.db.list(limit=buf_size):
                 cls.db.delete(record)
 
