@@ -75,10 +75,7 @@ def check_comment(comment):
 def create_comment(comment):
     check_comment(comment)
     comment.ctime = dateutil.format_datetime()
-
     _comment_db.insert(comment)
-
-    note_dao.refresh_note_stat_async(comment["user"])
 
 
 def update_comment(comment):
@@ -94,8 +91,6 @@ def delete_comment(comment_id):
     comment = get_comment(comment_id)
     if comment != None:
         _comment_db.delete(comment)
-        note_dao.refresh_note_stat_async(comment.user)
-
 
 def count_comment(user_name):
     return _comment_db.count_by_index("user", index_value=user_name)

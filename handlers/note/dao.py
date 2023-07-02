@@ -624,9 +624,6 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
         dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(note_id))
         xutils.makedirs(dirname)
 
-    # 更新统计数量
-    refresh_note_stat_async(creator)
-
     # 更新目录修改时间
     touch_note(note_dict["parent_id"])
 
@@ -854,12 +851,9 @@ def get_by_name(creator, name):
     assert creator != None, "get_by_name:creator is None"
     assert name != None, "get_by_name: name is None"
 
-    def find_func(key, value):
-        if value.is_deleted:
-            return False
-        return value.name == name
     db = get_note_tiny_table(creator)
-    result = db.list(offset=0, limit=1, filter_func=find_func)
+    result = db.list(offset=0, limit=1, where = dict(name=name))
+    result = list(filter(lambda x: not x.is_deleted, result))
     if len(result) > 0:
         note = result[0]
         return get_by_id(note.id)
@@ -1532,54 +1526,84 @@ def expire_search_history(user_name, limit=1000):
             for value in db.list(where = dict(user=user_name), limit = list_limit, reverse=False):
                 db.delete(value)
 
+
+class NoteStatDO(Storage):
+
+    def __init__(self):
+        self.total = 0
+        self.group_count = 0
+        self.doc_count = 0
+        self.gallery_count = 0
+        self.list_count = 0
+        self.table_count = 0
+        self.plan_count = 0
+        self.log_count = 0
+        self.sticky_count = 0
+        self.removed_count = 0
+        self.dict_count = 0
+        self.comment_count = 0
+        self.tag_count = 0
+        self.update_time = 0.0
+
+    def is_expired(self):
+        expire_time = 60 * 60 # 1小时
+        return time.time() - self.update_time > expire_time
+
+    @classmethod
+    def from_dict(cls, dict_value):
+        result=NoteStatDO()
+        result.update(dict_value)
+        return result
+
 @xutils.async_func_deco()
 def refresh_note_stat_async(user_name):
     """异步刷新笔记统计"""
-    with dbutil.get_write_lock(user_name):
-        refresh_note_stat(user_name)
-
+    refresh_note_stat(user_name)
 
 @xutils.timeit_deco(name="NOTE_DAO:refresh_note_stat")
 def refresh_note_stat(user_name):
     assert user_name != None, "[refresh_note_stat.assert] user_name != None"
 
-    stat = Storage()
+    with dbutil.get_write_lock(user_name):
+        stat = NoteStatDO()
+        if user_name is None:
+            return stat
 
-    if user_name is None:
+        stat.total = count_by_creator(user_name)
+        stat.group_count = count_group(user_name)
+        stat.doc_count = count_by_type(user_name, "doc")
+        stat.gallery_count = count_by_type(user_name, "gallery")
+        stat.list_count = count_by_type(user_name, "list")
+        stat.table_count = count_by_type(user_name, "table")
+        stat.plan_count = count_by_type(user_name, "plan")
+        stat.log_count = count_by_type(user_name, "log")
+        stat.sticky_count = count_sticky(user_name)
+        stat.removed_count = count_removed(user_name)
+        stat.dict_count = count_dict(user_name)
+        stat.comment_count = NoteDao.count_comment(user_name)
+        stat.tag_count = NoteDao.count_tag(user_name)
+        stat.update_time = time.time()
+
+        dbutil.put("user_stat:%s:note" % user_name, stat)
         return stat
 
-    stat.total = count_by_creator(user_name)
-    stat.group_count = count_group(user_name)
-    stat.doc_count = count_by_type(user_name, "doc")
-    stat.gallery_count = count_by_type(user_name, "gallery")
-    stat.list_count = count_by_type(user_name, "list")
-    stat.table_count = count_by_type(user_name, "table")
-    stat.plan_count = count_by_type(user_name, "plan")
-    stat.log_count = count_by_type(user_name, "log")
-    stat.sticky_count = count_sticky(user_name)
-    stat.removed_count = count_removed(user_name)
-    stat.dict_count = count_dict(user_name)
-    stat.comment_count = NoteDao.count_comment(user_name)
-    stat.tag_count = NoteDao.count_tag(user_name)
-
-    dbutil.put("user_stat:%s:note" % user_name, stat)
-    return stat
-
 def get_empty_note_stat():
-    stat = Storage()
+    stat = NoteStatDO()
     stat.total = 0
     stat.group_count = 0
     return stat
 
 
-def get_note_stat(user_name) -> Storage:
+def get_note_stat(user_name):
     if user_name == None:
         return get_empty_note_stat()
     stat = dbutil.get("user_stat:%s:note" % user_name)
     if stat is None:
         stat = refresh_note_stat(user_name)
-    
-    assert isinstance(stat, Storage)
+    else:
+        stat = NoteStatDO.from_dict(stat)
+        if stat.is_expired():
+            stat = refresh_note_stat(user_name)
     if stat.tag_count == None:
         stat.tag_count = 0
     return stat

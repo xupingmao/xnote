@@ -56,11 +56,20 @@ def get_date_by_type(note, type):
         return dtime.split()[0]
     return note.ctime.split()[0]
 
+class StatApiHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name_str()
+        return dict(code="success", data=dao.get_note_stat(user_name=user_name))
+
+
 xutils.register_func("page.list_recent_groups", list_recent_groups)
 xutils.register_func("page.list_recent_notes", list_recent_notes)
 xutils.register_func("note.get_date_by_type", get_date_by_type)
 xutils.register_func("note.assemble_notes_by_date", assemble_notes_by_date)
 
 xurls = (
-    r"/note/api/group", GroupApiHandler
+    r"/note/api/group", GroupApiHandler,
+    r"/note/api/stat", StatApiHandler,
 )

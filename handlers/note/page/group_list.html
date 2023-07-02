@@ -30,6 +30,11 @@
     {% set files = groups %}
     {% include note/component/note_list_component.html %}
 
+    <script>
+        $.get("{{_server_home}}/note/api/stat", function (resp) {
+            console.log("note stat:", resp);
+        });
+    </script>
 {% end %}
 
 {% block body_right %}

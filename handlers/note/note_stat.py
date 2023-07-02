@@ -95,7 +95,6 @@ class StatHandler(BasePlugin):
         self.writetemplate(HTML, stat_list = stat_list, admin_stat_list = admin_stat_list)
         self.write_aside(SIDEBAR_HTML)
 
-
 xurls = (
-    r"/note/stat", StatHandler
+    r"/note/stat", StatHandler,
 )

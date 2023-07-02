@@ -726,11 +726,11 @@ class DraftHandler:
 
     @xauth.login_required()
     def POST(self):
-        action = xutils.get_argument("action")
+        action = xutils.get_argument_str("action")
         note_id = xutils.get_argument_str("id", "")
-        content = xutils.get_argument("content")
-        token   = xutils.get_argument("token")
-        version = xutils.get_argument("version", 0, type=int)
+        content = xutils.get_argument_str("content")
+        token   = xutils.get_argument_str("token")
+        version = xutils.get_argument_int("version", 0)
 
         note = check_get_note(note_id)
         if action == "lock_and_save":

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 22:50:19
+@LastEditTime : 2023-07-02 14:06:31
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
@@ -20,7 +20,6 @@ from .dao import (
     put_note_to_db,
     delete_note_skey,
     refresh_note_stat,
-    refresh_note_stat_async,
     get_note_tiny_table,
     NOTE_DAO,
     _full_db,
@@ -42,9 +41,6 @@ def delete_note_physically(creator, note_id):
     note_tiny_db.delete_by_id(note_id)
 
     delete_history(note_id)
-
-    # 刷新数量
-    refresh_note_stat_async(creator)
 
 
 def delete_note(id):
