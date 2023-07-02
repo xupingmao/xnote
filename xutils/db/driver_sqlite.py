@@ -10,8 +10,9 @@ import sqlite3
 import threading
 import logging
 import web.db
+
 from xutils.mem_util import log_mem_info_deco
-from .. import interfaces
+from xutils import interfaces
 
 class FreeLock:
 
@@ -134,6 +135,11 @@ class SqliteKV(interfaces.DBInterface):
                 self.db.query(sql, vars=dict(key=key, value=value))
             except Exception as e:
                 raise e
+
+    def Insert(self, key=b'', value=b''):
+        insert_sql = "INSERT INTO kv_store (`key`, value) VALUES ($key, $value)"
+        vars = dict(key=key,value=value)
+        self.db.query(insert_sql, vars=vars)
 
     def Delete(self, key, sync=False):
         return self.doDelete(key, sync)
@@ -263,15 +269,21 @@ class SqliteKV(interfaces.DBInterface):
     @log_mem_info_deco("db.Write")
     def Write(self, batch, sync=False):
         """执行批量操作"""
+        assert isinstance(batch, interfaces.BatchInterface)
         # return self._db.write(batch, sync)
-        if len(batch._puts) + len(batch._deletes) == 0:
+        if len(batch._puts) + len(batch._deletes) + len(batch._inserts) == 0:
             return
+        
 
         with self._lock:
             with self.db.transaction():
                 for key in batch._puts:
                     value = batch._puts[key]
                     self.doPut(key, value)
+                
+                for key in batch._inserts:
+                    value = batch._inserts[key]
+                    self.Insert(key, value)
 
                 for key in batch._deletes:
                     self.doDelete(key)

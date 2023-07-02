@@ -150,6 +150,13 @@ class LmdbKV(interfaces.DBInterface):
                 value = batch_proxy._puts[key]
                 tx.put(key, value)
 
+            for key in batch_proxy._inserts:
+                value = batch_proxy._inserts[key]
+                old_value = tx.get(key)
+                if old_value != None:
+                    raise interfaces.new_duplicate_key_exception(key)
+                tx.put(key, value)
+                
             for key in batch_proxy._deletes:
                 tx.delete(key)
 
@@ -255,6 +262,13 @@ class LmdbEnhancedKV(interfaces.DBInterface):
         with self.kv.env.begin(write=True) as tx:
             for key in batch_proxy._puts:
                 value = batch_proxy._puts[key]
+                self.doPut(tx, key, value)
+            
+            for key in batch_proxy._inserts:
+                value = batch_proxy._inserts[key]
+                old_value = self.Get(key)
+                if old_value != None:
+                    raise interfaces.new_duplicate_key_exception(key)
                 self.doPut(tx, key, value)
 
             for key in batch_proxy._deletes:

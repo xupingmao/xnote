@@ -43,10 +43,11 @@ dbutil.register_table("test_user_db", "测试数据库用户版", user_attr="use
 BinLog.set_enabled(True)
 
 
-class MockedWriteBatch:
+class MockedWriteBatch(interfaces.BatchInterface):
 
     def __init__(self):
-        self._puts = dict()
+        self._puts = {}
+        self._inserts = {}
         self._deletes = set()
 
     def put(self, key, value):
@@ -56,7 +57,10 @@ class MockedWriteBatch:
     def delete(self, key):
         self._puts.pop(key, None)
         self._deletes.add(key)
-
+    
+    def insert(self, key, value):
+        self._deletes.discard(key)
+        self._inserts[key] = value
 
 def run_range_test_from_None(test, db):
     for key in db.RangeIter(include_value=False, key_from = b'', key_to = b'\xff'):
@@ -138,6 +142,35 @@ def run_increase_test(test, db):
     result = db.Increase(counter_key)
     assert result == 2
 
+def run_insert_test(test, db):
+    assert isinstance(db, interfaces.DBInterface)
+    insert_key = b'insert_test'
+    value = b'value'
+
+    db.Delete(insert_key)
+    db.Insert(insert_key, value)
+    
+    try:
+        db.Insert(insert_key, value)
+        assert 1==2
+    except Exception as e:
+        xutils.print_exc()
+        print("err:", str(e))
+        is_sqlite_err = "UNIQUE constraint failed" in str(e)
+        is_default_err = "Duplicate" in str(e) 
+        assert is_sqlite_err or is_default_err
+    
+    try:
+        batch = dbutil.create_write_batch(db_instance=db)
+        batch.insert(insert_key.decode("utf-8"), value, check_table=False)
+        batch.commit()
+        assert 1==2
+    except Exception as e:
+        xutils.print_exc()
+        print("err:", str(e))
+        is_sqlite_err = "UNIQUE constraint failed" in str(e)
+        is_default_err = "Duplicate" in str(e) 
+        assert is_sqlite_err or is_default_err
 
 def run_test_db_engine(test, db):
     # 等待异步任务完成
@@ -177,6 +210,8 @@ def run_test_db_engine(test, db):
     run_range_test_from_None(test, db)
 
     run_increase_test(test, db)
+
+    run_insert_test(test, db)
 
 
 def run_snapshot_test(test, db):

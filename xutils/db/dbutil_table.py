@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-30 20:29:41
+@LastEditTime : 2023-07-02 21:38:31
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -190,6 +190,22 @@ class LdbTable:
             old_obj = db_get(key)
             self._format_value(key, old_obj)
             batch.put(key, self._convert_to_db_row(obj))
+            self._update_index(old_obj, obj, batch)
+            if self.binlog_enabled:
+                self.binlog.add_log(
+                    "put", key, obj, batch=batch, old_value=old_obj)
+            # 更新批量操作
+            batch.commit(sync)
+
+    def _insert_obj(self, key, obj, sync=False):
+        # ~~写redo-log，启动的时候要先锁定检查redo-log，恢复异常关闭的数据~~
+        # 不需要重新实现redo-log，直接用leveldb的批量处理功能即可
+        # 使用leveldb的批量操作可以确保不会读到未提交的数据
+        batch = create_write_batch()
+        with get_write_lock(key):
+            old_obj = db_get(key)
+            self._format_value(key, old_obj)
+            batch.insert(key, self._convert_to_db_row(obj))
             self._update_index(old_obj, obj, batch)
             if self.binlog_enabled:
                 self.binlog.add_log(

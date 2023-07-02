@@ -27,6 +27,9 @@ class DatabaseException(Exception):
         super().__init__(message)
 
 
+def new_duplicate_key_exception(key=b''):
+    return Exception("Duplicate key: %s" % key)
+
 class DBInterface:
     """KV存储的数据库接口"""
 
@@ -57,6 +60,16 @@ class DBInterface:
         @param {bytes} value
         """
         raise NotImplementedError("Put")
+
+    def Insert(self, key=b'', value=b'', sync=False):
+        key_str = key.decode("utf-8")
+        with get_write_lock(key_str):
+            old = self.Get(key)
+            if old == None:
+                self.Put(key, value, sync=sync)
+            else:
+                raise new_duplicate_key_exception(key)
+
 
     def Delete(self, key, sync = False):
         # type: (bytes, bool) -> None
@@ -150,6 +163,11 @@ class RecordInterface:
 
 class BatchInterface:
     """批量操作"""
+
+    def __init__(self):
+        self._deletes = set()
+        self._puts = {}
+        self._inserts = {}
 
     def check_and_delete(self, key: str):
         raise NotImplementedError("待子类实现")

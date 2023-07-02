@@ -135,9 +135,16 @@ class LevelDBProxy(interfaces.DBInterface):
 
     def Write(self, batch_proxy, sync=False):
         """执行批量操作"""
+        assert isinstance(batch_proxy, interfaces.BatchInterface)
         batch = leveldbpy.WriteBatch()
         for key in batch_proxy._puts:
             value = batch_proxy._puts[key]
+            batch.put(key, value)
+        for key in batch_proxy._inserts:
+            value = batch_proxy._inserts[key]
+            old_value = self.Get(key)
+            if old_value != None:
+                raise interfaces.new_duplicate_key_exception(key)
             batch.put(key, value)
         for key in batch_proxy._deletes:
             batch.delete(key)

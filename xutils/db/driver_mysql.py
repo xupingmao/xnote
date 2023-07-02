@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 12:58:37
+@LastEditTime : 2023-07-02 22:20:13
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -361,6 +361,17 @@ class MySQLKV(interfaces.DBInterface):
         else:
             self.log_sql(update_sql, vars, start_time=start_time, key=key)
         return rowcount
+    
+    def Insert(self, key=b'', value=b'', version=0):
+        start_time = time.time()
+        if len(value) > self.max_value_length:
+            raise interfaces.DatabaseException(code=400, message="value too long")
+        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"
+        vars = dict(key=key,value=value,version=version)
+        try:
+            self.db.query(insert_sql, vars=vars)
+        finally:
+            self.log_sql(insert_sql, vars, start_time=start_time, key=key)
 
     def doDeleteRaw(self, key, sync=False, cursor=None):
         # type: (bytes, bool, object) -> None
@@ -497,11 +508,15 @@ class MySQLKV(interfaces.DBInterface):
         raise NotImplementedError("CreateSnapshot")
 
     def Write(self, batch, sync=False):
+        assert isinstance(batch, interfaces.BatchInterface)
+
         with self.db.transaction():
             for key in batch._puts:
                 value = batch._puts[key]
                 self.doPut(key, value)
-
+            for key in batch._inserts:
+                value = batch._inserts[key]
+                self.Insert(key, value)
             for key in batch._deletes:
                 self.doDelete(key)
 

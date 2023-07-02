@@ -117,6 +117,8 @@ class WriteBatchProxy(BatchInterface):
     def __init__(self, db_instance=None):
         self._puts = {}
         self._deletes = set()
+        self._inserts = {}
+
         if db_instance == None:
             db_instance = get_instance()
 
@@ -144,6 +146,7 @@ class WriteBatchProxy(BatchInterface):
         self._deletes.discard(key_bytes)
         self._puts[key_bytes] = val_bytes
 
+
     def put_bytes(self, key, value):
         # type: (bytes, bytes) -> None
         assert isinstance(key, bytes), key
@@ -151,6 +154,15 @@ class WriteBatchProxy(BatchInterface):
 
         self._deletes.discard(key)
         self._puts[key] = value
+
+    def insert(self, key='', val=None, check_table=True):
+        check_before_write(key, check_table)
+
+        key_bytes = key.encode("utf-8")
+        val_bytes = convert_object_to_json(val).encode("utf-8")
+
+        self._deletes.discard(key_bytes)
+        self._inserts[key_bytes] = val_bytes
 
     def check_and_delete(self, key):
         old_val = get(key)
@@ -189,14 +201,7 @@ class WriteBatchProxy(BatchInterface):
 
     def commit(self, sync=False, retries=0):
         self.log_debug_info()
-        while retries >= 0:
-            try:
-                self.db_instance.Write(self, sync)
-                return
-            except:
-                xutils.print_exc()
-                time.sleep(0.2)
-                retries -= 1
+        self.db_instance.Write(self, sync)
 
     def __enter__(self):
         return self
