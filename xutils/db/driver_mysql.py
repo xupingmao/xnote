@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-01 16:45:43
+@LastEditTime : 2023-07-02 12:58:37
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -317,19 +317,13 @@ class MySQLKV(interfaces.DBInterface):
             raise interfaces.DatabaseException(code=400, message="value too long")
 
         start_time = time.time()
-        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"
-        update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key"
+        upsert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0) ON DUPLICATE KEY UPDATE value=$value, version=version+1";
+        # update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key"
         vars = dict(key=key,value=value)
 
-        rowcount = self.db.query(update_sql, vars=vars)
-        
-        if rowcount == 0:
-            # 数据不存在,执行插入动作
-            # 如果这里冲突了，按照默认规则抛出异常
-            self.db.query(insert_sql, vars=vars)
-            self.log_sql(insert_sql, vars, start_time=start_time, key=key)
-        else:
-            self.log_sql(update_sql, vars, start_time=start_time, key=key)
+        rowcount = self.db.query(upsert_sql, vars=vars)
+        self.log_sql(upsert_sql, vars, start_time=start_time, key=key)
+        assert rowcount > 0
 
     def Put(self, key, value, sync=False, cursor=None):
         # type: (bytes,bytes,bool,object) -> None
@@ -373,6 +367,7 @@ class MySQLKV(interfaces.DBInterface):
         """删除Key-Value键值对
         @param {bytes} key
         """
+        start_time = time.time()
         sql = "DELETE FROM kv_store WHERE `key` = $key;"
         vars = dict(key=key)
 
@@ -380,18 +375,41 @@ class MySQLKV(interfaces.DBInterface):
             sql_query = self.db.query(sql, vars=vars, _test=True)
             logging.debug("SQL:%s", sql_query)
 
+        self.db.query(sql, vars=vars)
+
         if self.sql_logger:
             sql_query = self.db.query(sql, vars=vars, _test=True)
-            sql_info = "sql=(%s), key=(%s)" % (sql_query, key)
-            self.sql_logger.append(sql_info)
-
-        self.db.query(sql, vars=vars)
+            sql_info = str(sql_query)
+            cost_time = time.time() - start_time
+            log_info = sql_info + " [%.2fms]" % (cost_time*1000)
+            self.sql_logger.append(log_info)
 
     def doDelete(self, key, sync=False, cursor=None):
         return self.doDeleteRaw(key, sync, cursor)
 
     def Delete(self, key, sync=False):
-        self.doDelete(key)
+        self.doDeleteRaw(key)
+
+    def BatchDelete(self, keys=[]):
+        """批量删除键值对
+        :param {list} keys: 键集合
+        """
+        start_time = time.time()
+        sql = "DELETE FROM kv_store WHERE `key` in $keys;"
+        vars = dict(keys=keys)
+
+        if self.debug:
+            sql_query = self.db.query(sql, vars=vars, _test=True)
+            logging.debug("SQL:%s", sql_query)
+
+        self.db.query(sql, vars=vars)
+
+        if self.sql_logger:
+            sql_query = self.db.query(sql, vars=vars, _test=True)
+            sql_info = str(sql_query)
+            cost_time = time.time() - start_time
+            log_info = sql_info + " [%.2fms]" % (cost_time*1000)
+            self.sql_logger.append(log_info)
 
     def RangeIterRaw(self,
                      key_from=None,

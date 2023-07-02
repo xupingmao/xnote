@@ -43,7 +43,7 @@ class DBInterface:
         """
         raise NotImplementedError("Get")
     
-    def BatchGet(self, keys):
+    def BatchGet(self, keys=[]):
         """批量get操作"""
         result = dict()
         for key in keys:
@@ -64,6 +64,10 @@ class DBInterface:
         @param {bytes} key
         """
         raise NotImplementedError("Delete")
+    
+    def BatchDelete(self, keys=[]):
+        for key in keys:
+            self.Delete(key)
 
     def RangeIter(self, 
             key_from = b'', # type: bytes

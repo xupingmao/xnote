@@ -221,15 +221,11 @@ def check_not_empty(value, message):
 
 
 def timeseq(value=None):
-    """生成一个时间序列
-    @param {float|None} value 时间序列，单位是秒，可选
-    @return {string}    20位的时间序列
+    """生成一个时间序列, 单进程不重复
+    :param {float|None} value: 时间序列，单位是秒，可选
+    :return {str}:    时间序列
     """
     return TimeSeqId.create(value)
-
-
-def new_id(prefix):
-    return "%s:%s" % (prefix, timeseq())
 
 
 def check_leveldb():
@@ -569,6 +565,14 @@ def db_delete(key, sync=False):
 def delete(*args, **kw):
     return db_delete(*args, **kw)
 
+def db_batch_delete(keys=[]):
+    check_leveldb()
+    
+    key_bytes_list = []
+    for key in keys:
+        key_bytes_list.append(key.encode("utf-8"))
+
+    return get_db_instance().BatchDelete(key_bytes_list)
 
 def create_write_batch(db_instance=None):
     return WriteBatchProxy(db_instance=db_instance)
@@ -800,7 +804,7 @@ def count_table(table_name, use_cache=False):
     key_from = table_name.encode("utf-8")
     key_to = table_name.encode("utf-8") + b'\xff'
     count = _leveldb.Count(key_from, key_to)
-    if cache != None:
+    if use_cache and cache != None:
         cache.put(cache_key, count, expire=DEFAULT_CACHE_EXPIRE)
     return count
 

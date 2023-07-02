@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-01 20:36:18
+@LastEditTime : 2023-07-02 10:39:53
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -113,7 +113,7 @@ class TagBindDao:
                 rel = NoteTagRelation()
                 rel.user_id = user_id
                 rel.note_id = note_id
-                rel.tag_code = tag_code
+                rel.tag_code = tag_code.lower()
                 cls.db.insert(**rel)
 
 

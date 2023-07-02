@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-10-01 21:15:02
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-17 23:25:36
+@LastEditTime : 2023-07-02 13:03:23
 @FilePath     : /xnote/xutils/db/driver_mysql_enhance.py
 @Description  : 支持长key
 """
@@ -49,22 +49,23 @@ class EnhancedMySQLKV(MySQLKV):
     def doDeleteLongNoLock(self, key, cursor):
         short_key = key[:self.max_key_len]
         data_bytes = self.doGet(short_key, cursor=cursor)
+        assert isinstance(data_bytes, bytes)
         data_dict = encode.convert_bytes_to_dict(data_bytes)
         if key in data_dict:
             del data_dict[key]
 
         if len(data_dict) == 0:
-            self.doDeleteRaw(short_key, cursor=cursor)
+            self.doDelete(short_key, cursor=cursor)
         else:
             self.doPutRaw(
                 short_key, encode.convert_bytes_dict_to_bytes(data_dict), cursor)
 
-    def doDelete(self, key, sync=False, cursor=None):
+    def Delete(self, key, sync=False, cursor=None):
         if len(key) >= self.max_key_len:
             with self.lock:
                 self.doDeleteLongNoLock(key, cursor)
         else:
-            return self.doDeleteRaw(key, sync, cursor)
+            return self.doDelete(key, sync, cursor)
 
     def doPut(self, key, value, cursor=None):
         if len(key) >= self.max_key_len:

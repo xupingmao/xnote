@@ -210,23 +210,21 @@ def parse_date_to_object(date_str):
     return date_object
 
 
-def parse_time(date = None, fmt = None):
+def parse_datetime(date_str = "", fmt = DEFAULT_FORMAT):
     """解析时间字符串为unix时间戳
-    @param {string|None} date 时间
-    @param {string} fmt 时间的格式
-    @return {int} 时间戳，单位是秒
+    :param {string} date: 时间
+    :param {string} fmt: 时间的格式
+    :return {int}: 时间戳，单位是秒
     """
-    if date is None:
+    if date_str == "":
         return int(time.time())
-    if fmt is None:
-        fmt = DEFAULT_FORMAT
-    st = time.strptime(date, fmt)
+    st = time.strptime(date_str, fmt)
     return time.mktime(st)
 
-def get_seconds(date = None, fmt = None):
-    if fmt is None:
-        fmt = DEFAULT_FORMAT
-    return parse_time(date, fmt)
+parse_time = parse_datetime
+
+def get_seconds(date_str = "", fmt = DEFAULT_FORMAT):
+    return parse_datetime(date_str, fmt)
 
 def get_current_year():
     """获取当前年份"""

@@ -26,7 +26,7 @@ _debug = False
 class MessageDO(Storage):
     def __init__(self):
         self.id = "" # 主键
-        self.tag = "" # tag标签
+        self.tag = "" # tag标签 {task, done, log, key}
         self.user = "" # 用户名
         self.ip = ""
         self.ref = None # 引用的id
@@ -129,13 +129,6 @@ def execute_after_update(kw):
 def execute_after_delete(kw):
     build_task_index(kw)
 
-
-def get_message_key(user_name, timestamp):
-    assert user_name != None
-    assert timestamp != None
-    return "message:%s:%s" % (user_name, dbutil.timeseq(timestamp))
-
-
 def _create_message_with_date(kw):
     date = kw["date"]
     old_ctime = kw["ctime"]
@@ -157,6 +150,7 @@ def _create_message_with_date(kw):
     kw["id"] = key
     _msg_db.update(kw)
     execute_after_create(kw)
+    assert isinstance(key, str)
     return key
 
 
@@ -181,12 +175,13 @@ def _create_message_without_date(kw):
 
 
 def create_message(message):
+    # type: (MessageDO) -> str
     """创建信息
-    :param {string} user: 用户名
-    :param {string} tag: 类型
-    :param {string} ctime: 创建时间
-    :param {string|None} date: 日期，可选的
-    :param {string} content: 文本的内容
+    :param {str} user: 用户名
+    :param {str} tag: 类型
+    :param {str} ctime: 创建时间
+    :param {str|None} date: 日期，可选的
+    :param {str} content: 文本的内容
     """
     assert isinstance(message, MessageDO)
     message.check_before_create()
@@ -238,14 +233,14 @@ def has_tag_fast(content):
 
 def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_tag=None, count_only=False, date=""):
     """搜索短信
-    @param {string} user_name 用户名
-    @param {string} key 要搜索的关键字
-    @param {int} offset 下标
-    @param {int} limit 返回结果最大限制
-    @param {list} search_tags 搜索的标签集合
-    @param {bool} no_tag 是否搜索无标签的
-    @param {bool} count_only 只统计数量
-    @param {string} date 日期过滤条件
+    :param {str} user_name: 用户名
+    :param {str} key: 要搜索的关键字
+    :param {int} offset: 下标
+    :param {int} limit: 返回结果最大限制
+    :param {list} search_tags: 搜索的标签集合
+    :param {bool} no_tag: 是否搜索无标签的
+    :param {bool} count_only: 只统计数量
+    :param {str} date: 日期过滤条件
     """
     assert user_name != None and user_name != ""
     assert date != None
@@ -277,6 +272,8 @@ def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_t
     else:
         chatlist = _msg_db.list(filter_func=search_func, offset=offset,
                                 limit=limit, reverse=True, user_name=user_name)
+        # 安装创建时间倒排 (按日期补充的随手记的key不是按时间顺序的)
+        chatlist.sort(key = lambda x:x.ctime, reverse=True)
     amount = _msg_db.count(filter_func=search_func, user_name=user_name)
     return chatlist, amount
 
@@ -612,10 +609,29 @@ def refresh_message_stat(user) -> Storage:
 
     return stat
 
+class MsgSearchLogDao:
 
-def add_search_history(user, search_key, cost_time=0):
-    key = "msg_search_history:%s:%s" % (user, dbutil.timeseq())
-    dbutil.put(key, Storage(key=search_key, cost_time=cost_time))
+    max_log_size = xconfig.DatabaseConfig.user_max_log_size
+    
+    @classmethod
+    def get_table(cls, user_name=""):
+        return dbutil.get_hash_table("msg_search_history", user_name=user_name)
+
+    @classmethod
+    def add_log(cls, user_name="", search_key="", cost_time=0):
+        user_db = cls.get_table(user_name)
+        search_log = Storage(key=search_key, cost_time=cost_time)
+        user_db.put(dbutil.timeseq(), search_log)
+
+        if user_db.count() > cls.max_log_size:
+            keys = []
+            for key, value in user_db.list(limit=20):
+                keys.append(key)
+            user_db.batch_delete(keys=keys)
+
+
+def add_search_history(user="", search_key="", cost_time=0):
+    MsgSearchLogDao.add_log(user_name=user, search_key=search_key, cost_time=cost_time)
 
 
 class MessageTag(Storage):

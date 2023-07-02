@@ -5,6 +5,7 @@
 # @filename dbutil_hash.py
 
 from xutils import Storage
+from xutils.db import dbutil_base
 from xutils.db.dbutil_base import (
     db_get, db_put, db_delete, 
     check_table_name, 
@@ -16,7 +17,7 @@ from . import filters
 
 class KvHashTable:
     """基于Kv存储的哈希表结构
-    注: LdbTable可以覆盖LdbHashTable的功能, 如果不考虑极致的性能, 建议使用LdbTable+索引的方式
+    注: LdbTable可以覆盖 KvHashTable 的功能, 如果不考虑极致的性能, 建议使用 LdbTable+索引 的方式
     put -> LdbTable.update_by_id
     get -> LdbTable.get_by_id
     """
@@ -35,7 +36,7 @@ class KvHashTable:
         self.first_table = first_table
 
         if user_name != None and user_name != "":
-            self.prefix += ":" + user_name
+            self.prefix += ":" + encode_str(user_name)
         
         if table_info.check_user:
             assert user_name != None
@@ -119,6 +120,14 @@ class KvHashTable:
             batch.delete(row_key)
         else:
             db_delete(row_key)
+    
+    def batch_delete(self, keys=[]):
+        if len(keys) == 0:
+            return
+        db_keys = []
+        for key in keys:
+            db_keys.append(self.build_key(key))
+        dbutil_base.db_batch_delete(db_keys)
 
     def count(self, prefix = None):
         if prefix != None:

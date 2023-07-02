@@ -346,6 +346,7 @@ class TestMain(BaseTestCase):
             t.join()
 
     def do_test_lmdb_large_key(self, db):
+        # type: (dbutil.interfaces.DBInterface) -> None
         # 先清理数据
         for key in db.RangeIter(include_value=False):
             db.Delete(key)

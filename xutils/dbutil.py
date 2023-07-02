@@ -45,7 +45,7 @@ def get_table(table_name, user_name=None):
 
 
 def get_hash_table(table_name, user_name=None):
-    return LdbHashTable(table_name, user_name=user_name)
+    return KvHashTable(table_name, user_name=user_name)
 
 
 @xutils.log_init_deco("leveldb")

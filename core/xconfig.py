@@ -344,12 +344,14 @@ class DatabaseConfig:
     db_driver="" # sqlite/leveldb/mysql/lmdb
     mysql_cloud_type="" # mysql云服务类型
     mysql_database = ""
+    user_max_log_size = 500 # 用户日志保留的最大条数
 
     @classmethod
     def init(cls):
         cls.db_driver = get_system_config("db_driver")
         cls.mysql_cloud_type = SystemConfig.get_str("mysql_cloud_type")
         cls.mysql_database = SystemConfig.get_str("mysql_database")
+        cls.user_max_log_size = SystemConfig.get_int("user_max_log_size", 500)
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
