@@ -3,14 +3,11 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-07 19:09:56
 @LastEditors  : xupingmao
-@LastEditTime : 2023-04-05 19:59:15
+@LastEditTime : 2023-07-02 19:58:22
 @FilePath     : /xnote/handlers/common/base_footer.html
 @Description  : 描述
  #} -->
 {% init _cost_time = -1 %}
-
-{# 默认和导航保持一致 #}
-{% init _show_footer = show_nav %}
 
 {% if xconfig.DEV_MODE %}
 <div class="x-center">
@@ -23,7 +20,7 @@
 </div>
 {% end %}
 
-{% if _show_footer %}
+{% if show_nav and xconfig.WebConfig.ui_show_footer %}
 <div class="footer">
     <div class="x-center pad10">
         <div>
