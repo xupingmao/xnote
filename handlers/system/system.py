@@ -106,7 +106,7 @@ SYS_TOOLS = [
     admin_link("Shell",    "/tools/shell", "terminal"),
     admin_link("集群管理", "/system/sync?p=home", "server"),
 
-    user_link("Menu_Plugin",   "/plugins_list?show_back=true", "cogs"),
+    user_link("Menu_Plugin",   "/plugin_category_list?category=index&show_back=true", "cogs"),
     # 关于链接，支持外链
     about_link(),
 ]
