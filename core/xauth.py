@@ -142,7 +142,7 @@ class UserDao:
         user.pop("id")
         db = get_user_db()
         user_id = db.insert(**user)
-        xutils.trace("UserAdd", name)
+        #xutils.trace("UserAdd", name)
         if fire_event:
             event = Storage(user_name=name)
             xmanager.fire("user.create", event)
