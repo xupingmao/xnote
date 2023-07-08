@@ -222,3 +222,18 @@ def init_webutil_env(is_test = False):
     global IS_TEST
     IS_TEST = is_test
 
+
+class SuccessResult(web.Storage):
+
+    def __init__(self, data=None):
+        self.success = True
+        self.code = "success"
+        self.data = data
+
+
+class FailedResult(web.Storage):
+
+    def __init__(self, code="500", message=""):
+        self.success = False
+        self.code = code
+        self.message = message

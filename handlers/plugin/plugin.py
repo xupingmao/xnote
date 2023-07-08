@@ -157,6 +157,7 @@ class PluginContext(Storage):
     """插件上下文"""
 
     def __init__(self):
+        self.namespace = "" # 唯一识别符号
         self.title = ""
         self.name = ""
         self.url = ""  # 这个应该算是基础url，用于匹配访问日志
@@ -265,6 +266,10 @@ def load_plugin_file(fpath, fname=None):
         # 读取meta信息
         context.load_from_meta(meta)
         context.fpath = fpath
+        context.namespace = meta.get_str_value("namespace")
+        if context.namespace == "":
+            # 兼容没有namespace的数据
+            context.namespace = fpath
 
         if meta.has_tag("disabled"):
             return

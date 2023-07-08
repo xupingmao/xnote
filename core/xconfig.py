@@ -246,6 +246,7 @@ class FileConfig:
         cls.record_db_file = cls.get_db_path("record")
         cls.db_backup_expire_days = SystemConfig.get_int("db_backup_expire_days", 5)
         cls.plugins_dir = os.path.join(cls.data_dir, "scripts", "plugins")
+        cls.plugins_upload_dir = os.path.join(cls.plugins_dir, "upload")
 
         cls.template_base_nav_left = SystemConfig.get_str("template_base_nav_left", "common/nav/base_nav_left.html")
         cls.template_base_nav_top = SystemConfig.get_str("template_base_nav_top", "common/nav/base_nav_top.html")

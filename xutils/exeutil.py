@@ -196,6 +196,8 @@ def load_script(name, vars = None, dirname = None, code = None):
 
 
 class ScriptMeta:
+    """脚本的meta信息处理
+    """
 
     def __init__(self):
         self.meta_dict = dict()
@@ -252,7 +254,7 @@ class ScriptMeta:
     def get_raw_value(self, key):
         return self.meta_dict.get(key)
 
-    def get_str_value(self, key, default_value = None):
+    def get_str_value(self, key, default_value = ""):
         value = self.meta_dict.get(key)
         if value is None:
             return default_value
@@ -269,13 +271,13 @@ class ScriptMeta:
             return []
         return [value]
 
-    def get_bool_value(self, key, default_value = None):
+    def get_bool_value(self, key, default_value = False):
         value = self.meta_dict.get(key)
         if value is None:
             return default_value
         return "true" == value.lower()
 
-    def get_int_value(self, key, default_value = None):
+    def get_int_value(self, key, default_value = 0):
         value = self.get_raw_value(key)
         if value is None:
             return default_value
@@ -284,7 +286,7 @@ class ScriptMeta:
         except:
             return default_value
 
-    def get_float_value(self, key, default_value = None):
+    def get_float_value(self, key, default_value = 0.0):
         value = self.get_raw_value(key)
         if value is None:
             return default_value

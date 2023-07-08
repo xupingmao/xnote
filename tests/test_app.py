@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-23 00:30:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-01 16:26:58
+@LastEditTime : 2023-07-08 12:09:29
 @FilePath     : /xnote/tests/test_app.py
 @Description  : 描述
 """
@@ -445,3 +445,15 @@ class Main:
         xtemplate.init()
         text = xtemplate.render("$plugin/test_plugin.html")
         assert text.strip() == b"plugin"
+
+    def test_plugin_upload(self):
+        user = xauth.get_user_by_name("admin")
+        assert user != None
+        content = """
+# @namespace test-upload-plugin
+# @title test-upload-plugin
+# @api-level 2.8
+        """
+        resp = json_request("/plugins_upload", data=dict(content=content, token=user.token), method="POST")
+        assert isinstance(resp, dict)
+        assert resp["success"] == True
