@@ -33,6 +33,7 @@
 }
 
 .x-tab.active {
+    display: inherit;
     color: #000;
 }
 
