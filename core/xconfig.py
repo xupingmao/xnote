@@ -278,6 +278,8 @@ class WebConfig:
     
     nav_list = []
 
+    auth_max_session_size = 20
+
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
@@ -285,6 +287,7 @@ class WebConfig:
         cls.about_text = SystemConfig.get_str("about_text", "关于Xnote")
         cls.ui_show_footer = SystemConfig.get_bool("ui_show_footer")
         cls.nav_list = cls.load_nav_list()
+        cls.auth_max_session_size = SystemConfig.get_int("auth_max_session_size")
     
     @classmethod
     def load_nav_list(cls):

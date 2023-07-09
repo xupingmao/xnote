@@ -40,7 +40,6 @@ NAME_LENGTH_MIN = 4
 PASSWORD_LEN_MIN = 6
 INVALID_NAMES = None
 USER_CONFIG_PROP = {}  # type: dict
-MAX_SESSION_SIZE = 20
 SESSION_EXPIRE = 24 * 3600 * 7
 PRINT_DEBUG_LOG = False
 
@@ -381,10 +380,10 @@ def create_session_by_user(user_detail, expires=SESSION_EXPIRE, login_ip=""):
     session_list = list_user_session_detail(user_name)
     session_list.sort(key=lambda x: x.expire_time)
 
-    if len(session_list) > MAX_SESSION_SIZE:
+    if len(session_list) > xconfig.WebConfig.auth_max_session_size:
         # 踢出最早的登录
-        oldest = session_list[0]
-        delete_user_session_by_id(oldest.sid)
+        for old_session in session_list[0:2]:
+            delete_user_session_by_id(old_session.sid)
 
     # 保存会话信息
     session_info = SessionInfo()
@@ -841,11 +840,9 @@ def init():
     global USER_TABLE
     global INVALID_NAMES
     global USER_CONFIG_PROP
-    global MAX_SESSION_SIZE
 
     INVALID_NAMES = xconfig.load_invalid_names()
     USER_CONFIG_PROP = xconfig.load_user_config_properties()
-    MAX_SESSION_SIZE = xconfig.get_system_config("auth_max_session_size")
 
     SessionModel.init()
 
