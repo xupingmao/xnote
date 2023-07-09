@@ -91,8 +91,8 @@ class NoteDO(Storage):
         self.parent_id = "0" # 默认挂在根目录下
         self.content = ""
         self.data = ""
-        self.is_deleted = 0
-        self.is_public = False
+        self.is_deleted = 0 # 0-正常， 1-删除
+        self.is_public = 0  # 0-不公开, 1-公开
         self.token = ""
         self.priority = 0 # 1-正常
         self.visited_cnt = 0
@@ -1085,9 +1085,9 @@ def list_public(offset, limit, orderby="ctime_desc"):
             logging.warning("笔记已删除:%s,name:%s", note.id, note.name)
             _public_db.delete(note)
         
-        if str(note.id) != note._id:
+        if note_info != None and not note_info.is_public:
             # FIX 历史数据
-            logging.warning("笔记ID不匹配:%s,%s", note.id, note._id)
+            logging.warning("分享状态不匹配: %s", note.id)
             _public_db.delete(note)
 
     return public_notes
@@ -1732,5 +1732,4 @@ xutils.register_func("note.refresh_note_stat_async", refresh_note_stat_async)
 NoteDao.get_by_id_creator = get_by_id_creator
 NoteDao.get_root = get_root
 NoteDao.batch_query_list = batch_query_list
-NoteDao.add_history = add_history
 NoteDao.get_note_stat = get_note_stat

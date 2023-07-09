@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-03 09:09:49
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 10:53:34
+@LastEditTime : 2023-07-09 11:38:16
 @FilePath     : /xnote/handlers/note/dao_book.py
 @Description  : 描述
 """
@@ -45,7 +45,7 @@ def check_and_create_default_book(user_name):
             default_book.content = ""
             default_book.creator = user_name
             default_book.is_default = True
-            default_book.is_public = False
+            default_book.is_public = 0
             default_book.type = "group"
             default_book.priority = 1
             default_book.children_count = 0
@@ -62,7 +62,7 @@ def check_and_create_default_book(user_name):
             update_kw.type = "group"
             update_kw.priority = 1
             update_kw.is_default = True
-            update_kw.is_public = False
+            update_kw.is_public = 0
             update_kw.children_count = 0
             update_kw.is_deleted = 0
             update_kw.size = 0

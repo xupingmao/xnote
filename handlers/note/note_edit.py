@@ -362,8 +362,8 @@ class NoteShareHandler:
 
     @xauth.login_required()
     def GET(self):
-        id      = xutils.get_argument("id")
-        note    = check_get_note(id)
+        id = xutils.get_argument_str("id")
+        check_get_note(id)
         note_dao.update_note(id, is_public = 1)
         return dict(code = "success")
 
@@ -435,7 +435,7 @@ def update_and_notify(file, update_kw):
             raise NoteException("conflict", "当前笔记正在被其他设备编辑")
 
     # 先记录变更历史
-    NoteDao.add_history(file.id, update_kw.get("version"), update_kw)
+    note_dao.add_history(file.id, update_kw.get("version"), update_kw)
 
     # 执行变更
     rowcount = note_dao.update_note(file.id, **update_kw)
