@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 11:15:43
+@LastEditTime : 2023-07-09 11:42:50
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -220,7 +220,7 @@ class HttpClient:
             assert isinstance(result_obj, dict)
             return result_obj
         except:
-            logging.error("解析json失败:%s", result)
+            logging.error("解析json失败, result=%s", result)
             raise Exception("解析JSON失败")
     
     def list_db(self, last_key):
