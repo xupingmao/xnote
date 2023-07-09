@@ -37,11 +37,12 @@ def get_safe_file_name(filename):
     return filename
 
 
-def generate_filename(filename, prefix, ext=None):
+def generate_filename(filename, prefix="", ext=None):
     if prefix:
         prefix = prefix + '_'
     else:
-        prefix = ''
+        prefix = ""
+
     if filename is None:
         filename = time.strftime("%Y%m%d_%H%M%S")
         filename += "_" + xutils.create_uuid()
@@ -149,10 +150,12 @@ class UploadHandler:
     @xauth.login_required()
     def POST(self):
         file = xutils.get_argument("file", {})
-        prefix = xutils.get_argument("prefix")
-        name = xutils.get_argument("name")
-        note_id = xutils.get_argument("note_id")
+        prefix = xutils.get_argument_str("prefix")
+        name = xutils.get_argument_str("name")
+        note_id = xutils.get_argument_str("note_id")
         user_name = xauth.current_name()
+        webpath = ""
+        filename = ""
 
         if file.filename != None:            
             filename = get_safe_file_name(file.filename)
@@ -180,16 +183,16 @@ class UploadHandler:
 
     @xauth.login_required()
     def GET(self):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
 
         xmanager.add_visit_log(user_name, "/fs_upload")
 
-        year = xutils.get_argument("year", time.strftime("%Y"))
-        month = xutils.get_argument("month", time.strftime("%m"))
+        year = xutils.get_argument_str("year", time.strftime("%Y"))
+        month = xutils.get_argument_str("month", time.strftime("%m"))
         if len(month) == 1:
             month = '0' + month
 
-        dirname = os.path.join(xconfig.DATA_DIR, "files",
+        dirname = os.path.join(xconfig.FileConfig.data_dir, "files",
                                user_name, "upload", year, month)
         pathlist = fsutil.listdir_abs(dirname)
 
@@ -237,11 +240,11 @@ class RangeUploadHandler:
         user_name = xauth.current_name()
         part_file = True
         chunksize = 5 * 1024 * 1024
-        chunk = xutils.get_argument("chunk", 0, type=int)
+        chunk = xutils.get_argument_int("chunk")
         chunks = xutils.get_argument("chunks", 1, type=int)
         file = xutils.get_argument("file", {})
         prefix = xutils.get_argument("prefix", "")
-        dirname = xutils.get_argument("dirname", xconfig.DATA_DIR)
+        dirname = xutils.get_argument_str("dirname", xconfig.DATA_DIR)
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
         note_id = xutils.get_argument("note_id")
 
@@ -321,8 +324,8 @@ class UploadSearchHandler:
 
     @xauth.login_required()
     def GET(self):
-        key = xutils.get_argument("key")
-        user_name = xauth.current_name()
+        key = xutils.get_argument_str("key")
+        user_name = xauth.current_name_str()
         user_dir = os.path.join(xconfig.UPLOAD_DIR, user_name)
 
         find_key = "*" + key + "*"

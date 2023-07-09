@@ -102,7 +102,8 @@ $(function() {
     });
 
     $("body").on("paste", ".edit-box,.input-box", function (e) {
-        xnote.requestUploadByClip(e, "msg", function (resp) {
+        var filePrefix = "";
+        xnote.requestUploadByClip(e, filePrefix, function (resp) {
             console.log(resp);
             var webpath = "file://" + resp.webpath;
             xnote.action.message.updateInputBox(webpath);

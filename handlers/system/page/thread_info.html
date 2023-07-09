@@ -47,7 +47,7 @@ $(function () {
     $(".view-detail").click(function (e) {
         var value = $(this).attr("data-value");
         var html  = $("<div>").addClass("card").text(value);
-        xnote.showDialog("线程详情", html.prop("outerHTML"));
+        xnote.showDialog("线程详情", html.prop("outerHTML"), ["确定"]);
     });
 })
 </script>

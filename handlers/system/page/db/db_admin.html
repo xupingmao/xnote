@@ -113,7 +113,7 @@ $(function () {
     $("body").on("click", ".view-btn", function (e) {
         var value = $(this).attr("data-value");
         var text = $("<textarea>").text(value).addClass("value-detail");
-        xnote.showDialog("数据详情", text.prop("outerHTML"));
+        xnote.showDialog("数据详情", text.prop("outerHTML"), ["确定"]);
     }); 
 
     $(".do-search-btn").click(function (e) {
