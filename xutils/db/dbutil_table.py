@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 21:38:31
+@LastEditTime : 2023-07-09 09:51:04
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -444,9 +444,10 @@ class LdbTable:
         :param {int} offset: 返回结果下标开始
         :param {int} limit:  返回结果最大数量
         :param {bool} reverse: 返回结果是否逆序
+        :param {dict} where: where查询条件
         :param {str} key_from: 开始的key，这里是相对的key，也就是不包含table_name
         :param {func} filter_func: 过滤函数
-        :param user_name: 用户标识
+        :param {str} user_name: 用户标识
         """
         if key_from == "":
             key_from = None

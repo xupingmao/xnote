@@ -795,7 +795,7 @@ class PluginCategoryListHandler:
 
     @xauth.login_required()
     def GET(self):
-        version = xutils.get_argument("version", "")
+        version = xutils.get_argument_str("version")
         current_role = xauth.current_role()
         total_count = 0
         count_dict = dict()
@@ -827,6 +827,8 @@ class PluginCategoryListHandler:
         plugins.append(root)
 
         for key in category_keys:
+            if key == "":
+                continue
             p = PluginContext()
             p.title = get_category_name_by_code(key)
             url = get_category_url_by_code(key)

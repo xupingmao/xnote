@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 # @api-level 2.8
+# @namespace $namespace
 # @since $since
 # @author $author
 # @version 1.0.0

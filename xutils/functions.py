@@ -183,6 +183,9 @@ class MemTable:
 
     def __str__(self):
         return str(self.data)
+    
+    def new_value(self, name, extinfo):
+        return HistoryItem(name, extinfo)
 
     @staticmethod
     def get_items(name):
