@@ -635,9 +635,9 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     return note_id
 
 
-def create_token(type, id):
+def create_token(type, note_id=""):
     uuid = textutil.generate_uuid()
-    token_info = Storage(type=type, id=id)
+    token_info = Storage(type=type, id=note_id)
     dbutil.put("token:%s" % uuid, token_info)
     return uuid
 
@@ -1066,24 +1066,31 @@ def list_public(offset, limit, orderby="ctime_desc"):
     else:
         index_name = "share_time"
 
-    notes = _public_db.list_by_index(index_name,
+    public_notes = _public_db.list_by_index(index_name,
                              offset=offset, limit=limit, reverse=True)
 
-    build_note_list_info(notes)
+    build_note_list_info(public_notes)
 
     note_ids = []
-    for note in notes:
+    for note in public_notes:
+        assert isinstance(note, Storage)
         note_ids.append(note.id)
 
     batch_result = _index_db.batch_get_by_id(note_ids)
 
-    for note in notes:
+    for note in public_notes:
         assert isinstance(note, Storage)
-        if note.is_deleted or batch_result.get(note.id) == None:
+        note_info = batch_result.get(note.id)
+        if note.is_deleted or note_info == None:
             logging.warning("笔记已删除:%s,name:%s", note.id, note.name)
-            _public_db.delete_by_id(note.id)
+            _public_db.delete(note)
+        
+        if str(note.id) != note._id:
+            # FIX 历史数据
+            logging.warning("笔记ID不匹配:%s,%s", note.id, note._id)
+            _public_db.delete(note)
 
-    return notes
+    return public_notes
 
 
 def count_public():

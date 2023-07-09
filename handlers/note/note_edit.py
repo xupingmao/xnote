@@ -17,6 +17,7 @@ from xutils import dateutil
 from xutils import cacheutil
 from xutils import dbutil
 from xutils import textutil
+from xutils import webutil
 from xtemplate import T
 from .constant import *
 from . import dao_delete
@@ -388,12 +389,12 @@ class LinkShareHandler:
     def POST(self):
         id   = xutils.get_argument("id")
         note = check_get_note(id)
-        if note.token != None:
-            return dict(code = "success", data = "/note/view?token=%s" % note.token)
+        if note.token != None and note.token != "":
+            return webutil.SuccessResult(data = "/note/view?token=%s" % note.token)
         else:
             token = note_dao.create_token("note", note.id)
             note_dao.update_note(note.id, token = token)
-        return dict(code = "success", data = "/note/view?token=%s" % token)
+        return webutil.SuccessResult(data = "/note/view?token=%s" % token)
 
 class UnshareHandler:
 

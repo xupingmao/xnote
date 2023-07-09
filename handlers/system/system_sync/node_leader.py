@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 19:36:27
+@LastEditTime : 2023-07-09 11:21:07
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -171,7 +171,7 @@ class Leader(NodeManagerBase):
             return True
         return key.startswith(skipped_prefix_tuple)
 
-    def list_binlog(self, last_seq, limit=20, include_req_seq=True):
+    def list_binlog(self, last_seq=0, limit=20, include_req_seq=True):
         """列出指定条件的binlog
         include_req_seq: 是否包含请求的seq对应的binlog
         """
@@ -186,7 +186,7 @@ class Leader(NodeManagerBase):
             if self.skip_db_sync(record_key):
                 return None
             table_name, seq = key.split(":")
-            value["seq"] = int(seq)
+            value["seq"] = BinLog._unpack_id(seq)
             return value
 
         data_list = []
@@ -196,6 +196,7 @@ class Leader(NodeManagerBase):
             logging.debug("binlogs:%s", binlogs)
 
         for log in binlogs:
+            assert isinstance(log, Storage)
             if not include_req_seq and log.seq == last_seq:
                 continue
             

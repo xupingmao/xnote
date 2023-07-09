@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-27 12:58:37
+@LastEditTime : 2023-07-09 11:15:43
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -22,7 +22,7 @@ from xutils import textutil
 from xutils import dateutil
 from xutils import fsutil
 from xutils import dbutil
-from xutils.imports import quote
+from xutils.six.moves.urllib.parse import quote
 from xutils.mem_util import log_mem_info_deco
 
 RETRY_INTERVAL = 60
@@ -205,7 +205,7 @@ class HttpClient:
         return netutil.http_get(url, params=params)
 
     @log_mem_info_deco("proxy.list_binlog")
-    def list_binlog(self, last_seq) -> dict:
+    def list_binlog(self, last_seq=0) -> dict:
         assert isinstance(last_seq, int)
         params = dict(last_seq=str(last_seq), include_req_seq="false")
 

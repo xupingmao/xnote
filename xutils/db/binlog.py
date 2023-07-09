@@ -4,12 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 19:25:50
+@LastEditTime : 2023-07-09 11:24:11
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
 from xutils.db.dbutil_base import count_table, prefix_iter
-from xutils.db.dbutil_table import db_put, prefix_list, register_table, create_write_batch
+from xutils.db.dbutil_table import db_put, prefix_list, register_table, create_write_batch, db_batch_delete
 
 import struct
 import threading
@@ -50,6 +50,9 @@ class BinLog:
         
         id_bytes = base64.b16decode(id_str.upper())
         return struct.unpack('>Q', id_bytes)[0]
+
+    def _pack_id_v0(self, log_id=0):
+        return "%020d" % log_id
 
     @classmethod
     def get_instance(cls):
@@ -107,7 +110,7 @@ class BinLog:
                 binlog_body["value"] = value
             self._put_log(binlog_id, binlog_body, batch=batch)
 
-    def list(self, last_seq, limit, map_func=None):
+    def list(self, last_seq=0, limit=10, map_func=None):
         """从last_seq开始查询limit个binlog"""
         start_id = self._pack_id(last_seq)
         key_from = self._table_name + ":" + start_id
@@ -135,6 +138,16 @@ class BinLog:
                     if len(keys) >= batch_size:
                         self.delete_batch(keys)
                         keys = []
+                
+                # 兼容历史版本
+                key_from_old = self._table_name + ":" + self._pack_id_v0(start_seq)
+                key_to_old = self._table_name + ":" + self._pack_id_v0(start_seq + limit)
+                for key, value in prefix_iter(self._table_name, key_from=key_from_old, key_to=key_to_old, include_key=True):
+                    keys.append(key)
+                    if len(keys) >= batch_size:
+                        self.delete_batch(keys)
+                        keys = []
+                
                 self.delete_batch(keys)
     
     def delete_batch(self, keys):
@@ -142,6 +155,4 @@ class BinLog:
             return
         if self.log_debug:
             self.logger.info("Delete keys: %s", keys)
-        with create_write_batch() as batch:
-            for key in keys:
-                batch.delete(key)
+        db_batch_delete(keys)
