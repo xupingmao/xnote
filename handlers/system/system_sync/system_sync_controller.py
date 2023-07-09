@@ -321,7 +321,7 @@ class LeaderHandler(SyncHandler):
             return self.list_files()
 
         if p == "list_binlog":
-            binlog_last_seq = xutils.get_argument("last_seq", 0, type=int)
+            binlog_last_seq = xutils.get_argument_int("last_seq")
             limit = xutils.get_argument_int("limit", 20)
             include_req_seq = xutils.get_argument_bool("include_req_seq", True)
             return LEADER.list_binlog(binlog_last_seq, limit, include_req_seq=include_req_seq)

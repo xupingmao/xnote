@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 11:24:11
+@LastEditTime : 2023-07-09 11:46:38
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -48,8 +48,11 @@ class BinLog:
         if len(id_str) == 20:
             return int(id_str)
         
-        id_bytes = base64.b16decode(id_str.upper())
-        return struct.unpack('>Q', id_bytes)[0]
+        if len(id_str) == 16:
+            id_bytes = base64.b16decode(id_str.upper())
+            return struct.unpack('>Q', id_bytes)[0]
+
+        raise Exception("can not unpack value: %r" % id_str)
 
     def _pack_id_v0(self, log_id=0):
         return "%020d" % log_id

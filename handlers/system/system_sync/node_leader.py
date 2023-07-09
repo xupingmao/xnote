@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 11:21:07
+@LastEditTime : 2023-07-09 12:05:35
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -176,17 +176,30 @@ class Leader(NodeManagerBase):
         include_req_seq: 是否包含请求的seq对应的binlog
         """
         sync_diff = self.binlog.last_seq - last_seq
+        binlog_size = self.binlog.count_size()
         out_of_sync = sync_diff > self.binlog.count_size()
+        is_broken = False
+        broken_reason = ""
 
-        if (last_seq <= 0) or (last_seq > self.binlog.last_seq) or out_of_sync:
-            return dict(code="sync_broken", message="同步中断，请重新同步")
+        if last_seq <= 0:
+            broken_reason = "sync_broken: last_seq<=0"
+            is_broken = True
+        if last_seq > self.binlog.last_seq:
+            broken_reason = "sync_broken: last_seq=%s, binlog.last_seq=%s" % (last_seq, self.binlog.last_seq)
+            is_broken = True
+        if out_of_sync:
+            broken_reason = "sync_broken: sync_diff=%s, binlog_size=%s"% (sync_diff, binlog_size)
+            is_broken = True
+        
+        if is_broken:
+            return webutil.FailedResult(code="sync_broken", message="同步中断，请重新同步: %s" % broken_reason)
 
         def map_func(key, value):
             record_key = value.get("key")
             if self.skip_db_sync(record_key):
                 return None
             table_name, seq = key.split(":")
-            value["seq"] = BinLog._unpack_id(seq)
+            value["seq"] = self.binlog._unpack_id(seq)
             return value
 
         data_list = []
@@ -207,10 +220,7 @@ class Leader(NodeManagerBase):
                 
             data_list.append(log)
 
-        result = Storage()
-        result.code = "success"
-        result.data = data_list[:limit]
-        return result
+        return webutil.SuccessResult(data_list[:limit])
 
     def list_db(self, last_key, limit=20):
         def filter_func(key, value):

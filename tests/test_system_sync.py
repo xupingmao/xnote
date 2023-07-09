@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-19 16:59:16
+@LastEditTime : 2023-07-09 12:07:56
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -280,3 +280,16 @@ class TestSystemSync(BaseTestCase):
         manager.build_full_index()
         result = manager.list_files(None)
         self.assertTrue(len(result) > 0)
+    
+    def test_leader_list_binlog(self):
+        from handlers.system.system_sync.system_sync_controller import LEADER
+        from xutils.db.binlog import BinLog
+        binlog = BinLog.get_instance()
+        binlog.set_max_size(1000)
+        binlog.set_enabled(True)
+
+        for i in range(20):
+            binlog.add_log("put", "test", i)
+        last_seq = binlog.last_seq - 10
+        result = LEADER.list_binlog(last_seq=last_seq, limit=20)
+        assert result.success == True
