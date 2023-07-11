@@ -727,6 +727,8 @@ class TestMain(BaseTestCase):
 
         for i in range(20):
             binlog.add_log("put", "test_binlog_clear", "test")
+            start_seq = binlog.find_start_seq()
+            assert isinstance(start_seq, int)
 
         binlog.delete_expired()
 

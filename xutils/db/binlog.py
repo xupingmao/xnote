@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 11:46:38
+@LastEditTime : 2023-07-11 23:18:35
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -91,7 +91,8 @@ class BinLog:
         if len(logs) == 0:
             return 1
         key, value = logs[0]
-        return int(key.split(":")[1])
+        id_part = key.split(":")[1]
+        return self._unpack_id(id_part)
 
     def _put_log(self, log_id, log_body, batch=None):
         key = self.get_record_key(log_id)
