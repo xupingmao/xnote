@@ -480,12 +480,18 @@ class TestMain(BaseTestCase):
         self.assertIsNotNone(obj3_found)
         self.assertIsNone(obj4_found)
 
+        assert isinstance(obj1_found, Storage)
+        assert isinstance(obj2_found, Storage)
+        assert isinstance(obj3_found, Storage)
+
         self.assertEqual(decode_id(obj1_found._id) +
                          1, decode_id(obj2_found._id))
         self.assertEqual(decode_id(obj2_found._id) +
                          1, decode_id(obj3_found._id))
 
         results = db.list_by_index("age", limit=10)
+        assert isinstance(results, list)
+
         self.assertEqual(3, len(results))
         self.assertEqual(20, results[0].age)
         self.assertEqual(21, results[1].age)
@@ -544,6 +550,7 @@ class TestMain(BaseTestCase):
 
         params = dict(age=20)
         data = shard_manager.query_page(1, 10, params)
+        assert isinstance(data, list)
 
         print("shard page(1,10) query result:", data)
 
@@ -556,6 +563,7 @@ class TestMain(BaseTestCase):
         self.assertEqual("b3", data[5]["key"])
 
         data = shard_manager.query_page(2, 3, params)
+        assert isinstance(data, list)
 
         print("shard page(2,3) query result:", data)
 
