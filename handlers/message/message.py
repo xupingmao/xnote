@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 14:25:33
+@LastEditTime : 2023-07-15 00:07:54
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -638,30 +638,28 @@ def get_or_create_keyword(user_name, content, ip):
             return item
         return create_message(user_name, "key", content, ip)
 
-
-def apply_rules(user_name, id, tag, content):
-    global MSG_RULES
-    ctx = Storage(id=id, content=content, user=user_name, type="")
-    for rule in MSG_RULES:
-        rule.match_execute(ctx, content)
-
-
 class SaveAjaxHandler:
+
+    def apply_rules(self, user_name, id, tag, content):
+        global MSG_RULES
+        ctx = Storage(id=id, content=content, user=user_name, type="")
+        for rule in MSG_RULES:
+            rule.match_execute(ctx, content)
 
     @xauth.login_required()
     def do_post(self):
         id = xutils.get_argument("id")
-        content = xutils.get_argument("content")
+        content = xutils.get_argument_str("content")
         tag = xutils.get_argument("tag", DEFAULT_TAG)
-        location = xutils.get_argument("location", "")
+        location = xutils.get_argument_str("location", "")
         user_name = xauth.get_current_name()
         ip = get_remote_ip()
 
-        if content == None or content == "":
+        if content == "":
             return dict(code="fail", message="输入内容为空!")
 
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
-        apply_rules(user_name, id, tag, content)
+        self.apply_rules(user_name, id, tag, content)
 
         if id == "" or id is None:
             item = touch_key_by_content(user_name, tag, content)
@@ -1111,8 +1109,8 @@ class MessageKeywordAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        keyword = xutils.get_argument("keyword", "")
-        action = xutils.get_argument("action", "")
+        keyword = xutils.get_argument_str("keyword")
+        action = xutils.get_argument_str("action")
 
         assert keyword != ""
         assert action != ""

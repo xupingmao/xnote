@@ -115,11 +115,16 @@ class TestMain(BaseTestCase):
 
     def test_message_key(self):
         key_result = json_request("/message/list?tag=key")
+        assert isinstance(key_result, dict)
+
         for item in key_result["data"]:
             del_msg_by_id(item["id"])
 
         response = json_request(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test", tag="key"))
+    
+        assert isinstance(response, dict)
+
         self.assertEqual("success", response.get("code"))
         data = response.get("data")
         msg_id = data['id']
@@ -211,6 +216,9 @@ class TestMain(BaseTestCase):
     def test_message_keyword_mark(self):
         response = json_request(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test #test#"))
+        
+        assert isinstance(response, dict)
+        
         self.assertEqual("success", response.get("code"))
 
         result = json_request("/message/keyword", method="POST", data=dict(action="mark", keyword="#test#"))

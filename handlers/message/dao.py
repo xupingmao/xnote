@@ -47,6 +47,7 @@ class MessageDO(Storage):
     def from_dict(cls, dict_value):
         result = MessageDO()
         result.update(dict_value)
+        result.id = result._key
         return result
     
     @classmethod
@@ -161,15 +162,13 @@ def _create_message_without_date(kw):
 
     if tag == 'key':
         _keyword_db.insert(kw)
-        key = kw["_key"]
-        kw["id"] = key
-        _keyword_db.update(kw)
     else:
         _msg_db.insert(kw)
-        key = kw["_key"]
-        kw["id"] = key
-        _msg_db.update(kw)
+        
+    key = kw.get("_key")
+    assert isinstance(key, str)
 
+    kw["id"] = key
     execute_after_create(kw)
     return key
 
@@ -442,8 +441,8 @@ def get_filter_by_tag_func(tag):
     return filter_func
 
 
-def list_key(user, offset, limit=-1):
-    items = dbutil.prefix_list("msg_key:%s" % user)
+def list_key(user, offset=0, limit=1000):
+    items = _keyword_db.list_by_user(user_name=user, offset=offset,limit=limit)
     items.sort(key=lambda x: x.mtime, reverse=True)
 
     if limit < 0:

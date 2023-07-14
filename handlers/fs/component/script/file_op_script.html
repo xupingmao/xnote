@@ -54,7 +54,7 @@ xnote.action.fs.openOptionDialog = function (target) {
 
 xnote.action.fs.download = function(target) {
     var path = $(target).attr("data-path");
-    window.open("/fs/" + path +"?type=blob", "_blank");
+    window.open("{{_server_home}}/fs/~" + path +"?type=blob", "_blank");
 };
 
 xnote.action.fs.move = function(target) {
