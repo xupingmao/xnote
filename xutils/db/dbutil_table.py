@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-15 18:22:55
+@LastEditTime : 2023-07-15 18:34:25
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -414,6 +414,8 @@ class LdbTable:
         self.delete_by_key(obj_key)
 
     def batch_delete(self, obj_list=[]):
+        if len(obj_list) == 0:
+            return
         keys = []
         for obj in obj_list:
             key = self._get_key_from_obj(obj)
