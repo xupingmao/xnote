@@ -7,7 +7,7 @@
 """这里定义一个通用的K-V数据库接口
 PS: 接口是以Leveldb的接口为模板定义的
 """
-
+import web
 import warnings
 import threading
 
@@ -194,6 +194,17 @@ class CacheInterface:
 class SqlLoggerInterface:
 
     def append(self, sql):
+        pass
+
+class ProfileLog(web.Storage):
+    def __init__(self):
+        self.ctime = ""
+        self.cost_time = 0.0
+        self.table_name = ""
+        self.op_type = ""
+
+class ProfileLogger:
+    def log(self, log):
         pass
 
 empty_db = DBInterface()

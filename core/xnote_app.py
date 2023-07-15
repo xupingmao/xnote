@@ -31,7 +31,8 @@ from xutils.mem_util import log_mem_info_deco
 from xutils import mem_util
 from xutils import Storage
 from xutils import dbutil
-from xutils import cacheutil
+from xutils import cacheutil, interfaces
+from xutils.sqldb import TableProxy
 from . import xnote_code_builder, xnote_hooks
 import threading
 import xnote_trace
@@ -141,21 +142,18 @@ def init_sql_db():
     xtables.init()
 
 
-@log_mem_info_deco("init_kv_db")
-def init_kv_db():
+@log_mem_info_deco("init_kv_engine")
+def init_kv_engine():
     try:
-        block_cache_size = xconfig.get_global_config("system.block_cache_size")
-        write_buffer_size = xconfig.get_global_config(
-            "system.write_buffer_size")
-        max_open_files = xconfig.get_global_config("system.max_open_files")
-        db_log_debug = xconfig.get_system_config("db_log_debug")
-
+        block_cache_size = xconfig.DatabaseConfig.block_cache_size
+        write_buffer_size = xconfig.DatabaseConfig.write_buffer_size
+        max_open_files = xconfig.DatabaseConfig.max_open_files
         leveldb_kw = dict(block_cache_size=block_cache_size,
                           write_buffer_size=write_buffer_size,
                           max_open_files=max_open_files)
 
         db_instance = None
-        db_driver = xconfig.get_system_config("db_driver")
+        db_driver = xconfig.DatabaseConfig.db_driver
 
         if db_driver == "sqlite":
             from xutils.db.driver_sqlite import SqliteKV
@@ -206,9 +204,7 @@ def init_kv_db():
         dbutil.set_driver_name(db_driver)
 
         # 是否开启binlog
-        binlog = xconfig.get_system_config("binlog")
-        assert isinstance(binlog, bool)
-
+        binlog = xconfig.DatabaseConfig.binlog
         db_cache = cacheutil.MultiLevelCache()  # 多级缓存：内存+持久化
 
         # 初始化leveldb数据库
@@ -216,12 +212,27 @@ def init_kv_db():
                     db_instance=db_instance,
                     db_cache=db_cache,
                     binlog=binlog,
-                    binlog_max_size=xconfig.get_system_config("binlog_max_size"))
+                    binlog_max_size=xconfig.DatabaseConfig.binlog_max_size)
     except:
         xutils.print_exc()
         logging.error("初始化数据库失败...")
         sys.exit(1)
 
+class DBProfileLogger(interfaces.ProfileLogger):
+
+    def __init__(self):
+        self.db = dbutil.get_table("sys_log")
+
+    def log(self, log):
+        self.db.insert(log, id_type="timeseq")
+
+@log_mem_info_deco("init_kv_engine")
+def init_kv_db():
+    init_kv_engine()
+    xtables_new.init()
+    if xconfig.DatabaseConfig.db_profile_table_proxy:
+        TableProxy.profile_logger = DBProfileLogger()
+        TableProxy.log_profile = True
 
 def init_autoreload():
 
@@ -300,7 +311,6 @@ def init_app_no_lock(boot_config_kw=None):
     # 初始化数据库
     init_sql_db()
     init_kv_db()
-    xtables_new.init()
 
     # 初始化工具箱
     xutils.init(xconfig)

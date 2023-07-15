@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-11 14:17:01
+@LastEditTime : 2023-07-15 20:15:13
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -15,7 +15,8 @@ from xutils import dbutil
 @xutils.log_init_deco("xtables_new")
 def init():
     # 使用NoSQL风格的数据库接口
-    # 数据库索引保证最终一致，不保证强一致
+    # NoSQL适合的场景：大文档、配置、缓存、计数器、时序日志
+    # 尽量不要使用索引的功能，数据库索引保证最终一致，不保证强一致
     # 变更索引后需要调用 rebuild_index 方法
     dbutil.register_table("sys_log", "系统日志")
     dbutil.register_table("dict", "词典")

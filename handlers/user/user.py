@@ -69,7 +69,7 @@ class UserHandler:
         kw = Storage()
         kw.name = name
         kw.user_info = user_info
-        kw.log_list = OP_LOG_TABLE.list_by_user(name, reverse=True, limit=100)
+        kw.log_list = OP_LOG_TABLE.list_by_user(name, limit=100)
 
         return xtemplate.render("user/page/user_manage.html", **kw)
 
@@ -165,7 +165,7 @@ class UserOpLogHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name_str()
-        log_list = OP_LOG_TABLE.list_by_user(user_name, offset=0, limit=100, reverse=True)
+        log_list = OP_LOG_TABLE.list_by_user(user_name, limit=100)
         return xtemplate.render("user/page/user_op_log.html", log_list=log_list)
 
 

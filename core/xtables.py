@@ -170,7 +170,7 @@ def init_note_index_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    with create_record_table_manager("user") as manager:
+    with create_default_table_manager("user") as manager:
         manager.add_column("name",       "varchar(64)", "")
         manager.add_column("password",   "varchar(64)", "")
         manager.add_column("password_md5", "varchar(64)", "")
@@ -184,6 +184,16 @@ def init_user_table():
         manager.add_index("token")
         # 删除的字段
         manager.drop_column("privileges", "text", "")
+
+
+def init_user_op_log_table():
+    # 2023/07/15 用户操作日志，从kv迁移到sql
+    with create_default_table_manager("user_op_log") as manager:
+        manager.add_column("user_name", "varchar(64)", "")
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ip", "varchar(32)", "")
+        manager.add_column("type", "varchar(32)", "")
+        manager.add_column("detail", "text", "")
 
 
 def init_message_table():
@@ -368,3 +378,4 @@ def init():
     init_file_info()
     init_site_visit_log()
     init_note_tag_rel_table()
+    

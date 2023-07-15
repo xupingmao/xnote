@@ -356,6 +356,14 @@ class DatabaseConfig:
     user_max_log_size = 500 # 用户日志保留的最大条数
     db_debug = False
     db_log_debug = False
+    db_profile_table_proxy = False
+
+    binlog = False
+    binlog_max_size = 10000
+    # leveldb配置
+    block_cache_size = 16 * 1024**2
+    write_buffer_size = 4 * 1024**2
+    max_open_files = 1000
 
     # mysql相关配置
     mysql_cloud_type="" # mysql云服务类型
@@ -369,6 +377,12 @@ class DatabaseConfig:
         cls.user_max_log_size = SystemConfig.get_int("user_max_log_size", 500)
         cls.db_debug = SystemConfig.get_bool("db_debug")
         cls.db_log_debug = SystemConfig.get_bool("db_log_debug")
+        cls.binlog = SystemConfig.get_bool("binlog")
+        cls.binlog_max_size = SystemConfig.get_int("binlog_max_size")
+        cls.block_cache_size = SystemConfig.get_int("block_cache_size")
+        cls.write_buffer_size = SystemConfig.get_int("write_buffer_size")
+        cls.max_open_files = SystemConfig.get_int("max_open_files")
+        cls.db_profile_table_proxy = SystemConfig.get_int("db_profile_table_proxy")
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)

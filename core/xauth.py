@@ -867,11 +867,11 @@ class UserOpLogDao:
         assert isinstance(op_log, UserOpLog)
         assert op_log.user_name != ""
         cls.db.insert(op_log)
-        items = []
         if cls.db.count_by_user(op_log.user_name) > cls.max_log_size:
+            items = []
             for item in cls.db.list_by_user(op_log.user_name, limit=20):
                 items.append(item)
-        cls.db.batch_delete(items)
+            cls.db.batch_delete(items)
 
     @classmethod
     def list_by_user(cls, user_name="", offset=0, limit=20, reverse=True):

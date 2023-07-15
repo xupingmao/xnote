@@ -4,23 +4,33 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-15 17:39:45
+@LastEditTime : 2023-07-15 21:16:14
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
-
+import time
+import xutils
+from xutils.interfaces import ProfileLog, ProfileLogger
 from . import table_manager
 
 class TableProxy:
     """基于web.db的装饰器
     SqliteDB是全局唯一的，它的底层使用了连接池技术，每个线程都有独立的sqlite连接
     """
+    log_profile = False
+    profile_logger = ProfileLogger()
 
     def __init__(self, db, tablename):
         self.tablename = tablename
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         self.db = db
         self.table_info = None
+
+    def _new_profile_log(self):
+        log = ProfileLog()
+        log.ctime = xutils.format_datetime()
+        log.table_name = self.tablename
+        return log
 
     def fix_sql_keywords(self, where):
         # 兼容关键字
@@ -41,8 +51,20 @@ class TableProxy:
     def insert(self, seqname=None, _test=False, **values):
         self.fix_sql_keywords(values)
         # TODO 记录binlog
-        return self.db.insert(self.tablename, seqname, _test, **values)
-    
+        start_time = time.time()
+        try:
+            return self.db.insert(self.tablename, seqname, _test, **values)
+        except Exception as e:
+            del self.db.ctx.db # 尝试重新连接
+            raise e
+        finally:
+            cost_time = time.time() - start_time
+            if self.log_profile:
+                profile_log = self._new_profile_log()
+                profile_log.cost_time = cost_time
+                profile_log.op_type = "insert"
+                self.profile_logger.log(profile_log)
+        
     def _multiple_insert(self, values, seqname=None, _test=False):
         # sqlite不支持
         for value in values:
@@ -81,20 +103,36 @@ class TableProxy:
     def update(self, where, vars=None, _test=False, **values):
         self.fix_sql_keywords(where)
         # TODO 记录binlog
+        start_time = time.time()
         try:
             return self.db.update(self.tablename, where, vars=vars, _test=_test, **values)
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
+        finally:
+            cost_time = time.time() - start_time
+            if self.log_profile:
+                profile_log = self._new_profile_log()
+                profile_log.cost_time = cost_time
+                profile_log.op_type = "update"
+                self.profile_logger.log(profile_log)
 
     def delete(self,  where, using=None, vars=None, _test=False):
         self.fix_sql_keywords(where)
         # TODO 记录binlog
+        start_time = time.time()
         try:
             return self.db.delete(self.tablename, where, using=using, vars=vars, _test=_test)
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
+        finally:
+            cost_time = time.time() - start_time
+            if self.log_profile:
+                profile_log = self._new_profile_log()
+                profile_log.cost_time = cost_time
+                profile_log.op_type = "delete"
+                self.profile_logger.log(profile_log)
     
     def transaction(self):
         return self.db.transaction()
