@@ -873,6 +873,10 @@ class UserOpLogDao:
                 items.append(item)
         cls.db.batch_delete(items)
 
+    @classmethod
+    def list_by_user(cls, user_name="", offset=0, limit=20, reverse=True):
+        return cls.db.list_by_user(user_name, offset=offset, limit=limit, reverse=reverse)
+
 def init():
     global USER_TABLE
     global INVALID_NAMES

@@ -12,7 +12,7 @@ from xutils import dbutil
 from xutils import webutil
 from . import dao
 
-OP_LOG_TABLE = dbutil.get_table("user_op_log")
+OP_LOG_TABLE = xauth.UserOpLogDao
 
 
 def create_op_log(user_name, op_type, detail):
@@ -62,14 +62,14 @@ class UserHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        name = xutils.get_argument("name", "")
+        name = xutils.get_argument_str("name")
         user_info = None
         if name != "":
             user_info = xauth.get_user(name)
         kw = Storage()
         kw.name = name
         kw.user_info = user_info
-        kw.log_list = OP_LOG_TABLE.list_by_user(name, reverse=True, limit=20)
+        kw.log_list = OP_LOG_TABLE.list_by_user(name, reverse=True, limit=100)
 
         return xtemplate.render("user/page/user_manage.html", **kw)
 
@@ -164,8 +164,8 @@ class UserOpLogHandler:
 
     @xauth.login_required()
     def GET(self):
-        user_name = xauth.current_name()
-        log_list = OP_LOG_TABLE.list_by_user(user_name, 0, 100, reverse=True)
+        user_name = xauth.current_name_str()
+        log_list = OP_LOG_TABLE.list_by_user(user_name, offset=0, limit=100, reverse=True)
         return xtemplate.render("user/page/user_op_log.html", log_list=log_list)
 
 
