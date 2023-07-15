@@ -174,6 +174,16 @@ def convert_bytes_to_object(bytes, parse_json=True):
         obj = Storage(**obj)
     return obj
 
+def convert_bytes_to_object_strict(bytes_value=b""):
+    """严格转换字节数组到对象"""
+    if bytes_value is None:
+        return None
+    str_value = bytes_value.decode("utf-8")
+    obj = json.loads(str_value)
+    if isinstance(obj, dict):
+        obj = Storage(**obj)
+    return obj
+
 def _dict_del(dict, key):
     if key in dict:
         del dict[key]

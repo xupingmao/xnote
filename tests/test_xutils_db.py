@@ -798,26 +798,29 @@ class TestMain(BaseTestCase):
 
     def test_dbutil_sortedset(self):
         dbutil.register_table("sortedset_test", "sortedset测试")
-        db = dbutil.LdbSortedSet("sortedset_test")
+        db = dbutil.KvSortedSet("sortedset_test")
 
-        db.put("a", 10.5)
-        db.put("b", 20.6)
+        db.put("a", 105)
+        db.put("b", 206)
 
         value = db.get("a")
-        self.assertEqual(10.5, value)
+        self.assertEqual(105, value)
 
         result = db.list_by_score()
         self.assertEqual(2, len(result))
-        self.assertEqual(10.5, result[0].score)
+        self.assertEqual(105, result[0].score)
 
-        db.put("a", 30.0)
+        db.put("a", 300)
         result = db.list_by_score()
         self.assertEqual(2, len(result))
-        self.assertEqual(20.6, result[0].score)
+        self.assertEqual(206, result[0].score)
 
-        by_score = db.list_by_score(score=30.0)
+        by_score = db.list_by_score(score=300)
         assert len(by_score) == 1
         assert by_score[0].member == "a"
+
+        db.reset_repair()
+        db.repair()
 
     def test_dbutil_sortedset_mysql(self):
         print("test_dbutil_sortedset_mysql start...")

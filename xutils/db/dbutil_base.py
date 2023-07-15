@@ -52,7 +52,7 @@ except ImportError:
 import xutils
 from xutils.imports import is_str
 from xutils import dateutil
-from xutils.db.encode import convert_bytes_to_object, convert_object_to_json
+from xutils.db.encode import convert_bytes_to_object, convert_object_to_json, convert_bytes_to_object_strict
 from ..interfaces import DBInterface, BatchInterface
 from .dbutil_id_gen import TimeSeqId
 from .. import interfaces
@@ -622,9 +622,9 @@ def prefix_list(*args, **kw):
     :param {function} map_func(str, object): 映射函数，如果返回不为空则认为匹配
     :param {int} offset: 选择的开始下标，包含
     :param {int} limit:  选择的数据行数
-    :param {boolean} reverse: 是否反向遍历
-    :param {boolean} include_key: 返回的数据是否包含key，默认只有value
-    :param {boolean} scan_db: 是否扫描整个数据库
+    :param {bool} reverse=False: 是否反向遍历
+    :param {bool} include_key=False: 返回的数据是否包含key，默认只有value
+    :param {bool} scan_db: 是否扫描整个数据库
     :param {string} key_from: 开始的key(包含)
     :param {string} key_to: 结束的key(包含)
     """
@@ -639,7 +639,7 @@ def prefix_iter(prefix,  # type: str
                 include_key=False,
                 *,
                 key_from=None, key_to=None, map_func=None,
-                fill_cache=False, parse_json=True, scan_db=False):
+                **kw):
     """通过前缀迭代查询
     :param {string} prefix: 遍历前缀
     :param {function} filter_func(str, object): 过滤函数
@@ -651,8 +651,13 @@ def prefix_iter(prefix,  # type: str
     :param {boolean} scan_db: 是否扫描整个数据库
     :param {string} key_from: 开始的key(包含)
     :param {string} key_to: 结束的key(包含)
+    :param {bool} parse_json=True: 是否解析JSON
     """
     check_leveldb()
+
+    parse_json = kw.get("parse_json", True)
+    scan_db = kw.get("scan_db", False)
+    fill_cache = kw.get("fill_cache", False)
 
     if filter_func != None and map_func != None:
         raise Exception("不允许同时设置filter_func和map_func")
@@ -682,15 +687,15 @@ def prefix_iter(prefix,  # type: str
     result_size = 0
 
     if parse_json:
-        convert_value_func = convert_bytes_to_object
+        convert_value_func = convert_bytes_to_object_strict
     else:
-        def convert_value_func(x): return x.decode("utf-8")
+        def convert_value_func(bytes_value): return bytes_value.decode("utf-8")
 
-    for key_bytes, value in iterator:
+    for key_bytes, value_bytes in iterator:
         if not key_bytes.startswith(prefix_bytes):
             break
         key = key_bytes.decode("utf-8")
-        value = convert_value_func(value)
+        value = convert_value_func(value_bytes)
 
         is_match = True
 
@@ -699,7 +704,7 @@ def prefix_iter(prefix,  # type: str
 
         if map_func:
             value = map_func(key, value)
-            is_match = value != None
+            is_match = (value != None)
 
         if is_match:
             if matched_offset >= offset:

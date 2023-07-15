@@ -22,7 +22,9 @@ class RankTable:
     def __init__(self, table_name):
         check_table_name(table_name)
         self.table_name = table_name
-        self.score_factor = 10**6 # float转int的乘积
+        # 大部分场景都不需要支持 float
+        # 如果是浮点数，调用方自己转成int
+        # self.score_factor = 10**6 # float转int的乘积
         self.prefix = "_rank:" + table_name
         if self.prefix[-1] != ":":
             self.prefix += ":"
@@ -30,12 +32,15 @@ class RankTable:
     def _format_score(self, score):
         # type: (float|int) -> str
         assert isinstance(score, (float,int))
-        score_int = int(score * self.score_factor)
+        score_int = int(score)
         return encode_int(score_int)
+    
+    def _build_key(self, member="", score=0):
+        score_str = self._format_score(score)
+        return self.prefix + score_str + ":" + member
 
     def put(self, member, score, batch = None):
-        score_str = self._format_score(score)
-        key = self.prefix + score_str + ":" + member
+        key = self._build_key(member, score)
 
         if batch != None:
             batch.put(key, member)
@@ -43,33 +48,32 @@ class RankTable:
             db_put(key, member)
 
     def delete(self, member, score, batch = None):
-        score_str = self._format_score(score)
-        key = self.prefix + score_str + ":" + member
+        key = self._build_key(member, score)
 
         if batch != None:
             batch.delete(key)
         else:
             db_delete(key)
 
-    def list(self, score=None, offset = 0, limit = 10, reverse = False):
+    def list(self, score=None, offset = 0, limit = 10, reverse = False, include_key = False, key_from=None):
         if score != None:
             prefix = self.prefix + self._format_score(score) + ":"
         else:
             prefix = self.prefix
 
         return prefix_list(prefix, offset = offset, 
-            limit = limit, reverse = reverse)
+            limit = limit, reverse = reverse, include_key = include_key, key_from=key_from)
 
 class SortedSetItem:
 
-    def __init__(self, member = "", score=0.0):
+    def __init__(self, member = "", score=0):
         self.member = member
         self.score = score
 
     def __repr__(self):     
         return dict.__repr__(self.__dict__)
 
-class LdbSortedSet:
+class KvSortedSet:
 
     def __init__(self, table_name):
         # key-value的映射
@@ -77,6 +81,7 @@ class LdbSortedSet:
         # score的排名
         # TODO 考虑把排序放在内存里面
         self.rank = RankTable(table_name)
+        self.repair_last_key = None
 
     def put(self, member, score):
         """设置成员分值"""
@@ -112,6 +117,26 @@ class LdbSortedSet:
             result.append(SortedSetItem(member=member, score=score))
         return result
 
+    def repair(self):
+        """修复异常数据"""
+        offset = 0
+        limit = 100
+        for key, member in self.rank.list(offset=offset, limit=limit, include_key=True, key_from=self.repair_last_key):
+            score = self.get(member)
+            if score == None:
+                db_delete(key)
+                continue
+
+            key2 = self.rank._build_key(member, score)
+            if key != key2:
+                db_delete(key)
+                self.put(member, score)
+            
+            self.repair_last_key = key
+    
+    def reset_repair(self):
+        self.repair_last_key = None
+
 
 
 class RdbSortedSet:
@@ -134,7 +159,7 @@ class RdbSortedSet:
         return float(value)
 
     def put(self, member, score, prefix=""):
-        assert isinstance(score, float)
+        assert isinstance(score, (int, float))
 
         key = self.table_name + prefix
         vars=dict(key=key,member=member,score=score)
@@ -186,8 +211,17 @@ class RdbSortedSet:
 
         return result
 
+class RedisSortedSet:
+    """TODO 待实现"""    
+    
+    @classmethod
+    def init_class(cls):
+        import redis
+        cls.redis = redis.Redis(host="localhost",port=6379,db=0)
+
 
 def SortedSet(table_name):
+    """类似于redis的SortedSet, 但是score仅支持int类型, 浮点数需要调用方自行转换成int类型"""
     if get_driver_name() == "mysql":
         return RdbSortedSet(table_name)
-    return LdbSortedSet(table_name)
+    return KvSortedSet(table_name)

@@ -63,8 +63,8 @@ from collections import namedtuple
 
 def load_dll():
     dll_path = "leveldb.dll"
-    print("workingdir:", os.getcwd())
-    print("platform.architecture:", platform.architecture())
+    logging.info("workingdir: %s", os.getcwd())
+    logging.info("platform.architecture: %s", platform.architecture())
 
     if platform.architecture()[0] == "64bit":
         dll_path = "./lib/leveldb-x64.dll"
@@ -77,7 +77,7 @@ def load_dll():
     if not os.path.exists(dll_path):
         raise Exception("invalid dll_path:" + dll_path)
 
-    print("leveldb.dll.path: %r" % dll_path)
+    logging.info("leveldb.dll.path: %s" % dll_path)
     return ctypes.CDLL(dll_path)
 
 _ldb = load_dll()

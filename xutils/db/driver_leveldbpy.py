@@ -5,7 +5,7 @@
 # @filename driver_leveldbpy.py
 
 import leveldbpy
-from .. import interfaces
+from xutils import interfaces
 
 class LevelDBProxy(interfaces.DBInterface):
 
@@ -84,10 +84,10 @@ class LevelDBProxy(interfaces.DBInterface):
                   include_value=True,
                   fill_cache=False):
         """返回区间迭代器
-        @param {bytes}  key_from       开始的key（包含）
-        @param {bytes}  key_to         结束的key（包含）
-        @param {bool} reverse        是否反向查询
-        @param {bool} include_value  是否包含值
+        :param {bytes}  key_from: 开始的key（包含）
+        :param {bytes}  key_to: 结束的key（包含）
+        :param {bool} reverse: 是否反向查询
+        :param {bool} include_value: 是否包含值
         """
         # assert key_from <= key_to
         if include_value:
