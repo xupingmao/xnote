@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-01 12:45:28
+@LastEditTime : 2023-07-15 17:39:45
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -81,12 +81,20 @@ class TableProxy:
     def update(self, where, vars=None, _test=False, **values):
         self.fix_sql_keywords(where)
         # TODO 记录binlog
-        return self.db.update(self.tablename, where, vars=vars, _test=_test, **values)
+        try:
+            return self.db.update(self.tablename, where, vars=vars, _test=_test, **values)
+        except Exception as e:
+            del self.db.ctx.db # 尝试重新连接
+            raise e
 
     def delete(self,  where, using=None, vars=None, _test=False):
         self.fix_sql_keywords(where)
         # TODO 记录binlog
-        return self.db.delete(self.tablename, where, using=using, vars=vars, _test=_test)
+        try:
+            return self.db.delete(self.tablename, where, using=using, vars=vars, _test=_test)
+        except Exception as e:
+            del self.db.ctx.db # 尝试重新连接
+            raise e
     
     def transaction(self):
         return self.db.transaction()
