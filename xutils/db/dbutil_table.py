@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 09:51:04
+@LastEditTime : 2023-07-15 18:22:55
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -412,6 +412,13 @@ class LdbTable:
     def delete(self, obj):
         obj_key = self._get_key_from_obj(obj)
         self.delete_by_key(obj_key)
+
+    def batch_delete(self, obj_list=[]):
+        keys = []
+        for obj in obj_list:
+            key = self._get_key_from_obj(obj)
+            keys.append(key)
+        db_batch_delete(keys)
 
     def delete_by_id(self, id, user_name=None):
         validate_str(id, "delete_by_id: id is not str")

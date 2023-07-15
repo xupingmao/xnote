@@ -22,6 +22,7 @@ import warnings
 import time
 import datetime
 import xtables
+import enum
 from xutils import textutil, dbutil, fsutil, dateutil
 from xutils import Storage
 from xutils import logutil
@@ -397,7 +398,7 @@ def create_session_by_user(user_detail, expires=SESSION_EXPIRE, login_ip=""):
     if user_detail.mobile != None and user_detail.mobile != "":
         session_info.mobile = user_detail.mobile[0:3]+"********"
     else :
-        session_info.mobile = None
+        session_info.mobile = ""
 
     SessionModel.create(session_info)
 
@@ -835,6 +836,42 @@ def check_old_password(user_name, password):
     if user_info.password_md5 != encode_password(password, user_info.salt):
         raise Exception("旧的密码不匹配")
 
+class UserOpTypeEnum(enum.Enum):
+    # 登录
+    login = "login"
+    
+    # 修改密码
+    change_password = "change_password"
+
+    # 管理员重置密码
+    reset_password = "reset_password"
+
+class UserOpLog(Storage):
+
+    def __init__(self):
+        self.ctime = dateutil.format_datetime()
+        self.user_name = ""
+        self.type = ""
+        self.detail = ""
+        self.ip = ""
+
+class UserOpLogDao:
+
+    @classmethod
+    def init(cls):
+        cls.db = dbutil.get_table("user_op_log")
+        cls.max_log_size = 500
+
+    @classmethod
+    def create_op_log(cls, op_log):
+        assert isinstance(op_log, UserOpLog)
+        assert op_log.user_name != ""
+        cls.db.insert(op_log)
+        items = []
+        if cls.db.count_by_user(op_log.user_name) > cls.max_log_size:
+            for item in cls.db.list_by_user(op_log.user_name, limit=20):
+                items.append(item)
+        cls.db.batch_delete(items)
 
 def init():
     global USER_TABLE
@@ -845,6 +882,7 @@ def init():
     USER_CONFIG_PROP = xconfig.load_user_config_properties()
 
     SessionModel.init()
+    UserOpLogDao.init()
 
     _create_temp_user("admin")
     _create_temp_user("test")
