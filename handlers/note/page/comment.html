@@ -87,17 +87,17 @@
         refreshComments();
 
         $("#saveCommentBtn").click(function () {
-            var comment = {
-                note_id: "{{file.id}}",
-                content: $("#commentText").val()
-            };
+            var request = {};
+            request.note_id = "{{file.id}}";
+            request.content = $("#commentText").val();
+
             $.post("{{_server_home}}/note/comment/save", comment, function (resp) {
                 console.log(resp);
                 if (resp.code == "success") {
                     $("#commentText").val("");
                     refreshComments();
                 } else {
-                    xnote.alert(resp.message);
+                    xnote.toast(resp.message);
                 }
             });
         });
