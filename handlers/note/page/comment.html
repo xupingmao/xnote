@@ -5,6 +5,7 @@
 {% init show_comment_note = False %}
 {% init show_comment_edit = False %}
 {% init comment_title = "评论" %}
+{% init comment_create_type = "" %}
 {% init comment_list_type = "note_id" %}
 {% init comment_list_date = "" %}
 {% init comment_btn_text = "评论" %}
@@ -90,6 +91,7 @@
             var request = {};
             request.note_id = "{{file.id}}";
             request.content = $("#commentText").val();
+            request.type = "{{comment_create_type}}";
 
             $.post("{{_server_home}}/note/comment/save", comment, function (resp) {
                 console.log(resp);
