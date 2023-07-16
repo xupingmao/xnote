@@ -18,6 +18,9 @@ NOTE_DAO = xutils.DAO("note")
 
 _comment_db = dbutil.get_table("comment")
 
+class CommentDao:
+
+    valid_type_set = set(["", None, "list_item"])
 
 def list_comments(note_id, offset=0, limit=100):
     db = _comment_db
@@ -57,7 +60,7 @@ def count_comments_by_user(*args, **kw):
 
 
 def get_comment(comment_id:str):
-    """通过comment_id实际上是key)获取comment"""
+    """通过comment_id实际上是根据key获取comment"""
     value = _comment_db.get_by_key(comment_id)
     if value != None:
         value.id = comment_id
@@ -67,7 +70,7 @@ def get_comment(comment_id:str):
 def check_comment(comment):
     assert comment != None, "comment is None"
     assert comment.user != None, "comment.user is None"
-    assert comment.type in (None, "list_item"), "comment.type is invalid"
+    assert comment.type in CommentDao.valid_type_set, "comment.type is invalid"
     assert comment.note_id != None
     assert comment.content != None
     assert comment.content != ""

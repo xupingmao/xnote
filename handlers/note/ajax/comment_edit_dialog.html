@@ -1,11 +1,35 @@
+<style>
+.comment-edit-textarea {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 50px;
+    width: inherit;
+}
+
+.comment-edit-bottom {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.comment-edit-bottom button {
+    width: 80px;
+}
+</style>
+
 <div class="card">
     <div class="col-md-12">
-        <textarea autoHeight=true class="col-md-12 no-outline" id="commentUpdateContent"
-            rows=20>{{comment.content}}</textarea>
+        <textarea autoHeight=true class="no-outline comment-edit-textarea" id="commentUpdateContent">{{comment.content}}</textarea>
 
-        <input type="file" id="commentFilePicker2" class="hide" multiple />
-        <input type="button" class="btn btn-default attachment-btn" value="添加附件" />
-        <button class="btn" id="updateCommentBtn">更新</button>
+        <div class="comment-edit-bottom">
+            <input type="file" id="commentFilePicker2" class="hide" multiple />
+            <div class="float-right">
+                <button class="btn btn-default attachment-btn">添加附件</button>
+                <button class="btn" id="updateCommentBtn">更新</button>
+            </div>
+        </div>
     </div>
 </div>
 
