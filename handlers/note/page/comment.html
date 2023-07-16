@@ -93,7 +93,7 @@
             request.content = $("#commentText").val();
             request.type = "{{comment_create_type}}";
 
-            $.post("{{_server_home}}/note/comment/save", comment, function (resp) {
+            $.post("{{_server_home}}/note/comment/save", request, function (resp) {
                 console.log(resp);
                 if (resp.code == "success") {
                     $("#commentText").val("");
