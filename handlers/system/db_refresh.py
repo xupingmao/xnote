@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-03 22:43:20
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-01 18:29:41
+@LastEditTime : 2023-07-16 10:16:14
 @FilePath     : /xnote/handlers/system/db_refresh.py
 @Description  : 数据库定时任务
 """
@@ -21,7 +21,7 @@ class RefreshHandler:
     def GET(self):
         result = []
         for table_info in dbutil.get_table_dict_copy().values():
-            count = dbutil.count_table(table_info.name)
+            count = dbutil.count_table(table_info.name, use_cache=True)
             result.append((table_info.name, count))
         
         db_cache = dbutil_cache.DatabaseCache()
