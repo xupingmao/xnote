@@ -101,6 +101,8 @@
                 } else {
                     xnote.toast(resp.message);
                 }
+            }).fail(function (resp) {
+                xnote.toast("请求接口失败,请稍后重试~");
             });
         });
 
