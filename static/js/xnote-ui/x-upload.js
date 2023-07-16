@@ -90,6 +90,7 @@ xnote.createUploaderEx = function(req) {
     }
 
     var upload_service;
+    var serverHome = xnote.config.serverHome;
 
     // 默认分片
     if (chunked == undefined) {
@@ -97,10 +98,10 @@ xnote.createUploaderEx = function(req) {
     }
 
     if (chunked) {
-        upload_service = "/fs_upload/range";
+        upload_service = serverHome + "/fs_upload/range";
     } else {
         // 不分片的上传服务
-        upload_service = "/fs_upload";
+        upload_service = serverHome + "/fs_upload";
     }
 
     var uploader = WebUploader.create({

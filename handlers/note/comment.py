@@ -15,6 +15,7 @@ from xutils import textutil
 from xtemplate import T
 from . import dao as note_dao
 from . import dao_comment
+from xutils import webutil
 
 from .dao_comment import search_comment
 
@@ -105,10 +106,10 @@ def convert_to_html(comments, show_note = False, page = 1, page_max = 1, show_ed
 class CommentListAjaxHandler:
 
     def GET(self):
-        note_id   = xutils.get_argument("note_id", "")
-        list_type = xutils.get_argument("list_type")
-        resp_type = xutils.get_argument("resp_type")
-        list_date = xutils.get_argument("list_date")
+        note_id   = xutils.get_argument_str("note_id")
+        list_type = xutils.get_argument_str("list_type")
+        resp_type = xutils.get_argument_str("resp_type")
+        list_date = xutils.get_argument_str("list_date")
         show_note = xutils.get_argument_bool("show_note")
         show_edit = xutils.get_argument_bool("show_edit")
         page = xutils.get_argument_int("page", 1)
@@ -151,11 +152,14 @@ class SaveCommentAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        note_id = xutils.get_argument("note_id", "")
-        content = xutils.get_argument("content", "")
-        type    = xutils.get_argument("type")
-        user    = xauth.current_name()
+        note_id = xutils.get_argument_str("note_id")
+        content = xutils.get_argument_str("content")
+        type    = xutils.get_argument_str("type")
+        user    = xauth.current_name_str()
 
+        if note_id == "":
+            return webutil.FailedResult(message="note_id参数为空")
+        
         if content == "":
             return dict(code = "400", message = "content参数为空")
 
@@ -172,7 +176,7 @@ class DeleteCommentAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        comment_id = xutils.get_argument("comment_id")
+        comment_id = xutils.get_argument_str("comment_id")
         user       = xauth.current_name()
         comment    = dao_comment.get_comment(comment_id)
         if comment is None:
