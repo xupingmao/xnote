@@ -68,7 +68,7 @@ class LoginHandler:
                 target = "/"
             raise web.found(target)
         return error
-    
+
     def do_login_with_error(self, name, pswd, count=0):
         name = name.strip()
         pswd = pswd.strip()
@@ -81,10 +81,10 @@ class LoginHandler:
             error = "请输入密码"
         elif count >= RETRY_LIMIT:
             error = "重试次数过多"
-        
+
         if error != "":
             return error
-        
+
         user = xauth.get_user_by_name(name)
 
         if user == None:
@@ -128,7 +128,28 @@ class LoginAjaxHandler:
             response['error']  = error
         return json.dumps(response)
 
+class NewAccountLoginHandler:
+    def POST(self):
+        request_data = str(web.data(),'UTF-8')
+        print("enter login "+request_data)
+        request_json = json.loads(request_data)
+        name = request_json["username"]
+        pswd = request_json["password"]
+
+        hander = LoginHandler()
+        error = hander.do_login_with_error(name,pswd)
+
+        response = {}
+        response["type"] = "account"
+        if ( error == ""):
+            response['status'] = "ok"
+        else:
+            response['status']  = "error"
+            response['errorMsg']  = error
+        return json.dumps(response)
+
 xurls = (
     r"/login", LoginHandler,
-    r"/login_ajax", LoginAjaxHandler
+    r"/login_ajax", LoginAjaxHandler,
+    r"/login/account_login", NewAccountLoginHandler
 )

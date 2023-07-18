@@ -111,6 +111,23 @@ class UserInfoHandler:
         user = xauth.current_user()
         return xtemplate.render("user/page/userinfo.html", user=user)
 
+class UserInfoAjaxHandler:
+    def getDesensitizedUserInfo(self):
+        user = xauth.current_user()
+        mobile = ''
+        if (user.mobile != None and user.mobile != ''):
+            mobile = user.mobile[:3] + '****' + user.mobile[7:]
+        return dict(name=user.name, phone=mobile)
+
+
+    @xauth.login_required()
+    def POST(self):
+       return self.getDesensitizedUserInfo()
+
+    @xauth.login_required()
+    def GET(self):
+        return self.getDesensitizedUserInfo()
+
 
 class SessionInfoAjaxHandler:
 
@@ -173,6 +190,7 @@ xurls = (
     r"/user/add",  AddHandler,
     r"/user/list",  ListHandler,
     r"/user/info",   UserInfoHandler,
+    r"/user/info_ajax", UserInfoAjaxHandler,
     r"/user/session", SessionInfoAjaxHandler,
     r"/user/change_password", ChangePasswordHandler,
     r"/user/op_log", UserOpLogHandler,
