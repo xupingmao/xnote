@@ -30,6 +30,7 @@ class TableProxy:
         log = ProfileLog()
         log.ctime = xutils.format_datetime()
         log.table_name = self.tablename
+        log.type = "db_profile"
         return log
 
     def fix_sql_keywords(self, where):

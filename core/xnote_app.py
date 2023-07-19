@@ -221,7 +221,7 @@ def init_kv_engine():
 class DBProfileLogger(interfaces.ProfileLogger):
 
     def __init__(self):
-        self.db = dbutil.get_table("sys_log", user_name="db_profile")
+        self.db = dbutil.get_table("sys_log")
         self.db.binlog_enabled = False
 
     def log(self, log):

@@ -158,10 +158,10 @@ class RdbSortedSet:
     def mysql_to_float(self, value):
         return float(value)
 
-    def put(self, member, score, prefix=""):
+    def put(self, member, score):
         assert isinstance(score, (int, float))
 
-        key = self.table_name + prefix
+        key = self.table_name
         vars=dict(key=key,member=member,score=score)
         rowcount = self.db_instance.query(
             "UPDATE zset SET `score`=$score, version=version+1 WHERE `key`=$key AND member=$member", vars=vars)
@@ -169,8 +169,8 @@ class RdbSortedSet:
             self.db_instance.query(
                 "INSERT INTO zset (score, `key`, member, version) VALUES($score,$key,$member,0)", vars=vars)
 
-    def get(self, member, prefix=""):
-        key = self.table_name + prefix
+    def get(self, member):
+        key = self.table_name
         sql = "SELECT score FROM zset WHERE `key`=$key AND member=$member LIMIT 1"
         result_iter = self.db_instance.query(sql, vars=dict(key=key,member=member))
         for item in result_iter:
@@ -218,6 +218,12 @@ class RedisSortedSet:
     def init_class(cls):
         import redis
         cls.redis = redis.Redis(host="localhost",port=6379,db=0)
+    
+    def __init__(self, table_name=""):
+        self.table_name = table_name
+
+    def put(self, member="", score=0):
+        self.redis.zadd(self.table_name, {member: score})
 
 
 def SortedSet(table_name):

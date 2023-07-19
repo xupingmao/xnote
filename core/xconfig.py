@@ -383,6 +383,7 @@ class DatabaseConfig:
         cls.write_buffer_size = SystemConfig.get_int("write_buffer_size")
         cls.max_open_files = SystemConfig.get_int("max_open_files")
         cls.db_profile_table_proxy = SystemConfig.get_int("db_profile_table_proxy")
+        cls.db_sys_log_max_size = SystemConfig.get_int("db_sys_log_max_size", 100000)
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)

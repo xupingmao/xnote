@@ -198,6 +198,7 @@ class SqlLoggerInterface:
 
 class ProfileLog(web.Storage):
     def __init__(self):
+        self.type = ""
         self.ctime = ""
         self.cost_time = 0.0
         self.table_name = ""
