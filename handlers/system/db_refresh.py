@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-03 22:43:20
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-19 23:49:16
+@LastEditTime : 2023-07-20 09:17:21
 @FilePath     : /xnote/handlers/system/db_refresh.py
 @Description  : 数据库定时任务
 """
@@ -52,10 +52,10 @@ class RefreshHandler:
 
         self.locks.add(lock_key)
 
-        count = dbutil.count_table(self.sys_log_db.table_name, use_cache=True)
+        count = dbutil.count_table(self.sys_log_db.table_name)
         if count > xconfig.DatabaseConfig.db_sys_log_max_size:
             delete_count = count - xconfig.DatabaseConfig.db_sys_log_max_size
-            for obj in self.sys_log_db.iter(reverse=True, limit=delete_count):
+            for obj in self.sys_log_db.iter(limit=delete_count):
                 self.sys_log_db.delete(obj)
         
         self.locks.remove(lock_key)
