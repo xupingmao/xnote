@@ -208,5 +208,21 @@ class ProfileLogger:
     def log(self, log):
         pass
 
+
+class SortedSetInterface:
+    """有序集合接口, 参考redis的sortedset结构, 但是score限制在int范围"""
+
+    def put(self, member="", score=0):
+        pass
+
+    def get(self, member=""):
+        return 0
+    
+    def delete(self, member=""):
+        pass
+    
+    def list_by_score(self, **kw):
+        return []
+
 empty_db = DBInterface()
 empty_cache = CacheInterface()

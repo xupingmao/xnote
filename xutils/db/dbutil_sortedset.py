@@ -73,7 +73,7 @@ class SortedSetItem:
     def __repr__(self):     
         return dict.__repr__(self.__dict__)
 
-class KvSortedSet:
+class KvSortedSet(interfaces.SortedSetInterface):
 
     def __init__(self, table_name):
         # key-value的映射
@@ -139,7 +139,7 @@ class KvSortedSet:
 
 
 
-class RdbSortedSet:
+class RdbSortedSet(interfaces.SortedSetInterface):
 
     @classmethod
     def init_class(cls, db_instance):
@@ -211,8 +211,8 @@ class RdbSortedSet:
 
         return result
 
-class RedisSortedSet:
-    """TODO 待实现"""    
+class RedisSortedSet(interfaces.SortedSetInterface):
+    """TODO 待测试"""    
     
     @classmethod
     def init_class(cls):
@@ -225,6 +225,35 @@ class RedisSortedSet:
     def put(self, member="", score=0):
         self.redis.zadd(self.table_name, {member: score})
 
+    def get(self, member=""):
+        score = self.redis.zscore(self.table_name, member)
+        if score == None:
+            return None
+        return SortedSetItem(member=member, score=int(score))
+
+    def delete(self, member=""):
+        self.redis.zrem(self.table_name, member)
+    
+    def list_by_score(self, **kw):
+        offset = kw.get("offset", 0)
+        limit = kw.get("limit", 20)
+        reverse = kw.get("reverse", False)
+        score = kw.get("score")
+        min = "-inf"
+        max = "+inf"
+        start = offset
+
+        if score != None:
+            min = score
+            max = score
+
+        if reverse:
+            result = self.redis.zrevrangebyscore(self.table_name, max=max, min=min, start=start, num=limit, withscores=True)
+        else: 
+            result = self.redis.zrangebyscore(self.table_name, min=min, max=max, start=start, num=limit, withscores=True)
+        
+        return result
+        
 
 def SortedSet(table_name):
     """类似于redis的SortedSet, 但是score仅支持int类型, 浮点数需要调用方自行转换成int类型"""

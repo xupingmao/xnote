@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-15 18:34:25
+@LastEditTime : 2023-07-22 10:29:52
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -66,6 +66,8 @@ class LdbTable:
         self.user_attr = None
         self.id_gen = IdGenerator(self.table_name)
         self.fix_user_attr = True
+        # 自定义索引构建器
+        self.build_index_func = None
 
         if table_info.check_user:
             if table_info.user_attr == None:
@@ -174,6 +176,10 @@ class LdbTable:
             return self.table_name + ":" + encode_str(user_name) + ":"
 
     def _update_index(self, old_obj, new_obj, batch, force_update=False):
+        if self.build_index_func != None:
+            self.build_index_func(new_obj=new_obj, old_obj=old_obj, force_update=force_update)
+            return
+        
         for index in self.indexes:
             index.update_index(old_obj, new_obj, batch, force_update)
 

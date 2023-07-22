@@ -80,6 +80,8 @@ class KvDataBase:
     read_only = False
     # 驱动名称
     driver_name = ""
+    # sorted_set 驱动
+    driver_sorted_set = ""
     # 缓存对象（拥有put/get两个方法）
     cache = interfaces.empty_cache
 
@@ -326,7 +328,8 @@ class TableInfo:
         return table
     
     @classmethod
-    def check_table_name(cls, table_name):    
+    def check_table_name(cls, table_name):
+        table_name = table_name.split(":")[0]
         validate_str(table_name, "invalid table_name:{}", table_name)
         if not cls.is_registered(table_name):
             raise DBException("table %r not registered!" % table_name)

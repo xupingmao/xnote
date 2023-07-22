@@ -799,7 +799,12 @@ class TestMain(BaseTestCase):
     def test_dbutil_sortedset(self):
         dbutil.register_table("sortedset_test", "sortedset测试")
         db = dbutil.KvSortedSet("sortedset_test")
+        self.do_test_sortedset(db)
+        db.reset_repair()
+        db.repair()
 
+    def do_test_sortedset(self, db):
+        assert isinstance(db, interfaces.SortedSetInterface)
         db.put("a", 105)
         db.put("b", 206)
 
@@ -819,9 +824,6 @@ class TestMain(BaseTestCase):
         assert len(by_score) == 1
         assert by_score[0].member == "a"
 
-        db.reset_repair()
-        db.repair()
-
     def test_dbutil_sortedset_mysql(self):
         print("test_dbutil_sortedset_mysql start...")
         from xutils.db.dbutil_sortedset import RdbSortedSet
@@ -835,21 +837,7 @@ class TestMain(BaseTestCase):
         RdbSortedSet.init_class(db.db)
 
         db = RdbSortedSet("sorted_set_test")
-
-        db.put("a", 10.5)
-        db.put("b", 20.6)
-
-        value = db.get("a")
-        self.assertEqual(10.5, value)
-
-        result = db.list_by_score()
-        self.assertEqual(2, len(result))
-        self.assertEqual(10.5, result[0].score)
-
-        db.put("a", 30.0)
-        result = db.list_by_score()
-        self.assertEqual(2, len(result))
-        self.assertEqual(20.6, result[0].score)
+        self.do_test_sortedset(db)
     
     def test_range_iter_mysql(self):
         from xutils.db.driver_mysql import MySQLKV
