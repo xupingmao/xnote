@@ -7,7 +7,7 @@
 
 import xutils
 import xconfig
-
+import xmanager
 from xutils import dbutil
 from xutils import textutil
 from xutils import dateutil
@@ -17,6 +17,16 @@ from . import dao as note_dao
 NOTE_DAO = xutils.DAO("note")
 
 _comment_db = dbutil.get_table("comment")
+
+class CommentDO(xutils.Storage):
+    def __init__(self):
+        self.user = ""
+        self.user_id = 0
+        self.note_id = ""
+        self.type = ""
+        self.content = ""
+        self.ctime = dateutil.format_datetime()
+
 
 class CommentDao:
 
@@ -59,7 +69,7 @@ def count_comments_by_user(*args, **kw):
     return handle_comments_by_user("count", *args, **kw)
 
 
-def get_comment(comment_id:str):
+def get_comment(comment_id = ""):
     """通过comment_id实际上是根据key获取comment"""
     value = _comment_db.get_by_key(comment_id)
     if value != None:
@@ -76,9 +86,12 @@ def check_comment(comment):
     assert comment.content != ""
 
 def create_comment(comment):
+    assert isinstance(comment, CommentDO)
     check_comment(comment)
     comment.ctime = dateutil.format_datetime()
+
     _comment_db.insert(comment)
+    xmanager.fire("comment.create", comment)
 
 
 def update_comment(comment):
@@ -88,12 +101,14 @@ def update_comment(comment):
     comment.mtime = dateutil.format_datetime()
 
     _comment_db.update(comment)
+    xmanager.fire("comment.update", comment)
 
 
 def delete_comment(comment_id):
     comment = get_comment(comment_id)
     if comment != None:
         _comment_db.delete(comment)
+        xmanager.fire("comment.delete", comment)
 
 def count_comment(user_name):
     return _comment_db.count_by_index("user", index_value=user_name)

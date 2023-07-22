@@ -174,6 +174,10 @@ class RdbSortedSet(interfaces.SortedSetInterface):
         for item in result_iter:
             return self.mysql_to_int(item.score)
         return None
+    
+    def delete(self, member=""):
+        sql = "DELETE FROM kv_zset WHERE `key`=$key AND member=$member"
+        self.db_instance.query(sql, vars=dict(key=self.table_name, member=member))
 
     def list_by_score(self, **kw):
         """通过score查询列表

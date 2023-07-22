@@ -154,8 +154,11 @@ class SaveCommentAjaxHandler:
     def POST(self):
         note_id = xutils.get_argument_str("note_id")
         content = xutils.get_argument_str("content")
-        type    = xutils.get_argument_str("type")
-        user    = xauth.current_name_str()
+        type = xutils.get_argument_str("type")
+        user_info = xauth.current_user()
+
+        if user_info == None:
+            return webutil.FailedResult(code="403", message="请登录进行操作~")
 
         if note_id == "":
             return webutil.FailedResult(message="note_id参数为空")
@@ -163,10 +166,15 @@ class SaveCommentAjaxHandler:
         if content == "":
             return dict(code = "400", message = "content参数为空")
 
-        dao_comment.create_comment(Storage(note_id = note_id, 
-            user = user, 
-            type = type,
-            content = content))
+        comment = dao_comment.CommentDO()
+        comment.user = user_info.name
+        comment.user_id = user_info.id
+        comment.type = type
+        comment.content = content
+        comment.note_id = note_id
+
+        dao_comment.create_comment(comment)
+        
         return dict(code = "success", success = True)
 
 class DeleteCommentAjaxHandler:

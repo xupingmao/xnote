@@ -578,8 +578,16 @@ class TestMain(BaseTestCase):
 
 
     def test_comment_search(self):
+        from handlers.note.dao_comment import CommentDO
         note_id = create_note_for_test("list", "check-list-test")
-        comment = Storage(user = xauth.current_name_str(), type = "list_item")
+
+        user_info = xauth.current_user()
+        assert user_info != None
+
+        comment = CommentDO()
+        comment.user = user_info.name
+        comment.user_id = user_info.id
+        comment.type = "list_item"
         comment.note_id = note_id
         comment.content = "test comment search"
 

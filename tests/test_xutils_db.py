@@ -280,6 +280,7 @@ class TestMain(BaseTestCase):
 
         print("host=%s, user=%s, password=%s" % (host, user, password))
 
+        xconfig.DatabaseConfig.mysql_database = database
         db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database)
         db_instance.dbname = "mysql"
         return db_instance
@@ -828,6 +829,10 @@ class TestMain(BaseTestCase):
         by_score = db.list_by_score(score=300)
         assert len(by_score) == 1
         assert by_score[0].member == "a"
+
+        db.delete("b")
+        by_score = db.list_by_score(limit=10)
+        assert len(by_score) == 1
 
     def test_dbutil_sortedset_mysql(self):
         print("test_dbutil_sortedset_mysql start...")

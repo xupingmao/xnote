@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-22 10:29:52
+@LastEditTime : 2023-07-22 23:45:49
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -726,7 +726,7 @@ def prefix_iter_batch(prefix,  # type: str
                       include_key=False,
                       map_func=None,
                       fill_cache=False,
-                      batch_size=20):
+                      batch_size=100):
     """通过前缀迭代查询
     @param {string} prefix 遍历前缀
     @param {function} filter_func(str,object) 过滤函数

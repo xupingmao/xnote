@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-15 20:15:13
+@LastEditTime : 2023-07-22 23:30:55
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -121,9 +121,9 @@ def init_note_tables():
 
 
     db = dbutil.register_table("comment", "评论模型", category="note")
-    db.register_index("user", comment = "用户索引", index_type="copy")
-    db.register_index("note_id", comment = "笔记ID索引", index_type="copy")
-    db.rebuild_index("v1")
+    db.register_index("user", comment = "用户索引")
+    db.register_index("note_id", comment = "笔记ID索引")
+    db.rebuild_index("v2")
 
 
     # 公共笔记
