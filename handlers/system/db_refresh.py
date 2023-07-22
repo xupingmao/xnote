@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-03 22:43:20
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-20 09:17:21
+@LastEditTime : 2023-07-22 10:51:15
 @FilePath     : /xnote/handlers/system/db_refresh.py
 @Description  : 数据库定时任务
 """
@@ -21,6 +21,8 @@ from xutils.db.lock import RecordLock
 class RefreshHandler:
 
     sys_log_db = dbutil.get_table("sys_log")
+    sys_log_db.binlog_enabled = False
+    
     locks = set()
 
     @xauth.login_required("admin")
