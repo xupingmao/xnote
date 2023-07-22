@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 22:20:13
+@LastEditTime : 2023-07-22 10:58:07
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -212,15 +212,6 @@ class MySQLKV(interfaces.DBInterface):
             version int not null default 0 comment '版本',
             PRIMARY KEY (`key`(200))
         ) COMMENT '键值对存储';
-        """)
-        self.db.query("""CREATE TABLE IF NOT EXISTS `zset` (
-            `key` varchar(512) not null comment '键值对key',
-            `member` varchar(512) not null comment '成员',
-            `score` decimal(40,6) not null comment '分数',
-            `version` int not null default 0 comment '版本',
-            PRIMARY KEY (`key`(100), `member`(100)) ,
-            KEY idx_score(`score`)
-        ) COMMENT '有序集合';
         """)
 
     def get_with_version(self, key):

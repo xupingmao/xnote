@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-30 23:57:02
+@LastEditTime : 2023-07-22 13:15:52
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -59,7 +59,7 @@ class BaseTableManager:
         return [demo]
 
     def add_column(self, colname, coltype,
-                   default_value=None, not_null=True):
+                   default_value=None, not_null=True, **kw):
         """添加字段，如果已经存在则跳过，名称相同类型不同抛出异常"""
         sql = "ALTER TABLE `%s` ADD COLUMN `%s` %s" % (
             self.tablename, colname, coltype)
@@ -83,7 +83,7 @@ class BaseTableManager:
     def add_index(self, colname, is_unique=False, **kw):
         raise Exception("not implemented")
 
-    def drop_index(self, col_name):
+    def drop_index(self, col_name, is_unique=False):
         sql = "DROP INDEX idx_%s_%s" % (self.tablename, col_name)
         try:
             self.execute(sql)
@@ -135,22 +135,23 @@ class MySQLTableManager(BaseTableManager):
         return self.db.query(sql)
     
     def add_column(self, colname, coltype,
-                   default_value=None, not_null=True):
+                   default_value=None, not_null=True, **kw):
         if coltype == "text":
             # MySQL5.7不支持默认值
             default_value = None
         super().add_column(colname, coltype, default_value, not_null)
     
     def add_index(self, colname, is_unique=False, key_len=0, key_len_list=[], **kw):
+        """MySQL版创建索引"""
         index_name = ""
         colname_str = ""
 
-        index_prefix = "idx_"
+        index_prefix = "idx"
         if is_unique:
-            index_prefix = "uk_"
+            index_prefix = "uk"
 
         if isinstance(colname, list):
-            index_name = index_prefix + self.tablename
+            index_name = index_prefix
             for name in colname:
                 index_name += "_" + name
             temp_col_list = []
@@ -166,7 +167,7 @@ class MySQLTableManager(BaseTableManager):
                 temp_col_list.append(tmp_col_name)
             colname_str = ",".join(temp_col_list)
         else:
-            index_name = index_prefix + colname
+            index_name = index_prefix + "_" + colname
             colname_str = self.quote_col(colname)
             if key_len > 0:
                 colname_str += "(%d)" % key_len
@@ -322,9 +323,9 @@ class TableManagerFacade:
             self.table_dict[tablename] = self.table_info
     
     def add_column(self, colname, coltype,
-                   default_value=None, not_null=True):
+                   default_value=None, not_null=True, comment=""):
         self.table_info.add_column(colname, coltype, default_value, not_null)
-        self.manager.add_column(colname, coltype, default_value, not_null)
+        self.manager.add_column(colname, coltype, default_value, not_null, comment=comment)
     
     def drop_column(self, colname, coltype,
                    default_value=None, not_null=True):

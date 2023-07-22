@@ -25,6 +25,7 @@ import xutils
 import xconfig
 import json
 import web.db
+import xtables
 
 from . import test_base
 
@@ -39,6 +40,7 @@ db.register_index("age")
 
 dbutil.register_table("test_user_db1", "测试数据库用户版v1")
 dbutil.register_table("test_user_db", "测试数据库用户版", user_attr="user")
+dbutil.register_table("sortedset_test", "sortedset测试", type="sorted_set")
 
 BinLog.set_enabled(True)
 
@@ -270,8 +272,7 @@ class TestMain(BaseTestCase):
         run_test_db_engine(self, db)
         run_snapshot_test(self, db.CreateSnapshot())
 
-    def get_mysql_db2(self):
-        from xutils.db.driver_mysql import MySQLKV
+    def get_mysql_instance(self):
         host = os.environ.get("mysql_host")
         user = os.environ.get("mysql_user")
         password = os.environ.get("mysql_password")
@@ -280,7 +281,12 @@ class TestMain(BaseTestCase):
         print("host=%s, user=%s, password=%s" % (host, user, password))
 
         db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database)
-        db = MySQLKV(db_instance = db_instance)
+        db_instance.dbname = "mysql"
+        return db_instance
+
+    def get_mysql_db2(self):
+        from xutils.db.driver_mysql import MySQLKV
+        db = MySQLKV(db_instance = self.get_mysql_instance())
         return db
 
     def test_dbutil_mysql(self):
@@ -797,7 +803,6 @@ class TestMain(BaseTestCase):
 
 
     def test_dbutil_sortedset(self):
-        dbutil.register_table("sortedset_test", "sortedset测试")
         db = dbutil.KvSortedSet("sortedset_test")
         self.do_test_sortedset(db)
         db.reset_repair()
@@ -834,9 +839,10 @@ class TestMain(BaseTestCase):
             return
 
         db = self.get_mysql_db2()
+        xtables.init_kv_zset_table(self.get_mysql_instance())
         RdbSortedSet.init_class(db.db)
 
-        db = RdbSortedSet("sorted_set_test")
+        db = RdbSortedSet("sortedset_test")
         self.do_test_sortedset(db)
     
     def test_range_iter_mysql(self):

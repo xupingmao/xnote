@@ -149,32 +149,30 @@ class RdbSortedSet(interfaces.SortedSetInterface):
 
     def __init__(self, table_name=""):
         self.table_name = table_name
+        check_table_name(table_name)
 
     def mysql_to_str(self, value):
         if isinstance(value, bytearray):
             return bytes(value).decode("utf-8")
         return value
-
-    def mysql_to_float(self, value):
-        return float(value)
+    
+    def mysql_to_int(self, value):
+        return int(value)
 
     def put(self, member, score):
         assert isinstance(score, (int, float))
 
         key = self.table_name
         vars=dict(key=key,member=member,score=score)
-        rowcount = self.db_instance.query(
-            "UPDATE zset SET `score`=$score, version=version+1 WHERE `key`=$key AND member=$member", vars=vars)
-        if rowcount == 0:
-            self.db_instance.query(
-                "INSERT INTO zset (score, `key`, member, version) VALUES($score,$key,$member,0)", vars=vars)
+        self.db_instance.query(
+            "INSERT INTO kv_zset (score, `key`, member, version) VALUES($score,$key,$member,0) ON DUPLICATE KEY UPDATE score=$score, version=version+1", vars=vars)
 
     def get(self, member):
         key = self.table_name
-        sql = "SELECT score FROM zset WHERE `key`=$key AND member=$member LIMIT 1"
+        sql = "SELECT score FROM kv_zset WHERE `key`=$key AND member=$member LIMIT 1"
         result_iter = self.db_instance.query(sql, vars=dict(key=key,member=member))
         for item in result_iter:
-            return self.mysql_to_float(item.score)
+            return self.mysql_to_int(item.score)
         return None
 
     def list_by_score(self, **kw):
@@ -191,9 +189,9 @@ class RdbSortedSet(interfaces.SortedSetInterface):
         score = kw.get("score")
 
         if score != None:
-            sql = "SELECT member, score FROM zset WHERE `key` = $key AND score = $score"
+            sql = "SELECT member, score FROM kv_zset WHERE `key` = $key AND score = $score"
         else:
-            sql = "SELECT member, score FROM zset WHERE `key` = $key"
+            sql = "SELECT member, score FROM kv_zset WHERE `key` = $key"
         
         if reverse:
             sql += " ORDER BY score DESC"
@@ -206,7 +204,7 @@ class RdbSortedSet(interfaces.SortedSetInterface):
         result = []
         for item in result_iter:
             member = self.mysql_to_str(item.member)
-            score = self.mysql_to_float(item.score)
+            score = self.mysql_to_int(item.score)
             result.append(SortedSetItem(member=member, score=score))
 
         return result
@@ -226,10 +224,7 @@ class RedisSortedSet(interfaces.SortedSetInterface):
         self.redis.zadd(self.table_name, {member: score})
 
     def get(self, member=""):
-        score = self.redis.zscore(self.table_name, member)
-        if score == None:
-            return None
-        return SortedSetItem(member=member, score=int(score))
+        return self.redis.zscore(self.table_name, member)
 
     def delete(self, member=""):
         self.redis.zrem(self.table_name, member)

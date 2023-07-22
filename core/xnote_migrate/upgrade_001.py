@@ -6,12 +6,11 @@
 
 """user_note_log日志重建"""
 
-import xutils
 from xutils import dbutil
 from .base import log_info
+from handlers.note import dao_log
 
 dbutil.register_table("note_migrate_log", "笔记迁移日志")
-NOTE_DAO = xutils.DAO("note")
 
 def get_note_migrate_log_table():
     return dbutil.get_hash_table("note_migrate_log")
@@ -37,10 +36,10 @@ def rebuild_visit_log():
             log_info("invalid note:%r", note.id)
             continue
         if note.is_deleted:
-            NOTE_DAO.delete_visit_log(note.creator, note_id)
+            dao_log.delete_visit_log(note.creator, note_id)
             continue
         increment = note.visited_cnt or 1
-        NOTE_DAO._update_log(note.creator, note, increment)
+        dao_log._update_log(note.creator, note, increment)
 
     mark_migrate_done("note_visit_log")
 

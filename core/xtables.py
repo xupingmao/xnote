@@ -53,6 +53,10 @@ def create_table_manager_with_dbpath(table_name="", dbpath=""):
     db = get_db_instance(dbpath)
     return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database)
 
+def create_table_manager_with_db(table_name="", db=None):
+    assert isinstance(db, web.db.DB)
+    return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database)
+
 def create_record_table_manager(table_name=""):
     """默认使用 record.db 文件"""
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
@@ -287,6 +291,18 @@ def init_site_visit_log():
         manager.add_column("count", "bigint", 0)
         manager.add_index(["date", "ip"])
 
+
+def init_kv_zset_table(db=None):
+    """使用关系型数据库模拟redis的zset结构"""
+    with create_table_manager_with_db("kv_zset", db=db) as manager:
+        manager.add_column("key", "varchar(512)", "")
+        manager.add_column("member", "varchar(512)", "")
+        manager.add_column("score", "bigint", default_value=0)
+        manager.add_column("version", "int", default_value=0)
+        manager.add_index(["key", "member"], is_unique=True, key_len_list=[32,100])
+        manager.add_index(["key", "score"], key_len_list=[32, 0])
+
+
 def DBWrapper(dbpath, tablename):
     db = MySqliteDB(db=dbpath)
     return TableProxy(db, tablename)
@@ -379,3 +395,5 @@ def init():
     init_site_visit_log()
     init_note_tag_rel_table()
     
+    if xconfig.DatabaseConfig.db_driver == "mysql":
+        init_kv_zset_table(get_db_instance())
