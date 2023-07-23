@@ -272,6 +272,8 @@ class FileConfig:
 class WebConfig:
 
     server_home = ""
+    port = "1234"
+
     # 关于系统的链接
     about_url = "" 
     about_text = ""
@@ -288,6 +290,7 @@ class WebConfig:
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
+        cls.port = SystemConfig.get_str("port", "1234")
         cls.about_url = SystemConfig.get_str("about_url", "/code/wiki/README.md")
         cls.login_url = SystemConfig.get_str("login_url", "/login?target=")
         cls.about_text = SystemConfig.get_str("about_text", "关于Xnote")
@@ -604,7 +607,7 @@ def init_boot_config(fpath, boot_config_kw=None):
 
 
 def init_http_port():
-    port = get_global_config("system.port")
+    port = SystemConfig.get_str("port")
 
     if port != None:
         # 指定端口优先级最高
