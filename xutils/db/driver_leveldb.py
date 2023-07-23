@@ -7,7 +7,7 @@
 import leveldb
 import logging
 
-from .. import interfaces
+from xutils import interfaces
 
 class LevelDBImpl(interfaces.DBInterface):
 

@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-22 10:58:07
+@LastEditTime : 2023-07-23 11:54:33
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -15,8 +15,8 @@ import logging
 import threading
 import time
 from collections import deque
-from .. import interfaces
-from ..interfaces import SqlLoggerInterface
+from xutils import interfaces
+from xutils.interfaces import SqlLoggerInterface
 from xutils.base import Storage
 import web.db
 

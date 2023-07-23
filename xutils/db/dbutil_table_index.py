@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 22:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 19:03:59
+@LastEditTime : 2023-07-23 11:53:51
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
 @Description  : 表索引管理
                 - [x] 引用索引
@@ -29,7 +29,7 @@ from xutils.db.dbutil_base import (
     IndexInfo,
 )
 from xutils.db import dbutil_base
-from ..interfaces import BatchInterface
+from xutils.interfaces import BatchInterface
 
 class TableIndex:
 

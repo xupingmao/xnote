@@ -216,7 +216,9 @@ class FileConfig:
     backup_dir = ""
     backup_db_dir = ""
 
+    boot_lock_file = "" # 启动的锁文件
     record_db_file = "" # 默认的sqlite数据库
+
     source_root_dir = "" # 源码根目录
     plugins_dir = "" # 插件目录
     ext_handlers_dir = "./ext_handlers"
@@ -250,6 +252,8 @@ class FileConfig:
 
         cls.template_base_nav_left = SystemConfig.get_str("template_base_nav_left", "common/nav/base_nav_left.html")
         cls.template_base_nav_top = SystemConfig.get_str("template_base_nav_top", "common/nav/base_nav_top.html")
+
+        cls.boot_lock_file = SystemConfig.get_str("boot_lock_file", "pid.lock")
 
     @classmethod
     def get_db_path(cls, dbname=""):

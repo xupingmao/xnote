@@ -46,7 +46,6 @@ import xauth
 import web
 import atexit
 
-FILE_LOCK = FileLock("pid.lock")
 DEFAULT_CONFIG_FILE = xconfig.resolve_config_path("./config/boot/boot.default.properties")
 
 class XnoteApp:
@@ -295,13 +294,10 @@ def init_debug():
     mem_util.ignore_log_mem_info_deco("sync_by_binlog_step")
 
 
-def init_app_no_lock(boot_config_kw=None):
+def init_app_internal(boot_config_kw=None):
+    """初始化APP内部方法"""
     global app
-
     print_env_info()
-
-    # 处理初始化参数
-    handle_args_and_init_config(boot_config_kw=boot_config_kw)
 
     # 构建静态文件
     xnote_code_builder.build()
@@ -341,7 +337,8 @@ def init_app_no_lock(boot_config_kw=None):
 
 
 def init_app():
-    return init_app_no_lock()
+    handle_args_and_init_config()
+    return init_app_internal()
 
 
 def count_worker_thread():
@@ -372,12 +369,16 @@ def run_init_hooks(app):
 
 def main(boot_config_kw=None):
     global app
-    global FILE_LOCK
+
+    # 处理初始化参数
+    handle_args_and_init_config(boot_config_kw=boot_config_kw)
+
+    file_lock = FileLock(xconfig.FileConfig.boot_lock_file)
 
     try:
-        if FILE_LOCK.acquire():
+        if file_lock.acquire():
             # 初始化
-            init_app_no_lock(boot_config_kw=boot_config_kw)
+            init_app_internal(boot_config_kw=boot_config_kw)
             # 执行钩子函数
             run_init_hooks(app)
             # 监听端口
@@ -390,7 +391,7 @@ def main(boot_config_kw=None):
             logging.error("xnote进程已启动，请不要重复启动!")
             sys.exit(1)
     finally:
-        FILE_LOCK.release()
+        file_lock.release()
 
 
 if __name__ == '__main__':
