@@ -271,6 +271,7 @@ class WebConfig:
     # 关于系统的链接
     about_url = "" 
     about_text = ""
+    login_url = ""
 
     # 展示配置
     # 是否展示footer
@@ -284,6 +285,7 @@ class WebConfig:
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
         cls.about_url = SystemConfig.get_str("about_url", "/code/wiki/README.md")
+        cls.login_url = SystemConfig.get_str("login_url", "/login?target=")
         cls.about_text = SystemConfig.get_str("about_text", "关于Xnote")
         cls.ui_show_footer = SystemConfig.get_bool("ui_show_footer")
         cls.nav_list = cls.load_nav_list()

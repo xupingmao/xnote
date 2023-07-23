@@ -777,7 +777,7 @@ def check_login(user_name=None):
 
 def redirect_to_login():
     path = web.ctx.fullpath
-    raise web.seeother("/login?target=" + xutils.encode_uri_component(path))
+    raise web.seeother(xconfig.WebConfig.login_url + xutils.encode_uri_component(path))
 
 
 def login_required(user_name=None):
