@@ -30,12 +30,26 @@ if (window.xnote === undefined) {
     throw new Error("xnote is undefined!");
 }
 
-function getDialogArea() {
+xnote.getDialogArea = function () {
     if (isMobile()) {
         return ['100%', '100%'];
     } else {
         return ['600px', '80%'];
     }
+}
+
+getDialogArea = xnote.getDialogArea;
+
+xnote.getDialogAreaLarge = function() {
+    if (xnote.isMobile()) {
+        return ['100%', '100%'];
+    } else {
+        return ['80%', '80%'];
+    }
+}
+
+xnote.getDialogAreaFullScreen = function() {
+    return ["100%", "100%"];
 }
 
 xnote.getNewDialogId = function () {
@@ -132,7 +146,15 @@ xnote.openDialogExInner = function (options) {
     }
 
     if (area === undefined) {
-        area = getDialogArea();
+        area = xnote.getDialogArea();
+    }
+
+    if (area == "large") {
+        area = xnote.getDialogAreaLarge();
+    }
+
+    if (area == "fullscreen") {
+        area = xnote.getDialogAreaFullScreen();
     }
 
     var params = {

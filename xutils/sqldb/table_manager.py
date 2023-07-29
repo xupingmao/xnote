@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-22 13:15:52
+@LastEditTime : 2023-07-29 17:34:58
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -234,6 +234,12 @@ class SqliteTableManager(BaseTableManager):
         )
         return step2
     
+    def add_column(self, colname, coltype,
+                   default_value=None, not_null=True, **kw):
+        if coltype == "text" and default_value == None:
+            default_value = ""
+        super().add_column(colname, coltype, default_value, not_null)
+
     def drop_column(self, colname):
         # sqlite不支持 DROP COLUMN 得使用中间表
         pass
