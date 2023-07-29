@@ -1,5 +1,9 @@
 {% extends base %}
 
+{% block init_vars_block %}
+    {% init show_right = False %}
+{% end %}
+
 {% block body %}
 
 <style type="text/css">
@@ -12,10 +16,11 @@
     }
 </style>
 
-<div class="col-md-12 grid-card">
+<div class="card">
 
 {% set title = "浏览器信息" %}
 {% include "tools/base_title.html" %}
+
 </div>
 
 <div class="card">

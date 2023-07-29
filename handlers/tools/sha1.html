@@ -1,13 +1,17 @@
 {% extends base %}
 
-{% block head %}
+{% block init_vars_block %}
+    {% init show_right = False %}
 {% end %}
+
 {% block body %}
 
 <div class="card">
-{% set title = "sha1" %}
-{% include "tools/base_title.html" %}
+    {% set title = "sha1" %}
+    {% include "tools/base_title.html" %}
+</div>
 
+<div class="card">
 {% import hashlib %}
 {% set input_text = xutils.get_argument("input", "") %}
 <form>

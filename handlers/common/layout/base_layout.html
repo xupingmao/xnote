@@ -1,3 +1,5 @@
+{% init show_right = True %}
+
 {% if not show_menu %}
 <style type="text/css">
   body {
@@ -58,19 +60,6 @@
 </style>
 {% end %}
 
-<!--
-白色样式
-<style type="text/css">
-.nav {
-  background-color: white;
-}
-
-.nav-item>a {
-  color: black;
-}
-</style>
--->
-
 <style type="text/css" id="layout-css"></style>
 
 <script type="text/javascript">
@@ -83,7 +72,7 @@
       var winWidth = $(window).width(); // 窗口的宽度
       var leftNavWidth = 0; // 左侧导航的宽度
       var contentLeftWidth = 0; // content-left宽度
-      var styleText = ""; 
+      var styleText = "";
       var paddingLeft = 10;
       var paddingRight = 10;
 
@@ -92,8 +81,8 @@
         xnote.device.leftNavWidth = leftNavWidth;
         contentWidth = winWidth - leftNavWidth;
       }
-      
-      if (winWidth>=xnote.MOBILE_MAX_WIDTH) {
+
+      if (winWidth >= xnote.MOBILE_MAX_WIDTH) {
         // 桌面版
         styleText += ".content-left { width: calc(100% - 300px); }";
         styleText += ".content-right { width: 300px; }";
@@ -102,7 +91,7 @@
         if (navStyle == "left") {
           paddingLeft = 190;
         } else {
-          paddingLeft = (winWidth - contentWidth)/2 + 10;
+          paddingLeft = (winWidth - contentWidth) / 2 + 10;
           paddingRight = paddingLeft;
         }
       } else {
@@ -127,7 +116,7 @@
 
       styleText += ".main-content { width: 100%; padding-left:" + paddingLeft + "px; "
         + "padding-right: " + paddingRight + "px;}";
-      
+
       styleText += ".root{ min-height:" + rootMinHeight + "px;}";
 
       // 设备大小信息
@@ -147,6 +136,20 @@
     loadStyle();
 
     $(window).on("resize", loadStyle);
-    
+
   })();
 </script>
+
+{% if not show_right %}
+
+<style>
+  .content-left {
+    width: 100%;
+  }
+
+  .content-right {
+    display: none;
+  }
+</style>
+
+{% end %}

@@ -362,6 +362,7 @@ class TemplateConfig:
 class DatabaseConfig:
 
     db_driver="" # sqlite/leveldb/mysql/lmdb
+    db_driver_cache = "" # memory/redis
     user_max_log_size = 500 # 用户日志保留的最大条数
     db_debug = False
     db_log_debug = False
@@ -381,6 +382,7 @@ class DatabaseConfig:
     @classmethod
     def init(cls):
         cls.db_driver = get_system_config("db_driver")
+        cls.db_driver_cache = SystemConfig.get_str("db_driver_cache", "")
         cls.mysql_cloud_type = SystemConfig.get_str("mysql_cloud_type")
         cls.mysql_database = SystemConfig.get_str("mysql_database")
         cls.user_max_log_size = SystemConfig.get_int("user_max_log_size", 500)

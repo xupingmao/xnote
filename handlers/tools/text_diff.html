@@ -1,5 +1,9 @@
 {% extends base %}
 
+{% block init_vars_block %}
+    {% init show_right = False %}
+{% end %}
+
 {% block head %}
 
 <style type="text/css">
@@ -22,10 +26,11 @@
     }
 
     del {
-    text-decoration: none;
-    color: #b30000;
-    background: #fadad7;
+        text-decoration: none;
+        color: #b30000;
+        background: #fadad7;
     }
+
     ins {
         background: #eaf2c2;
         color: #406619;
@@ -58,15 +63,17 @@
 
 </style>
 
-<script type="text/javascript" src="/static/lib/jsdiff/diff.js"></script>
+<script type="text/javascript" src="{{_server_home}}/_static/lib/jsdiff/diff.js"></script>
 {% end %}
 
 {% block body %}
 
-<div class="grid-card">
+<div class="card">
     {% set title = "文本对比" %}
     {% include "tools/base_title.html" %}
+</div>
 
+<div class="card">
     <div id="settings">
         <label><input type="radio" name="diff_type" value="diffChars"> Chars</label>
         <label><input type="radio" name="diff_type" value="diffWords"> Words</label>

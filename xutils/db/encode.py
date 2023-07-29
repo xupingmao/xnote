@@ -195,6 +195,7 @@ def clean_value_before_update(value):
 
 def encode_id(id_value):
     """对ID进行编码, 第一位是标记位, 起步5位, 指数增长
+    数据标志位的好处是可以和正常的数字一样处理
     >>> encode_id(100) > encode_id(50)
     True
     >>> encode_id(10**5+10) > encode_id(20)
@@ -208,11 +209,11 @@ def encode_id(id_value):
     if id_value < 10**10:
         return "2%010d" % id_value
     
-    if id_value < 10**20:
-        return "3%020d" % id_value
+    if id_value < 10**15:
+        return "3%015d" % id_value
     
-    if id_value < 10**40:
-        return "4%040d" % id_value
+    if id_value < 10**20:
+        return "4%020d" % id_value
     
     raise Exception("too large id value")
 
