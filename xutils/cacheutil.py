@@ -369,7 +369,7 @@ class CacheObj:
             os.remove(path)
 
 
-def cache_deco(key=None, prefix=None, expire=600):
+def cache_deco(key=None, prefix=None, expire=600, expire_random=600):
     """缓存的装饰器，会自动清理失效的缓存
     注意：不考虑持久化，如果有持久化需要使用db实现
     @param {str} key    指定缓存的key，也就是使用固定的key
@@ -399,13 +399,27 @@ def cache_deco(key=None, prefix=None, expire=600):
                 _global_cache.delete(key=cache_key)
                 return None
 
-            _global_cache.put(key=cache_key, value=value, expire=expire)
+            _global_cache.put(key=cache_key, value=value, expire=expire, random_range=expire_random)
             return value
         return handle
     return deco
 
 
-def kw_cache_deco(prefix="", expire=600):
+def cache_call(cache_key, func, expire=600, expire_random=600):
+    """带缓存的函数调用,这种方式可以生成可读性更高的cache_key"""
+    assert isinstance(cache_key, str)
+    cache_value = _global_cache.get(key=cache_key)
+    if cache_value is not None:
+        return cache_value
+    value = func()
+    if value is None:
+        _global_cache.delete(key=cache_key)
+        return None
+
+    _global_cache.put(key=cache_key, value=value, expire=expire, random_range=expire_random)
+    return value
+
+def kw_cache_deco(prefix="", expire=600, expire_random=600):
     """缓存的装饰器，会自动清理失效的缓存
     注意：不考虑持久化，如果有持久化需要使用db实现
     @param {str} key    指定缓存的key，也就是使用固定的key
@@ -426,7 +440,7 @@ def kw_cache_deco(prefix="", expire=600):
                 _global_cache.delete(key=cache_key)
                 return None
 
-            _global_cache.put(key=cache_key, value=value, expire=expire)
+            _global_cache.put(key=cache_key, value=value, expire=expire, random_range=expire_random)
             return value
         return handle
     return deco

@@ -99,6 +99,16 @@ xnote.showDialogEx = function () {
     return xnote.openDialogEx.apply(this, arguments);
 }
 
+/**
+ * 创建对话框
+ * @param {object} options 创建选项
+ * @param {string} options.title 标题
+ * @param {string} options.html HTML内容
+ * @param {list[string]} options.buttons 按钮文案
+ * @param {list[function]} options.functions 回调函数(第一个是成功的回调函数)
+ * @param {boolean} options.closeForYes 成功后是否关闭对话框(默认关闭)
+ * @returns index
+ */
 xnote.openDialogExInner = function (options) {
     var area = options.area;
     var title = options.title;
@@ -111,7 +121,7 @@ xnote.openDialogExInner = function (options) {
     var shadeClose = xnote.getOrDefault(options.shadeClose, true);
     var closeForYes = xnote.getOrDefault(options.closeForYes, true);
     var template = options.template;
-    var defaultValues = options.defaultValues;
+    var defaultValues = options.defaultValues; // 模板的默认值
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数

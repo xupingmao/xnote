@@ -3,7 +3,6 @@ from .a import *
 import time
 import xutils
 from xutils import cacheutil
-
 # cannot perform relative import
 try:
     import test_base
@@ -60,10 +59,22 @@ class TestXutilCache(BaseTestCase):
         self.assertEqual(None, cacheutil.get("name"))
 
     def test_cache_load_dump(self):
-        xutils.cacheutil.load_dump()
+        cacheutil.load_dump()
 
     def test_cache_hash(self):
-        xutils.cacheutil.hset("h01", "key", "value", expire = 600)
-        value = xutils.cacheutil.hget("h01", "key")
+        cacheutil.hset("h01", "key", "value", expire = 600)
+        value = cacheutil.hget("h01", "key")
         self.assertEqual("value", value)
-        self.assertEqual(None, xutils.cacheutil.hget("h01", "key02"))
+        self.assertEqual(None, cacheutil.hget("h01", "key02"))
+
+    def test_cache_call(self):
+        counter = [0]
+        def do_get_value():
+            counter[0] += 1
+            return counter[0]
+        
+        v1 = cacheutil.cache_call("cache_call", do_get_value, expire=600)
+        v2 = cacheutil.cache_call("cache_call", do_get_value, expire=600)
+
+        self.assertEqual(v1, 1)
+        self.assertEqual(v2, 1)
