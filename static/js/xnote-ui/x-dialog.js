@@ -109,6 +109,7 @@ xnote.openDialogExInner = function (options) {
     var closeBtn = options.closeBtn;
     var onOpenFn = options.onOpenFn;
     var shadeClose = xnote.getOrDefault(options.shadeClose, true);
+    var closeForYes = xnote.getOrDefault(options.closeForYes, true);
     var template = options.template;
     var defaultValues = options.defaultValues;
 
@@ -173,7 +174,9 @@ xnote.openDialogExInner = function (options) {
         params.btn = buttons
         params.yes = function (index, layero) {
             console.log(index, layero);
-            layer.close(index);
+            if (closeForYes) {
+                layer.close(index);
+            }
             var dialogInfo = {
                 id: dialogId
             };
