@@ -5,7 +5,7 @@ services:
        context: .
      container_name: xnote
      volumes:
-       - ./data:/data
+       - ./data:/xnote/data
        - ./boot.properties:/config/boot/boot.sae.properties
        - ../xnote:/xnote
      ports:
