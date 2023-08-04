@@ -7,6 +7,6 @@ services:
      volumes:
        - ./data:/data
        - ./boot.properties:/config/boot/boot.sae.properties
-       - ./xnote:/xnote
+       - ../xnote:/xnote
      ports:
        - 1234:1234
