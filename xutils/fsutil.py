@@ -37,14 +37,18 @@ ENCODING_TUPLE = ("utf-8", "gbk", "gb18030", "mbcs", "latin_1")
 CONFIG_FILE_MAX_SIZE = 1024 * 1024
 
 
+class FileUtilConfig:
+    use_urlencode = False
+    data_dir = ""
+
 def get_real_path(path):
-    import xconfig
     """获取真实的path信息，如果配置了urlencode，强制进行urlencode，否则先按原路径检查，如果文件不存在，再进行urlencode
     之所以要这样做，主要是为了兼容从不支持unicode文件名的服务器同步到本地的文件"""
     assert isinstance(path, str)
     if path == "":
         return path
-    if xconfig.USE_URLENCODE:
+    
+    if FileUtilConfig.use_urlencode:
         return get_real_path_encode_first(path)
 
     if os.path.exists(path):
@@ -285,8 +289,7 @@ def tmp_path(fname="", prefix="", ext=""):
 
 def data_path(fname):
     """获取data目录文件路径"""
-    import xconfig
-    return os.path.join(xconfig.DATA_DIR, fname)
+    return os.path.join(FileUtilConfig.data_dir, fname)
 
 
 ### 文件操作部分
@@ -800,9 +803,10 @@ def load_ini_config(fpath):
 
 
 def get_webpath(fpath):
-    import xconfig
-    rpath = get_relative_path(fpath, xconfig.DATA_DIR)
-    return "/data/" + rpath
+    if is_parent_dir(FileUtilConfig.data_dir, fpath):
+        rpath = get_relative_path(fpath, FileUtilConfig.data_dir)
+        return "/data/" + rpath
+    return "/fs/~" + fpath
 
 def backupfile(path, backup_dir=None, rename=False):
     if os.path.exists(path):

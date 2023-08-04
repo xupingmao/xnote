@@ -232,7 +232,7 @@ class FileSystemHandler:
             except Exception as e:
                 # 其他未知异常
                 xutils.print_stacktrace()
-                # yield最好不要和return混用
+                # yield最好不要和return value混用
                 yield self.read_all(path, blocksize)
         else:
             # 处理不了，返回所有的数据

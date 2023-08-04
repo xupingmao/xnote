@@ -294,6 +294,12 @@ def init_debug():
     mem_util.ignore_log_mem_info_deco("sync_by_binlog_step")
 
 
+def init_xutils():
+    xutils.init(xconfig)
+    from xutils.fsutil import FileUtilConfig
+    FileUtilConfig.data_dir = xconfig.FileConfig.data_dir
+    FileUtilConfig.use_urlencode = xconfig.USE_URLENCODE
+
 def init_app_internal(boot_config_kw=None):
     """初始化APP内部方法"""
     global app
@@ -310,7 +316,7 @@ def init_app_internal(boot_config_kw=None):
     init_kv_db()
 
     # 初始化工具箱
-    xutils.init(xconfig)
+    init_xutils()
 
     # 初始化权限系统
     xauth.init()
@@ -334,7 +340,6 @@ def init_app_internal(boot_config_kw=None):
     # 记录已经启动
     xconfig.mark_started()
     logging.info("app started")
-
 
 def init_app():
     handle_args_and_init_config()

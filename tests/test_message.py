@@ -113,12 +113,20 @@ class TestMain(BaseTestCase):
         for msg in done_list:
             del_msg_by_id(msg['id'])
 
+    def count_message_key(self):
+        response = json_request("/message/list?tag=key")
+        assert isinstance(response, dict)
+        assert response.get("code") == "success"
+        return len(response.get("data"))
+
     def test_message_key(self):
         key_result = json_request("/message/list?tag=key")
         assert isinstance(key_result, dict)
 
         for item in key_result["data"]:
             del_msg_by_id(item["id"])
+
+        assert self.count_message_key() == 0
 
         response = json_request(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test", tag="key"))
@@ -129,11 +137,7 @@ class TestMain(BaseTestCase):
         data = response.get("data")
         msg_id = data['id']
 
-        key_result = json_request("/message/list?tag=key")
-        self.assertEqual("success", key_result['code'])
-
-        key_list = key_result['data']
-        self.assertEqual(1, len(key_list))
+        assert self.count_message_key() == 1
 
         del_msg_by_id(msg_id)
 

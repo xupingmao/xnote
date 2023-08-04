@@ -99,10 +99,10 @@ def get_file_thumbnail(fpath):
         return xutils.get_webpath(fpath) + "?mode=thumbnail"
 
     if xutils.is_text_file(fpath):
-        return "/static/image/icon_txt.png"
+        return "/_static/image/icon_txt.png"
 
     # 位置类型
-    return "/static/image/file2.png"
+    return "/_static/image/file2.png"
 
 def get_file_download_link(fpath):
     if fsutil.is_parent_dir(xconfig.DATA_DIR, fpath):
