@@ -71,6 +71,7 @@
 
 {% import xutils.textutil as textutil %}
 {% init parent_path = None %}
+{% init get_file_thumbnail = xutils.get_func_by_name("fs.get_file_thumbnail") %}
 
 <div class="card">
     {% include fs/component/fs_title.html %}
@@ -98,16 +99,17 @@
                     </div>
                     <div class="icon-box">
                         {% if item.type == "dir" %}
-                            <img class="fs-icon" src="/static/image/folder2.png">
+                            <img class="fs-icon" src="{{_server_home}}/_static/image/folder2.png">
                         {% elif xutils.is_img_file(item.path) %}
-                            <img class="x-photo" src="/fs/{{item.encoded_path}}">
+                            <img class="x-photo" src="{{_server_home}}{{get_file_thumbnail(item.path)}}" 
+                                data-src="{{_server_home}}/fs/~{{item.encoded_path}}">
                         {% elif xutils.is_text_file(item.path) %}
-                            <img class="fs-icon" src="/static/image/icon_txt.png">
+                            <img class="fs-icon" src="{{_server_home}}/_static/image/icon_txt.png">
                         {% else %}
-                            <img class="fs-icon" src="/static/image/file2.png">
+                            <img class="fs-icon" src="{{_server_home}}/_static/image/file2.png">
                         {% end %}
                     </div>
-                    <a href="{{_server_home}}/fs/{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
+                    <a href="{{_server_home}}/fs/~{{item.path}}?mode=grid">{{textutil.get_short_text(item.name, 10)}}</a>
                 </div>
             {% end %}
         {% end %}
@@ -117,6 +119,6 @@
 
 {% end %}
 
-{% block aside %}
-    {% include fs/mod_aside.html %}
+{% block body_right %}
+    {% include fs/component/fs_sidebar.html %}
 {% end %}

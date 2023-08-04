@@ -11,7 +11,9 @@ label {
     float: left;
     width: calc(100% - 80px);
 }
-
+.create-tag {
+    margin-bottom: 5px;
+}
 </style>
 {% end %}
 
@@ -71,7 +73,7 @@ label {
     <div class="input-group-row">
         <label>标签</label>
         {{! each tagList tag }}
-            <a class="tag lightgray large">{{! tag.tag_name }}</a>
+            <a class="tag lightgray large create-tag">{{! tag.tag_name }}</a>
         {{!/each}}
     </div>
 {{!/if}}
@@ -187,6 +189,6 @@ label {
 
 {% end %}
 
-{% block aside %}
-    {% include note/component/mod_aside.html %}
+{% block body_right %}
+    {% include note/component/sidebar/group_list_sidebar.html %}
 {% end %}
