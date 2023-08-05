@@ -107,6 +107,10 @@ def run_range_test(test, db):
                                   key_to=b"test6:\xff",
                                   include_value=False,
                                   reverse=True))
+
+    if len(data_list) != 2:
+        print(data_list)
+
     test.assertEqual(2, len(data_list))
     test.assertEqual(b"test6:2", data_list[0])
     test.assertEqual(b"test6:1", data_list[1])
@@ -298,6 +302,15 @@ class TestMain(BaseTestCase):
             return
         
         db = self.get_mysql_db2()
+        run_test_db_engine(self, db)
+
+    def test_ssdb_kv(self):
+        from xutils.db.driver_ssdb import SSDBKV
+
+        if not xconfig.SystemConfig.get_bool("test_ssdb"):
+            return
+        
+        db = SSDBKV()
         run_test_db_engine(self, db)
 
     def test_dbutil_mysql_enhanced(self):

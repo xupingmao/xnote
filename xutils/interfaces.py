@@ -81,6 +81,11 @@ class DBInterface:
     def BatchDelete(self, keys=[]):
         for key in keys:
             self.Delete(key)
+    
+    def BatchPut(self, kv_dict={}):
+        for key in kv_dict:
+            value = kv_dict.get(key)
+            self.Put(key, value)
 
     def RangeIter(self, 
             key_from = b'', # type: bytes
@@ -105,7 +110,18 @@ class DBInterface:
         raise NotImplementedError("CreateSnapshot")
 
     def Write(self, batch_proxy, sync = False):
-        raise NotImplementedError("Write")
+        """兜底的批量操作,不保证原子性"""
+        assert isinstance(batch_proxy, BatchInterface)
+        
+        if len(batch_proxy._puts) > 0:
+            self.BatchPut(batch_proxy._puts)
+        
+        for key in batch_proxy._inserts:
+            value = batch_proxy._inserts[key]
+            self.Insert(key, value)
+
+        if len(batch_proxy._deletes) > 0:
+            self.BatchDelete(batch_proxy._deletes)
 
     def Count(self, key_from:bytes, key_to:bytes):
         iterator = self.RangeIter(
