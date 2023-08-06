@@ -9,6 +9,8 @@ from xutils import Storage
 class HookStore:
     init_hooks = []
     reload_hooks = []
+    # 自动加载模块的钩子函数
+    autoreload_hooks = []
 
     @classmethod
     def add_init_hook(cls, func):
