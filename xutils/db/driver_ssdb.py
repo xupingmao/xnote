@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-07-29 19:49:39
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-05 12:26:21
+@LastEditTime : 2023-08-06 00:34:13
 @FilePath     : /xnote/xutils/db/driver_ssdb.py
 @Description  : ssdb驱动,可以看成是leveldb的server版本
 """
@@ -111,4 +111,9 @@ class SSDBKV(interfaces.DBInterface):
         """执行批量操作"""
         return super().Write(batch_proxy)
 
-
+    def Increase(self, key=b'', increment=1, start_id=1):
+        result_int = self.db.incr(key, increment)
+        if result_int < start_id:
+            diff = start_id - result_int
+            result_int = self.db.incr(key, diff)
+        return result_int
