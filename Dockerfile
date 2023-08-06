@@ -2,10 +2,10 @@ FROM python:3.7.2
 
 COPY config/requirements.txt ./
 
-RUN pip install --upgrade pip -i https://pypi.douban.com/simple
+RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # install required packages
-RUN pip install -r requirements.txt -i https://pypi.douban.com/simple
+RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # set timezone
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
