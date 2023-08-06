@@ -242,6 +242,8 @@ def init_autoreload():
         autoreload_thread.watch_dir(xconfig.resolve_config_path("static/js"), recursive=True)
         autoreload_thread.watch_dir(xconfig.resolve_config_path("static/css"), recursive=True)
         autoreload_thread.watch_file(xconfig.resolve_config_path("core/xtemplate.py"))
+        for fn in xnote_hooks.HookStore.autoreload_hooks:
+            fn(autoreload_thread)
 
     def reload_callback():
         xnote_code_builder.build()
