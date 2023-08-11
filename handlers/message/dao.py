@@ -35,6 +35,7 @@ class MessageDO(Storage):
         self.mtime = xutils.format_datetime()
         self.date = xutils.format_date()
         self.content = ""
+        self.comments = [] # 评论信息
         self.version = 0
         self.visit_cnt = 0
         self.status = None # 老的结构
@@ -48,6 +49,8 @@ class MessageDO(Storage):
         result = MessageDO()
         result.update(dict_value)
         result.id = result._key
+        if result.comments == None:
+            result.comments = []
         return result
     
     @classmethod
@@ -312,8 +315,8 @@ def count_message(user, status):
     return kv_count_message(user, status)
 
 
-def get_message_by_id(full_key):
-    # type: (str) -> MessageDO|None
+def get_message_by_id(full_key, user_name=""):
+    # type: (str, str) -> MessageDO|None
     check_param_id(full_key)
     if full_key.startswith("message:"):
         value = _msg_db.get_by_key(full_key)
@@ -323,6 +326,8 @@ def get_message_by_id(full_key):
     if value != None:
         value = MessageDO.from_dict(value)
         value.id = full_key
+        if user_name != "" and user_name != value.user:
+            return None
     return value
 
 def check_param_user(user_name):
@@ -665,6 +670,11 @@ def get_message_tag(user, tag, priority=0):
         return MessageTag(tag, msg_stat.task_count, priority=priority)
 
     raise Exception("unknown tag:%s" % tag)
+
+class MessageComment(Storage):
+    def __init__(self):
+        self.time = dateutil.format_datetime()
+        self.content = ""
 
 class MessageDao:
     """message的数据接口"""

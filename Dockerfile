@@ -2,6 +2,8 @@ FROM python:3.7.2
 
 COPY config/requirements.txt ./
 
+RUN pip config set global.cache-dir "/data/pip-cache"
+
 RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # install required packages

@@ -50,6 +50,8 @@ if (window.xnote === undefined) {
     xnote.state = {};
     // 系统状态
     xnote.state.system = {};
+    // http相关操作
+    xnote.http = {};
 }
 
 xnote.registerApiModule = function (name) {
@@ -138,6 +140,11 @@ xnote.appendCSS = function (styleText) {
     } 
 
     document.head.appendChild(style);
+};
+
+xnote.http.defaultFailHandler = function (err) {
+    console.log(err);
+    xnote.toast("服务器繁忙, 请稍后重试~");
 };
 
 var XUI = function(window) {

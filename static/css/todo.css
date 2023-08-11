@@ -38,6 +38,10 @@
     width: 100%;
 }
 
+.todo-foot .btn, .todo-foot .btn-default {
+    margin-top: 0px;
+}
+
 .todo-tag {
     display: inline-block;
     padding: 3px;
@@ -57,4 +61,32 @@
 
 .second-btn {
     margin-left: 50px;
+}
+
+.todo-comment {
+    width: 100%;
+    float: left;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.comment-line {
+    background-color: #eee;
+    width: 100%;
+    float: left;
+}
+
+.comment-second a {
+    margin-left: 50px;
+} 
+
+
+.todo-comment-row {
+    border-top: 1px solid #ccc;
+    padding: 10px;
+}
+
+.todo-comment-row .time {
+    color: #888;
 }

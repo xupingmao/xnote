@@ -338,6 +338,62 @@ MessageView.markTagLevel = function (e) {
     });
 }
 
+MessageView.createComment = function (target) {
+    var id = $(target).attr("data-id");
+    xnote.prompt("备注", "", function (inputText) {
+        var req = {};
+        req.id = id;
+        req.content = inputText;
+        $.post("/message/comment/create", req, function (resp) {
+            if (resp.success) {
+                xnote.toast("备注成功");
+                window.location.reload();
+            } else {
+                xnote.toast(resp.message);
+            }
+        }).fail(xnote.http.defaultFailHandler);
+    });
+}
+
+MessageView.deleteComment = function (target) {
+    var id = $(target).attr("data-id");
+    var time = $(target).attr("data-time");
+    var req = {};
+    req.id = id;
+    req.time = time;
+    console.log("deleteComment req:", req);
+    $.post("/message/comment/delete", req, function (resp) {
+        if (resp.success) {
+            xnote.toast("删除备注成功");
+            MessageView.refreshCommentList(id, "#msgCommentListTpl");
+        } else {
+            xnote.toast(resp.message);
+        }
+    }).fail(xnote.http.defaultFailHandler);
+}
+
+MessageView.refreshCommentList = function(id, selector) {
+    var req = {};
+    req.id = id;
+    console.log("listComments req:", req);
+    $.post("/message/comment/list", req, function (resp) {
+        if (resp.success) {
+            var html = $(selector).render({
+                commentList: resp.data,
+                msgId: id
+            });
+            $("#listCommentDialog").html(html);
+        } else {
+            xnote.toast(resp.message);
+        }
+    }).fail(xnote.http.defaultFailHandler);
+}
+
+MessageView.showAllComments = function(target, selector) {
+    xnote.showDialog("查看备注", '<div id="listCommentDialog"></div>', ["关闭"]);
+    this.refreshCommentList($(target).attr("data-id"), selector);
+}
+
 $("body").on("keyup", ".nav-search-input", function (e) {
     console.log(e);
     var inputText = $(e.target).val();

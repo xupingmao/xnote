@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-15 00:07:54
+@LastEditTime : 2023-08-11 20:06:30
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -24,7 +24,7 @@ import logging
 from xutils import BaseRule, Storage, functions, u, SearchResult
 from xutils import dateutil
 from xtemplate import T
-from xutils import netutil
+from xutils import netutil, webutil
 from xutils.functions import safe_list
 from handlers.message.message_utils import (
     list_task_tags,
@@ -452,7 +452,6 @@ def update_message_tag(id, tag):
             data.done_time = xutils.format_datetime()
             # 任务完成时除了标记原来任务的完成时间，还要新建一条消息
             create_done_message(data)
-
         MessageDao.update(data)
         MessageDao.refresh_message_stat(user_name)
         xmanager.fire("message.updated", Storage(
@@ -484,8 +483,8 @@ class UpdateTagAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument("id")
-        tag = xutils.get_argument("tag")
+        id = xutils.get_argument_str("id")
+        tag = xutils.get_argument_str("tag")
         if id == "":
             return failure(code="404", message="id为空")
 
@@ -1205,6 +1204,65 @@ MSG_RULES = [
     CalendarRule(r"(\d+)年(\d+)月(\d+)日"),
 ]
 
+class CreateCommentHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument_str("id")
+        content = xutils.get_argument_str("content")
+
+        if content == "":
+            return webutil.FailedResult(message="备注内容不能为空")
+
+        user_name = xauth.current_name_str()
+        msg = dao.get_message_by_id(id, user_name=user_name)
+        if msg == None:
+            return webutil.FailedResult(message="随手记不存在")
+        comment = dao.MessageComment()
+        comment.content = content
+        msg.comments.append(comment)
+        
+        dao.update_message(msg)
+        return webutil.SuccessResult()
+
+
+class DeleteCommentHandler:
+    
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument_str("id")
+        time_str = xutils.get_argument_str("time")
+
+        if time_str == "":
+            return webutil.FailedResult(message="备注时间不能为空")
+        user_name = xauth.current_name_str()
+        msg = dao.get_message_by_id(id, user_name=user_name)
+        if msg == None:
+            return webutil.FailedResult(message="随手记不存在")
+        
+        new_comments = []
+        for comment in msg.comments:
+            if comment.get("time") != time_str:
+                new_comments.append(comment)
+        
+        msg.comments = new_comments
+        dao.update_message(msg)
+        return webutil.SuccessResult()
+    
+class ListCommentHandler:
+    
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument_str("id")
+        user_name = xauth.current_name_str()
+        msg = dao.get_message_by_id(id, user_name=user_name)
+        if msg == None:
+            return webutil.FailedResult(message="随手记不存在")
+        
+        comments = list(reversed(msg.comments))
+        return webutil.SuccessResult(data=comments)
+
+
 xurls = (
     r"/message", MessageHandler,
     r"/message/calendar", CalendarHandler,
@@ -1232,4 +1290,7 @@ xurls = (
     r"/message/touch", TouchAjaxHandler,
     r"/message/tag", UpdateTagAjaxHandler,
     r"/message/keyword", MessageKeywordAjaxHandler,
+    r"/message/comment/create", CreateCommentHandler,
+    r"/message/comment/delete", DeleteCommentHandler,
+    r"/message/comment/list", ListCommentHandler,
 )
