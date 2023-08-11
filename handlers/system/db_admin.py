@@ -312,9 +312,8 @@ class SqlDBOperateHandler:
     @xauth.login_required()
     def GET(self):
         table_name = xutils.get_argument_str("table_name")
-        if xconfig.DatabaseConfig.db_driver == "sqlite":
-            db = xtables.get_table_by_name(table_name)
-            assert isinstance(db.db, xtables.MySqliteDB)
+        db = xtables.get_table_by_name(table_name)
+        if isinstance(db.db, xtables.MySqliteDB):
             raise web.seeother("/system/sqlite?path=" + xutils.quote(db.db.dbpath))
         return "not ready"
 
