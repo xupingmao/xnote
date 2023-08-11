@@ -17,7 +17,7 @@
             <td><a href="{{_server_home}}/system/sqldb_detail?name={{db.name}}">{{db.name}}</a></td>
             <td></td>
             <td>{{db.amount}}</td>
-            <td></td>
+            <td><a href="{{_server_home}}/system/sqldb_operate?table_name={{db.name}}">操作</a></td>
         </tr>
         {% end %}
     </table>

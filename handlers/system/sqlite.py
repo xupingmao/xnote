@@ -92,7 +92,7 @@ class handler:
         else:
             keys = []
         return xtemplate.render("system/page/sqlite.html", 
-            show_aside = False,
+            show_right = False,
             keys = keys, 
             result_list = result_list, 
             sql = sql, 

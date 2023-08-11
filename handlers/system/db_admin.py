@@ -285,10 +285,12 @@ class SqlDBDetailHandler:
         # type: (str) -> TableProxy
         return xtables.get_table_by_name(name)
 
+    @xauth.login_required("admin")
     def GET(self):
         name = xutils.get_argument_str("name")
         page = xutils.get_argument_int("page", 1)
         page_size = xutils.get_argument_int("page_size", 20)
+        assert page_size <= 100
         db = self.get_table_by_name(name)
         db_rows = []
         page_max = 0
@@ -305,6 +307,16 @@ class SqlDBDetailHandler:
         kw.page_url = "?name={name}&page_size={page_size}&page=".format(name = name, page_size=page_size)
         return xtemplate.render("system/page/db/sqldb_detail.html", **kw)
 
+class SqlDBOperateHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        table_name = xutils.get_argument_str("table_name")
+        if xconfig.DatabaseConfig.db_driver == "sqlite":
+            db = xtables.get_table_by_name(table_name)
+            assert isinstance(db.db, xtables.MySqliteDB)
+            raise web.seeother("/system/sqlite?path=" + xutils.quote(db.db.dbpath))
+        return "not ready"
 
 class DropTableHandler:
 
@@ -361,6 +373,7 @@ xurls = (
     "/system/leveldb_admin", DbScanHandler,
     "/system/sqldb_admin", SqlDBHandler,
     "/system/sqldb_detail", SqlDBDetailHandler,
+    "/system/sqldb_operate", SqlDBOperateHandler,
     "/system/db/drop_table", DropTableHandler,
     "/system/db/driver_info", DatabaseDriverInfoHandler,
 )
