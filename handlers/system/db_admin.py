@@ -363,6 +363,10 @@ class DatabaseDriverInfoHandler:
             info += self.get_sqlite_pragma(db, "page_count")
             info += self.get_sqlite_pragma(db, "page_size")
             info += self.get_sqlite_pragma(db, "max_page_count")
+        if xconfig.DatabaseConfig.db_driver == "leveldb":
+            from xutils.db.driver_leveldb import LevelDBImpl
+            assert isinstance(instance, LevelDBImpl)
+            info += instance.GetStats()
 
         return info
 

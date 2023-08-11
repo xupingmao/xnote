@@ -56,6 +56,6 @@ class LevelDBImpl(interfaces.DBInterface):
             batch.Delete(key)
         return self._db.Write(batch, sync)
     
-    def GetStatus(self):
-        return self._db.GetStatus()
+    def GetStats(self):
+        return self._db.GetStats()
 
