@@ -282,10 +282,12 @@ class WebConfig:
     # 展示配置
     # 是否展示footer
     ui_show_footer = True
+    ui_title_prefix = "Xnote"
     
     nav_list = []
 
     auth_max_session_size = 20
+
 
     @classmethod
     def init(cls):
@@ -294,9 +296,11 @@ class WebConfig:
         cls.about_url = SystemConfig.get_str("about_url", "/code/wiki/README.md")
         cls.login_url = SystemConfig.get_str("login_url", "/login?target=")
         cls.about_text = SystemConfig.get_str("about_text", "关于Xnote")
-        cls.ui_show_footer = SystemConfig.get_bool("ui_show_footer")
         cls.nav_list = cls.load_nav_list()
         cls.auth_max_session_size = SystemConfig.get_int("auth_max_session_size")
+
+        cls.ui_show_footer = SystemConfig.get_bool("ui_show_footer")
+        cls.ui_title_prefix = SystemConfig.get_str("ui_title_prefix", "Xnote")
     
     @classmethod
     def load_nav_list(cls):

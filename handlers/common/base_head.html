@@ -16,7 +16,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1.0,user-scalable=0"/>
 {% end %}
 
-<title>Xnote{%if html_title%} | {{T(html_title)}}{%end%}</title>
+<title>{{xconfig.WebConfig.ui_title_prefix}}{%if html_title%} | {{T(html_title)}}{%end%}</title>
 
 <link rel="shortcut icon" href="{{_server_home}}/_static/favicon.ico"/>
 <link rel="bookmark" href="{{_server_home}}/_static/favicon.ico"/>
