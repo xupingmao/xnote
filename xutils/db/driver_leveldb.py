@@ -55,4 +55,7 @@ class LevelDBImpl(interfaces.DBInterface):
         for key in batch_proxy._deletes:
             batch.Delete(key)
         return self._db.Write(batch, sync)
+    
+    def GetStatus(self):
+        return self._db.GetStatus()
 

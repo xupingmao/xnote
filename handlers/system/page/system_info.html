@@ -27,6 +27,9 @@
                 {% else %}
                     {{item.value}}
                 {% end %}
+                {% if item.extra_link != "" %}
+                    <a href="{{item.extra_link}}">查看详情</a>
+                {% end %}
             </div>
         </div>
     {% end %}

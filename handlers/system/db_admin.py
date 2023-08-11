@@ -10,6 +10,8 @@ from xutils import textutil
 import xtables
 import xtemplate
 import math
+import xconfig
+import web.db
 from xutils.sqldb import TableProxy
 
 def get_display_value(value):
@@ -319,6 +321,40 @@ class DropTableHandler:
         dbutil.count_table(table_name, use_cache=False)
         return dict(code="success")
 
+class DatabaseDriverInfoHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        kw = Storage()
+        kw.info_text = self.get_driver_info_text()
+        return xtemplate.render("system/page/db/driver_info.html", **kw)
+
+    def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma):
+        result = db.query("pragma %s" % pragma).first().get(pragma)
+        return "\n\n%s: %s" % (pragma, result)
+
+    def get_driver_info_text(self):
+        info = "%s: %s" % ("db_driver", xconfig.DatabaseConfig.db_driver)
+        instance = dbutil.get_instance()
+        if xconfig.DatabaseConfig.db_driver == "sqlite":
+            db = xtables.get_db_instance(xconfig.FileConfig.record_db_file)
+            assert isinstance(db, web.db.SqliteDB)
+            info += self.get_sqlite_pragma(db, "journal_mode")
+            info += self.get_sqlite_pragma(db, "journal_size_limit")
+            info += self.get_sqlite_pragma(db, "synchronous")
+            info += self.get_sqlite_pragma(db, "cache_size")
+            info += self.get_sqlite_pragma(db, "data_version")
+            info += self.get_sqlite_pragma(db, "busy_timeout")
+            info += self.get_sqlite_pragma(db, "encoding")
+            info += self.get_sqlite_pragma(db, "mmap_size")
+            info += self.get_sqlite_pragma(db, "locking_mode")
+            info += self.get_sqlite_pragma(db, "wal_autocheckpoint")
+            info += self.get_sqlite_pragma(db, "page_count")
+            info += self.get_sqlite_pragma(db, "page_size")
+            info += self.get_sqlite_pragma(db, "max_page_count")
+
+        return info
+
 xurls = (
     "/system/db_scan", DbScanHandler,
     "/system/db_admin", DbScanHandler,
@@ -326,4 +362,5 @@ xurls = (
     "/system/sqldb_admin", SqlDBHandler,
     "/system/sqldb_detail", SqlDBDetailHandler,
     "/system/db/drop_table", DropTableHandler,
+    "/system/db/driver_info", DatabaseDriverInfoHandler,
 )

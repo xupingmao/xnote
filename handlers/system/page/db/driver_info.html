@@ -1,0 +1,19 @@
+{% extends base %}
+
+{% block body_left %}
+{% init info_text = "" %}
+
+<div class="card">
+    {% set-global title = "数据库引擎信息" %}
+    {% include common/base_title.html %}    
+</div>
+
+<div class="card">
+    <textarea class="row" rows="30" readonly>{{info_text}}</textarea>
+</div>
+
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
+{% end %}

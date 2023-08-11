@@ -385,7 +385,7 @@ class DatabaseConfig:
 
     @classmethod
     def init(cls):
-        cls.db_driver = get_system_config("db_driver")
+        cls.db_driver = SystemConfig.get_str("db_driver")
         cls.db_driver_cache = SystemConfig.get_str("db_driver_cache", "")
         cls.mysql_cloud_type = SystemConfig.get_str("mysql_cloud_type")
         cls.mysql_database = SystemConfig.get_str("mysql_database")

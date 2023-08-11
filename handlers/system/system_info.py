@@ -26,7 +26,7 @@ except ImportError:
     psutil = None
 
 def get_xnote_version():
-    return xconfig.get_global_config("system.version")
+    return xconfig.SystemConfig.get_str("version")
 
 def get_mem_info():
     mem_used = 0
@@ -53,10 +53,11 @@ def get_free_data_space():
 
 class SystemInfoItem:
 
-    def __init__(self, name = "", value = "", link = ""):
+    def __init__(self, name = "", value = "", link = "", extra_link=""):
         self.name  = name
         self.value = value
         self.link = link
+        self.extra_link = extra_link
 
 def get_db_info():
     return Storage(
@@ -127,7 +128,7 @@ class InfoHandler:
             SystemInfoItem("Xnote版本", value = get_xnote_version()),
             SystemInfoItem("应用内存使用量", value = mem_info.mem_used),
             SystemInfoItem("磁盘可用容量", get_free_data_space()),
-            SystemInfoItem("数据库驱动", xconfig.get_system_config("db_driver")),
+            SystemInfoItem("数据库驱动", xconfig.DatabaseConfig.db_driver, extra_link="/system/db/driver_info"),
             SystemInfoItem("sqlite版本", sqlite3.sqlite_version if sqlite3 != None else ''),
             SystemInfoItem("CPU型号", platform.processor()),
             SystemInfoItem("操作系统", platform.system()),
