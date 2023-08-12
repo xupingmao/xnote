@@ -147,6 +147,14 @@ xnote.http.defaultFailHandler = function (err) {
     xnote.toast("服务器繁忙, 请稍后重试~");
 };
 
+xnote.http.post = function (url, data, callback, type) {
+    $.post(xnote.config.serverHome + url, data, callback, type).fail(xnote.http.defaultFailHandler);
+}
+
+xnote.http.get = function (url, data, callback, type) {
+    $.get(xnote.config.serverHome + url, data, callback, type).fail(xnote.http.defaultFailHandler);
+}
+
 var XUI = function(window) {
     // 处理select标签选中情况
     function initSelect() {

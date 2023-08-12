@@ -29,16 +29,17 @@ PlanView.removeNote = function (target) {
         id: PlanView.state.id,
         note_id: noteId
     };
-    $.post("/plan/month/remove", params, function (resp) {
-        if (resp.code == "success") {
-            xnote.toast("移除成功");
-            window.location.reload();
-        } else {
-            xnote.alert(resp.message);
-        }
-    }).fail(function (err) {
-        xnote.alert("调用接口失败:" + err);
-    })
+
+    xnote.confirm("确认要移除吗?", function () {
+        xnote.http.post("/plan/month/remove", params, function (resp) {
+            if (resp.code == "success") {
+                xnote.toast("移除成功");
+                window.location.reload();
+            } else {
+                xnote.alert(resp.message);
+            }
+        });
+    });
 };
 
 
