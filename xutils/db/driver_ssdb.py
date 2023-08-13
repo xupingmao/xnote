@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-07-29 19:49:39
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-06 00:34:13
+@LastEditTime : 2023-08-06 11:35:34
 @FilePath     : /xnote/xutils/db/driver_ssdb.py
 @Description  : ssdb驱动,可以看成是leveldb的server版本
 """
@@ -25,6 +25,19 @@ class SSDBKV(interfaces.DBInterface):
         self.db = pyssdb.Client(host=host, port=port)
         self.driver_type = "ssdb"
 
+    def list_to_dict(self, list_result):
+        dict_result = {}
+        key = b''
+        count = 0
+        for item in list_result:
+            count += 1
+            if count % 2 == 1:
+                key = item
+            if count % 2 == 0:
+                value = item
+                dict_result[key] = value
+        return dict_result
+
     def Get(self, key):
         return self.db.get(key)
 
@@ -33,6 +46,12 @@ class SSDBKV(interfaces.DBInterface):
 
     def Delete(self, key, sync = False):
         return self.db.delete(key)
+    
+    def BatchGet(self, keys=[]):
+        if len(keys) == 0:
+            return dict()
+        result = self.db.multi_get(*keys)
+        return self.list_to_dict(result)
     
     def BatchPut(self, kv_dict={}):
         kv_list = []

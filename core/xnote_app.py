@@ -183,6 +183,10 @@ def init_kv_engine():
             dbutil.RdbSortedSet.init_class(db_instance=xtables.get_db_instance())
             logging.info("use mysql as db engine")
 
+        if db_driver == "ssdb":
+            from xutils.db.driver_ssdb import SSDBKV
+            db_instance = SSDBKV(host=xconfig.DatabaseConfig.ssdb_host, port=xconfig.DatabaseConfig.ssdb_port)
+
         # 默认使用leveldb启动
         if db_instance is None:
             try:

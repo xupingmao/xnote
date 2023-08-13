@@ -178,6 +178,22 @@ def run_insert_test(test, db):
         is_default_err = "Duplicate" in str(e) 
         assert is_sqlite_err or is_default_err
 
+def run_batch_test(test, db):
+    assert isinstance(db, interfaces.DBInterface)
+    kv_dict = {
+        b"batch-test:1": b"1",
+        b"batch-test:2": b"2",
+    }
+    keys = list(kv_dict.keys())
+    db.BatchPut(kv_dict)
+    result = db.BatchGet(keys)
+    assert len(result) == 2
+    assert result[b"batch-test:1"] == b"1"
+    assert result[b"batch-test:2"] == b"2"
+
+    db.BatchDelete(keys)
+    assert db.Count(b"batch-test:", b"batch-test:\xff") == 0
+
 def run_test_db_engine(test, db):
     # 等待异步任务完成
     logutil.wait_task_done()
@@ -210,6 +226,8 @@ def run_test_db_engine(test, db):
 
     test.assertEqual(b"value1", db.Get(b"test5:1"))
     test.assertEqual(None, db.Get(b"key_to_delete"))
+
+    run_batch_test(test, db)
 
     run_range_test(test, db)
 

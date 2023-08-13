@@ -129,7 +129,7 @@ class TestMain(BaseTestCase):
         assert self.count_message_key() == 0
 
         response = json_request(
-            "/message/save", method="POST", data=dict(content="Xnote-Unit-Test", tag="key"))
+            "/message/save", method="POST", data=dict(content="#Xnote-Unit-Test#", tag="key"))
     
         assert isinstance(response, dict)
 

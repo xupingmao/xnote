@@ -387,6 +387,10 @@ class DatabaseConfig:
 
     # sqlite配置 { DELETE, TRUNCATE, PERSIST, WAL, MEMORY, OFF }
     sqlite_journal_mode = "delete"
+    
+    # ssdb相关配置
+    ssdb_host = ""
+    ssdb_port = 8888
 
     @classmethod
     def init(cls):
@@ -405,6 +409,8 @@ class DatabaseConfig:
         cls.db_profile_table_proxy = SystemConfig.get_int("db_profile_table_proxy")
         cls.db_sys_log_max_size = SystemConfig.get_int("db_sys_log_max_size", 100000)
         cls.sqlite_journal_mode = SystemConfig.get_str("sqlite_journal_mode", "delete")
+        cls.ssdb_host = SystemConfig.get_str("ssdb_host", "127.0.0.1")
+        cls.ssdb_port = SystemConfig.get_int("ssdb_port", 8888)
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
