@@ -13,6 +13,7 @@ import os
 
 def _add_to_sys_path(path):
     if path not in sys.path:
+        # insert after working dir
         sys.path.insert(1, path)
 
 def fix():
@@ -25,5 +26,5 @@ def fix():
     _add_to_sys_path(lib_dir)
     _add_to_sys_path(core_dir)
 
-
 fix()
+

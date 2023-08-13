@@ -14,3 +14,6 @@ __doc__ = """core模块的作用主要是为应用层提供一些通用的能力
 core模块依赖xutils模块，xutils提供更加底层的组件能力，比如数据库、文本函数库、文件操作等等。
 两者的区别是：core模块是拥有业务状态的，xutils基本没有。
 """
+from . import xnote_pathfix
+
+xnote_pathfix.fix()

@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from __future__ import print_function
-from . import xnote_pathfix
 import argparse
 import logging
 import time
@@ -33,7 +32,8 @@ from xutils import Storage
 from xutils import dbutil
 from xutils import cacheutil, interfaces
 from xutils.sqldb import TableProxy
-from . import xnote_code_builder, xnote_hooks
+from . import xnote_code_builder
+import xnote_hooks
 import threading
 import xnote_trace
 import xtables_new
