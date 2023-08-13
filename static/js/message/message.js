@@ -30,11 +30,8 @@ $(function() {
             page: getCurrentPage()
         };
 
-        $.get("/message/date", params,function (respText) {
+        xnote.http.get("/message/date", params,function (respText) {
             $(".message-list").html(respText);
-        }).fail(function (e) {
-            console.error(e);
-            xnote.alert("调用接口失败");
         });
     };
 
@@ -46,12 +43,9 @@ $(function() {
         params.format = "html";
         params.displayTag = getUrlParam("displayTag", "");
 
-        $.get("/message/list", params, function (resp) {
+        xnote.http.get("/message/list", params, function (resp) {
             // console.log(resp);
             $(".message-list").html(resp);
-        }).fail(function (e) {
-            console.error(e);
-            xnote.alert("调用接口失败，请稍后重试");
         });
     }
 
@@ -162,7 +156,7 @@ MessageView.edit = function (target) {
     var params = {
         id: id
     };
-    $.get("/message/detail", params, function (resp) {
+    xnote.http.get("/message/detail", params, function (resp) {
         if (resp.code == "success") {
             var html = $("#msg-edit-tpl").render({
                 detail: resp.data,
@@ -177,14 +171,12 @@ MessageView.edit = function (target) {
         } else {
             xnote.alert(resp.message);
         }
-    }).fail(function (err) {
-        xnote.alert("接口失败:" + err);
     });
 };
 
 // 展示选择标签对话框
 MessageView.showTopicDialog = function (target) {
-    $.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
+    xnote.http.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
         } else {
@@ -197,8 +189,6 @@ MessageView.showTopicDialog = function (target) {
                 xnote.closeDialog(dialogId);
             }
         }
-    }).fail(function (err) {
-        xnote.alert("调用接口失败, err=" + err);
     });
 };
 
@@ -216,7 +206,7 @@ MessageView.saveMessage = function (target) {
 
     var self = this;
 
-    $.post("/message/update", params, function (resp) {
+    xnote.http.post("/message/update", params, function (resp) {
         if (resp.code == "success") {
             xnote.toast("更新成功");
             self.closeEdit();
@@ -224,9 +214,6 @@ MessageView.saveMessage = function (target) {
         } else {
             xnote.alert("更新失败:" + resp.message);
         }
-    }).fail(function (e) {
-        console.error(e);
-        xnote.alert("系统繁忙，请稍后重试");
     });
 };
 
@@ -328,7 +315,7 @@ MessageView.markTagLevel = function (e) {
     params.keyword = $(".keyword-span").text();
     params.action = $(e.target).attr("data-action");
 
-    $.post("/message/keyword", params, function (resp) {
+    xnote.http.post("/message/keyword", params, function (resp) {
         if (resp.code == "success") {
             xnote.toast("标记成功");
             window.location.reload();
@@ -344,14 +331,14 @@ MessageView.createComment = function (target) {
         var req = {};
         req.id = id;
         req.content = inputText;
-        $.post("/message/comment/create", req, function (resp) {
+        xnote.http.post("/message/comment/create", req, function (resp) {
             if (resp.success) {
                 xnote.toast("备注成功");
                 window.location.reload();
             } else {
                 xnote.toast(resp.message);
             }
-        }).fail(xnote.http.defaultFailHandler);
+        });
     });
 }
 
@@ -362,21 +349,21 @@ MessageView.deleteComment = function (target) {
     req.id = id;
     req.time = time;
     console.log("deleteComment req:", req);
-    $.post("/message/comment/delete", req, function (resp) {
+    xnote.http.post("/message/comment/delete", req, function (resp) {
         if (resp.success) {
             xnote.toast("删除备注成功");
             MessageView.refreshCommentList(id, "#msgCommentListTpl");
         } else {
             xnote.toast(resp.message);
         }
-    }).fail(xnote.http.defaultFailHandler);
+    });
 }
 
 MessageView.refreshCommentList = function(id, selector) {
     var req = {};
     req.id = id;
     console.log("listComments req:", req);
-    $.post("/message/comment/list", req, function (resp) {
+    xnote.http.post("/message/comment/list", req, function (resp) {
         if (resp.success) {
             var html = $(selector).render({
                 commentList: resp.data,
@@ -386,7 +373,7 @@ MessageView.refreshCommentList = function(id, selector) {
         } else {
             xnote.toast(resp.message);
         }
-    }).fail(xnote.http.defaultFailHandler);
+    });
 }
 
 MessageView.showAllComments = function(target, selector) {

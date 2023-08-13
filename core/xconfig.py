@@ -288,6 +288,7 @@ class WebConfig:
 
     auth_max_session_size = 20
 
+    fast_reload = False
 
     @classmethod
     def init(cls):
@@ -298,6 +299,7 @@ class WebConfig:
         cls.about_text = SystemConfig.get_str("about_text", "关于Xnote")
         cls.nav_list = cls.load_nav_list()
         cls.auth_max_session_size = SystemConfig.get_int("auth_max_session_size")
+        cls.fast_reload = SystemConfig.get_bool("fast_reload", False)
 
         cls.ui_show_footer = SystemConfig.get_bool("ui_show_footer")
         cls.ui_title_prefix = SystemConfig.get_str("ui_title_prefix", "Xnote")
@@ -383,6 +385,9 @@ class DatabaseConfig:
     mysql_cloud_type="" # mysql云服务类型
     mysql_database = ""
 
+    # sqlite配置 { DELETE, TRUNCATE, PERSIST, WAL, MEMORY, OFF }
+    sqlite_journal_mode = "delete"
+
     @classmethod
     def init(cls):
         cls.db_driver = SystemConfig.get_str("db_driver")
@@ -399,6 +404,7 @@ class DatabaseConfig:
         cls.max_open_files = SystemConfig.get_int("max_open_files")
         cls.db_profile_table_proxy = SystemConfig.get_int("db_profile_table_proxy")
         cls.db_sys_log_max_size = SystemConfig.get_int("db_sys_log_max_size", 100000)
+        cls.sqlite_journal_mode = SystemConfig.get_str("sqlite_journal_mode", "delete")
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)

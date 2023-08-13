@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-11 20:06:30
+@LastEditTime : 2023-08-13 12:06:04
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -46,7 +46,7 @@ from handlers.message.message_utils import (
 )
 
 from .message_utils import sort_keywords_by_marked
-from . import dao
+from . import dao, message_tag
 from .dao import MessageDao
 from handlers.message import message_utils
 from xutils.db.lock import RecordLock
@@ -171,6 +171,9 @@ def after_upsert_async(msg_item):
     user_name = msg_item.user
 
     for keyword in safe_list(msg_item.keywords):
+        # 只自动创建标准的tag
+        if not message_utils.is_standard_tag(keyword):
+            continue
         message = get_or_create_keyword(user_name, keyword, msg_item.ip)
         update_keyword_amount(message, user_name, keyword)
 
@@ -780,31 +783,10 @@ class MessageListHandler:
                                 show_nav=False)
     
     def get_tag_list(self):
-        user_name = xauth.current_name()
-        offset = 0
-        msg_list, amount = dao.list_by_tag(
-            user_name, "key", offset, MAX_LIST_LIMIT)
-        return dict(code="success", data = msg_list)
+        return message_tag.get_tag_list()
 
     def get_log_tags_page(self):
-        """随手记的话题标签页面"""
-        orderby = xutils.get_argument("orderby", "")
-
-        kw = Storage(
-            tag="key",
-            search_type="message",
-            show_tag_btn=False,
-            show_attachment_btn=False,
-            show_system_tag=True,
-            message_placeholder="添加标签/关键字/话题",
-            show_side_tags=False,
-        )
-
-        kw.show_input_box = False
-        kw.show_sub_link = False
-        kw.orderby = orderby
-
-        return xtemplate.render("message/page/message_list_view.html", **kw)
+        return message_tag.get_log_tags_page()
 
     def get_system_tag_page(self, tag):
         kw = Storage(
@@ -912,7 +894,7 @@ class MessageListHandler:
 
     def do_view_month_tags(self):
         user_name = xauth.current_name()
-        date = xutils.get_argument("date", "")
+        date = xutils.get_argument_str("date")
 
         year, month, mday = do_split_date(date)
 
@@ -974,18 +956,21 @@ class MessageListHandler:
                                 **kw)
 
     def GET(self):
-        tag = xutils.get_argument("tag")
+        tag = xutils.get_argument_str("tag")
         return self.do_get(tag)
 
 class MessageDetailAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id")
-        detail = MessageDao.get_by_id(id)
+        id = xutils.get_argument_str("id")
+        user_name = xauth.current_name_str()
+        detail = msg_dao.get_message_by_id(id, user_name=user_name)
+        if detail == None:
+            return webutil.FailedResult(message="数据不存在")
 
         if detail.ref != None:
-            detail = MessageDao.get_by_id(detail.ref)
+            detail = msg_dao.get_message_by_id(detail.ref, user_name=user_name)
         
         return dict(code="success", data = detail)
 
@@ -1277,6 +1262,7 @@ xurls = (
     r"/message/list_by_day", MessageListByDayHandler,
 
     r"/message/refresh", MessageRefreshHandler,
+    
     # Ajax处理
     r"/message/list", ListAjaxHandler,
     r"/message/date", DateAjaxHandler,

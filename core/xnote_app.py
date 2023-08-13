@@ -236,6 +236,10 @@ def init_kv_db():
 
 def init_autoreload():
 
+    if not xconfig.WebConfig.fast_reload:
+        logging.info("fast_reload is disabled")
+        return
+
     def register_watch(autoreload_thread):
         """监控文件夹及文件的变更"""
         autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)

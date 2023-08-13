@@ -44,6 +44,7 @@ class DBPool:
         db = cls.sqlite_pool.get(dbpath)
         if db == None:
             db = MySqliteDB(db=dbpath)
+            db.query("pragma journal_mode = %s" % xconfig.DatabaseConfig.sqlite_journal_mode)
             cls.sqlite_pool[dbpath] = db
         return db
 

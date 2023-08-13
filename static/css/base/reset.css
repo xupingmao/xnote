@@ -73,6 +73,7 @@ input {
 textarea, input {
     border: 1px solid #ccc;
     border-radius: 0px;
+    font-size: 14px;
 }
 
 textarea:focus, input:focus {

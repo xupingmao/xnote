@@ -24,11 +24,8 @@
             page: getCurrentPage()
         };
 
-        $.get("/message/date", params,function (respText) {
+        xnote.http.get("/message/date", params,function (respText) {
             $(".message-list").html(respText);
-        }).fail(function (e) {
-            console.error(e);
-            xnote.alert("调用接口失败");
         });
     };
 
@@ -40,12 +37,9 @@
         params.format = "html";
         params.displayTag = getUrlParam("displayTag", "");
 
-        $.get("/message/list", params, function (resp) {
+        xnote.http.get("/message/list", params, function (resp) {
             // console.log(resp);
             $(".message-list").html(resp);
-        }).fail(function (e) {
-            console.error(e);
-            xnote.alert("调用接口失败，请稍后重试");
         });
     }
 

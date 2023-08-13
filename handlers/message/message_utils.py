@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-24 14:36:59
+@LastEditTime : 2023-08-13 11:13:53
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -243,6 +243,9 @@ def is_system_tag(tag):
     assert isinstance(tag, str)
     return tag.startswith("$")
 
+def is_standard_tag(tag):
+    assert isinstance(tag, str)
+    return tag.startswith("#") and tag.endswith("#")
 
 def convert_message_list_to_day_folder(item_list, date, show_empty=False):
     result = []

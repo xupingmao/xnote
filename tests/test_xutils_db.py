@@ -305,11 +305,10 @@ class TestMain(BaseTestCase):
         run_test_db_engine(self, db)
 
     def test_ssdb_kv(self):
-        from xutils.db.driver_ssdb import SSDBKV
-
         if not xconfig.SystemConfig.get_bool("test_ssdb"):
             return
         
+        from xutils.db.driver_ssdb import SSDBKV
         db = SSDBKV()
         run_test_db_engine(self, db)
 
