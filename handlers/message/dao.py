@@ -45,7 +45,7 @@ class MessageDO(Storage):
         self.done_time = None # type: str|None
 
     @classmethod
-    def from_dict(cls, dict_value):
+    def from_dict(cls, dict_value: dict):
         result = MessageDO()
         result.update(dict_value)
         result.id = result._key
@@ -549,9 +549,11 @@ def count_by_tag(user, tag):
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
 
-def get_message_stat0(user) -> Storage:
+def get_message_stat0(user):
+    # type: (str) -> Storage|None
     stat = dbutil.get("user_stat:%s:message" % user)
     if stat != None:
+        assert isinstance(stat, Storage)
         if stat.canceled_count is None:
             stat.canceled_count = 0
     return stat
@@ -567,7 +569,9 @@ def get_empty_stat():
     stat.canceled_count = 0
     return stat
 
-def get_message_stat(user) -> Storage:
+def get_message_stat(user):
+    # type: (str) -> Storage
+    """读取随手记的状态"""
     if user == None:
         return get_empty_stat()
     check_param_user(user)

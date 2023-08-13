@@ -496,6 +496,27 @@ def list_task_tags(user_name, limit=20, offset=0):
         user_name, offset=0, limit=MAX_LIST_LIMIT)
     return get_tags_from_message_list(msg_list, "task", display_tag="taglist")
 
+def is_marked_keyword(user_name, keyword):
+    obj = msg_dao.get_by_content(user_name, "key", keyword)
+    return obj != None and obj.is_marked
+
+def check_content_for_update(user_name, tag, content):
+    if tag == 'key':
+        return msg_dao.get_by_content(user_name, tag, content)
+    return None
+
+
+def touch_key_by_content(user_name, tag, content):
+    item = check_content_for_update(user_name, tag, content)
+    if item != None:
+        item.mtime = xutils.format_datetime()
+        if item.visit_cnt is None:
+            item.visit_cnt = 0
+        item.visit_cnt += 1
+
+        msg_dao.update_message(item)
+    return item
+
 
 xutils.register_func("message.list_hot_tags", list_hot_tags)
 xutils.register_func("message.filter_default_content", filter_default_content)

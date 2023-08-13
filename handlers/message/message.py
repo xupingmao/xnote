@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-13 12:06:04
+@LastEditTime : 2023-08-13 22:06:49
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -43,10 +43,13 @@ from handlers.message.message_utils import (
     failure,
     convert_message_list_to_day_folder,
     count_month_size,
+    is_marked_keyword,
+    touch_key_by_content,
+    check_content_for_update,
 )
 
 from .message_utils import sort_keywords_by_marked
-from . import dao, message_tag
+from . import dao, message_tag, message_search
 from .dao import MessageDao
 from handlers.message import message_utils
 from xutils.db.lock import RecordLock
@@ -62,49 +65,6 @@ MAX_LIST_LIMIT = 1000
 SYSTEM_TAG_TUPLE = ("book", "people", "file", "phone", "link")
 
 LIST_VIEW_TPL = "message/page/message_list_view.html"
-
-
-@xmanager.searchable()
-def on_search_message(ctx):
-    if ctx.search_message is False:
-        return
-
-    key = ctx.key
-    touch_key_by_content(ctx.user_name, 'key', key)
-    max_len = xconfig.SEARCH_SUMMARY_LEN
-
-    messages, count = dao.search_message(ctx.user_name, key, 0, 3)
-    search_result = []
-    for message in messages:
-        item = SearchResult()
-        if message.content != None and len(message.content) > max_len:
-            message.content = message.content[:max_len] + "......"
-        process_message(message)
-        item.tag_name = u("记事")
-        item.tag_class = "orange"
-        item.name = u('记事 - ') + message.ctime
-        item.html = message.html
-        item.icon = "hide"
-        search_result.append(item)
-        # print(message)
-
-    show_message_detail = xconfig.get_user_config(
-        ctx.user_name, "search_message_detail_show")
-
-    if show_message_detail == "false":
-        search_result = []
-
-    if count > 0:
-        more = SearchResult()
-        more.name = "搜索到[%s]条记事" % count
-        more.url = "/message?key=" + ctx.key
-        more.icon = "fa-file-text-o"
-        more.show_more_link = True
-        search_result.insert(0, more)
-
-    if len(search_result) > 0:
-        ctx.messages += search_result
-
 
 def get_current_message_stat():
     user_name = xauth.current_name()
@@ -177,20 +137,6 @@ def after_upsert_async(msg_item):
         message = get_or_create_keyword(user_name, keyword, msg_item.ip)
         update_keyword_amount(message, user_name, keyword)
 
-
-def is_marked_keyword(user_name, keyword):
-    obj = msg_dao.get_by_content(user_name, "key", keyword)
-    return obj != None and obj.is_marked
-
-# class
-
-
-class SearchContext:
-
-    def __init__(self, key):
-        self.key = key
-
-
 class ListAjaxHandler:
 
     @xauth.login_required()
@@ -245,8 +191,8 @@ class ListAjaxHandler:
             return self.do_list_task(user_name, offset, pagesize)
 
         if tag == "key":
-            orderby = xutils.get_argument("orderby", "")
-            return self.do_list_key(user_name, offset, pagesize, orderby = orderby)
+            orderby = xutils.get_argument_str("orderby", "")
+            return message_tag.list_message_tags(user_name, offset, pagesize, orderby = orderby)
 
         list_func = xutils.lookup_func("message.list_%s" % tag)
         if list_func != None:
@@ -310,7 +256,7 @@ class ListAjaxHandler:
             assert isinstance(user_name, str)
             kw.top_keywords = []
             if orderby == "amount_desc" and page == 1:
-                kw.recent_keywords = self.get_recent_keywords(user_name, tag = tag)
+                kw.recent_keywords = message_tag.get_recent_keywords(user_name, tag = tag)
 
         return xtemplate.render(template_file, **kw)
     
@@ -321,25 +267,16 @@ class ListAjaxHandler:
             if item.is_marked:
                 result.append(item)
         return result
-    
-    def get_recent_keywords(self, user_name: str, tag: str):
-        msg_list, amount = self.do_list_key(user_name, 0, 20, orderby = "recent")
-        parser = MessageListParser(msg_list, tag=tag)
-        parser.parse()
-        result = parser.get_message_list()
-        for item in result:
-            item.badge_info = ""
-        return result
 
     def do_search(self, user_name, key, offset, pagesize):
         # 搜索
         search_tags = None
         no_tag = False
 
-        input_search_tags = xutils.get_argument("searchTags", "")
+        input_search_tags = xutils.get_argument_str("searchTags")
         input_no_tag = xutils.get_argument("noTag", "false")
         p = xutils.get_argument("p", "")
-        date = xutils.get_argument("date", "")
+        date = xutils.get_argument_str("date")
 
         if input_search_tags != "":
             search_tags = input_search_tags.split(",")
@@ -353,7 +290,7 @@ class ListAjaxHandler:
         if input_no_tag == "true":
             no_tag = True
 
-        searcher = SearchHandler()
+        searcher = message_search.SearchHandler()
         return searcher.get_ajax_data(user_name=user_name, key=key, offset=offset,
                                       limit=pagesize, search_tags=search_tags,
                                       no_tag=no_tag, date=date)
@@ -384,15 +321,6 @@ class ListAjaxHandler:
             return msg_list[offset:offset+pagesize], len(msg_list)
         else:
             return msg_dao.list_by_date(user_name, date, offset, pagesize)
-
-    def do_list_key(self, user_name, offset, limit, *, orderby = "amount_desc"):
-        msg_list, amount = msg_dao.list_by_tag(
-            user_name, "key", 0, MAX_LIST_LIMIT)
-        p = message_utils.MessageKeyWordProcessor(msg_list)
-        p.process()
-        p.sort(orderby)
-
-        return msg_list[offset:offset+limit], len(msg_list)
 
 
 def update_message_status(id, status):
@@ -614,25 +542,6 @@ def create_message(user_name, tag, content, ip):
 
     return message
 
-
-def check_content_for_update(user_name, tag, content):
-    if tag == 'key':
-        return msg_dao.get_by_content(user_name, tag, content)
-    return None
-
-
-def touch_key_by_content(user_name, tag, content):
-    item = check_content_for_update(user_name, tag, content)
-    if item != None:
-        item.mtime = xutils.format_datetime()
-        if item.visit_cnt is None:
-            item.visit_cnt = 0
-        item.visit_cnt += 1
-
-        msg_dao.update_message(item)
-    return item
-
-
 def get_or_create_keyword(user_name, content, ip):
     with RecordLock(user_name):
         item = msg_dao.get_by_content(user_name, "key", content)
@@ -755,7 +664,7 @@ class MessageListHandler:
             return self.get_task_taglist_page()
 
         if tag == "search" or type_ == "search":
-            return SearchHandler().get_page()
+            return message_search.SearchHandler().get_page()
 
         if tag == "log" and p == "taglist":
             return self.get_log_tags_page()
@@ -1123,61 +1032,6 @@ class MessageKeywordAjaxHandler:
             MessageDao.update(key_obj)
         
         return dict(code="success")
-
-
-class SearchHandler:
-    """搜索逻辑处理"""
-
-    def get_page(self):
-        user_name = xauth.current_name()
-        key = xutils.get_argument("key", "")
-
-        kw = Storage()
-        kw.tag = "search"
-        kw.key = key
-        kw.keyword = key
-        kw.default_content = message_utils.filter_key(key)
-        kw.side_tags = message_utils.list_hot_tags(user_name, 20)
-        kw.create_tag = self.get_create_tag()
-        kw.show_create_on_tag = kw.create_tag != "forbidden"
-        kw.is_keyword_marked = is_marked_keyword(user_name, key)
-        kw.search_type = "message"
-
-        return xtemplate.render("message/page/message_search.html", **kw)
-
-    def get_ajax_data(self, *, user_name=None, key=None, offset=0,
-                      limit=20, search_tags=None, no_tag=False, date=""):
-        start_time = time.time()
-        chatlist, amount = dao.search_message(
-            user_name, key, offset, limit,
-            search_tags=search_tags, no_tag=no_tag, date=date)
-
-        # 搜索扩展
-        xmanager.fire("message.search", SearchContext(key))
-
-        # 自动置顶
-        touch_key_by_content(user_name, "key", key)
-        touch_key_by_content(user_name, "key", get_similar_key(key))
-
-        cost_time = functions.second_to_ms(time.time() - start_time)
-
-        MessageDao.add_search_history(user_name, key, cost_time)
-
-        return chatlist, amount
-
-    def search_items(self, user_name, key):
-        pass
-
-    def get_create_tag(self):
-        p = xutils.get_argument("p", "")
-        if p == "task":
-            return "task"
-
-        if p == "log":
-            return "log"
-
-        return "forbidden"
-
 
 xutils.register_func("message.process_message", process_message)
 xutils.register_func("message.get_current_message_stat",

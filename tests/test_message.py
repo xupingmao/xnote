@@ -205,9 +205,12 @@ class TestMain(BaseTestCase):
         create_data = dict(content="Xnote-Unit-Test")
         response = json_request(
             "/message/save", method="POST", data=create_data)
+        
+        assert isinstance(response, dict)
+        
         self.assertEqual("success", response.get("code"))
 
-        from handlers.message.message import on_search_message
+        from handlers.message.message_search import on_search_message
         ctx = Storage(key="xnote", user_name=xauth.current_name(), messages=[])
         on_search_message(ctx)
         # 两条记录（第一个是汇总，第二个是实际数据）
