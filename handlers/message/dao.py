@@ -275,7 +275,9 @@ def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_t
         chatlist = _msg_db.list(filter_func=search_func, offset=offset,
                                 limit=limit, reverse=True, user_name=user_name)
         # 安装创建时间倒排 (按日期补充的随手记的key不是按时间顺序的)
-        chatlist.sort(key = lambda x:x.ctime, reverse=True)
+    
+    chatlist = MessageDO.from_dict_list(chatlist)
+    chatlist.sort(key = lambda x:x.ctime, reverse=True)
     amount = _msg_db.count(filter_func=search_func, user_name=user_name)
     return chatlist, amount
 

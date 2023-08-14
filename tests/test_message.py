@@ -202,20 +202,31 @@ class TestMain(BaseTestCase):
     def test_message_search(self):
         delete_all_messages()
 
+        user_name = xauth.current_name_str()
+
         create_data = dict(content="Xnote-Unit-Test")
         response = json_request(
             "/message/save", method="POST", data=create_data)
         
         assert isinstance(response, dict)
+        resp_data = response.get("data")
+        assert isinstance(resp_data, dict)
+        new_msg_id = resp_data.get("id")
         
         self.assertEqual("success", response.get("code"))
 
-        from handlers.message.message_search import on_search_message
-        ctx = Storage(key="xnote", user_name=xauth.current_name(), messages=[])
+        from handlers.message.message_search import on_search_message, SearchHandler
+        ctx = Storage(key="xnote", user_name=user_name, messages=[])
         on_search_message(ctx)
         # 两条记录（第一个是汇总，第二个是实际数据）
         self.assertEqual(2, len(ctx.messages))
         self.assertEqual("Xnote-Unit-Test", ctx.messages[1].html)
+
+        search_list, amount = SearchHandler().get_ajax_data(user_name=user_name, key="xnote")
+        assert amount == 1
+        assert len(search_list) == 1
+        assert search_list[0].id == new_msg_id
+
 
     def test_message_search_page(self):
         self.check_OK("/message?tag=search&key=123")
@@ -229,6 +240,8 @@ class TestMain(BaseTestCase):
         self.assertEqual("success", response.get("code"))
 
         result = json_request("/message/keyword", method="POST", data=dict(action="mark", keyword="#test#"))
+        assert isinstance(result, dict)
+    
         self.assertEqual("success", result["code"])
 
         from handlers.message.message import get_or_create_keyword

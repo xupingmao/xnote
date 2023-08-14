@@ -286,11 +286,16 @@ MessageView.selectTopic = function (target) {
 // 搜索话题标签
 MessageView.searchTopic = function(inputText) {
     var showCount = 0;
+    var hasMatch = false;
+    var inputTextTag = "#" + inputText + "#";
 
     $(".empty-item").hide();
     
     $(".topic-item").each(function (index, element) {
         var text = $(element).text();
+        if (text == inputTextTag) {
+            hasMatch = true;
+        }
         if (text.indexOf(inputText) < 0) {
             $(element).hide();
         } else {
@@ -299,7 +304,7 @@ MessageView.searchTopic = function(inputText) {
         }
     });
 
-    if (showCount == 0) {
+    if (!hasMatch) {
         var showText = "";
         if (inputText == "") {
             showText = "#请输入标签#";
@@ -327,6 +332,10 @@ MessageView.markTagLevel = function (e) {
 
 MessageView.createComment = function (target) {
     var id = $(target).attr("data-id");
+    if (id == "") {
+        xnote.toast("id不能为空");
+        return;
+    }
     xnote.prompt("备注", "", function (inputText) {
         var req = {};
         req.id = id;

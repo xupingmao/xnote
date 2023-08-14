@@ -18,11 +18,9 @@ $(function () {
 
         function touchTopic(topic) {
             var params = {"key": topic};
-            $.post("/message/touch", params, function (resp) {
+            xnote.http.post("/message/touch", params, function (resp) {
                 console.log(resp);
-            }).fail(function (error) {
-                console.error(error);
-            })
+            });
         }
 
         window.topic_dialog_tag_click = function (target) {
@@ -39,7 +37,7 @@ $(function () {
             layer.close(dialogIndex);
         };
 
-        $.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
+        xnote.http.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
             if (resp.code == "success") {
                 var data = resp.data;
                 var html = $("<div>").addClass("card");
@@ -51,8 +49,6 @@ $(function () {
                 }
                 dialogIndex = xnote.showDialog("选择标签", html.html(), ["确认", "取消"]);
             }
-        }).fail(function (error) {
-            xnote.toast("请求失败:" + error);
         });
     }
 
