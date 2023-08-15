@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-01-10 14:36:09
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-17 11:36:40
+@LastEditTime : 2023-08-15 23:54:53
 @FilePath     : /xnote/xutils/text_parser.py
 @Description  : 描述
 """
@@ -245,14 +245,13 @@ class TextParserBase(object):
         
         if len(pos_list) > 0:
             end = min(pos_list)
-            key = self.text[self.i:end+1]
             target = target_map[end]
+            key = self.text[self.i:end+len(target)]
             # 包含 target
             self.i = end + len(target)
             return key
-        key = self.text[self.i:]
-        self.i = self.length
-        return key
+        # 无匹配项
+        return ""
     
     def append_token(self, token):
         self.save_str_token()
@@ -386,15 +385,20 @@ class TextParser(TextParserBase):
     def mark_strong(self, tag="**"):
         tag_len = len(tag)
         self.save_str_token()
-        key = self.read_till_target(tag)
+        self.i += len(tag)
+        
+        key = self.read_till_any_target((tag,"\n"))
         if key == "":
-            self.tokens.append(self.text[self.i:self.i+tag_len])
-            self.i += len(tag)
+            # 无匹配的
+            self.tokens.append(self.escape(tag))
             return
-        key = key[tag_len:len(key)-tag_len]
-        token = self.build_strong_tag(key)
-        self.tokens.append(token)
-
+        
+        if key.endswith("\n"):
+            self.tokens.append(self.escape(tag + key))
+        else:
+            key = key[0:len(key)-tag_len]
+            token = self.build_strong_tag(key)
+            self.tokens.append(token)
 
     def mark_book_single(self):
         return self.mark_tag_single(">")
@@ -521,6 +525,7 @@ def runtest_head(message):
     length = len(message)
     left  = (width - length) // 2
     right = width - length - left
+    print()
     print("-" * left, message, "-" * right)
 
 def runtest_topic1():
@@ -549,10 +554,44 @@ def runtest_topic3():
     print("keywords=%s" % parser.keywords)
 
 
+def runtest_strong_normal():
+    runtest_head("runtest_strong_normal")
+    text = "test**mark**end"
+    parser = TextParser()
+    tokens = parser.parse(text)
+    print(tokens)
+    assert tokens[0] == "test"
+    assert tokens[1] == "<span class=\"msg-strong\">mark</span>"
+    assert tokens[2] == "end"
+
+def runtest_strong_nl():
+    runtest_head("runtest_strong_nl")
+    text = "test**mark\n**end"
+    parser = TextParser()
+    tokens = parser.parse(text)
+    assert tokens[0] == "test"
+    assert tokens[1] == "**mark<br/>"
+    assert tokens[2] == "**"
+    assert tokens[3] == "end"
+
+def runtest_strong_no_match():
+    runtest_head("runtest_strong_no_match")
+    text = "test***"
+    parser = TextParser()
+    tokens = parser.parse(text)
+    print(tokens)
+    assert tokens[0] == "test"
+    assert tokens[1] == "**"
+    assert tokens[2] == "*"
+    
+
 def runtest():
     runtest_topic1()
     runtest_topic2()
     runtest_topic3()
+    runtest_strong_normal()
+    runtest_strong_nl()
+    runtest_strong_no_match()
 
     runtest_head("Other Test")
     text   = """#Topic1# #Topic2 Test#

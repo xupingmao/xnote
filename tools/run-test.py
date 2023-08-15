@@ -42,6 +42,11 @@ def run_test(args):
 	os.environ["mysql_database"] = str(args.mysql_database)
 	os.environ["mysql_user"] = str(args.mysql_user)
 
+	if target == "xutils":
+		py_exec("-m pytest tests/test_xutils.py --doctest-modules --cov xutils --capture no")
+		py_exec("-m coverage html")
+		return
+	
 	if target == "xutils_db":
 		# os.system("python3 -m pytest tests/test_xutils_db.py::TestMain::test_dbutil_mysql_enhanced --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		py_exec("-m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py tests/test_xutils_db_hash_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")

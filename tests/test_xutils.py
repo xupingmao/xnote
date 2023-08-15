@@ -438,5 +438,3 @@ class TestMain(unittest.TestCase):
         self.assertEqual(tokens[0], "test")
         self.assertEqual(tokens[1], "<span class=\"msg-strong\">mark</span>")
         self.assertEqual(tokens[2], "end")
-
-        

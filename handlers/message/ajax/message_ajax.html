@@ -24,27 +24,24 @@
         </div>
         <div class="todo-content">{% raw item.html %}</div>
         <div class="todo-foot">
-            <div class="float-right">
-                {% if item.tag == "task" %}
-                <!-- <button class="dialog-btn btn-default">编辑</button> -->
-                <!-- <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox" onclick="onMessageDone(this)"> -->
-                <button class="btn-default" data-id="{{item.id}}" onclick="onMessageDone(this)">完成</button>
-                {% end %}
+            {% if item.tag == "task" %}
+            <!-- <button class="dialog-btn btn-default">编辑</button> -->
+            <!-- <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox" onclick="onMessageDone(this)"> -->
+            <button class="btn-default" data-id="{{item.id}}" onclick="onMessageDone(this)">完成</button>
+            {% end %}
 
-                {% if item.tag == "done1" %}
-                <a class="update-tag-btn btn btn-default" data-id="{{item.id}}" data-tag="task">重做</a>
-                {% end %}
+            {% if item.tag == "done1" %}
+            <a class="update-tag-btn btn btn-default" data-id="{{item.id}}" data-tag="task">重做</a>
+            {% end %}
+            
+            {% if show_edit_btn %}
+            <a class="todo-edit-btn btn btn-default" data-id="{{item.id}}" 
+                onclick="xnote.action.message.edit(this);"
+                data-url="/message/edit?id={{item.id}}">编辑</a>
+            {% end %}
 
-                <a class="btn btn-default" data-id="{{item.id}}" onclick="xnote.action.message.createComment(this)">备注</a>
-                {% if show_edit_btn %}
-                <a class="todo-edit-btn btn btn-default" data-id="{{item.id}}" 
-                    onclick="xnote.action.message.edit(this);"
-                    data-url="/message/edit?id={{item.id}}">编辑</a>
-                {% end %}
-                
-                <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}">删除</a>
-
-            </div>
+            <a class="btn btn-default" data-id="{{item.id}}" onclick="xnote.action.message.createComment(this)">备注</a>
+            <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}">删除</a>
         </div>
         {% if item.comments != None and len(item.comments) > 0 %}
         <div class="todo-comment">
