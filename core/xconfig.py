@@ -218,6 +218,7 @@ class FileConfig:
 
     boot_lock_file = "" # 启动的锁文件
     record_db_file = "" # 默认的sqlite数据库
+    kv_db_file = ""
 
     source_root_dir = "" # 源码根目录
     plugins_dir = "" # 插件目录
@@ -246,6 +247,7 @@ class FileConfig:
         makedirs(cls.backup_db_dir)
 
         cls.record_db_file = cls.get_db_path("record")
+        cls.kv_db_file = cls.get_db_path("kv_store")
         cls.db_backup_expire_days = SystemConfig.get_int("db_backup_expire_days", 5)
         cls.plugins_dir = os.path.join(cls.data_dir, "scripts", "plugins")
         cls.plugins_upload_dir = os.path.join(cls.plugins_dir, "upload")
@@ -369,6 +371,7 @@ class DatabaseConfig:
 
     db_driver="" # sqlite/leveldb/mysql/lmdb
     db_driver_cache = "" # memory/redis
+    db_driver_sql = "" # sqlite/mysql
     user_max_log_size = 500 # 用户日志保留的最大条数
     db_debug = False
     db_log_debug = False
@@ -411,6 +414,11 @@ class DatabaseConfig:
         cls.sqlite_journal_mode = SystemConfig.get_str("sqlite_journal_mode", "delete")
         cls.ssdb_host = SystemConfig.get_str("ssdb_host", "127.0.0.1")
         cls.ssdb_port = SystemConfig.get_int("ssdb_port", 8888)
+
+        if cls.db_driver == "mysql":
+            cls.db_driver_sql = "mysql"
+        else:
+            cls.db_driver_sql = "sqlite"
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)

@@ -314,7 +314,9 @@ class SqlDBOperateHandler:
         table_name = xutils.get_argument_str("table_name")
         db = xtables.get_table_by_name(table_name)
         if isinstance(db.db, xtables.MySqliteDB):
-            raise web.seeother("/system/sqlite?path=" + xutils.quote(db.db.dbpath))
+            raise web.found("/system/sqlite?path=" + xutils.quote(db.db.dbpath))
+        if isinstance(db.db, web.db.MySQLDB):
+            raise web.found("/system/sqlite?type=mysql")
         return "not ready"
 
 class DropTableHandler:
@@ -336,33 +338,71 @@ class DatabaseDriverInfoHandler:
 
     @xauth.login_required("admin")
     def GET(self):
+        type = xutils.get_argument_str("type")
         kw = Storage()
-        kw.info_text = self.get_driver_info_text()
+        if type == "sql":
+            kw.info_text = self.get_sql_driver_info_text()
+        else:
+            kw.info_text = self.get_kv_driver_info_text()
         return xtemplate.render("system/page/db/driver_info.html", **kw)
 
     def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma):
         result = db.query("pragma %s" % pragma).first().get(pragma)
         return "\n\n%s: %s" % (pragma, result)
+    
+    def get_mysql_variable(self, db: web.db.DB, var_name):
+        # TODO 可以一次性取出所有的变量
+        result = ""
+        first = db.query("show variables like $var_name", vars=dict(var_name="%" +var_name + "%")).first()
+        if first != None:
+            result = first.get("Value")
+        return "\n\n%s: %s" % (var_name, result)
+    
+    def get_sql_driver_info_text(self):
+        info = "%s: %s" % ("db_driver", xconfig.DatabaseConfig.db_driver)
+        if xconfig.DatabaseConfig.db_driver_sql == "sqlite":
+            info += self.get_sqlite_info(xtables.get_default_db_instance())
+        elif xconfig.DatabaseConfig.db_driver_sql == "mysql":
+            info += self.get_mysql_info()
+        return info
+    
+    def get_mysql_info(self):
+        db = xtables.get_default_db_instance()
+        info = ""
+        info += self.get_mysql_variable(db, "key_buffer_size")
+        info += self.get_mysql_variable(db, "table_open_cache")
+        info += self.get_mysql_variable(db, "sort_buffer_size")
+        info += self.get_mysql_variable(db, "read_buffer_size")
+        info += self.get_mysql_variable(db, "open_files_limit")
+        info += self.get_mysql_variable(db, "innodb_buffer_pool_size")
+        info += self.get_mysql_variable(db, "sync_binlog")
+        return info
+    
+    def get_sqlite_info(self, db):
+        info = ""
+        assert isinstance(db, xtables.MySqliteDB)
+        info += "\n\ndb_path: %s" % db.dbpath
+        info += self.get_sqlite_pragma(db, "journal_mode")
+        info += self.get_sqlite_pragma(db, "journal_size_limit")
+        info += self.get_sqlite_pragma(db, "synchronous")
+        info += self.get_sqlite_pragma(db, "cache_size")
+        info += self.get_sqlite_pragma(db, "data_version")
+        info += self.get_sqlite_pragma(db, "busy_timeout")
+        info += self.get_sqlite_pragma(db, "encoding")
+        info += self.get_sqlite_pragma(db, "mmap_size")
+        info += self.get_sqlite_pragma(db, "locking_mode")
+        info += self.get_sqlite_pragma(db, "wal_autocheckpoint")
+        info += self.get_sqlite_pragma(db, "page_count")
+        info += self.get_sqlite_pragma(db, "page_size")
+        info += self.get_sqlite_pragma(db, "max_page_count")
+        return info
 
-    def get_driver_info_text(self):
+    def get_kv_driver_info_text(self):
         info = "%s: %s" % ("db_driver", xconfig.DatabaseConfig.db_driver)
         instance = dbutil.get_instance()
         if xconfig.DatabaseConfig.db_driver == "sqlite":
-            db = xtables.get_db_instance(xconfig.FileConfig.record_db_file)
-            assert isinstance(db, web.db.SqliteDB)
-            info += self.get_sqlite_pragma(db, "journal_mode")
-            info += self.get_sqlite_pragma(db, "journal_size_limit")
-            info += self.get_sqlite_pragma(db, "synchronous")
-            info += self.get_sqlite_pragma(db, "cache_size")
-            info += self.get_sqlite_pragma(db, "data_version")
-            info += self.get_sqlite_pragma(db, "busy_timeout")
-            info += self.get_sqlite_pragma(db, "encoding")
-            info += self.get_sqlite_pragma(db, "mmap_size")
-            info += self.get_sqlite_pragma(db, "locking_mode")
-            info += self.get_sqlite_pragma(db, "wal_autocheckpoint")
-            info += self.get_sqlite_pragma(db, "page_count")
-            info += self.get_sqlite_pragma(db, "page_size")
-            info += self.get_sqlite_pragma(db, "max_page_count")
+            db = xtables.get_db_instance(xconfig.FileConfig.kv_db_file)
+            info += self.get_sqlite_info(db)
         if xconfig.DatabaseConfig.db_driver == "leveldb":
             from xutils.db.driver_leveldb import LevelDBImpl
             assert isinstance(instance, LevelDBImpl)

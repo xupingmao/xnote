@@ -65,6 +65,9 @@ def create_record_table_manager(table_name=""):
 def create_default_table_manager(table_name=""):
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
 
+def get_default_db_instance():
+    return get_db_instance(xconfig.FileConfig.record_db_file)
+
 def get_db_instance(dbpath=""):
     db_driver = xconfig.DatabaseConfig.db_driver
     if db_driver == "mysql":

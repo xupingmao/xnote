@@ -9,6 +9,7 @@ import xconfig
 import xtemplate
 import time
 import logging
+import xtables
 
 from collections import OrderedDict
 
@@ -58,14 +59,12 @@ class handler:
             return result
 
         return []
-
-    @xauth.login_required("admin")
-    def POST(self):
-        sql = xutils.get_argument("sql", "")
-        path = xutils.get_argument("path", "")
-        action = xutils.get_argument("action", "")
+    
+    def do_execute(self):
+        path = xutils.get_argument_str("path")
+        sql = xutils.get_argument_str("sql")
+        action = xutils.get_argument_str("action")
         result_list = []
-        t_start = time.time()
         error = ""
         logging.info("path:(%s), sql:(%s)", path, sql)
 
@@ -79,27 +78,57 @@ class handler:
             except Exception as e:
                 xutils.print_exc()
                 error = e
-        t_stop = time.time()
-        path_list = []
-        for p in os.listdir(xconfig.DATA_DIR):
-            if p.endswith(".db"):
-                p = os.path.join(xconfig.DATA_DIR, p)
-                path_list.append(p)
-        if path == "" and len(path_list) > 0:
-            path = path_list[0]
         if len(result_list) > 0:
             keys = result_list[0].keys()
         else:
             keys = []
-        return xtemplate.render("system/page/sqlite.html", 
-            show_right = False,
-            keys = keys, 
-            result_list = result_list, 
-            sql = sql, 
-            error = error,
-            cost_time = int((t_stop - t_start) * 1000),
-            path_list = path_list,
-            path = path)
+        return keys, result_list, error
+
+    def handle_mysql(self,sql=""):
+        if sql == "":
+            return [], [], ""
+        db = xtables.get_default_db_instance()
+        try:
+            result = db.query(sql)
+        except:
+            error = xutils.print_exc()
+            return [],[],error
+        result_list = []
+
+        for record in result:
+            if len(result_list) > 100:
+                logging.info("too many results")
+                break
+            result_list.append(record)
+
+        return result.names, result_list, ""
+
+
+    @xauth.login_required("admin")
+    def POST(self):
+        sql = xutils.get_argument_str("sql")
+        path = xutils.get_argument_str("path")
+        action = xutils.get_argument_str("action")
+        type = xutils.get_argument_str("type")
+
+        t_start = time.time()
+        if type == "mysql":
+            keys, result_list, error = self.handle_mysql(sql)
+        else:
+            keys, result_list, error = self.do_execute()
+        t_stop = time.time()
+
+
+        kw = xutils.Storage()
+        kw.cols = keys
+        kw.show_right = False
+        kw.result_list = result_list
+        kw.sql = sql
+        kw.error = error
+        kw.cost_time = int((t_stop-t_start)*1000)
+        kw.path = path
+
+        return xtemplate.render("system/page/sqlite.html", **kw)
 
     def GET(self):
         return self.POST()

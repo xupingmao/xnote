@@ -36,6 +36,7 @@
     {% include mod_fs_path.html %}
     <form>
         <input type="hidden" name="path" value="{{path}}">
+        <input type="hidden" name="type" value="{{type}}">
         <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
         <button>运行</button>
         <a class="btn btn-default" href="?path={{path}}&action=show_tables">展示表</a>
@@ -59,19 +60,19 @@
     {% end %}
 
     <div class="row">
-    {% if len(keys) > 0 %}
+    {% if len(cols) > 0 %}
 
         <table class="table">
             <tr>
-                {% for key in keys %}
+                {% for key in cols %}
                 <th>{{key}}</th>
                 {% end %} <!-- for end -->
             </tr>
 
             {% for record in result_list %}
                 <tr>
-                {% for val in record.values() %}
-                    <td>{{val}}</td>
+                {% for key in cols %}
+                    <td>{{record.get(key)}}</td>
                 {% end %}
                 </tr>
             {% end %}
