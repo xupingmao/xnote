@@ -19,7 +19,7 @@ import xconfig
 import xauth
 import xutils
 import time
-from tornado.template import Template, Loader
+from xutils.tornado.template import Template, Loader
 from xutils import dateutil, u
 from xutils import tojson
 from xutils import Storage

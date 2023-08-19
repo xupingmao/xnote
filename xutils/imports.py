@@ -30,7 +30,7 @@ import codecs
 from xutils.base import Storage
 from collections import deque
 from fnmatch import fnmatch
-from tornado.escape import xhtml_escape
+from xutils.tornado.escape import xhtml_escape
 
 import web
 from web.utils import safestr, safeunicode
