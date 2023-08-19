@@ -135,5 +135,6 @@ def try_decode(bytes):
             return codecs.decode(bytes, charset)
         except Exception as e:
             exc = e
-    raise exc
+    if exc != None:
+        raise exc
 

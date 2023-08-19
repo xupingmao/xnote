@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-06 12:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-07 00:00:56
+@LastEditTime : 2023-08-19 18:20:47
 @FilePath     : /xnote/handlers/system/system_log.py
 @Description  : 描述
 """
@@ -212,9 +212,7 @@ class UvRecord(Storage):
 class LogVisitHandler:
 
     def do_get(self, site="", ip=""):
-        uv_db = xtables.get_table_by_name("site_visit_log")
-        uv_db.db.query("PRAGMA synchronous = NORMAL;")
-        
+        uv_db = xtables.get_table_by_name("site_visit_log")        
         date = dateutil.format_date()
         db_record = uv_db.select_first(where = dict(date = date, ip = ip, site = site))
 
