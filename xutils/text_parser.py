@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-01-10 14:36:09
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-15 23:54:53
+@LastEditTime : 2023-08-19 11:48:48
 @FilePath     : /xnote/xutils/text_parser.py
 @Description  : 描述
 """
@@ -86,6 +86,7 @@ class TextParserBase(object):
     blank_chars = " \t\n\r"
 
     def init(self, text):
+        # type: (str)->None
         text = text.replace("\r", "")
         text = text.replace(u'\xad', '\n')
 
@@ -244,7 +245,7 @@ class TextParserBase(object):
                 target_map[end] = target
         
         if len(pos_list) > 0:
-            end = min(pos_list)
+            end = min(pos_list) # type: int
             target = target_map[end]
             key = self.text[self.i:end+len(target)]
             # 包含 target
@@ -520,99 +521,108 @@ class TextParser(TextParserBase):
         self.save_str_token()
         return self.tokens
 
-def runtest_head(message):
-    width  = 60
-    length = len(message)
-    left  = (width - length) // 2
-    right = width - length - left
-    print()
-    print("-" * left, message, "-" * right)
+class ParseTestCase:
 
-def runtest_topic1():
-    runtest_head("Topic Test 1")
-    text = "#Topic1# Text"
-    parser = TextParser()
-    tokens = parser.parse(text)
-    print("text=%r" % text)
-    print(tokens)
+    def print_head(self, message):
+        width  = 60
+        length = len(message)
+        left  = (width - length) // 2
+        right = width - length - left
+        print()
+        print("-" * left, message, "-" * right)
 
-def runtest_topic2():
-    runtest_head("Topic Test 2")
-    text = "#Topic2 Bank# Text"
-    parser = TextParser()
-    tokens = parser.parse(text)
-    print("text=%r" % text)
-    print(tokens)
+    def test_topic1(self, ):
+        self.print_head("Topic Test 1")
+        text = "#Topic1# Text"
+        parser = TextParser()
+        tokens = parser.parse(text)
+        print("text=%r" % text)
+        print(tokens)
 
-def runtest_topic3():
-    runtest_head("Topic Test 3")
-    text = "#NewLineTopic \nBank# Text"
-    parser = TextParser()
-    tokens = parser.parse(text)
-    print("text=%r" % text)
-    print(tokens)
-    print("keywords=%s" % parser.keywords)
+    def test_topic2(self):
+        self.print_head("Topic Test 2")
+        text = "#Topic2 Bank# Text"
+        parser = TextParser()
+        tokens = parser.parse(text)
+        print("text=%r" % text)
+        print(tokens)
+
+    def test_topic3(self):
+        self.print_head("Topic Test 3")
+        text = "#NewLineTopic \nBank# Text"
+        parser = TextParser()
+        tokens = parser.parse(text)
+        print("text=%r" % text)
+        print(tokens)
+        print("keywords=%s" % parser.keywords)
 
 
-def runtest_strong_normal():
-    runtest_head("runtest_strong_normal")
-    text = "test**mark**end"
-    parser = TextParser()
-    tokens = parser.parse(text)
-    print(tokens)
-    assert tokens[0] == "test"
-    assert tokens[1] == "<span class=\"msg-strong\">mark</span>"
-    assert tokens[2] == "end"
+    def test_strong_normal(self):
+        self.print_head("runtest_strong_normal")
+        text = "test**mark**end"
+        parser = TextParser()
+        tokens = parser.parse(text)
+        print(tokens)
+        assert tokens[0] == "test"
+        assert tokens[1] == "<span class=\"msg-strong\">mark</span>"
+        assert tokens[2] == "end"
 
-def runtest_strong_nl():
-    runtest_head("runtest_strong_nl")
-    text = "test**mark\n**end"
-    parser = TextParser()
-    tokens = parser.parse(text)
-    assert tokens[0] == "test"
-    assert tokens[1] == "**mark<br/>"
-    assert tokens[2] == "**"
-    assert tokens[3] == "end"
+    def test_strong_nl(self):
+        self.print_head("runtest_strong_nl")
+        text = "test**mark\n**end"
+        parser = TextParser()
+        tokens = parser.parse(text)
+        assert tokens[0] == "test"
+        assert tokens[1] == "**mark<br/>"
+        assert tokens[2] == "**"
+        assert tokens[3] == "end"
 
-def runtest_strong_no_match():
-    runtest_head("runtest_strong_no_match")
-    text = "test***"
-    parser = TextParser()
-    tokens = parser.parse(text)
-    print(tokens)
-    assert tokens[0] == "test"
-    assert tokens[1] == "**"
-    assert tokens[2] == "*"
+    def test_strong_no_match(self):
+        self.print_head("runtest_strong_no_match")
+        text = "test***"
+        parser = TextParser()
+        tokens = parser.parse(text)
+        print(tokens)
+        assert tokens[0] == "test"
+        assert tokens[1] == "**"
+        assert tokens[2] == "*"
+
+    def test_image(self):
+        text = "图片file:///data/temp/1.png"
+        parser = TextParser()
+        tokens = parser.parse(text)
+        print(tokens)
+        assert tokens[0] == "图片"
+        assert tokens[1] == '<div class="msg-img-box"><img class="msg-img x-photo" alt="/data/temp/1.png" src="/data/temp/1.png"></div>'
     
+    def test_other(self):
+        text = """#Topic1# #Topic2 Test#
+        #中文话题#
+        This is a new line
+        图片file:///data/temp/1.png
+        文件file:///data/temp/1.zip
+        link1:http://abc.com/test?name=1
+        link2:https://abc.com/test?name=1&age=2 text after link
+        数字123456END
+        <code>test</code>
+        """
+
+        parser = TextParser()
+        tokens = parser.parse(text)
+        # print(tokens)
+        print("input: %s" % text)
+        print("output:")
+        result = "".join(tokens)
+        result = result.replace("<br/>", "\n<br/>\n")
+        print(result)
 
 def runtest():
-    runtest_topic1()
-    runtest_topic2()
-    runtest_topic3()
-    runtest_strong_normal()
-    runtest_strong_nl()
-    runtest_strong_no_match()
-
-    runtest_head("Other Test")
-    text   = """#Topic1# #Topic2 Test#
-    #中文话题#
-    This is a new line
-    图片file:///data/temp/1.png
-    文件file:///data/temp/1.zip
-    link1:http://abc.com/test?name=1
-    link2:https://abc.com/test?name=1&age=2 text after link
-    数字123456END
-    <code>test</code>
-    """
-
-    parser = TextParser()
-    tokens = parser.parse(text)
-    # print(tokens)
-    print("input: %s" % text)
-    print("output:")
-    result = "".join(tokens)
-    result = result.replace("<br/>", "\n<br/>\n")
-    print(result)
+    testcase = ParseTestCase()
+    for attr in dir(testcase):
+        if attr.startswith("test_"):
+            testcase.print_head(attr)
+            method = getattr(testcase, attr)
+            method()
 
 if __name__ == '__main__':
     runtest()
