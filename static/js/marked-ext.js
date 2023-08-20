@@ -155,17 +155,20 @@
         return html.replace(new RegExp(regexp, 'g'), '<code class="keyword">' + target + "</code>");
     }
 
-    function highlightKeywords(code) {
-        // 先简单处理一下
-        var html = escape(code);
-        /*
-        var keywords = ["import ", "from ", "def ", "if ", "for ", "try:", "except:", "except ", 
-            " in ", "not ", "return "];
-        for (var i = 0; i < keywords.length; i++) {
-            html = replaceKeyword(html, keywords[i]);
+    function highlightKeywords(code, lang) {
+        // 这个需要依赖 hightlight
+        console.log("code language:", lang);
+        if (window.hljs == undefined) {
+            return code
         }
-        */
-        return html;
+        if (lang == undefined) {
+            return hljs.highlightAuto(code).value;
+        }
+        try {
+            return hljs.highlight(code, {language: lang}).value;
+        } catch (e) {
+            return hljs.highlightAuto(code).value;
+        }
     }
 
     function highlight(code, lang) {
@@ -182,7 +185,7 @@
             console.log(code);
             return highlight_csv(code);
         } else {
-            return highlightKeywords(code);
+            return highlightKeywords(code, lang);
         }
     }
 

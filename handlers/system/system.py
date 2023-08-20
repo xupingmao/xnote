@@ -205,7 +205,7 @@ class ReloadHandler:
         # autoreload will load new handlers
         import web
 
-        runtime_id = xutils.get_argument("runtime_id")
+        runtime_id = xutils.get_argument_str("runtime_id")
         if runtime_id == xconfig.RUNTIME_ID:
             # autoreload.reload()
             xmanager.restart()

@@ -64,7 +64,8 @@ h3.marked-heading {
 
 .marked-code {
     width: 100%;
-    background: #ffd;
+    background-color: #000;
+    color: #fff;
     padding: 0.5rem;
     border: 1px solid #ddd;
     word-wrap: break-word;

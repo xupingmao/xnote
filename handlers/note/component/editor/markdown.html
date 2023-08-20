@@ -2,7 +2,11 @@
 {% init edit_token = "" %}
 
 <!-- 解析CSV依赖 -->
-<script type="text/javascript" src="/static/lib/csv.js/csv.js"></script>
+<script type="text/javascript" src="{{_server_home}}/_static/lib/csv.js/csv.js"></script>
+<!-- 代码高亮highlight依赖 -->
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+<link rel="stylesheet" href="//cdn.bootcdn.net/ajax/libs/highlight.js/11.7.0/styles/a11y-dark.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
 
 <div class="card">
     {% include "note/component/view_header.html" %}
