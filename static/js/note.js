@@ -19,7 +19,7 @@ xnote.updateNoteCategory = function(req) {
         value: req.value
     };
     
-    $.post("/note/attribute/update", params, function (resp) {
+    xnote.http.post("/note/attribute/update", params, function (resp) {
         console.log("update category", resp);
         if (resp.code == "success") {
             xnote.toast("更新类目成功");
@@ -53,13 +53,13 @@ xnote.updateCategoryName = function (req) {
             name: newName
         };
 
-        $.post("/api/note/category/update", params, function(resp) {
+        xnote.http.post("/api/note/category/update", params, function(resp) {
             if (resp.code=="success") {
                 window.location.reload();
             } else {
                 xnote.alert(resp.message);
             }
-        })
+        });
     });
 };
 
@@ -78,15 +78,12 @@ xnote.api["note.create"] = function (req) {
 
     var title = req.name;
     
-    $.post("/note/create", createOption, function (resp) {
+    xnote.http.post("/note/create", createOption, function (resp) {
         if (resp.code == "success") {
             req.callback(resp);
         } else {
             xnote.alert(title + "失败:" + resp.message);
         }
-    }).fail(function (e) {
-        console.error(title + "失败", e);
-        xnote.alert(title + "失败:" + e);
     });
 };
 
@@ -100,15 +97,12 @@ xnote.api["note.copy"] = function (req) {
     };
     var title = req.name;
 
-    $.post("/note/copy", copyOption, function (resp) {
+    xnote.http.post("/note/copy", copyOption, function (resp) {
         if (resp.code == "success") {
             req.callback(resp);
         } else {
             xnote.alert(title + "失败:" + resp.message);
         }
-    }).fail(function (e) {
-        console.error("Copy " + title + "失败", e);
-        xnote.alert("Copy " + title + "失败:" + e);
     });
 };
 
@@ -152,16 +146,13 @@ noteAPI.bindTag = function (cmd) {
             tag_names: JSON.stringify(selectedNames),
         };
 
-        $.post("/note/tag/bind", bindParams, function (resp) {
+        xnote.http.post("/note/tag/bind", bindParams, function (resp) {
             if (resp.code != "success") {
                 xnote.alert(resp.message);
             } else {
                 xnote.toast("添加标签成功");
             }
             location.reload();
-        }).fail(function (err) {
-            console.error(err);
-            xnote.toast("系统繁忙，请稍后重试");
         });
     });
 };
@@ -169,6 +160,7 @@ noteAPI.bindTag = function (cmd) {
 
 var NoteView = {};
 xnote.action.note = NoteView;
+xnote.note = NoteView;
 
 NoteView.onTagClick = function(target) {
     $(target).toggleClass("active");
@@ -189,7 +181,7 @@ NoteView.editNoteTag = function (target) {
         group_id:parentId,
     };
 
-    $.get("/note/tag/list", listParams, function (resp) {
+    xnote.http.get("/note/tag/list", listParams, function (resp) {
         var cmd = {
             tagType: "note", // 绑定类型始终是note
             currentTags: JSON.parse(tagsJson),
@@ -211,7 +203,7 @@ NoteView.searchNote = function() {
     } else {
         api = "/note/api/timeline?type=search&key=" + searchText;
     }
-    $.get(api, function (resp) {
+    xnote.http.get(api, function (resp) {
         if (resp.code != "success") {
             xnote.toast(resp.message);
         } else {
@@ -221,8 +213,6 @@ NoteView.searchNote = function() {
             });
             $(".note-search-dialog-body").html(html);
         }
-    }).fail(function (err) {
-        xnote.toast("调用接口失败");
     });
 };
 
@@ -274,7 +264,7 @@ NoteView.renderNoteList = function (itemList) {
 
 NoteView.openDialogToAddNote = function (event) {
     var tagCode = $(event.target).attr("data-code");
-    $.get("/note/api/timeline?type=all&limit=100",  function (resp) {
+    xnote.http.get("/note/api/timeline?type=all&limit=100",  function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
         } else {
@@ -299,15 +289,13 @@ NoteView.addNoteToTag = function (tagCode) {
         tag_code: tagCode,
         note_ids: selectedIds.join(",")
     };
-    $.post("/note/tag/bind", params, function(resp) {
+    xnote.http.post("/note/tag/bind", params, function(resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
         } else {
             xnote.toast("添加成功");
             location.reload();
         }
-    }).fail(function () {
-        xnote.toast("调用接口失败，请稍后重试~");
     });
 };
 
@@ -384,7 +372,7 @@ NoteView.selectGroupFlat =  function (req) {
         $(".group-select-data").html(html);
     }
 
-    $.get("/note/api/group?list_type=all", function (resp) {
+    xnote.http.get("/note/api/group?list_type=all", function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
             return;
@@ -396,12 +384,46 @@ NoteView.selectGroupFlat =  function (req) {
         bindEvent();
         // 渲染数据
         renderData(respData);
-    }).fail(function (err) {
-        xnote.alert("请求接口失败:" + err);
     });
 };
 
 // 选择笔记本-树视图
 NoteView.selectGroupTree = function () {
     // 树视图目前用的是html-ajax接口   
+}
+
+// 删除标签元信息
+NoteView.deleteTagMeta = function (tagMetaList) {
+    var html = $("#deleteTagTemplate").render({
+        tagList: tagMetaList,
+    });
+
+    xnote.openDialog("删除标签", html, ["确定删除", "取消"], function () {
+        var tagIds = [];
+        $(".tag.delete.active").each(function (idx, ele) {
+            var tagId = $(ele).attr("data-id");
+            tagIds.push(tagId);
+        });
+
+        var deleteParams = {
+            tag_type: "group",
+            tag_ids: JSON.stringify(tagIds),
+        };
+        xnote.http.post("/note/tag/delete", deleteParams, function (resp) {
+            if (resp.code != "success") {
+                xnote.alert(resp.message);
+            } else {
+                xnote.toast("删除成功,准备刷新...");
+                setTimeout(function () {
+                    window.location.reload()
+                }, 500);
+            }
+            refreshTagTop();
+        });
+    });
+};
+
+// 点击标签操作
+NoteView.onTagClick = function (target) {
+    $(target).toggleClass("active");
 }

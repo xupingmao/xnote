@@ -12,21 +12,12 @@
 
         <div class="row top-offset-1">
             <button class="create-tag-btn btn-default">创建新标签</button>
-            <button class="delete-tag-btn btn danger">删除标签</button>
+            <button class="delete-tag-btn btn danger" onclick="xnote.action.note.deleteTagMeta(xnote.note.tagList)">删除标签</button>
         </div>
     </div>
 </script>
 
-<!-- 删除标签的模板 -->
-<script type="text/template" id="deleteTagTemplate">
-    <div class="card btn-line-height">
-        {{! each tagList tag }}
-        <a class="tag lightgray for-dialog large delete" data-id="{{!tag._id}}">
-            {{! tag.tag_name }}
-        </a>
-        {{!/each}}
-    </div>
-</script>
+{% include note/component/script/note_template.html %}
 
 <div class="tag-top"></div>
 
@@ -61,12 +52,13 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
             "tag_type": cmd.tagType
         };
 
-        $.get("/note/tag/list", params, function (resp) {
+        xnote.http.get("/note/tag/list", params, function (resp) {
             console.log("resp", resp);
             if (resp.code != "success") {
                 xnote.alert(resp.message);
             } else {
                 tagList = resp.data;
+                xnote.note.tagList = tagList;
                 for (var i=0; i < tagList.length; i++) {
                     var item = tagList[i];
                     if (filterTags.indexOf(item.tag_name)>=0) {
@@ -110,35 +102,6 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
                     xnote.alert(resp.message);
                 } else {
                     xnote.toast("创建成功");
-                }
-                refreshTagTop();
-            });
-        });
-    });
-
-    // 删除标签
-    $("body").on("click", ".delete-tag-btn", function (e) {
-        var html = $("#deleteTagTemplate").render({
-            tagList: tagList,
-        });
-
-        xnote.openDialog("删除标签", html, ["确定删除", "取消"], function () {
-            var tagIds = [];
-            $(".tag.delete.active").each(function (idx, ele) {
-                var tagId = $(ele).attr("data-id");
-                tagIds.push(tagId);
-            });
-
-            var deleteParams = {
-                tag_type: "group",
-                tag_ids: JSON.stringify(tagIds),
-                group_id: cmd.groupId,
-            };
-            $.post("/note/tag/delete", deleteParams, function (resp) {
-                if (resp.code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    xnote.toast("删除成功");
                 }
                 refreshTagTop();
             });

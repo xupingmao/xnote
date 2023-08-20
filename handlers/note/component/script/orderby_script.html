@@ -10,7 +10,7 @@ $(function () {
         
         checkNotEmpty(id, "data-id为空");
 
-        $.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
+        xnote.http.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
             var code = resp.code;
             if (code != "success") {
                 xnote.alert(resp.message);

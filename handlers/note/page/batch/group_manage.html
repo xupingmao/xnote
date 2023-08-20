@@ -7,7 +7,7 @@
 
 {% block body_left %}
 
-<script src="/static/js/note.js"></script>
+<script src="/_static/js/note.js"></script>
 
 {% init show_note_path = True %}
 {% init note_tags = dict() %}
@@ -27,21 +27,12 @@
 
         <div class="row top-offset-1">
             <button class="create-tag-btn btn-default">创建新标签</button>
-            <button class="delete-tag-btn btn danger">删除标签</button>
+            <button class="delete-tag-btn btn danger" onclick="xnote.action.note.deleteTagMeta(xnote.note.tagList)">删除标签</button>
         </div>
     </div>
 </script>
 
-<!-- 删除标签的模板 -->
-<script type="text/template" id="deleteTagTemplate">
-    <div class="card btn-line-height">
-        {{! each tagList tag }}
-        <a class="tag lightgray for-dialog large delete" data-id="{{!tag._id}}">
-            {{! tag.tag_name }}
-        </a>
-        {{!/each}}
-    </div>
-</script>
+{% include note/component/script/note_template.html %}
 
 <div class="card note-list">
 
@@ -121,13 +112,14 @@
     function refreshTagTop() {
         var filterTags = JSON.parse(xnote.getUrlParam("tags", "[]"));
 
-        $.get("/note/tag/list?tag_type=group", function (resp) {
+        xnote.http.get("/note/tag/list?tag_type=group", function (resp) {
             console.log("resp", resp);
             if (resp.code != "success") {
                 xnote.alert(resp.message);
             } else {
                 // self.tagList = resp.data;
                 tagList = resp.data;
+                xnote.note.tagList = tagList;
                 for (var i=0; i < tagList.length; i++) {
                     var item = tagList[i];
                     if (filterTags.indexOf(item.tag_name)>=0) {
@@ -200,7 +192,7 @@
                 tag_names: JSON.stringify(selectedNames),
             };
 
-            $.post("/note/tag/bind", bindParams, function (resp) {
+            xnote.http.post("/note/tag/bind", bindParams, function (resp) {
                 if (resp.code != "success") {
                     xnote.alert(resp.message);
                 } else {
@@ -227,35 +219,6 @@
             });
         });
     });
-
-    
-    $("body").on("click", ".delete-tag-btn", function (e) {
-        var html = $("#deleteTagTemplate").render({
-            tagList: tagList,
-        });
-
-        xnote.openDialog("删除标签", html, ["确定删除", "取消"], function () {
-            var tagIds = [];
-            $(".tag.delete.active").each(function (idx, ele) {
-                var tagId = $(ele).attr("data-id");
-                tagIds.push(tagId);
-            });
-
-            var deleteParams = {
-                tag_type: "group",
-                tag_ids: JSON.stringify(tagIds),
-            };
-            $.post("/note/tag/delete", deleteParams, function (resp) {
-                if (resp.code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    xnote.toast("删除成功");
-                }
-                refreshTagTop();
-            });
-        });
-    });
-
 })();
 
 </script>

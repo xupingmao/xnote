@@ -1,0 +1,11 @@
+<!-- 删除标签的模板 -->
+<script type="text/template" id="deleteTagTemplate">
+    <div class="card btn-line-height">
+        {{! each tagList tag }}
+        <a class="tag lightgray for-dialog large delete" data-id="{{!tag._id}}" onclick="xnote.action.note.onTagClick(this)">
+            {{! tag.tag_name }}
+        </a>
+        {{!/each}}
+    </div>
+</script>
+

@@ -38,6 +38,7 @@ if (window.xnote === undefined) {
     xnote.api = {};
     // 操作动作接口
     xnote.action = {};
+
     // 事件相关接口
     xnote.events = {};
     // resize事件回调
@@ -52,6 +53,9 @@ if (window.xnote === undefined) {
     xnote.state.system = {};
     // http相关操作
     xnote.http = {};
+
+    // 功能模块
+    xnote.note = {};
 }
 
 xnote.registerApiModule = function (name) {
