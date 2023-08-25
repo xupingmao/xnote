@@ -597,7 +597,7 @@ class SyncTaskThread(Thread):
     def run(self):
         while True:
             fire("sync.step")
-            sleep_seconds = xconfig.get_system_config_int("sync_interval_seconds", 3)
+            sleep_seconds = xconfig.WebConfig.sync_interval_seconds
             quick_sleep(sleep_seconds)
 
 

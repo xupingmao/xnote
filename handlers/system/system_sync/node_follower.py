@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-18 10:33:29
+@LastEditTime : 2023-08-25 22:23:38
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -400,7 +400,10 @@ class DBSyncer:
                 logging.debug("list binlog result=%s" % result_obj)
 
             code = result_obj.get("code")
-            has_next = result_obj.get("has_next", False)
+            data = result_obj.get("data")
+            # TODO 优化has_next判断
+            has_next = (data != None and len(data) > 1)
+            logging.info("code=%s, has_next=%s", code, has_next)
 
             if code == "success":
                 self.sync_by_binlog_step(result_obj)

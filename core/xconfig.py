@@ -292,6 +292,8 @@ class WebConfig:
 
     fast_reload = False
 
+    sync_interval_seconds = 3
+
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
@@ -305,6 +307,8 @@ class WebConfig:
 
         cls.ui_show_footer = SystemConfig.get_bool("ui_show_footer")
         cls.ui_title_prefix = SystemConfig.get_str("ui_title_prefix", "Xnote")
+
+        cls.sync_interval_seconds = SystemConfig.get_int("sync_interval_seconds", 3)
     
     @classmethod
     def load_nav_list(cls):
