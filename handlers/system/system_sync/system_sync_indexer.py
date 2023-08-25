@@ -42,6 +42,7 @@ def is_temp_file(fname):
     return fname in TEMP_FNAME_SET
 
 def build_index_by_fpath(fpath, user_id=0):
+    # TODO 如果 user_id=0 尝试根据路径推测用户
     from handlers.fs.fs_helper import FileInfo, FileInfoDao
     file_info = FileInfo()
     file_info.fpath = fpath
@@ -111,6 +112,7 @@ class FileSyncIndexManager:
             fpath = item.fpath
             if os.path.isdir(fpath):
                 item.ftype = "dir"
+            item.web_path = fsutil.get_webpath(fpath)
         return result
 
     def count_index(self):
