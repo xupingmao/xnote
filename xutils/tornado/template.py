@@ -381,7 +381,7 @@ class Template(object):
             if isinstance(chunk, _ExtendsBlock):
                 if not loader:
                     raise ParseError("{% extends %} block found, but no "
-                                     "template loader")
+                                     "template loader", self.name, 0)
                 template = loader.load(chunk.name, self.name)
                 ancestors.extend(template._get_ancestors(loader))
         return ancestors

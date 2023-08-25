@@ -258,7 +258,7 @@ class MarkdownImageParser(TextParserBase):
         url = url.replace("\r", "")
         url = url.replace("\n", "")
 
-        if url.startswith("/"):
+        if url.startswith("/") and not url.startswith("//"):
             # 已经是本地地址
             return url
         
