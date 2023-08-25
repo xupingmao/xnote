@@ -8,4 +8,6 @@ class FileIndexInfo(Storage):
         self.id = 0
         self.web_path = kw.get("web_path", "")
         self.fpath = kw.get("fpath", "")
-        self.mtime = kw.get("mtime", 0)
+        self.mtime = kw.get("mtime", "")
+        self.fsize = 0
+        self.ftype = ""

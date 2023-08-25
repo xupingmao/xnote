@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 00:58:15
+@LastEditTime : 2023-08-26 01:31:30
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -141,10 +141,14 @@ class HttpClient:
         if not self.check_disk_space():
             logging.error("磁盘容量不足，跳过")
             raise Exception("磁盘容量不足")
+        
+        if item.ftype == "dir":
+            logging.info("跳过目录, dir=%s", item.fpath)
+            return
 
         fpath = item.fpath
         web_path = item.web_path
-        mtime = item.mtime
+        mtime = dateutil.parse_datetime(item.mtime)
 
         # 先保存失败记录，成功后再删除
         self.upsert_retry_task(item)

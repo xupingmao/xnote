@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 01:01:43
+@LastEditTime : 2023-08-26 01:23:52
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -192,7 +192,7 @@ class Follower(NodeManagerBase):
         
         for item in data:
             item = FileIndexInfo(**item)
-            last_id = item.id
+            last_id = max(last_id, item.id)
 
         # logging.debug("result:%s", result)
         client.download_files(result)

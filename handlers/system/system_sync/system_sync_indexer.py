@@ -48,7 +48,10 @@ def build_index_by_fpath(fpath, user_id=0):
     file_info.user_id = user_id
     file_info.fsize = fsutil.get_file_size_int(fpath)
     file_info.mtime = xutils.format_datetime()
-    file_info.ftype = fsutil.get_file_ext(fpath)
+    if os.path.isdir(fpath):
+        file_info.ftype = "dir"
+    else:
+        file_info.ftype = fsutil.get_file_ext(fpath)
     FileInfoDao.upsert(file_info)
     logging.debug("更新文件索引:%s", file_info)
 
@@ -102,8 +105,13 @@ class FileSyncIndexManager:
 
     def list_files(self, last_id = 0, offset = 0, limit = 20):
         db = xtables.get_file_info_table()
-        return db.select(where="id > $last_id", vars=dict(last_id=last_id), 
+        result = db.select(where="id > $last_id", vars=dict(last_id=last_id), 
                                offset=offset, limit=limit, order="id")
+        for item in result:
+            fpath = item.fpath
+            if os.path.isdir(fpath):
+                item.ftype = "dir"
+        return result
 
     def count_index(self):
         return dbutil.count_table("fs_sync_index")

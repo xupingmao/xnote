@@ -40,6 +40,7 @@ class IndexBuilder:
         info = FileInfo()
         info.fpath = dirname
         info.fsize = size
+        info.ftype = "dir"
         FileInfoModel.upsert(info)
         return size
 
