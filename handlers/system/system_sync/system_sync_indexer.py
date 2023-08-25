@@ -40,31 +40,16 @@ def convert_time_to_str(mtime):
 def is_temp_file(fname):
     return fname in TEMP_FNAME_SET
 
-def build_index_by_fpath(fpath):
-    if not os.path.isfile(fpath):
-        return
-
-    stat = os.stat(fpath)
-    mtime = stat.st_mtime
-    ts = convert_time_to_str(mtime)
-    web_path = fsutil.get_webpath(fpath)
-    key = ts + "#" + web_path
-    file_size = stat.st_size
-
-    old_info = _fs_index_db.get_by_id(key)
-    if old_info != None and old_info.ts == ts and old_info.size == file_size:
-        logging.debug("文件已处理:%s", fpath)
-        return
-
-    file_info = Storage()
-    file_info.mtime = mtime
+def build_index_by_fpath(fpath, user_id=0):
+    from handlers.fs.fs_helper import FileInfo, FileInfoDao
+    file_info = FileInfo()
     file_info.fpath = fpath
-    file_info.web_path = web_path
-    file_info.ts = ts
-    file_info.size = file_size
-
-    _fs_index_db.update_by_id(key, file_info)
-    logging.debug("更新文件索引:%s", web_path)
+    file_info.user_id = user_id
+    file_info.fsize = fsutil.get_file_size(fpath)
+    file_info.mtime = xutils.format_datetime()
+    file_info.ftype = fsutil.get_file_ext(fpath)
+    FileInfoDao.upsert(file_info)
+    logging.debug("更新文件索引:%s", file_info)
 
 class FileSyncIndexManager:
 
@@ -236,7 +221,8 @@ def on_fs_upload(ctx: dict):
     filepath = ctx.get("fpath")
     if filepath == None:
         return
-    build_index_by_fpath(filepath)
+    user_id = ctx.get("user_id", 0)
+    build_index_by_fpath(filepath, user_id)
 
     log_data = Storage()
     log_data.fpath = filepath

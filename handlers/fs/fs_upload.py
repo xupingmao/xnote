@@ -11,8 +11,9 @@ import xtemplate
 import xmanager
 import time
 import math
-from xutils import fsutil
+from xutils import fsutil, Storage
 from xtemplate import T
+from xnote_event import FileUploadEvent
 try:
     from PIL import Image
 except ImportError:
@@ -153,7 +154,9 @@ class UploadHandler:
         prefix = xutils.get_argument_str("prefix")
         name = xutils.get_argument_str("name")
         note_id = xutils.get_argument_str("note_id")
-        user_name = xauth.current_name()
+        user_info = xauth.current_user()
+        assert user_info != None
+        user_name = user_info.name
         webpath = ""
         filename = ""
 
@@ -173,8 +176,11 @@ class UploadHandler:
                 for chunk in file.file:
                     fout.write(chunk)
             
-            xmanager.fire("fs.upload", dict(
-                user=user_name, path=filepath, fpath=filepath))
+            event = FileUploadEvent()
+            event.fpath = filepath
+            event.user_name = user_info.name
+            event.user_id = user_info.id
+            xmanager.fire("fs.upload", event)
 
             try_fix_orientation(filepath)
             try_touch_note(note_id)
@@ -213,7 +219,10 @@ class RangeUploadHandler:
 
     def merge_files(self, dirname, filename, chunks):
         dest_path = os.path.join(dirname, filename)
-        user_name = xauth.current_name()
+        user_info = xauth.current_user()
+        assert user_info != None
+        user_name = user_info.name
+
         with open(dest_path, "wb") as fp:
             for chunk in range(chunks):
                 tmp_path = os.path.join(dirname, filename)
@@ -223,8 +232,12 @@ class RangeUploadHandler:
                 with open(tmp_path, "rb") as tmp_fp:
                     fp.write(tmp_fp.read())
                 xutils.remove(tmp_path, True)
-            xmanager.fire("fs.upload", dict(user=user_name,
-                          path=dest_path, fpath=dest_path))
+
+            event = FileUploadEvent()
+            event.user_name = user_name
+            event.user_id = user_info.id
+            event.fpath = dest_path
+            xmanager.fire("fs.upload", event)
 
     def is_fixed_name(self, filename):
         name, ext = os.path.splitext(filename)

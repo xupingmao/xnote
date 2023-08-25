@@ -20,26 +20,44 @@ from xutils import fsutil, six
 from xutils.dbutil import LdbTable
 from xutils.fsutil import FileItem
 from xutils.sqldb import TableProxy
+from xutils import Storage
 
 _index_db = xtables.get_table_by_name("file_info")
 
-class FileInfoModel:
+
+class FileInfo(Storage):
+
+    def __init__(self):
+        self.ctime = xutils.format_datetime()
+        self.mtime = xutils.format_datetime()
+        self.fpath = ""
+        self.ftype = ""
+        self.user_id = 0
+        self.fsize = 0
+
+class FileInfoDao:
 
     @classmethod
     def get_by_fpath(cls, fpath = ""):
         return _index_db.select_first(where = dict(fpath = fpath))
     
     @classmethod
-    def upsert(cls, info):
+    def upsert(cls, info: FileInfo):
         old = cls.get_by_fpath(info.fpath)
         if old == None:
             return _index_db.insert(**info)
         else:
-            _index_db.update(**info, where = dict(fpath=info.fpath))
+            updates = dict(**info)
+            updates.pop("ctime") # 不更新创建时间
+            _index_db.update(**updates, where = dict(id=old.id))
 
     @classmethod
     def prefix_count(cls, fpath):
         return _index_db.count(where = "fpath LIKE $fpath", vars = dict(fpath = fpath + "%"))
+
+
+class FileInfoModel(FileInfoDao):
+    pass
 
 def get_index_db(): # type: ()-> TableProxy
     return _index_db

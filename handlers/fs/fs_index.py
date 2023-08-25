@@ -19,7 +19,7 @@ import xutils
 from xutils import Storage
 from xutils.sqldb import TableProxy
 
-from .fs_helper import get_index_dirs, get_index_db, FileInfoModel
+from .fs_helper import get_index_dirs, get_index_db, FileInfoModel, FileInfo
 
 class IndexBuilder:
 
@@ -37,7 +37,9 @@ class IndexBuilder:
             # 无法读取目录
             xutils.print_exc()
 
-        info = Storage(fsize = size, fpath = dirname)
+        info = FileInfo()
+        info.fpath = dirname
+        info.fsize = size
         FileInfoModel.upsert(info)
         return size
 
@@ -54,12 +56,14 @@ class IndexBuilder:
 
         fpath = os.path.realpath(fpath)
         logging.info("fs_index path: %s", fpath)
-        
+
         if os.path.isdir(fpath):
             return self.calc_dir_size(db, fpath, depth-1)
         try:
             st = os.stat(fpath)
-            info = Storage(fsize = st.st_size, fpath = fpath)
+            info = FileInfo()
+            info.fsize = st.st_size
+            info.fpath = fpath
             info.ctime = xutils.format_datetime(st.st_ctime)
             info.mtime = xutils.format_datetime(st.st_mtime)
             if xutils.is_text_file(fpath):
@@ -70,7 +74,9 @@ class IndexBuilder:
             return st.st_size
         except:
             xutils.print_exc()
-            info = Storage(fsize = -1, fpath = fpath)
+            info = FileInfo()
+            info.fsize = -1
+            info.fpath = fpath
             FileInfoModel.upsert(info)
             return 0
 
