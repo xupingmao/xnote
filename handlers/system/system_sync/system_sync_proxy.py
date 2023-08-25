@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 11:42:50
+@LastEditTime : 2023-08-26 00:58:15
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -24,6 +24,7 @@ from xutils import fsutil
 from xutils import dbutil
 from xutils.six.moves.urllib.parse import quote
 from xutils.mem_util import log_mem_info_deco
+from .models import FileIndexInfo
 
 RETRY_INTERVAL = 60
 MAX_KEY_SIZE = 511
@@ -83,12 +84,13 @@ class HttpClient:
         result_obj = textutil.parse_json(result, ignore_error = True)
         return result_obj    
 
-    def list_files(self, offset):
+    def list_files(self, last_id=0):
         if self.check_failed():
             return
 
-        url = "{host}/system/sync/leader?p=list_files&token={token}&offset={offset}".format(
-            host = self.host, token = self.token, offset = quote(offset))
+        last_id_str = str(last_id)
+        url = "{host}/system/sync/leader?p=list_files&token={token}&last_id={last_id}".format(
+            host = self.host, token = self.token, last_id = last_id_str)
         
         if self.debug:
             logging.info("sync_from_leader: %s", url)
@@ -131,7 +133,7 @@ class HttpClient:
 
         return result
 
-    def download_file(self, item):
+    def download_file(self, item: FileIndexInfo):
         if self.admin_token is None:
             logging.warn("admin_token为空，跳过")
             return
@@ -188,7 +190,7 @@ class HttpClient:
 
     def download_files(self, result):
         for item in result.data:
-            self.download_file(Storage(**item))
+            self.download_file(FileIndexInfo(**item))
 
     def retry_failed(self):
         """TODO 这个应该是调度层的"""

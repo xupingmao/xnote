@@ -287,15 +287,12 @@ class LeaderHandler(SyncHandler):
 
     def list_files(self):
         """(主节点)读取文件列表"""
-        offset = xutils.get_argument("offset", "")
+        last_id = xutils.get_argument_int("last_id", 0)
         result = Storage()
         result.code = "success"
-        result.sync_offset = offset
+        result.req_last_id = last_id
 
-        data = system_sync_indexer.list_files(offset)
-        for item in data:
-            result.sync_offset = item.ts
-
+        data = system_sync_indexer.list_files(last_id=last_id)
         result.data = data
         return result
 

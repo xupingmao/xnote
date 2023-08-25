@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 12:07:56
+@LastEditTime : 2023-08-26 01:12:37
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -278,7 +278,7 @@ class TestSystemSync(BaseTestCase):
 
         manager = system_sync_indexer.FileSyncIndexManager()
         manager.build_full_index()
-        result = manager.list_files(None)
+        result = manager.list_files(last_id=0)
         self.assertTrue(len(result) > 0)
     
     def test_leader_list_binlog(self):

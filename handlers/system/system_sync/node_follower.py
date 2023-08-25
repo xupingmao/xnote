@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-25 22:23:38
+@LastEditTime : 2023-08-26 01:01:43
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -22,6 +22,7 @@ from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
 from .system_sync_proxy import HttpClient, empty_http_client
+from .models import FileIndexInfo
 from xutils.mem_util import log_mem_info_deco
 
 fs_sync_index_db = dbutil.get_hash_table("fs_sync_index")
@@ -152,6 +153,13 @@ class Follower(NodeManagerBase):
         last_sync = time.time() - self.fs_sync_done_time
         return last_sync >= self.PING_INTERVAL
 
+    def get_fs_sync_last_id(self):
+        value = CONFIG.get("fs_sync_last_id")
+        try:
+            return int(value)
+        except:
+            return 0
+
     def sync_files_from_leader(self):
         result = self.ping_leader()
         if result == None:
@@ -166,41 +174,34 @@ class Follower(NodeManagerBase):
         # 先重试失败的任务
         client.retry_failed()
 
-        offset = CONFIG.get("fs_sync_offset", "")
-        offset = textutil.remove_head(offset, "fs_sync_index:")
-
-        logging.debug("offset:%s", offset)
-        result = client.list_files(offset)
-        logging.debug("list files result=(%s), offset=(%s)", result, offset)
+        last_id = self.get_fs_sync_last_id()
+        
+        logging.debug("fs_sync_last_id=%s", last_id)
+        result = client.list_files(last_id)
+        logging.debug("list files result=(%s), last_id=(%s)", result, last_id)
 
         if result is None:
             logging.error("返回结果为空")
             return
 
-        # 不需要包含offset的结果
-        result = filter_result(result, offset)
-        if len(result.data) == 0:
+        data = result.get("data", [])
+        if len(data) == 0:
             logging.debug("返回文件列表为空")
             self.fs_sync_done_time = time.time()
             return
-
-        max_offset = offset
-        for item in result.data:
-            item = Storage(**item)
-            key = item._key
-            key = textutil.remove_head(key, "fs_sync_index:")
-            max_offset = max(max_offset, key)
+        
+        for item in data:
+            item = FileIndexInfo(**item)
+            last_id = item.id
 
         # logging.debug("result:%s", result)
         client.download_files(result)
 
         # offset可能不变
         logging.debug("result.sync_offset:%s", result.sync_offset)
-        logging.debug("max_offset:%s", max_offset)
+        logging.debug("last_id = %s", last_id)
 
-        if max_offset != offset:
-            CONFIG.put("fs_sync_offset", max_offset)
-
+        CONFIG.put("fs_sync_last_id", last_id)
         return result
 
     def get_sync_process(self):

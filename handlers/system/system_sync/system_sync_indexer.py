@@ -14,13 +14,14 @@ from collections import deque
 import xmanager
 import xutils
 import xconfig
+import xnote_event
+import xtables
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil
 from xutils import fsutil
 from xutils import textutil
 
-_fs_index_db = dbutil.get_table("fs_sync_index")
 _binlog = dbutil.BinLog.get_instance()
 
 # 临时文件
@@ -45,7 +46,7 @@ def build_index_by_fpath(fpath, user_id=0):
     file_info = FileInfo()
     file_info.fpath = fpath
     file_info.user_id = user_id
-    file_info.fsize = fsutil.get_file_size(fpath)
+    file_info.fsize = fsutil.get_file_size_int(fpath)
     file_info.mtime = xutils.format_datetime()
     file_info.ftype = fsutil.get_file_ext(fpath)
     FileInfoDao.upsert(file_info)
@@ -99,29 +100,10 @@ class FileSyncIndexManager:
         cost_time = time.time() - start_time
         logging.info("构建索引耗时: %0.2fms", cost_time*1000)
 
-    def list_files(self, key_from = None, offset = 0, limit = 20):
-        result = []
-        MAX_LIMIT = limit * 5
-
-        db = _fs_index_db
-
-        for value in db.iter(offset = offset, limit = MAX_LIMIT, key_from = key_from):
-            fpath = value.fpath
-            key   = value._key
-
-            if check_index(key, value, db):
-                result.append(value)
-
-            hash_key = textutil.remove_head(key, "fs_sync_index:")
-            value.hash_key = hash_key
-
-            if value.ts is None:
-                value.ts = convert_time_to_str(value.mtime)
-
-            if len(result) >= limit:
-                return result
-
-        return result
+    def list_files(self, last_id = 0, offset = 0, limit = 20):
+        db = xtables.get_file_info_table()
+        return db.select(where="id > $last_id", vars=dict(last_id=last_id), 
+                               offset=offset, limit=limit, order="id")
 
     def count_index(self):
         return dbutil.count_table("fs_sync_index")
@@ -216,25 +198,25 @@ def on_fs_rename(event: dict):
 
 
 @xmanager.listen(["fs.upload", "fs.update"])
-def on_fs_upload(ctx: dict):
+def on_fs_upload(ctx: xnote_event.FileUploadEvent):
     logging.debug("检测到文件上传信息:%s", ctx)
-    filepath = ctx.get("fpath")
+    filepath = ctx.fpath
     if filepath == None:
         return
-    user_id = ctx.get("user_id", 0)
+    user_id = ctx.user_id
     build_index_by_fpath(filepath, user_id)
 
     log_data = Storage()
     log_data.fpath = filepath
-    log_data.user = ctx.get("user")
+    log_data.user = ctx.user_name
     log_data.web_path = fsutil.get_webpath(filepath)
     stat = os.stat(filepath)
     log_data.mtime = stat.st_mtime
     _binlog.add_log("file_upload", filepath, log_data, record_value=True)
 
-def list_files(key_from = None):
+def list_files(last_id = 0):
     manager = FileSyncIndexManager()
-    return manager.list_files(key_from)
+    return manager.list_files(last_id=last_id)
 
 def count_index():
     manager = FileSyncIndexManager()

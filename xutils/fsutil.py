@@ -171,25 +171,27 @@ def format_size(size):
 
 
 def format_file_size(fpath):
-    """获取文件大小"""
+    """获取文件大小,返回文本格式"""
     return get_file_size(fpath, format=True)
 
 
-def get_file_size(fpath, format=False):
+def get_file_size_int(fpath):
+    """读取文件大小,返回数字"""
     try:
         st = os.stat(fpath)
         if st and st.st_size >= 0:
-            if format:
-                return format_size(st.st_size)
-            else:
-                return st.st_size
+            return st.st_size
     except OSError as e:
-        pass
-    if format:
-        return "-"
-    else:
         return -1
+    return 0
 
+def get_file_size(fpath, format=False):
+    size = get_file_size_int(fpath)
+    if size < 0 and format:
+        return "-"
+    if format:
+        return format_size(size)
+    return size
 
 def list_file_objects(dirname, webpath=False):
     import xconfig
