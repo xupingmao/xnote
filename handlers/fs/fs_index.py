@@ -53,8 +53,8 @@ class IndexBuilder:
             return 0
 
         fpath = os.path.realpath(fpath)
-        print("fs_index path: %s" % fpath)    
-
+        logging.info("fs_index path: %s", fpath)
+        
         if os.path.isdir(fpath):
             return self.calc_dir_size(db, fpath, depth-1)
         try:

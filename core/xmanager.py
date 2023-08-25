@@ -435,8 +435,8 @@ class HandlerManager:
         if self.report_loading:
             log("Load mapping (%s, %s)" % (url, handler))
 
-    def run_task(self):
-        self.task_manager.do_run_task()
+    def start_cron_job(self):
+        self.task_manager.start_cron_job()
 
     def load_tasks(self):
         self.task_manager.do_load_tasks()
@@ -469,40 +469,42 @@ class CronTaskManager:
                 and self._match(tm.tm_min, task.tm_min):
             return True
         return False
+    
+    def request_url(self, task):
+        url = task.url
+        if url is None:
+            url = ""
 
-    def do_run_task(self):
-        """执行定时任务"""
-        def request_url(task):
-            url = task.url
-            if url is None:
-                url = ""
+        quoted_url = xutils.quote_unicode(url)
+        if quoted_url.startswith(("http://", "https://")):
+            # 处理外部HTTP请求
+            response = xutils.urlopen(quoted_url).read()
+            xutils.log("Request %r success" % quoted_url)
+            return response
+        elif url.startswith("script://"):
+            name = url[len("script://"):]
+            return xutils.exec_script(name, False)
 
-            quoted_url = xutils.quote_unicode(url)
-            if quoted_url.startswith(("http://", "https://")):
-                # 处理外部HTTP请求
-                response = xutils.urlopen(quoted_url).read()
-                xutils.log("Request %r success" % quoted_url)
-                return response
-            elif url.startswith("script://"):
-                name = url[len("script://"):]
-                return xutils.exec_script(name, False)
+        cookie = xauth.get_user_cookie("admin")
+        url = url + "?content=" + xutils.quote_unicode(str(task.message))
 
-            cookie = xauth.get_user_cookie("admin")
-            url = url + "?content=" + xutils.quote_unicode(str(task.message))
+        return self.app.request(url, headers=dict(COOKIE=cookie))
 
-            return self.app.request(url, headers=dict(COOKIE=cookie))
+    def check_and_run(self, task, tm):
+        if self.match(task, tm):
+            put_task_async(self.request_url, task)
+            try:
+                xutils.trace("RunTask",  task.url)
+                if task.tm_wday == "no-repeat":
+                    # 一次性任务直接删除
+                    dbutil.delete(task.id)
+                    self.do_load_tasks()
+            except Exception as e:
+                xutils.log("run task [%s] failed, %s" % (task.url, e))
 
-        def check_and_run(task, tm):
-            if self.match(task, tm):
-                put_task_async(request_url, task)
-                try:
-                    xutils.trace("RunTask",  task.url)
-                    if task.tm_wday == "no-repeat":
-                        # 一次性任务直接删除
-                        dbutil.delete(task.id)
-                        self.do_load_tasks()
-                except Exception as e:
-                    xutils.log("run task [%s] failed, %s" % (task.url, e))
+
+    def start_cron_job(self):
+        """开始执行定时任务"""
 
         def fire_cron_events(tm):
             fire("cron.minute", tm)
@@ -516,7 +518,7 @@ class CronTaskManager:
 
                 # 定时任务
                 for task in self.task_list:
-                    check_and_run(task, tm)
+                    self.check_and_run(task, tm)
 
                 # cron.* 事件
                 put_task_async(fire_cron_events, tm)
@@ -529,7 +531,7 @@ class CronTaskManager:
 
         self.do_load_tasks()
 
-        if not self.thread_started:
+        if not self.thread_started and xconfig.WebConfig.cron_enabled:
             # 任务队列处理线程，开启两个线程
             WorkerThread("WorkerThread-1").start()
             WorkerThread("WorkerThread-2").start()
@@ -765,7 +767,7 @@ def init(app, vars, last_mapping=None):
     reload()
 
     # 启动任务
-    _manager.run_task()
+    _manager.start_cron_job()
 
     # 同步任务线程
     SyncTaskThread().start()

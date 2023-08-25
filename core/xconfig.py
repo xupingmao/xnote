@@ -294,6 +294,9 @@ class WebConfig:
 
     sync_interval_seconds = 3
 
+    # 定时任务开关
+    cron_enabled = True
+
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
@@ -309,6 +312,7 @@ class WebConfig:
         cls.ui_title_prefix = SystemConfig.get_str("ui_title_prefix", "Xnote")
 
         cls.sync_interval_seconds = SystemConfig.get_int("sync_interval_seconds", 3)
+        cls.cron_enabled = SystemConfig.get_bool("cron_enabled", True)
     
     @classmethod
     def load_nav_list(cls):
