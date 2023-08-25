@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 01:40:53
+@LastEditTime : 2023-08-26 01:49:50
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -25,6 +25,7 @@ from xutils import dbutil
 from xutils.six.moves.urllib.parse import quote
 from xutils.mem_util import log_mem_info_deco
 from .models import FileIndexInfo
+from .system_sync_indexer import build_index_by_fpath
 
 RETRY_INTERVAL = 60
 MAX_KEY_SIZE = 511
@@ -190,6 +191,7 @@ class HttpClient:
             netutil.http_download(url, dest_path)
             os.utime(dest_path, times=(mtime, mtime))
             self.delete_retry_task(item)
+            build_index_by_fpath(dest_path)
         except:
             item.err_msg = xutils.print_exc()
             self.upsert_retry_task(item)

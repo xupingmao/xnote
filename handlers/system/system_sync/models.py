@@ -1,6 +1,6 @@
 # encoding=utf-8
 
-from xutils import Storage
+from xutils import Storage, fsutil
 
 class FileIndexInfo(Storage):
 

@@ -60,6 +60,7 @@ class FileSyncIndexManager:
 
     # 文件队列
     data = deque()
+    db = xtables.get_file_info_table()
 
     def init_file_queue(self):
         logging.debug("初始化文件队列")
@@ -116,7 +117,7 @@ class FileSyncIndexManager:
         return result
 
     def count_index(self):
-        return dbutil.count_table("fs_sync_index")
+        return self.db.count()
 
 
 def check_index(key, value, db):
