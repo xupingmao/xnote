@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 01:31:30
+@LastEditTime : 2023-08-26 01:40:53
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -148,8 +148,11 @@ class HttpClient:
 
         fpath = item.fpath
         web_path = item.web_path
-        mtime = dateutil.parse_datetime(item.mtime)
-
+        try:
+            mtime = dateutil.parse_datetime(item.mtime)
+        except:
+            mtime = time.time()
+        
         # 先保存失败记录，成功后再删除
         self.upsert_retry_task(item)
 
