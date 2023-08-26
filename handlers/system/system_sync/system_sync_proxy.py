@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 11:32:02
+@LastEditTime : 2023-08-26 11:58:01
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -152,10 +152,12 @@ class HttpClient:
             logging.info("跳过目录, dir=%s", item.fpath)
             return
         
-        # 数据库文件不能下载
-        if fsutil.is_parent_dir("/data/db", item.fpath):
-            logging.info("跳过数据库文件, fpath=%s", item.fpath)
-            return
+        skip_dir_list = ["/data/db", "/data/tmp", "/data/log", "/data/backup", "/data/cache", "/data/trash"]
+        for skip_dir in skip_dir_list:
+            # 数据库文件不能下载
+            if fsutil.is_parent_dir(skip_dir, item.webpath):
+                logging.info("跳过系统/临时文件, fpath=%s", item.fpath)
+                return
 
         fpath = item.fpath
         webpath = item.webpath

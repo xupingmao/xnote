@@ -10,9 +10,9 @@ class FileIndexInfo(Storage):
         self.webpath = kw.get("webpath", "")
         self.fpath = kw.get("fpath", "")
         self.mtime = kw.get("mtime", "")
-        self.fsize = 0
-        self.ftype = ""
-        self.last_try_time = 0.0
+        self.fsize = kw.get("fsize", 0)
+        self.ftype = kw.get("ftype", "")
+        self.last_try_time = kw.get("last_try_time", 0.0)
 
 class LeaderStat(Storage):
     """主节点信息"""

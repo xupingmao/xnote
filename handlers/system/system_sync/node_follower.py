@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 11:20:53
+@LastEditTime : 2023-08-26 11:48:12
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -467,7 +467,7 @@ class DBSyncer:
         if max_seq != last_seq:
             self.put_binlog_last_seq(max_seq)
         else:
-            logging.info("已经保持同步")
+            logging.info("db已经保持同步")
 
     def _sync_db_full_step_work(self, result_obj: dict, last_key):
         # type: (dict, str) -> int
