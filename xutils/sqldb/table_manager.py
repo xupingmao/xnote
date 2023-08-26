@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-29 17:34:58
+@LastEditTime : 2023-08-26 16:22:25
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -31,6 +31,12 @@ class BaseTableManager:
         self.connect()
         self.db = db
         self.mysql_database = kw.get("mysql_database", "")
+        self.pk_name = kw.get("pk_name", "id")
+        self.pk_type = kw.get("pk_type", "int")
+        self.pk_len = kw.get("pk_len", 0)
+        self.pk_comment = kw.get("pk_comment", "主键")
+        # 目前只支持这两种主键
+        assert self.pk_type in ("int", "blob")
 
     def __enter__(self):
         return self
@@ -61,9 +67,7 @@ class BaseTableManager:
     def add_column(self, colname, coltype,
                    default_value=None, not_null=True, **kw):
         """添加字段，如果已经存在则跳过，名称相同类型不同抛出异常"""
-        sql = "ALTER TABLE `%s` ADD COLUMN `%s` %s" % (
-            self.tablename, colname, coltype)
-        
+        sql = f"ALTER TABLE `{self.tablename}` ADD COLUMN `{colname}` {coltype}"
         columns = self.desc_columns()
         for column in columns:
             name = column.name
@@ -110,11 +114,20 @@ class MySQLTableManager(BaseTableManager):
         pass
 
     def create_table(self):
-        tablename = self.tablename
-        sql = """CREATE TABLE IF NOT EXISTS `%s` (
-            id bigint unsigned not null auto_increment,
-            PRIMARY KEY (`id`)
-        ) CHARACTER SET utf8mb4;""" % tablename
+        table_name = self.tablename
+        pk_name = self.pk_name
+        pk_len = self.pk_len
+        pk_comment = self.pk_comment
+        if self.pk_type == "blob":
+            sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
+                `{pk_name}` blob not null comment '{pk_comment}',
+                PRIMARY KEY (`{pk_name}`({pk_len}))
+            )"""
+        else:
+            sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
+                `{pk_name}` bigint unsigned not null auto_increment,
+                PRIMARY KEY (`{pk_name}`)
+            ) CHARACTER SET utf8mb4;"""
         self.db.query(sql)
 
     
@@ -200,17 +213,26 @@ class SqliteTableManager(BaseTableManager):
         pass
 
     def create_table(self):
-        tablename = self.tablename
-        sql = "CREATE TABLE IF NOT EXISTS `%s` (id integer primary key autoincrement);" % tablename
+        table_name = self.tablename
+        pk_name = self.pk_name
+
+        if self.pk_type == "blob":
+            sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
+                {pk_name} blob primary key
+            );"""
+        else:
+            sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}`(
+                {pk_name} integer primary key autoincrement
+            );"""
         self.execute(sql)
 
     def execute(self, sql):
         try:
             if self.debug:
-                xutils.log(sql)
+                logging.debug(sql)
             return self.db.query(sql)
-        except Exception:
-            raise
+        except Exception as e:
+            raise e
 
     def close(self):
         pass
@@ -282,6 +304,7 @@ class TableInfo:
 
     def __init__(self, tablename = ""):
         self.tablename = tablename
+        self.pk_name = "id"
         self.column_names = []
         self.columns = []
         self.indexes = []
@@ -312,6 +335,7 @@ class TableManagerFacade:
 
     def __init__(self, tablename, db = empty_db, is_backup = False, **kw):
         self.table_info = TableInfo(tablename)
+        self.table_info.pk_name = kw.get("pk_name", "id")
 
         if db.dbname == "mysql":
             self.manager = MySQLTableManager(tablename, db = db, **kw)

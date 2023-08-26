@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 12:23:14
+@LastEditTime : 2023-08-26 14:33:16
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -145,6 +145,20 @@ class HttpClient:
             if fsutil.is_parent_dir(skip_dir, webpath):
                 return True
         return False
+    
+    def is_invalid_file(self, webpath=""):
+        if xutils.is_windows():
+            invalid_list = ":?"
+            for item in invalid_list:
+                if item in webpath:
+                    return True
+        return False
+    
+    def get_dest_path(self, webpath=""):
+        data_dir  = xconfig.FileConfig.data_dir
+        temp_path = fsutil.get_relative_path(webpath, "/data/")
+        path = os.path.join(data_dir, temp_path)
+        return os.path.abspath(path)
 
     def download_file(self, item: FileIndexInfo):
         if self.admin_token is None:
@@ -191,9 +205,7 @@ class HttpClient:
         params = dict(token = self.admin_token, fpath = encoded_fpath)
         url = netutil._join_url_and_params(url, params)
 
-        data_dir  = xconfig.FileConfig.data_dir
-        temp_path = fsutil.get_relative_path(webpath, "/data/")
-        dest_path = os.path.join(data_dir, temp_path)
+        dest_path = self.get_dest_path(webpath)
         dirname   = os.path.dirname(dest_path)
 
         if self.is_same_file(dest_path, item):
@@ -228,8 +240,14 @@ class HttpClient:
             if (now - item.last_try_time) < RETRY_INTERVAL:
                 continue
 
-            if xutils.is_windows() and len(item.fpath) > fsutil.WIN_MAXPATH:
+            dest_path = self.get_dest_path(item.webpath) 
+            if xutils.is_windows() and len(dest_path) >= fsutil.WIN_MAXPATH:
                 logging.info("文件名过长, 取消重试, item=%s", item)
+                self.get_failed_table().delete(item_raw)
+                continue
+
+            if self.is_invalid_file(item.webpath):
+                logging.info("无效的文件名, item=%s", item)
                 self.get_failed_table().delete(item_raw)
                 continue
 

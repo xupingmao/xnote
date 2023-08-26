@@ -48,11 +48,11 @@ class DBPool:
             cls.sqlite_pool[dbpath] = db
         return db
 
-def create_table_manager_with_dbpath(table_name="", dbpath=""):
+def create_table_manager_with_dbpath(table_name="", dbpath="", **kw):
     assert table_name != ""
     assert dbpath != ""
     db = get_db_instance(dbpath)
-    return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database)
+    return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database, **kw)
 
 def create_table_manager_with_db(table_name="", db=None):
     assert isinstance(db, web.db.DB)
@@ -299,6 +299,17 @@ def init_site_visit_log():
         manager.add_index(["date", "ip"])
 
 
+def init_kv_store_table():
+    kw = dict()
+    kw["pk_name"] = "key"
+    kw["pk_len"] = 100
+    kw["pk_type"] = "blob"
+    kw["debug"] = xconfig.DatabaseConfig.db_debug
+    dbpath = xconfig.FileConfig.kv_db_file
+    with create_table_manager_with_dbpath("kv_store", dbpath=dbpath, **kw) as manager:
+        manager.add_column("value", "longblob", default_value="")
+        manager.add_column("version", "int", default_value=0)
+
 def init_kv_zset_table(db=None):
     """使用关系型数据库模拟redis的zset结构"""
     with create_table_manager_with_db("kv_zset", db=db) as manager:
@@ -403,4 +414,8 @@ def init():
     init_note_tag_rel_table()
     
     if xconfig.DatabaseConfig.db_driver == "mysql":
+        init_kv_store_table()
         init_kv_zset_table(get_db_instance())
+    
+    if xconfig.DatabaseConfig.db_driver_sql == "sqlite":
+        init_kv_store_table()

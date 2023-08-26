@@ -13,7 +13,7 @@
         </tr>
         {% for row in db_rows %}
         <tr>
-            <td>{{row.id}}</td>
+            <td>{{row.get(pk_name)}}</td>
             <td>{{row}}</td>
             <td></td>
         </tr>

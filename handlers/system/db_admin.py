@@ -292,15 +292,20 @@ class SqlDBDetailHandler:
         page_size = xutils.get_argument_int("page_size", 20)
         assert page_size <= 100
         db = self.get_table_by_name(name)
+        table_info = xtables.TableManager.get_table_info(name)
         db_rows = []
         page_max = 0
-        if db != None:
+        pk_name = "id"
+        
+        if db != None and table_info != None:
+            pk_name = table_info.pk_name
             offset = (page-1) * page_size
-            db_rows = db.select(offset = offset, limit = page_size, order = "id desc")
+            db_rows = db.select(offset = offset, limit = page_size, order = f"`{pk_name}` desc")
             page_max = math.ceil(db.count() / page_size) // 1
 
         kw = Storage()
         kw.db_rows = db_rows
+        kw.pk_name = pk_name
         kw.page = page
         kw.page_size = page_size
         kw.page_max = page_max
@@ -360,10 +365,14 @@ class DatabaseDriverInfoHandler:
     
     def get_mysql_variable(self, db: web.db.DB, var_name):
         # TODO 可以一次性取出所有的变量
-        result = ""
-        first = db.query("show variables like $var_name", vars=dict(var_name="%" +var_name + "%")).first()
-        if first != None:
-            result = first.get("Value")
+        if not hasattr(self, "mysql_vars"):
+            self.mysql_vars = {}
+            for item in db.query("show variables"):
+                key = item.get("Variable_name")
+                value = item.get("Value")
+                self.mysql_vars[key] = value
+                
+        result = self.mysql_vars.get(var_name)
         return "\n\n%s: %s" % (var_name, result)
     
     def get_sql_driver_info_text(self):
