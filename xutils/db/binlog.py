@@ -23,6 +23,7 @@ class BinLogOpType:
     put = "put"
     delete = "delete"
     file_upload = "file_upload"
+    file_delete = "file_delete"
 
 class BinLog:
     _table_name = "_binlog"

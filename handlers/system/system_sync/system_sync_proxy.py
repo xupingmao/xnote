@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 10:52:36
+@LastEditTime : 2023-08-26 11:26:04
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -124,8 +124,10 @@ class HttpClient:
         stat = os.stat(dest_path)
         remote_mtime = item.mtime
         local_mtime = xutils.format_datetime(stat.st_mtime)
-        logging.info("远程文件: %s, 本地文件: %s", remote_mtime, local_mtime)
-        return item.size == stat.st_size and remote_mtime == local_mtime
+        is_same_file = (item.fsize == stat.st_size and remote_mtime == local_mtime)
+        logging.debug("远程文件: %s, 本地文件: %s, is_same_file: %s", (remote_mtime, item.fsize), 
+                      (local_mtime, stat.st_size), is_same_file)
+        return is_same_file
 
     def check_disk_space(self):
         data_dir = xconfig.get_system_dir("data")
@@ -212,9 +214,10 @@ class HttpClient:
 
     def retry_failed(self):
         """TODO 这个应该是调度层的"""
-        for item in self.get_failed_table().iter(limit = -1):
+        for item_raw in self.get_failed_table().iter(limit = -1):
             now = time.time()
-            if item.last_try_time is not None and (now - item.last_try_time) > RETRY_INTERVAL:
+            item = FileIndexInfo(**item_raw)
+            if (now - item.last_try_time) < RETRY_INTERVAL:
                 continue
 
             logging.debug("正在重试:%s", item)

@@ -60,10 +60,14 @@ def parse_prop_text(text, ret_type = "dict"):
     assert ret_type in ("dict", "list")
     pairs = parse_prop_text_to_pairs(text)
     if ret_type == "dict":
-        result = dict()
-        for item in pairs:
-            key = item.get("key")
-            value = item.get("value")
-            result[key] = value
-        return result
+        return parse_prop_text_to_dict(text)
     return pairs
+
+def parse_prop_text_to_dict(text):
+    pairs = parse_prop_text_to_pairs(text)
+    result = dict()
+    for item in pairs:
+        key = item.get("key")
+        value = item.get("value")
+        result[key] = value
+    return result

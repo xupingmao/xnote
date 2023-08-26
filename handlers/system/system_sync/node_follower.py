@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 02:32:02
+@LastEditTime : 2023-08-26 11:20:53
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -159,21 +159,12 @@ class Follower(NodeManagerBase):
             return int(value)
         except:
             return 0
-
-    def sync_files_from_leader(self):
-        result = self.ping_leader()
-        if result == None:
-            logging.error("ping_leader结果为空")
-            return
-
-        if not self.need_sync():
-            # logging.debug("没到SYNC时间")
-            return
-
+        
+    def sync_file_step(self):
         client = self.get_client()
         # 先重试失败的任务
         client.retry_failed()
-
+    
         last_id = self.get_fs_sync_last_id()
         
         logging.debug("fs_sync_last_id=%s", last_id)
@@ -182,13 +173,15 @@ class Follower(NodeManagerBase):
 
         if result is None:
             logging.error("返回结果为空")
-            return
+            return []
 
         data = result.get("data", [])
+        assert isinstance(data, list)
+        
         if len(data) == 0:
             logging.debug("返回文件列表为空")
             self.fs_sync_done_time = time.time()
-            return
+            return data
         
         for item in data:
             item = FileIndexInfo(**item)
@@ -202,6 +195,25 @@ class Follower(NodeManagerBase):
         logging.debug("last_id = %s", last_id)
 
         CONFIG.put("fs_sync_last_id", last_id)
+        return data
+
+    def sync_files_from_leader(self):
+        result = self.ping_leader()
+        if result == None:
+            logging.error("ping_leader结果为空")
+            return
+
+        if not self.need_sync():
+            # logging.debug("没到SYNC时间")
+            return
+
+        has_next = True
+        loop_count = 0
+        while has_next and loop_count < 100:
+            result = self.sync_file_step()
+            has_next = len(result) > 0
+            loop_count += 1
+
         return result
 
     def get_sync_process(self):
@@ -445,6 +457,9 @@ class DBSyncer:
                 self.delete_and_log(key)
             elif optype == "file_upload":
                 self.file_syncer.handle_file_binlog(key, value)
+            elif optype == "file_delete":
+                # TODO 考虑移动到一个删除文件夹下面
+                logging.info("【不处理】删除文件操作: %s", data)
             else:
                 logging.error("未知的optype:%s", optype)
 

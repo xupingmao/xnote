@@ -12,6 +12,7 @@ class FileIndexInfo(Storage):
         self.mtime = kw.get("mtime", "")
         self.fsize = 0
         self.ftype = ""
+        self.last_try_time = 0.0
 
 class LeaderStat(Storage):
     """主节点信息"""

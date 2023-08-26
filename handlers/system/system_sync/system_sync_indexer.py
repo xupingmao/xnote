@@ -21,6 +21,7 @@ from xutils import dbutil
 from xutils import dateutil
 from xutils import fsutil
 from xutils import textutil
+from xutils.db.binlog import BinLogOpType
 
 _binlog = dbutil.BinLog.get_instance()
 
@@ -44,7 +45,7 @@ def is_temp_file(fname):
 def build_index_by_fpath(fpath, user_id=0):
     # TODO 如果 user_id=0 尝试根据路径推测用户
     from handlers.fs.fs_helper import FileInfo, FileInfoDao
-    st = stat = os.stat(fpath)
+    st = os.stat(fpath)
     file_info = FileInfo()
     file_info.fpath = fpath
     file_info.user_id = user_id
@@ -115,6 +116,7 @@ class FileSyncIndexManager:
             if os.path.isdir(fpath):
                 item.ftype = "dir"
             item.web_path = fsutil.get_webpath(fpath)
+            item.fsize = fsutil.get_file_size_int(fpath)
         return result
 
     def count_index(self):
@@ -210,7 +212,7 @@ def on_fs_rename(event: dict):
 
 @xmanager.listen(["fs.upload", "fs.update"])
 def on_fs_upload(ctx: xnote_event.FileUploadEvent):
-    logging.debug("检测到文件上传信息:%s", ctx)
+    logging.debug("检测到文件上传事件: %s", ctx)
     filepath = ctx.fpath
     if filepath == None:
         return
@@ -224,6 +226,19 @@ def on_fs_upload(ctx: xnote_event.FileUploadEvent):
     stat = os.stat(filepath)
     log_data.mtime = stat.st_mtime
     _binlog.add_log("file_upload", filepath, log_data, record_value=True)
+
+
+@xmanager.listen("fs.remove")
+def on_fs_remove(ctx: xnote_event.FileDeleteEvent):
+    logging.debug("检测到文件删除事件: %s", ctx)
+    from handlers.fs.fs_helper import FileInfoDao
+    FileInfoDao.delete_by_fpath(ctx.fpath)
+
+    log_data = Storage()
+    log_data.fpath = ctx.fpath
+    log_data.user = ctx.user_name
+    log_data.web_path = fsutil.get_webpath(ctx.fpath)
+    _binlog.add_log(BinLogOpType.file_delete, ctx.fpath, log_data, record_value=True)
 
 def list_files(last_id = 0):
     manager = FileSyncIndexManager()

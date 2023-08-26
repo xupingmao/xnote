@@ -771,8 +771,8 @@ def load_set_config(fpath):
 def load_prop_config(fpath):
     # type: (str) -> dict[str, str]
     text = readfile(fpath)
-    from xutils.text_parser_properties import parse_prop_text
-    return parse_prop_text(text, "dict")
+    from xutils.text_parser_properties import parse_prop_text_to_dict
+    return parse_prop_text_to_dict(text)
 
 
 def load_json_config(fpath):

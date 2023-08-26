@@ -24,6 +24,7 @@ import xtemplate
 import xmanager
 import logging
 import multiprocessing
+import xnote_event
 
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
@@ -416,7 +417,13 @@ class RemoveAjaxHandler:
                 basename = os.path.basename(path)
                 return dict(code="fail", message="源文件`%s`不存在" % basename)
             xutils.remove(path)
-            xmanager.fire("fs.remove", Storage(user = user_name, path = path))
+
+            event = xnote_event.FileDeleteEvent()
+            event.fpath = path
+            
+            xmanager.fire("fs.remove", event)
+            xmanager.fire("fs.delete", event)
+
             return dict(code="success")
         except Exception as e:
             xutils.print_exc()

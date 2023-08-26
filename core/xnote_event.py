@@ -8,3 +8,7 @@ class FileUploadEvent(Storage):
         self.user_name = ""
         self.user_id = 0
         self.fpath = ""
+
+
+class FileDeleteEvent(FileUploadEvent):
+    pass

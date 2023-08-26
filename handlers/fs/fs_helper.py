@@ -42,6 +42,10 @@ class FileInfoDao:
         return _index_db.select_first(where = dict(fpath = fpath))
     
     @classmethod
+    def delete_by_fpath(cls, fpath=""):
+        return _index_db.delete(where=dict(fpath=fpath))
+    
+    @classmethod
     def upsert(cls, info: FileInfo):
         old = cls.get_by_fpath(info.fpath)
         if old == None:
