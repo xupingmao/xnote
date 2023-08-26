@@ -281,10 +281,6 @@ class LeaderHandler(SyncHandler):
             headers = {"Content-Type": "application/json"}
             raise web.HTTPError(status, headers, textutil.tojson(error))
 
-    def get_stat(self):
-        port = xutils.get_argument("port", "")
-        return LEADER.get_stat(port)
-
     def list_files(self):
         """(主节点)读取文件列表"""
         last_id = xutils.get_argument_int("last_id", 0)
@@ -312,7 +308,8 @@ class LeaderHandler(SyncHandler):
             return self.refresh_token()
 
         if p == "get_stat":
-            return self.get_stat()
+            port = xutils.get_argument("port", "")
+            return LEADER.get_stat(port)
 
         if p == "list_files":
             return self.list_files()

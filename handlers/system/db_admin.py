@@ -348,6 +348,14 @@ class DatabaseDriverInfoHandler:
 
     def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma):
         result = db.query("pragma %s" % pragma).first().get(pragma)
+        if pragma == "synchronous":
+            result = str(result)
+            if result == "0":
+                result += " (off)"
+            if result == "1":
+                result += " (normal)"
+            if result == "2":
+                result += " (full)"
         return "\n\n%s: %s" % (pragma, result)
     
     def get_mysql_variable(self, db: web.db.DB, var_name):
@@ -359,7 +367,7 @@ class DatabaseDriverInfoHandler:
         return "\n\n%s: %s" % (var_name, result)
     
     def get_sql_driver_info_text(self):
-        info = "%s: %s" % ("db_driver", xconfig.DatabaseConfig.db_driver)
+        info = "%s: %s" % ("db_driver", xconfig.DatabaseConfig.db_driver_sql)
         if xconfig.DatabaseConfig.db_driver_sql == "sqlite":
             info += self.get_sqlite_info(xtables.get_default_db_instance())
         elif xconfig.DatabaseConfig.db_driver_sql == "mysql":

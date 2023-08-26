@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 12:05:35
+@LastEditTime : 2023-08-26 02:31:05
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -27,6 +27,7 @@ from xutils.db.binlog import BinLog
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import CONFIG
 from .node_base import get_system_port
+from .models import LeaderStat
 
 MAX_FOLLOWER_SIZE = 100
 EXPIRE_TIME = 60 * 60
@@ -109,7 +110,7 @@ class Leader(NodeManagerBase):
         return xutils.call("system_sync.count_index")
 
     def get_system_version(self):
-        return xconfig.get_global_config("system.version")
+        return xconfig.SystemConfig.get_str("version")
 
     def remove_expired_followers(self):
         for key in self.FOLLOWER_DICT.copy():
@@ -125,17 +126,19 @@ class Leader(NodeManagerBase):
                     binlog_last_seq=self.binlog.last_seq)
 
     def get_stat(self, port):
-        admin_token = xauth.get_user_by_name("admin").token
+        admin_info = xauth.get_user_by_name("admin")
+        assert admin_info != None
+        admin_token = admin_info.token
         fs_index_count = self.get_fs_index_count()
 
-        result = Storage()
+        result = LeaderStat()
         result.code = "success"
         result.timestamp = int(time.time())
         result.system_version = self.get_system_version()
         result.admin_token = admin_token
         result.fs_index_count = fs_index_count
 
-        node_id = xutils.get_argument("node_id", "")
+        node_id = xutils.get_argument_str("node_id")
 
         client_ip = webutil.get_client_ip()
         url = "{ip}:{port}#{node_id}".format(
@@ -149,7 +152,7 @@ class Leader(NodeManagerBase):
 
             follower = self.get_follower_info(url)
             follower.update_ping_info()
-            follower.fs_sync_offset = xutils.get_argument("fs_sync_offset", "")
+            follower.fs_sync_offset = xutils.get_argument_str("fs_sync_offset")
             follower.fs_index_count = fs_index_count
             follower.admin_token = admin_token
             follower.node_id = node_id

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 01:23:52
+@LastEditTime : 2023-08-26 02:32:02
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -22,7 +22,7 @@ from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
 from .system_sync_proxy import HttpClient, empty_http_client
-from .models import FileIndexInfo
+from .models import FileIndexInfo, LeaderStat
 from xutils.mem_util import log_mem_info_deco
 
 fs_sync_index_db = dbutil.get_hash_table("fs_sync_index")
@@ -92,7 +92,7 @@ class Follower(NodeManagerBase):
     def do_ping_leader(self):
         port = self.get_current_port()
 
-        fs_sync_offset = CONFIG.get("fs_sync_offset", "")
+        fs_sync_offset = str(self.get_fs_sync_last_id())
 
         leader_host = self.get_leader_url()
         if leader_host != None:
@@ -111,7 +111,7 @@ class Follower(NodeManagerBase):
             logging.error("PING主节点:返回None")
             return
 
-        result = Storage(**result0)
+        result = LeaderStat(**result0)
         if result.code != "success":
             self.ping_error = result.message
             logging.error("PING主节点失败:%s", self.ping_error)

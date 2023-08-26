@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 01:49:50
+@LastEditTime : 2023-08-26 09:39:08
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -117,12 +117,12 @@ class HttpClient:
 
         return result
 
-    def is_same_file(self, dest_path, item):
+    def is_same_file(self, dest_path, item: FileIndexInfo):
         if not os.path.exists(dest_path):
             return False
 
         stat = os.stat(dest_path)
-        return item.size == stat.st_size and item.mtime == stat.st_mtime
+        return item.size == stat.st_size and item.mtime == xutils.format_datetime(stat.st_mtime)
 
     def check_disk_space(self):
         data_dir = xconfig.get_system_dir("data")
@@ -146,9 +146,15 @@ class HttpClient:
         if item.ftype == "dir":
             logging.info("跳过目录, dir=%s", item.fpath)
             return
+        
+        # 数据库文件不能下载
+        if fsutil.is_parent_dir("/data/db", item.fpath):
+            logging.info("跳过数据库文件, fpath=%s", item.fpath)
+            return
 
         fpath = item.fpath
         web_path = item.web_path
+
         try:
             mtime = dateutil.parse_datetime(item.mtime)
         except:
@@ -172,7 +178,7 @@ class HttpClient:
         params = dict(token = self.admin_token, fpath = encoded_fpath)
         url = netutil._join_url_and_params(url, params)
 
-        data_dir  = xconfig.get_system_dir("data")
+        data_dir  = xconfig.FileConfig.data_dir
         temp_path = fsutil.get_relative_path(web_path, "/data/")
         dest_path = os.path.join(data_dir, temp_path)
         dirname   = os.path.dirname(dest_path)

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-11 23:18:35
+@LastEditTime : 2023-08-26 02:21:10
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -17,6 +17,12 @@ import logging
 import base64
 
 register_table("_binlog", "数据同步的binlog")
+
+class BinLogOpType:
+    """binlog操作枚举"""
+    put = "put"
+    delete = "delete"
+    file_upload = "file_upload"
 
 class BinLog:
     _table_name = "_binlog"

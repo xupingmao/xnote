@@ -60,7 +60,7 @@ class SqliteKV(interfaces.DBInterface):
     def __init__(self, db_file, snapshot=None,
                  block_cache_size=None,
                  write_buffer_size=None,
-                 config_dict=None,
+                 config_dict={},
                  debug=True):
         """通过 sqlite 来实现leveldb的接口代理"""
         self.db_file = db_file
@@ -82,11 +82,11 @@ class SqliteKV(interfaces.DBInterface):
         with self._lock:
             # 设置 isolation_level=None 开启自动提交
             # db = sqlite3.connect(self.db_file, isolation_level=None)
-
-            if config_dict != None and config_dict.sqlite_journal_mode == "WAL":
+            journal_mode = config_dict.get("sqlite_journal_mode", "").lower()
+            if config_dict != None and journal_mode == "wal":
+                # WAL模式，并发度更高
                 self.db.query("PRAGMA journal_mode = WAL;")
             else:
-                # WAL模式，并发度更高
                 self.db.query("PRAGMA journal_mode = DELETE;")
 
             # db_execute(self.db_holder.db, "PRAGMA journal_mode = DELETE;") # 默认模式

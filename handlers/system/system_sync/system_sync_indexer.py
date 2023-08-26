@@ -44,11 +44,12 @@ def is_temp_file(fname):
 def build_index_by_fpath(fpath, user_id=0):
     # TODO 如果 user_id=0 尝试根据路径推测用户
     from handlers.fs.fs_helper import FileInfo, FileInfoDao
+    st = stat = os.stat(fpath)
     file_info = FileInfo()
     file_info.fpath = fpath
     file_info.user_id = user_id
     file_info.fsize = fsutil.get_file_size_int(fpath)
-    file_info.mtime = xutils.format_datetime()
+    file_info.mtime = xutils.format_datetime(st.st_mtime)
     if os.path.isdir(fpath):
         file_info.ftype = "dir"
     else:
@@ -194,7 +195,6 @@ def on_fs_rename(event: dict):
     if fpath == None:
         return
 
-    log_data = Storage()
     log_data = Storage()
     log_data.fpath = fpath
     log_data.user = user

@@ -215,6 +215,7 @@ class FileConfig:
     sqlite_dir = ""
     backup_dir = ""
     backup_db_dir = ""
+    db_dir = ""
 
     boot_lock_file = "" # 启动的锁文件
     record_db_file = "" # 默认的sqlite数据库
@@ -237,6 +238,8 @@ class FileConfig:
         cls.data_dir = os.path.abspath(data_dir)
         makedirs(cls.data_dir)
 
+        cls.db_dir = os.path.join(data_dir, "db")
+        
         cls.sqlite_dir = os.path.join(data_dir, "db", "sqlite")
         makedirs(cls.sqlite_dir)
 
