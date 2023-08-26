@@ -26,6 +26,18 @@ class MsgInfoV1(Storage):
     def from_dict(dict_value):
         return new_from_dict(MsgInfoV1, dict_value)
 
+def fix_datetime(datetime_str=""):
+    if datetime_str == "":
+        return ""
+    
+    default_value = "1970-01-01 00:00:00"
+    
+    if len(datetime_str) != len(default_value):
+        logging.error("invalid datetime: %s", datetime_str)
+        return default_value
+    
+    return datetime_str
+
 def migrate_msg_index():
     """迁移随手记索引"""
     old_db = dbutil.get_table("message")
@@ -42,8 +54,8 @@ def migrate_msg_index():
             continue
 
         msg_index.tag = msg_info.tag
-        msg_index.ctime = msg_info.ctime
-        msg_index.ctime_sys = msg_info.ctime0
+        msg_index.ctime = fix_datetime(msg_info.ctime)
+        msg_index.ctime_sys = fix_datetime(msg_info.ctime0)
         if msg_index.ctime_sys == "":
             msg_index.ctime_sys = msg_index.ctime
         msg_index.date = xutils.format_date(msg_info.ctime)

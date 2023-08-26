@@ -762,8 +762,11 @@ class MsgTagInfoDao:
         return MsgTagInfo.from_dict_or_None(result)
     
     @classmethod
-    def list(cls, user="", offset=0, limit=20):
-        return cls.db.list(user_name=user,offset=offset,limit=limit,reverse=True)
+    def list(cls, user="", offset=0, limit=20, content=None):
+        where = {}
+        if content != None:
+            where["content"] = content
+        return cls.db.list(where=where, user_name=user,offset=offset,limit=limit,reverse=True)
     
     @classmethod
     def update(cls, tag_info: MsgTagInfo):

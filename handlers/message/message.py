@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 01:37:26
+@LastEditTime : 2023-08-27 01:57:47
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -117,7 +117,6 @@ def after_message_delete(msg_item):
     process_message(msg_item)
     after_upsert_async(msg_item)
 
-@xutils.async_func_deco()
 def after_upsert_async(msg_item):
     """插入或者更新异步处理"""
     user_name = msg_item.user

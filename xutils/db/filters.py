@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-03-17 23:32:09
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-20 00:08:42
+@LastEditTime : 2023-08-27 01:54:22
 @FilePath     : /xnote/xutils/db/filters.py
 @Description  : 描述
 """
@@ -58,6 +58,11 @@ def create_func_by_where(where: dict, user_filter_func):
             return user_filter_func(key, value)
         
         return True
+    
+    def empty_filter_func(key, value):
+        if user_filter_func != None:
+            return user_filter_func(key, value)
+        return True
 
     has_complex_query = False
     for key in where:
@@ -68,6 +73,9 @@ def create_func_by_where(where: dict, user_filter_func):
     
     if has_complex_query:
         return filter_func_complex
+    
+    if len(where) == 0:
+        return empty_filter_func
     
     return filter_func
 

@@ -232,6 +232,13 @@ class TestMain(BaseTestCase):
         self.check_OK("/message?tag=search&key=123")
     
     def test_message_keyword_mark(self):
+        user_name = xauth.current_name_str()
+        from handlers.message.dao import MsgTagInfoDao
+        tags = MsgTagInfoDao.list(user=user_name, content="#test#")
+        for tag in tags:
+            print("删除tag:", tag)
+            MsgTagInfoDao.delete(tag)
+
         response = json_request(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test #test#"))
         
@@ -267,7 +274,7 @@ class TestMain(BaseTestCase):
 
         resp = json_request("/message/delete", method="POST", data=dict(id=tagInfo.id))
         print("resp=", resp)
-        
+
         self.assertEqual("success", resp["code"])
 
         keyword = msg_dao.get_by_content(user_name, "key", tagname)
