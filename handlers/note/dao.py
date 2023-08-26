@@ -203,7 +203,7 @@ def batch_query(id_list):
 def batch_query_list(id_list):
     result = []
     batch_result = _index_db.batch_get_by_id(id_list)
-    for id in batch_result:
+    for id in id_list:
         note = batch_result.get(id)
         if note:
             build_note_info(note)

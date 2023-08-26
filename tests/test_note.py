@@ -573,6 +573,7 @@ class TestMain(BaseTestCase):
 
         recent_notes = list_most_visited(xauth.current_name(), 0, 20)
 
+        print(recent_notes)
         self.assertTrue(len(recent_notes) > 0)
         self.assertEqual(recent_notes[0].badge_info, "102")
 
