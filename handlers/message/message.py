@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 20:53:05
+@LastEditTime : 2023-08-26 21:13:21
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -494,6 +494,7 @@ def create_message(user_name, tag, content, ip):
 
     if tag == "key":
         content = filter_key(content)
+        return msg_dao.MsgTagInfoDao.get_or_create(user=user_name, content=content)
 
     date = xutils.get_argument("date", "")
     content = content.strip()
@@ -994,13 +995,13 @@ class MessageKeywordAjaxHandler:
 
     def do_mark_or_unmark(self, keyword, action):
         user_name = xauth.current_name_str()
-        key_obj = msg_dao.MsgTagInfoDao.get_or_create(user_name=user_name, tag_name=keyword)
+        key_obj = msg_dao.MsgTagInfoDao.get_or_create(user=user_name, content=keyword)
         assert key_obj != None
 
         if action == "unmark":
-            key_obj.is_marked = 0
+            key_obj.is_marked = False
         else:
-            key_obj.is_marked = 1
+            key_obj.is_marked = True
 
         msg_dao.MsgTagInfoDao.update(key_obj)
         

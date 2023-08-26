@@ -465,10 +465,14 @@ def list_task_done(user, offset=0, limit=xconfig.PAGE_SIZE):
 
 def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
     check_param_user(user)
-    user_id = xauth.UserDao.get_id_by_name(user)
-    index_list = MsgIndexDao.list(user_id=user_id, tag=tag, offset=offset, limit=limit)
-    
-    chatlist = MessageDao.batch_get_by_index_list(index_list, user_name=user)
+
+    if tag == "key":
+        chatlist = MsgTagInfoDao.list(user=user, offset=offset, limit=limit)
+    else:
+        user_id = xauth.UserDao.get_id_by_name(user)
+        index_list = MsgIndexDao.list(user_id=user_id, tag=tag, offset=offset, limit=limit)
+        
+        chatlist = MessageDao.batch_get_by_index_list(index_list, user_name=user)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -720,22 +724,27 @@ class MsgIndexDao:
 
 class MsgTagInfo(Storage):
     def __init__(self):
+        self._key = "" # kv的真实key
+        self.id = ""
         self.ctime = xutils.format_datetime()
         self.mtime = xutils.format_datetime()
         self.user = ""
         self.content=""
         self.amount=0
         self.is_marked=False
+        self.visit_cnt=0
     
     @staticmethod
     def from_dict(dict_value):
-        return new_from_dict(MsgTagInfo, dict_value)
+        result = new_from_dict(MsgTagInfo, dict_value)
+        result.id = result._key
+        return result
     
-    @staticmethod
-    def from_dict_or_None(dict_value):
+    @classmethod
+    def from_dict_or_None(cls, dict_value):
         if dict_value == None:
             return None
-        return new_from_dict(MsgTagInfo, dict_value)
+        return cls.from_dict(dict_value)
 
 class MsgTagInfoDao:
     db = dbutil.get_table("msg_key")
@@ -746,7 +755,12 @@ class MsgTagInfoDao:
         return cls.db.get_first(where=where)
     
     @classmethod
+    def list(cls, user="", offset=0, limit=20):
+        return cls.db.list(user_name=user,offset=offset,limit=limit,reverse=True)
+    
+    @classmethod
     def update(cls, tag_info: MsgTagInfo):
+        tag_info.mtime = xutils.format_datetime()
         return cls.db.update(tag_info)
 
     @classmethod
@@ -766,7 +780,8 @@ class MsgTagInfoDao:
             record = MsgTagInfo()
             record.user = user
             record.content = content
-            cls.db.insert(**record)
+            cls.db.insert(record)
+            record.id = record._key
             return record
 
     @classmethod

@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-13 11:13:53
+@LastEditTime : 2023-08-26 21:12:01
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -513,8 +513,7 @@ def touch_key_by_content(user_name, tag, content):
         if item.visit_cnt is None:
             item.visit_cnt = 0
         item.visit_cnt += 1
-
-        msg_dao.update_message(item)
+        msg_dao.MsgTagInfoDao.update(item)
     return item
 
 

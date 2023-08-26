@@ -188,7 +188,7 @@ class TestMain(BaseTestCase):
 
         task_id = data["id"]
 
-        update_result = json_request("/message/status", method="POST",
+        update_result = json_request("/message/finish", method="POST",
                                      data=dict(id=task_id, status=100))
         self.assertEqual("success", update_result.get("code"))
 
@@ -251,7 +251,7 @@ class TestMain(BaseTestCase):
         print(keyword)
         
         assert keyword != None
-        self.assertTrue(keyword.is_marked==1)
+        self.assertTrue(keyword.is_marked==True)
 
         logutil.wait_task_done()
 
