@@ -115,7 +115,7 @@ class FileSyncIndexManager:
             fpath = item.fpath
             if os.path.isdir(fpath):
                 item.ftype = "dir"
-            item.web_path = fsutil.get_webpath(fpath)
+            item.webpath = fsutil.get_webpath(fpath)
             item.fsize = fsutil.get_file_size_int(fpath)
         return result
 
@@ -142,8 +142,8 @@ def check_index(key, value, db):
         db.delete(value)
         return False
 
-    if parts[1] != value.web_path:
-        logging.debug("check_index:%s", "web_path不匹配")
+    if parts[1] != value.webpath:
+        logging.debug("check_index:%s", "webpath不匹配")
         db.delete(value)
         return False
 
@@ -200,7 +200,7 @@ def on_fs_rename(event: dict):
     log_data = Storage()
     log_data.fpath = fpath
     log_data.user = user
-    log_data.web_path = fsutil.get_webpath(fpath)
+    log_data.webpath = fsutil.get_webpath(fpath)
     stat = os.stat(fpath)
     log_data.mtime = stat.st_mtime
 
@@ -222,7 +222,7 @@ def on_fs_upload(ctx: xnote_event.FileUploadEvent):
     log_data = Storage()
     log_data.fpath = filepath
     log_data.user = ctx.user_name
-    log_data.web_path = fsutil.get_webpath(filepath)
+    log_data.webpath = fsutil.get_webpath(filepath)
     stat = os.stat(filepath)
     log_data.mtime = stat.st_mtime
     _binlog.add_log("file_upload", filepath, log_data, record_value=True)
@@ -237,7 +237,7 @@ def on_fs_remove(ctx: xnote_event.FileDeleteEvent):
     log_data = Storage()
     log_data.fpath = ctx.fpath
     log_data.user = ctx.user_name
-    log_data.web_path = fsutil.get_webpath(ctx.fpath)
+    log_data.webpath = fsutil.get_webpath(ctx.fpath)
     _binlog.add_log(BinLogOpType.file_delete, ctx.fpath, log_data, record_value=True)
 
 def list_files(last_id = 0):

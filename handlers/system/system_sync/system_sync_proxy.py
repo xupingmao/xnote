@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 11:26:04
+@LastEditTime : 2023-08-26 11:32:02
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -158,7 +158,7 @@ class HttpClient:
             return
 
         fpath = item.fpath
-        web_path = item.web_path
+        webpath = item.webpath
 
         try:
             mtime = dateutil.parse_datetime(item.mtime)
@@ -168,12 +168,13 @@ class HttpClient:
         # 先保存失败记录，成功后再删除
         self.upsert_retry_task(item)
 
+        table = self.get_table()
+        item.last_try_time = time.time()
+        
         try:
             # 文件名太长会导致保存失败
             # 保存文件索引信息
-            table = self.get_table()
-            item.last_try_time = time.time()
-            table.put(web_path, item)
+            table.put(webpath, item)
         except:
             item.err_msg = xutils.print_exc()
             self.upsert_retry_task(item)
@@ -184,12 +185,12 @@ class HttpClient:
         url = netutil._join_url_and_params(url, params)
 
         data_dir  = xconfig.FileConfig.data_dir
-        temp_path = fsutil.get_relative_path(web_path, "/data/")
+        temp_path = fsutil.get_relative_path(webpath, "/data/")
         dest_path = os.path.join(data_dir, temp_path)
         dirname   = os.path.dirname(dest_path)
 
         if self.is_same_file(dest_path, item):
-            logging.debug("文件没有变化，跳过:%s", web_path)
+            logging.debug("文件没有变化，跳过:%s", webpath)
             self.delete_retry_task(item)
             return
 

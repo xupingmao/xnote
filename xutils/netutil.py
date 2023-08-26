@@ -61,12 +61,12 @@ def splithost(url):
     if match: return match.group(3, 4)
     return None, url
 
-def get_path(web_root, web_path):
-    if len(web_path) > 0 and web_path[0] == "/":
-        web_path = web_path[1:]
+def get_path(web_root, webpath):
+    if len(webpath) > 0 and webpath[0] == "/":
+        webpath = webpath[1:]
     if os.name == "nt":
-        web_path = web_path.replace("/", "\\")
-    return os.path.join(web_root, web_path)
+        webpath = webpath.replace("/", "\\")
+    return os.path.join(web_root, webpath)
 
 
 def get_http_home(host):
