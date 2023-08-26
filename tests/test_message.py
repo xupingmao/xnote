@@ -260,17 +260,14 @@ class TestMain(BaseTestCase):
         user_name = xauth.current_name_str()
         tagname = "#delete-test#"
 
-        keyword = MessageDO()
-        keyword.tag = "key"
-        keyword.user = user_name
-        keyword.content = tagname
-        keyword.ctime = dateutil.format_datetime()
-        keyword.mtime = dateutil.format_datetime()
-        keyword.date = dateutil.format_date()
+        tagInfo = msg_dao.MsgTagInfoDao.get_or_create(user_name, tagname)
+        keyword = msg_dao.get_by_content(user_name, "key", tagname)
+        assert keyword != None
+        assert keyword.content == tagname
 
-        key = msg_dao.create_message(keyword)
-
-        resp = json_request("/message/delete", method="POST", data=dict(id=key))
+        resp = json_request("/message/delete", method="POST", data=dict(id=tagInfo.id))
+        print("resp=", resp)
+        
         self.assertEqual("success", resp["code"])
 
         keyword = msg_dao.get_by_content(user_name, "key", tagname)

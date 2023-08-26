@@ -153,9 +153,9 @@ def _create_message_with_date(kw):
 def _create_message_without_date(kw):
     assert isinstance(kw, MessageDO)
 
-    tag = kw['tag']
-    ctime = kw["ctime"]
-    kw['date'] = dateutil.format_date(ctime)
+    tag = kw.tag
+    ctime = kw.ctime
+    kw.date = dateutil.format_date(ctime)
 
     index = MsgIndex()
     index.tag = tag
@@ -313,6 +313,8 @@ def count_message(user, status):
 
 
 def get_message_by_id(full_key, user_name=""):
+    if not full_key.startswith(_msg_db.prefix):
+        return None
     value = _msg_db.get_by_key(full_key)
     if value != None:
         value = MessageDO.from_dict(value)
@@ -755,6 +757,11 @@ class MsgTagInfoDao:
         return cls.db.get_first(where=where)
     
     @classmethod
+    def get_by_key(cls, key=""):
+        result = cls.db.get_by_key(key)
+        return MsgTagInfo.from_dict_or_None(result)
+    
+    @classmethod
     def list(cls, user="", offset=0, limit=20):
         return cls.db.list(user_name=user,offset=offset,limit=limit,reverse=True)
     
@@ -812,6 +819,10 @@ class MessageDao:
 
     @staticmethod
     def delete(full_key):
+        return delete_message_by_id(full_key)
+    
+    @staticmethod
+    def delete_by_key(full_key):
         return delete_message_by_id(full_key)
 
     @staticmethod

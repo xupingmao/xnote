@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 21:13:21
+@LastEditTime : 2023-08-27 01:37:26
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -449,20 +449,7 @@ class TouchAjaxHandler:
 
 class DeleteAjaxHandler:
 
-    @xauth.login_required()
-    def POST(self):
-        id = xutils.get_argument("id")
-        if id == "":
-            return failure(message="id为空")
-
-        try:
-            msg = MessageDao.get_by_id(id)
-        except:
-            return failure(message="删除失败")
-
-        if msg is None:
-            return dict(code="fail", message="data not exists")
-
+    def delete_msg(self, msg: msg_dao.MessageDO):
         if msg.user != xauth.current_name():
             return dict(code="fail", message="no permission")
 
@@ -470,11 +457,36 @@ class DeleteAjaxHandler:
         MessageDao.add_history(msg)
 
         # 删除并刷新统计信息
-        MessageDao.delete(id)
+        MessageDao.delete_by_key(msg.id)
         MessageDao.refresh_message_stat(msg.user)
         after_message_delete(msg)
 
-        return dict(code="success")
+        return webutil.SuccessResult()
+    
+    def delete_tag(self, tag_info: msg_dao.MsgTagInfo):
+        if tag_info.user != xauth.current_name_str():
+            return webutil.FailedResult(message="no permission")
+        
+        msg_dao.MsgTagInfoDao.delete(tag_info)
+        return webutil.SuccessResult()
+
+    @xauth.login_required()
+    def POST(self):
+        id = xutils.get_argument_str("id")
+        if id == "":
+            return failure(message="id为空")
+
+        try:
+            msg = MessageDao.get_by_id(id)
+            if msg != None:
+                return self.delete_msg(msg)
+            tag_info = msg_dao.MsgTagInfoDao.get_by_key(id)
+            if tag_info != None:
+                return self.delete_tag(tag_info)
+            return webutil.FailedResult(message="数据不存在")
+        except:
+            xutils.print_exc()
+            return webutil.FailedResult(message="删除失败")
 
 
 class CalendarRule(BaseRule):
@@ -995,15 +1007,15 @@ class MessageKeywordAjaxHandler:
 
     def do_mark_or_unmark(self, keyword, action):
         user_name = xauth.current_name_str()
-        key_obj = msg_dao.MsgTagInfoDao.get_or_create(user=user_name, content=keyword)
-        assert key_obj != None
+        tag_info = msg_dao.MsgTagInfoDao.get_or_create(user=user_name, content=keyword)
+        assert tag_info != None
 
         if action == "unmark":
-            key_obj.is_marked = False
+            tag_info.is_marked = False
         else:
-            key_obj.is_marked = True
+            tag_info.is_marked = True
 
-        msg_dao.MsgTagInfoDao.update(key_obj)
+        msg_dao.MsgTagInfoDao.update(tag_info)
         
         return dict(code="success")
 
