@@ -36,6 +36,9 @@ ENCODING_TUPLE = ("utf-8", "gbk", "gb18030", "mbcs", "latin_1")
 # 配置文件最大大小
 CONFIG_FILE_MAX_SIZE = 1024 * 1024
 
+# Windows的文件名最大长度
+WIN_MAXPATH = 260
+
 
 class FileUtilConfig:
     use_urlencode = False
@@ -47,12 +50,14 @@ def get_real_path(path):
     assert isinstance(path, str)
     if path == "":
         return path
-    
+
     if FileUtilConfig.use_urlencode:
         return get_real_path_encode_first(path)
 
+    # 如果文件存在,直接返回
     if os.path.exists(path):
         return path
+
     # 兼容urlencode编码
     quoted = quote_unicode(path)
     if os.path.exists(quoted):

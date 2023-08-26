@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 11:58:01
+@LastEditTime : 2023-08-26 12:23:14
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -60,7 +60,7 @@ class HttpClient:
     
     def upsert_retry_task(self, item):
         db = self.get_failed_table()
-        first = db.get_first(filter_func=lambda k,x:x.webpath==item.webpath)
+        first = db.get_first(where = dict(webpath=item.webpath))
         if first == None:
             db.insert(item)
         else:
@@ -138,6 +138,13 @@ class HttpClient:
             logging.debug("磁盘容量不足, 当前容量:%s", fsutil.format_size(free_space))
 
         return result
+    
+    def is_ignore_file(self, webpath):
+        skip_dir_list = ["/data/db", "/data/tmp", "/data/log", "/data/backup", "/data/cache", "/data/trash"]
+        for skip_dir in skip_dir_list:
+            if fsutil.is_parent_dir(skip_dir, webpath):
+                return True
+        return False
 
     def download_file(self, item: FileIndexInfo):
         if self.admin_token is None:
@@ -152,12 +159,10 @@ class HttpClient:
             logging.info("跳过目录, dir=%s", item.fpath)
             return
         
-        skip_dir_list = ["/data/db", "/data/tmp", "/data/log", "/data/backup", "/data/cache", "/data/trash"]
-        for skip_dir in skip_dir_list:
-            # 数据库文件不能下载
-            if fsutil.is_parent_dir(skip_dir, item.webpath):
-                logging.info("跳过系统/临时文件, fpath=%s", item.fpath)
-                return
+        # 数据库文件不能下载
+        if self.is_ignore_file(item.webpath):
+            logging.info("跳过系统/临时文件, fpath=%s", item.fpath)
+            return
 
         fpath = item.fpath
         webpath = item.webpath
@@ -221,6 +226,16 @@ class HttpClient:
             now = time.time()
             item = FileIndexInfo(**item_raw)
             if (now - item.last_try_time) < RETRY_INTERVAL:
+                continue
+
+            if xutils.is_windows() and len(item.fpath) > fsutil.WIN_MAXPATH:
+                logging.info("文件名过长, 取消重试, item=%s", item)
+                self.get_failed_table().delete(item_raw)
+                continue
+
+            if self.is_ignore_file(item.webpath):
+                logging.info("忽略的文件, item=%s", item)
+                self.get_failed_table().delete(item_raw)
                 continue
 
             logging.debug("正在重试:%s", item)

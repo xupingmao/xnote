@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 11:48:12
+@LastEditTime : 2023-08-26 12:45:56
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -17,7 +17,7 @@ from xutils import Storage
 from xutils import textutil, cacheutil
 from xutils import dbutil, six
 import xutils
-from xutils.db.binlog import BinLog
+from xutils.db.binlog import BinLog, FileLog
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
@@ -456,6 +456,9 @@ class DBSyncer:
             elif optype == "delete":
                 self.delete_and_log(key)
             elif optype == "file_upload":
+                self.file_syncer.handle_file_binlog(key, value)
+            elif optype == "file_rename":
+                # TODO 重命名需要考虑删除原来的文件
                 self.file_syncer.handle_file_binlog(key, value)
             elif optype == "file_delete":
                 # TODO 考虑移动到一个删除文件夹下面

@@ -121,7 +121,7 @@ class FileSystemHandler:
 
     def handle_content_type(self, path):
         """Content-Type设置, 优先级从高到低依次是：参数配置、系统配置、默认配置"""
-        type = xutils.get_argument("type")
+        type = xutils.get_argument_str("type")
         path = xutils.decode_name(path)
 
         if type == "text":
@@ -326,8 +326,8 @@ class FileSystemHandler:
 
     def resolve_fpath(self, path):
         # fpath参数使用b64编码
-        fpath = xutils.get_argument("fpath")
-        if fpath != None:
+        fpath = xutils.get_argument_str("fpath")
+        if fpath != "":
             return xutils.urlsafe_b64decode(fpath)
 
         if not xconfig.USE_URLENCODE:
@@ -340,7 +340,7 @@ class FileSystemHandler:
         return path
 
     @xauth.login_required("admin")
-    def GET(self, path = None):
+    def GET(self, path = ""):
         # 文件路径默认都进行urlencode
         # 如果存储结构不采用urlencode，那么这里也必须unquote回去
         path = self.resolve_fpath(path)
@@ -439,7 +439,10 @@ class RenameAjaxHandler:
         dirname  = xutils.get_argument("dirname")
         old_name = xutils.get_argument("old_name", "")
         new_name = xutils.get_argument("new_name", "")
-        user_name = xauth.current_name()
+        user_info = xauth.current_user()
+        assert user_info != None
+
+        user_name = user_info.name
 
         assert isinstance(old_name, str)
         assert isinstance(new_name, str)
@@ -471,7 +474,14 @@ class RenameAjaxHandler:
         if os.path.exists(new_path):
             return dict(code="fail", message="目标文件 `%s` 已存在" % new_name)
         os.rename(old_path, new_path)
-        xmanager.fire("fs.rename", Storage(user = user_name, path = new_path, new_path = new_path, old_path = old_path))
+
+        event = xnote_event.FileRenameEvent()
+        event.fpath = new_path
+        event.old_fpath = old_path
+        event.user_name = user_name
+        event.user_id = user_info.id
+
+        xmanager.fire("fs.rename", event)
         return dict(code="success")
 
 class CutAjaxHandler:

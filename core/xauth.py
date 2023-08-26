@@ -73,6 +73,7 @@ class UserDO(xutils.Storage):
     def from_dict(cls, dict_value):
         if dict_value == None:
             return None
+        assert isinstance(dict_value, dict)
         result = UserDO()
         result.update(dict_value)
         result.build()

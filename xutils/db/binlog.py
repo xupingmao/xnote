@@ -8,6 +8,7 @@
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
+from web import Storage
 from xutils.db.dbutil_base import count_table, prefix_iter
 from xutils.db.dbutil_table import db_put, prefix_list, register_table, create_write_batch, db_batch_delete
 
@@ -24,6 +25,18 @@ class BinLogOpType:
     delete = "delete"
     file_upload = "file_upload"
     file_delete = "file_delete"
+    file_rename = "file_rename"
+
+
+class FileLog(Storage):
+    """文件变更日志"""
+    def __init__(self):
+        self.fpath = ""
+        self.user_name = ""
+        self.user_id = 0
+        self.webpath = ""
+        self.old_webpath = ""
+        self.mtime = 0.0
 
 class BinLog:
     _table_name = "_binlog"

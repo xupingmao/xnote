@@ -12,3 +12,11 @@ class FileUploadEvent(Storage):
 
 class FileDeleteEvent(FileUploadEvent):
     pass
+
+class FileRenameEvent(Storage):
+
+    def __init__(self):
+        self.user_name = ""
+        self.user_id = 0
+        self.fpath = ""
+        self.old_fpath = ""

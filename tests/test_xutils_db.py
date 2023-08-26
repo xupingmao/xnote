@@ -954,3 +954,8 @@ class TestMain(BaseTestCase):
         result = table.list()
         print("set result:", result)
         assert set(result) == set(["x1", "x2", "x3"])
+
+
+    def test_db_admin(self):
+        self.check_OK("/system/db/driver_info")
+        self.check_OK("/system/db/driver_info?type=sql")

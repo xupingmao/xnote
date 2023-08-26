@@ -21,7 +21,7 @@ from xutils import dbutil
 from xutils import dateutil
 from xutils import fsutil
 from xutils import textutil
-from xutils.db.binlog import BinLogOpType
+from xutils.db.binlog import BinLogOpType, FileLog
 
 _binlog = dbutil.BinLog.get_instance()
 
@@ -189,26 +189,6 @@ class FileIndexCheckManager:
 
         FileIndexCheckManager.last_check_time = time.time()
 
-@xmanager.listen("fs.rename")
-def on_fs_rename(event: dict):
-    user = event.get("user")
-    fpath = event.get("path")
-    old_path = event.get("old_path")
-    if fpath == None:
-        return
-
-    log_data = Storage()
-    log_data.fpath = fpath
-    log_data.user = user
-    log_data.webpath = fsutil.get_webpath(fpath)
-    stat = os.stat(fpath)
-    log_data.mtime = stat.st_mtime
-
-    old_value = Storage()
-    old_value.fpath = old_path
-
-    _binlog.add_log("file_rename", fpath, log_data, old_value = old_value, record_value=True)
-
 
 @xmanager.listen(["fs.upload", "fs.update"])
 def on_fs_upload(ctx: xnote_event.FileUploadEvent):
@@ -219,9 +199,9 @@ def on_fs_upload(ctx: xnote_event.FileUploadEvent):
     user_id = ctx.user_id
     build_index_by_fpath(filepath, user_id)
 
-    log_data = Storage()
+    log_data = FileLog()
     log_data.fpath = filepath
-    log_data.user = ctx.user_name
+    log_data.user_name = ctx.user_name
     log_data.webpath = fsutil.get_webpath(filepath)
     stat = os.stat(filepath)
     log_data.mtime = stat.st_mtime
@@ -234,11 +214,28 @@ def on_fs_remove(ctx: xnote_event.FileDeleteEvent):
     from handlers.fs.fs_helper import FileInfoDao
     FileInfoDao.delete_by_fpath(ctx.fpath)
 
-    log_data = Storage()
+    log_data = FileLog()
     log_data.fpath = ctx.fpath
-    log_data.user = ctx.user_name
+    log_data.user_name = ctx.user_name
     log_data.webpath = fsutil.get_webpath(ctx.fpath)
     _binlog.add_log(BinLogOpType.file_delete, ctx.fpath, log_data, record_value=True)
+
+
+@xmanager.listen("fs.rename")
+def on_fs_rename(ctx: xnote_event.FileRenameEvent):
+    logging.debug("检测到文件重命名事件: %s", ctx)
+    from handlers.fs.fs_helper import FileInfoDao
+
+    build_index_by_fpath(ctx.fpath, ctx.user_id)
+    FileInfoDao.delete_by_fpath(ctx.old_fpath)
+
+    log_data = FileLog()
+    log_data.fpath = ctx.fpath
+    log_data.user_name = ctx.user_name
+    log_data.webpath = fsutil.get_webpath(ctx.fpath)
+    log_data.old_webpath = fsutil.get_webpath(ctx.old_fpath)
+    _binlog.add_log(BinLogOpType.file_rename, ctx.fpath, log_data, record_value=True)
+
 
 def list_files(last_id = 0):
     manager = FileSyncIndexManager()
