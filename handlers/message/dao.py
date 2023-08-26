@@ -7,10 +7,14 @@ import xconfig
 import xmanager
 import re
 import logging
+import xtables
+import xauth
+
 from xutils import dbutil, cacheutil, textutil, Storage, functions
 from xutils import dateutil
 from xutils.functions import del_dict_key
 from xtemplate import T
+from xutils.db.dbutil_helper import new_from_dict
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
@@ -25,6 +29,9 @@ _debug = False
 
 class MessageDO(Storage):
     def __init__(self):
+        self._key = "" # kv的主键
+        self._id = "" # kv的ID
+
         self.id = "" # 主键
         self.tag = "" # tag标签 {task, done, log, key}
         self.user = "" # 用户名
@@ -99,28 +106,8 @@ class MessageDO(Storage):
             raise Exception("message.dao.create: tag `%s` is invalid" % self.tag)
 
 
-def convert_to_task_idx_key(key):
-    assert isinstance(key, str)
-    prefix, user_name, timeseq = key.split(":")
-    return "msg_task_idx:%s:%s" % (user_name, timeseq)
-
-
-def convert_to_task_index(kw):
-    index = Storage()
-    index.tag = kw["tag"]
-    index.user = kw["user"]
-    index.content = kw["content"]
-    return index
-
-
 def build_task_index(kw):
-    tag = kw["tag"]
-
-    if tag == "task" or tag == "done" or tag == "todo":
-        task_key = convert_to_task_idx_key(kw["id"])
-        task_index = convert_to_task_index(kw)
-        dbutil.put(task_key, task_index)
-
+    pass
 
 def execute_after_create(kw):
     build_task_index(kw)
@@ -134,10 +121,9 @@ def execute_after_delete(kw):
     build_task_index(kw)
 
 def _create_message_with_date(kw):
-    date = kw["date"]
-    old_ctime = kw["ctime"]
-    kw["tag"] = "log"
-
+    assert isinstance(kw, MessageDO)
+    date = kw.date
+    kw.tag = "log"
     today = dateutil.get_today()
 
     if today == date:
@@ -145,35 +131,45 @@ def _create_message_with_date(kw):
 
     timestamp = dateutil.parse_date_to_timestamp(date)
     timestamp += 60 * 60 * 23 + 60 * 59 # 追加日志的开始时间默认为23点59
+    ctime = dateutil.format_datetime(timestamp)
 
-    kw["ctime0"] = old_ctime
-    kw["ctime"] = dateutil.format_datetime(timestamp)
-    kw["date"] = date
-    _msg_db.insert(kw)
-    key = kw.get("_key")
-    kw["id"] = key
-    _msg_db.update(kw)
-    execute_after_create(kw)
-    assert isinstance(key, str)
-    return key
+    kw.ctime0 = xutils.format_datetime()
+    kw.ctime = ctime
+    kw.date = date
+
+    msg_index = MsgIndex()
+    msg_index.tag = kw.tag
+    msg_index.user_name = kw.user
+    msg_index.user_id = xauth.UserDao.get_id_by_name(kw.user)
+    msg_index.ctime_sys = xutils.format_datetime()
+    msg_index.ctime = ctime
+    msg_index.date = date
+    msg_id = MsgIndexDao.insert(msg_index)
+    _msg_db.update_by_id(str(msg_id), kw)
+    kw.id = kw._key
+    return kw._key
 
 
 def _create_message_without_date(kw):
+    assert isinstance(kw, MessageDO)
+
     tag = kw['tag']
     ctime = kw["ctime"]
     kw['date'] = dateutil.format_date(ctime)
 
-    if tag == 'key':
-        _keyword_db.insert(kw)
-    else:
-        _msg_db.insert(kw)
-        
-    key = kw.get("_key")
-    assert isinstance(key, str)
+    index = MsgIndex()
+    index.tag = tag
+    index.ctime = ctime
+    index.date = kw.date
+    index.user_name = kw.user
+    index.user_id = xauth.UserDao.get_id_by_name(kw.user)
 
-    kw["id"] = key
+    msg_id = MsgIndexDao.insert(index)
+    _msg_db.update_by_id(str(msg_id), kw)
+    
+    kw.id = kw._key
     execute_after_create(kw)
-    return key
+    return kw._key
 
 
 def create_message(message):
@@ -295,11 +291,10 @@ def delete_message_by_id(id):
 
     if old == None:
         return
+    index_id = int(old._id)
+    _msg_db.delete(old)
+    MsgIndexDao.delete_by_id(index_id)
 
-    if id.startswith("message:"):
-        _msg_db.delete(old)
-    else:
-        dbutil.delete(id)
 
     xmanager.fire("message.remove", Storage(id=id))
     execute_after_delete(old)
@@ -318,13 +313,7 @@ def count_message(user, status):
 
 
 def get_message_by_id(full_key, user_name=""):
-    # type: (str, str) -> MessageDO|None
-    check_param_id(full_key)
-    if full_key.startswith("message:"):
-        value = _msg_db.get_by_key(full_key)
-    else:
-        value = dbutil.get(full_key)
-    
+    value = _msg_db.get_by_key(full_key)
     if value != None:
         value = MessageDO.from_dict(value)
         value.id = full_key
@@ -357,17 +346,20 @@ def list_message_page(user, status, offset, limit):
     amount = _msg_db.count(filter_func=filter_func, user_name=user)
     return chatlist, amount
 
+def query_special_page(user_name="", filter_func=None, offset=0, limit=10):
+    chatlist = _msg_db.list(filter_func=filter_func, offset=offset,
+                            limit=limit, reverse=True, user_name=user_name)
+    chatlist.sort(key = lambda x:x.ctime, reverse=True)
+    # TODO 后续可以用message_stat加速
+    amount = _msg_db.count(filter_func=filter_func, user_name=user_name)
+    return chatlist, amount
 
 def list_file_page(user, offset, limit):
     def filter_func(key, value):
         if value.content is None:
             return False
         return value.content.find("file://") >= 0
-    chatlist = _msg_db.list_by_index("ctime", filter_func=filter_func, offset=offset,
-                            limit=limit, reverse=True, user_name=user)
-    # TODO 后续可以用message_stat加速
-    amount = _msg_db.count(filter_func=filter_func, user_name=user)
-    return chatlist, amount
+    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
 
 
 def list_link_page(user, offset, limit):
@@ -375,12 +367,7 @@ def list_link_page(user, offset, limit):
         if value.content is None:
             return False
         return value.content.find("http://") >= 0 or value.content.find("https://") >= 0
-    chatlist = _msg_db.list_by_index("ctime", filter_func = filter_func, 
-                                     offset = offset, limit = limit, reverse=True, 
-                                     user_name = user)
-    # TODO 后续可以用message_stat加速
-    amount = _msg_db.count(filter_func = filter_func, user_name = user)
-    return chatlist, amount
+    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
 
 
 def list_book_page(user, offset, limit, key=None):
@@ -390,12 +377,8 @@ def list_book_page(user, offset, limit, key=None):
         if value.content is None:
             return False
         return pattern.search(value.content)
-
-    msg_list = dbutil.prefix_list(
-        "message:%s" % user, filter_func, offset, limit, reverse=True)
-    # TODO 后续可以用message_stat加速
-    amount = dbutil.prefix_count("message:%s" % user, filter_func)
-    return msg_list, amount
+    
+    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
 
 
 def list_people_page(user, offset, limit, key=None):
@@ -404,11 +387,7 @@ def list_people_page(user, offset, limit, key=None):
             return False
         return value.content.find("@") >= 0
 
-    msg_list = dbutil.prefix_list(
-        "message:%s" % user, filter_func, offset, limit, reverse=True)
-    # TODO 后续可以用message_stat加速
-    amount = dbutil.prefix_count("message:%s" % user, filter_func)
-    return msg_list, amount
+    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
 
 
 def list_phone_page(user, offset, limit, key=None):
@@ -423,11 +402,7 @@ def list_phone_page(user, offset, limit, key=None):
                 return True
         return False
 
-    msg_list = dbutil.prefix_list(
-        "message:%s" % user, filter_func, offset, limit, reverse=True)
-    # TODO 后续可以用message_stat加速
-    amount = dbutil.prefix_count("message:%s" % user, filter_func)
-    return msg_list, amount
+    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
 
 
 def filter_todo_func(key, value):
@@ -449,7 +424,8 @@ def get_filter_by_tag_func(tag):
 
 
 def list_key(user, offset=0, limit=1000):
-    items = _keyword_db.list_by_user(user_name=user, offset=offset,limit=limit)
+    user_id = xauth.UserDao.get_id_by_name(user)
+    items = MsgIndexDao.list(user_id=user_id, tag="key", offset=offset, limit=limit)
     items.sort(key=lambda x: x.mtime, reverse=True)
 
     if limit < 0:
@@ -469,15 +445,15 @@ def get_content_filter_func(tag, content):
 def get_by_content(user, tag, content):
     if tag == "key":
         # tag是独立的表，不需要比较tag
-        value = _keyword_db.get_first(where = dict(user = user, content=content))
-        return MessageDO.from_dict_or_None(value)
+        value = MsgTagInfoDao.get_first(user=user, content=content)
+        return MsgTagInfo.from_dict_or_None(value)
     else:
         return None
 
 def delete_keyword(user, content):
-    first = _keyword_db.get_first(where = dict(user = user, content = content))
+    first = MsgTagInfoDao.get_first(user=user, content=content)
     if first != None:
-        _keyword_db.delete(first)
+        MsgTagInfoDao.delete(first)
 
 def list_task(user, offset=0, limit=xconfig.PAGE_SIZE):
     return list_by_tag(user, "task", offset, limit)
@@ -489,22 +465,10 @@ def list_task_done(user, offset=0, limit=xconfig.PAGE_SIZE):
 
 def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
     check_param_user(user)
-
-    if tag == "key":
-        chatlist = list_key(user, offset, limit)
-    else:
-        filter_func = get_filter_by_tag_func(tag)
-        if tag == "task":
-            chatlist = _msg_db.list_by_index(
-                "tag_ctime", filter_func=filter_func, 
-                offset=offset, limit=limit, reverse=True, 
-                where = dict(user = user, tag = tag))
-        else:
-            chatlist = _msg_db.list_by_index("ctime",
-                filter_func=filter_func, offset=offset, 
-                limit=limit, reverse=True, user_name=user)
+    user_id = xauth.UserDao.get_id_by_name(user)
+    index_list = MsgIndexDao.list(user_id=user_id, tag=tag, offset=offset, limit=limit)
     
-    chatlist = MessageDO.from_dict_list(chatlist)
+    chatlist = MessageDao.batch_get_by_index_list(index_list, user_name=user)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -529,25 +493,22 @@ def list_by_date(user, date, offset=0, limit=xconfig.PAGE_SIZE):
     if date is None or date == "":
         return []
     
-    where = {
-        "user": user,
-        "date": {
-            "$prefix": date,
-        },
-    }
-    amount = _msg_db.count_by_index("date", where = where)
-    msg_list = _msg_db.list_by_index("date", offset= offset, limit=limit, 
-                                     reverse=True, where = where)
-
+    user_id = xauth.UserDao.get_id_by_name(user)
+    index_list = MsgIndexDao.list(user_id=user_id, date_prefix=date, offset=offset, limit=limit)
+    msg_list = MessageDao.batch_get_by_index_list(index_list, user_name=user)
+    amount = MsgIndexDao.count(user_id=user_id, date_prefix=date)
     return msg_list, amount
 
 
 def count_by_tag(user, tag):
     """内部方法"""
     if tag == "key":
-        return dbutil.count_table("msg_key:%s" % user)
+        return MsgTagInfoDao.count(user=user)
+    
     if tag == "all":
-        return dbutil.count_table("message:%s" % user)
+        user_id = xauth.UserDao.get_id_by_name(user)
+        return MsgIndexDao.count(user_id=user_id)
+    
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
 
@@ -682,6 +643,137 @@ class MessageComment(Storage):
         self.time = dateutil.format_datetime()
         self.content = ""
 
+class MsgIndex(Storage):
+    def __init__(self):
+        self.id = 0
+        self.tag = ""
+        self.user_id = 0
+        self.user_name = ""
+        self.ctime_sys = dateutil.format_datetime() # 实际创建时间
+        self.ctime = dateutil.format_datetime() # 展示创建时间
+        self.mtime = dateutil.format_datetime() # 修改时间
+        self.date = "1970-01-01"
+
+class MsgIndexDao:
+
+    db = xtables.get_table_by_name("msg_index")
+
+    @classmethod
+    def insert(cls, msg_index: MsgIndex):
+        msg_index.pop("id")
+        assert msg_index.tag != ""
+        assert msg_index.ctime != ""
+        assert msg_index.ctime_sys != ""
+        assert msg_index.date != ""
+        assert msg_index.user_id != 0
+        assert msg_index.user_name != ""
+
+        msg_index.mtime = dateutil.format_datetime()
+        return cls.db.insert(**msg_index)
+    
+    @classmethod
+    def count(cls, user_id=0, tag = "", date_prefix=""):
+        where = "1=1"
+        if user_id != 0:
+            where += " AND user_id=$user_id"
+        
+        if tag != "":
+            where += " AND tag=$tag"
+        
+        if date_prefix != "":
+            where += " AND date LIKE $date_prefix"
+
+        vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%")
+        return cls.db.count(where=where, vars=vars)
+    
+    @classmethod
+    def list(cls, user_id=0, tag="", date_prefix="",offset=0, limit=10, order="ctime desc"):
+        where = "1=1"
+        if user_id != 0:
+            where += " AND user_id=$user_id"
+        if tag != "":
+            where += " AND tag=$tag"
+        if date_prefix != "":
+            where += " AND date LIKE $date_prefix"
+
+        vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%")
+        return cls.db.select(where=where, vars=vars,offset=offset,limit=limit,order=order)
+    
+    @classmethod
+    def delete_by_id(cls, id=0):
+        return cls.db.delete(where=dict(id=id))
+    
+    @classmethod
+    def update_tag(cls, id=0, tag=""):
+        return cls.db.update(tag=tag, where=dict(id=id))
+    
+    @classmethod
+    def get_first(cls, user_id=0, content="", tag=""):
+        where = "1=1"
+        if user_id != 0:
+            where += " AND user_id=$user_id"
+        if tag != "":
+            where += " AND tag=$tag"
+        vars = dict(user_id=user_id, tag=tag)
+        return cls.db.select_first(where=where, vars=vars)
+
+
+class MsgTagInfo(Storage):
+    def __init__(self):
+        self.ctime = xutils.format_datetime()
+        self.mtime = xutils.format_datetime()
+        self.user = ""
+        self.content=""
+        self.amount=0
+        self.is_marked=False
+    
+    @staticmethod
+    def from_dict(dict_value):
+        return new_from_dict(MsgTagInfo, dict_value)
+    
+    @staticmethod
+    def from_dict_or_None(dict_value):
+        if dict_value == None:
+            return None
+        return new_from_dict(MsgTagInfo, dict_value)
+
+class MsgTagInfoDao:
+    db = dbutil.get_table("msg_key")
+
+    @classmethod
+    def get_first(cls, user="", content=""):
+        where = dict(user=user, content=content)
+        return cls.db.get_first(where=where)
+    
+    @classmethod
+    def update(cls, tag_info: MsgTagInfo):
+        return cls.db.update(tag_info)
+
+    @classmethod
+    def delete_by_id(cls, id=""):
+        return cls.db.delete_by_id(id=id)
+    
+    @classmethod
+    def delete(cls, obj):
+        return cls.db.delete(obj)
+
+    @classmethod
+    def get_or_create(cls, user="", content=""):
+        item = cls.get_first(user=user, content=content)
+        if item != None:
+            return MsgTagInfo.from_dict(item)
+        else:
+            record = MsgTagInfo()
+            record.user = user
+            record.content = content
+            cls.db.insert(**record)
+            return record
+
+    @classmethod
+    def count(cls, user=""):
+        return cls.db.count(user_name=user)
+    
+
 class MessageDao:
     """message的数据接口"""
 
@@ -696,6 +788,12 @@ class MessageDao:
     @staticmethod
     def update(message):
         return update_message(message)
+    
+    @classmethod
+    def update_tag(cls, message:MessageDO, tag=""):
+        MsgIndexDao.update_tag(id=int(message._id), tag=tag)
+        cls.update(message)
+        cls.refresh_message_stat(message.user)
 
     @staticmethod
     def delete(full_key):
@@ -720,6 +818,21 @@ class MessageDao:
     @staticmethod
     def get_message_tag(user, tag, priority=0):
         return get_message_tag(user, tag, priority)
+    
+    @classmethod
+    def batch_get_by_index_list(cls, index_list, user_name=""):
+        id_list = []
+        for index in index_list:
+            id_list.append(str(index.id))
+
+        dict_result = _msg_db.batch_get_by_id(id_list, user_name=user_name)
+        result = []
+        for index in index_list:
+            msg = dict_result.get(str(index.id))
+            if msg != None:
+                new_msg = MessageDO.from_dict(msg)
+                result.append(new_msg)
+        return result
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.update", update_message)

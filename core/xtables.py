@@ -299,6 +299,23 @@ def init_site_visit_log():
         manager.add_index(["date", "ip"])
 
 
+def init_msg_index():
+    """随手记索引"""
+    table_name = "msg_index"
+    with create_default_table_manager(table_name) as manager:
+        # 展示创建时间
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        # 实际创建时间
+        manager.add_column("ctime_sys", "datetime", "1970-01-01 00:00:00")
+        # 修改时间
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("user_name", "varchar(64)", "")
+        # 短信息的类型
+        manager.add_column("tag", "varchar(32)", "")
+        manager.add_column("date", "date", default_value="1970-01-01")
+        manager.add_index(["user_id", "ctime"])
+
 def init_kv_store_table():
     kw = dict()
     kw["pk_name"] = "key"
@@ -412,6 +429,7 @@ def init():
     init_file_info()
     init_site_visit_log()
     init_note_tag_rel_table()
+    init_msg_index()
     
     if xconfig.DatabaseConfig.db_driver == "mysql":
         init_kv_store_table()

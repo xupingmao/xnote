@@ -100,6 +100,13 @@ class UserDao:
         return UserDO.from_dict(user)
 
     @classmethod
+    def get_id_by_name(cls, name=""):
+        user_info = cls.get_by_name(name)
+        if user_info != None:
+            return user_info.id
+        return 0
+
+    @classmethod
     def get_user_from_db(cls, name=""):
         db = get_user_db()
         user_dict = db.select_first(where=dict(name=name))

@@ -10,6 +10,7 @@ import sqlite3
 import threading
 import logging
 import web.db
+import time
 
 from xutils.mem_util import log_mem_info_deco
 from xutils import interfaces
@@ -107,6 +108,30 @@ class SqliteKV(interfaces.DBInterface):
         if len(result) > 0:
             return result[0].value
         return None
+
+
+    def BatchGet(self, key_list):
+        # type: (list[bytes]) -> dict[bytes, bytes]
+        if len(key_list) == 0:
+            return {}
+
+        start_time = time.time()
+
+        sql = ""
+        vars = dict(key_list=key_list)
+        try:
+            result = dict()
+            sql = "SELECT `key`, value FROM kv_store WHERE `key` IN $key_list"
+            result_iter = self.db.query(sql, vars=vars)
+            for item in result_iter:
+                key = item.key
+                value = item.value
+                result[key] = value
+            return result
+        finally:
+            cost_time = time.time() - start_time
+            if self.debug:
+                logging.debug(f"BatchGet ({key_list}) cost {cost_time:.2f}ms")
     
     def _exists(self, key, cursor=None):
         sql = "SELECT `key` FROM kv_store WHERE `key` = $key;"
@@ -191,7 +216,7 @@ class SqliteKV(interfaces.DBInterface):
             result = list(result_iter)
 
             if self.debug:
-                logging.debug("SQL:%s (%s) vars:%s, rows:%s", sql, vars, len(result))
+                logging.debug(f"SQL:{sql} ({vars}), rows:{len(result)}")
             
             # return cur.execute(sql, tuple(params))
             for item in result[:limit]:

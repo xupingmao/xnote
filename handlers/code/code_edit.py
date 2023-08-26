@@ -10,6 +10,7 @@ import xutils
 import xtemplate
 import xconfig
 import xmanager
+import xnote_event
 from xutils import Storage, fsutil
 
 
@@ -119,9 +120,9 @@ class UpdateHandler(object):
 
     @xauth.login_required("admin")
     def POST(self):
-        path = xutils.get_argument("path", "")
+        path = xutils.get_argument_str("path", "")
         content = xutils.get_argument_str("content", "")
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
 
         if content == "" or path == "":
             # raise web.seeother("/fs/")
@@ -130,8 +131,12 @@ class UpdateHandler(object):
             content = content.replace("\r\n", "\n")
             xutils.savetofile(path, content)
 
+            event = xnote_event.FileUploadEvent()
+            event.fpath = path
+            event.user_name = user_name
+
             # 发送通知刷新文件索引
-            xmanager.fire("fs.update", dict(user=user_name, fpath=path))
+            xmanager.fire("fs.update", event)
             # raise web.seeother("/code/edit?path=" + xutils.quote(path))
             return dict(code="success")
 

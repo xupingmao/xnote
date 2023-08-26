@@ -249,7 +249,9 @@ class TestMain(BaseTestCase):
         user_name = xauth.current_name()
         keyword = get_or_create_keyword(user_name, "#test#", "127.0.0.1")
         print(keyword)
-        self.assertTrue(keyword.is_marked)
+        
+        assert keyword != None
+        self.assertTrue(keyword.is_marked==1)
 
         logutil.wait_task_done()
 

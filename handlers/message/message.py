@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-13 22:06:49
+@LastEditTime : 2023-08-26 20:53:05
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -36,7 +36,6 @@ from handlers.message.message_utils import (
     get_remote_ip,
     get_length,
     get_tags_from_message_list,
-    get_similar_key,
     is_system_tag,
     do_split_date,
     success,
@@ -45,14 +44,12 @@ from handlers.message.message_utils import (
     count_month_size,
     is_marked_keyword,
     touch_key_by_content,
-    check_content_for_update,
 )
 
 from .message_utils import sort_keywords_by_marked
 from . import dao, message_tag, message_search
 from .dao import MessageDao
 from handlers.message import message_utils
-from xutils.db.lock import RecordLock
 import handlers.message.dao as msg_dao
 
 MSG_DAO = xutils.DAO("message")
@@ -72,24 +69,19 @@ def get_current_message_stat():
     return format_message_stat(message_stat)
 
 
-def update_keyword_amount(message, user_name, key):
+def update_keyword_amount(tag_info: msg_dao.MsgTagInfo, user_name, key):
     msg_list, amount = dao.search_message(user_name, key, 0, 1)
-    message.amount = amount
+    tag_info.amount = amount
     if amount == 0:
-        msg_dao.delete_keyword(user_name, key)
+        msg_dao.MsgTagInfoDao.delete(tag_info)
     else:
-        MessageDao.update(message)
+        msg_dao.MsgTagInfoDao.update(tag_info)
     logging.info("user:%s,key:%s,amount:%s", user_name, key, amount)
 
 
 @xutils.timeit(name="message.refresh", logfile=True)
 def refresh_key_amount():
-    for user_info in xauth.iter_user(limit=-1):
-        user_name = user_info.name
-        msg_list, amount = msg_dao.list_by_tag(user_name, "key", 0, -1)
-        for index, message in enumerate(msg_list):
-            key = message.content
-            update_keyword_amount(message, user_name, key)
+    pass
 
 
 def refresh_message_index():
@@ -383,8 +375,9 @@ def update_message_tag(id, tag):
             data.done_time = xutils.format_datetime()
             # 任务完成时除了标记原来任务的完成时间，还要新建一条消息
             create_done_message(data)
-        MessageDao.update(data)
-        MessageDao.refresh_message_stat(user_name)
+            
+        MessageDao.update_tag(data, tag)
+
         xmanager.fire("message.updated", Storage(
             id=id, user=user_name, tag=tag, content=data.content))
 
@@ -423,16 +416,6 @@ class UpdateTagAjaxHandler:
             return update_message_tag(id, tag)
         else:
             return failure(message="invalid tag(%s)" % tag)
-
-
-class UpdateStatusAjaxHandler:
-
-    @xauth.login_required()
-    def POST(self):
-        id = xutils.get_argument("id")
-        status = xutils.get_argument("status", type=int)
-        return update_message_status(id, status)
-
 
 class TouchAjaxHandler:
 
@@ -542,12 +525,8 @@ def create_message(user_name, tag, content, ip):
 
     return message
 
-def get_or_create_keyword(user_name, content, ip):
-    with RecordLock(user_name):
-        item = msg_dao.get_by_content(user_name, "key", content)
-        if item != None:
-            return item
-        return create_message(user_name, "key", content, ip)
+def get_or_create_keyword(user_name, content="", ip=""):
+    return msg_dao.MsgTagInfoDao.get_or_create(user_name, content)
 
 class SaveAjaxHandler:
 
@@ -1014,22 +993,16 @@ class MessageKeywordAjaxHandler:
         return dict(code="404", message="指定动作不存在")
 
     def do_mark_or_unmark(self, keyword, action):
-        user_name = xauth.current_name()
-        
-        with RecordLock(user_name):
-            key_obj = msg_dao.get_by_content(user_name, "key", keyword)
+        user_name = xauth.current_name_str()
+        key_obj = msg_dao.MsgTagInfoDao.get_or_create(user_name=user_name, tag_name=keyword)
+        assert key_obj != None
 
-            if key_obj == None:
-                # 不存在，创建新的标签
-                ip = get_remote_ip()
-                key_obj = create_message(user_name, "key", keyword, ip)
+        if action == "unmark":
+            key_obj.is_marked = 0
+        else:
+            key_obj.is_marked = 1
 
-            if action == "unmark":
-                key_obj.is_marked = None
-            else:
-                key_obj.is_marked = True
-
-            MessageDao.update(key_obj)
+        msg_dao.MsgTagInfoDao.update(key_obj)
         
         return dict(code="success")
 
@@ -1122,7 +1095,6 @@ xurls = (
     r"/message/date", DateAjaxHandler,
     r"/message/stat", StatAjaxHandler,
     r"/message/save", SaveAjaxHandler,
-    r"/message/status", UpdateStatusAjaxHandler,
     r"/message/delete", DeleteAjaxHandler,
     r"/message/update", SaveAjaxHandler,
     r"/message/open", OpenMessageAjaxHandler,

@@ -143,12 +143,6 @@ def init_note_tables():
 
 def init_message_tables():
     db = dbutil.register_table("message", "短文本", check_user=True, user_attr="user")
-    db.register_index("date")
-    db.register_index("tag")
-    db.register_index("tag_ctime", columns=["tag", "ctime"])
-    db.register_index("ctime")
-    db.rebuild_index("v2")
-
     db = dbutil.register_table("msg_key", "备忘关键字/标签", check_user=True, user_attr="user")
     dbutil.register_table("msg_search_history", "备忘搜索历史", check_user=True, user_attr="user")
     dbutil.register_table("msg_history", "备忘历史")
