@@ -8,7 +8,7 @@
 
 操作步骤：
 1、启动主节点服务，在主节点上添加IP白名单
-2、设置`--role follower`参数启动子节点服务
+2、设置`node_role=follower`参数启动子节点服务
 3、配置子节点同步：
     a. 从主节点同步设置页面拷贝`同步链接`
     b. 把`同步链接`配置到子节点的同步设置页面上，点击同步按钮
@@ -48,19 +48,19 @@ class SyncConfig:
 
     @staticmethod
     def need_sync_db():
-        return xconfig.get_system_config("sync_db_from_leader")
+        return xconfig.WebConfig.sync_db_from_leader
     
     @staticmethod
     def need_sync_files():
-        return xconfig.get_system_config("sync_files_from_leader")
+        return xconfig.WebConfig.sync_files_from_leader
     
     @staticmethod
     def set_need_sync_db(bool_value = False):
-        xconfig.set_system_config("sync_db_from_leader", bool_value)
+        xconfig.WebConfig.sync_db_from_leader = bool_value
     
     @staticmethod
     def set_need_sync_files(bool_value = False):
-        xconfig.set_system_config("sync_files_from_leader", bool_value)
+        xconfig.WebConfig.sync_files_from_leader = bool_value
 
 def get_system_role():
     return xconfig.get_global_config("system.node_role")

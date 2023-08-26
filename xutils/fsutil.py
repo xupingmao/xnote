@@ -137,10 +137,14 @@ def detect_encoding(fpath, raise_error=True):
 
 
 def get_file_ext(fname):
+    """获取文件扩展名,不带dot符号"""
     if '.' not in fname:
         return ''
-    return fname.split('.')[-1]
-
+    ext = fname.split('.')[-1]
+    if len(ext) > 5:
+        # 太长的扩展名视作无效
+        return ""
+    return ext
 
 def format_size(size):
     """格式化大小

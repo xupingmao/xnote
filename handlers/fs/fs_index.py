@@ -18,7 +18,7 @@ import xmanager
 import xutils
 from xutils import Storage
 from xutils.sqldb import TableProxy
-
+from xutils import fsutil
 from .fs_helper import get_index_dirs, get_index_db, FileInfoModel, FileInfo
 
 class IndexBuilder:
@@ -67,10 +67,7 @@ class IndexBuilder:
             info.fpath = fpath
             info.ctime = xutils.format_datetime(st.st_ctime)
             info.mtime = xutils.format_datetime(st.st_mtime)
-            if xutils.is_text_file(fpath):
-                info.ftype = "text"
-            elif xutils.is_img_file(fpath):
-                info.ftype = "img"
+            info.ftype = fsutil.get_file_ext(fpath)
             FileInfoModel.upsert(info)
             return st.st_size
         except:
@@ -143,7 +140,7 @@ class IndexHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        is_ajax = xutils.get_argument("is_ajax", False)
+        is_ajax = xutils.get_argument_bool("is_ajax", False)
         tpl = "fs/page/fs_index.html"
         index_dirs = get_index_dirs()
         cost = 0
@@ -178,8 +175,8 @@ class IndexHandler:
     
     def create_kw(self):
         kw = Storage()
-        embed = xutils.get_argument("embed", "")
-        if embed == "true":
+        embed = xutils.get_argument_bool("embed", False)
+        if embed:
             kw.show_nav = False
         return kw
     

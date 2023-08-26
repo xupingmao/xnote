@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 09:39:08
+@LastEditTime : 2023-08-26 10:52:36
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -122,7 +122,10 @@ class HttpClient:
             return False
 
         stat = os.stat(dest_path)
-        return item.size == stat.st_size and item.mtime == xutils.format_datetime(stat.st_mtime)
+        remote_mtime = item.mtime
+        local_mtime = xutils.format_datetime(stat.st_mtime)
+        logging.info("远程文件: %s, 本地文件: %s", remote_mtime, local_mtime)
+        return item.size == stat.st_size and remote_mtime == local_mtime
 
     def check_disk_space(self):
         data_dir = xconfig.get_system_dir("data")

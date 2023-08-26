@@ -431,6 +431,7 @@ class BasePlugin:
 
     # {侧边栏自定义HTML}
     show_aside = False
+    show_right = False
     aside_html = u("")
 
     # {搜索配置}
@@ -604,6 +605,7 @@ class BasePlugin:
         kw.css_style = self.css_style
         kw.show_nav = self.show_nav
         kw.show_aside = self.show_aside
+        kw.show_right = self.show_right
         kw.show_search = self.show_search
         kw.search_action = self.search_action
         kw.search_placeholder = self.search_placeholder

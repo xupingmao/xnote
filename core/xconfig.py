@@ -296,6 +296,8 @@ class WebConfig:
     fast_reload = False
 
     sync_interval_seconds = 3
+    sync_db_from_leader = False
+    sync_files_from_leader = False
 
     # 定时任务开关
     cron_enabled = True
@@ -315,6 +317,9 @@ class WebConfig:
         cls.ui_title_prefix = SystemConfig.get_str("ui_title_prefix", "Xnote")
 
         cls.sync_interval_seconds = SystemConfig.get_int("sync_interval_seconds", 3)
+        cls.sync_db_from_leader = SystemConfig.get_bool("sync_db_from_leader", False)
+        cls.sync_files_from_leader = SystemConfig.get_bool("sync_files_from_leader", False)
+        
         cls.cron_enabled = SystemConfig.get_bool("cron_enabled", True)
     
     @classmethod

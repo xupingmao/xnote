@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-15 21:16:14
+@LastEditTime : 2023-08-26 10:33:30
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -93,12 +93,7 @@ class TableProxy:
     def count(self, where=None, sql=None, vars=None):
         self.fix_sql_keywords(where)
         if sql is None:
-            if isinstance(where, dict):
-                return self.select_first(what="COUNT(1) AS amount", where=where).amount
-            else:
-                sql = "SELECT COUNT(1) AS amount FROM %s" % self.tablename
-                if where:
-                    sql += " WHERE %s" % where
+            return self.select_first(what="COUNT(1) AS amount", where=where, vars=vars).amount
         return self.db.query(sql, vars=vars).first().amount
 
     def update(self, where, vars=None, _test=False, **values):

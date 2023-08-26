@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-22 23:45:49
+@LastEditTime : 2023-08-26 10:22:21
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -149,9 +149,9 @@ class LdbTable:
         if not key.startswith(self.prefix):
             raise Exception("invalid key:%s" % key)
 
-    def _check_value(self, obj):
+    def _check_value(self, obj, key=""):
         if not isinstance(obj, dict):
-            raise Exception("invalid obj:%r, expected dict" % obj)
+            raise Exception("key:%r, invalid obj:%r, expected dict" % (key, obj))
 
     def _check_key(self, key):
         if not key.startswith(self.prefix):
@@ -377,7 +377,7 @@ class LdbTable:
     def update_by_key(self, key, obj):
         """直接通过`key`进行更新"""
         self._check_key(key)
-        self._check_value(obj)
+        self._check_value(obj, key=key)
 
         obj[self.key_name] = key
         obj[self.id_name] = self._get_id_from_key(key)

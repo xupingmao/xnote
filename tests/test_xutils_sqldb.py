@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:04:36
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-01 12:46:39
+@LastEditTime : 2023-08-26 10:48:09
 @FilePath     : /xnote/tests/test_xutils_sqldb.py
 @Description  : 描述
 """
@@ -42,6 +42,8 @@ class TestMain(test_base.BaseTestCase):
         first = table.select_first(where = "age=$age", vars=dict(age=10))
         self.assertEqual("test-1", first.name)
 
+        count = table.count(where="age=$age", vars=dict(age=10))
+        self.assertEqual(1, count)
 
 
 
