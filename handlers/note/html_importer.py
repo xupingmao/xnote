@@ -9,6 +9,7 @@ import xutils
 import xauth
 import xmanager
 import xconfig
+import xnote_event
 try:
     from bs4 import BeautifulSoup
 except ImportError:
@@ -290,8 +291,11 @@ class MarkdownImageParser(TextParserBase):
         xutils.makedirs(dirname)
 
         resp_headers = self.download(url, fpath)
-        xmanager.fire("fs.upload", dict(
-            user=user_name, path=fpath, fpath=fpath))
+
+        event = xnote_event.FileUploadEvent()
+        event.fpath = fpath
+        event.user_name = user_name
+        xmanager.fire("fs.upload", event)
 
         content_type = ""
         if resp_headers != None:
@@ -304,7 +308,10 @@ class MarkdownImageParser(TextParserBase):
                 filename = filename_new
 
                 fpath = os.path.join(dirname, filename)
-                xmanager.fire("fs.upload", dict(user=user_name, path=fpath, fpath=fpath))
+                event = xnote_event.FileUploadEvent()
+                event.fpath = fpath
+                event.user_name = user_name
+                xmanager.fire("fs.upload", event)
 
         webpath = "/data/files/%s/upload/%s/%s" % (
             user_name, date_dir, filename)
