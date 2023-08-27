@@ -25,8 +25,12 @@ def mark_migrate_done(op_flag):
 
 #### 重建访问日志
 def rebuild_visit_log():
-    if is_migrate_done("note_visit_log"):
+    mark_flag = "20211231_not_visit_log"
+    mark_flag_old = "note_visit_log"
+    if is_migrate_done(mark_flag):
         log_info("note_visit_log migrate done")
+        return
+    if is_migrate_done(mark_flag_old):
         return
 
     db = dbutil.get_table("note_index")
@@ -41,7 +45,7 @@ def rebuild_visit_log():
         increment = note.visited_cnt or 1
         dao_log._update_log(note.creator, note, increment)
 
-    mark_migrate_done("note_visit_log")
+    mark_migrate_done(mark_flag)
 
 def do_upgrade():
     """升级入口"""

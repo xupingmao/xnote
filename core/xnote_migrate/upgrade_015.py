@@ -11,7 +11,7 @@ from xutils.db.dbutil_helper import new_from_dict
 from handlers.message.dao import MsgIndex
 
 def do_upgrade():
-    base.execute_upgrade("20230826", migrate_msg_index)
+    base.execute_upgrade("20230826_msg_index", migrate_msg_index)
 
 class MsgInfoV1(Storage):
 
@@ -41,6 +41,7 @@ def fix_datetime(datetime_str=""):
 def migrate_msg_index():
     """迁移随手记索引"""
     old_db = dbutil.get_table("message")
+    old_db_backup = dbutil.get_table("msg_backup")
     new_db = xtables.get_table_by_name("msg_index")
     for item in old_db.iter(limit=-1):
         msg_info = MsgInfoV1.from_dict(item)
@@ -54,6 +55,8 @@ def migrate_msg_index():
             continue
 
         msg_index.tag = msg_info.tag
+        if msg_index.tag == "":
+            msg_index.tag = "done"
         msg_index.ctime = fix_datetime(msg_info.ctime)
         msg_index.ctime_sys = fix_datetime(msg_info.ctime0)
         if msg_index.ctime_sys == "":
@@ -68,7 +71,12 @@ def migrate_msg_index():
             new_db.insert(**msg_index)
         
         if kv_id.startswith("0"):
-            old_db.update_by_id(str(msg_index.id), msg_info)
+            # 先备份再删除
+            old_kv_key = msg_info._key
+            new_kv_id = str(msg_index.id)
+            old_db.update_by_id(new_kv_id, msg_info)
+            old_db_backup.update_by_id(kv_id, msg_info)
+            old_db.delete_by_key(old_kv_key)
             logging.info("迁移0前缀随手记, kv_id=%s", kv_id)
         
         logging.info("迁移随手记: %s", msg_index)
