@@ -4,27 +4,35 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 10:33:30
+@LastEditTime : 2023-08-27 11:19:11
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
 import time
 import xutils
+import web.db
+from xutils import Storage
 from xutils.interfaces import ProfileLog, ProfileLogger
 from . import table_manager
+from xutils.db.binlog import BinLog, BinLogOpType
 
 class TableProxy:
     """基于web.db的装饰器
     SqliteDB是全局唯一的，它的底层使用了连接池技术，每个线程都有独立的sqlite连接
     """
     log_profile = False
+    enable_binlog = False
     profile_logger = ProfileLogger()
 
     def __init__(self, db, tablename):
         self.tablename = tablename
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
+        assert isinstance(db, web.db.DB)
         self.db = db
-        self.table_info = None
+        table_info = table_manager.TableManagerFacade.get_table_info(tablename)
+        assert table_info != None
+        self.table_info = table_info
+        self.enable_binlog = table_info.enable_binlog
 
     def _new_profile_log(self):
         log = ProfileLog()
@@ -54,7 +62,9 @@ class TableProxy:
         # TODO 记录binlog
         start_time = time.time()
         try:
-            return self.db.insert(self.tablename, seqname, _test, **values)
+            new_id = self.db.insert(self.tablename, seqname, _test, **values)
+            self.add_insert_binlog(new_id)
+            return new_id
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
@@ -101,7 +111,9 @@ class TableProxy:
         # TODO 记录binlog
         start_time = time.time()
         try:
-            return self.db.update(self.tablename, where, vars=vars, _test=_test, **values)
+            result = self.db.update(self.tablename, where, vars=vars, _test=_test, **values)
+            self.add_update_binlog(where=where, vars=vars, _test=_test)
+            return result
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
@@ -114,11 +126,25 @@ class TableProxy:
                 self.profile_logger.log(profile_log)
 
     def delete(self,  where, using=None, vars=None, _test=False):
+        if _test:
+            return self.db.delete(self.tablename, where, using=using, vars=vars, _test=True)
+        
         self.fix_sql_keywords(where)
         # TODO 记录binlog
         start_time = time.time()
+        pk_name = self.table_info.pk_name
+        pk_list = []
+        
         try:
-            return self.db.delete(self.tablename, where, using=using, vars=vars, _test=_test)
+            for row in self.select(where=where, vars=vars, _test=_test):
+                pk_value = row.get(pk_name)
+                pk_list.append(pk_value)
+            
+            new_where = f"`{pk_name}` in $pk_list"
+            new_vars = dict(pk_list=pk_list)
+            result = self.db.delete(self.tablename, new_where, using=using, vars=new_vars, _test=_test)
+            self.add_delete_binlog(pk_list)
+            return result
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
@@ -149,8 +175,6 @@ class TableProxy:
             last_id = records[-1].id
     
     def get_table_info(self):
-        if self.table_info == None:
-            self.table_info = table_manager.TableManagerFacade.get_table_info(self.tablename)
         return self.table_info
 
     def filter_record(self, record):
@@ -162,3 +186,40 @@ class TableProxy:
             if col_value != None:
                 result[colname] = col_value
         return result
+
+    def add_row_binlog(self, row):
+        if not self.enable_binlog:
+            return
+        if row == None:
+            return
+        pk_name = self.table_info.pk_name
+        pk_value = row.get(pk_name)
+
+        BinLog.get_instance().add_log(BinLogOpType.sql_upsert, pk_value, table_name=self.tablename)
+
+    def add_insert_binlog(self, new_id):
+        if not self.enable_binlog:
+            return
+        pk_name = self.table_info.pk_name
+        where = {
+            pk_name: new_id
+        }
+        row = self.select_first(where=where)
+        self.add_row_binlog(row)
+
+    def add_update_binlog(self, where=None, vars=None, _test=False):
+        if _test:
+            return
+        if not self.enable_binlog:
+            return
+                
+        for row in self.select(where=where, vars=vars):
+            self.add_row_binlog(row)
+
+    def add_delete_binlog(self, pk_list=[]):
+        if not self.enable_binlog:
+            return
+        pk_name = self.table_info.pk_name
+        for pk_value in pk_list:
+            BinLog.get_instance().add_log(BinLogOpType.sql_delete, pk_value, table_name=self.tablename)
+        

@@ -88,6 +88,14 @@ class MessageDO(Storage):
 
         del_dict_key(self, "html")
         del_dict_key(self, "tag_text")
+        if self.status == None:
+            self.pop("status", None)
+        if self.amount == None:
+            self.pop("amount", None)
+        if self.ref == None:
+            self.pop("ref", None)
+        if self.keywords == None:
+            self.pop("keywords", None)
 
     def check_before_create(self):
         if self.id != "":
@@ -183,6 +191,7 @@ def create_message(message):
     """
     assert isinstance(message, MessageDO)
     message.check_before_create()
+    message.fix_before_update()
     tag = message.tag
 
     if tag == "date":
@@ -195,11 +204,7 @@ def update_message(message):
     assert isinstance(message, MessageDO)
     message.check_before_update()
     message.fix_before_update()
-    id = message.id
-    if id.startswith("message:"):
-        _msg_db.update(message)
-    else:
-        dbutil.put(id, message)
+    _msg_db.update(message)
     execute_after_update(message)
 
 
@@ -270,7 +275,7 @@ def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_t
     else:
         chatlist = _msg_db.list(filter_func=search_func, offset=offset,
                                 limit=limit, reverse=True, user_name=user_name)
-        # 安装创建时间倒排 (按日期补充的随手记的key不是按时间顺序的)
+        # 按照创建时间倒排 (按日期补充的随手记的key不是按时间顺序的)
     
     chatlist = MessageDO.from_dict_list(chatlist)
     chatlist.sort(key = lambda x:x.ctime, reverse=True)
@@ -560,28 +565,35 @@ def get_message_stat(user):
     return value
 
 
-def refresh_message_stat(user) -> Storage:
+def refresh_message_stat(user, tag_list=[]) -> Storage:
     if user == None:
         return get_empty_stat()
-    # TODO 优化，只需要更新原来的tag和新的tag
-    task_count = count_by_tag(user, "task")
-    log_count = count_by_tag(user, "log")
-    done_count = count_by_tag(user, "done")
-    cron_count = count_by_tag(user, "cron")
-    key_count = count_by_tag(user, "key")
-    canceled_count = count_by_tag(user, "canceled")
+
     stat = get_message_stat0(user)
     if stat is None:
-        stat = Storage()
+        stat = get_empty_stat()
 
-    stat.task_count = task_count
-    stat.log_count = log_count
-    stat.done_count = done_count
-    stat.cron_count = cron_count
-    stat.key_count = key_count
-    stat.canceled_count = canceled_count
+    update_all = len(tag_list) == 0
+    if update_all or "task" in tag_list:
+        task_count = count_by_tag(user, "task")
+        stat.task_count = task_count
+    if update_all or "log" in tag_list:
+        log_count = count_by_tag(user, "log")
+        stat.log_count = log_count
+    if update_all or "done" in tag_list:
+        done_count = count_by_tag(user, "done")
+        stat.done_count = done_count
+    if update_all or "cron" in tag_list:
+        cron_count = count_by_tag(user, "cron")
+        stat.cron_count = cron_count
+    if update_all or "key" in tag_list:
+        key_count = count_by_tag(user, "key")
+        stat.key_count = key_count
+    if update_all or "canceled" in tag_list:
+        canceled_count = count_by_tag(user, "canceled")
+        stat.canceled_count = canceled_count
+
     dbutil.put("user_stat:%s:message" % user, stat)
-
     _msg_stat_cache.delete(user)
 
     return stat
@@ -661,7 +673,7 @@ class MsgIndex(Storage):
         self.date = "1970-01-01"
 
 class MsgIndexDao:
-
+    """随手记索引表,使用SQL存储"""
     db = xtables.get_table_by_name("msg_index")
 
     @classmethod
@@ -749,6 +761,7 @@ class MsgTagInfo(Storage):
         return cls.from_dict(dict_value)
 
 class MsgTagInfoDao:
+    """随手记标签元信息表,使用KV存储"""
     db = dbutil.get_table("msg_key")
 
     @classmethod
@@ -800,7 +813,7 @@ class MsgTagInfoDao:
     
 
 class MessageDao:
-    """message的数据接口"""
+    """message的主数据接口,使用KV存储"""
 
     @staticmethod
     def get_by_id(full_key):
@@ -837,8 +850,8 @@ class MessageDao:
         return add_message_history(message)
     
     @staticmethod
-    def refresh_message_stat(user):
-        return refresh_message_stat(user)
+    def refresh_message_stat(user, tag_list=[]):       
+        return refresh_message_stat(user, tag_list)
     
     @staticmethod
     def get_message_stat(user):

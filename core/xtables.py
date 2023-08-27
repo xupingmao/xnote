@@ -315,6 +315,7 @@ def init_msg_index():
         manager.add_column("tag", "varchar(32)", "")
         manager.add_column("date", "date", default_value="1970-01-01")
         manager.add_index(["user_id", "ctime"])
+        manager.table_info.enable_binlog = True
 
 def init_kv_store_table():
     kw = dict()

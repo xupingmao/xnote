@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 02:21:10
+@LastEditTime : 2023-08-27 11:15:41
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -26,6 +26,8 @@ class BinLogOpType:
     file_upload = "file_upload"
     file_delete = "file_delete"
     file_rename = "file_rename"
+    sql_upsert = "sql_upsert"
+    sql_delete = "sql_delete"
 
 
 class FileLog(Storage):
@@ -122,16 +124,20 @@ class BinLog:
         else:
             db_put(key, log_body)
 
-    def add_log(self, optype, key, value=None, batch=None, old_value=None, *, record_value=False):
+    def add_log(self, optype, key, value=None, batch=None, old_value=None, *, record_value=False, table_name=None):
         if not self._is_enabled:
             return
 
         with self._lock:
             self.last_seq += 1
             binlog_id = self._pack_id(self.last_seq)
-            binlog_body = dict(optype=optype, key=key, old_value=old_value)
-            if record_value:
+            binlog_body = dict(optype=optype, key=key)
+            if old_value != None:
+                binlog_body["old_value"] = old_value
+            if record_value and value != None:
                 binlog_body["value"] = value
+            if table_name != None:
+                binlog_body["table_name"] = table_name
             self._put_log(binlog_id, binlog_body, batch=batch)
 
     def list(self, last_seq=0, limit=10, map_func=None):

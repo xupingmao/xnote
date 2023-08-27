@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 01:57:47
+@LastEditTime : 2023-08-27 10:19:33
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -322,7 +322,7 @@ def update_message_status(id, status):
         data.mtime = xutils.format_datetime()
 
         MessageDao.update(data)
-        MessageDao.refresh_message_stat(user_name)
+        MessageDao.refresh_message_stat(user_name, ["task", "done"])
 
         event = Storage(id=id, user=user_name,
                         status=status, content=data.content)
@@ -457,7 +457,7 @@ class DeleteAjaxHandler:
 
         # 删除并刷新统计信息
         MessageDao.delete_by_key(msg.id)
-        MessageDao.refresh_message_stat(msg.user)
+        MessageDao.refresh_message_stat(msg.user, [msg.tag])
         after_message_delete(msg)
 
         return webutil.SuccessResult()
@@ -521,10 +521,7 @@ def create_message(user_name, tag, content, ip):
     message.content = content
 
     id = MessageDao.create(message)
-
-    message.id = id
-
-    MessageDao.refresh_message_stat(user_name)
+    MessageDao.refresh_message_stat(user_name, [message.tag])
 
     created_msg = MessageDao.get_by_id(id)
     assert created_msg != None
@@ -770,7 +767,7 @@ class MessageListHandler:
 
     def get_task_taglist_page(self):
         user_name = xauth.current_name()
-        msg_list, amount = msg_dao.list_task(user_name, 0, -1)
+        msg_list, amount = msg_dao.list_task(user_name, 0, 1000)
 
         tag_list = get_tags_from_message_list(
             msg_list, "task", display_tag="taglist")
@@ -898,7 +895,7 @@ class StatAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        user = xauth.current_name()
+        user = xauth.current_name_str()
         stat = msg_dao.get_message_stat(user)
         format_message_stat(stat)
         return stat

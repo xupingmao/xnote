@@ -309,6 +309,7 @@ class TableInfo:
         self.columns = []
         self.indexes = []
         self.dbpath = "" # sqlite文件路径
+        self.enable_binlog = False
     
     def add_column(self, colname, *args, **kw):
         self.column_names.append(colname)
@@ -327,6 +328,7 @@ class TableManagerFacade:
     
     @classmethod
     def get_table_info(cls, tablename=""):
+        # type: (str) -> TableInfo|None
         return cls.table_dict.get(tablename)
     
     @classmethod
