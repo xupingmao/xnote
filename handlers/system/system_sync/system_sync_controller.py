@@ -185,6 +185,11 @@ class SyncHandler:
             xauth.check_login("admin")
             return FOLLOWER.sync_files_from_leader()
 
+        if p == "sync_db":
+            xauth.check_login("admin")
+            FOLLOWER.sync_db_from_leader()
+            return webutil.SuccessResult()
+
         return LeaderHandler().handle_leader_action()
     
     def get_leader_binlog_seq(self, role_manager):

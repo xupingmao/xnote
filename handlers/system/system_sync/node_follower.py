@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 12:05:06
+@LastEditTime : 2023-08-27 13:20:11
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -356,6 +356,7 @@ class DBSyncer:
                 table.delete_by_key(key)
                 done = True
         except:
+            logging.error("key=%s", key)
             xutils.print_exc()
 
         if not done:
@@ -448,14 +449,9 @@ class DBSyncer:
             optype = data.get("optype")
             key = data.get("key")
             value = data.get("value")
-            assert key != None
-            if value == None:
-                optype = "delete"
 
-            if optype == "put":
-                self.put_and_log(key, value)
-            elif optype == "delete":
-                self.delete_and_log(key)
+            if optype in (BinLogOpType.put, BinLogOpType.delete):
+                self.handle_kv_binlog(data)
             elif optype == "file_upload":
                 self.file_syncer.handle_file_binlog(key, value)
             elif optype == "file_rename":
@@ -475,6 +471,15 @@ class DBSyncer:
         else:
             logging.info("db已经保持同步")
     
+    def handle_kv_binlog(self, data):
+        key = data.get("key")
+        value = data.get("value")
+        assert key != None
+        if value == None:
+            self.delete_and_log(key)
+        else:
+            self.put_and_log(key, value)
+
     def handle_sql_binlog(self, data):
         optype = data.get("optype")
         table_name = data.get("table_name")
