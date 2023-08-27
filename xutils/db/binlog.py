@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 11:39:56
+@LastEditTime : 2023-08-27 19:16:53
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -34,6 +34,7 @@ class FileLog(Storage):
     """文件变更日志"""
     def __init__(self):
         self.fpath = ""
+        self.ftype = ""
         self.user_name = ""
         self.user_id = 0
         self.webpath = ""

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 18:54:50
+@LastEditTime : 2023-08-27 19:16:15
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -17,12 +17,14 @@ import xconfig
 import xutils
 import logging
 import xtables
+import os
 
 from xutils import dateutil
 from xutils import textutil
 from xutils import Storage
 from xutils import webutil
 from xutils import dbutil
+from xutils import fsutil
 from xutils.db.binlog import BinLog, BinLogOpType
 
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
@@ -227,9 +229,16 @@ class Leader(NodeManagerBase):
         return webutil.SuccessResult(data_list[:limit])
     
     def process_file_log(self, log):
+        fpath = log.fpath
+        if os.path.isdir(fpath):
+            log.ftype = "dir"
+        else:
+            log.ftype = fsutil.get_file_ext(fpath)
+
         return log
     
     def process_log(self, log):
+        # TODO 补充单元测试
         optype = log.optype
         if optype in (BinLogOpType.sql_upsert, BinLogOpType.sql_delete):
             table_name = log.table_name
@@ -246,7 +255,7 @@ class Leader(NodeManagerBase):
                 log.optype = BinLogOpType.sql_delete
         elif optype in (BinLogOpType.file_upload, BinLogOpType.file_rename, BinLogOpType.file_delete):
             return self.process_file_log(log)
-        else:
+        elif optype == BinLogOpType.put:
             key = log.key
             log.value = dbutil.get(key)
             if log.value == None:

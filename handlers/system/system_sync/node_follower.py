@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 13:20:11
+@LastEditTime : 2023-08-27 19:17:38
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -57,7 +57,8 @@ class Follower(NodeManagerBase):
         # 同步完成的时间
         self.fs_sync_done_time = -1
         self._debug = False
-        self.file_syncer = FileSyncer(self.get_client())
+        self.http_client = self.get_client()
+        self.file_syncer = FileSyncer(self.http_client)
         self.db_syncer = DBSyncer(file_syncer = self.file_syncer)
 
     def create_http_client(self):
@@ -131,6 +132,7 @@ class Follower(NodeManagerBase):
             item = self.follower_list[0]
             self.admin_token = item.admin_token
             self.fs_index_count = item.fs_index_count
+            self.http_client.admin_token = self.admin_token
 
     def get_follower_list(self):
         return self.follower_list
@@ -284,7 +286,8 @@ class FileSyncer:
         self.sync_file(value)
     
     def sync_file(self, item):
-        self.http_client.download_file(item)
+        new_item = FileIndexInfo(**item)
+        self.http_client.download_file(new_item)
 
 empty_file_syncer = FileSyncer()
 
