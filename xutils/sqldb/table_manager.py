@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 16:22:25
+@LastEditTime : 2023-08-27 11:30:14
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -347,7 +347,8 @@ class TableManagerFacade:
         
         self.manager.create_table()
 
-        if not is_backup:
+        check_table_define = kw.get("check_table_define", True)
+        if not is_backup and check_table_define:
             if tablename in self.table_dict:
                 raise Exception("table already defined: %s" % tablename)
         

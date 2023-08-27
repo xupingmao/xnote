@@ -4,16 +4,15 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 11:19:11
+@LastEditTime : 2023-08-27 11:43:08
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
 import time
 import xutils
 import web.db
-from xutils import Storage
-from xutils.interfaces import ProfileLog, ProfileLogger
 from . import table_manager
+from xutils.interfaces import ProfileLog, ProfileLogger
 from xutils.db.binlog import BinLog, BinLogOpType
 
 class TableProxy:
@@ -142,7 +141,7 @@ class TableProxy:
             
             new_where = f"`{pk_name}` in $pk_list"
             new_vars = dict(pk_list=pk_list)
-            result = self.db.delete(self.tablename, new_where, using=using, vars=new_vars, _test=_test)
+            result = self.db.delete(self.tablename, where=new_where, using=using, vars=new_vars, _test=_test)
             self.add_delete_binlog(pk_list)
             return result
         except Exception as e:
@@ -219,7 +218,6 @@ class TableProxy:
     def add_delete_binlog(self, pk_list=[]):
         if not self.enable_binlog:
             return
-        pk_name = self.table_info.pk_name
         for pk_value in pk_list:
             BinLog.get_instance().add_log(BinLogOpType.sql_delete, pk_value, table_name=self.tablename)
         

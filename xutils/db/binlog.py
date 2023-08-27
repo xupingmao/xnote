@@ -4,13 +4,13 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 11:15:41
+@LastEditTime : 2023-08-27 11:39:56
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
 from web import Storage
 from xutils.db.dbutil_base import count_table, prefix_iter
-from xutils.db.dbutil_table import db_put, prefix_list, register_table, create_write_batch, db_batch_delete
+from xutils.db.dbutil_base import db_put, prefix_list, register_table, db_batch_delete
 
 import struct
 import threading
@@ -99,6 +99,13 @@ class BinLog:
 
     def get_record_key(self, log_id):
         return self._table_name + ":" + log_id
+    
+    def get_last_log(self):
+        logs = prefix_list(self._table_name, reverse=True,
+                           limit=1, include_key=False)
+        if len(logs) == 0:
+            return None
+        return logs[0]
 
     def get_last_key(self):
         logs = prefix_list(self._table_name, reverse=True,
