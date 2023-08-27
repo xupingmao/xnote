@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 02:31:05
+@LastEditTime : 2023-08-27 11:59:06
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -16,13 +16,14 @@ import xauth
 import xconfig
 import xutils
 import logging
+import xtables
 
 from xutils import dateutil
 from xutils import textutil
 from xutils import Storage
 from xutils import webutil
 from xutils import dbutil
-from xutils.db.binlog import BinLog
+from xutils.db.binlog import BinLog, BinLogOpType
 
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import CONFIG
@@ -166,7 +167,10 @@ class Leader(NodeManagerBase):
 
         return result
 
-    def skip_db_sync(self, key:str):
+    def skip_db_sync(self, key):
+        # type: (str|int) -> bool
+        if isinstance(key, int):
+            return False
         skipped_prefix_tuple = ("_binlog:", "_index$", "cluster_config:",
                                 "fs_index:", "fs_sync_index:", "fs_sync_index_copy:")
         table_name = key.split(":", 1)[0]
@@ -216,14 +220,34 @@ class Leader(NodeManagerBase):
             if not include_req_seq and log.seq == last_seq:
                 continue
             
+            log = self.process_log(log)
+            if log != None:
+                data_list.append(log)
+
+        return webutil.SuccessResult(data_list[:limit])
+    
+    def process_log(self, log):
+        optype = log.optype
+        if optype in (BinLogOpType.sql_upsert, BinLogOpType.sql_delete):
+            table_name = log.table_name
+            table_info = xtables.TableManager.get_table_info(table_name)
+            if table_info == None:
+                # 无效的binlog
+                return None
+            table = xtables.get_table_by_name(table_name)
+            pk_name = table_info.pk_name
+            pk_value = log.key
+            db_record = table.select_first(where={pk_name: pk_value})
+            log.value = db_record
+            if db_record == None:
+                log.optype = BinLogOpType.sql_delete
+        else:
             key = log.key
             log.value = dbutil.get(key)
             if log.value == None:
                 log.optype = "delete"
-                
-            data_list.append(log)
-
-        return webutil.SuccessResult(data_list[:limit])
+        
+        return log
 
     def list_db(self, last_key, limit=20):
         def filter_func(key, value):

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 12:45:56
+@LastEditTime : 2023-08-27 12:05:06
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -12,12 +12,13 @@
 import time
 import logging
 import xconfig
+import xtables
 
 from xutils import Storage
 from xutils import textutil, cacheutil
 from xutils import dbutil, six
 import xutils
-from xutils.db.binlog import BinLog, FileLog
+from xutils.db.binlog import BinLog, FileLog, BinLogOpType
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .node_base import CONFIG
@@ -463,6 +464,8 @@ class DBSyncer:
             elif optype == "file_delete":
                 # TODO 考虑移动到一个删除文件夹下面
                 logging.info("【不处理】删除文件操作: %s", data)
+            elif optype in (BinLogOpType.sql_upsert, BinLogOpType.sql_delete):
+                self.handle_sql_binlog(data)
             else:
                 logging.error("未知的optype:%s", optype)
 
@@ -471,6 +474,28 @@ class DBSyncer:
             self.put_binlog_last_seq(max_seq)
         else:
             logging.info("db已经保持同步")
+    
+    def handle_sql_binlog(self, data):
+        optype = data.get("optype")
+        table_name = data.get("table_name")
+        value = data.get("value")
+        pk_value = data.get("key")
+
+        if table_name == None:
+            return
+        
+        table = xtables.get_table_by_name(table_name)
+        pk_name = table.table_info.pk_name
+        where = {pk_name:pk_value}
+        if optype == BinLogOpType.sql_delete:
+            table.delete(where=where)
+
+        if optype == BinLogOpType.sql_upsert:
+            old = table.select_first(where=where)
+            if old == None:
+                table.insert(**value)
+            else:
+                table.update(where=where, **value)
 
     def _sync_db_full_step_work(self, result_obj: dict, last_key):
         # type: (dict, str) -> int
