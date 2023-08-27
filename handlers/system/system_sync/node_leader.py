@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 11:59:06
+@LastEditTime : 2023-08-27 18:54:50
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -226,6 +226,9 @@ class Leader(NodeManagerBase):
 
         return webutil.SuccessResult(data_list[:limit])
     
+    def process_file_log(self, log):
+        return log
+    
     def process_log(self, log):
         optype = log.optype
         if optype in (BinLogOpType.sql_upsert, BinLogOpType.sql_delete):
@@ -241,6 +244,8 @@ class Leader(NodeManagerBase):
             log.value = db_record
             if db_record == None:
                 log.optype = BinLogOpType.sql_delete
+        elif optype in (BinLogOpType.file_upload, BinLogOpType.file_rename, BinLogOpType.file_delete):
+            return self.process_file_log(log)
         else:
             key = log.key
             log.value = dbutil.get(key)
