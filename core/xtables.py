@@ -436,5 +436,5 @@ def init():
         init_kv_store_table()
         init_kv_zset_table(get_db_instance())
     
-    if xconfig.DatabaseConfig.db_driver_sql == "sqlite":
+    if xconfig.DatabaseConfig.db_driver == "sqlite":
         init_kv_store_table()
