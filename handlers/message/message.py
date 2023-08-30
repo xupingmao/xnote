@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 10:19:33
+@LastEditTime : 2023-08-30 01:28:54
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -248,7 +248,7 @@ class ListAjaxHandler:
             kw.top_keywords = []
             if orderby == "amount_desc" and page == 1:
                 kw.recent_keywords = message_tag.get_recent_keywords(user_name, tag = tag)
-
+                
         return xtemplate.render(template_file, **kw)
     
     def get_top_keywords(self, msg_list):
@@ -713,7 +713,7 @@ class MessageListHandler:
         kw.side_tags = list_task_tags(xauth.current_name())
         kw.side_tag_tab_key = "filterKey"
 
-        return xtemplate.render("message/page/message_list_view.html", **kw)
+        return xtemplate.render("message/page/tag_index.html", **kw)
 
     def get_task_by_keyword_page(self, filter_key):
         user_name = xauth.current_name()
@@ -770,7 +770,7 @@ class MessageListHandler:
         msg_list, amount = msg_dao.list_task(user_name, 0, 1000)
 
         tag_list = get_tags_from_message_list(
-            msg_list, "task", display_tag="taglist")
+            msg_list, "task", display_tag="taglist", search_tag="task")
 
         for tag in tag_list:
             tag.is_marked = is_marked_keyword(user_name, tag.name)

@@ -1,0 +1,106 @@
+{% extends base %}
+
+{% block body_top %}
+
+    {% init default_content = "" %}
+    {% init show_tab = True %}
+    <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/webuploader/webuploader.css">
+    <script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
+    <script type="text/javascript" src="{{_server_home}}/_static/js/message/message.js?ts={{_ts}}"></script>
+
+    <input class="msg-search-key" type="hidden" value="{{key}}"/>
+    <input class="default-content-input" type="hidden" value="{{default_content}}"/>
+{% end %}
+
+{% block body_left %}
+
+    {% init message_tag = "" %}
+    <!-- Tab页 -->
+    {% init message_tab = "log" %}
+    {% init default_content = "" %}
+    {% init show_tab = True %}
+    {% init show_input_box = True %}
+    {% init show_system_tag = True %}
+    {% init show_keyword_info = False %}
+
+    
+    {% include message/component/message_title.html %}
+
+    <!-- 事件转换 -->
+    {% include message/component/message_event.html %}
+
+    <!-- 编辑 -->
+    {% include message/component/message_edit.html %}
+
+    <!-- Tab页 -->
+    {% include message/component/message_tab_task.html %}
+
+    <!-- 编辑器 -->
+    {% include message/component/message_input.html %}
+
+    <!-- 内容区域 -->
+    {% include message/component/message_list.html %}
+
+    <script type="text/javascript">
+        $(function (e) {
+            xnote.state.message.messageTag = "{{message_tag}}";
+            xnote.state.message.tag = "{{tag}}";
+
+            function getParamTag() {
+                var tag = "{{message_tag}}";
+                if (tag != "") {
+                    return tag;
+                }
+                return "{{tag}}";
+            }
+
+            function getParamPage() {
+                var page = getUrlParam("page");
+                if (page == undefined) {
+                    return 1;
+                } else {
+                    return page;
+                }
+            }
+
+            function getParamKey() {
+                // getUrlParam 获取参数空格会被处理成`+`
+                // return getUrlParam("key", "");
+                return $(".msg-search-key").val();
+            }
+
+            function onMessageRefresh() {
+                var params = getUrlParams();
+
+                params.tag  = getParamTag();
+                params.page = getParamPage();
+                params.key = getParamKey();
+
+                window.doRefreshMessageList(params);
+            }
+
+            function onMessageCreated() {
+                onMessageRefresh();
+            }
+
+            xnote.on("message.updated", onMessageRefresh);
+            xnote.on("message.created", onMessageCreated);
+
+            // 定义刷新消息列表函数
+            xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
+
+            // 触发更新事件
+            xnote.fire("message.updated");
+        })
+    </script>
+
+{% end %}
+
+
+{% block body_right %}
+    <div class="desktop-only">
+        {% include common/sidebar/app_index.html %}
+        {% include note/component/group_special_folder.html %}
+        {% include message/component/right/tags.html %}
+    </div>
+{% end %}

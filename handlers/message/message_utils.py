@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 21:12:01
+@LastEditTime : 2023-08-30 01:13:44
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -76,7 +76,6 @@ class TopicTranslator:
         fmt = "<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={p}\">{value}</a>"
         return fmt.format(quoted_key=quoted_key, value=value, p=p)
 
-
 def mark_text(content, tag="log"):
     import xconfig
     from xutils.text_parser import TextParser
@@ -95,6 +94,8 @@ def mark_text(content, tag="log"):
     keywords = parser.keywords
     if keywords == None:
         keywords = set()
+
+    keywords = get_standard_tag_set(keywords)
 
     return "".join(tokens), keywords
 
@@ -169,7 +170,8 @@ def get_tags_from_message_list(
         msg_list,
         input_tag="",
         input_date="",
-        display_tag=None):
+        display_tag=None,
+        search_tag="all"):
 
     assert isinstance(msg_list, list)
     assert isinstance(input_tag, str)
@@ -208,6 +210,7 @@ def get_tags_from_message_list(
             key=search_key,
             displayTag=display_tag,
             noTag=no_tag,
+            p=search_tag,
         )
 
         url = "/message?" + \
@@ -246,6 +249,11 @@ def is_system_tag(tag):
 def is_standard_tag(tag):
     assert isinstance(tag, str)
     return tag.startswith("#") and tag.endswith("#")
+
+def get_standard_tag_set(tags):
+    # type: (set)->set
+    return set(filter(is_standard_tag, tags))
+
 
 def convert_message_list_to_day_folder(item_list, date, show_empty=False):
     result = []

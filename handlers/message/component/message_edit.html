@@ -66,7 +66,7 @@ $(function () {
             content: content
         }
 
-        $.post("/message/update", params, function (resp) {
+        xnote.http.post("/message/update", params, function (resp) {
             if (resp.code == "success") {
                 xnote.toast("更新成功");
 
@@ -76,9 +76,6 @@ $(function () {
             } else {
                 xnote.alert("更新失败:" + resp.message);
             }
-        }).fail(function (e) {
-            console.error(e);
-            xnote.alert("系统繁忙，请稍后重试");
         });
     });
 
