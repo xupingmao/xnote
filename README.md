@@ -43,9 +43,12 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 2. 创建配置文件 `mv ./config/boot/boot.default.properties ./boot.properties`
 3. 修改boot.properties
 4. ```docker-compose up -d```
+
 ### 物理机安装
+
 #### 安装依赖环境
-#### - Python >= 3.6
+
+- Python >= 3.6
 - 安装依赖的软件包
     - 最小化安装(使用sqlite) `python3 -m pip install -r config/requirements.min.txt`
     - Mac/Linux执行 ```python -m pip install -r config/requirements.txt```
@@ -60,9 +63,9 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 # 切换到xnote目录
 > cd xnote
 # 复制配置并且进行自定义配置
-> cp config/boot/boot.min.properties config/boot/boot.local.properties
+> cp config/boot/boot.min.properties boot.local.properties
 # 启动
-> python3 app.py --config config/boot/boot.local.properties
+> python3 app.py --config boot.local.properties
 ```
 
 如果不修改端口号，启动之后在浏览器打开 http://localhost:1234/ 就可以使用了，初始化的管理员账号是admin，默认密码是 123456
