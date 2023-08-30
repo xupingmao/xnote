@@ -38,14 +38,20 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 
 ## 安装&运行
 
-### 安装依赖环境
-- Python >= 3.6
+### Docker-compose
+1. 创建持久化数据目录 ```mkdir data```
+2. 创建配置文件 `mv ./config/boot/boot.default.properties ./boot.properties`
+3. 修改boot.properties
+4. ```docker-compose up -d```
+### 物理机安装
+#### 安装依赖环境
+#### - Python >= 3.6
 - 安装依赖的软件包
     - 最小化安装(使用sqlite) `python3 -m pip install -r config/requirements.min.txt`
     - Mac/Linux执行 ```python -m pip install -r config/requirements.txt```
     - Windows执行 `python -m pip install -r config/requirements.win.txt`
 
-### 配置和启动
+#### 配置和启动
 
 
 默认的配置文件位于`config/boot/boot.default.properties`，具体的功能参考配置的注释
