@@ -12,10 +12,11 @@
 
 <div class="card">    
     <div class="card-title btn-line-height">
-        <span class="x-tab-box" data-tab-key="tag" data-tab-default="log">
-            <a class="x-tab" href="{{_server_home}}/message?tag=log" data-tab-value="log">{{T("随手记")}}</a>
-            <a class="x-tab" href="{{_server_home}}/message?tag=task" data-tab-value="task">{{T("待办任务")}}</a>
-        </span>
+        {% if tag == "task" %}
+            <span>{{T("待办任务")}}</span>
+        {% else %}
+            <span>{{T("随手记")}}</span>
+        {% end %}
         <div class="float-right">
             {% if HOME_PATH == "/message/log" and not show_back_btn %}
                 <a class="btn btn-default" href="{{_server_home}}/note/group">笔记</a>

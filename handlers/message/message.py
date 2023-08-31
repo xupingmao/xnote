@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-30 01:28:54
+@LastEditTime : 2023-08-31 23:11:02
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -182,8 +182,8 @@ class ListAjaxHandler:
             return self.do_list_task(user_name, offset, pagesize)
 
         if tag == "key":
-            orderby = xutils.get_argument_str("orderby", "")
-            return message_tag.list_message_tags(user_name, offset, pagesize, orderby = orderby)
+            orderby = xutils.get_argument_str("orderby", "amount_desc")
+            return message_tag.list_message_tags(user_name, offset, pagesize, orderby = orderby, only_standard=True)
 
         list_func = xutils.lookup_func("message.list_%s" % tag)
         if list_func != None:
@@ -882,13 +882,15 @@ class CalendarHandler:
 
         date = "%s-%02d" % (year, month)
 
-        return xtemplate.render("message/page/message_calendar.html",
-                                tag="date",
-                                year=year,
-                                month=month,
-                                date=date,
-                                html_title=T("随手记"),
-                                search_type="message")
+        kw = Storage()
+        kw.tag = "date"
+        kw.year = year
+        kw.month = month
+        kw.date = date
+        kw.html_title = T("随手记")
+        kw.search_type = "message"
+
+        return xtemplate.render("message/page/message_calendar.html", **kw)
 
 
 class StatAjaxHandler:
