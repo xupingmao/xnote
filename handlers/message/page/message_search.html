@@ -5,9 +5,9 @@
     {% init default_content = "" %}
     {% init show_tab = True %}
 
-    <link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/webuploader/webuploader.css">
-    <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
-    <script type="text/javascript" src="/static/js/message/message.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/webuploader/webuploader.css">
+    <script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
+    <script type="text/javascript" src="{{_server_home}}/_static/js/message/message.js"></script>
 
     <input class="msg-search-key" type="hidden" value="{{key}}"/>
     <input class="default-content-input" type="hidden" value="{{default_content}}"/>
@@ -23,40 +23,37 @@
     {% init message_tab = "log" %}
     {% init default_content = "" %}
     {% init date = "" %}
+    {% init is_task_tag = False %}
     
     <div class="card">    
         <div class="card-title btn-line-height">
-            {% if p == "task" %}
+            {% if is_task_tag %}
                 <span>搜索待办</span>
-            {% elif p == "done" %}
-                <span>搜索已完成</span>
             {% else %}
                 <span>搜索随手记</span>
             {% end %}
 
             <div class="float-right">
-                <a class="btn btn-default" href="{{_server_home}}/message?tag=task">待办</a>
-                <a class="btn btn-default" href="{{_server_home}}/message?tag=log">随手记</a>
+                {% if is_task_tag %}
+                    <a class="btn btn-default" href="{{_server_home}}/message?tag=task">待办</a>
+                {% else %}
+                    <a class="btn btn-default" href="{{_server_home}}/message?tag=log">随手记</a>
+                {% end %}
                 {% include common/button/back_button.html %}
             </div>
         </div>
     </div>
 
+    {% if is_task_tag %}
     <div class="card x-tab-box" data-tab-key="p" data-tab-default="all">
-        <a class="x-tab" href="{{_server_home}}/message?tag=search&p=all&key={{quote(key)}}" data-tab-value="all">
-            全部
-        </a>
-    
         <a class="x-tab" href="{{_server_home}}/message?tag=search&p=task&key={{quote(key)}}" data-tab-value="task">
             待办
-        </a>
-        <a class="x-tab" href="{{_server_home}}/message?tag=search&p=log&key={{quote(key)}}" data-tab-value="log">
-            随手记
         </a>
         <a class="x-tab" href="{{_server_home}}/message?tag=search&p=done&key={{quote(key)}}" data-tab-value="done">
             已完成
         </a>
     </div>
+    {% end %}
 
     <!-- 事件转换 -->
     {% include message/component/message_event.html %}

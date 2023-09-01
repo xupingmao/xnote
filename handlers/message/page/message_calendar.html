@@ -1,5 +1,13 @@
 {% extends base %}
 
+{% block head %}
+
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
+<script type="text/javascript" src="{{_server_home}}/_static/js/message/message.js"></script>
+
+{% end %}
+
 {% block body_left %}
 
     {% include message/component/message_title.html %}
@@ -14,6 +22,9 @@
 
     <!-- 文字区域 -->
     {% include message/component/message_list.html %}
+
+    <!-- 编辑 -->
+    {% include message/component/message_edit.html %}
 
     <script type="text/javascript">
         $(function (e) {

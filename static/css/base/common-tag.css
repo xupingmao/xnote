@@ -75,7 +75,6 @@ a.tag:hover {
 .tag-span, .tag-span-danger {
     display: block;
     float: left;
-    font-size: 12px;
     line-height: 20px;
     border-radius: 2px;
     padding: 5px;

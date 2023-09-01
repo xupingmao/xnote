@@ -66,7 +66,8 @@ class SearchHandler:
 
     def get_page(self):
         user_name = xauth.current_name()
-        key = xutils.get_argument("key", "")
+        key = xutils.get_argument_str("key", "")
+        p = xutils.get_argument_str("p")
 
         kw = Storage()
         kw.tag = "search"
@@ -78,6 +79,7 @@ class SearchHandler:
         kw.show_create_on_tag = kw.create_tag != "forbidden"
         kw.is_keyword_marked = message_utils.is_marked_keyword(user_name, key)
         kw.search_type = "message"
+        kw.is_task_tag = message_utils.is_task_tag(p)
 
         return xtemplate.render("message/page/message_search.html", **kw)
 

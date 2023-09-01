@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-30 01:13:44
+@LastEditTime : 2023-09-01 18:56:48
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -245,6 +245,9 @@ def filter_default_content(content):
 def is_system_tag(tag):
     assert isinstance(tag, str)
     return tag.startswith("$")
+
+def is_task_tag(tag):
+    return tag in ("task", "done")
 
 def is_standard_tag(tag):
     assert isinstance(tag, str)

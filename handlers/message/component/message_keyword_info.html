@@ -1,21 +1,26 @@
 {% init is_keyword_marked = False %}
 {% init show_create_on_tag = True %}
+{% init is_task_tag = False %}
 
 {% if keyword != "" %}
 <div class="card btn-line-height">
     <span class="info-tag">标签</span>
     <span class="keyword-span">{{keyword}}</span>
     <div class="float-right">
+
+        {% if is_task_tag %}
         <button class="btn-default" 
             data-keyword="{{keyword}}"
             data-tag="task"
             data-title="创建待办"
             onclick="xnote.action.message.createMessageOnTag(this);">+待办</button>
+        {% else %}
         <button class="btn-default" 
             data-keyword="{{keyword}}"
             data-tag="log"
             data-title="创建随手记"
             onclick="xnote.action.message.createMessageOnTag(this);">+随手记</button>
+        {% end %}
     
         {% if is_keyword_marked %}
             <button class="btn-default mark-btn" data-action="unmark"
