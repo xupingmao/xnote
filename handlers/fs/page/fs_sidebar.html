@@ -10,20 +10,32 @@
     .fs-image {
         width: 180px;
     }
+
     .fs-path {
         padding: 5px;
         background-color: #eee;
     }
+
+    .content-left {
+        width: 100%;
+    }
+
+    .content-right {
+        display: none;
+    }
+
     .left {
         float: left;
     }
+
     .right {
         float: right;
     }
+
     .checkboxTd {
         width: 20px;
     }
-        
+
     tr:hover td {
         background: none;
     }
@@ -39,6 +51,7 @@
     .size-td {
         width: 100px;
     }
+
     .options-td {
         width: 100px;
     }
@@ -91,24 +104,33 @@
         height: 500px;
         background-color: white;
     }
+
     #previewIframe {
         border: none;
         width: 100%;
         height: 100%;
         overflow: hidden;
     }
+
     .error {
         display: block;
     }
 
+    .footer, .sql-info {
+        display: none;
+    }
+
+    .fs-file.active {
+        color: red;
+    }
 </style>
 
-    {% set search_action = '/fs_find' %}
-    {% set search_placeholder = '搜索文件' %}
+{% set search_action = '/fs_find' %}
+{% set search_placeholder = '搜索文件' %}
 {% end %}
 
 {% block search_form %}
-<input type="text" name="path" class="hide" value="{{?path}}"/>
+<input type="text" name="path" class="hide" value="{{?path}}" />
 {% end %}
 
 {% block body %}
@@ -119,36 +141,34 @@
 {% end %}
 
 <div class="card">
+    {% include fs/component/fs_title.html %}
+    {% include mod_fs_path.html %}
 
-{% include fs/component/fs_title.html %}
-{% include mod_fs_path.html %}
-
-<div class="col-md-12 fs-main file-list">
-<div class="fs-left">
-<table class="col-md-12 no-border-table fs-table">
-{% for item in filelist %}
-    {# 隐藏文件 #}
-    {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
-        {% continue %}
-    {% end %}
-    <tr>
-        <td class="checkboxTd"><input type="checkbox" data-path="{{item.path}}" data-name="{{item.name}}"></td>
-        <td>
-        {% if item.type == "dir" %}
-            <img src="/static/image/folder.gif"/>
-            <a href="{{_server_home}}/fs/{{item.path}}?mode=sidebar" class="fs-folder">{{item.name}}</a>
-        {% else %}
-            <a data-path="{{item.path}}" class="fs-file">{{item.name}}</a>
-        {% end %}
-        </td>
-    </tr>
-{% end %}
-</table>
-</div>
-<div class="fs-preview">
-    <iframe id="previewIframe" src=""></iframe>
-</div>
-</div>
+    <div class="fs-left">
+        <table class="col-md-12 no-border-table fs-table">
+            {% for item in filelist %}
+            {# 隐藏文件 #}
+            {% if xconfig.FS_HIDE_FILES and (item.name[0] == "." or item.name.endswith((".pyc", ".class"))) %}
+            {% continue %}
+            {% end %}
+            <tr>
+                <td class="checkboxTd"><input type="checkbox" data-path="{{item.path}}" data-name="{{item.name}}">
+                </td>
+                <td>
+                    {% if item.type == "dir" %}
+                    <img src="/static/image/folder.gif" />
+                    <a href="{{item.url}}?mode=sidebar" class="fs-folder">{{item.name}}</a>
+                    {% else %}
+                    <a data-path="{{item.path}}" class="fs-file">{{item.name}}</a>
+                    {% end %}
+                </td>
+            </tr>
+            {% end %}
+        </table>
+    </div>
+    <div class="fs-preview">
+        <iframe id="previewIframe" src=""></iframe>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -158,16 +178,17 @@
         $(".error").text(message).fadeIn(200).delay(3000).fadeOut(300);
     }
 
-
     $(".command-btn").on("click", function () {
         var command = $(this).attr("data-command");
-        $.get("/system/command", {command: command, path: globalPath});
+        xnote.http.get("/system/command", { command: command, path: globalPath });
     })
 
     $(function () {
         adjustHeight(".fs-left", 20);
-        adjustHeight(".fs-preview", 20, {overflow:"hidden"});
+        adjustHeight(".fs-preview", 20, { overflow: "hidden" });
         $(".fs-file").click(function (e) {
+            $(".fs-file").removeClass("active");
+            $(e.target).addClass("active");
             var path = $(e.target).attr("data-path");
             var previewURL = "/fs_preview?path=" + path;
             window.location.hash = previewURL;
@@ -179,5 +200,5 @@
 {% end %}
 
 {% block aside %}
-    {% include fs/mod_aside.html %}
+{% include fs/mod_aside.html %}
 {% end %}

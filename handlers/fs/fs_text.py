@@ -18,12 +18,19 @@ class TextHandler:
     @xauth.login_required("admin")
     def GET(self):
         method = xutils.get_argument("method", "page")
+        embed = xutils.get_argument_bool("embed")
+
         if method == "contents":
             return self.get_bookmark()
         if method == "read_page":
             return self.read_page()
         
-        return xtemplate.render("fs/page/fs_text.html")
+        kw = Storage()
+        kw.embed = embed
+        if embed:
+            kw.show_nav = False
+        
+        return xtemplate.render("fs/page/fs_text.html", **kw)
 
     def get_table(self, user_name):
         assert len(user_name) > 0
@@ -71,7 +78,7 @@ class TextHandler:
         txt_info.version = TXT_INFO_VER
         txt_info.encoding = encoding
         txt_info.total_size = total_size
-        txt_info.file_size = fsutil.get_file_size(fpath)
+        txt_info.file_size = fsutil.get_file_size_int(fpath)
         txt_info.current_offset = 0
 
         db = self.get_table(user_name)

@@ -37,7 +37,7 @@ class PreviewHandler:
     def GET(self):
         # TODO 使用文件扩展
         path = xutils.get_argument_str("path", "")
-        embed = xutils.get_argument("embed", "true")
+        embed = xutils.get_argument_str("embed", "true")
 
         path = xutils.get_real_path(path)
         path = path.replace("\\", "/")
@@ -51,7 +51,7 @@ class PreviewHandler:
             return web.seeother(open_url.format(path=encoded_path, quoted_path=quoted_path, embed = embed))
 
         if xutils.is_img_file(path):
-            return """<html><img style="width: 100%%;" src="/fs~%s"></html>""" % xutils.quote(path)
+            return """<html><img style="width: 100%%;" src="/fs/~%s"></html>""" % xutils.quote(path)
         
         if xutils.is_text_file(path):
             raise web.seeother("/code/edit?path={path}&embed={embed}".format(path=encoded_path, embed=embed))

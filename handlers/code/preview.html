@@ -49,7 +49,7 @@
 
     <div class="card">
         
-        {% if _is_admin and path != "" %}
+        {% if _is_admin and path != "" and not embed %}
             {% include "mod_fs_path.html" %}
         {% end %}
         

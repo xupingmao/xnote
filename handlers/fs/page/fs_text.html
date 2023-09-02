@@ -15,8 +15,11 @@
 {% end %}
 
 {% block body %}
+
+{% init embed = False %}
 {% set path = xutils.get_argument("path") %}
 
+{% if not embed %}
 <div class="card">
     {% init fs_title = "文本阅读" %}
     <h3 class="card-title btn-line-height">
@@ -28,10 +31,13 @@
         </div>
     </h3>
 </div>
+{% end %}
 
 <div class="card">
     <!-- header -->
+    {% if not embed %}
     {% include mod_fs_path.html %}
+    {% end %}
 
     <!-- 目录 -->
     <div class="book-contents">

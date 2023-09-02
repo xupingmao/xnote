@@ -60,19 +60,20 @@ def get_path_list(path):
 
 def handle_layout(kw):
     kw.show_aside = False
-    embed = xutils.get_argument("embed", type=bool)
+    embed = xutils.get_argument_bool("embed")
     kw.embed = embed
     if embed:
         kw.show_menu = False
         kw.show_search = False
         kw.show_path = True
+        kw.show_nav = False
 
 
 class PreviewHandler:
 
     def GET(self, path=""):
         if path == "":
-            path = xutils.get_argument("path")
+            path = xutils.get_argument_str("path")
         else:
             path = xutils.unquote(path)
 

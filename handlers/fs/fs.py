@@ -182,11 +182,12 @@ class FileSystemHandler:
         kw["parent_path"]   = get_parent_path(path)
         kw["search_action"] = "/fs_find"
         kw["show_aside"]    = False
-        kw["show_hidden_files"] = xutils.get_argument("show_hidden_files", False, type = bool)
+        kw["show_hidden_files"] = xutils.get_argument_bool("show_hidden_files")
 
-        mode = xutils.get_argument("mode", xconfig.FS_VIEW_MODE)
+        mode = xutils.get_argument_str("mode", xconfig.FS_VIEW_MODE)
         kw["fs_mode"] = mode
-
+        if mode == "sidebar":
+            kw.show_search = False
         return get_fs_page_by_mode(mode, kw)
 
     def list_root(self):
