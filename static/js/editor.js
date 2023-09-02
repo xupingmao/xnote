@@ -108,6 +108,8 @@ function initCodeMirror(selector, options) {
             if (editor.showHint) {
                 editor.showHint();
             }
+            // 更新上次更新时间
+            xnote.editor.lastKeyUpTime = new Date().getTime();
         }
     });
 

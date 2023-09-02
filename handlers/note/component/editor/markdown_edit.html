@@ -94,6 +94,7 @@
 
     // 注册到xnote的接口中
     xnote.editor.codeInsert = codeInsert;
+    xnote.editor.lastKeyUpTime = 0;
     xnote.state.reloadDraft = false;
 
     function initMdCodeMirror() {
@@ -288,12 +289,15 @@
 
         // 格式化表格
         xnote.editor.formatMarkdownTable = function () {
-            // var selection = codeMirror.getSelection();
-            var selection = codeMirror.doc.getValue();
-            var formatedText = formatMarkdownTable(selection);
+            var cursor = codeMirror.getCursor();
+            var oldValue = codeMirror.doc.getValue();
+            var formatedText = formatMarkdownTable(oldValue);
             console.log(formatedText);
             // codeMirror.replaceSelection(formatedText, "around");
-            codeMirror.doc.setValue(formatedText);
+            if (oldValue != formatedText) {
+                codeMirror.doc.setValue(formatedText);
+                codeMirror.setCursor(cursor);
+            }
         };
 
         // 文件上传
@@ -393,7 +397,20 @@
             autoSave(true);
         };
 
+        function autoFormat() {
+            var now = new Date().getTime();
+            var editGap = now - xnote.editor.lastKeyUpTime;
+            if (editGap > 1000) {
+                // 编辑间隔大于1秒，视为停顿
+                xnote.editor.formatMarkdownTable();
+            }
+            setTimeout(autoFormat, 500);
+        }
+
         onPageLoad();
+
+        // 自动格式化
+        autoFormat();
     });
 
 </script>
