@@ -48,6 +48,10 @@ class FileInfoDao:
         return _index_db.delete(where=dict(fpath=fpath))
     
     @classmethod
+    def delete_by_id(cls, id=0):
+        return _index_db.delete(where=dict(id=id))
+    
+    @classmethod
     def upsert(cls, info: FileInfo):
         info.fpath = os.path.abspath(info.fpath)
         old = cls.get_by_fpath(info.fpath)

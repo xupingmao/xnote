@@ -9,6 +9,7 @@ import unittest
 sys.path.insert(1, "lib")
 sys.path.insert(1, "core")
 import xauth
+import xnote_user_config
 from xutils import Storage
 from xutils import dateutil
 
@@ -135,3 +136,12 @@ class TestXauth(BaseTestCase):
         user_name = "test"
         session_info = xauth.login_user_by_name(user_name, write_cookie=False)
         assert xauth.has_login_by_sid(user_name, session_info.sid)
+
+    def test_user_config(self):
+        from xnote_user_config import UserConfigKey
+        user_name = xauth.current_name_str()
+        config_dict = xnote_user_config.get_config_dict(user_name)
+        
+        assert config_dict[UserConfigKey.THEME] == "default"
+        assert config_dict[UserConfigKey.HOME_PATH] == "/note/group"
+        assert config_dict[UserConfigKey.nav_style] == "left"

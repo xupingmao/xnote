@@ -22,6 +22,7 @@ from xutils import dateutil
 from xutils import fsutil
 from xutils import textutil
 from xutils.db.binlog import BinLogOpType, FileLog
+from handlers.fs.fs_helper import FileInfoDao
 
 _binlog = dbutil.BinLog.get_instance()
 
@@ -122,39 +123,6 @@ class FileSyncIndexManager:
     def count_index(self):
         return self.db.count()
 
-
-def check_index(key, value, db):
-    fpath = value.fpath
-
-    if fpath is None:
-        logging.debug("check_index:%s", "fpath为空")
-        db.delete(value)
-        return False
-    
-    if not os.path.exists(fpath):
-        logging.debug("check_index:%s", "文件不存在")
-        db.delete(value)
-        return False
-
-    parts = key.split("#")
-    if len(parts) != 2:
-        logging.debug("check_index:%s", "key的格式不匹配")
-        db.delete(value)
-        return False
-
-    if parts[1] != value.webpath:
-        logging.debug("check_index:%s", "webpath不匹配")
-        db.delete(value)
-        return False
-
-    if value.size is None or value.mtime is None or value.ts is None:
-        logging.debug("check_index:%s", "关键信息缺失")
-        db.delete(value)
-        return False
-
-    return True
-
-
 class Refrence:
 
     def __init__(self, value):
@@ -163,29 +131,38 @@ class Refrence:
 class FileIndexCheckManager:
     """索引检查器"""
 
-    key_from = Refrence("")
     last_check_time = -1
+    last_id = 0
+    db = xtables.get_table_by_name("file_info")
 
-    def get_key_from(self):
-        return self.key_from.value
+    def check_index(self, value):
+        # type: (Storage) -> bool
+        fpath = value.fpath
+        index_id = int(value.id)
 
-    def update_key_from(self, value):
-        self.key_from.value = value
+        if fpath is None:
+            logging.debug("check_index:%s", "fpath为空")
+            FileInfoDao.delete_by_id(index_id)
+            return False
+        
+        if not os.path.exists(fpath):
+            logging.debug("check_index:%s", "文件不存在")
+            FileInfoDao.delete_by_id(index_id)
+            return False
+        
+        return True
 
-    def step(self):
-        key_from_copy = self.get_key_from()
 
-        db = dbutil.get_table("fs_sync_index")
-        for value in db.iter(offset = 0, limit = 10, key_from = self.get_key_from()):
-            key = value._key
-            check_index(key, value, db)
-
-            if value.ts != None:
-                self.update_key_from(value.ts)
-
-        if self.get_key_from() != "" and self.get_key_from() == key_from_copy:
+    def run_step(self):
+        where = "id > $id"
+        vars = dict(id = self.last_id)
+        file_info_list = self.db.select(where=where, vars=vars, order="id", offset=0, limit=20)
+        if len(file_info_list) == 0:
             logging.debug("已完成一次全量检查")
-            self.update_key_from("")
+        
+        for file_info in file_info_list:
+            self.check_index(file_info)
+            self.last_id = max(self.last_id, file_info.id)
 
         FileIndexCheckManager.last_check_time = time.time()
 

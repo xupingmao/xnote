@@ -6,6 +6,14 @@ import xconfig
 import xauth
 from xutils import Storage
 
+class UserConfigKey:
+
+    THEME = "THEME"         # 主题
+    HOME_PATH = "HOME_PATH" # 家目录
+    LANG = "LANG"           # 语言
+    nav_style = "nav_style" # 导航风格
+
+
 ###### 获取指定用户信息
 def get_user_config(user_name, config_key):
     """默认值参考DEFAULT_USER_CONFIG"""
@@ -18,10 +26,10 @@ def get_config_dict(user_name):
     return value
 
 def get_theme(user_name):
-    return get_user_config(user_name, "THEME")
+    return get_user_config(user_name, UserConfigKey.THEME)
 
 def get_home_path(user_name):
-    return get_user_config(user_name, "HOME_PATH")
+    return get_user_config(user_name, UserConfigKey.HOME_PATH)
     # return "/note/category"
 
 def get_project_path(user_name):
@@ -36,7 +44,7 @@ def get_current_user_config(key):
     return get_user_config(xauth.current_name(), key)
 
 def get_current_lang():
-    return get_current_user_config("LANG")
+    return get_current_user_config(UserConfigKey.LANG)
 
 def get_current_project_path():
     return get_project_path(xauth.current_name())

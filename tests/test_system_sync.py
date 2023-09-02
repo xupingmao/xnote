@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-02 11:48:24
+@LastEditTime : 2023-09-02 12:03:36
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -297,7 +297,7 @@ class TestSystemSync(BaseTestCase):
 
     def test_leader_list_file_binlog(self):
         from handlers.system.system_sync.system_sync_controller import LEADER
-        from handlers.system.system_sync.system_sync_indexer import on_fs_upload
+        from handlers.system.system_sync.system_sync_indexer import on_fs_upload, FileIndexCheckManager
         from xutils.db.binlog import BinLog, BinLogOpType
         binlog = BinLog.get_instance()
         binlog.set_max_size(1000)
@@ -318,3 +318,6 @@ class TestSystemSync(BaseTestCase):
         assert result.data[0].optype == BinLogOpType.file_upload
         assert result.data[0].value["fpath"] == upload_event.fpath
         assert result.data[0].value["ftype"] == "txt"
+
+        check_manager = FileIndexCheckManager()
+        check_manager.run_step()
