@@ -105,7 +105,9 @@ function initCodeMirror(selector, options) {
             || keyCode == 95
             || keyCode == 36) {
             // 字母及其他合法变量字符_$
-            editor.showHint();
+            if (editor.showHint) {
+                editor.showHint();
+            }
         }
     });
 

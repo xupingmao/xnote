@@ -11,7 +11,7 @@
     <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
     <script type="text/javascript" src="/static/js/upload.js"></script>
     <script type="text/javascript" src="/static/js/marked-ext.js?ts={{_ts}}"></script>
-    <script type="text/javascript" src="/static/js/editor.js"></script>
+    <script type="text/javascript" src="/static/js/editor.js?ts={{_ts}}"></script>
     {% include note/component/css/edit_css.html %}
 {% end %} 
 
@@ -53,6 +53,7 @@
                 <input type="file" id="file" name="file" class="hidden-file" />
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
                 <input type="button" id="insertNoteLink" class="toolbox-btn" value="笔记链接" />
+                <input type="button" class="toolbox-btn" value="格式化" onclick="xnote.editor.formatMarkdownTable()" />
                 <div class="float-right">
                     <div class="float-left">
                         <span id="uploadProgress" class="upload-progress"></span>
@@ -111,7 +112,7 @@
             height: "auto"
         });
 
-        xnote.editor = window.codeMirror;
+        xnote.codeMirror = window.codeMirror;
     }
 
     function initEditor() {
@@ -202,13 +203,13 @@
                 if (resp.code == "success") {
                     $("#autosaveResult").show().fadeOut(1000);
                 } else if (resp.code == "conflict") {
-                    xnote.editor.options.readOnly = "nocursor"; // 不允许编辑了
+                    xnote.codeMirror.options.readOnly = "nocursor"; // 不允许编辑了
                     xnote.confirm(resp.message, function () {
                         // 偷锁编辑
                         stealLockAndEdit();
                     });
                 } else if (resp.code == "version_too_low") {
-                    xnote.editor.options.readOnly = "nocursor"; // 不允许编辑了
+                    xnote.codeMirror.options.readOnly = "nocursor"; // 不允许编辑了
                     xnote.confirm(resp.message, function() {
                         // 重新加载草稿
                         reloadDraft();
@@ -230,9 +231,9 @@
             $.post("/note/draft", params, function (resp) {
                 if (resp.code == "success") {
                     if (resp.data != null) {
-                        xnote.editor.setValue(resp.data);
+                        xnote.codeMirror.setValue(resp.data);
                     }
-                    xnote.editor.options.readOnly = false; // 开启编辑
+                    xnote.codeMirror.options.readOnly = false; // 开启编辑
                 } else {
                     xnote.alert(resp.message);
                 }
@@ -286,14 +287,14 @@
         });
 
         // 格式化表格
-        $("#formatTable").click(function () {
+        xnote.editor.formatMarkdownTable = function () {
             // var selection = codeMirror.getSelection();
             var selection = codeMirror.doc.getValue();
             var formatedText = formatMarkdownTable(selection);
             console.log(formatedText);
             // codeMirror.replaceSelection(formatedText, "around");
             codeMirror.doc.setValue(formatedText);
-        });
+        };
 
         // 文件上传
         $("#uploadBtn").click(function () {
