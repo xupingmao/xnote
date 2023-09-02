@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-02 11:29:23
+@LastEditTime : 2023-09-02 11:41:54
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -230,11 +230,11 @@ class Leader(NodeManagerBase):
     
     def process_file_log(self, log):
         value = log.value
-        fpath = value.fpath
+        fpath = value.get("fpath", "")
         if os.path.isdir(fpath):
-            value.ftype = "dir"
+            value["ftype"] = "dir"
         else:
-            value.ftype = fsutil.get_file_ext(fpath)
+            value["ftype"] = fsutil.get_file_ext(fpath)
 
         return log
     
