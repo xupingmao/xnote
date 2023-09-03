@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-03 17:03:58
+@LastEditTime : 2023-09-03 18:30:42
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -72,9 +72,7 @@ class TopicTranslator:
         key = key.rstrip("")
         quoted_key = textutil.quote(key)
         value = textutil.escape_html(key0)
-        p = "all" # 默认展示全部，系统处理排序的问题
-        fmt = "<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={p}\">{value}</a>"
-        return fmt.format(quoted_key=quoted_key, value=value, p=p)
+        return f"<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={self.tag}\">{value}</a>"
 
 def mark_text(content, tag="log"):
     import xconfig
