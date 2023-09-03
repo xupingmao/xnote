@@ -3,7 +3,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-31 12:15:50
 @LastEditors  : xupingmao
-@LastEditTime : 2022-11-19 14:48:26
+@LastEditTime : 2023-09-03 10:29:49
 @FilePath     : /xnote/handlers/note/component/sidebar/markdown_edit_sidebar.html
 @Description  : 描述
  #} -->
@@ -44,8 +44,8 @@ $(function () {
 
 $(".sidebar-contents").on("click", ".list-item", function (e) {
     var lineNo = $(this).attr("data-line");
-    // xnote.editor.setCursor({line:lineNo-1, ch:0});
-    xnote.editor.setSelection({line:lineNo-1, ch:0}, {line:lineNo});
+    // xnote.codeMirror.setCursor({line:lineNo-1, ch:0});
+    xnote.codeMirror.setSelection({line:lineNo-1, ch:0}, {line:lineNo});
 });
 
 </script>

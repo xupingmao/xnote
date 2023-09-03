@@ -292,9 +292,9 @@
             var cursor = codeMirror.getCursor();
             var oldValue = codeMirror.doc.getValue();
             var formatedText = formatMarkdownTable(oldValue);
-            console.log(formatedText);
             // codeMirror.replaceSelection(formatedText, "around");
             if (oldValue != formatedText) {
+                // console.log(formatedText);
                 codeMirror.doc.setValue(formatedText);
                 codeMirror.setCursor(cursor);
             }
