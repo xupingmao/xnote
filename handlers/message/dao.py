@@ -527,6 +527,10 @@ def count_by_tag(user, tag):
         user_id = xauth.UserDao.get_id_by_name(user)
         return MsgIndexDao.count(user_id=user_id)
     
+    if tag in ("task", "done", "log"):
+        user_id = xauth.UserDao.get_id_by_name(user)
+        return MsgIndexDao.count(user_id=user_id, tag=tag)
+    
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
 
