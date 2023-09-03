@@ -6,6 +6,11 @@
 
 from xutils import Storage
 
+"""消息模型相关的内容
+任务：默认按照修改时间排序
+记事/日记：默认按照创建时间排序
+"""
+
 class MessageFolder(Storage):
 
     def __init__(self):
@@ -27,3 +32,5 @@ class MessageTag(Storage):
         self.url = url
         self.mtime = mtime
 
+def is_task_tag(tag):
+    return tag in ("task", "done")

@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-03 12:17:04
+@LastEditTime : 2023-09-03 17:03:58
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -25,7 +25,7 @@ from xutils import u
 from xutils import netutil
 from xutils.functions import Counter
 from xutils.textutil import quote
-from handlers.message.message_model import MessageFolder, MessageTag
+from handlers.message.message_model import MessageFolder, MessageTag, is_task_tag
 
 from . import dao as msg_dao
 
@@ -246,9 +246,6 @@ def is_system_tag(tag):
     assert isinstance(tag, str)
     return tag.startswith("$")
 
-def is_task_tag(tag):
-    return tag in ("task", "done")
-
 def is_standard_tag(tag):
     assert isinstance(tag, str)
     return tag.startswith("#") and tag.endswith("#")
@@ -423,7 +420,7 @@ class MessageListParser(object):
             self.process_message(message, search_tag=self.search_tag)
             if message.keywords != None:
                 keywords = message.keywords.union(keywords)
-            if message.tag == "done":
+            if is_task_tag(message.tag):
                 message.time_info = message.mtime
             else:
                 message.time_info = message.ctime

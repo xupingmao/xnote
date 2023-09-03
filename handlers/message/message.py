@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-03 12:12:41
+@LastEditTime : 2023-09-03 17:00:28
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -201,7 +201,9 @@ class ListAjaxHandler:
         filter_key = xutils.get_argument("filterKey", "")
         orderby = xutils.get_argument("orderby", "")
         p = xutils.get_argument("p", "")
-        xutils.get_argument("show_marked_tag", "true", type=bool)
+        xutils.get_argument_bool("show_marked_tag", True)
+
+        show_edit_btn = (p != "done")
 
         if tag == "todo" or tag == "task":
             show_todo_check = True
@@ -380,17 +382,17 @@ def update_message_tag(id, tag):
         # 任务完成时除了标记原来任务的完成时间，还要新建一条消息
         data.done_time = xutils.format_datetime()
         data.mtime = xutils.format_datetime()
-        data.append_comment("标记任务完成")
+        data.append_comment("$mark_task_done$")
     
     if tag == "task":
         # 重新开启任务
-        data.append_comment("重新开启任务")
+        data.append_comment("$reopen_task$")
 
         ref = data.ref
         origin_data = MessageDao.get_by_id(ref)
         if origin_data != None:
             # 更新原始任务后删除当前的完成记录
-            origin_data.append_comment("重新开启任务")
+            origin_data.append_comment("$reopen_task$")
             MessageDao.update_tag(origin_data, tag)
             MessageDao.delete_by_key(data.id)
             need_update = False

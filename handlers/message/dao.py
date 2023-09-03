@@ -15,6 +15,7 @@ from xutils import dateutil
 from xutils.functions import del_dict_key
 from xtemplate import T
 from xutils.db.dbutil_helper import new_from_dict
+from .message_model import is_task_tag
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
@@ -26,6 +27,11 @@ _keyword_db = dbutil.get_table("msg_key")
 _msg_db = dbutil.get_table("message")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
 _debug = False
+
+sys_comment_dict = {
+    "$mark_task_done$": T("标记任务完成"),
+    "$reopen_task$": T("重新开启任务"),
+}
 
 class MessageDO(Storage):
     def __init__(self):
@@ -58,6 +64,9 @@ class MessageDO(Storage):
         result.id = result._key
         if result.comments == None:
             result.comments = []
+        for item in result.comments:
+            comment_text = item.get("content")
+            item["content"] = sys_comment_dict.get(comment_text, comment_text)
         return result
     
     @classmethod
@@ -210,6 +219,7 @@ def update_message(message):
     message.check_before_update()
     message.fix_before_update()
     _msg_db.update(message)
+    MsgIndexDao.touch(int(message._id))
     execute_after_update(message)
 
 
@@ -725,7 +735,7 @@ class MsgIndexDao:
         if date_prefix != "":
             where += " AND date LIKE $date_prefix"
         
-        if tag == "done":
+        if is_task_tag(tag):
             order = "mtime desc"
 
         vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%")
@@ -739,6 +749,11 @@ class MsgIndexDao:
     def update_tag(cls, id=0, tag=""):
         now = xutils.format_datetime()
         return cls.db.update(tag=tag, mtime=now, where=dict(id=id))
+    
+    @classmethod
+    def touch(cls, id=0):
+        now = xutils.format_datetime()
+        return cls.db.update(mtime=now, where=dict(id=id))
     
     @classmethod
     def get_first(cls, user_id=0, content="", tag=""):
