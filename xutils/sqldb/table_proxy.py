@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 11:43:08
+@LastEditTime : 2023-09-03 11:13:15
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -17,7 +17,7 @@ from xutils.db.binlog import BinLog, BinLogOpType
 
 class TableProxy:
     """基于web.db的装饰器
-    SqliteDB是全局唯一的，它的底层使用了连接池技术，每个线程都有独立的sqlite连接
+    SqliteDB是全局唯一的, 它的底层使用了连接池技术, 每个线程都有独立的sqlite连接
     """
     log_profile = False
     enable_binlog = False
@@ -58,30 +58,22 @@ class TableProxy:
 
     def insert(self, seqname=None, _test=False, **values):
         self.fix_sql_keywords(values)
-        # TODO 记录binlog
         start_time = time.time()
         try:
             new_id = self.db.insert(self.tablename, seqname, _test, **values)
-            self.add_insert_binlog(new_id)
+            self.add_insert_binlog(new_id, _test=_test)
             return new_id
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
         finally:
             cost_time = time.time() - start_time
-            if self.log_profile:
+            if self.log_profile and self.table_info.log_profile:
                 profile_log = self._new_profile_log()
                 profile_log.cost_time = cost_time
                 profile_log.op_type = "insert"
                 self.profile_logger.log(profile_log)
         
-    def _multiple_insert(self, values, seqname=None, _test=False):
-        # sqlite不支持
-        for value in values:
-            self.fix_sql_keywords(value)
-        # TODO 记录binlog
-        return self.db.multiple_insert(self.tablename, values, seqname, _test)
-
     def select(self, vars=None, what='*', where=None, order=None, group=None,
                limit=None, offset=None, _test=False):
         self.fix_sql_keywords(where)
@@ -107,7 +99,7 @@ class TableProxy:
 
     def update(self, where, vars=None, _test=False, **values):
         self.fix_sql_keywords(where)
-        # TODO 记录binlog
+        
         start_time = time.time()
         try:
             result = self.db.update(self.tablename, where, vars=vars, _test=_test, **values)
@@ -118,7 +110,7 @@ class TableProxy:
             raise e
         finally:
             cost_time = time.time() - start_time
-            if self.log_profile:
+            if self.log_profile and self.table_info.log_profile:
                 profile_log = self._new_profile_log()
                 profile_log.cost_time = cost_time
                 profile_log.op_type = "update"
@@ -126,10 +118,11 @@ class TableProxy:
 
     def delete(self,  where, using=None, vars=None, _test=False):
         if _test:
+            # delete为了记录binlog会转换成按照主键删除的sql, 所以这里单独处理下_test场景
             return self.db.delete(self.tablename, where, using=using, vars=vars, _test=True)
         
         self.fix_sql_keywords(where)
-        # TODO 记录binlog
+
         start_time = time.time()
         pk_name = self.table_info.pk_name
         pk_list = []
@@ -149,7 +142,7 @@ class TableProxy:
             raise e
         finally:
             cost_time = time.time() - start_time
-            if self.log_profile:
+            if self.log_profile and self.table_info.log_profile:
                 profile_log = self._new_profile_log()
                 profile_log.cost_time = cost_time
                 profile_log.op_type = "delete"
@@ -196,7 +189,9 @@ class TableProxy:
 
         BinLog.get_instance().add_log(BinLogOpType.sql_upsert, pk_value, table_name=self.tablename)
 
-    def add_insert_binlog(self, new_id):
+    def add_insert_binlog(self, new_id, _test=False):
+        if _test:
+            return
         if not self.enable_binlog:
             return
         pk_name = self.table_info.pk_name

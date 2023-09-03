@@ -297,6 +297,8 @@ def init_site_visit_log():
         manager.add_column("ip", "varchar(64)", "")
         manager.add_column("count", "bigint", 0)
         manager.add_index(["date", "ip"])
+        # 日志数据, 关闭profile
+        manager.table_info.log_profile = False
 
 
 def init_msg_index():

@@ -310,6 +310,7 @@ class TableInfo:
         self.indexes = []
         self.dbpath = "" # sqlite文件路径
         self.enable_binlog = False
+        self.log_profile = True
     
     def add_column(self, colname, *args, **kw):
         self.column_names.append(colname)
