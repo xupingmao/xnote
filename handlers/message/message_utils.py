@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-01 18:56:48
+@LastEditTime : 2023-09-03 12:17:04
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -423,6 +423,10 @@ class MessageListParser(object):
             self.process_message(message, search_tag=self.search_tag)
             if message.keywords != None:
                 keywords = message.keywords.union(keywords)
+            if message.tag == "done":
+                message.time_info = message.mtime
+            else:
+                message.time_info = message.ctime
 
         self.keywords = []
         for word in keywords:

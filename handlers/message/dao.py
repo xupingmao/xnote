@@ -112,6 +112,11 @@ class MessageDO(Storage):
 
         if self.tag not in VALID_TAG_SET:
             raise Exception("message.dao.create: tag `%s` is invalid" % self.tag)
+        
+    def append_comment(self, comment_text=""):
+        comment = MessageComment()
+        comment.content = comment_text
+        self.comments.append(comment)
 
 
 def build_task_index(kw):
@@ -318,6 +323,8 @@ def count_message(user, status):
 
 
 def get_message_by_id(full_key, user_name=""):
+    if full_key == None:
+        return None
     if not full_key.startswith(_msg_db.prefix):
         return None
     value = _msg_db.get_by_key(full_key)
@@ -713,6 +720,9 @@ class MsgIndexDao:
             where += " AND tag=$tag"
         if date_prefix != "":
             where += " AND date LIKE $date_prefix"
+        
+        if tag == "done":
+            order = "mtime desc"
 
         vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%")
         return cls.db.select(where=where, vars=vars,offset=offset,limit=limit,order=order)
@@ -723,7 +733,8 @@ class MsgIndexDao:
     
     @classmethod
     def update_tag(cls, id=0, tag=""):
-        return cls.db.update(tag=tag, where=dict(id=id))
+        now = xutils.format_datetime()
+        return cls.db.update(tag=tag, mtime=now, where=dict(id=id))
     
     @classmethod
     def get_first(cls, user_id=0, content="", tag=""):
@@ -829,6 +840,7 @@ class MessageDao:
     
     @classmethod
     def update_tag(cls, message:MessageDO, tag=""):
+        message.tag = tag
         MsgIndexDao.update_tag(id=int(message._id), tag=tag)
         cls.update(message)
         cls.refresh_message_stat(message.user)

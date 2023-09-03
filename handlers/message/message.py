@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-31 23:11:02
+@LastEditTime : 2023-09-03 12:12:41
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -362,25 +362,46 @@ def create_done_message(old_message):
 
 
 def update_message_tag(id, tag):
+    """更新message的tag字段"""
     user_name = xauth.current_name()
     data = MessageDao.get_by_id(id)
-    if data and data.user == user_name:
-        # 修复status数据，全部采用tag
-        if 'status' in data:
-            del data['status']
-        data.tag = tag
+    if data == None:
+        return webutil.FailedResult(message="数据不存在")
+    if data.user != user_name:
+        return webutil.FailedResult(message="无权操作")
+    
+    # 修复status数据，全部采用tag
+    data.pop("status", None)
+    data.tag = tag
+    data.mtime = xutils.format_datetime()
+    need_update = True
+    
+    if tag == "done":
+        # 任务完成时除了标记原来任务的完成时间，还要新建一条消息
+        data.done_time = xutils.format_datetime()
         data.mtime = xutils.format_datetime()
-        if tag == "done":
-            data.done_time = xutils.format_datetime()
-            # 任务完成时除了标记原来任务的完成时间，还要新建一条消息
-            create_done_message(data)
-            
+        data.append_comment("标记任务完成")
+    
+    if tag == "task":
+        # 重新开启任务
+        data.append_comment("重新开启任务")
+
+        ref = data.ref
+        origin_data = MessageDao.get_by_id(ref)
+        if origin_data != None:
+            # 更新原始任务后删除当前的完成记录
+            origin_data.append_comment("重新开启任务")
+            MessageDao.update_tag(origin_data, tag)
+            MessageDao.delete_by_key(data.id)
+            need_update = False
+    
+    if need_update:    
         MessageDao.update_tag(data, tag)
 
-        xmanager.fire("message.updated", Storage(
-            id=id, user=user_name, tag=tag, content=data.content))
+    xmanager.fire("message.updated", Storage(
+        id=id, user=user_name, tag=tag, content=data.content))
 
-    return dict(code="success")
+    return webutil.SuccessResult()
 
 
 class FinishMessageAjaxHandler:
@@ -395,6 +416,7 @@ class FinishMessageAjaxHandler:
 
 class OpenMessageAjaxHandler:
 
+    @xauth.login_required()
     def POST(self):
         id = xutils.get_argument("id")
         if id == "":
@@ -409,12 +431,12 @@ class UpdateTagAjaxHandler:
         id = xutils.get_argument_str("id")
         tag = xutils.get_argument_str("tag")
         if id == "":
-            return failure(code="404", message="id为空")
+            return webutil.FailedResult(code="404", message="id为空")
 
         if tag in ("task", "cron", "log", "key", "done"):
             return update_message_tag(id, tag)
         else:
-            return failure(message="invalid tag(%s)" % tag)
+            return webutil.FailedResult(message="无效的标签: %s" % tag)
 
 class TouchAjaxHandler:
 
@@ -457,6 +479,9 @@ class DeleteAjaxHandler:
 
         # 删除并刷新统计信息
         MessageDao.delete_by_key(msg.id)
+        if msg.tag == "done" and msg.ref != None:
+            MessageDao.delete_by_key(msg.ref)
+            
         MessageDao.refresh_message_stat(msg.user, [msg.tag])
         after_message_delete(msg)
 

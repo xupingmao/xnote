@@ -96,6 +96,10 @@ def json_request(*args, **kw):
         return json.loads(data)
     return json.loads(data.decode("utf-8"))
 
+def json_request_return_dict(*args, **kw):
+    ret = json_request(*args, **kw)
+    assert isinstance(ret, dict)
+    return ret
 
 def request_html(*args, **kw):
     ret = APP.request(*args, **kw)

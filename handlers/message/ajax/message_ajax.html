@@ -14,7 +14,7 @@
     <div class="todo-row">
         <!-- <div class="todo-user">${user}</div> -->
         <div class="col-md-12">
-            <div class="todo-time">{{item.ctime}}</div>
+            <div class="todo-time">{{item.time_info}}</div>
 
             {% if item.tag == "task" %}
             <span class="task-tag">{{item.tag_text}}</span>
@@ -25,13 +25,11 @@
         <div class="todo-content">{% raw item.html %}</div>
         <div class="todo-foot">
             {% if item.tag == "task" %}
-            <!-- <button class="dialog-btn btn-default">编辑</button> -->
-            <!-- <input type="checkbox" data-id="{{item.id}}" class="todo-checkbox" onclick="onMessageDone(this)"> -->
             <button class="btn-default" data-id="{{item.id}}" onclick="onMessageDone(this)">完成</button>
             {% end %}
 
-            {% if item.tag == "done1" %}
-            <a class="update-tag-btn btn btn-default" data-id="{{item.id}}" data-tag="task">重做</a>
+            {% if item.tag == "done" %}
+                <button class="btn-default" data-id="{{item.id}}" onclick="xnote.action.message.reopen(this)">重做</button>
             {% end %}
             
             {% if show_edit_btn %}
@@ -86,13 +84,7 @@
 <script type="text/javascript">
     $(function () {
         function updateMessageTag(id, tag) {
-            $.post("/message/tag", { id: id, tag: tag }, function (resp) {
-                if (resp.code == "success") {
-                    xnote.fire("message.updated");
-                } else {
-                    alert(resp.message);
-                }
-            });
+            return xnote.action.message.updateMessageTag(id, tag);
         }
 
         $(".update-tag-btn").click(function (e) {

@@ -148,6 +148,7 @@ MessageView.closeTopicDiloag = function () {
     // 关闭
 }
 
+// 编辑随手记
 MessageView.edit = function (target) {
     MessageView.state.isEditDialog = true;
 
@@ -389,6 +390,24 @@ MessageView.showAllComments = function(target, selector) {
     xnote.showDialog("查看备注", '<div id="listCommentDialog"></div>', ["关闭"]);
     this.refreshCommentList($(target).attr("data-id"), selector);
 }
+
+MessageView.updateMessageTag = function(id, tag) {
+    xnote.http.post("/message/tag", { id: id, tag: tag }, function (resp) {
+        if (resp.code == "success") {
+            xnote.toast("更新状态成功");
+            xnote.fire("message.updated");
+        } else {
+            alert(resp.message);
+        }
+    });
+}
+
+// 重新打开任务
+MessageView.reopen = function (target) {
+    // 标记为完成
+    var id = $(target).attr("data-id");
+    this.updateMessageTag(id, "task");
+};
 
 $("body").on("keyup", ".nav-search-input", function (e) {
     console.log(e);
