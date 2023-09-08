@@ -87,9 +87,9 @@
         styleText += ".content-left { width: calc(100% - 300px); }";
         styleText += ".content-right { width: 300px; }";
         styleText += ".mobile-only { display: none; }";
-        contentLeftWidth = contentWidth - 300;
+        contentLeftWidth = contentWidth - 300; // 300是右侧边栏宽度
         if (navStyle == "left") {
-          paddingLeft = 190;
+          paddingLeft = leftNavWidth + 10;
         } else {
           paddingLeft = (winWidth - contentWidth) / 2 + 10;
           paddingRight = paddingLeft;

@@ -103,6 +103,9 @@ def run_test(args):
 	check_and_install_pkg("coveralls", "python-coveralls>=2.9.3")
 	check_and_install_pkg("coverage", "coverage==4.5.4")
 	check_and_install_pkg("bs4", "beautifulsoup4==4.12.2")
+	check_and_install_pkg("pymysql", "PyMySQL==1.0.2")
+	if os.name != "nt":
+		check_and_install_pkg("leveldb", "leveldb==0.201")
 	os.system("%s -m pip install lmdb" % executable)
 	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --ff" % executable)
 	os.system("%s -m coverage html -i" % executable)

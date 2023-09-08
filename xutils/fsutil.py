@@ -19,11 +19,11 @@ try:
 except ImportError:
     ctypes = None
 
-import six
+from xutils import six
 from xutils.imports import *
 from xutils.base import Storage
 from fnmatch import fnmatch
-from six.moves.configparser import ConfigParser
+from xutils.six.moves.configparser import ConfigParser
 from xutils import logutil
 
 # mbcs泛指通过2字节来编码的字符编码

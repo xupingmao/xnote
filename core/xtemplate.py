@@ -24,7 +24,7 @@ from xutils import dateutil, u
 from xutils import tojson
 from xutils import Storage
 from xutils import textutil
-from six.moves.urllib.parse import quote
+from xutils.six.moves.urllib.parse import quote
 import xnote_trace
 import xnote_hooks
 from xconfig import TemplateConfig

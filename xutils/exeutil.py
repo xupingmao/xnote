@@ -14,8 +14,8 @@ import re
 import threading
 from collections import deque
 
-import six
 import web
+from xutils import six
 from xutils.imports import PY2, getstatusoutput
 
 # 输出缓存区

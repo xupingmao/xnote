@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-03 17:00:28
+@LastEditTime : 2023-09-08 23:30:55
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -635,6 +635,60 @@ class DateAjaxHandler:
                                 item_list=msg_list)
 
 
+class TaskListHandler:
+    
+    @staticmethod
+    def get_task_kw():
+        kw = Storage()
+        kw.title = T("待办任务")
+        kw.html_title = T("待办任务")
+        kw.search_type = "task"
+        kw.show_back_btn = True
+        kw.tag = "task"
+        kw.message_placeholder = T("添加待办任务")
+        kw.message_tab = "task"
+        return kw
+    
+    @classmethod
+    def get_task_create_page(cls):
+        kw = cls.get_task_kw()
+        kw.show_input_box = True
+        kw.show_system_tag = False
+        side_tags = list_task_tags(xauth.current_name())
+        for tag in side_tags:
+            tag.url = f"/message?tag=task&filterKey={xutils.quote(tag.content)}"
+        kw.side_tag_tab_key = "filterKey"
+        kw.side_tags = side_tags
+        kw.default_content = xutils.get_argument_str("filterKey")
+        # kw.show_right = False
+
+        return xtemplate.render("message/page/task_index.html", **kw)
+
+    @classmethod
+    def get_task_by_keyword_page(cls, filter_key):
+        return cls.get_task_create_page()
+    
+        user_name = xauth.current_name()
+        kw = cls.get_task_kw()
+        kw.message_tag = "task"
+        kw.show_system_tag = False
+        kw.show_sub_link = False
+        kw.show_input_box = True
+        kw.side_tag_tab_key = "filterKey"
+
+        if filter_key != "$no_tag":
+            kw.show_keyword_info = True
+
+        kw.is_keyword_marked = is_marked_keyword(user_name, filter_key)
+        kw.keyword = filter_key
+        kw.side_tags = list_task_tags(user_name)
+
+        if not is_system_tag(filter_key):
+            kw.default_content = filter_key
+
+        return xtemplate.render("message/page/message_list_view.html", **kw)
+
+
 class MessageListHandler:
 
     @xauth.login_required()
@@ -723,45 +777,7 @@ class MessageListHandler:
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def get_task_kw(self):
-        kw = Storage()
-        kw.title = T("待办任务")
-        kw.html_title = T("待办任务")
-        kw.search_type = "task"
-        kw.show_back_btn = True
-        kw.tag = "task"
-        kw.message_placeholder = T("添加待办任务")
-        kw.message_tab = "task"
-        return kw
-
-    def get_task_create_page(self):
-        kw = self.get_task_kw()
-        kw.show_input_box = True
-        kw.show_system_tag = False
-        kw.side_tags = list_task_tags(xauth.current_name())
-        kw.side_tag_tab_key = "filterKey"
-
-        return xtemplate.render("message/page/tag_index.html", **kw)
-
-    def get_task_by_keyword_page(self, filter_key):
-        user_name = xauth.current_name()
-        kw = self.get_task_kw()
-        kw.message_tag = "task"
-        kw.show_system_tag = False
-        kw.show_sub_link = False
-        kw.show_input_box = True
-        kw.side_tag_tab_key = "filterKey"
-
-        if filter_key != "$no_tag":
-            kw.show_keyword_info = True
-
-        kw.is_keyword_marked = is_marked_keyword(user_name, filter_key)
-        kw.keyword = filter_key
-        kw.side_tags = list_task_tags(user_name)
-
-        if not is_system_tag(filter_key):
-            kw.default_content = filter_key
-
-        return xtemplate.render("message/page/message_list_view.html", **kw)
+        return TaskListHandler.get_task_kw()
 
     def get_task_done_page(self):
         kw = self.get_task_kw()
@@ -771,11 +787,11 @@ class MessageListHandler:
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def get_task_page(self):
-        filter_key = xutils.get_argument("filterKey", "")
-        page_name = xutils.get_argument("p", "")
+        filter_key = xutils.get_argument_str("filterKey", "")
+        page_name = xutils.get_argument_str("p", "")
 
         if page_name == "create":
-            return self.get_task_create_page()
+            return TaskListHandler.get_task_create_page()
 
         if page_name == "done":
             return self.get_task_done_page()
@@ -784,13 +800,13 @@ class MessageListHandler:
             return self.get_task_taglist_page()
 
         if filter_key != "":
-            return self.get_task_by_keyword_page(filter_key)
+            return TaskListHandler.get_task_by_keyword_page(filter_key)
         else:
             # 任务的首页
-            return self.get_task_home_page()
+            return TaskListHandler.get_task_create_page()
 
     def get_task_home_page(self):
-        return self.get_task_create_page()
+        return TaskListHandler.get_task_create_page()
 
     def get_task_taglist_page(self):
         user_name = xauth.current_name()

@@ -1,0 +1,27 @@
+/** 二级导航 **/
+.second-nav {
+    position: fixed;
+    height: 100%;
+    width: 200px;
+    margin-left: 180px;
+    background-color: white;
+    overflow-y: auto;
+}
+
+/** PC页面 **/
+.main-content {
+    padding-left: 390px;
+}
+.x-center {
+    padding-left: 390px;
+}
+
+@media screen and (max-width: 800px) {
+    .main-content, .x-center {
+        padding-left: 10px;
+    }
+
+    .second-nav {
+        display: none;
+    }
+}
