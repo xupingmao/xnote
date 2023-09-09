@@ -129,9 +129,9 @@ class CreateHandler:
 
     @xauth.login_required()
     def POST(self, method='POST'):
-        name      = xutils.get_argument("name", "")
+        name      = xutils.get_argument_str("name", "")
         tags      = xutils.get_argument_str("tags", "")
-        key       = xutils.get_argument("key", "")
+        key       = xutils.get_argument_str("key", "")
         content   = xutils.get_argument_str("content", "")
         type0     = xutils.get_argument_str("type", "md")
         date      = xutils.get_argument("date", "")

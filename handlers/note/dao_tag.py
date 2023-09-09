@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-09 17:44:07
+@LastEditTime : 2023-09-09 23:55:51
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -73,7 +73,7 @@ class TagBindDao:
     tag_bind_service = TagBindService(TagTypeEnum.note_tag)
 
     @classmethod
-    def bind_tag(cls, user_name, note_id, tags, parent_id=None):
+    def bind_tag(cls, user_name="", note_id="", tags=[], parent_id=None):
         tag_bind_db.update_by_id(note_id, Storage(
             note_id=note_id, user=user_name, tags=tags, parent_id=parent_id))
         

@@ -304,8 +304,21 @@ class TestMain(BaseTestCase):
         json_request("/note/remove?name=xnote-tag-test")
         id = create_note_for_test("md", "xnote-tag-test", content = "hello", tags="ABC DEF")
 
-        note_info = NOTE_DAO.get_by_id(id)
+        note_info = note_dao.get_by_id(id)
+        assert note_info != None
+
         self.assertEqual(note_info.tags, ["ABC", "DEF"])
+
+        from xnote_core.xnote_tag import TagBindService, TagTypeEnum
+        user_info = xauth.current_user()
+        assert user_info != None
+
+        service = TagBindService(TagTypeEnum.note_tag)
+        binds = service.get_by_target_id(user_id=user_info.id, target_id=int(note_info.id))
+        tags = [x.tag_code for x in binds]
+        assert len(binds) == 2
+        assert "abc" in tags
+        assert "def" in tags
 
         # clean up
         json_request("/note/remove?id=%s" % id)

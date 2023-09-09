@@ -627,6 +627,12 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     # 更新目录修改时间
     touch_note(note_dict["parent_id"])
 
+    # 处理标签
+    tags = note_dict.get("tags")
+    if tags != None and len(tags) > 0:
+        from . import dao_tag
+        dao_tag.TagBindDao.bind_tag(user_name = creator, note_id = note_id, tags=tags)
+
     # 最后发送创建笔记成功的消息
     create_msg = dict(name=name, type=type, id=note_id)
     xmanager.fire("note.add", create_msg)
