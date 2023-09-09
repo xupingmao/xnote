@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-03 18:30:42
+@LastEditTime : 2023-09-09 10:02:45
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -422,6 +422,7 @@ class MessageListParser(object):
                 message.time_info = message.mtime
             else:
                 message.time_info = message.ctime
+            message.weekday = dateutil.datetime_to_weekday(message.time_info)
 
         self.keywords = []
         for word in keywords:

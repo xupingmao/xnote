@@ -14,7 +14,7 @@
     <div class="todo-row">
         <!-- <div class="todo-user">${user}</div> -->
         <div class="col-md-12">
-            <div class="todo-time">{{item.time_info}}</div>
+            <div class="todo-time">{{item.time_info}} {{item.weekday}}</div>
 
             {% if item.tag == "task" %}
             <span class="task-tag">{{item.tag_text}}</span>

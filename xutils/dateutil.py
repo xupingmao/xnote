@@ -113,7 +113,7 @@ def format_time_only(seconds=None):
         st = time.localtime(seconds)
         return time.strftime('%H:%M:%S', st)
 
-def format_wday(date_str, fmt = "") -> str:
+def format_weekday(date_str, fmt = "") -> str:
     if fmt == "":
         fmt = "%Y-%m-%d"
     
@@ -121,6 +121,16 @@ def format_wday(date_str, fmt = "") -> str:
     wday = str(tm.tm_wday + 1)
     return WDAY_DICT.get(wday) or ""
 
+format_wday = format_weekday
+
+def datetime_to_weekday(datetime_obj):
+    if isinstance(datetime_obj, datetime.datetime):
+        weekday = str(datetime_obj.weekday()+1)
+        return WDAY_DICT.get(weekday, "")
+    if isinstance(datetime_obj, str):
+        date_str = datetime_obj.split()[0]
+        return format_weekday(date_str)
+    raise Exception("unsupported type: %r" % type(datetime_obj))
 
 def format_date(seconds=None, fmt = None):
     """格式化日期

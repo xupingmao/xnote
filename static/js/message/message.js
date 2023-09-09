@@ -286,6 +286,7 @@ MessageView.selectTopic = function (target) {
 
 // 搜索话题标签
 MessageView.searchTopic = function(inputText) {
+    inputText = inputText.toLowerCase();
     var showCount = 0;
     var hasMatch = false;
     var inputTextTag = "#" + inputText + "#";
@@ -293,7 +294,7 @@ MessageView.searchTopic = function(inputText) {
     $(".empty-item").hide();
     
     $(".topic-item").each(function (index, element) {
-        var text = $(element).text();
+        var text = $(element).text().toLowerCase();
         if (text == inputTextTag) {
             hasMatch = true;
         }
