@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 15:01:45
+@LastEditTime : 2023-09-09 17:32:02
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -144,7 +144,10 @@ def init_note_tables():
 def init_message_tables():
     dbutil.register_table("message", "短文本", check_user=True, user_attr="user")
     dbutil.register_table("msg_key", "备忘关键字/标签", check_user=True, user_attr="user")
-    dbutil.register_table("msg_backup", "随手记备份", check_user=True, user_attr="user")
+    
+    db = dbutil.register_table("msg_backup", "随手记备份", check_user=True, user_attr="user")
+    db.delete_table()
+
     dbutil.register_table("msg_search_history", "备忘搜索历史", check_user=True, user_attr="user")
     dbutil.register_table("msg_history", "备忘历史")
 

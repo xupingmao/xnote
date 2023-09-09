@@ -15,6 +15,7 @@ from xutils import dateutil
 from xutils.functions import del_dict_key
 from xtemplate import T
 from xutils.db.dbutil_helper import new_from_dict
+from xnote_core.xnote_tag import TagBindService, TagTypeEnum
 from .message_model import is_task_tag
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
@@ -41,6 +42,7 @@ class MessageDO(Storage):
         self.id = "" # 主键
         self.tag = "" # tag标签 {task, done, log, key}
         self.user = "" # 用户名
+        self.user_id = 0 # 用户ID
         self.ip = ""
         self.ref = None # 引用的id
         self.ctime = xutils.format_datetime()  # 展示的创建时间
@@ -126,6 +128,9 @@ class MessageDO(Storage):
         comment = MessageComment()
         comment.content = comment_text
         self.comments.append(comment)
+
+    def get_int_id(self):
+        return int(self._id)
 
 
 def build_task_index(kw):
@@ -840,7 +845,17 @@ class MsgTagInfoDao:
     @classmethod
     def count(cls, user=""):
         return cls.db.count(user_name=user)
-    
+
+class MsgTagBindDao:
+
+    tag_bind_service = TagBindService(TagTypeEnum.msg_tag)
+
+    @classmethod
+    def bind_tags(cls, user_id=0, msg_id=0, tags=[]):
+        if user_id == 0:
+            logging.error("user_id=0")
+            return
+        cls.tag_bind_service.bind_tags(user_id=user_id, target_id=msg_id, tags=tags)
 
 class MessageDao:
     """message的主数据接口,使用KV存储"""
@@ -856,6 +871,11 @@ class MessageDao:
     @staticmethod
     def update(message):
         return update_message(message)
+    
+    @staticmethod
+    def update_user_tags(message:MessageDO):
+        msg_id = message.get_int_id()
+        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.keywords)
     
     @classmethod
     def update_tag(cls, message:MessageDO, tag=""):

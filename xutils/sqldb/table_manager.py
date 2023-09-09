@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 11:30:14
+@LastEditTime : 2023-09-09 17:45:34
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -311,6 +311,7 @@ class TableInfo:
         self.dbpath = "" # sqlite文件路径
         self.enable_binlog = False
         self.log_profile = True
+        self.is_deleted = False
     
     def add_column(self, colname, *args, **kw):
         self.column_names.append(colname)
@@ -334,18 +335,24 @@ class TableManagerFacade:
     
     @classmethod
     def get_table_info_dict(cls):
+        # type: () -> dict[str, TableInfo]
         return cls.table_dict
 
     def __init__(self, tablename, db = empty_db, is_backup = False, **kw):
         self.table_info = TableInfo(tablename)
         self.table_info.pk_name = kw.get("pk_name", "id")
-
         if db.dbname == "mysql":
             self.manager = MySQLTableManager(tablename, db = db, **kw)
         else:
             self.manager = SqliteTableManager(tablename, db = db, **kw)
             self.table_info.dbpath = db.dbpath
         
+        is_deleted = kw.get("is_deleted", False)
+        if is_deleted:
+            self.table_info.is_deleted = True
+            self.table_dict[tablename] = self.table_info
+            return
+
         self.manager.create_table()
 
         check_table_define = kw.get("check_table_define", True)
@@ -358,6 +365,8 @@ class TableManagerFacade:
     
     def add_column(self, colname, coltype,
                    default_value=None, not_null=True, comment=""):
+        if self.table_info.is_deleted:
+            return
         self.table_info.add_column(colname, coltype, default_value, not_null)
         self.manager.add_column(colname, coltype, default_value, not_null, comment=comment)
     
@@ -366,6 +375,8 @@ class TableManagerFacade:
         pass
 
     def add_index(self, colname, is_unique=False, **kw):
+        if self.table_info.is_deleted:
+            return
         self.table_info.add_index(colname, is_unique)
         self.manager.add_index(colname, is_unique, **kw)
 

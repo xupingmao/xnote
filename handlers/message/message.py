@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-08 23:30:55
+@LastEditTime : 2023-09-09 17:23:33
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -111,6 +111,9 @@ def after_message_create_or_update(msg_item):
         msg_item.no_tag = True
         msg_item.keywords = None
         MessageDao.update(msg_item)
+    else:
+        MessageDao.update_user_tags(msg_item)
+
     after_upsert_async(msg_item)
 
 def after_message_delete(msg_item):
@@ -338,9 +341,12 @@ def update_message_status(id, status):
 def update_message_content(id, user_name, content):
     data = MessageDao.get_by_id(id)
     if data and data.user == user_name:
+        if data.user_id == 0:
+            data.user_id = xauth.UserDao.get_id_by_name(user_name)
+            
         # 先保存历史
         MessageDao.add_history(data)
-
+        
         data.content = content
         data.mtime = xutils.format_datetime()
         data.version = data.get('version', 0) + 1
@@ -540,6 +546,7 @@ def create_message(user_name, tag, content, ip):
 
     message = dao.MessageDO()
     message.user = user_name
+    message.user_id = xauth.UserDao.get_id_by_name(user_name)
     message.tag = tag
     message.ip = ip
     message.date = date

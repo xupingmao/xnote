@@ -62,8 +62,8 @@ def create_record_table_manager(table_name=""):
     """默认使用 record.db 文件"""
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
 
-def create_default_table_manager(table_name=""):
-    return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
+def create_default_table_manager(table_name="", **kw):
+    return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file, **kw)
 
 def get_default_db_instance():
     return get_db_instance(xconfig.FileConfig.record_db_file)
@@ -110,6 +110,9 @@ def get_all_tables():
     result = []
     table_dict = TableManager.get_table_info_dict()
     for table_name in table_dict:
+        table_info = table_dict[table_name]
+        if table_info.is_deleted:
+            continue
         proxy = get_table_by_name(table_name)
         result.append(proxy)
     return result
@@ -179,15 +182,16 @@ def init_user_table():
     # 2017/05/21
     # 简单的用户表
     with create_default_table_manager("user") as manager:
-        manager.add_column("name",       "varchar(64)", "")
-        manager.add_column("password",   "varchar(64)", "")
+        manager.add_column("name", "varchar(64)", "")
+        manager.add_column("password", "varchar(64)", "") # 始终为空
         manager.add_column("password_md5", "varchar(64)", "")
         manager.add_column("mobile", "varchar(32)", "")
-        manager.add_column("salt",       "varchar(64)", "")
-        manager.add_column("ctime",      "datetime", "1970-01-01 00:00:00")
-        manager.add_column("mtime",      "datetime", "1970-01-01 00:00:00")
-        manager.add_column("token",      "varchar(32)", "")
+        manager.add_column("salt", "varchar(64)", "")
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("token", "varchar(32)", "")
         manager.add_column("login_time", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("status", "tinyint", 0)
         manager.add_index("name", is_unique=True)
         manager.add_index("token")
         # 删除的字段
@@ -260,13 +264,40 @@ def init_note_tag_rel_table():
     @since 2023/07/01
     """
     table_name = "note_tag_rel"
-    with create_default_table_manager(table_name) as manager:
+    with create_default_table_manager(table_name, is_deleted=True) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("note_id", "varchar(32)", "")
         manager.add_column("tag_code", "varchar(32)", "")
         manager.add_index(["user_id", "tag_code"])
 
+def init_tag_info_table():
+    """标签信息
+    @since 2023/09/09
+    """
+    table_name = "tag_info"
+    with create_default_table_manager(table_name) as manager:
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("tag_type", "tinyint", 0)
+        manager.add_column("tag_code",  "varchar(32)", "")
+        manager.add_column("tag_size", "bigint", 0)
+        manager.add_index(["user_id", "tag_code"])
+
+
+def init_tag_bind_table():
+    """标签绑定关系
+    @since 2023/09/09
+    """
+    table_name = "tag_bind"
+    with create_default_table_manager(table_name) as manager:
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("tag_type", "tinyint", 0)
+        manager.add_column("tag_code",  "varchar(32)", "")
+        manager.add_column("target_id", "bigint", 0)
+        manager.add_index(["user_id", "tag_code"])
 
 def init_file_info():
     """文件信息
@@ -301,7 +332,7 @@ def init_site_visit_log():
         manager.table_info.log_profile = False
 
 
-def init_msg_index():
+def init_msg_index_table():
     """随手记索引"""
     table_name = "msg_index"
     with create_default_table_manager(table_name) as manager:
@@ -432,8 +463,13 @@ def init():
     init_user_table()
     init_file_info()
     init_site_visit_log()
-    init_note_tag_rel_table()
-    init_msg_index()
+    
+    # 标签相关
+    init_note_tag_rel_table() # 已删除, 占位防止冲突
+    init_tag_bind_table()
+
+    # 随手记
+    init_msg_index_table()
     
     if xconfig.DatabaseConfig.db_driver == "mysql":
         init_kv_store_table()

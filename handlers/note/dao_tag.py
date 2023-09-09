@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 10:39:53
+@LastEditTime : 2023-09-09 17:44:07
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -19,6 +19,7 @@ from xutils import functions
 from xutils import dbutil
 from xutils import attrget, Storage
 from handlers.note.dao_api import NoteDao
+from xnote_core.xnote_tag import TagBindService, TagTypeEnum
 
 tag_bind_db = dbutil.get_table("note_tags")
 tag_meta_db = dbutil.get_table("note_tag_meta")
@@ -69,7 +70,7 @@ def get_tags(creator, note_id):
 
 class TagBindDao:
     """标签绑定信息"""
-    db = xtables.get_table_by_name("note_tag_rel")
+    tag_bind_service = TagBindService(TagTypeEnum.note_tag)
 
     @classmethod
     def bind_tag(cls, user_name, note_id, tags, parent_id=None):
@@ -107,14 +108,7 @@ class TagBindDao:
     
     @classmethod
     def update_tag_rel(cls, user_id=0, note_id="", new_tags=[]):
-        cls.db.delete(where=dict(user_id=user_id, note_id=note_id))
-        with cls.db.transaction():
-            for tag_code in new_tags:
-                rel = NoteTagRelation()
-                rel.user_id = user_id
-                rel.note_id = note_id
-                rel.tag_code = tag_code.lower()
-                cls.db.insert(**rel)
+        cls.tag_bind_service.bind_tags(user_id=user_id, target_id=int(note_id), tags=new_tags)
 
 
 class TagMetaDao:
