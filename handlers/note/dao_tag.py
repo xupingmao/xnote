@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-09 23:55:51
+@LastEditTime : 2023-09-10 15:45:33
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -19,7 +19,7 @@ from xutils import functions
 from xutils import dbutil
 from xutils import attrget, Storage
 from handlers.note.dao_api import NoteDao
-from xnote_core.xnote_tag import TagBindService, TagTypeEnum
+from xnote_core.service_tag import TagBindService, TagTypeEnum
 
 tag_bind_db = dbutil.get_table("note_tags")
 tag_meta_db = dbutil.get_table("note_tag_meta")
@@ -79,7 +79,7 @@ class TagBindDao:
         
         user_info = xauth.get_user_by_name(user_name)
         assert user_info != None
-        cls.update_tag_rel(user_info.id, note_id, tags)
+        cls.update_tag_bind(user_info.id, note_id, tags)
 
     @staticmethod
     def get_by_note_id(user_name, note_id):
@@ -107,7 +107,7 @@ class TagBindDao:
             yield value
     
     @classmethod
-    def update_tag_rel(cls, user_id=0, note_id="", new_tags=[]):
+    def update_tag_bind(cls, user_id=0, note_id="", new_tags=[]):
         cls.tag_bind_service.bind_tags(user_id=user_id, target_id=int(note_id), tags=new_tags)
 
 
@@ -246,7 +246,6 @@ update_tags = bind_tags
 
 def delete_tags(creator, note_id):
     tag_bind_db.delete_by_id(note_id, user_name=creator)
-
 
 def list_by_tag(user="", tagname = "", limit = 1000):
     # TODO 优化查询性能

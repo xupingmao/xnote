@@ -52,11 +52,9 @@ $(function () {
         var note_id = getUrlParam("id");
         var version = $(this).attr("data-version");
         var width   = $(".root").width() - 40;
-        $.get("/note/history_view", {id: note_id, version: version}, function (resp) {
+        xnote.http.get("/note/history_view", {id: note_id, version: version}, function (resp) {
             var content = $("<div>").append($("<textarea>").text(resp.data).addClass("history-detail-md")).html();
             xnote.showDialog("版本 - " + version, content, ["确定"]);
-        }).fail(function (resp) {
-            layer.alert("系统繁忙，请重试");
         });
     })
 

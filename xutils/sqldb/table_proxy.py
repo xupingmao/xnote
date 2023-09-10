@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-03 11:13:15
+@LastEditTime : 2023-09-10 12:18:29
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -81,7 +81,7 @@ class TableProxy:
                               limit=limit, offset=offset, _test=_test)
         records = list(result_set)
         return records
-
+    
     def select_first(self, *args, **kw):
         records = self.select(*args, **kw)
         if len(records) > 0:

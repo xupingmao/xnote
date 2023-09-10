@@ -128,7 +128,7 @@ class CommentListAjaxHandler:
             count = len(comments)
         else:
             assert note_id != None and note_id != ""
-            comments  = dao_comment.list_comments(note_id, offset = offset, limit = page_size)
+            comments  = dao_comment.list_comments(note_id, offset = offset, limit = page_size, user_name=user_name)
             count = dao_comment.count_comment_by_note(note_id)
         
         page_max = get_page_max(count)
@@ -188,7 +188,8 @@ class DeleteCommentAjaxHandler:
         user       = xauth.current_name()
         comment    = dao_comment.get_comment(comment_id)
         if comment is None:
-            return dict(success = False, message = "comment not found")
+            dao_comment.delete_index(comment_id)
+            return webutil.SuccessResult()
         if user != comment.user:
             return dict(success = False, message = "unauthorized")
         dao_comment.delete_comment(comment_id)
@@ -215,7 +216,7 @@ class CommentAjaxHandler:
     def GET(self):
         p = xutils.get_argument("p")
         user_name = xauth.current_name()
-        comment_id = xutils.get_argument("comment_id", "")
+        comment_id = xutils.get_argument_str("comment_id", "")
 
         if p == "edit":
             comment = dao_comment.get_comment(comment_id)

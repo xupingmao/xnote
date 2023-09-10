@@ -15,7 +15,7 @@ from xutils import dateutil
 from xutils.functions import del_dict_key
 from xtemplate import T
 from xutils.db.dbutil_helper import new_from_dict
-from xnote_core.xnote_tag import TagBindService, TagTypeEnum
+from xnote_core.service_tag import TagBindService, TagTypeEnum
 from .message_model import is_task_tag
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")

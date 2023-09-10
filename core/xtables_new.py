@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-09 17:32:02
+@LastEditTime : 2023-09-10 16:14:13
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -20,6 +20,7 @@ def init():
     # 变更索引后需要调用 rebuild_index 方法
     dbutil.register_table("sys_log", "系统日志")
     dbutil.register_table("dict", "词典")
+    dbutil.register_table("migrate_failed", "迁移失败记录")
 
     init_note_tables()
     init_message_tables()
@@ -121,10 +122,8 @@ def init_note_tables():
 
 
     db = dbutil.register_table("comment", "评论模型", category="note")
-    db.register_index("user", comment = "用户索引")
-    db.register_index("note_id", comment = "笔记ID索引")
-    db.rebuild_index("v2")
-
+    db.drop_index("user", comment = "用户索引")
+    db.drop_index("note_id", comment = "笔记ID索引")
 
     # 公共笔记
     db = dbutil.register_table("note_public", "公共笔记", category="note")

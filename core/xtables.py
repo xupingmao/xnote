@@ -345,7 +345,7 @@ def init_msg_index_table():
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("user_name", "varchar(64)", "")
         # 短信息的类型
-        manager.add_column("tag", "varchar(32)", "")
+        manager.add_column("tag", "varchar(16)", "")
         manager.add_column("date", "date", default_value="1970-01-01")
         manager.add_index(["user_id", "ctime"])
         manager.add_index(["user_id", "mtime"])
@@ -372,6 +372,21 @@ def init_kv_zset_table(db=None):
         manager.add_index(["key", "member"], is_unique=True, key_len_list=[32,100])
         manager.add_index(["key", "score"], key_len_list=[32, 0])
 
+def init_comment_index_table():
+    """评论索引"""
+    table_name = "comment_index"
+    with create_default_table_manager(table_name) as manager:
+        # 展示创建时间
+        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        # 修改时间
+        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("type", "varchar(16)", 0)
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("target_id", "bigint", 0)
+        
+        manager.add_index(["user_id", "ctime"])
+        manager.add_index("target_id")
+        manager.table_info.enable_binlog = True
 
 def DBWrapper(dbpath, tablename):
     db = MySqliteDB(db=dbpath)
@@ -467,6 +482,9 @@ def init():
     # 标签相关
     init_note_tag_rel_table() # 已删除, 占位防止冲突
     init_tag_bind_table()
+
+    # 评论相关
+    init_comment_index_table()
 
     # 随手记
     init_msg_index_table()

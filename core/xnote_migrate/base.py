@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-02-05 16:19:20
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-17 09:31:15
+@LastEditTime : 2023-09-10 11:46:41
 @FilePath     : /xnote/core/xnote_migrate/base.py
 @Description  : 描述
 """
@@ -12,12 +12,22 @@
 import xconfig
 import xtables
 import os
-from xutils import dbutil
+import xutils
+from xutils import dbutil, Storage
 from xutils import dateutil
+
+class MigradeFailedDO(Storage):
+
+    def __init__(self):
+        self.ctime = xutils.format_datetime()
+        self.table_name = ""
+        self.reason = ""
+        self.record = None
 
 
 dbutil.register_table("db_upgrade_log", "数据库升级日志")
 sys_log_db = dbutil.get_table("sys_log")
+failed_db = dbutil.get_table("migrate_failed")
 
 def get_upgrade_log_table():
     return dbutil.get_hash_table("db_upgrade_log")
@@ -45,6 +55,13 @@ def execute_upgrade(key = "", fn = lambda:None):
         return
     fn()
     mark_upgrade_done(key)
+
+def add_failed_log(table_name="", record=None, reason=""):
+    failed_obj = MigradeFailedDO()
+    failed_obj.table_name = table_name
+    failed_obj.record = record
+    failed_obj.reason = reason
+    failed_db.insert(failed_obj)
 
 
 def migrate_sqlite_table(new_table: xtables.TableProxy, old_dbname="", check_exist_func=None):

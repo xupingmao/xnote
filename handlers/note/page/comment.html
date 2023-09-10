@@ -66,10 +66,8 @@
                 page: page
             };
 
-            $.get("{{_server_home}}/note/comments", list_param, function (resp) {
+            xnote.http.get("{{_server_home}}/note/comments", list_param, function (resp) {
                 $("#comments").html(resp);
-            }).fail(function (resp) {
-                console.log("请求失败", resp);
             });
         }
 
@@ -93,7 +91,7 @@
             request.content = $("#commentText").val();
             request.type = "{{comment_create_type}}";
 
-            $.post("{{_server_home}}/note/comment/save", request, function (resp) {
+            xnote.http.post("/note/comment/save", request, function (resp) {
                 console.log(resp);
                 if (resp.code == "success") {
                     $("#commentText").val("");
@@ -101,8 +99,6 @@
                 } else {
                     xnote.toast(resp.message);
                 }
-            }).fail(function (resp) {
-                xnote.toast("请求接口失败,请稍后重试~");
             });
         });
 
@@ -111,10 +107,8 @@
             var content = $(this).attr("data-content");
             xnote.confirm("确定删除`" + content + "`?", function (conf) {
                 if (conf) {
-                    $.post("{{_server_home}}/note/comment/delete", { comment_id: id }, function (resp) {
+                    xnote.http.post("/note/comment/delete", { comment_id: id }, function (resp) {
                         refreshComments();
-                    }).fail(function() {
-                        xnote.toast("请求接口失败,请稍后重试~");
                     });
                 }
             });
@@ -122,7 +116,7 @@
 
         $("#comments").on("click", ".edit-comment-btn", function () {
             var id = $(this).attr("data-id");
-            $.get("{{_server_home}}/note/comment?p=edit&comment_id=" + id, function (resp) {
+            xnote.http.get("/note/comment?p=edit&comment_id=" + id, function (resp) {
                 editIndex = xnote.showDialog("编辑", resp);
             });
         });
