@@ -4,6 +4,13 @@
 {% include system/component/db_nav.html %}
 
 <div class="card">
+    <div class="x-tab-box" data-tab-key="p2" data-tab-default="active">
+        <a class="x-tab" href="{{_server_home}}/system/sqldb_admin?p=sqldb&p2=active" data-tab-value="active">活跃</a>
+        <a class="x-tab" href="{{_server_home}}/system/sqldb_admin?p=sqldb&p2=delete" data-tab-value="delete">已删除</a>
+    </div>
+</div>
+
+<div class="card">
 
     <table class="table">
         <tr>
@@ -15,7 +22,7 @@
         {% for db in db_info_list %}
         <tr>
             <td><a href="{{_server_home}}/system/sqldb_detail?name={{db.name}}">{{db.name}}</a></td>
-            <td></td>
+            <td>{{db.comment}}</td>
             <td>{{db.amount}}</td>
             <td><a class="btn btn-default" href="{{_server_home}}/system/sqldb_operate?table_name={{db.name}}">操作</a></td>
         </tr>

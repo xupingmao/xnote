@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-09 17:45:34
+@LastEditTime : 2023-09-15 21:54:43
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -305,6 +305,7 @@ class TableInfo:
     def __init__(self, tablename = ""):
         self.tablename = tablename
         self.pk_name = "id"
+        self.comment = "" # 表的描述
         self.column_names = []
         self.columns = []
         self.indexes = []
@@ -347,11 +348,8 @@ class TableManagerFacade:
             self.manager = SqliteTableManager(tablename, db = db, **kw)
             self.table_info.dbpath = db.dbpath
         
-        is_deleted = kw.get("is_deleted", False)
-        if is_deleted:
-            self.table_info.is_deleted = True
-            self.table_dict[tablename] = self.table_info
-            return
+        self.table_info.is_deleted = kw.get("is_deleted", False)
+        self.table_info.comment = kw.get("comment", "")
 
         self.manager.create_table()
 
@@ -365,8 +363,6 @@ class TableManagerFacade:
     
     def add_column(self, colname, coltype,
                    default_value=None, not_null=True, comment=""):
-        if self.table_info.is_deleted:
-            return
         self.table_info.add_column(colname, coltype, default_value, not_null)
         self.manager.add_column(colname, coltype, default_value, not_null, comment=comment)
     
@@ -375,8 +371,6 @@ class TableManagerFacade:
         pass
 
     def add_index(self, colname, is_unique=False, **kw):
-        if self.table_info.is_deleted:
-            return
         self.table_info.add_index(colname, is_unique)
         self.manager.add_index(colname, is_unique, **kw)
 

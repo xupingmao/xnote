@@ -263,17 +263,20 @@ class SqlDBInfo:
     def __init__(self):
         self.name = ""
         self.amount = 0
+        self.comment = ""
 
 class SqlDBHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        db_list = xtables.get_all_tables()
+        p2 = xutils.get_argument_str("p2")
+        db_list = xtables.get_all_tables(is_deleted=(p2=="delete"))
         db_info_list = []
         for db in db_list:
             info = SqlDBInfo()
             info.name = db.tablename
             info.amount = db.count()
+            info.comment = db.table_info.comment
             db_info_list.append(info)
         kw = Storage()
         kw.db_info_list = db_info_list

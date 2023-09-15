@@ -71,7 +71,7 @@ def do_translate_strict(ctx):
         return
 
     user_name = ctx.user_name
-    db = xtables.get_dictionary_table()
+    db = xtables.get_dict_table()
     results = db.select(where="key = $key", vars=dict(key=ctx.input_text))
     for item in results:
         value = item.value.replace("\\n", "\n")
@@ -94,7 +94,7 @@ def translate_english(ctx):
         return
 
     user_name = ctx.user_name
-    db = xtables.get_dictionary_table()
+    db = xtables.get_dict_table()
     results = db.select(where="key like $key", vars=dict(key=ctx.input_text + "%"))
     for item in results:
         value = item.value.replace("\\n", "\n")

@@ -105,13 +105,14 @@ def get_table_by_name(table_name=""):
     return TableProxy(db, table_name)
 
 
-def get_all_tables():
+def get_all_tables(is_deleted=False):
+    # type: (bool) -> list[TableProxy]
     """获取所有的sql-数据库代理实例"""
     result = []
     table_dict = TableManager.get_table_info_dict()
     for table_name in table_dict:
         table_info = table_dict[table_name]
-        if table_info.is_deleted:
+        if is_deleted != table_info.is_deleted:
             continue
         proxy = get_table_by_name(table_name)
         result.append(proxy)
@@ -181,7 +182,8 @@ def init_note_index_table():
 def init_user_table():
     # 2017/05/21
     # 简单的用户表
-    with create_default_table_manager("user") as manager:
+    comment = "用户信息"
+    with create_default_table_manager("user", comment=comment) as manager:
         manager.add_column("name", "varchar(64)", "")
         manager.add_column("password", "varchar(64)", "") # 始终为空
         manager.add_column("password_md5", "varchar(64)", "")
@@ -233,9 +235,10 @@ def init_message_table():
 
 
 def init_record_table():
-    # 日志库和主库隔离开
+    # 日志记录
     dbpath = xconfig.FileConfig.record_db_file
-    with create_table_manager_with_dbpath("record", dbpath=dbpath) as manager:
+    comment = "通用日志记录"
+    with create_table_manager_with_dbpath("record", dbpath=dbpath, comment=comment) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
         manager.add_column("cdate", "date", "1970-01-01")
@@ -251,7 +254,8 @@ def init_dict_table():
     """词典，和主库隔离
     @since 2018/01/14
     """
-    with create_default_table_manager("dictionary") as manager:
+    comment = "词典"
+    with create_default_table_manager("dictionary", comment=comment) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("key", "varchar(100)", "")
@@ -264,7 +268,8 @@ def init_note_tag_rel_table():
     @since 2023/07/01
     """
     table_name = "note_tag_rel"
-    with create_default_table_manager(table_name, is_deleted=True) as manager:
+    comment = "笔记标签绑定关系(废弃)"
+    with create_default_table_manager(table_name, is_deleted=True, comment=comment) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("note_id", "varchar(32)", "")
@@ -291,7 +296,8 @@ def init_tag_bind_table():
     @since 2023/09/09
     """
     table_name = "tag_bind"
-    with create_default_table_manager(table_name) as manager:
+    comment = "标签绑定关系"
+    with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("tag_type", "tinyint", 0)
@@ -304,7 +310,8 @@ def init_file_info():
     @since 2023/05/26
     """
     table_name = "file_info"
-    with create_default_table_manager(table_name) as manager:
+    comment = "文件索引信息"
+    with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("fpath", "text", "")
@@ -322,7 +329,8 @@ def init_site_visit_log():
     @since 2023/05/28
     """
     table_name = "site_visit_log"
-    with create_default_table_manager(table_name) as manager:
+    comment = "站点访问统计"
+    with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("date", "date", "1970-01-01")
         manager.add_column("site", "varchar(64)", "")
         manager.add_column("ip", "varchar(64)", "")
@@ -335,7 +343,8 @@ def init_site_visit_log():
 def init_msg_index_table():
     """随手记索引"""
     table_name = "msg_index"
-    with create_default_table_manager(table_name) as manager:
+    comment = "随手记索引"
+    with create_default_table_manager(table_name, comment=comment) as manager:
         # 展示创建时间
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         # 实际创建时间
@@ -375,7 +384,8 @@ def init_kv_zset_table(db=None):
 def init_comment_index_table():
     """评论索引"""
     table_name = "comment_index"
-    with create_default_table_manager(table_name) as manager:
+    comment = "评论索引"
+    with create_default_table_manager(table_name, comment=comment) as manager:
         # 展示创建时间
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         # 修改时间

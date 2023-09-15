@@ -27,6 +27,7 @@ class TextHandler:
         
         kw = Storage()
         kw.embed = embed
+        kw.show_right = False
         if embed:
             kw.show_nav = False
         
