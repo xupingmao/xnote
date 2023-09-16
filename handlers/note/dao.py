@@ -60,6 +60,7 @@ MAX_STICKY_SIZE = 1000
 MAX_SEARCH_SIZE = 1000
 MAX_SEARCH_KEY_LENGTH = 20
 MAX_LIST_SIZE = 1000
+DEFAULT_DATETIME = "1970-01-01 00:00:00"
 _cache = cacheutil.PrefixedCache("note:")
 
 NOTE_ICON_DICT = {
@@ -86,43 +87,56 @@ class NoteIndexDO(Storage):
         self.type = ""
         self.ctime = dateutil.format_datetime()
         self.mtime = dateutil.format_datetime()
-        self.dtime = "1970-01-01 00:00:00"
+        self.dtime = DEFAULT_DATETIME
         self.parent_id = 0
         self.size = 0
+        self.children_count = 0
         self.version = 0
         self.is_deleted = 0
         self.level = 1 # 等级 0-归档 1-正常, 2-置顶
+        self.tag_str = ""
 
     @staticmethod
     def from_dict(dict_value):
         return new_from_dict(NoteIndexDO, dict_value)
+    
+    def before_save(self, index_do):
+        # type: (NoteDO) -> None
+        tags = index_do.tags
+        if tags == None:
+            tags = []
+        self.tag_str = " ".join(tags)
 
 class NoteDO(Storage):
     def __init__(self):
-        self.id = "" # id是str
+        self.id = 0 # 笔记ID
         self.name = ""
         self.path = ""
         self.creator = ""
+        self.creator_id = 0
         self.ctime = dateutil.format_datetime()
         self.mtime = dateutil.format_datetime()
         self.atime = dateutil.format_datetime()
+        self.dtime = DEFAULT_DATETIME # 删除时间
         self.type = "md"
         self.category = "" # 废弃
         self.size = 0
         self.children_count = 0
-        self.parent_id = "0" # 默认挂在根目录下
+        self.parent_id = 0 # 默认挂在根目录下
         self.content = ""
         self.data = ""
         self.is_deleted = 0 # 0-正常， 1-删除
         self.is_public = 0  # 0-不公开, 1-公开
         self.token = ""
         self.priority = 0 # (-1):归档, 0-正常, 1-置顶
+        self.level = 0
         self.visited_cnt = 0
         self.orderby = ""
         # 热门指数
         self.hot_index = 0
         # 版本
         self.version = 0
+        self.tags = []
 
         # 假的属性
         self.url = ""
@@ -171,6 +185,8 @@ class NoteIndexDao:
         index_do = NoteIndexDO()
         for key in index_do:
             index_do[key] = note_do.get(key)
+        index_do.pop("id", None)
+        index_do.before_save(note_do)
         return cls.db.insert(**index_do)
     
     @classmethod
@@ -180,6 +196,7 @@ class NoteIndexDao:
             value = note_do.get(key)
             if value != None:
                 index_do[key] = value
+        index_do.before_save(note_do)
         note_id = int(note_do.id)
         return cls.db.update(where=dict(id=note_id), **index_do)
 
@@ -190,7 +207,10 @@ class NoteIndexDao:
     @classmethod
     def get_by_id(cls, id=0):
         note_id = int(id)
-        return cls.db.select_first(where=dict(id=note_id))
+        first = cls.db.select_first(where=dict(id=note_id))
+        if first != None:
+            cls.compat_old(first)
+        return first
 
     @classmethod
     def get_by_name(cls, creator_id=0, name=""):
@@ -201,6 +221,7 @@ class NoteIndexDao:
 
     @classmethod
     def compat_old(cls, item: NoteIndexDO):
+        item.tags = item.tag_str.split()
         item.priority = item.level
         item.content = ""
         item.data = ""
@@ -209,10 +230,10 @@ class NoteIndexDao:
         item.category = ""
         item.hot_index = 0
         item.badge_info = ""
-        item.tags = []
         item.show_next = False
         item.is_public = False
         item.archived = (item.level<0)
+        item.atime = DEFAULT_DATETIME
     
     @classmethod
     def fix_result(cls, result=[]):
@@ -266,6 +287,14 @@ class NoteIndexDao:
         if is_deleted != None:
             where_dict["is_deleted"] = is_deleted
         return cls.db.count(where=where_dict)
+    
+    @classmethod
+    def list_float_notes(cls, creator_id=0, offset=0, limit=20, order="id desc"):
+        """查询漂浮的笔记"""
+        where = "creator_id=$creator_id AND parent_id=0 AND type!=$group_type"
+        vars = dict(creator_id=creator_id, group_type="group")
+        result = cls.db.select(where=where, vars=vars, offset=offset, limit=limit,order=order)
+        return cls.fix_result(result)
     
     @classmethod
     def delete_by_id(cls, note_id=0):
@@ -485,7 +514,7 @@ def build_note_info(note, orderby=None):
         note.data = ''
     # process icon
     note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
-    note.id = str(note.id)
+    note.id = int(note.id)
 
     if note.type in ("list", "csv"):
         note.show_edit = False
@@ -495,9 +524,6 @@ def build_note_info(note, orderby=None):
 
     if note.orderby is None:
         note.orderby = "ctime_desc"
-
-    if note.category is None:
-        note.category = "000"
 
     if note.hot_index is None:
         note.hot_index = 0
@@ -652,7 +678,7 @@ def get_or_create_note(skey, creator, creator_id=0):
     # 检查笔记名称
     check_by_name(creator, skey)
 
-    note_dict = Storage()
+    note_dict = NoteDO()
     note_dict.name = skey
     note_dict.skey = skey
     note_dict.creator = creator
@@ -717,9 +743,11 @@ def is_not_empty(value):
 
 
 def create_note(note_dict, date_str=None, note_id=None, check_name=True):
-    content = note_dict["content"]
-    creator = note_dict["creator"]
-    name = note_dict.get("name")
+    assert isinstance(note_dict, NoteDO)
+
+    content = note_dict.content
+    creator = note_dict.creator
+    name = note_dict.name
 
     assert is_not_empty(name), "笔记名称不能为空"
 
@@ -729,8 +757,6 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
         note_dict["priority"] = 0
     if "data" not in note_dict:
         note_dict["data"] = ""
-    if "category" not in note_dict:
-        note_dict["category"] = "000"
 
     with dbutil.get_write_lock(name):
         # 检查名称是否冲突
@@ -745,15 +771,12 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
         add_history(note_id, note_dict["version"], note_dict)
 
     # 更新分组下面页面的数量
-    update_children_count(note_dict["parent_id"])
+    update_children_count(note_dict.parent_id)
 
     # 创建对应的文件夹
     if type == "gallery":
         dirname = os.path.join(xconfig.UPLOAD_DIR, creator, str(note_id))
         xutils.makedirs(dirname)
-
-    # 更新目录修改时间
-    touch_note(note_dict["parent_id"])
 
     # 处理标签
     tags = note_dict.get("tags")
@@ -775,6 +798,46 @@ def create_token(type, note_id=""):
     dbutil.put("token:%s" % uuid, token_info)
     return uuid
 
+def check_and_create_default_book(user_name="", default_book_name="默认笔记本"):
+    """检查并且创建默认笔记本"""
+    assert user_name != None
+    creator_id = xauth.UserDao.get_id_by_name(user_name)
+    
+    with dbutil.get_write_lock():
+        result = NoteIndexDao.get_by_name(creator_id=creator_id, name=default_book_name)
+        if result == None:
+            default_book = NoteDO()
+            default_book.ctime = dateutil.format_datetime()
+            default_book.mtime = dateutil.format_datetime()
+            default_book.name = default_book_name
+            default_book.content = ""
+            default_book.creator = user_name
+            default_book.is_default = True
+            default_book.is_public = 0
+            default_book.type = "group"
+            default_book.priority = 1
+            default_book.children_count = 0
+            default_book.size = 0
+            default_book.is_deleted = 0
+            default_book_id = create_note(default_book, check_name=False)
+        else:
+            note_info = result[0]
+            default_book_id = note_info.id
+            update_kw = NoteDO()
+            update_kw.type = "group"
+            update_kw.priority = 1
+            update_kw.is_default = True
+            update_kw.is_public = 0
+            update_kw.children_count = 0
+            update_kw.is_deleted = 0
+            update_kw.size = 0
+
+            update_note(default_book_id, **update_kw)
+        
+        for note in list_default_notes(user_name):
+            move_note(note, default_book_id)
+    
+        return default_book_id
 
 def add_create_log(note):
     dao_log.add_create_log(note.creator, note)
@@ -831,14 +894,11 @@ def convert_to_index(note):
 def update_index(note):
     """更新索引的时候也会更新用户维度的索引(note_tiny)"""
     id = note['id']
-    note_id = format_note_id(id)
 
     if is_root_id(id):
         # 根目录，不需要更新
         return
-        
-    note_index = convert_to_index(note)
-    NoteIndexDao.update(note_index)
+    NoteIndexDao.update(note)
 
 def update_public_index(note):
     db = get_note_public_table()
@@ -928,9 +988,8 @@ def update_note(note_id, **kw):
 
 
 def move_note(note, new_parent_id):
-    # type: (Storage, str) -> None
-    assert isinstance(new_parent_id, str)
-    assert len(new_parent_id) > 0
+    # type: (Storage, int) -> None
+    new_parent_id = int(new_parent_id)
 
     old_parent_id = note.parent_id
     note.parent_id = new_parent_id
@@ -952,10 +1011,6 @@ def move_note(note, new_parent_id):
     # 更新文件夹的容量
     update_children_count(old_parent_id)
     update_children_count(new_parent_id, parent_note=new_parent)
-
-    # 更新新的parent更新时间
-    touch_note(new_parent_id)
-
 
 def update0(note):
     """更新基本信息，比如name、mtime、content、items、priority等,不处理parent_id更新"""
@@ -1019,11 +1074,11 @@ def update_children_count(parent_id, db=None, parent_note=None):
     if parent_note is None:
         return
 
-    creator = parent_note.creator
+    creator_id = parent_note.creator_id
     count = 0
-    for child in list_by_parent(creator, parent_id):
+    for child in list_by_parent(creator_id=creator_id, parent_id=parent_id):
         if child.type == "group":
-            count += child.children_count or 0
+            count += child.children_count
         else:
             count += 1
 
@@ -1167,25 +1222,15 @@ def count_group_by_db(creator, status=None):
 
 @xutils.timeit(name="NoteDao.ListRootGroup:leveldb", logfile=True)
 def list_root_group(creator=None, orderby="name"):
-    def list_root_group_func(key, value):
-        return value.creator == creator and value.type == "group" \
-            and value.parent_id in (0,"0") and value.is_deleted == 0
-
-    notes = _book_db.list(user_name=creator, filter_func = list_root_group_func)
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    notes = NoteIndexDao.list(creator_id=creator_id, parent_id=0, type="group")
     sort_notes(notes, orderby)
     return notes
 
 
-def list_default_notes(creator, offset=0, limit=1000, orderby="mtime_desc"):
-    # TODO 添加索引优化
-    def list_default_func(key, value):
-        if value.is_deleted:
-            return False
-        if value.type == "group":
-            return False
-        return value.creator == creator and str(value.parent_id) == "0"
-
-    notes = _tiny_db.list(filter_func = list_default_func)
+def list_default_notes(creator, offset=0, limit=1000, orderby="mtime desc"):
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    notes = NoteIndexDao.list_float_notes(creator_id=creator_id, offset=offset, limit=limit)
     sort_notes(notes, orderby)
     return notes[offset:offset+limit]
 
@@ -1229,7 +1274,7 @@ def count_public():
 
 
 @xutils.timeit_deco(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
-def list_by_parent(creator, parent_id="", offset=0, limit=1000,
+def list_by_parent(creator="", parent_id="", offset=0, limit=1000,
                    orderby="name",
                    skip_group=False,
                    include_public=True,

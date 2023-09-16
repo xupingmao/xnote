@@ -235,7 +235,7 @@ def list_root_func(context):
     if offset > 0:
         rows = []
     else:
-        rows = note_dao.list_group(user_name, parent_id="0")
+        rows = note_dao.list_group(user_name, parent_id=0)
         # 处理默认项目
         insert_default_project(rows, user_name)
         # 处理备忘录

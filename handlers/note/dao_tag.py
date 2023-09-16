@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-10 15:45:33
+@LastEditTime : 2023-09-16 22:22:53
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -222,7 +222,7 @@ def bind_tags(creator, note_id, tags, tag_type="group"):
         old_tags = old_tag_bind.tags
     
     if old_tags == tags:
-        logging.info("笔记标签没有变化")
+        logging.info("笔记标签没有变化,tags=%s", tags)
         return
 
     TagBindDao.bind_tag(creator, note_id, tags, parent_id=note.parent_id)
@@ -366,7 +366,7 @@ def handle_tag_for_note(note_info):
     note.tag_info_list = tag_info_list
 
 
-def append_tag(note_id="", tag_code=""):
+def append_tag(note_id=0, tag_code=""):
     """向笔记追加标签"""
     note_info = note_dao.get_by_id(note_id)
     if note_info == None:

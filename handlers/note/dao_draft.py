@@ -56,8 +56,8 @@ class NoteLockDao:
 
     @classmethod
     def lock_for_edit(cls, note_id, token):
-        assert isinstance(note_id, str)
         assert isinstance(token, str)
+        note_id = str(note_id)
         lock_info = cls.get_by_note_id(note_id)
         if lock_info == None or not cls.is_valid_token(lock_info):
             return True
@@ -65,10 +65,10 @@ class NoteLockDao:
 
     @classmethod
     def steal_edit_lock(cls, note_id, token, expire_time):
-        assert isinstance(note_id, str)
         assert isinstance(token, str)
         assert isinstance(expire_time, float)
 
+        note_id = str(note_id)
         lock_info = Storage(token = token, expire_time = expire_time)
         cls.db.put(note_id, lock_info)
     
@@ -91,14 +91,13 @@ def get_note_lock_db():
 def lock_for_edit(note_id, token):
     return NoteLockDao.lock_for_edit(note_id, token)
 
-def save_draft(note_id, content):
+def save_draft(note_id, content=""):
     """
     @param {string} note_id 笔记ID
     @param {string} content 笔记内容
     """
-    assert isinstance(note_id, str)
-    assert isinstance(content, str)
 
+    note_id = str(note_id)
     db = get_note_draft_db()
     if content=="":
         db.delete(note_id)
@@ -106,7 +105,7 @@ def save_draft(note_id, content):
         db.put(note_id, content)
 
 def get_draft(note_id):
-    assert isinstance(note_id, str)
+    note_id = str(note_id)
 
     db = get_note_draft_db()
     return db.get(note_id)

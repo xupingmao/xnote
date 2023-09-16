@@ -39,6 +39,7 @@ class KvNoteIndexDO(Storage):
         self.hot_index = 0
         # 版本
         self.version = 0
+        self.tags = []
 
     @staticmethod
     def from_dict(dict_value):
@@ -59,6 +60,7 @@ class NoteIndexDO(Storage):
         self.is_deleted = 0
         self.level = 0
         self.children_count = 0
+        self.tag_str = ""
 
     @staticmethod
     def from_dict(dict_value):
@@ -83,6 +85,9 @@ def migrate_note_index():
         creator = old_index.creator
         creator_id = xauth.UserDao.get_id_by_name(creator)
 
+        if old_index.tags == None:
+            old_index.tags = []
+
         new_index.id = note_id
         new_index.name = old_index.name
         new_index.creator = old_index.creator
@@ -95,6 +100,7 @@ def migrate_note_index():
         new_index.size = old_index.size or 0
         new_index.level = old_index.priority or 0
         new_index.children_count = old_index.children_count or 0
+        new_index.tag_str = " ".join(old_index.tags)
         if old_index.archived:
             new_index.level = -1
 

@@ -36,13 +36,15 @@ def get_user_note_log_table(user_name):
     assert user_name != None, "invalid user_name:%r" % user_name
     return dbutil.get_table("user_note_log", user_name = user_name)
 
+class UserNoteLogDao:
+    db = dbutil.get_table("user_note_log")
+
 @xutils.timeit_deco(name = "_update_log", switch_func = is_debug_enabled)
 def _update_log(user_name, note, increment = 1, insert_only = False):
     # 部分历史数据是int类型，所以需要转换一下
     note_id = str(note.id)
-
-    db = get_user_note_log_table(user_name)
     atime = dateutil.format_datetime()
+    db = UserNoteLogDao.db
 
     with dbutil.get_write_lock(user_name):
         log = db.get_by_id(note_id, user_name = user_name)
@@ -55,7 +57,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
             log.mtime = note.mtime
             log.ctime = note.ctime
             log.user = user_name
-            db.insert(log, id_type = None, id_value = note_id)
+            db.put_by_id(note_id, log)
         else:
             if insert_only:
                 log_debug("skip for insert_only mode, note_id:{!r}", note_id)

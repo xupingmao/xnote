@@ -232,8 +232,8 @@ class LdbTable:
         :param default_value: 默认值
         :param user_name: 用户标识
         """
-        validate_str(row_id, "invalid row_id:{!r}", row_id)
-
+        row_id = str(row_id)
+        
         if self._need_check_user:
             validate_str(user_name, "invalid user_name:{!r}", user_name)
 
@@ -357,7 +357,7 @@ class LdbTable:
 
         self._put_obj(obj_key, obj)
 
-    def update_by_id(self, id, obj, user_name=None):
+    def put_by_id(self, id, obj, user_name=None):
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)"""
         id = str(id)
         if self.user_name != None and user_name != None:
@@ -373,6 +373,8 @@ class LdbTable:
         self._check_user_name(user_name)
         key = self._build_key_with_user(id, user_name)
         self.update_by_key(key, obj)
+
+    update_by_id = put_by_id
 
     def update_by_key(self, key, obj):
         """直接通过`key`进行更新"""

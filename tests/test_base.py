@@ -127,7 +127,7 @@ class BaseTestCase(unittest.TestCase):
     def check_OK(self, *args, **kw):
         response = APP.request(*args, **kw)
         status = response.status
-        print(status)
+        print("response.status:", status)
         self.assertEqual(True, status == "200 OK" or status ==
                          "303 See Other" or status == "302 Found")
 

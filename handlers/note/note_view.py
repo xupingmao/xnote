@@ -298,8 +298,8 @@ class ViewHandler:
             return note_dao.list_path(file)
 
     @xutils.timeit(name="Note.View", logfile=True)
-    def GET(self, op, id=None, is_public_page=False):
-        if id is None:
+    def GET(self, op, id=0, is_public_page=False):
+        if id == 0:
             id = xutils.get_argument_int("id")
         else:
             id = int(id)
@@ -307,9 +307,9 @@ class ViewHandler:
         name = xutils.get_argument("name", "")
         page = xutils.get_argument_int("page", 1)
         pagesize = xutils.get_argument_int("pagesize", xconfig.PAGE_SIZE)
-        orderby = xutils.get_argument("orderby", "")
+        orderby = xutils.get_argument_str("orderby", "")
         is_iframe = xutils.get_argument("is_iframe", "false")
-        token = xutils.get_argument("token", "")
+        token = xutils.get_argument_str("token", "")
         user_info = xauth.current_user()
         assert user_info != None
         user_name = user_info.name

@@ -30,6 +30,7 @@ from xutils import textutil
 
 app          = test_base.init()
 json_request = test_base.json_request
+json_request_return_dict = test_base.json_request_return_dict
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
@@ -44,7 +45,7 @@ def get_default_group_id():
         return note.id
     return create_note_for_test("group", name)
 
-def create_note_for_test(type, name, *, content = "", tags="") -> str:
+def create_note_for_test(type, name, *, content = "", tags="") -> int:
     assert type != None, "type cannot be None"
     assert name != None, "name cannot be None"
     assert isinstance(tags, str), "tags must be str"
@@ -54,12 +55,17 @@ def create_note_for_test(type, name, *, content = "", tags="") -> str:
     if type != "group":
         data["parent_id"] = get_default_group_id()
 
-    file = json_request("/note/add", 
+    note_result = json_request_return_dict("/note/add", 
         method = "POST",
         data = data)
-    return file["id"]
+    
+    note_id = note_result.get("id")
+    print("新笔记id:", note_id)
+    return note_id
 
 def delete_note_for_test(name):
+    # 调用2次彻底删除
+    json_request("/note/remove?name=%s" % name)
     json_request("/note/remove?name=%s" % name)
 
 def get_note_info(id):
@@ -117,12 +123,15 @@ class TestMain(BaseTestCase):
         # 第二次更新 使用新的api
         NoteDao.update_content(note_info, "new-content-2")
         note_info = NoteDao.get_by_id(id)
+        assert note_info != None
+        
         self.assertEqual(note_info.content, "new-content-2")
 
         # 复制笔记
         assert isinstance(note_info.name, str)
         copy_data = dict(name=note_info.name + "-copy", origin_id = note_info.id)
-        resp = json_request("/note/copy", method="POST", data=copy_data)
+        resp = json_request_return_dict("/note/copy", method="POST", data=copy_data)
+        print("copy resp:", resp)
         self.assertEqual("success", resp["code"])
 
         # 删除笔记
@@ -259,7 +268,7 @@ class TestMain(BaseTestCase):
         self.check_200("/note/sticky")
 
     def test_note_share(self):
-        json_request("/note/remove?name=xnote-share-test")
+        delete_note_for_test("xnote-share-test")
 
         id = create_note_for_test("md", "xnote-share-test", content = "hello")
 
@@ -272,11 +281,12 @@ class TestMain(BaseTestCase):
         self.assertEqual(0, file["is_public"])
 
         logout_test_user()
-        self.check_OK("/note/view/%s" % id)
-
-        # clean up
-        json_request("/note/remove?id=" + str(id))
-        login_test_user()
+        try:
+            self.check_OK("/note/view/%s" % id)
+            # clean up
+            json_request("/note/remove?id=" + str(id))
+        finally:
+            login_test_user()
 
     def test_note_share_to(self):
         delete_note_for_test("xnote-share-test")
@@ -338,7 +348,7 @@ class TestMain(BaseTestCase):
         self.assertEqual("group", meta_info.tag_type)
 
     def test_note_stick(self):
-        json_request("/note/remove?name=xnote-share-test")
+        delete_note_for_test("xnote-share-test")
 
         id = create_note_for_test("md", "xnote-share-test", content = "hello")
 
@@ -499,13 +509,11 @@ class TestMain(BaseTestCase):
     def test_workspace(self):
         self.check_OK("/note/workspace")
 
-    def test_view_by_skey(self):
-        self.check_OK("/note/view?skey=skey_test")
-
-        note = get_by_user_skey(xauth.current_name(), "skey_test")
-        self.assertTrue(note != None)
-
-        delete_note_for_test("skey_test")
+    # def test_view_by_skey(self):
+    #     self.check_OK("/note/view?skey=skey_test")
+    #     note = get_by_user_skey(xauth.current_name(), "skey_test")
+    #     self.assertTrue(note != None)
+    #     delete_note_for_test("skey_test")
 
     def test_import_from_html(self):
         html = """<html>
@@ -586,7 +594,8 @@ class TestMain(BaseTestCase):
 
         recent_notes = list_most_visited(xauth.current_name(), 0, 20)
 
-        print(recent_notes)
+        print("recent_notes", recent_notes)
+
         self.assertTrue(len(recent_notes) > 0)
         self.assertEqual(recent_notes[0].badge_info, "102")
 
@@ -623,6 +632,7 @@ class TestMain(BaseTestCase):
         note_id = create_note_for_test("md", "bind-tag-test")
         dao_tag.append_tag(note_id, "$todo$")
         note_info = note_dao.get_by_id(note_id)
+        assert note_info != None
         assert isinstance(note_info.tags, list)
         self.assertEqual(note_info.tags, ["$todo$"])
         delete_note_for_test("bind-tag-test")

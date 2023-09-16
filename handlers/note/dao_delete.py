@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-16 14:44:25
+@LastEditTime : 2023-09-16 19:33:25
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
@@ -48,6 +48,12 @@ def delete_note(id):
     note.mtime = xutils.format_datetime()
     note.dtime = xutils.format_datetime()
     note.is_deleted = 1
+
+    # 防止冲突
+    if note.name.startswith("deleted-"):
+        note.name = "deleted-" + note.name
+    
+    NoteIndexDao.update(note)
     put_note_to_db(id, note)
 
     # 更新数量

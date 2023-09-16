@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-10-03 22:51:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 12:48:35
+@LastEditTime : 2023-09-16 19:58:59
 @FilePath     : /xnote/xutils/db/dbutil_id_gen.py
 @Description  : id生成
 """
@@ -39,8 +39,8 @@ class IdGenerator:
             base.validate_none(id_value, "invalid id_value")
             return self.create_increment_id()
 
-        if id_value != None:
-            base.validate_none(id_type, "invalid id_type")
+        if id_type == "value":
+            assert id_value != None
             return id_value
 
         raise Exception("unknown id_type:%s" % id_type)

@@ -15,7 +15,7 @@ from xutils import dateutil, dbutil, fsutil
 import xutils
 import xconfig
 from . import dao as note_dao
-from .dao import get_by_id, create_note, update_note, list_default_notes, move_note
+from .dao import get_by_id, check_and_create_default_book
 
 _db = dbutil.get_table("notebook")
 NOTE_DAO = xutils.DAO("note")
@@ -27,53 +27,6 @@ def SmartNote(name, url, icon="fa-folder", size=None, size_attr=None):
     note.size = size
     note.size_attr = size_attr
     return note
-
-def check_and_create_default_book(user_name):
-    """检查并且创建默认笔记本"""
-    assert user_name != None
-    
-    def find_default_func(key, value):
-        return value.is_default == True
-    
-    with dbutil.get_write_lock():
-        result = _db.list(filter_func = find_default_func, user_name = user_name)
-        if len(result) == 0:
-            default_book = note_dao.NoteDO()
-            default_book.ctime = dateutil.format_datetime()
-            default_book.mtime = dateutil.format_datetime()
-            default_book.name = "默认笔记本"
-            default_book.content = ""
-            default_book.creator = user_name
-            default_book.is_default = True
-            default_book.is_public = 0
-            default_book.type = "group"
-            default_book.priority = 1
-            default_book.children_count = 0
-            default_book.size = 0
-            default_book.is_deleted = 0
-
-            default_book_id = create_note(default_book, check_name=False)
-
-        else:
-            note_info = result[0]
-            default_book_id = note_info.id
-            
-            update_kw = note_dao.NoteDO()
-            update_kw.type = "group"
-            update_kw.priority = 1
-            update_kw.is_default = True
-            update_kw.is_public = 0
-            update_kw.children_count = 0
-            update_kw.is_deleted = 0
-            update_kw.size = 0
-
-            update_note(default_book_id, **update_kw)
-        
-        for note in list_default_notes(user_name):
-            move_note(note, default_book_id)
-    
-        return default_book_id
-
 
 def fix_book_delete(id, user_name):
     note = get_by_id(id)

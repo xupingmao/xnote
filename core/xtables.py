@@ -162,6 +162,7 @@ def init_note_index_table():
         manager.add_column("creator", "varchar(64)", "")
         manager.add_column("creator_id", "bigint", 0)
         manager.add_column("level", "tinyint", 0)
+        manager.add_column("tag_str", "varchar(255)", "")
 
         # 各种索引
         manager.add_index("parent_id")

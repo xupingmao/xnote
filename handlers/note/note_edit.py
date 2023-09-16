@@ -129,15 +129,15 @@ class CreateHandler:
 
     @xauth.login_required()
     def POST(self, method='POST'):
-        name      = xutils.get_argument_str("name", "")
+        name = xutils.get_argument_str("name")
         tags      = xutils.get_argument_str("tags", "")
         key       = xutils.get_argument_str("key", "")
         content   = xutils.get_argument_str("content", "")
         type0     = xutils.get_argument_str("type", "md")
         date      = xutils.get_argument("date", "")
-        format    = xutils.get_argument("_format", "")
-        parent_id = xutils.get_argument("parent_id", "0")
-        deafult_name = xutils.get_argument("default_name", "")
+        format    = xutils.get_argument_str("_format", "")
+        parent_id = xutils.get_argument_int("parent_id")
+        deafult_name = xutils.get_argument_str("default_name")
 
         user_info = xauth.current_user()
         assert user_info != None
@@ -154,10 +154,11 @@ class CreateHandler:
 
         type = NOTE_TYPE_MAPPING.get(type0, type0)
 
-        note           = Storage(name = name)
+        note = note_dao.NoteDO()
+        note.name = name
         note.creator   = creator
         note.creator_id = creator_id
-        note.parent_id = str(parent_id)
+        note.parent_id = parent_id
         note.type      = type
         note.type0 = type0 # 原始输入的type
         note.content   = content
@@ -170,9 +171,10 @@ class CreateHandler:
         note.tags = tags.split()
         note.level = 0
 
-        if note.parent_id == "-1":
+        if note.parent_id < 0:
             note.archived = True
             note.priority = -1
+            note.level = -1
 
         heading = T("创建笔记")
         code = "fail"
@@ -254,8 +256,8 @@ class RemoveAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id", "")
-        name = xutils.get_argument("name", "")
+        id = xutils.get_argument_int("id")
+        name = xutils.get_argument_str("name")
         file = None
 
         if id != "" and id != None:
@@ -263,10 +265,10 @@ class RemoveAjaxHandler:
         elif name != "":
             file = note_dao.get_by_name(xauth.current_name(), name)
         else:
-            return dict(code="fail", message="id,name至少一个不为空")
+            return webutil.FailedResult(code="fail", message="id,name至少一个不为空")
 
         if file is None:
-            return dict(code="fail", message="笔记不存在")
+            return webutil.FailedResult(code="fail", message="笔记不存在")
 
         creator = xauth.current_name()
         if not xauth.is_admin() and file.creator != creator:
@@ -281,7 +283,7 @@ class RemoveAjaxHandler:
         
         self.after_delete(file)
 
-        return dict(code="success")
+        return webutil.SuccessResult()
         
     def POST(self):
         return self.GET()
@@ -560,6 +562,7 @@ class StickHandler:
     def GET(self):
         id = xutils.get_argument_int("id")
         level = xutils.get_argument_int("level", 1)
+        # 正常(0), 归档(-1), 置顶(1)
         assert level in (-1,0,1)
 
         note = check_get_note(id)
@@ -570,9 +573,9 @@ class UnstickHandler:
     
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id")
+        id = xutils.get_argument_int("id")
         note = check_get_note(id)
-        note_dao.update_note(id, level = 0)
+        note_dao.NoteIndexDao.update_level(note_id=id, level = 0)
         raise web.found("/note/%s" % id)
 
 class ArchiveHandler:

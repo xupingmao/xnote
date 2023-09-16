@@ -67,7 +67,10 @@ def migrate_comment_index():
         else:
             new_db.insert(**comment_index)
         
-        if str(idx_id) != comment_info._id:
-            old_db.update_by_id(str(idx_id), comment_info)
+        old_idx_id = comment_info._id
+        new_idx_id = str(idx_id)
+        if new_idx_id != old_idx_id:
+            old_db.update_by_id(new_idx_id, comment_info)
+            old_db.delete_by_id(old_idx_id)
         
         logging.info("迁移评论: %s", comment_index)

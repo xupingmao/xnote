@@ -188,11 +188,10 @@ class TagListAjaxHandler:
 class BindTagAjaxHandler:
 
     def bind_group_tag(self):
-        group_id = xutils.get_argument("group_id", "")
-        tag_names_str = xutils.get_argument("tag_names", "")
+        group_id = xutils.get_argument_int("group_id")
+        tag_names_str = xutils.get_argument_str("tag_names")
         assert isinstance(tag_names_str, str)
-
-        assert group_id != ""
+        assert group_id != 0
         
         user_name = xauth.current_name()
         book_info = get_by_id_creator(group_id, user_name)
@@ -204,10 +203,10 @@ class BindTagAjaxHandler:
         return dict(code="success")
     
     def bind_note_tag(self):
-        note_id = xutils.get_argument("note_id", "")
-        tag_names_str = xutils.get_argument("tag_names", "")
-
-        assert note_id != ""
+        note_id = xutils.get_argument_int("note_id")
+        tag_names_str = xutils.get_argument_str("tag_names")
+        
+        assert note_id != 0
         assert isinstance(tag_names_str, str)
         
         user_name = xauth.current_name()
@@ -240,7 +239,7 @@ class BindTagAjaxHandler:
         if len(note_ids) == 0:
             return dict(code="400", message="note_ids参数无效")
         for note_id in note_ids:
-            dao_tag.append_tag(note_id, tag_code)
+            dao_tag.append_tag(int(note_id), tag_code)
         return dict(code="success")
 
 xurls = (
