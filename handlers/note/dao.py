@@ -25,12 +25,14 @@ import xutils
 import xmanager
 import logging
 import xauth
+import xtables
 import pdb
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
 from .dao_api import NoteDao
 from . import dao_log
+from xutils.db.dbutil_helper import new_from_dict
 
 def register_note_table(name, description, check_user=False, user_attr=None):
     dbutil.register_table(name, description, category="note",
@@ -44,8 +46,8 @@ NOTE_DAO = xutils.DAO("note")
 
 _full_db = dbutil.get_table("note_full")
 _tiny_db = dbutil.get_table("note_tiny")
-_index_db = dbutil.get_table("note_index")
-_book_db = dbutil.get_table("notebook")
+# _index_db = dbutil.get_table("note_index")
+# _book_db = dbutil.get_table("notebook")
 _search_history_db = dbutil.get_table("search_history")
 
 _note_history_db = dbutil.get_hash_table("note_history")
@@ -75,6 +77,26 @@ NOTE_ICON_DICT = {
     "form": "fa-table",  # 开发中
 }
 
+class NoteIndexDO(Storage):
+    def __init__(self):
+        self.id = 0
+        self.name = ""
+        self.creator = ""
+        self.creator_id = 0
+        self.type = ""
+        self.ctime = dateutil.format_datetime()
+        self.mtime = dateutil.format_datetime()
+        self.dtime = "1970-01-01 00:00:00"
+        self.parent_id = 0
+        self.size = 0
+        self.version = 0
+        self.is_deleted = 0
+        self.level = 1 # 等级 0-归档 1-正常, 2-置顶
+
+    @staticmethod
+    def from_dict(dict_value):
+        return new_from_dict(NoteIndexDO, dict_value)
+
 class NoteDO(Storage):
     def __init__(self):
         self.id = "" # id是str
@@ -94,7 +116,7 @@ class NoteDO(Storage):
         self.is_deleted = 0 # 0-正常， 1-删除
         self.is_public = 0  # 0-不公开, 1-公开
         self.token = ""
-        self.priority = 0 # 1-正常
+        self.priority = 0 # (-1):归档, 0-正常, 1-置顶
         self.visited_cnt = 0
         self.orderby = ""
         # 热门指数
@@ -139,6 +161,115 @@ def format_date(date):
         return date
     return date.split(" ")[0].replace("-", "/")
 
+
+class NoteIndexDao:
+    db = xtables.get_table_by_name("note_index")
+
+    @classmethod
+    def insert(cls, note_do: NoteDO):
+        # type: (NoteDO) -> int
+        index_do = NoteIndexDO()
+        for key in index_do:
+            index_do[key] = note_do.get(key)
+        return cls.db.insert(**index_do)
+    
+    @classmethod
+    def update(cls, note_do: NoteDO):
+        index_do = NoteIndexDO()
+        for key in index_do:
+            value = note_do.get(key)
+            if value != None:
+                index_do[key] = value
+        note_id = int(note_do.id)
+        return cls.db.update(where=dict(id=note_id), **index_do)
+
+    @classmethod
+    def update_level(cls, note_id=0, level=0):
+        return cls.db.update(where=dict(id=note_id), level=level, mtime=xutils.format_datetime())
+
+    @classmethod
+    def get_by_id(cls, id=0):
+        note_id = int(id)
+        return cls.db.select_first(where=dict(id=note_id))
+
+    @classmethod
+    def get_by_name(cls, creator_id=0, name=""):
+        result = cls.db.select_first(where=dict(creator_id=creator_id, name=name))
+        if result != None:
+            cls.compat_old(result)
+        return result
+
+    @classmethod
+    def compat_old(cls, item: NoteIndexDO):
+        item.priority = item.level
+        item.content = ""
+        item.data = ""
+        item.visited_cnt = 0
+        item.orderby = ""
+        item.category = ""
+        item.hot_index = 0
+        item.badge_info = ""
+        item.tags = []
+        item.show_next = False
+        item.is_public = False
+        item.archived = (item.level<0)
+    
+    @classmethod
+    def fix_result(cls, result=[]):
+        for item in result:
+            cls.compat_old(item)
+            build_note_info(item)
+        return result
+
+    @classmethod
+    def get_by_id_list(cls, id_list=[]):
+        if len(id_list) == None:
+            return []
+        int_list = []
+        for id_str in id_list:
+            int_list.append(int(id_str))
+        result = cls.db.select(where="id in $id_list", vars=dict(id_list=int_list))
+        return cls.fix_result(result)
+    
+    @classmethod
+    def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, is_deleted=0, 
+            level=None, date=None, order="id desc"):
+        date_like = ""
+        where = "1=1"
+        if creator_id != 0:
+            where += " AND creator_id=$creator_id"
+        if parent_id != 0 and parent_id != None:
+            where += " AND parent_id=$parent_id"
+        if type != None and type != "all":
+            where += " AND type=$type"
+        if level != None:
+            where += " AND level=$level"
+        if is_deleted != None:
+            where += " AND is_deleted=$is_deleted"
+        if date != None:
+            date_like = date + "%"
+            where += " AND ctime LIKE $date_like"
+        vars = dict(creator_id=creator_id, parent_id=parent_id, type=type, level=level, 
+                    is_deleted=is_deleted, date_like=date_like)
+        result = cls.db.select(where=where, vars=vars, offset=offset, limit=limit, order=order)
+        return cls.fix_result(result)
+    
+    @classmethod
+    def count(cls, creator_id=0, type=None, level=None, is_deleted=0):
+        where_dict = dict()
+        if creator_id != 0:
+            where_dict["creator_id"] = creator_id
+        if type != None and type != "all":
+            where_dict["type"] = type
+        if level != None:
+            where_dict["level"] = level
+        if is_deleted != None:
+            where_dict["is_deleted"] = is_deleted
+        return cls.db.count(where=where_dict)
+    
+    @classmethod
+    def delete_by_id(cls, note_id=0):
+        return cls.db.delete(where=dict(id=note_id))
 
 def get_root(creator=None):
     if creator == None:
@@ -187,27 +318,27 @@ def get_note_public_table():
 
 
 def get_note_tiny_table(user_name):
+    raise Exception("note_tiny is abondon")
     return dbutil.get_table("note_tiny", user_name=user_name)
 
 
-def batch_query(id_list):
+def batch_query_dict(id_list):
     result = dict()
-    for id in id_list:
-        note = _index_db.get_by_id(id)
-        if note:
-            result[id] = note
-            build_note_info(note)
+    index_list = NoteIndexDao.get_by_id_list(id_list)
+
+    for note in index_list:
+        result[id] = note
+        build_note_info(note)
     return result
 
+batch_query = batch_query_dict
 
 def batch_query_list(id_list):
     result = []
-    batch_result = _index_db.batch_get_by_id(id_list)
-    for id in id_list:
-        note = batch_result.get(id)
-        if note:
-            build_note_info(note)
-            result.append(note)
+    index_list = NoteIndexDao.get_by_id_list(id_list)
+    for note in index_list:
+        build_note_info(note)
+        result.append(note)
     return result
 
 
@@ -343,6 +474,7 @@ def build_note_info(note, orderby=None):
 
     # note.url = "/note/view?id={}".format(note["id"])
     note.url = "/note/view/{}".format(note["id"])
+
     if note.priority is None:
         note.priority = 0
 
@@ -440,7 +572,6 @@ def get_full_by_id(id):
         id = str(id)
     return _full_db.get_by_id(id)
 
-
 @xutils.timeit(name="NoteDao.GetById:leveldb", logfile=True)
 def get_by_id(id, include_full=True, creator=None):
     if id == "" or id is None:
@@ -449,7 +580,8 @@ def get_by_id(id, include_full=True, creator=None):
     if id == "0":
         return get_root(creator)
 
-    note_index = _index_db.get_by_id(id)
+    id_int = int(id)
+    note_index = NoteIndexDao.get_by_id(id_int)
     if note_index != None:
         note_index = NoteDO.from_dict(note_index)
 
@@ -476,6 +608,7 @@ def get_by_id(id, include_full=True, creator=None):
         note.hot_index = note_index.hot_index
         note.children_count = note_index.children_count
         note.path = note_index.path
+        note.level = note_index.level
 
     build_note_info(note)
     return note
@@ -495,20 +628,14 @@ def get_by_token(token):
 
 
 def get_by_user_skey(user_name, skey):
-    skey = skey.replace("-", "_")
-    note_info = _index_db.first_by_index("skey", where = dict(creator=user_name, skey=skey))
-    if note_info != None:
-        note_info = NoteDO.from_dict(note_info)
-        return get_by_id(note_info.id)
-    else:
-        return None
+    return None
 
 def delete_note_skey(note):
     # 使用的是note_index的索引,不需要处理
     pass
 
 
-def get_or_create_note(skey, creator):
+def get_or_create_note(skey, creator, creator_id=0):
     """根据skey查询或者创建笔记
     @param {string} skey 笔记的特殊key，用户维度唯一
     @param {string} creator 笔记的创建者
@@ -529,11 +656,12 @@ def get_or_create_note(skey, creator):
     note_dict.name = skey
     note_dict.skey = skey
     note_dict.creator = creator
+    note_dict.creator_id = creator_id
     note_dict.content = ""
     note_dict.data = ""
     note_dict.type = "md"
     note_dict.sub_type = "log"
-    note_dict.parent_id = "0"
+    note_dict.parent_id = 0
 
     note_id = create_note(note_dict)
 
@@ -559,7 +687,7 @@ def create_note_base(note_dict, date_str=None, note_id=None):
         return note_id
     elif date_str is None or date_str == "":
         # 默认创建规则
-        note_id = _index_db.insert(note_dict)
+        note_id = NoteIndexDao.insert(note_dict)
         note_dict["id"] = note_id
         put_note_to_db(note_id, note_dict)
         # 创建日志
@@ -575,7 +703,7 @@ def create_note_base(note_dict, date_str=None, note_id=None):
             timestamp = int(dateutil.parse_date_to_timestamp(date_str) * 1000)
 
         note_dict["ctime"] = dateutil.format_datetime(timestamp/1000)
-        note_id = _index_db.insert(note_dict)
+        note_id = NoteIndexDao.insert(note_dict)
         note_dict["id"] = note_id
         put_note_to_db(note_id, note_dict)
 
@@ -710,18 +838,7 @@ def update_index(note):
         return
         
     note_index = convert_to_index(note)
-    _index_db.update_by_id(note_id, note_index)
-
-    # 更新用户维度的笔记索引
-    note_tiny_db = get_note_tiny_table(note.creator)
-    note_tiny_db.update_by_id(note_id, note_index)
-
-    if note.type == "group":
-        _book_db.update_by_id(note_id, note_index, user_name=note.creator)
-
-    if note.is_public != None:
-        update_public_index(note)
-
+    NoteIndexDao.update(note_index)
 
 def update_public_index(note):
     db = get_note_public_table()
@@ -856,12 +973,9 @@ def update0(note):
 def get_by_name(creator, name):
     assert creator != None, "get_by_name:creator is None"
     assert name != None, "get_by_name: name is None"
-
-    db = get_note_tiny_table(creator)
-    result = db.list(offset=0, limit=1, where = dict(name=name))
-    result = list(filter(lambda x: not x.is_deleted, result))
-    if len(result) > 0:
-        note = result[0]
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    note = NoteIndexDao.get_by_name(creator_id=creator_id, name=name)
+    if note != None:
         return get_by_id(note.id)
     return None
 
@@ -890,7 +1004,9 @@ def visit_note(user_name, id):
     note.hot_index += 1
 
     add_visit_log(user_name, note)
-    update_index(note)
+
+    # TODO 延迟更新索引
+    # update_index(note)
 
 
 def update_children_count(parent_id, db=None, parent_note=None):
@@ -921,7 +1037,7 @@ def fill_parent_name(files):
         build_note_info(item)
         id_list.append(item.parent_id)
 
-    note_dict = batch_query(id_list)
+    note_dict = batch_query_dict(id_list)
     for item in files:
         parent = note_dict.get(item.parent_id)
         if parent != None:
@@ -956,8 +1072,9 @@ def list_group_with_count(creator=None,
     assert creator != None
     check_group_status(status)
 
-    if category == "" or category == "all":
-        category = None
+    creator_id = kw.get("creator_id", 0)
+    if creator_id == 0:
+        creator_id = xauth.UserDao.get_id_by_name(creator)
 
     q_tags = tags
     if tags != None and len(tags) == 0:
@@ -970,17 +1087,12 @@ def list_group_with_count(creator=None,
     if q_name != None:
         q_name = q_name.lower()
 
-    # TODO 添加索引优化
-    def list_group_func(key, value):
-        if value.type != "group" or value.is_deleted:
-            return False
+    def filter_group_func(value):
+        # print(f"note_id={value.id}, archived={value.archived}")
 
         if skip_archived and value.archived:
             return False
-
-        if parent_id != None and value.parent_id != parent_id:
-            return False
-
+        
         if category != None and value.category != category:
             return False
 
@@ -993,7 +1105,7 @@ def list_group_with_count(creator=None,
         if q_name != None:
             if q_name not in value.name.lower():
                 return False
-
+        
         if status == "archived":
             return value.archived
 
@@ -1001,19 +1113,30 @@ def list_group_with_count(creator=None,
             return not value.archived
 
         return True
+    
+    where_dict = dict(
+        creator_id=creator_id,
+        type="group",
+        parent_id=parent_id,
+    )
 
+    notes = NoteIndexDao.list(
+        **where_dict, limit=limit)
+
+    notes = list(filter(filter_group_func, notes))
+    
     if count_only:
-        return [], _book_db.count(user_name=creator, filter_func=list_group_func)
+        # TODO 其他筛选条件
+        return [],len(notes)
 
-    notes = _book_db.list(
-        user_name=creator, filter_func=list_group_func, limit=limit)
+    
     sort_notes(notes, orderby)
     result = notes[offset:offset + limit]
 
     if count_total:
         if len(notes) < limit:
             return result, len(notes)
-        return result, _book_db.count(user_name=creator, filter_func=list_group_func)
+        return result, len(notes)
     else:
         return result, 0
 
@@ -1035,7 +1158,8 @@ def count_group(creator, status=None):
 
 def count_group_by_db(creator, status=None):
     if status is None:
-        return _book_db.count(user_name=creator)
+        creator_id = xauth.UserDao.get_id_by_name(creator)
+        return NoteIndexDao.count(creator_id=creator_id, type="group")
 
     data, count = list_group_with_count(creator, status = status, count_only=True)
     return count
@@ -1082,7 +1206,7 @@ def list_public(offset, limit, orderby="ctime_desc"):
         assert isinstance(note, Storage)
         note_ids.append(note.id)
 
-    batch_result = _index_db.batch_get_by_id(note_ids)
+    batch_result = batch_query_dict(note_ids)
 
     for note in public_notes:
         assert isinstance(note, Storage)
@@ -1110,25 +1234,25 @@ def list_by_parent(creator, parent_id="", offset=0, limit=1000,
                    skip_group=False,
                    include_public=True,
                    *,
+                   creator_id=0,
                    tags=None):
     """通过父级节点ID查询笔记列表"""
     if parent_id is None:
         raise Exception("list_by_parent: parent_id is None")
+
+    if creator_id == 0:
+        creator_id = xauth.UserDao.get_id_by_name(creator)
 
     # 只要一个标签匹配即可
     q_tags = tags
     if q_tags != None and len(q_tags) == 0:
         q_tags = None
 
+    parent_id_int = int(parent_id)
     parent_id = str(parent_id)
-    # TODO 添加索引优化
 
-    def list_note_func(key, value):
-        if value.is_deleted:
-            return False
+    def filter_note_func(value):
         if skip_group and value.type == "group":
-            return False
-        if str(value.parent_id) != parent_id:
             return False
 
         if q_tags != None:
@@ -1141,10 +1265,10 @@ def list_by_parent(creator, parent_id="", offset=0, limit=1000,
             return (value.is_public or value.creator == creator)
         else:
             return value.creator == creator
-
-    notes = _tiny_db.list_by_index("parent_id", index_value=parent_id,
-                                   offset=0, limit=limit, filter_func=list_note_func, user_name=creator)
-
+    
+    # TODO 优化其他筛选条件
+    notes = NoteIndexDao.list(parent_id=parent_id_int, offset=offset, limit=limit, creator_id=creator_id)
+    notes = list(filter(filter_note_func, notes))
     if orderby == "db":
         note = get_by_id_creator(parent_id, creator)
         if note == None:
@@ -1155,17 +1279,13 @@ def list_by_parent(creator, parent_id="", offset=0, limit=1000,
     return notes[offset:offset+limit]
 
 
-def list_by_date(field, creator, date, orderby="ctime_desc"):
+def list_by_date(field, creator, date, orderby="ctime desc"):
     user = creator
     if user is None:
         user = "public"
 
-    def list_func(key, value):
-        if value.is_deleted:
-            return False
-        return date in getattr(value, field)
-
-    files = dbutil.prefix_list("note_tiny:%s" % user, list_func)
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    files = NoteIndexDao.list(creator_id=creator_id, date=date, order=orderby)
     fill_parent_name(files)
     sort_notes(files, orderby)
     return files
@@ -1246,18 +1366,18 @@ def find_next_note(note, user_name):
         return None
 
 
-def add_history_index(id, version, new_note):
+def add_history_index(note_id, version, new_note):
     brief = Storage()
-    brief.note_id = id
+    brief.note_id = note_id
     brief.name = new_note.get("name")
     brief.version = version
     brief.mtime = new_note.get("mtime")
 
     version_str = str(version)
-    _note_history_index_db.with_user(id).put(version_str, brief)
+    _note_history_index_db.with_user(str(note_id)).put(version_str, brief)
 
 def add_history(note_id, version, new_note):
-    # type: (str, int, dict) -> None
+    # type: (int, int, dict) -> None
     """version是新的版本"""
     assert version != None
 
@@ -1267,11 +1387,11 @@ def add_history(note_id, version, new_note):
     version_str = str(version)
     note_copy = dict(**new_note)
     note_copy['note_id'] = note_id
-    _note_history_db.with_user(note_id).put(version_str, note_copy)
+    _note_history_db.with_user(str(note_id)).put(version_str, note_copy)
 
 def list_history(note_id, limit=1000):
     """获取笔记历史的列表"""
-    result_list = _note_history_index_db.with_user(note_id).list(limit=limit, reverse = True)
+    result_list = _note_history_index_db.with_user(str(note_id)).list(limit=limit, reverse = True)
     history_list = [y for x,y in result_list]
     history_list = sorted(
         history_list, key=lambda x: x.mtime or "", reverse=True)
@@ -1288,7 +1408,7 @@ def get_history(note_id, version):
     return _note_history_db.with_user(note_id).get(version_str)
 
 
-def search_name(words, creator=None, parent_id=None, orderby="hot_index"):
+def search_name(words, creator="", parent_id=None, orderby="hot_index"):
     # TODO 搜索排序使用索引
     assert isinstance(words, list)
 
@@ -1296,19 +1416,16 @@ def search_name(words, creator=None, parent_id=None, orderby="hot_index"):
     if parent_id != None and parent_id != "":
         parent_id = str(parent_id)
 
-    def search_func(key, value):
+    def search_func(value):
         if value.is_deleted:
-            return False
-        if parent_id != None and str(value.parent_id) != parent_id:
             return False
         is_user_match = (value.creator == creator or value.is_public)
         is_words_match = textutil.contains_all(value.name.lower(), words)
         return is_user_match and is_words_match
 
-    db = get_note_tiny_table(creator)
-
-    result = db.list(filter_func=search_func,
-                     offset=0, limit=MAX_SEARCH_SIZE, fill_cache=False)
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    result = NoteIndexDao.list(creator_id=creator_id, parent_id=parent_id, limit=MAX_SEARCH_SIZE)
+    result = list(filter(search_func, result))
 
     # 补全信息
     build_note_list_info(result)
@@ -1357,39 +1474,14 @@ def search_public(words):
     sort_notes(notes)
     return notes
 
-
-def check_and_remove_broken_notes(notes, user_name):
-    result = []
-    has_broken = False
-    for note in notes:
-        full = get_full_by_id(note.id)
-        if full != None:
-            result.append(note)
-        else:
-            logging.error("node=%s", note)
-            NoteDao.delete_note(note.id)
-            # 如果note_index被删除，delete_note也无法删除它，所以需要再删除一下
-            db = get_note_tiny_table(note.creator)
-            db.delete(note)
-            has_broken = True
-    return result
-
-
 def count_removed(creator):
-    def count_func(key, value):
-        return value.is_deleted and value.creator == creator
-    db = get_note_tiny_table(creator)
-    return db.count(filter_func=count_func)
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    return NoteIndexDao.count(creator_id=creator_id, is_deleted=1)
 
 
-def list_removed(creator, offset, limit, orderby=None):
-    def list_func(key, value):
-        return value.is_deleted and value.creator == creator
-
-    db = get_note_tiny_table(creator)
-    notes = db.list(filter_func=list_func, offset=offset, limit=MAX_LIST_SIZE)
-    notes = check_and_remove_broken_notes(notes, creator)
-    sort_notes(notes, orderby)
+def list_removed(creator, offset, limit, orderby="ctime desc"):
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    notes = NoteIndexDao.list(is_deleted=1, creator_id=creator_id, order=orderby)
     return notes[offset: offset + limit]
 
 
@@ -1409,7 +1501,7 @@ def get_filter_func(type, default_filter_func):
     return default_filter_func
 
 
-def list_by_type(creator, type, offset, limit, orderby="name", skip_archived=False):
+def list_by_type(creator, type, offset=0, limit=20, orderby="name desc", skip_archived=False):
     """按照类型查询笔记列表
     @param {str} creator 笔记作者
     @param {str|None} type  笔记类型
@@ -1420,48 +1512,28 @@ def list_by_type(creator, type, offset, limit, orderby="name", skip_archived=Fal
     """
 
     assert type != None, "note.dao.list_by_type: type is None"
-
-    def list_func(key, value):
-        if skip_archived and value.archived:
-            return False
-        if type != "all" and value.type != type:
-            return False
-        return value.is_deleted == 0
-
-    filter_func = get_filter_func(type, list_func)
-
-    db = get_note_tiny_table(creator)
-    notes = db.list_by_index("ctime", filter_func=filter_func, offset=offset,
-                             limit=limit, reverse=True)
-
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    notes = NoteIndexDao.list(creator_id=creator_id, offset=offset, limit=limit, type=type, order=orderby)
     sort_notes(notes, orderby)
     return notes
 
 
 def count_by_type(creator, type):
-    def default_count_func(key, value):
-        return value.type == type and value.creator == creator and value.is_deleted == 0
-    filter_func = get_filter_func(type, default_count_func)
-    return dbutil.prefix_count("note_tiny:%s" % creator, filter_func)
-
-
-def list_sticky(creator, offset=0, limit=1000, orderby="ctime_desc"):
-    def list_func(key, value):
-        return value.priority > 0 and value.creator == creator and value.is_deleted == 0
-
-    db = get_note_tiny_table(creator)
-
-    notes = db.list(filter_func=list_func,
-                    offset=offset, limit=MAX_STICKY_SIZE)
-    sort_notes(notes, orderby=orderby)
-    return notes[offset:offset+limit]
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    return NoteIndexDao.count(creator_id=creator_id, type=type)
 
 
 def count_sticky(creator):
-    def list_func(key, value):
-        return value.priority > 0 and value.creator == creator and value.is_deleted == 0
-    db = get_note_tiny_table(creator)
-    return db.count(filter_func=list_func)
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    return NoteIndexDao.count(creator_id=creator_id, level=1)
+
+
+
+def list_sticky(creator, offset=0, limit=1000, orderby="ctime_desc"):
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    notes = NoteIndexDao.list(creator_id=creator_id, level=1, offset=offset, limit=limit)
+    sort_notes(notes, orderby=orderby)
+    return notes[offset:offset+limit]
 
 
 def list_archived(creator, offset=0, limit=100):
@@ -1655,7 +1727,7 @@ def get_virtual_group(user_name, name):
         group.size = len(files)
         group.children_count = len(files)
         group.icon = "fa-folder"
-        group.priority = 1
+        group.priority = 0
         return group
     else:
         raise Exception("[get_virtual_group] invalid name: %s" % name)

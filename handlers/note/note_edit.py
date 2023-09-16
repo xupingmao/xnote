@@ -139,7 +139,11 @@ class CreateHandler:
         parent_id = xutils.get_argument("parent_id", "0")
         deafult_name = xutils.get_argument("default_name", "")
 
-        creator = xauth.current_name_str()
+        user_info = xauth.current_user()
+        assert user_info != None
+        creator = user_info.name
+        creator_id = user_info.id
+
         xmanager.add_visit_log(creator, "/note/create")
 
         if key == "":
@@ -152,6 +156,7 @@ class CreateHandler:
 
         note           = Storage(name = name)
         note.creator   = creator
+        note.creator_id = creator_id
         note.parent_id = str(parent_id)
         note.type      = type
         note.type0 = type0 # 原始输入的type
@@ -163,6 +168,7 @@ class CreateHandler:
         note.version   = 0
         note.is_deleted = 0
         note.tags = tags.split()
+        note.level = 0
 
         if note.parent_id == "-1":
             note.archived = True
@@ -171,7 +177,7 @@ class CreateHandler:
         heading = T("创建笔记")
         code = "fail"
         error = ""
-        ctx = Storage(method = method, date = date)
+        ctx = Storage(method = method, date = date, creator_id=creator_id)
         
         try:
             self.check_before_create(note)
@@ -552,14 +558,12 @@ class StickHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id")
-        level = xutils.get_argument_str("level", "0")
-        priority = 1
-        if level in ("0", "2"):
-            priority = int(level)
+        id = xutils.get_argument_int("id")
+        level = xutils.get_argument_int("level", 1)
+        assert level in (-1,0,1)
 
         note = check_get_note(id)
-        note_dao.update_note(id, priority = priority, archived = False)
+        note_dao.NoteIndexDao.update_level(note_id=int(id), level = level)
         raise web.found("/note/%s" % id)
 
 class UnstickHandler:
@@ -568,7 +572,7 @@ class UnstickHandler:
     def GET(self):
         id = xutils.get_argument("id")
         note = check_get_note(id)
-        note_dao.update_note(id, priority = 0)
+        note_dao.update_note(id, level = 0)
         raise web.found("/note/%s" % id)
 
 class ArchiveHandler:

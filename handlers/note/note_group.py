@@ -223,8 +223,7 @@ class GroupListHandler:
                                    status=status,
                                    orderby="default",
                                    parent_id=parent_id,
-                                   tags=kw.q_tags,
-                                   category=kw.note_category)
+                                   tags=kw.q_tags)
         else:
             notes = SmartGroupService.list_smart_group(user_name)
 
@@ -527,7 +526,7 @@ class BaseListHandler:
 
     note_type = "gallery"
     title = "相册"
-    orderby = "ctime_desc"
+    orderby = "ctime desc"
     create_type = ""
     create_text = T("创建笔记")
     date_type = "cdate"
@@ -565,7 +564,7 @@ class BaseListHandler:
         limit = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
-        self.note_type = xutils.get_argument("type", self.note_type)
+        self.note_type = xutils.get_argument_str("type", self.note_type)
         assert isinstance(self.note_type, str)
 
         amount = self.count_notes(user_name)
@@ -613,7 +612,7 @@ class AddressBookListHandler(BaseListHandler):
 
 class DocumentListHandler(BaseListHandler):
 
-    note_type = "document"
+    note_type = "md"
     create_type = "md"
     create_text = T("创建文档")
     title = "我的文档"
@@ -937,7 +936,7 @@ class DateListHandler:
                               priority=2))
 
         notes_new = note_dao.list_by_date(
-            "ctime", user_name, date, orderby="ctime_desc")
+            "ctime", user_name, date, orderby="ctime desc")
         for note in notes_new:
             note.badge_info = dateutil.format_date(note.ctime)
 
@@ -977,6 +976,7 @@ xurls = (
     r"/note/manage", ManagementHandler,
     r"/note/public", ShareListHandler,
     r"/note/document", DocumentListHandler,
+    r"/note/md", DocumentListHandler,
     r"/note/gallery", GalleryListHandler,
     r"/note/list", CheckListHandler,
     r"/note/table", TableListHandler,

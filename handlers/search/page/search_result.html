@@ -54,7 +54,7 @@
             {# 右侧操作选项 #}
             <div class="note-visited-cnt">
                 {# 快捷命令 #}
-                {% if file.command != None %}
+                {% if file.get("command") != None %}
                     <input type="button" class="btn execute-btn float-right" value="执行" href="{{file.command}}"/>
                 {% end %}
 
@@ -72,7 +72,7 @@
                     <a class="item-option" href="{{_server_home}}/dict/update?id={{file.id}}">编辑</a>
                 {% end %}
 
-                {% if file.show_more_link %}
+                {% if file.get("show_more_link") %}
                     <!-- 分类导航 -->
                     <a href="{{file.url}}">查看全部</a>
                 {% end %}
@@ -126,9 +126,6 @@
                             <span class="search-badge-info">{{file.badge_info}}</span>
                         {% end %}
                     </div>
-                </div>
-                <div class="note-related">
-                    <input type="text" data-role="tagsinput" value="{{file.related}}"/>
                 </div>
             {% end %}
         </div>

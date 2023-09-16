@@ -137,46 +137,36 @@ def init_test_table():
 
 
 def init_note_index_table():
-    with create_default_table_manager("note_index") as manager:
-        manager.add_column("name",    "varchar(255)", "")
-        # 文本内容长度或者子页面数量
-        manager.add_column("size",    "bigint", 0)
+    comment = "笔记索引"
+    with create_default_table_manager("note_index", comment=comment) as manager:
+        manager.add_column("name", "varchar(255)", "")
+        # 文本内容长度
+        manager.add_column("size", "bigint", 0)
+        # 子节点数量
+        manager.add_column("children_count", "bigint", 0)
         # 修改版本
-        manager.add_column("version",  "int", 0)
+        manager.add_column("version", "int", 0)
         # 类型, markdown, post, mailist, file
-        # 类型为file时，content值为文件的web路径
         manager.add_column("type", "varchar(32)", "")
-
-        # 关联关系
         # 上级目录
-        manager.add_column("parent_id", "int", 0)
+        manager.add_column("parent_id", "bigint", 0)
         # 创建时间ctime
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         # 修改时间mtime
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
-        # 访问时间atime
-        manager.add_column("atime", "datetime", "1970-01-01 00:00:00")
-        # 访问次数
-        manager.add_column("visited_cnt", "int", 0)
+        # 删除时间
+        manager.add_column("dtime", "datetime", "1970-01-01 00:00:00")
         # 逻辑删除标记
-        manager.add_column("is_deleted", "int", 0)
+        manager.add_column("is_deleted", "tinyint", 0)
         # 创建者
         manager.add_column("creator", "varchar(64)", "")
-        # 置顶顺序
-        manager.add_column("priority", "int", 0)
+        manager.add_column("creator_id", "bigint", 0)
+        manager.add_column("level", "tinyint", 0)
 
         # 各种索引
-        manager.add_index(["parent_id", "name"])
-        manager.add_index(["creator", "mtime", "type", "is_deleted"])
-        manager.add_index(["creator", "type"])
-        manager.add_index(["role", "mtime"])
-        manager.add_index("ctime")
-        # 虽然不能加速匹配过程，但是可以加速全表扫描
-        manager.add_index("name")
-
-        # 废弃字段
-        manager.drop_column("content", "text", "")
-        manager.drop_column("data", "text", "")
+        manager.add_index("parent_id")
+        manager.add_index(["creator_id", "mtime"])
+        manager.add_index(["creator_id", "type"])
 
 
 def init_user_table():
@@ -498,6 +488,8 @@ def init():
 
     # 随手记
     init_msg_index_table()
+    # 笔记索引
+    init_note_index_table()
     
     if xconfig.DatabaseConfig.db_driver == "mysql":
         init_kv_store_table()

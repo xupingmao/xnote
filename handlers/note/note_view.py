@@ -300,15 +300,21 @@ class ViewHandler:
     @xutils.timeit(name="Note.View", logfile=True)
     def GET(self, op, id=None, is_public_page=False):
         if id is None:
-            id = xutils.get_argument("id", "")
+            id = xutils.get_argument_int("id")
+        else:
+            id = int(id)
+        
         name = xutils.get_argument("name", "")
-        page = xutils.get_argument("page", 1, type=int)
-        pagesize = xutils.get_argument("pagesize", xconfig.PAGE_SIZE, type=int)
+        page = xutils.get_argument_int("page", 1)
+        pagesize = xutils.get_argument_int("pagesize", xconfig.PAGE_SIZE)
         orderby = xutils.get_argument("orderby", "")
         is_iframe = xutils.get_argument("is_iframe", "false")
         token = xutils.get_argument("token", "")
-        user_name = xauth.current_name()
-        skey = xutils.get_argument("skey")
+        user_info = xauth.current_user()
+        assert user_info != None
+        user_name = user_info.name
+        user_id = user_info.id
+        skey = xutils.get_argument_str("skey")
 
         kw = create_view_kw()
 
@@ -324,10 +330,7 @@ class ViewHandler:
             raise web.found("/")
 
         if skey != None and skey != "":
-            try:
-                file = note_dao.get_or_create_note(skey, user_name)
-            except Exception as e:
-                return xtemplate.render("error.html", error=e)
+            return xtemplate.render("error.html", error="skey属性已经废弃")
         else:
             # 回收站的笔记也能看到
             file = find_note_for_view(token, id, name)
@@ -487,14 +490,14 @@ class QueryHandler:
 class GetDialogHandler:
 
     def get_group_option_dialog(self, kw):
-        note_id = xutils.get_argument_str("note_id", "")
+        note_id = xutils.get_argument_int("note_id")
         file = NoteDao.get_by_id(note_id)
         if file != None and file.children_count == 0:
             kw.show_delete_btn = True
         kw.file = file
 
     def get_share_group_dialog(self, kw):
-        note_id = xutils.get_argument_str("note_id", "")
+        note_id = xutils.get_argument_int("note_id")
         file = note_dao.get_by_id(note_id)
         kw.file = file
         kw.share_to_list = []
@@ -503,7 +506,7 @@ class GetDialogHandler:
             kw.share_to_list = dao_share.list_share_by_note_id(file.id)
 
     def get_share_note_dialog(self, kw):
-        note_id = xutils.get_argument_str("note_id")
+        note_id = xutils.get_argument_int("note_id")
         file = NoteDao.get_by_id(note_id)
         kw.file = file
 

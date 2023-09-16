@@ -4,13 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 14:27:39
+@LastEditTime : 2023-09-16 14:44:25
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
 
 import xutils
-from xutils import dbutil
 from .dao_api import NoteDao
 from .dao import (
     delete_history,
@@ -20,9 +19,8 @@ from .dao import (
     put_note_to_db,
     delete_note_skey,
     refresh_note_stat,
-    get_note_tiny_table,
     _full_db,
-    _book_db
+    NoteIndexDao
 )
 
 from .dao_tag import delete_tags
@@ -31,14 +29,8 @@ def delete_note_physically(creator, note_id):
     assert creator != None, "creator can not be null"
     assert note_id != None, "note_id can not be null"
 
-    index_key = "note_index:%s" % note_id
-
     _full_db.delete_by_id(note_id)
-    dbutil.delete(index_key)
-
-    note_tiny_db = get_note_tiny_table(creator)
-    note_tiny_db.delete_by_id(note_id)
-
+    NoteIndexDao.delete_by_id(int(note_id))
     delete_history(note_id)
 
 
@@ -61,9 +53,6 @@ def delete_note(id):
     # 更新数量
     update_children_count(note.parent_id)
     delete_tags(note.creator, id)
-
-    # 删除笔记本
-    _book_db.delete_by_id(id, user_name=note.creator)
 
     # 删除skey索引
     delete_note_skey(note)
@@ -88,7 +77,6 @@ def recover_note(id):
     add_history(id, note.version, note)
     # 更新数据
     put_note_to_db(id, note)
-    
     # 更新数量
     update_children_count(note.parent_id)
 

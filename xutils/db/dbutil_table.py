@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-26 10:22:21
+@LastEditTime : 2023-09-16 14:20:52
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -359,7 +359,7 @@ class LdbTable:
 
     def update_by_id(self, id, obj, user_name=None):
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)"""
-        assert xutils.is_str(id)
+        id = str(id)
         if self.user_name != None and user_name != None:
             raise DBException("table实例已经设置了user_name，不能再通过参数设置")
 
@@ -429,7 +429,7 @@ class LdbTable:
         db_batch_delete(keys)
 
     def delete_by_id(self, id, user_name=None):
-        validate_str(id, "delete_by_id: id is not str")
+        id = str(id)
         key = self._build_key_with_user(id, user_name)
         self.delete_by_key(key)
 

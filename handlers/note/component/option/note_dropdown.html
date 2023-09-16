@@ -30,7 +30,7 @@ xnote.state.note = {
         <a class="dropdown-option move-btn link">移动</a>
         <a class="dropdown-option copy-btn link">复制</a>
 
-        {% if file.priority > 0 %}
+        {% if file.level > 0 %}
             <a class="dropdown-option link" href="{{_server_home}}/note/stick?id={{file.id}}&level=0">取消置顶</a>
         {% else %}
             <a class="dropdown-option link" href="{{_server_home}}/note/stick?id={{file.id}}&level=1">置顶</a>

@@ -42,6 +42,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
     note_id = str(note.id)
 
     db = get_user_note_log_table(user_name)
+    atime = dateutil.format_datetime()
 
     with dbutil.get_write_lock(user_name):
         log = db.get_by_id(note_id, user_name = user_name)
@@ -50,7 +51,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
             log = Storage()
             log.note_id = note_id
             log.visit_cnt  = increment
-            log.atime = note.atime
+            log.atime = atime
             log.mtime = note.mtime
             log.ctime = note.ctime
             log.user = user_name
@@ -62,7 +63,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
             if log.visit_cnt is None:
                 log.visit_cnt = 1
             log.visit_cnt += increment
-            log.atime = note.atime
+            log.atime = atime
             log.mtime = note.mtime
             log.ctime = note.ctime
             log.user = user_name
@@ -82,13 +83,21 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
 
     db = get_user_note_log_table(user)
     logs = db.list_by_index("atime", offset = offset, limit = limit, reverse = True)
+    atime_dict = dict()
+    for log in logs:
+        note_id = int(log.note_id)
+        atime_dict[note_id] = log.atime
+    
+    print("atime_dict", atime_dict)
 
     note_ids = get_note_ids_from_logs(logs)
 
-    notes = NoteDao.batch_query_list(note_ids)
+    notes = note_dao.batch_query_list(note_ids)
 
     for note in notes:
-        note.badge_info = dateutil.format_date(note.atime, "/")
+        note_id = int(note.id)
+        atime = atime_dict.get(note_id, note.mtime)
+        note.badge_info = dateutil.format_date(atime, "/")
 
     return notes
 

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-10 12:18:29
+@LastEditTime : 2023-09-16 10:29:23
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -128,15 +128,16 @@ class TableProxy:
         pk_list = []
         
         try:
-            for row in self.select(where=where, vars=vars, _test=_test):
+            for row in self.select(what=pk_name, where=where, vars=vars, _test=_test):
                 pk_value = row.get(pk_name)
                 pk_list.append(pk_value)
             
-            new_where = f"`{pk_name}` in $pk_list"
-            new_vars = dict(pk_list=pk_list)
-            result = self.db.delete(self.tablename, where=new_where, using=using, vars=new_vars, _test=_test)
-            self.add_delete_binlog(pk_list)
-            return result
+            if len(pk_list) > 0:
+                new_where = f"`{pk_name}` in $pk_list"
+                new_vars = dict(pk_list=pk_list)
+                result = self.db.delete(self.tablename, where=new_where, using=using, vars=new_vars, _test=_test)
+                self.add_delete_binlog(pk_list)
+                return result
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
