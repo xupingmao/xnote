@@ -865,7 +865,7 @@ def check_and_create_default_book(user_name="", default_book_name="默认笔记�
             default_book.name = default_book_name
             default_book.content = ""
             default_book.creator = user_name
-            default_book.is_default = True
+            default_book.creator_id = creator_id
             default_book.is_public = 0
             default_book.type = "group"
             default_book.priority = 1
@@ -874,12 +874,11 @@ def check_and_create_default_book(user_name="", default_book_name="默认笔记�
             default_book.is_deleted = 0
             default_book_id = create_note(default_book, check_name=False)
         else:
-            note_info = result[0]
+            note_info = result
             default_book_id = note_info.id
             update_kw = NoteDO()
             update_kw.type = "group"
             update_kw.priority = 1
-            update_kw.is_default = True
             update_kw.is_public = 0
             update_kw.children_count = 0
             update_kw.is_deleted = 0

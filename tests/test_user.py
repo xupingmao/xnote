@@ -28,3 +28,9 @@ class TestUser(BaseTestCase):
 
     def test_change_password(self):
         self.check_OK("/user/change_password")
+
+    def test_user_oplog(self):
+        self.check_OK("/user/op_log")
+
+    def test_user_session(self):
+        self.check_OK("/user/session")

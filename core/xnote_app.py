@@ -158,8 +158,7 @@ def init_kv_engine():
             from xutils.db.driver_sqlite import SqliteKV
             db_file = os.path.join(xconfig.DB_DIR, "sqlite", "kv_store.db")
             config_dict = Storage()
-            config_dict.sqlite_journal_mode = xconfig.get_system_config(
-                "sqlite_journal_mode")
+            config_dict.sqlite_journal_mode = xconfig.DatabaseConfig.sqlite_journal_mode
             db_instance = SqliteKV(db_file, config_dict=config_dict)
             db_instance.debug = xconfig.DatabaseConfig.db_debug
 

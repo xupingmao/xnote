@@ -544,7 +544,6 @@ class BaseListHandler:
 
     @xauth.login_required()
     def GET(self):
-        from .dao_book import get_default_book_id
         page = xutils.get_argument("page", 1, type=int)
         user_name = xauth.current_name()
 
@@ -566,7 +565,6 @@ class BaseListHandler:
         kw.page = page
         kw.page_max = math.ceil(amount / xconfig.PAGE_SIZE)
         kw.page_url = "/note/%s?page=" % self.note_type
-        kw.parent_id = get_default_book_id(user_name)
         kw.notes = notes
         kw.group_type = self.note_type
         kw.note_type = self.note_type

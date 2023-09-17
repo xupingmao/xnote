@@ -85,3 +85,6 @@ class TestMain(BaseTestCase):
     def test_fs_find_in_cache(self):
         xconfig.USE_CACHE_SEARCH = True
         self.check_OK("/fs_find?key=test")
+
+    def test_fs_upload_search(self):
+        self.check_OK("/fs_upload/search?key=" + xutils.quote("test"))
