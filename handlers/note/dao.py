@@ -309,7 +309,7 @@ def get_root(creator=None):
     root.creator = creator
     root.name = "根目录"
     root.type = "group"
-    root.parent_id = "0"
+    root.parent_id = 0
     build_note_info(root)
     root.url = "/note/group"
     return root
@@ -768,7 +768,7 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     
     if content != "":
         # 如果内部不为空，创建一个历史记录
-        add_history(note_id, note_dict["version"], note_dict)
+        add_history(note_id, note_dict.version, note_dict)
 
     # 更新分组下面页面的数量
     update_children_count(note_dict.parent_id)
@@ -779,7 +779,7 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
         xutils.makedirs(dirname)
 
     # 处理标签
-    tags = note_dict.get("tags")
+    tags = note_dict.tags
     if tags != None and len(tags) > 0:
         from . import dao_tag
         dao_tag.TagBindDao.bind_tag(user_name = creator, note_id = note_id, tags=tags)
@@ -988,7 +988,7 @@ def update_note(note_id, **kw):
 
 
 def move_note(note, new_parent_id):
-    # type: (Storage, int) -> None
+    # type: (NoteDO, int) -> None
     new_parent_id = int(new_parent_id)
 
     old_parent_id = note.parent_id
@@ -1065,6 +1065,8 @@ def visit_note(user_name, id):
 
 
 def update_children_count(parent_id, db=None, parent_note=None):
+    print(f"update_children_count({parent_id})")
+
     if is_root_id(parent_id):
         return
 
@@ -1076,7 +1078,11 @@ def update_children_count(parent_id, db=None, parent_note=None):
 
     creator_id = parent_note.creator_id
     count = 0
-    for child in list_by_parent(creator_id=creator_id, parent_id=parent_id):
+    children_items = list_by_parent(creator_id=creator_id, parent_id=parent_id)
+    
+    print(f"len(children_items)={len(children_items)}")
+
+    for child in children_items:
         if child.type == "group":
             count += child.children_count
         else:
@@ -1274,7 +1280,7 @@ def count_public():
 
 
 @xutils.timeit_deco(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
-def list_by_parent(creator="", parent_id="", offset=0, limit=1000,
+def list_by_parent(creator="", parent_id=None, offset=0, limit=1000,
                    orderby="name",
                    skip_group=False,
                    include_public=True,
@@ -1305,11 +1311,7 @@ def list_by_parent(creator="", parent_id="", offset=0, limit=1000,
                 return False
             if not textutil.contains_any(value.tags, q_tags):
                 return False
-
-        if include_public:
-            return (value.is_public or value.creator == creator)
-        else:
-            return value.creator == creator
+        return True
     
     # TODO 优化其他筛选条件
     notes = NoteIndexDao.list(parent_id=parent_id_int, offset=offset, limit=limit, creator_id=creator_id)

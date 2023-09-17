@@ -555,6 +555,11 @@ def get_current_user():
 def current_user():
     return get_current_user()
 
+def current_user_id():
+    user = get_current_user()
+    if user != None:
+        return user.id
+    return 0
 
 def get_current_name():
     # type: () -> str|None

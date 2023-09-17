@@ -90,7 +90,7 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
         note_id = int(log.note_id)
         atime_dict[note_id] = log.atime
     
-    print("atime_dict", atime_dict)
+    # print("atime_dict", atime_dict)
 
     note_ids = get_note_ids_from_logs(logs)
 
@@ -131,26 +131,15 @@ def list_most_visited(user_name, offset, limit):
 
 @xutils.timeit(name = "NoteDao.ListRecentEdit:leveldb", logfile = True, logargs = True)
 def list_recent_edit(user_name = None, offset = 0, limit = None, skip_deleted = True):
-    """通过KV存储实现"""
+    """查询最近编辑的笔记"""
     if limit is None:
         limit = xconfig.PAGE_SIZE
     
-    if user_name is None:
-        user_name = "public"
-
-    db = get_user_note_log_table(user_name)
-    logs = db.list_by_index("mtime", offset = offset, limit = limit, reverse = True)
-
+    assert user_name != None
+    creator_id = xauth.UserDao.get_id_by_name(user_name)
     result = []
-    id_list = []
-    for log in logs:
-        id_list.append(log.note_id)
-    
-    note_list = note_dao.batch_query_list(id_list)
+    note_list = note_dao.NoteIndexDao.list(creator_id=creator_id, offset=offset, limit=limit, order="mtime desc")
     for note in note_list:
-        if note is None:
-            continue
-
         note.badge_info = dateutil.format_date(note.mtime, "/")
         result.append(note)
 

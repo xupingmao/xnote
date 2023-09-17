@@ -65,8 +65,10 @@ def create_note_for_test(type, name, *, content = "", tags="") -> int:
 
 def delete_note_for_test(name):
     # 调用2次彻底删除
-    json_request("/note/remove?name=%s" % name)
-    json_request("/note/remove?name=%s" % name)
+    user_id = xauth.current_user_id()
+    note_index = note_dao.NoteIndexDao.get_by_name(creator_id=user_id, name=name)
+    if note_index != None:
+        dao_delete.delete_note_physically(note_index.creator, note_index.id)
 
 def get_note_info(id):
     return get_by_id(id)
@@ -92,6 +94,8 @@ class TestMain(BaseTestCase):
 
         id = file["id"]
         note_info = NoteDao.get_by_id(id)
+        assert note_info != None
+
         version = note_info.version
         assert isinstance(version, int)
 
@@ -99,25 +103,28 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/print?id=" + str(id))
 
         # 乐观锁更新
-        resp = json_request("/note/update", method="POST", 
+        resp = json_request_return_dict("/note/update", method="POST", 
             data=dict(id=id, content="new-content2", type="md", version=version, resp_type="json"))
         assert isinstance(resp, dict)
 
         self.assertEqual("success", resp["code"])
 
-        resp = json_request("/note/update", method="POST", 
+        resp = json_request_return_dict("/note/update", method="POST", 
             data=dict(id=id, content="new-content3", type="md", version=version+1, resp_type="json"))
+        
         self.assertEqual("success", resp["code"])
 
         # 访问日志
         visit_note("test", id)
         
         # 普通更新
-        resp = json_request("/note/save", method="POST",
+        resp = json_request_return_dict("/note/save", method="POST",
             data=dict(id=id, content="new-content", version=version+2, resp_type="json"))
         self.assertEqual("success", resp["code"])
 
         note_info = NoteDao.get_by_id(id)
+        assert note_info != None
+
         self.assertEqual(note_info.content, "new-content")
         
         # 第二次更新 使用新的api
@@ -137,11 +144,15 @@ class TestMain(BaseTestCase):
         # 删除笔记
         json_request("/note/remove?id=" + str(id))
         note_info = NoteDao.get_by_id(id)
+        assert note_info != None
+
         self.assertEqual(note_info.is_deleted, 1)
 
         # 恢复笔记
         json_request("/note/recover", method="POST", data=dict(id=id))
         note_info = NoteDao.get_by_id(id)
+        assert note_info != None
+
         self.assertEqual(note_info.is_deleted, 0)
 
     def test_create_page(self):
@@ -273,11 +284,13 @@ class TestMain(BaseTestCase):
         id = create_note_for_test("md", "xnote-share-test", content = "hello")
 
         self.check_OK("/note/share?id=" + str(id))
-        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
+        file = json_request_return_dict("/note/view?id=%s&_format=json" % id).get("file")
+        assert file != None
         self.assertEqual(1, file["is_public"])
         
         self.check_OK("/note/share/cancel?id=" + str(id))
-        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
+        file = json_request_return_dict("/note/view?id=%s&_format=json" % id).get("file")
+        assert file != None
         self.assertEqual(0, file["is_public"])
 
         logout_test_user()
@@ -334,7 +347,7 @@ class TestMain(BaseTestCase):
         json_request("/note/remove?id=%s" % id)
     
     def test_note_tag_meta_create(self):
-        tag_meta_dao = xutils.DAO("note_tag_meta")
+        from handlers.note.dao_tag import TagMetaDao
         create_params = dict(
             tag_type = "group",
             tag_name = "测试"
@@ -342,8 +355,9 @@ class TestMain(BaseTestCase):
         result = json_request("/note/tag/create", method="POST", data = create_params)
         self.assertEqual("success", result["code"])
 
-        meta_info = tag_meta_dao.get_by_name(xauth.current_name(), "测试")
-        self.assertIsNotNone(meta_info)
+        meta_info = TagMetaDao.get_by_name(xauth.current_name(), "测试")
+        assert meta_info != None
+
         self.assertEqual("测试", meta_info.tag_name)
         self.assertEqual("group", meta_info.tag_type)
 
@@ -462,6 +476,7 @@ class TestMain(BaseTestCase):
 
         json_request("/note/move?id=%s&parent_id=%s" % (id, parent_id))
         group_info = get_note_info(parent_id)
+        assert group_info != None
         self.assertEqual(1, group_info.children_count)
 
     def test_rename(self):

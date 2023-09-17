@@ -9,7 +9,8 @@ from xutils import dbutil, dateutil
 from xutils.db.dbutil_helper import new_from_dict
 
 def do_upgrade():
-    base.execute_upgrade("20230916_note_index", migrate_note_index)
+    handler = MigrateHandler()
+    base.execute_upgrade("20230916_note_index", handler.migrate_note_index)
 
 
 
@@ -22,6 +23,7 @@ class KvNoteIndexDO(Storage):
         self.ctime = dateutil.format_datetime()
         self.mtime = dateutil.format_datetime()
         self.atime = dateutil.format_datetime()
+        self.share_time = self.ctime
         self.type = "md"
         self.category = "" # 废弃
         self.size = 0
@@ -66,55 +68,83 @@ class NoteIndexDO(Storage):
     def from_dict(dict_value):
         return new_from_dict(NoteIndexDO, dict_value)
 
-def migrate_note_index():
-    """迁移笔记索引"""
-    old_db = dbutil.get_table("note_index")
-    new_db = xtables.get_table_by_name("note_index")
-    note_full_db = dbutil.get_table("note_full")
 
-    for item in old_db.iter(limit=-1):
-        old_index = KvNoteIndexDO.from_dict(item)
-        new_index = NoteIndexDO()
+class NoteShareDO(Storage):
+    def __init__(self):
+        self.ctime = dateutil.format_datetime()
+        self.share_type = ""
+        self.note_id = 0
+        self.from_user_id = 0
+        self.to_user_id = 0
 
-        try:
-            note_id = int(old_index.id)
-        except:
-            base.add_failed_log("note_index", old_index, reason="note_id无法转换成数字")
-            continue
+class MigrateHandler:
 
-        creator = old_index.creator
-        creator_id = xauth.UserDao.get_id_by_name(creator)
+    share_db = xtables.get_table_by_name("note_share")
 
-        if old_index.tags == None:
-            old_index.tags = []
-
-        new_index.id = note_id
-        new_index.name = old_index.name
-        new_index.creator = old_index.creator
-        new_index.creator_id = creator_id
-        new_index.name = old_index.name
-        new_index.parent_id = int(old_index.parent_id)
-        new_index.ctime = old_index.ctime
-        new_index.mtime = old_index.mtime
-        new_index.type = old_index.type or "md"
-        new_index.size = old_index.size or 0
-        new_index.level = old_index.priority or 0
-        new_index.children_count = old_index.children_count or 0
-        new_index.tag_str = " ".join(old_index.tags)
-        if old_index.archived:
-            new_index.level = -1
-
-        old_note_id = str(old_index.id)
-        if str(note_id) != old_note_id:
-            full_do = note_full_db.get_by_id(old_note_id)
-            if full_do != None:
-                note_full_db.update_by_id(str(note_id), full_do)
-                note_full_db.delete_by_id(old_note_id)
-
-        old = new_db.select_first(where=dict(id=note_id))
-        if old != None:
-            new_db.update(**new_index, where=dict(id=new_index.id))
-        else:
-            new_db.insert(**new_index)
+    def migrate_note_index(self):
+        """迁移笔记索引"""
+        old_db = dbutil.get_table("note_index")
+        new_db = xtables.get_table_by_name("note_index")
+        note_full_db = dbutil.get_table("note_full")
         
-        logging.info("迁移笔记索引: %s", new_index)
+
+        for item in old_db.iter(limit=-1):
+            old_index = KvNoteIndexDO.from_dict(item)
+            new_index = NoteIndexDO()
+
+            try:
+                note_id = int(old_index.id)
+            except:
+                base.add_failed_log("note_index", old_index, reason="note_id无法转换成数字")
+                continue
+
+            creator = old_index.creator
+            creator_id = xauth.UserDao.get_id_by_name(creator)
+
+            if old_index.tags == None:
+                old_index.tags = []
+
+            new_index.id = note_id
+            new_index.name = old_index.name
+            new_index.creator = old_index.creator
+            new_index.creator_id = creator_id
+            new_index.name = old_index.name
+            new_index.parent_id = int(old_index.parent_id)
+            new_index.ctime = old_index.ctime
+            new_index.mtime = old_index.mtime
+            new_index.type = old_index.type or "md"
+            new_index.size = old_index.size or 0
+            new_index.level = old_index.priority or 0
+            new_index.children_count = old_index.children_count or 0
+            new_index.tag_str = " ".join(old_index.tags)
+            if old_index.archived:
+                new_index.level = -1
+
+            if old_index.is_public:
+                self.upsert_public_note(new_index, old_index.share_time)
+
+            old_note_id = str(old_index.id)
+            if str(note_id) != old_note_id:
+                full_do = note_full_db.get_by_id(old_note_id)
+                if full_do != None:
+                    note_full_db.update_by_id(str(note_id), full_do)
+                    note_full_db.delete_by_id(old_note_id)
+
+            old = new_db.select_first(where=dict(id=note_id))
+            if old != None:
+                new_db.update(**new_index, where=dict(id=new_index.id))
+            else:
+                new_db.insert(**new_index)
+            
+            logging.info("迁移笔记索引: %s", new_index)
+
+    def upsert_public_note(self, index: NoteIndexDO, share_time:str):
+        share_info = self.share_db.select_first(where=dict(note_id=index.id))
+        if share_info == None:
+            new_share = NoteShareDO()
+            new_share.ctime = share_time
+            new_share.share_type = "public"
+            new_share.note_id = index.id
+            new_share.from_user_id = index.creator_id
+            self.share_db.insert(**new_share)
+            logging.info("迁移笔记分享: %s", new_share)

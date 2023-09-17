@@ -14,6 +14,9 @@ from xutils.sqldb import TableManagerFacade as TableManager
 from xutils.sqldb import TableProxy
 from xutils import fsutil
 
+
+DEFAULT_DATETIME = "1970-01-01 00:00:00"
+
 class MySqliteDB(web.db.SqliteDB):
     _lock = threading.RLock()
     _instances = set()
@@ -169,6 +172,19 @@ def init_note_index_table():
         manager.add_index(["creator_id", "mtime"])
         manager.add_index(["creator_id", "type"])
 
+def init_note_share_table():
+    comment = "笔记分享记录"
+    table_name = "note_share"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME, comment="创建时间")
+        # 分享类型 {public, to_user, to_group}
+        manager.add_column("share_type", "varchar(32)", "", comment="分享类型")
+        manager.add_column("note_id", "bigint", 0, comment="笔记ID")
+        manager.add_column("from_user_id", "bigint", 0, comment="分享人ID")
+        manager.add_column("to_user_id", "bigint", 0, comment="接收人ID")
+
+        # 索引
+        manager.add_index(["share_type", "note_id"])
 
 def init_user_table():
     # 2017/05/21
@@ -491,6 +507,7 @@ def init():
     init_msg_index_table()
     # 笔记索引
     init_note_index_table()
+    init_note_share_table()
     
     if xconfig.DatabaseConfig.db_driver == "mysql":
         init_kv_store_table()

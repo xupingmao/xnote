@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-01-25 22:37:52
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 14:57:48
+@LastEditTime : 2023-09-17 11:48:13
 @FilePath     : /xnote/core/xnote_migrate/upgrade_000.py
 @Description  : 描述
 """
@@ -20,6 +20,8 @@ def do_upgrade():
         return
     
     if base.is_upgrade_done(mark_flag_old):
+        base.mark_upgrade_done(mark_flag)
+        base.get_upgrade_log_table().delete(mark_flag_old)
         return
     
     base.log_info("this is upgrade demo")

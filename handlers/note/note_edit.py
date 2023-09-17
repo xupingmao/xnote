@@ -636,24 +636,24 @@ class MoveAjaxHandler:
     
     @xauth.login_required()
     def GET(self):
-        id        = xutils.get_argument("id", "")
-        parent_id = xutils.get_argument("parent_id", "")
-        parent_id = str(parent_id)
-        user_name = xauth.current_name()
-        file = NoteDao.get_by_id_creator(id, user_name)
-        target_book = NoteDao.get_by_id_creator(parent_id, user_name)
+        id = xutils.get_argument_int("id")
+        parent_id = xutils.get_argument_int("parent_id")
+
+        user_name = xauth.current_name_str()
+        file = note_dao.get_by_id_creator(id, user_name)
+        target_book = note_dao.get_by_id_creator(parent_id, user_name)
 
         if file is None:
-            return dict(code="fail", message="笔记不存在")
+            return webutil.FailedResult(code="fail", message="笔记不存在")
         
         if target_book is None:
-            return dict(code="fail", message="目标笔记本不存在")
+            return webutil.FailedResult(code="fail", message="目标笔记本不存在")
         
         if str(id) == parent_id:
-            return dict(code="fail", message="不能移动到自身目录")
+            return webutil.FailedResult(code="fail", message="不能移动到自身目录")
         
         if target_book.type != "group":
-            return dict(code="fail", message="只能移动到笔记本中")
+            return webutil.FailedResult(code="fail", message="只能移动到笔记本中")
 
         pathlist = note_dao.list_path(target_book)
         for item in pathlist:
@@ -667,7 +667,7 @@ class MoveAjaxHandler:
             # pathlist包含了根目录
             depth = len(pathlist) - 1 + dao_read.get_note_depth(file)
             if depth > max_depth:
-                return dict(code="fail", message="笔记本的层次不能超过%d, 当前层次:%d" % (max_depth, depth))
+                return webutil.FailedResult(code="fail", message="笔记本的层次不能超过%d, 当前层次:%d" % (max_depth, depth))
 
         with dbutil.get_write_lock(user_name):
             note_dao.move_note(file, parent_id)
@@ -800,26 +800,30 @@ class CopyHandler:
 
     @xauth.login_required()
     def POST(self):
-        name = xutils.get_argument("name", "")
-        origin_id = xutils.get_argument("origin_id", "")
-        user_name = xauth.current_name()
+        name = xutils.get_argument_str("name", "")
+        origin_id = xutils.get_argument_int("origin_id")
+        user_info = xauth.current_user()
+        assert user_info != None
+        user_name = user_info.name
+        user_id = user_info.id
 
         origin_note = NoteDao.get_by_id_creator(origin_id, user_name)
         if origin_note == None:
-            return dict(code="404", message = "笔记不存在或没有权限")
+            return webutil.FailedResult(code="404", message = "笔记不存在或没有权限")
         
-        new_note_dict = Storage()
+        new_note_dict = note_dao.NoteDO()
         new_note_dict.name = name
         new_note_dict.content = origin_note.content
         new_note_dict.type = origin_note.type
         new_note_dict.parent_id = origin_note.parent_id
         new_note_dict.creator = user_name
+        new_note_dict.creator_id = user_id
 
         try:
             new_note_id = NoteDao.create(new_note_dict)
             return dict(code="success", url = NoteDao.get_view_url_by_id(new_note_id))
         except Exception as e:
-            return dict(code="500", message = str(e))
+            return webutil.FailedResult(code="500", message = str(e))
 
 
 xurls = (
