@@ -28,7 +28,7 @@ def do_upgrade():
         note = note_dao.get_by_id(note_id)
         if note != None:
             for to_user in to_user_list:
-                share_note_to(note, note.creator, to_user)
+                share_note_to(note.id, note.creator, to_user)
 
     mark_upgrade_done("upgrade_005")
 

@@ -72,6 +72,7 @@ class NoteIndexDO(Storage):
         self.level = 0
         self.children_count = 0
         self.tag_str = ""
+        self.visit_cnt = 0
 
     @staticmethod
     def from_dict(dict_value):
@@ -85,6 +86,7 @@ class ShareInfoDO(Storage):
         self.target_id = 0
         self.from_id = 0
         self.to_id = 0
+        self.visit_cnt = 0
 
 class MigrateHandler:
 
@@ -130,6 +132,7 @@ class MigrateHandler:
             new_index.is_deleted = old_index.is_deleted
             new_index.is_public = old_index.is_public
             new_index.tag_str = " ".join(old_index.tags)
+            new_index.visit_cnt = old_index.visited_cnt
             if old_index.archived:
                 new_index.level = -1
 
@@ -160,6 +163,7 @@ class MigrateHandler:
             new_share.share_type = "note_public"
             new_share.target_id = index.id
             new_share.from_id = index.creator_id
+            new_share.visit_cnt = index.visit_cnt
             self.share_db.insert(**new_share)
             logging.info("迁移笔记分享: %s", new_share)
 

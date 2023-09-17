@@ -395,7 +395,7 @@ class NoteShareHandler:
         if share_to == share_from:
             return dict(code = "fail", message = "不需要分享给自己")
 
-        dao_share.share_note_to(note, share_from, share_to)
+        dao_share.share_note_to(note.id, share_from, share_to)
         return dict(code = "success", message = "分享成功")
 
 class LinkShareHandler:

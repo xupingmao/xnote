@@ -316,6 +316,7 @@ class ShareInfoDO(Storage):
         self.target_id = 0
         self.from_id = 0
         self.to_id = 0
+        self.visit_cnt = 0
 
 class ShareInfoDao:
     db = xtables.get_table_by_name("share_info")

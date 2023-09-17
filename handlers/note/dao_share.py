@@ -5,83 +5,103 @@
 # @filename dao_share.py
 
 import json
-
 import xutils
 import xauth
 import xconfig
+import xtables
+
 from xutils import Storage
 from xutils import dbutil
 from xutils import logutil
-
+import handlers.note.dao as note_dao
+from handlers.note.dao import ShareTypeEnum, ShareInfoDO
 from .dao import sort_notes, batch_query_list
-
-_note_share_db = dbutil.get_table("note_share")
-
-def get_share_db():
-    return _note_share_db
 
 def check_not_empty(value, method_name):
     if value == None or value == "":
         raise Exception("[%s] can not be empty" % method_name)
 
-def args_convert_func(note, from_user, to_user):
-    obj = Storage(note_id = note.id, from_user = from_user, to_user = to_user)
+def args_convert_func(note_id, from_user, to_user):
+    obj = Storage(note_id = note_id, from_user = from_user, to_user = to_user)
     return json.dumps(obj)
 
+class NoteShareDao:
+    db = xtables.get_table_by_name("share_info")
+    user_dao = xauth.UserDao
+    share_type = ShareTypeEnum.note_to_user.value
+
+    @classmethod
+    def get_by_note_and_to_user(cls, note_id, to_id):
+        where = dict(share_type="note_to_user", target_id = int(note_id), to_id = to_id)
+        return cls.db.select_first(where=where)
+    
+    @classmethod
+    def delete_by_id(cls, id):
+        return cls.db.delete(where=dict(id=id))
+
+    @classmethod
+    def share_note_to(cls, target_id=0, from_id=0, to_id=0):
+        record = cls.get_by_note_and_to_user(note_id=target_id, to_id=to_id)
+        if record != None:
+            # 已经分享了
+            return
+
+        record = ShareInfoDO()
+        record.share_type = cls.share_type
+        record.target_id = target_id
+        record.from_id = from_id
+        record.to_id = to_id
+        return cls.db.insert(**record)
+
+    @classmethod
+    def count(cls, to_id=0):
+        where = dict(share_type = cls.share_type)
+        if to_id != 0:
+            where["to_id"] = to_id
+        return cls.db.count(where=where)
+    
+    @classmethod
+    def list(cls, target_id=0, to_id=0, offset=0, limit=20, order="id desc"):
+        where = dict(share_type = cls.share_type)
+        if to_id != 0:
+            where["to_id"] = to_id
+        if target_id != 0:
+            where["target_id"] = target_id
+        return cls.db.select(where=where, offset=offset, limit=limit, order=order)
 
 def get_share_by_note_and_to_user(note_id, to_user):
-    def find_func(key, record):
-        return record.to_user == to_user
-
-    db = get_share_db()
-    records = db.list_by_index("note_id", index_value = note_id, filter_func = find_func)
-    if len(records) > 0:
-        return records[0]
-    return None
+    to_id = xauth.UserDao.get_id_by_name(to_user)
+    return NoteShareDao.get_by_note_and_to_user(note_id, to_id=to_id)
 
 
 @logutil.log_deco("share_note_to", log_args = True, args_convert_func = args_convert_func)
-def share_note_to(note, from_user, to_user):
-    # TODO 记录到笔记表中
-    if not xauth.is_user_exist(to_user):
-        raise Exception("[share_note_to] user not exist: %s" % to_user)
-
-    db = get_share_db()
-
-    record = get_share_by_note_and_to_user(note.id, to_user)
-    if record != None:
-        # 已经分享了
-        return
-
-    record = Storage(from_user = from_user, to_user = to_user, note_id = note.id)
-    db.insert(record)
+def share_note_to(note_id, from_user, to_user):
+    from_id = xauth.UserDao.get_id_by_name(from_user)
+    to_id = xauth.UserDao.get_id_by_name(to_user)
+    return NoteShareDao.share_note_to(target_id=note_id, from_id=from_id, to_id=to_id)
 
 @logutil.log_deco("delete_share", log_args = True)
 def delete_share(note_id, to_user):
     record = get_share_by_note_and_to_user(note_id, to_user)
     if record != None:
-        db = get_share_db()
-        db.delete(record)
+        NoteShareDao.delete_by_id(record.id)
 
 def list_share_to(to_user, offset = 0, limit = None, orderby = None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
 
-    db = get_share_db()
-    records = db.list_by_index("to_user", index_value = to_user, offset = offset, limit = limit)
-    id_list = list(map(lambda x:x.note_id, records))
+    to_id = xauth.UserDao.get_id_by_name(to_user)
+    records = NoteShareDao.list(to_id=to_id, offset=offset, limit=limit, order="ctime desc")
+    id_list = list(map(lambda x:x.target_id, records))
     notes = batch_query_list(id_list)
-    sort_notes(notes, orderby = orderby)
     return notes
 
 def list_share_by_note_id(note_id):
-    db = get_share_db()
-    return db.list_by_index("note_id", index_value = note_id)
+    return NoteShareDao.list(target_id = note_id)
 
 def count_share_to(to_user):
-    check_not_empty(to_user, "count_share_to")
-    db = get_share_db()
-    return db.count_by_index("to_user", index_value = to_user)
+    to_id = xauth.UserDao.get_id_by_name(to_user)
+    return NoteShareDao.count(to_id=to_id)
 
 
 def get_share_to(to_user, note_id):

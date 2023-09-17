@@ -167,6 +167,7 @@ def init_note_index_table():
         manager.add_column("creator_id", "bigint", 0)
         manager.add_column("level", "tinyint", 0)
         manager.add_column("tag_str", "varchar(255)", "")
+        manager.add_column("visit_cnt", "bigint", 0, comment="访问次数")
 
         # 各种索引
         manager.add_index("parent_id")
@@ -183,9 +184,11 @@ def init_share_info_table():
         manager.add_column("target_id", "bigint", 0, comment="被分享的对象ID")
         manager.add_column("from_id", "bigint", 0, comment="分享人ID")
         manager.add_column("to_id", "bigint", 0, comment="接收人ID")
+        manager.add_column("visit_cnt", "bigint", 0, comment="访问次数")
 
         # 索引
         manager.add_index(["share_type", "ctime"])
+        manager.add_index(["share_type", "visit_cnt"])
         manager.add_index("target_id")
         manager.add_index("from_id")
         manager.add_index("to_id")

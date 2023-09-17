@@ -190,13 +190,12 @@ class ShareToMeListHandler(ShareListHandler):
 
     share_type = "share_to_me"
     title = T("分享给我")
-    orderby = "ctime_desc"
 
     def count_notes(self, user_name):
         return dao_share.count_share_to(user_name)
 
     def list_notes(self, user_name, offset, limit):
-        return dao_share.list_share_to(user_name, offset, limit, self.orderby)
+        return dao_share.list_share_to(user_name, offset, limit)
 
 
 class GroupListHandler:
