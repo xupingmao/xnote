@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-07-03 09:09:49
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 11:38:16
+@LastEditTime : 2023-09-17 17:50:46
 @FilePath     : /xnote/handlers/note/dao_book.py
 @Description  : 描述
 """
@@ -17,7 +17,6 @@ import xconfig
 from . import dao as note_dao
 from .dao import get_by_id, check_and_create_default_book
 
-_db = dbutil.get_table("notebook")
 NOTE_DAO = xutils.DAO("note")
 
 def SmartNote(name, url, icon="fa-folder", size=None, size_attr=None):
@@ -29,18 +28,10 @@ def SmartNote(name, url, icon="fa-folder", size=None, size_attr=None):
     return note
 
 def fix_book_delete(id, user_name):
-    note = get_by_id(id)
-    book = _db.get_by_id(id, user_name=user_name)
-    if note == None and book != None:
-        _db.delete(book)
-
+    pass
 
 def get_default_book_id(user_name):
-    assert user_name != None, "user_name不能为空"
-    first = _db.get_first(user_name = user_name)
-    if first == None:
-        return check_and_create_default_book(user_name)
-    return first.id
+    return check_and_create_default_book(user_name)
 
 class SmartGroupService:
 

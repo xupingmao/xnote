@@ -34,6 +34,7 @@ from xutils import cacheutil
 from .dao_api import NoteDao
 from . import dao_log
 from xutils.db.dbutil_helper import new_from_dict
+from web.db import SQLLiteral
 
 def register_note_table(name, description, check_user=False, user_attr=None):
     dbutil.register_table(name, description, category="note",
@@ -96,6 +97,7 @@ class NoteIndexDO(Storage):
         self.is_deleted = 0
         self.level = 1 # 等级 0-归档 1-正常, 2-置顶
         self.tag_str = ""
+        self.visit_cnt = 0
 
     @staticmethod
     def from_dict(dict_value):
@@ -227,10 +229,10 @@ class NoteIndexDao:
         item.priority = item.level
         item.content = ""
         item.data = ""
-        item.visited_cnt = 0
+        item.visited_cnt = item.visit_cnt
         item.orderby = ""
         item.category = ""
-        item.hot_index = 0
+        item.hot_index = item.visit_cnt
         item.badge_info = ""
         item.show_next = False
         item.is_public = False
@@ -333,6 +335,11 @@ class ShareInfoDao:
         old = cls.db.select_first(where=dict(share_type=share_type, target_id=target_id))
         if old == None:
             cls.insert(share_info)
+
+    @classmethod
+    def incr_visit_cnt(cls, target_id=0):
+        where = dict(target_id=target_id)
+        cls.db.update(where=where, visit_cnt=SQLLiteral("visit_cnt + 1"))
 
     @classmethod
     def delete_by_target(cls, share_type="", target_id=0):
@@ -1109,6 +1116,8 @@ def visit_note(user_name, id):
     # TODO 延迟更新索引
     # update_index(note)
 
+def visit_public(note_id):
+    ShareInfoDao.incr_visit_cnt(target_id=note_id)
 
 def update_children_count(parent_id, db=None, parent_note=None):
     print(f"update_children_count({parent_id})")
@@ -1301,7 +1310,7 @@ def list_public(offset, limit, orderby="ctime_desc"):
 
     batch_result = batch_query_dict(note_ids)
     
-    print("batch_result: ", batch_result)
+    # print("batch_result: ", batch_result)
 
     result = []
     for share_info in public_notes:
@@ -1311,7 +1320,7 @@ def list_public(offset, limit, orderby="ctime_desc"):
         else:
             note_info.url = "/note/view/public?id=%s" % note_info.id
             if orderby == "hot":
-                note_info.badge_info = note_info.hot_index
+                note_info.badge_info = share_info.visit_cnt
             else:
                 note_info.badge_info = dateutil.format_date(share_info.ctime)
             result.append(note_info)

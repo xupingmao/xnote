@@ -392,6 +392,9 @@ class ViewHandler:
         kw.CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT
         kw.is_iframe = is_iframe
 
+        if is_public_page:
+            note_dao.visit_public(id)
+
         return xtemplate.render_by_ua(template_name, **kw)
 
 
