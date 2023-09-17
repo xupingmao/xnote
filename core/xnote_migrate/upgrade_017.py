@@ -69,17 +69,17 @@ class NoteIndexDO(Storage):
         return new_from_dict(NoteIndexDO, dict_value)
 
 
-class NoteShareDO(Storage):
+class ShareInfoDO(Storage):
     def __init__(self):
         self.ctime = dateutil.format_datetime()
         self.share_type = ""
-        self.note_id = 0
-        self.from_user_id = 0
-        self.to_user_id = 0
+        self.target_id = 0
+        self.from_id = 0
+        self.to_id = 0
 
 class MigrateHandler:
 
-    share_db = xtables.get_table_by_name("note_share")
+    share_db = xtables.get_table_by_name("share_info")
 
     def migrate_note_index(self):
         """迁移笔记索引"""
@@ -141,10 +141,10 @@ class MigrateHandler:
     def upsert_public_note(self, index: NoteIndexDO, share_time:str):
         share_info = self.share_db.select_first(where=dict(note_id=index.id))
         if share_info == None:
-            new_share = NoteShareDO()
+            new_share = ShareInfoDO()
             new_share.ctime = share_time
-            new_share.share_type = "public"
-            new_share.note_id = index.id
-            new_share.from_user_id = index.creator_id
+            new_share.share_type = "note_public"
+            new_share.target_id = index.id
+            new_share.from_id = index.creator_id
             self.share_db.insert(**new_share)
             logging.info("迁移笔记分享: %s", new_share)

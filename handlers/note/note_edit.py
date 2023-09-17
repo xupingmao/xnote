@@ -370,10 +370,17 @@ class NoteShareHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument_str("id")
-        check_get_note(id)
+        id = xutils.get_argument_int("id")
+        note_info = check_get_note(id)
+        
+        share_info = note_dao.ShareInfoDO()
+        share_info.share_type=note_dao.ShareTypeEnum.note_public.value
+        share_info.target_id = id
+        share_info.from_id = note_info.creator_id
+        note_dao.ShareInfoDao.insert_ignore(share_info)
         note_dao.update_note(id, is_public = 1)
-        return dict(code = "success")
+
+        return webutil.SuccessResult()
 
     @xauth.login_required()
     def POST(self):
@@ -408,13 +415,14 @@ class UnshareHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id")
-        to_user = xutils.get_argument("share_to", "")
+        id = xutils.get_argument_int("id")
+        to_user = xutils.get_argument_str("share_to", "")
         note = check_get_note(id)
         if to_user != "":
             dao_share.delete_share(id, to_user = to_user)
         else:
             note_dao.update_note(id, is_public = 0)
+            note_dao.ShareInfoDao.delete_by_target(share_type="note_public", target_id=id)
         return dict(code = "success", message = "取消分享成功")
 
     def POST(self):

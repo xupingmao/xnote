@@ -27,6 +27,7 @@ import logging
 import xauth
 import xtables
 import pdb
+import enum
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
@@ -130,6 +131,7 @@ class NoteDO(Storage):
         self.token = ""
         self.priority = 0 # (-1):归档, 0-正常, 1-置顶
         self.level = 0
+        self.visit_cnt = 0
         self.visited_cnt = 0
         self.orderby = ""
         # 热门指数
@@ -300,6 +302,50 @@ class NoteIndexDao:
     def delete_by_id(cls, note_id=0):
         return cls.db.delete(where=dict(id=note_id))
 
+class ShareTypeEnum(enum.Enum):
+    note_public = "note_public"
+
+class ShareInfoDO(Storage):
+    def __init__(self):
+        self.ctime = dateutil.format_datetime()
+        # 分享类型 {note_public, note_to_user}
+        self.share_type = ""
+        self.target_id = 0
+        self.from_id = 0
+        self.to_id = 0
+
+class ShareInfoDao:
+    db = xtables.get_table_by_name("share_info")
+
+    @classmethod
+    def insert(cls, share_info: ShareInfoDO):
+        return cls.db.insert(**share_info)
+    
+    @classmethod
+    def insert_ignore(cls, share_info: ShareInfoDO):
+        share_type = share_info.share_type
+        target_id = share_info.target_id
+
+        old = cls.db.select_first(where=dict(share_type=share_type, target_id=target_id))
+        if old == None:
+            cls.insert(share_info)
+
+    @classmethod
+    def delete_by_target(cls, share_type="", target_id=0):
+        return cls.db.delete(where=dict(share_type=share_type, target_id=target_id))
+
+    @classmethod
+    def list(cls, share_type="", offset=0, limit=20, order="id desc"):
+        where=dict(share_type=share_type)
+        result = cls.db.select(where=where, offset=offset,limit=limit,order=order)
+        return result
+    
+    @classmethod
+    def count(cls, share_type=""):
+        where=dict(share_type=share_type)
+        return cls.db.count(where=where)
+
+
 def get_root(creator=None):
     if creator == None:
         creator = xauth.current_name()
@@ -323,8 +369,8 @@ def get_default_group():
     group = NoteDO()
     group.name = "默认分组"
     group.type = "group"
-    group.id = "default"
-    group.parent_id = "0"
+    group.id = 0
+    group.parent_id = 0
     build_note_info(group)
     group.url = "/note/default"
     return group
@@ -334,8 +380,8 @@ def get_archived_group():
     group = NoteDO()
     group.name = "归档分组"
     group.type = "group"
-    group.id = "archived"
-    group.parent_id = "0"
+    group.id = 0
+    group.parent_id = 0
     group.content = ""
     group.priority = 0
     build_note_info(group)
@@ -346,17 +392,13 @@ def get_note_public_table():
     return _public_db
 
 
-def get_note_tiny_table(user_name):
-    raise Exception("note_tiny is abondon")
-    return dbutil.get_table("note_tiny", user_name=user_name)
-
-
 def batch_query_dict(id_list):
     result = dict()
     index_list = NoteIndexDao.get_by_id_list(id_list)
 
     for note in index_list:
-        result[id] = note
+        note_id = note.id
+        result[note_id] = note
         build_note_info(note)
     return result
 
@@ -1242,41 +1284,38 @@ def list_default_notes(creator, offset=0, limit=1000, orderby="mtime desc"):
 
 
 def list_public(offset, limit, orderby="ctime_desc"):
+    order="id desc"
     if orderby == "hot":
-        index_name = "hot_index"
+        order = "visit_cnt desc"
     else:
-        index_name = "share_time"
+        order = "ctime desc"
 
-    public_notes = _public_db.list_by_index(index_name,
-                             offset=offset, limit=limit, reverse=True)
-
-    build_note_list_info(public_notes)
-
+    public_notes = ShareInfoDao.list(share_type="note_public", offset=offset,limit=limit,order=order)
     note_ids = []
     for note in public_notes:
-        assert isinstance(note, Storage)
-        note_ids.append(note.id)
+        note_ids.append(note.target_id)
 
     batch_result = batch_query_dict(note_ids)
+    
+    print("batch_result: ", batch_result)
 
-    for note in public_notes:
-        assert isinstance(note, Storage)
-        note_info = batch_result.get(note.id)
-        if note.is_deleted or note_info == None:
-            logging.warning("笔记已删除:%s,name:%s", note.id, note.name)
-            _public_db.delete(note)
-        
-        if note_info != None and not note_info.is_public:
-            # FIX 历史数据
-            logging.warning("分享状态不匹配: %s", note.id)
-            _public_db.delete(note)
-
-    return public_notes
+    result = []
+    for share_info in public_notes:
+        note_info = batch_result.get(share_info.target_id)
+        if note_info == None:
+            logging.warning("笔记已删除:%s", share_info)
+        else:
+            note_info.url = "/note/view/public?id=%s" % note_info.id
+            if orderby == "hot":
+                note_info.badge_info = note_info.hot_index
+            else:
+                note_info.badge_info = dateutil.format_date(share_info.ctime)
+            result.append(note_info)
+    return result
 
 
 def count_public():
-    db = get_note_public_table()
-    return db.count()
+    return ShareInfoDao.count(share_type="note_public")
 
 
 @xutils.timeit_deco(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)

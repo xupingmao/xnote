@@ -310,10 +310,15 @@ class ViewHandler:
         orderby = xutils.get_argument_str("orderby", "")
         is_iframe = xutils.get_argument("is_iframe", "false")
         token = xutils.get_argument_str("token", "")
+        
         user_info = xauth.current_user()
-        assert user_info != None
-        user_name = user_info.name
-        user_id = user_info.id
+        if user_info != None:
+            user_name = user_info.name
+            user_id = user_info.id
+        else:
+            user_name = ""
+            user_id = 0
+
         skey = xutils.get_argument_str("skey")
 
         kw = create_view_kw()
@@ -530,7 +535,7 @@ class ViewPublicHandler:
     """查看公开的笔记"""
 
     def GET(self):
-        id = xutils.get_argument("id", "")
+        id = xutils.get_argument_int("id")
         return ViewHandler().GET("view", id, is_public_page=True)
 
 

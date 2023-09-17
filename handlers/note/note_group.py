@@ -151,18 +151,8 @@ class ShareListHandler:
     title = T("公开分享")
 
     def list_notes(self, user_name, offset, limit):
-        orderby = xutils.get_argument("tab", "ctime_desc")
-
-        assert isinstance(orderby, str)
-
+        orderby = xutils.get_argument_str("tab", "ctime_desc")
         notes = note_dao.list_public(offset, limit, orderby)
-        for note in notes:
-            assert isinstance(note, Storage)
-            note.url = "/note/view/public?id=%s" % note.id
-            if orderby == "hot":
-                note.badge_info = note.hot_index
-            else:
-                note.badge_info = dateutil.format_date(note.share_time)
         return notes
 
     def count_notes(self, user_name):

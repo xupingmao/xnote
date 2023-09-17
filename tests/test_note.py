@@ -295,7 +295,8 @@ class TestMain(BaseTestCase):
 
         logout_test_user()
         try:
-            self.check_OK("/note/view/%s" % id)
+            # 登出后无法访问
+            self.check_303("/note/view/%s" % id)
             # clean up
             json_request("/note/remove?id=" + str(id))
         finally:
@@ -352,10 +353,10 @@ class TestMain(BaseTestCase):
             tag_type = "group",
             tag_name = "测试"
         )
-        result = json_request("/note/tag/create", method="POST", data = create_params)
+        result = json_request_return_dict("/note/tag/create", method="POST", data = create_params)
         self.assertEqual("success", result["code"])
 
-        meta_info = TagMetaDao.get_by_name(xauth.current_name(), "测试")
+        meta_info = TagMetaDao.get_by_name(xauth.current_name(), "测试", tag_type="group")
         assert meta_info != None
 
         self.assertEqual("测试", meta_info.tag_name)

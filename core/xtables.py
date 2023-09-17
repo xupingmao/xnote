@@ -159,8 +159,9 @@ def init_note_index_table():
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         # 删除时间
         manager.add_column("dtime", "datetime", "1970-01-01 00:00:00")
-        # 逻辑删除标记
-        manager.add_column("is_deleted", "tinyint", 0)
+        manager.add_column("is_deleted", "tinyint", 0, comment="逻辑删除标记")
+        manager.add_column("is_public", "tinyint", 0, comment="是否是公开的笔记")
+        
         # 创建者
         manager.add_column("creator", "varchar(64)", "")
         manager.add_column("creator_id", "bigint", 0)
@@ -172,19 +173,22 @@ def init_note_index_table():
         manager.add_index(["creator_id", "mtime"])
         manager.add_index(["creator_id", "type"])
 
-def init_note_share_table():
-    comment = "笔记分享记录"
-    table_name = "note_share"
+def init_share_info_table():
+    comment = "分享记录"
+    table_name = "share_info"
     with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("ctime", "datetime", DEFAULT_DATETIME, comment="创建时间")
-        # 分享类型 {public, to_user, to_group}
-        manager.add_column("share_type", "varchar(32)", "", comment="分享类型")
-        manager.add_column("note_id", "bigint", 0, comment="笔记ID")
-        manager.add_column("from_user_id", "bigint", 0, comment="分享人ID")
-        manager.add_column("to_user_id", "bigint", 0, comment="接收人ID")
+        # 分享类型 {note_public, note_to_user, note_to_group}
+        manager.add_column("share_type", "varchar(16)", "", comment="分享类型")
+        manager.add_column("target_id", "bigint", 0, comment="被分享的对象ID")
+        manager.add_column("from_id", "bigint", 0, comment="分享人ID")
+        manager.add_column("to_id", "bigint", 0, comment="接收人ID")
 
         # 索引
-        manager.add_index(["share_type", "note_id"])
+        manager.add_index(["share_type", "ctime"])
+        manager.add_index("target_id")
+        manager.add_index("from_id")
+        manager.add_index("to_id")
 
 def init_user_table():
     # 2017/05/21
@@ -394,12 +398,12 @@ def init_comment_index_table():
     comment = "评论索引"
     with create_default_table_manager(table_name, comment=comment) as manager:
         # 展示创建时间
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         # 修改时间
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("type", "varchar(16)", 0)
-        manager.add_column("user_id", "bigint", 0)
-        manager.add_column("target_id", "bigint", 0)
+        manager.add_column("user_id", "bigint", 0, comment="用户ID")
+        manager.add_column("target_id", "bigint", 0, comment="关联的对象ID")
         
         manager.add_index(["user_id", "ctime"])
         manager.add_index("target_id")
@@ -507,7 +511,8 @@ def init():
     init_msg_index_table()
     # 笔记索引
     init_note_index_table()
-    init_note_share_table()
+    # 通用的分享记录
+    init_share_info_table()
     
     if xconfig.DatabaseConfig.db_driver == "mysql":
         init_kv_store_table()

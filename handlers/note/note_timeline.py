@@ -53,6 +53,7 @@ class SystemGroup(Storage):
         self.url = url
         self.priority = priority
         self.size = 0
+        self.mtime = dateutil.format_datetime()
 
 
 class TaskGroup(Storage):

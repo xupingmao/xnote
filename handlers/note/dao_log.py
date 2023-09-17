@@ -23,8 +23,8 @@ from . import dao as note_dao
 
 
 NOTE_DAO = xutils.DAO("note")
-MAX_EDIT_LOG    = 500
-MAX_VIEW_LOG    = 500
+MAX_EDIT_LOG = 500
+MAX_VIEW_LOG = 500
 
 def log_debug(fmt, *args):
     print(dateutil.format_time(), fmt.format(*args))
@@ -39,18 +39,29 @@ def get_user_note_log_table(user_name):
 class UserNoteLogDao:
     db = dbutil.get_table("user_note_log")
 
+class NoteVisitLogDO(Storage):
+    def __init__(self):
+        self.note_id = 0
+        self.visit_cnt = 0
+        self.ctime = dateutil.format_datetime()
+        self.mtime = dateutil.format_datetime()
+        self.atime = dateutil.format_datetime()
+        self.user = ""
+
 @xutils.timeit_deco(name = "_update_log", switch_func = is_debug_enabled)
 def _update_log(user_name, note, increment = 1, insert_only = False):
     # 部分历史数据是int类型，所以需要转换一下
-    note_id = str(note.id)
+    note_id = note.id
     atime = dateutil.format_datetime()
     db = UserNoteLogDao.db
 
     with dbutil.get_write_lock(user_name):
         log = db.get_by_id(note_id, user_name = user_name)
         
+        # print(f"_update_log={log}")
+
         if log is None:
-            log = Storage()
+            log = NoteVisitLogDO()
             log.note_id = note_id
             log.visit_cnt  = increment
             log.atime = atime
@@ -115,16 +126,27 @@ def list_hot(user_name, offset = 0, limit = 100):
     hot_dict = dict()
     log_dict = dict()
     for log in logs:
-        hot_dict[log.note_id] = log.visit_cnt
-        log_dict[log.note_id] = log
+        try:
+            note_id = int(log.note_id)
+        except:
+            note_id = 0
+
+        hot_dict[note_id] = log.visit_cnt
+        log_dict[note_id] = log
         
     note_ids = get_note_ids_from_logs(logs)
 
-    notes = note_dao.batch_query_list(note_ids)
-    for note in notes:
-        note.badge_info = str(hot_dict.get(note.id))
-        note.user_log = log_dict.get(note.id)
-    return notes
+    result = []
+    note_dict = note_dao.batch_query_dict(note_ids)
+    for log in logs:
+        note_id = int(log.note_id)
+        note_info = note_dict.get(note_id)
+        if note_info != None:
+            note_info.badge_info = str(hot_dict.get(note_id))
+            note_info.user_log = log_dict.get(note_id)
+            result.append(note_info)
+
+    return result
 
 def list_most_visited(user_name, offset, limit):
     return list_hot(user_name, offset, limit)
