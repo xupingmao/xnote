@@ -258,7 +258,7 @@ class NoteIndexDao:
     
     @classmethod
     def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, is_deleted=0, 
-            level=None, date=None, order="id desc"):
+            level=None, date=None, name_like=None, order="id desc"):
         if order=="dtime_asc":
             order = "dtime"
         date_like = ""
@@ -276,11 +276,20 @@ class NoteIndexDao:
         if date != None:
             date_like = date + "%"
             where += " AND ctime LIKE $date_like"
+        if name_like != None:
+            where += " AND name LIKE $name_like"
         vars = dict(creator_id=creator_id, parent_id=parent_id, type=type, level=level, 
-                    is_deleted=is_deleted, date_like=date_like)
+                    is_deleted=is_deleted, date_like=date_like, name_like=name_like)
         result = cls.db.select(where=where, vars=vars, offset=offset, limit=limit, order=order)
         return cls.fix_result(result)
     
+    @classmethod
+    def iter_batch(cls, creator_id=0, batch_size=20):
+        where = "AND creator_id=$creator_id"
+        vars = dict(creator_id=creator_id)
+        for batch_records in cls.db.iter_batch(batch_size=batch_size, where = where, vars=vars):
+            yield batch_records
+
     @classmethod
     def count(cls, creator_id=0, type=None, level=None, is_deleted=0):
         where_dict = dict()
@@ -1506,24 +1515,19 @@ def get_history(note_id, version):
     return _note_history_db.with_user(note_id).get(version_str)
 
 
-def search_name(words, creator="", parent_id=None, orderby="hot_index"):
+def search_name(words, creator="", parent_id=0, orderby="hot_index", limit=1000):
     # TODO 搜索排序使用索引
     assert isinstance(words, list)
 
     words = [word.lower() for word in words]
-    if parent_id != None and parent_id != "":
-        parent_id = str(parent_id)
 
-    def search_func(value):
-        if value.is_deleted:
-            return False
-        is_user_match = (value.creator == creator or value.is_public)
-        is_words_match = textutil.contains_all(value.name.lower(), words)
-        return is_user_match and is_words_match
-
+    name_like = ""
+    if len(words) > 0:
+        name_like = "%" + "%".join(words) + "%"
+    
     creator_id = xauth.UserDao.get_id_by_name(creator)
-    result = NoteIndexDao.list(creator_id=creator_id, parent_id=parent_id, limit=MAX_SEARCH_SIZE)
-    result = list(filter(search_func, result))
+    result = NoteIndexDao.list(creator_id=creator_id, parent_id=parent_id, limit=limit, 
+                               name_like=name_like)
 
     # 补全信息
     build_note_list_info(result)
@@ -1534,19 +1538,31 @@ def search_name(words, creator="", parent_id=None, orderby="hot_index"):
     return result
 
 
-def search_content(words, creator=None, orderby="hot_index"):
+def search_content(words, creator="", orderby="hot_index", limit=1000):
     # TODO 全文搜索排序使用索引
     assert isinstance(words, list)
     words = [word.lower() for word in words]
 
-    def search_func(key, value):
+    def is_match(value):
         if value.content is None:
             return False
         return (value.creator == creator or value.is_public) \
             and textutil.contains_all(value.content.lower(), words)
 
-    result = _full_db.list(filter_func=search_func,
-                           offset=0, limit=MAX_SEARCH_SIZE)
+    creator_id = xauth.UserDao.get_id_by_name(creator)
+    result = []
+
+    for index_list in NoteIndexDao.iter_batch(creator_id=creator_id, batch_size=20):
+        id_list = [str(x.id) for x in index_list]
+        batch_result = _full_db.batch_get_by_id(id_list)
+        for key in batch_result:
+            value = batch_result[key]
+            if is_match(value):
+                value.content = ""
+                value.data = ""
+                result.append(value)
+            if len(result) > limit:
+                break
 
     # 补全信息
     build_note_list_info(result)

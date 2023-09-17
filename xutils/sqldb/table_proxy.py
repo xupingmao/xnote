@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-16 10:29:23
+@LastEditTime : 2023-09-17 20:30:40
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -158,10 +158,15 @@ class TableProxy:
                 yield record
 
 
-    def iter_batch(self, batch_size=20):
+    def iter_batch(self, batch_size=20, where="", vars=None):
+        assert isinstance(where, str)
+        
         last_id = 0
         while True:
-            records = self.select(where = "id > $last_id", vars = dict(last_id = last_id), limit = batch_size, order="id")
+            this_vars = dict(last_id = last_id)
+            if vars != None:
+                this_vars.update(vars)
+            records = self.select(where = "id > $last_id " + where, vars = this_vars, limit = batch_size, order="id")
             if len(records) == 0:
                 break
             yield records

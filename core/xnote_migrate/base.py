@@ -40,6 +40,10 @@ def mark_upgrade_done(op_flag):
     db = get_upgrade_log_table()
     db.put(op_flag, "1")
 
+def delete_old_flag(op_flag):
+    db = get_upgrade_log_table()
+    db.delete(op_flag)
+
 def log_info(fmt, *args):
     print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
 

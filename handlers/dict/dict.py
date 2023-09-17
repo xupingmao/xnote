@@ -10,53 +10,11 @@ import xconfig
 import xmanager
 import math
 from xutils import Storage, encode_uri_component, dateutil
-from xutils.imports import is_str
 
 from . import dict_dao
+from handlers.dict.dict_dao import search_dict, convert_dict_func
 
 PAGE_SIZE = xconfig.PAGE_SIZE
-
-def escape_sqlite_text(text):
-    text = text.replace('/', '//')
-    text = text.replace("'", '\'\'')
-    text = text.replace('[', '/[')
-    text = text.replace(']', '/]')
-    text = text.replace('(', '/(')
-    text = text.replace(')', '/)')
-    return text
-
-def search_escape(text):
-    if not is_str(text):
-        return text
-    text = escape_sqlite_text(text)
-    return "'%" + text + "%'"
-
-def left_match_escape(text):
-    return "'%s%%'" % escape_sqlite_text(text)
-
-
-def convert_dict_func(item):
-    v = Storage()
-    v.name = item.key
-    v.value = item.value
-    v.summary = item.value
-    v.mtime = item.mtime
-    v.ctime = item.ctime
-    v.url = "/dict/update?id=%s" % item.id
-    v.priority = 0
-    v.show_next = True
-    return v
-
-def search_dict(key, offset = 0, limit = None):
-    if limit is None:
-        limit = PAGE_SIZE
-    db = xtables.get_dict_table()
-    where_sql = "key LIKE %s" % left_match_escape(key)
-    items = db.select(order="key", where = where_sql, limit=limit, offset=offset)
-    items = list(map(convert_dict_func, items))
-    count = db.count(where = where_sql)
-    return items, count
-
 
 class DictEditHandler:
 
@@ -90,7 +48,7 @@ class DictSearchHandler:
 
     def GET(self):
         key  = xutils.get_argument("key")
-        page = xutils.get_argument("page", 1, type=int)
+        page = xutils.get_argument_int("page", 1)
         items, count = search_dict(key, (page-1) * PAGE_SIZE)
         page_max = math.ceil(count / PAGE_SIZE)
 

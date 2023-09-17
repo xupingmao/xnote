@@ -14,6 +14,7 @@ import xmanager
 import xtemplate
 import xnote_hooks
 import handlers.note.dao as note_dao
+import handlers.dict.dict_dao as dict_dao
 from xutils import textutil, u
 from xutils import Storage
 from xutils import dateutil
@@ -95,13 +96,19 @@ class SearchContext:
         return self.commands + self.tools + self.dicts + self.messages + self.notes + self.files
 
 def fill_note_info(files):
+    ids = []
     for file in files:
         if file.category == "note":
-            parent = note_dao.get_by_id(file.parent_id, file.creator)
-            if parent is not None:
-                file.parent_name = parent.name
-            file.show_move = True
-            file.badge_info = "热度:%s" % file.hot_index
+            ids.append(file.parent_id)
+    
+    note_dict = note_dao.batch_query_dict(ids)
+    for file in files:
+        file.parent_name = ""
+        parent = note_dict.get(file.parent_id)
+        if parent is not None:
+            file.parent_name = parent.name
+        file.show_move = True
+        file.badge_info = "热度:%s" % file.hot_index
 
 def log_search_history(user, key, category = "default", cost_time = 0):
     note_dao.add_search_history(user, key, category, cost_time)
@@ -240,15 +247,15 @@ class SearchHandler:
     def do_search_dict(self, ctx, key):
         offset = ctx.offset
         limit  = ctx.limit
-        notes, count = DICT_DAO.search(key, offset, limit)
+        notes, count = dict_dao.search_dict(key, offset, limit)
         for note in notes:
             note.raw = note.value
             note.icon = "hide"
         return notes, count
 
     def do_search_note(self, ctx, key):
-        user_name = xauth.get_current_name()
-        parent_id = xutils.get_argument("parent_id")
+        user_name = xauth.current_name_str()
+        parent_id = xutils.get_argument_int("parent_id")
         words = textutil.split_words(key)
         notes = note_dao.search_name(words, user_name, parent_id = parent_id)
         for note in notes:
