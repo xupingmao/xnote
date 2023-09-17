@@ -21,7 +21,7 @@ class TestHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        p = xutils.get_argument("p", "")
+        p = xutils.get_argument_str("p")
         if p == "clear":
             return self.clear_data()
 
@@ -33,7 +33,7 @@ class TestHandler:
         for i in range(1,11):
             id_value = "name_%s" % i
             row = Storage(name = id_value, age = random.randint(0, 10))
-            db.insert(row, id_type = None, id_value = id_value)
+            db.put_by_id(id_value, row)
 
         result = Storage()
         result.list = db.list()

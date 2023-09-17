@@ -257,6 +257,8 @@ class NoteIndexDao:
     @classmethod
     def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, is_deleted=0, 
             level=None, date=None, order="id desc"):
+        if order=="dtime_asc":
+            order = "dtime"
         date_like = ""
         where = "1=1"
         if creator_id != 0:
@@ -304,6 +306,7 @@ class NoteIndexDao:
 
 class ShareTypeEnum(enum.Enum):
     note_public = "note_public"
+    note_to_user = "note_to_user"
 
 class ShareInfoDO(Storage):
     def __init__(self):

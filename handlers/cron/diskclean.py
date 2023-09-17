@@ -7,6 +7,8 @@ import time
 import xutils
 import xconfig
 import xauth
+import handlers.note.dao as note_dao
+import handlers.note.dao_delete as dao_delete
 from xutils import dateutil
 from xutils.db.binlog import BinLog
 
@@ -47,7 +49,7 @@ def rm_expired_files(dirname, expired_time, depth=0, hard=False):
 def rm_expired_notes(expired_time):
     for user_info in xauth.iter_user(limit = -1):
         user_name = user_info.name
-        notes = NOTE_DAO.list_removed(user_name, offset = 0, limit = 20, orderby = "dtime_asc")
+        notes = note_dao.list_removed(user_name, offset = 0, limit = 20, orderby = "dtime_asc")
         for note in notes:
             print("id:{note.id},dtime:{note.dtime},name:{note.name}".format(note = note))
 
@@ -55,13 +57,13 @@ def rm_expired_notes(expired_time):
             delete_timestamp = dateutil.parse_time(note.dtime)
 
             # 处理脏数据
-            note_full = NOTE_DAO.get_by_id(note.id)
+            note_full = note_dao.get_by_id(note.id)
             if note_full is None:
                 print("delete dirty note, id:{note.id}, name:{note.name}".format(note = note))
-                NOTE_DAO.delete_physically(note.creator, note.id)
+                dao_delete.delete_note_physically(note.creator, note.id)
 
             if now - delete_timestamp >= expired_time:
-                NOTE_DAO.delete(note.id)
+                dao_delete.delete_note(note.id)
                 print("note expired, id:{note.id},name:{note.name}".format(note = note))
 
 def rm_expired_binlog():

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-10 16:14:13
+@LastEditTime : 2023-09-17 15:00:58
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -100,6 +100,7 @@ def init_note_tables():
     db.register_index("ctime", columns=["creator", "ctime"])
     db.register_index("skey", columns=["creator", "skey"])
     db.rebuild_index("v5")
+    db.delete_table()
 
     # 用户维度笔记索引
     db = dbutil.register_table("note_tiny", "用户维度的笔记索引",
@@ -108,6 +109,7 @@ def init_note_tables():
     db.register_index("ctime")
     db.register_index("parent_id")
     db.rebuild_index("v3")
+    db.delete_table()
 
     # 笔记修改历史
     dbutil.register_table("note_history_index", "笔记历史索引", category="note")
@@ -119,6 +121,7 @@ def init_note_tables():
     db.register_index("note_id", comment = "笔记ID")
     db.register_index("to_user", comment = "分享的目标用户")
     db.rebuild_index("v1")
+    db.delete_table()
 
 
     db = dbutil.register_table("comment", "评论模型", category="note")
@@ -130,6 +133,7 @@ def init_note_tables():
     db.register_index("hot_index")
     db.register_index("share_time")
     db.rebuild_index("v1")
+    db.delete_table()
 
     # 操作日志
     db = dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True, user_attr="user")

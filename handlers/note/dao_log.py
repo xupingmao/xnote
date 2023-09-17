@@ -105,14 +105,15 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
 
     note_ids = get_note_ids_from_logs(logs)
 
-    notes = note_dao.batch_query_list(note_ids)
-
-    for note in notes:
-        note_id = int(note.id)
-        atime = atime_dict.get(note_id, note.mtime)
-        note.badge_info = dateutil.format_date(atime, "/")
-
-    return notes
+    result = []
+    note_dict = note_dao.batch_query_dict(note_ids)
+    for log in logs:
+        note_id = int(log.note_id)
+        note_info = note_dict.get(note_id)
+        if note_info != None:
+            note_info.badge_info = dateutil.format_date(log.atime, "/")
+            result.append(note_info)
+    return result
 
 
 def list_hot(user_name, offset = 0, limit = 100):
@@ -172,19 +173,14 @@ def list_recent_created(user_name = None, offset = 0, limit = 10, skip_archived 
     if limit is None:
         limit = xconfig.PAGE_SIZE
 
-    user = xauth.current_name()
-    if user is None:
-        user = "public"
-
-    db = get_user_note_log_table(user_name)
-    logs = db.list_by_index("ctime", offset = offset, limit = limit, reverse = True)
-    note_ids = get_note_ids_from_logs(logs)
-    notes = note_dao.batch_query_list(note_ids)
-
-    for note in notes:
-        note.badge_info = dateutil.format_date(note.mtime, "/")
-
-    return notes
+    assert user_name != None
+    creator_id = xauth.UserDao.get_id_by_name(user_name)
+    result = []
+    note_list = note_dao.NoteIndexDao.list(creator_id=creator_id, offset=offset, limit=limit, order="ctime desc")
+    for note in note_list:
+        note.badge_info = dateutil.format_date(note.ctime, "/")
+        result.append(note)
+    return result
 
 def count_visit_log(user_name):
     return get_user_note_log_table(user_name).count()

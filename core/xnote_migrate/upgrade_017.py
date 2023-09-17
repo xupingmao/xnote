@@ -2,6 +2,7 @@ import xtables
 import xutils
 import xauth
 import logging
+import handlers.note.dao as note_dao
 
 from . import base
 from xutils import Storage
@@ -11,6 +12,7 @@ from xutils.db.dbutil_helper import new_from_dict
 def do_upgrade():
     handler = MigrateHandler()
     base.execute_upgrade("20230916_note_index", handler.migrate_note_index)
+    base.execute_upgrade("20230917_note_share", handler.migrate_note_share)
 
 
 
@@ -47,6 +49,12 @@ class KvNoteIndexDO(Storage):
     def from_dict(dict_value):
         return new_from_dict(KvNoteIndexDO, dict_value)
 
+class KvNoteShareDO(Storage):
+    def __init__(self, **kw):
+        self.from_user = kw.get("from_user", "")
+        self.to_user = kw.get("to_user", "")
+        self.note_id = kw.get("note_id", "")
+
 class NoteIndexDO(Storage):
     def __init__(self):
         self.id = 0
@@ -60,6 +68,7 @@ class NoteIndexDO(Storage):
         self.size = 0
         self.version = 0
         self.is_deleted = 0
+        self.is_public = 0
         self.level = 0
         self.children_count = 0
         self.tag_str = ""
@@ -80,6 +89,8 @@ class ShareInfoDO(Storage):
 class MigrateHandler:
 
     share_db = xtables.get_table_by_name("share_info")
+    kv_note_share = dbutil.get_table("note_share")
+    user_dao = xauth.UserDao
 
     def migrate_note_index(self):
         """迁移笔记索引"""
@@ -116,6 +127,8 @@ class MigrateHandler:
             new_index.size = old_index.size or 0
             new_index.level = old_index.priority or 0
             new_index.children_count = old_index.children_count or 0
+            new_index.is_deleted = old_index.is_deleted
+            new_index.is_public = old_index.is_public
             new_index.tag_str = " ".join(old_index.tags)
             if old_index.archived:
                 new_index.level = -1
@@ -139,7 +152,8 @@ class MigrateHandler:
             logging.info("迁移笔记索引: %s", new_index)
 
     def upsert_public_note(self, index: NoteIndexDO, share_time:str):
-        share_info = self.share_db.select_first(where=dict(note_id=index.id))
+        note_id = index.id
+        share_info = self.share_db.select_first(where=dict(target_id=note_id))
         if share_info == None:
             new_share = ShareInfoDO()
             new_share.ctime = share_time
@@ -148,3 +162,23 @@ class MigrateHandler:
             new_share.from_id = index.creator_id
             self.share_db.insert(**new_share)
             logging.info("迁移笔记分享: %s", new_share)
+
+
+    def migrate_note_share(self):
+        for item in self.kv_note_share.iter(limit=-1):
+            kv_share = KvNoteShareDO(**item)
+            note_id = int(kv_share.note_id)
+            from_id = self.user_dao.get_id_by_name(kv_share.from_user)
+            to_id = self.user_dao.get_id_by_name(kv_share.to_user)
+            share_type = note_dao.ShareTypeEnum.note_to_user.value
+            where = dict(target_id=note_id, from_id=from_id, to_id=to_id, 
+                         share_type=share_type)
+            share_info = self.share_db.select_first(where=where)
+            if share_info == None:
+                new_share = ShareInfoDO()
+                new_share.ctime = dateutil.format_datetime()
+                new_share.share_type = share_type
+                new_share.target_id = note_id
+                new_share.from_id = from_id
+                new_share.to_id = to_id
+                self.share_db.insert(**new_share)
