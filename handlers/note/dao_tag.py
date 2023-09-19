@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-19 23:30:35
+@LastEditTime : 2023-09-19 23:52:00
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -199,7 +199,7 @@ def list_tag_meta(user_name, *, limit=1000, tag_type="group", tag_name=None, gro
     if tag_name != None:
         where["tag_name"] = tag_name
     if group_id != None:
-        where["group_id"] = group_id
+        where["group_id"] = str(group_id)
     
     result = tag_meta_db.list(
         limit=limit, where = where, user_name=user_name)
