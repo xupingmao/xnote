@@ -652,3 +652,8 @@ class TestMain(BaseTestCase):
         assert isinstance(note_info.tags, list)
         self.assertEqual(note_info.tags, ["$todo$"])
         delete_note_for_test("bind-tag-test")
+
+    def test_group_manage(self):
+        delete_note_for_test("group-manage-test")
+        note_id = create_note_for_test("group", "group-manage-test")
+        self.check_OK(f"/note/manage?parent_id={note_id}")

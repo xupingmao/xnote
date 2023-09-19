@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-16 22:22:53
+@LastEditTime : 2023-09-19 23:30:35
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -274,7 +274,7 @@ def batch_get_tags_by_notes(notes):
 
     id_list = []
     for note in notes:
-        id_list.append(note.id)
+        id_list.append(str(note.id))
 
     creator = notes[0].creator
     tags_dict = tag_bind_db.batch_get_by_id(id_list, user_name=creator)
