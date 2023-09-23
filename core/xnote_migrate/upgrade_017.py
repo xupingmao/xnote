@@ -205,7 +205,6 @@ class MigrateHandler:
             for item in batch_result:
                 creator = item.creator
                 user_id = xauth.UserDao.get_id_by_name(creator)
-                if user_id != 0:
-                    print(f"fix note_index, note_id={item.id}")
-                    self.note_index_db.update(where=dict(id=item.id), creator_id=user_id)
+                print(f"fix note_index, note_id={item.id}")
+                self.note_index_db.update(where=dict(id=item.id), creator_id=user_id)
 

@@ -989,6 +989,7 @@ def update_note(note_id, **kw):
     size = kw.get("size")
     token = kw.get("token")
     visited_cnt = kw.get("visited_cnt")
+    creator_id = kw.get("creator_id", 0)
 
     note = get_by_id(note_id)
     if note is None:
@@ -1043,6 +1044,9 @@ def update_note(note_id, **kw):
     # 只修改名称
     if len(kw) == 1 and kw.get('name') != None:
         note.version = old_version
+        
+    if creator_id != 0:
+        note.creator_id = creator_id
 
     put_note_to_db(note_id, note)
     return 1
