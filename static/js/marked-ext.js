@@ -345,12 +345,16 @@
 
     // 重写html标签
     myRenderer.html = function (html) {
-        var cap = marked.Lexer.rules.html.exec(html);
-        console.log(cap, html);
-        var htmlTag = cap[1].toLowerCase();
-        if (htmlTag == "script" || htmlTag == "pre") {
-            // 过滤脚本
-            return "";
+        try {
+            var cap = marked.Lexer.rules.html.exec(html);
+            console.log(cap, html);
+            var htmlTag = cap[1].toLowerCase();
+            if (htmlTag == "script" || htmlTag == "pre") {
+                // 过滤脚本
+                return "";
+            }
+        } catch (e) {
+            console.error(e);
         }
         return html;
     }
