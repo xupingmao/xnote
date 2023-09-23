@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 19:17:38
+@LastEditTime : 2023-09-23 12:38:26
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -490,6 +490,10 @@ class DBSyncer:
         pk_value = data.get("key")
 
         if table_name == None:
+            return
+        
+        if not xtables.is_table_exists(table_name):
+            logging.info("表不存在, table_name=%s", table_name)
             return
         
         table = xtables.get_table_by_name(table_name)

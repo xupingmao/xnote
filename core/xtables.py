@@ -100,9 +100,14 @@ def get_db_instance(dbpath=""):
     db.dbpath = dbpath
     return db
 
+def is_table_exists(table_name=""):
+    """判断表是否存在"""
+    table_info = TableManager.get_table_info(table_name)
+    return table_info != None
 
 def get_table_by_name(table_name=""):
     # type: (str) -> TableProxy
+    """通过表名获取操作代理"""
     table_info = TableManager.get_table_info(table_name)
     if table_info == None:
         raise Exception("table not found: %s" % table_name)
