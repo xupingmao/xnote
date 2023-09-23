@@ -96,6 +96,9 @@ def build_app_css():
         builder.append("./static/css/todo.css")
         # echo "打包app.build.css ... [OK]"
 
+        # 针对特殊设备的适配
+        builder.append("./static/css/base/reset-wide.css")
+
 def build_utils_js():
     with FileBuilder("./static/js/utils.build.js") as builder:
         # utils.js

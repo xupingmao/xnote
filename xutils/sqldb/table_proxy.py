@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-17 20:30:40
+@LastEditTime : 2023-09-23 10:24:13
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -14,6 +14,12 @@ import web.db
 from . import table_manager
 from xutils.interfaces import ProfileLog, ProfileLogger
 from xutils.db.binlog import BinLog, BinLogOpType
+
+
+class TableConfig:
+
+    log_profile = False
+    enable_binlog = False
 
 class TableProxy:
     """基于web.db的装饰器
@@ -31,7 +37,7 @@ class TableProxy:
         table_info = table_manager.TableManagerFacade.get_table_info(tablename)
         assert table_info != None
         self.table_info = table_info
-        self.enable_binlog = table_info.enable_binlog
+        self.enable_binlog = TableConfig.enable_binlog and table_info.enable_binlog
 
     def _new_profile_log(self):
         log = ProfileLog()

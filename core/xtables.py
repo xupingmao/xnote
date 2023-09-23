@@ -10,8 +10,10 @@ import threading
 import xutils
 import xconfig
 import web.db
+from xutils import dbutil
+from xutils.dbutil import interfaces
 from xutils.sqldb import TableManagerFacade as TableManager
-from xutils.sqldb import TableProxy
+from xutils.sqldb import TableProxy, TableConfig
 from xutils import fsutil
 
 
@@ -212,6 +214,7 @@ def init_user_table():
         manager.add_index("token")
         # 删除的字段
         manager.drop_column("privileges", "text", "")
+        manager.table_info.enable_binlog = True
 
 
 def init_user_op_log_table():
@@ -352,6 +355,7 @@ def init_site_visit_log():
         manager.add_index(["date", "ip"])
         # 日志数据, 关闭profile
         manager.table_info.log_profile = False
+        manager.table_info.enable_binlog = False
 
 
 def init_msg_index_table():
@@ -372,7 +376,6 @@ def init_msg_index_table():
         manager.add_column("date", "date", default_value="1970-01-01")
         manager.add_index(["user_id", "ctime"])
         manager.add_index(["user_id", "mtime"])
-        manager.table_info.enable_binlog = True
 
 def init_kv_store_table():
     kw = dict()
@@ -380,6 +383,7 @@ def init_kv_store_table():
     kw["pk_len"] = 100
     kw["pk_type"] = "blob"
     kw["debug"] = xconfig.DatabaseConfig.db_debug
+    kw["comment"] = "kv存储"
     dbpath = xconfig.FileConfig.kv_db_file
     with create_table_manager_with_dbpath("kv_store", dbpath=dbpath, **kw) as manager:
         manager.add_column("value", "longblob", default_value="")
@@ -493,10 +497,27 @@ def move_sqlite_to_backup(db_name=""):
     target_path = xconfig.FileConfig.get_backup_db_path(db_name)
     fsutil.mvfile(source_path, target_path, rename_on_conflict=True)
 
+class DBProfileLogger(interfaces.ProfileLogger):
+
+    def __init__(self):
+        self.db = dbutil.get_table("sys_log")
+        self.db.binlog_enabled = False
+
+    def log(self, log):
+        self.db.insert(log, id_type="timeseq")
+
+
 @xutils.log_init_deco("xtables")
 def init():
     TableManager.clear_table_dict()
-    web.db.config.debug_sql = xconfig.DatabaseConfig.db_log_debug
+    web.db.config.debug_sql = xconfig.DatabaseConfig.db_debug
+
+    TableConfig.enable_binlog = xconfig.DatabaseConfig.binlog
+    if xconfig.DatabaseConfig.db_profile_table_proxy:
+        dbutil.register_table("sys_log", "系统日志")
+        TableProxy.profile_logger = DBProfileLogger()
+        TableProxy.log_profile = True
+    
     init_dict_table()
     init_record_table()
     init_user_table()

@@ -1,0 +1,20 @@
+/* 宽屏设备 */
+@media screen and (min-width: 1500px) {
+    body, a, textarea, span {
+        font-size: 16px;
+    }
+    
+    button, .btn, .btn-default, input[type=button] {
+        font-size: 14px;
+        line-height: 20px;
+    }
+    
+    .send-button {
+        width: 80px;
+    }
+    
+    .tag-span {
+        font-size: 16px;
+    }
+}
+

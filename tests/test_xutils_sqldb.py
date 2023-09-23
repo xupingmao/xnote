@@ -12,6 +12,7 @@
 from . import test_base
 from xutils.sqldb import TableManagerFacade, TableProxy
 from xutils.db.binlog import BinLog
+from xutils.sqldb import TableConfig
 import xconfig
 import os
 import xtables
@@ -58,6 +59,7 @@ class TestMain(test_base.BaseTestCase):
     def test_db_binlog(self):
         db = self.get_db()
         self.define_db()
+        TableConfig.enable_binlog = True
         web.db.config.debug_sql = True
 
         table = TableProxy(db, "unit_test")

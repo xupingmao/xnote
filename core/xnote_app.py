@@ -220,22 +220,10 @@ def init_kv_engine():
         logging.error("初始化数据库失败...")
         sys.exit(1)
 
-class DBProfileLogger(interfaces.ProfileLogger):
-
-    def __init__(self):
-        self.db = dbutil.get_table("sys_log")
-        self.db.binlog_enabled = False
-
-    def log(self, log):
-        self.db.insert(log, id_type="timeseq")
-
 @log_mem_info_deco("init_kv_engine")
 def init_kv_db():
     init_kv_engine()
     xtables_new.init()
-    if xconfig.DatabaseConfig.db_profile_table_proxy:
-        TableProxy.profile_logger = DBProfileLogger()
-        TableProxy.log_profile = True
 
 def init_autoreload():
 

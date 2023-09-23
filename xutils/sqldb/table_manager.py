@@ -310,7 +310,7 @@ class TableInfo:
         self.columns = []
         self.indexes = []
         self.dbpath = "" # sqlite文件路径
-        self.enable_binlog = False
+        self.enable_binlog = True
         self.log_profile = True
         self.is_deleted = False
     

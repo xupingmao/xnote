@@ -10,4 +10,4 @@
 """
 
 from .table_manager import TableManagerFacade
-from .table_proxy import TableProxy
+from .table_proxy import TableProxy, TableConfig
