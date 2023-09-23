@@ -362,7 +362,10 @@ class TableInfo:
         return self
 
     def drop_index(self, index_name, comment = ""):
-        # TODO 记录删除的索引
+        # 记录删除的索引
+        info = register_table_index(self.name, index_name,
+                             comment = comment, is_deleted=True)
+        info.delete_table()
         return self
 
     def rebuild_index(self, version="v1"):
@@ -445,7 +448,7 @@ def _register_table_inner(table_name, description, **kw):
     return info
 
 
-def register_table_index(table_name, index_name, columns = [], comment="", index_type="ref"):
+def register_table_index(table_name, index_name, columns = [], comment="", index_type="ref", **kw):
     """注册表的索引"""
     validate_str(table_name, "invalid table_name")
     validate_str(index_name, "invalid index_name")
@@ -457,12 +460,14 @@ def register_table_index(table_name, index_name, columns = [], comment="", index
     if len(columns) == 0:
         columns = [index_name]
 
-    IndexInfo.register(table_name, index_name, columns, index_type)
+    is_deleted = kw.get("is_deleted", False)
+    if not is_deleted:
+        IndexInfo.register(table_name, index_name, columns, index_type)
 
     # 注册索引表
     index_table = get_index_table_name(table_name, index_name)
     description = "%s表索引" % table_name
-    _register_table_inner(index_table, description, type="index")
+    return _register_table_inner(index_table, description, type="index")
 
 
 def register_table_user_attr(table_name, user_attr):

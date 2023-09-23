@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-17 15:00:58
+@LastEditTime : 2023-09-23 19:55:55
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -139,8 +139,8 @@ def init_note_tables():
     db = dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True, user_attr="user")
     db.register_index("visit_cnt")
     db.register_index("atime")
-    db.register_index("mtime")
-    db.register_index("ctime")
+    db.drop_index("mtime")
+    db.drop_index("ctime")
     db.rebuild_index("v1")
 
 
