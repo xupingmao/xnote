@@ -44,53 +44,53 @@ def run_test(args):
 
 	if target == "xutils":
 		py_exec("-m pytest tests/test_xutils.py --doctest-modules --cov xutils --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 	
 	if target == "xutils_db":
 		# py_exec("-m pytest tests/test_xutils_db.py::TestMain::test_dbutil_mysql_enhanced --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		py_exec("-m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py tests/test_xutils_db_hash_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 	
 	if target == "xutils_sqldb":
 		py_exec("-m pytest tests/test_xutils_sqldb.py --doctest-modules --cov xutils.sqldb --cov handlers.system.db_index --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 	
 	if target == "xutils_cache":
 		py_exec("-m pytest tests/test_xutils_cache.py --doctest-modules --cov xutils.cacheutil --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 
 	if target == "fs":
 		py_exec("-m pytest tests/test_fs.py --doctest-modules --cov handlers.fs --cov handlers.fs --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 
 	if target == "app":
 		py_exec("-m pytest tests/test_app.py --doctest-modules --cov handlers --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 	
 	if target == "note":
 		py_exec("-m pytest tests/test_note.py --doctest-modules --cov handlers --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 	
 	if target == "system_sync":
 		py_exec("-m pytest tests/test_system_sync.py --doctest-modules --cov handlers.system.system_sync --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 	
 	if target == "message":
 		py_exec("-m pytest tests/test_message.py --doctest-modules --cov handlers.message --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 	
 	if target == "xauth":
 		py_exec("-m pytest tests/test_xauth.py --doctest-modules --cov xauth --capture no")
-		py_exec("-m coverage html")
+		py_exec("-m coverage html -i")
 		return
 
 	if target != "all":

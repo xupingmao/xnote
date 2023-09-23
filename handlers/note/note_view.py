@@ -152,8 +152,8 @@ def view_group_detail_func(file, kw):
         kw.template_name = "note/component/editor/markdown_edit.html"
         return
 
-    if orderby != "" and orderby != file.orderby:
-        note_dao.update_note(file.id, orderby=orderby)
+    if orderby != "" and orderby != file.orderby and user_name == file.creator:
+        note_dao.update_note(file.id, orderby=orderby, creator_id=file.creator_id)
 
     if orderby == None or orderby == "":
         orderby = file.orderby

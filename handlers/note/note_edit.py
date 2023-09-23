@@ -621,15 +621,13 @@ class UpdateStatusHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument("id")
-        status = xutils.get_argument_str("status", "")
-        if status not in ("0", "-1", "1"):
-            return dict(code = "fail", message = "无效的状态: %s" % status)
+        id = xutils.get_argument_int("id")
+        status = xutils.get_argument_int("status")
+        if status not in (0, -1, 1):
+            return webutil.FailedResult(code="fail", message="无效的状态: %s" % status)
         note = check_get_note(id)
-        
-        archived = (status == "-1")
-        note_dao.update_note(id, priority = int(status), archived = archived)
-        return dict(code = "success", message = "更新状态成功")
+        note_dao.NoteIndexDao.update_level(id, level = status)
+        return webutil.SuccessResult(message = "更新状态成功")
 
 class UpdateOrderByHandler:
 
@@ -641,7 +639,7 @@ class UpdateOrderByHandler:
             return dict(code = "fail", message = "无效的排序方式: %s" % orderby)
         note = check_get_note(id)
         
-        note_dao.update_note(id, orderby = orderby)
+        note_dao.update_note(id, orderby = orderby, creator_id = note.creator_id)
         return dict(code = "success", message = "更新排序方式成功")
 
 class MoveAjaxHandler:

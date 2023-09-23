@@ -194,7 +194,7 @@ class MigrateHandler:
     def fix_creator_id(self):
         """修复creator_id数据"""
         for item in self.note_full_db.iter(limit=-1):
-            if item.creator_id == 0 and item.creator != "":
+            if item.creator_id in (0, None) and item.creator != "":
                 user_name = item.creator
                 user_id = xauth.UserDao.get_id_by_name(user_name)
                 item.creator_id = user_id

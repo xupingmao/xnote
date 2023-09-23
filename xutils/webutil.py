@@ -225,7 +225,7 @@ def init_webutil_env(is_test = False):
 
 class SuccessResult(web.Storage):
 
-    def __init__(self, data=None):
+    def __init__(self, data=None, message=""):
         self.success = True
         self.code = "success"
         self.data = data

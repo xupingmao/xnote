@@ -673,3 +673,19 @@ class TestMain(BaseTestCase):
         plan_id = plan_record._id
         json_request_return_dict("/plan/month/add", method="POST", data=dict(id=plan_id, note_ids=str(note_id)))
         self.check_OK("/plan/month")
+
+    def test_touch_note(self):
+        delete_note_for_test("touch-test")
+        note_id = create_note_for_test("md", "touch-test")
+        self.check_OK(f"/note/touch?id={note_id}&resp_type=json")
+
+    def test_update_level(self):
+        delete_note_for_test("status-test")
+        note_id = create_note_for_test("md", "status-test")
+        resp = self.json_request_return_dict(f"/note/status", method="POST", data=dict(id=note_id, status=1))
+        self.assertTrue(resp["success"])
+
+        note_info = note_dao.get_by_id(note_id)
+        assert note_info != None
+        assert note_info.level == 1
+    

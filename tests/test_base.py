@@ -156,6 +156,8 @@ class BaseTestCase(unittest.TestCase):
     def json_request(self, *args, **kw):
         return json_request(*args, **kw)
 
+    def json_request_return_dict(self, *args, **kw):
+        return json_request_return_dict(*args, **kw)
 
 class BaseTestMain(unittest.TestCase):
 

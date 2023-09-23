@@ -111,7 +111,7 @@
             checkNotEmpty(id, "data-id为空");
             checkNotEmpty(status, "data-status为空");
 
-            $.post("/note/status", {id: id, status: status}, function (resp) {
+            xnote.http.post("/note/status", {id: id, status: status}, function (resp) {
                 var code = resp.code;
                 if (code != "success") {
                     xnote.alert(resp.message);
@@ -129,7 +129,7 @@
             checkNotEmpty(id, "data-id为空");
             checkNotEmpty(status, "data-status为空");
 
-            $.post("/note/status", {id: id, status: status}, function (resp) {
+            xnote.http.post("/note/status", {id: id, status: status}, function (resp) {
                 var code = resp.code;
                 if (code != "success") {
                     xnote.alert(resp.message);
