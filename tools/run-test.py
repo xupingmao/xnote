@@ -48,7 +48,7 @@ def run_test(args):
 		return
 	
 	if target == "xutils_db":
-		# os.system("python3 -m pytest tests/test_xutils_db.py::TestMain::test_dbutil_mysql_enhanced --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
+		# py_exec("-m pytest tests/test_xutils_db.py::TestMain::test_dbutil_mysql_enhanced --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		py_exec("-m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py tests/test_xutils_db_hash_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		py_exec("-m coverage html")
 		return
@@ -59,38 +59,38 @@ def run_test(args):
 		return
 	
 	if target == "xutils_cache":
-		os.system("python3 -m pytest tests/test_xutils_cache.py --doctest-modules --cov xutils.cacheutil --capture no")
-		os.system("python3 -m coverage html")
+		py_exec("-m pytest tests/test_xutils_cache.py --doctest-modules --cov xutils.cacheutil --capture no")
+		py_exec("-m coverage html")
 		return
 
 	if target == "fs":
-		os.system("python3 -m pytest tests/test_fs.py --doctest-modules --cov handlers.fs --cov handlers.fs --capture no")
-		os.system("python3 -m coverage html")
+		py_exec("-m pytest tests/test_fs.py --doctest-modules --cov handlers.fs --cov handlers.fs --capture no")
+		py_exec("-m coverage html")
 		return
 
 	if target == "app":
-		os.system("python3 -m pytest tests/test_app.py --doctest-modules --cov handlers --capture no")
-		os.system("python3 -m coverage html")
+		py_exec("-m pytest tests/test_app.py --doctest-modules --cov handlers --capture no")
+		py_exec("-m coverage html")
 		return
 	
 	if target == "note":
-		os.system("python3 -m pytest tests/test_note.py --doctest-modules --cov handlers --capture no")
-		os.system("python3 -m coverage html")
+		py_exec("-m pytest tests/test_note.py --doctest-modules --cov handlers --capture no")
+		py_exec("-m coverage html")
 		return
 	
 	if target == "system_sync":
-		os.system("python3 -m pytest tests/test_system_sync.py --doctest-modules --cov handlers.system.system_sync --capture no")
-		os.system("python3 -m coverage html")
+		py_exec("-m pytest tests/test_system_sync.py --doctest-modules --cov handlers.system.system_sync --capture no")
+		py_exec("-m coverage html")
 		return
 	
 	if target == "message":
-		os.system("python3 -m pytest tests/test_message.py --doctest-modules --cov handlers.message --capture no")
-		os.system("python3 -m coverage html")
+		py_exec("-m pytest tests/test_message.py --doctest-modules --cov handlers.message --capture no")
+		py_exec("-m coverage html")
 		return
 	
 	if target == "xauth":
-		os.system("python3 -m pytest tests/test_xauth.py --doctest-modules --cov xauth --capture no")
-		os.system("python3 -m coverage html")
+		py_exec("-m pytest tests/test_xauth.py --doctest-modules --cov xauth --capture no")
+		py_exec("-m coverage html")
 		return
 
 	if target != "all":

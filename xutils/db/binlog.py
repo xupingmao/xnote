@@ -4,13 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 19:16:53
+@LastEditTime : 2023-09-23 12:13:05
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
 from web import Storage
 from xutils.db.dbutil_base import count_table, prefix_iter
 from xutils.db.dbutil_base import db_put, prefix_list, register_table, db_batch_delete
+from xutils.db.dbutil_id_gen import IdGenerator
 
 import struct
 import threading
@@ -50,6 +51,7 @@ class BinLog:
     _max_size = 10000
     log_debug = False
     logger = logging.getLogger("binlog")
+    id_gen = IdGenerator(_table_name)
 
     def __init__(self) -> None:
         """正常要使用单例模式使用"""
@@ -57,12 +59,6 @@ class BinLog:
             if self._instance != None:
                 raise Exception("只能创建一个BinLog单例")
             self._instance = self
-
-        last_key = self.get_last_key()
-        if last_key == None:
-            self.last_seq = 0
-        else:
-            self.last_seq = self._unpack_id(last_key)
 
     def _pack_id(self, log_id=0):
         return struct.pack('>Q', log_id).hex()
@@ -80,8 +76,16 @@ class BinLog:
     def _pack_id_v0(self, log_id=0):
         return "%020d" % log_id
 
+    @property
+    def last_seq(self):
+        return self.id_gen.current_id_int()
+
     @classmethod
     def get_instance(cls):
+        # type: () -> BinLog
+        if cls._instance != None:
+            return cls._instance
+
         with cls._lock:
             if cls._instance == None:
                 cls._instance = BinLog()
@@ -137,8 +141,8 @@ class BinLog:
             return
 
         with self._lock:
-            self.last_seq += 1
-            binlog_id = self._pack_id(self.last_seq)
+            new_id = self.id_gen.create_increment_id_int()
+            binlog_id = self._pack_id(new_id)
             binlog_body = dict(optype=optype, key=key)
             if old_value != None:
                 binlog_body["old_value"] = old_value

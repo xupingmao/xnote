@@ -776,6 +776,7 @@ def set_db_instance(db_instance):
 
 
 def get_db_instance():
+    # type: () -> interfaces.DBInterface
     global _leveldb
     return _leveldb
 

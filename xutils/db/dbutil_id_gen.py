@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-10-03 22:51:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-16 19:58:59
+@LastEditTime : 2023-09-23 11:59:05
 @FilePath     : /xnote/xutils/db/dbutil_id_gen.py
 @Description  : id生成
 """
@@ -20,11 +20,22 @@ class IdGenerator:
         self.table_name = table_name
 
     def create_increment_id(self, start_id=1):
+        new_id = self.create_increment_id_int(start_id=start_id)
+        return encode_id(new_id)
+    
+    def create_increment_id_int(self, start_id=1):
         assert start_id > 0
         max_id_key = "_max_id:" + self.table_name
         key_bytes = max_id_key.encode("utf-8")
-        new_id = base.get_db_instance().Increase(key_bytes, start_id=start_id)
-        return encode_id(new_id)
+        return base.get_db_instance().Increase(key_bytes, start_id=start_id)
+    
+    def current_id_int(self):
+        max_id_key = "_max_id:" + self.table_name
+        key_bytes = max_id_key.encode("utf-8")
+        value = base.get_db_instance().Get(key_bytes)
+        if value == None:
+            return 0
+        return int(value)
 
     def create_new_id(self, id_type="uuid", id_value=None):
         if id_type == "uuid":
