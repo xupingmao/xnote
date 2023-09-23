@@ -95,11 +95,12 @@ class MigrateHandler:
     kv_note_share = dbutil.get_table("note_share")
     user_dao = xauth.UserDao
     note_full_db = dbutil.get_table("note_full")
+    note_index_db = xtables.get_table_by_name("note_index")
 
     def migrate_note_index(self):
         """迁移笔记索引"""
         old_db = dbutil.get_table("note_index")
-        new_db = xtables.get_table_by_name("note_index")
+        new_db = self.note_index_db
         note_full_db = self.note_full_db
         
 
@@ -197,4 +198,14 @@ class MigrateHandler:
                 user_name = item.creator
                 user_id = xauth.UserDao.get_id_by_name(user_name)
                 item.creator_id = user_id
+                print(f"fix note_full, note_id={item.id}")
                 self.note_full_db.update(item)
+
+        for batch_result in self.note_index_db.iter_batch(where=" AND creator_id = 0"):
+            for item in batch_result:
+                creator = item.creator
+                user_id = xauth.UserDao.get_id_by_name(creator)
+                if user_id != 0:
+                    print(f"fix note_index, note_id={item.id}")
+                    self.note_index_db.update(where=dict(id=item.id), creator_id=user_id)
+
