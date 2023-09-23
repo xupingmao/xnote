@@ -437,9 +437,13 @@ def check_get_note(id):
     if note is None:
         raise NoteException("404", "笔记不存在")
 
-    if note.creator != xauth.current_name():
+    user_info = xauth.current_user()
+    assert user_info != None
+
+    if note.creator != user_info.name:
         raise NoteException("403", "无权编辑")
-    
+
+    note.creator_id = user_info.id
     return note
 
 def update_and_notify(file, update_kw):

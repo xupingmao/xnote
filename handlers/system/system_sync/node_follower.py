@@ -85,8 +85,8 @@ class Follower(NodeManagerBase):
         is_active = (now - self.last_ping_time) < self.PING_INTERVAL
         return self.admin_token != None and is_active
 
-    def ping_leader(self):
-        if self.is_token_active():
+    def ping_leader(self, force=True):
+        if self.is_token_active() and not force:
             return self.ping_result
         
         return self.do_ping_leader()

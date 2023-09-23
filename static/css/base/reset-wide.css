@@ -1,6 +1,6 @@
 /* 宽屏设备 */
 @media screen and (min-width: 1500px) {
-    body, a, textarea, span {
+    body, a, textarea, span, .card-title, .grid-title {
         font-size: 16px;
     }
     

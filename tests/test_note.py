@@ -87,6 +87,9 @@ class TestMain(BaseTestCase):
         delete_note_for_test("xnote-unit-test")
         delete_note_for_test("xnote-unit-test-copy")
 
+        user_info = xauth.current_user()
+        assert user_info != None
+        
         group_id = get_default_group_id()
         file = json_request("/note/add", method="POST", 
             data=dict(name="xnote-unit-test", content="hello", parent_id = group_id))
@@ -126,6 +129,7 @@ class TestMain(BaseTestCase):
         assert note_info != None
 
         self.assertEqual(note_info.content, "new-content")
+        self.assertEqual(user_info.id, note_info.creator_id)
         
         # 第二次更新 使用新的api
         NoteDao.update_content(note_info, "new-content-2")

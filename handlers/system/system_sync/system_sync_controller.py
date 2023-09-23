@@ -259,8 +259,8 @@ class SyncHandler:
         return dict(code="success")
 
     def do_ping(self):
-        data = FOLLOWER.ping_leader()
-        return dict(code="success", data=data)
+        data = FOLLOWER.ping_leader(force=True)
+        return webutil.SuccessResult(data)
 
 
 class LeaderHandler(SyncHandler):
