@@ -13,6 +13,7 @@ def do_upgrade():
     handler = MigrateHandler()
     base.execute_upgrade("20230916_note_index", handler.migrate_note_index)
     base.execute_upgrade("20230917_note_share", handler.migrate_note_share)
+    base.execute_upgrade("20230923_fix_creator_id", handler.fix_creator_id)
 
 
 
@@ -93,12 +94,13 @@ class MigrateHandler:
     share_db = xtables.get_table_by_name("share_info")
     kv_note_share = dbutil.get_table("note_share")
     user_dao = xauth.UserDao
+    note_full_db = dbutil.get_table("note_full")
 
     def migrate_note_index(self):
         """迁移笔记索引"""
         old_db = dbutil.get_table("note_index")
         new_db = xtables.get_table_by_name("note_index")
-        note_full_db = dbutil.get_table("note_full")
+        note_full_db = self.note_full_db
         
 
         for item in old_db.iter(limit=-1):
@@ -186,3 +188,13 @@ class MigrateHandler:
                 new_share.from_id = from_id
                 new_share.to_id = to_id
                 self.share_db.insert(**new_share)
+    
+
+    def fix_creator_id(self):
+        """修复creator_id数据"""
+        for item in self.note_full_db.iter(limit=-1):
+            if item.creator_id == 0 and item.creator != "":
+                user_name = item.creator
+                user_id = xauth.UserDao.get_id_by_name(user_name)
+                item.creator_id = user_id
+                self.note_full_db.update(item)
