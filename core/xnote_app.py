@@ -160,6 +160,7 @@ def init_kv_engine():
             config_dict = Storage()
             config_dict.sqlite_journal_mode = xconfig.DatabaseConfig.sqlite_journal_mode
             db_instance = SqliteKV(db_file, config_dict=config_dict)
+            db_instance.sql_logger = xnote_trace.SqlLogger()
             db_instance.debug = xconfig.DatabaseConfig.db_debug
 
         if db_driver == "leveldbpy":

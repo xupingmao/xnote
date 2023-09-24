@@ -57,6 +57,8 @@ class Holder(threading.local):
 class SqliteKV(interfaces.DBInterface):
 
     _lock = threading.RLock()
+    
+    sql_logger = interfaces.SqlLoggerInterface()
 
     def __init__(self, db_file, snapshot=None,
                  block_cache_size=None,
@@ -101,10 +103,12 @@ class SqliteKV(interfaces.DBInterface):
     @log_mem_info_deco("db.Get")
     def Get(self, key):
         sql = "SELECT value FROM kv_store WHERE `key` = $key;"
-        r_iter = self.db.query(sql, vars=dict(key=key))
+        vars = dict(key=key)
+        r_iter = self.db.query(sql, vars=vars)
         result = list(r_iter)
         if self.debug:
-            logging.info("SQL:%s, key:%s, rows:%s", sql, key, len(result))
+            raw_sql = self.db.query(sql, vars=vars, _test=True)
+            self.sql_logger.append(f"[Get] {raw_sql}")
         if len(result) > 0:
             return result[0].value
         return None
@@ -131,13 +135,16 @@ class SqliteKV(interfaces.DBInterface):
         finally:
             cost_time = time.time() - start_time
             if self.debug:
-                logging.debug(f"BatchGet ({key_list}) cost {cost_time:.2f}ms")
+                raw_sql = self.db.query(sql, vars=vars, _test=True)
+                self.sql_logger.append(f"[BatchGet {cost_time:.2f}ms] {raw_sql}")
     
     def _exists(self, key, cursor=None):
         sql = "SELECT `key` FROM kv_store WHERE `key` = $key;"
-        result = list(self.db.query(sql, vars=dict(key=key)))
+        vars = dict(key=key)
+        result = list(self.db.query(sql, vars=vars))
         if self.debug:
-            logging.info("SQL:%s, key:%s, rows:%s", sql, key, len(result))
+            raw_sql = self.db.query(sql, vars=vars, _test=True)
+            self.sql_logger.append(f"[_exists] {raw_sql}")
 
         return len(result) > 0
 
@@ -170,11 +177,15 @@ class SqliteKV(interfaces.DBInterface):
         return self.doDelete(key, sync)
 
     def doDelete(self, key, sync=False, cursor=None):
+        sql = "DELETE FROM kv_store WHERE key = $key;"
+        vars = dict(key=key)
+        
         if self.debug:
-            logging.debug("Delete: key(%s)", key)
+            raw_sql = self.db.query(sql, vars=vars, _test=True)
+            self.sql_logger.append(f"Delete: {raw_sql}")
 
         with self._lock:
-            return self.db.query("DELETE FROM kv_store WHERE key = $key;", vars=dict(key=key))
+            return self.db.query(sql, vars=vars)
 
     def RangeIter(self, *args, **kw):
         yield from self.RangeIterNoLock(*args, **kw)
@@ -216,7 +227,8 @@ class SqliteKV(interfaces.DBInterface):
             result = list(result_iter)
 
             if self.debug:
-                logging.debug(f"SQL:{sql} ({vars}), rows:{len(result)}")
+                raw_sql = self.db.query(sql, vars=vars, _test=True)
+                self.sql_logger.append(f"[RangeIterNoLock rows:{len(result)}] {raw_sql}")
             
             # return cur.execute(sql, tuple(params))
             for item in result[:limit]:
@@ -276,7 +288,8 @@ class SqliteKV(interfaces.DBInterface):
         sql = " ".join(sql_builder)
 
         if self.debug:
-            logging.debug("SQL:%s (%s)", sql, vars)
+            raw_sql = self.db.query(sql, vars=vars, _test=True)
+            self.sql_logger.append(f"[RangeIterWithLock] {raw_sql}")
 
         # return cur.execute(sql, tuple(params))
         for item in self.db.query(sql, vars=vars):
@@ -313,6 +326,22 @@ class SqliteKV(interfaces.DBInterface):
                 for key in batch._deletes:
                     self.doDelete(key)
 
+
+    def Count(self, key_from=b'', key_to=b'\xff'):
+        sql = "SELECT COUNT(*) AS amount FROM kv_store WHERE `key` >= $key_from AND `key` <= $key_to"
+        start_time = time.time()
+        vars = dict(key_from=key_from, key_to=key_to)
+        try:
+            result_iter = self.db.query(sql, vars=vars)
+            for row in result_iter:
+                return row.amount
+            return 0
+        finally:
+            if self.debug:
+                cost_time = time.time() - start_time
+                sql_query = self.db.query(sql, vars=vars, _test=True)
+                self.sql_logger.append(f"[Count {cost_time*100:.2f}ms] {sql_query}")
+                
     def Close(self):
         self.db.ctx.db.close()
         del self.db

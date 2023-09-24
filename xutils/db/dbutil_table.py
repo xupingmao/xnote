@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-16 14:20:52
+@LastEditTime : 2023-09-24 18:30:46
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -694,6 +694,9 @@ class LdbTable:
         prefix = self._get_prefix(user_name=user_name)
         if id_prefix != None:
             prefix += encode_str(id_prefix)
+            
+        if filter_func == None:
+            return prefix_count_fast(prefix)
 
         return prefix_count(prefix, filter_func)
 

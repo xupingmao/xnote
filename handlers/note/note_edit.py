@@ -473,21 +473,16 @@ class SaveAjaxHandler:
         try:
             return self.do_post()
         except NoteException as e:
-            return dict(code = "fail", message = e.message)
+            return webutil.FailedResult(code = "fail", message = e.message)
 
     
     def do_post(self):
-        content = xutils.get_argument("content", "")
-        data    = xutils.get_argument("data", "")
-        id      = xutils.get_argument("id", "")
-        type    = xutils.get_argument("type")
-        version = xutils.get_argument("version", 0, type=int)
-        edit_token = xutils.get_argument("edit_token", "")
-
-        assert isinstance(version, int)
-        assert isinstance(content, str)
-        assert isinstance(id, str)
-        assert isinstance(data, str)
+        content = xutils.get_argument_str("content", "")
+        data = xutils.get_argument_str("data", "")
+        id = xutils.get_argument_int("id")
+        type = xutils.get_argument_str("type")
+        version = xutils.get_argument_int("version", 0)
+        edit_token = xutils.get_argument_str("edit_token", "")
 
         with dbutil.get_write_lock(id):
             file = check_get_note(id)
@@ -514,7 +509,7 @@ class SaveAjaxHandler:
                 new_file.size = len(content)
 
             update_and_notify(file, new_file)
-            return dict(code = "success")
+            return webutil.SuccessResult()
 
 
 class UpdateHandler:

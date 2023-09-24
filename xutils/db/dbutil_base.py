@@ -751,6 +751,10 @@ def count(key_from=None, key_to=None, filter_func=None):
             count += 1
     return count
 
+def prefix_count_fast(prefix=""):
+    key_from = prefix.encode("utf-8")
+    key_to = (prefix + "\xff").encode("utf-8")
+    return _leveldb.Count(key_from=key_from, key_to=key_to)
 
 def prefix_count(*args, **kw):
     """通过前缀统计行数
