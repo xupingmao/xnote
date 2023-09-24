@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as fp:
 data_ext_list =  ["*.txt", "*.json", "*.properties", "*.js", "*.html", "*.css"]
 
 setuptools.setup(
-    name = "xnote",
+    name = "xnote-web",
     version = "0.0.1",
     author = "mark",
     author_email = "578749341@qq.com",

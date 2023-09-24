@@ -81,4 +81,5 @@ start-cmd.bat
 # pypi构建临时目录
 /build/
 /xnote.egg-info/
+/xnote-web.egg-info/
 /dist/
