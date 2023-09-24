@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-06 12:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-19 18:20:47
+@LastEditTime : 2023-09-24 12:48:47
 @FilePath     : /xnote/handlers/system/system_log.py
 @Description  : 描述
 """
@@ -15,8 +15,6 @@
 import os
 import time
 from collections import deque
-from handlers.system.system_event import ASIDE_HTML
-
 import xauth
 import xutils
 import xconfig
@@ -85,7 +83,7 @@ OPTION_HTML = '''
 '''
 
 ASIDE_HTML = """
-    {% include system/component/admin_nav.html %}
+{% include system/component/admin_nav.html %}
 """
 
 
@@ -173,6 +171,8 @@ class LogHandler(BasePlugin):
         date = self.get_arg_date()
 
         self.render_options(date)
+        
+        self.show_aside = True
         self.write_aside(ASIDE_HTML)
 
         if log_type == "mem":

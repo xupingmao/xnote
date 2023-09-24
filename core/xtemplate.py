@@ -504,6 +504,7 @@ class BasePlugin:
 
     def write_aside(self, template, **kw):
         self.show_aside = True
+        self.show_right = True
         self.aside_html = render_text(template, **kw)
 
     def ajax_response(self, template, **kw):

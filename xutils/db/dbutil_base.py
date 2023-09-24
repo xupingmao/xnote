@@ -361,7 +361,7 @@ class TableInfo:
                              comment = comment, index_type=index_type)
         return self
 
-    def drop_index(self, index_name, comment = ""):
+    def drop_index(self, index_name, columns = [], comment = ""):
         # 记录删除的索引
         info = register_table_index(self.name, index_name,
                              comment = comment, is_deleted=True)

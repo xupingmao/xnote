@@ -244,7 +244,7 @@ class DbScanHandler:
 
         return result
 
-    def list_table_by_type(self, type=""):
+    def list_table_by_type(self, type="", include_deleted=False):
         result = []
         if xauth.is_admin():
             table_dict = dbutil.get_table_dict_copy()
@@ -252,6 +252,8 @@ class DbScanHandler:
                                   key=lambda x: (x.category, x.name))
             for table_info in table_values:
                 name = table_info.name
+                if not include_deleted and table_info.is_deleted:
+                    continue
                 if table_info.type == type:
                     table_count = dbutil.count_table(name, use_cache=True)
                     result.append([table_info, table_count])

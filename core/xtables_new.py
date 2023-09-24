@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-23 19:55:55
+@LastEditTime : 2023-09-24 12:28:18
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -54,7 +54,7 @@ def init():
 def init_deleted_table():
     # 统计数据
     db = dbutil.register_table("plugin_visit_log", "插件访问日志", user_attr="user", check_user = True)
-    db.register_index("url", comment = "页面URL")
+    db.drop_index("url", comment = "页面URL")
     db.rebuild_index("v2")
     db.delete_table()
 
@@ -73,13 +73,13 @@ def init_deleted_table():
 
     # uv统计
     db = dbutil.register_table("uv", "uv访问统计")
-    db.register_index("date_ip", columns = ["date", "ip"])
+    db.drop_index("date_ip", columns = ["date", "ip"])
     db.rebuild_index("v1")
     db.delete_table()
 
     # 文件相关，废弃，新的使用sql-db
     db = dbutil.register_table("fs_index", "文件索引")
-    db.register_index("ftype", comment = "类型索引")
+    db.drop_index("ftype", comment = "类型索引")
     db.delete_table()
 
 def init_note_tables():

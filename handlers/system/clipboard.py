@@ -77,6 +77,11 @@ function xnoteOpenClipDetail(target) {
 </script>
 """
 
+ASIDE_HTML = """
+{% include system/component/admin_nav.html %}
+"""
+
+
 dbutil.register_table("clip_log", "剪切板历史")
 
 class ClipLogDO(xutils.Storage):
@@ -150,7 +155,9 @@ class Main(BasePlugin):
     category = "system"
 
     editable = False
+    show_aside = True
     
+
     def handle(self, input):
         # 输入框的行数
         watch_clipboard()
@@ -170,6 +177,7 @@ class Main(BasePlugin):
         kw.page_total = ClipLogDao.count()
         kw.records = ClipLogDao.list_recent(offset=offset, limit=page_size)
         self.writehtml(HTML, **kw)
+        self.write_aside(ASIDE_HTML)
 
     def handle_detail(self):
         id = xutils.get_argument_str("id")

@@ -72,7 +72,7 @@ class EventHandler(BasePlugin):
     
     def handle(self, content):
         self.rows = 0
-        self.show_aside = False
+        self.show_aside = True
         event_type_list = []
         handlers = xmanager._event_manager._handlers
         event_type_list = sorted(handlers.keys())

@@ -24,15 +24,15 @@
     {% raw css_style %}
 </style>
 
-{% init error       = "" %}
+{% init error = "" %}
 {% init description = "" %}
-{% init input       = "" %}
-{% init output      = "" %}
+{% init input = "" %}
+{% init output = "" %}
 
 {% end %}
 
 {% block body %}
-    {% if not model.show_aside %}
+    {% if not model.show_title %}
         {# 标题 #}
         {% include plugin/base/base_plugin_title.html %}
         {# 内容 #}
@@ -41,7 +41,7 @@
 {% end %}
 
 {% block body_left %}
-    {% if model.show_aside %}
+    {% if model.show_title %}
         {# 标题 #}
         {% include plugin/base/base_plugin_title.html %}
         {# 内容 #}
