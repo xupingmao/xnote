@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-06-26 10:49:13
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-04 10:50:10
+@LastEditTime : 2023-09-24 12:16:08
 @FilePath     : /xnote/handlers/note/note_checklist.py
 @Description  : 清单列表
 """
@@ -39,6 +39,7 @@ class ChecklistSearchHandler:
         kw.pathlist = list_path(note_detail)
         kw.file = note_detail
         kw.show_checklist_search = True
+        kw.key = xutils.get_argument_str("key")
 
         return xtemplate.render("note/page/detail/checklist_detail.html", **kw)
 

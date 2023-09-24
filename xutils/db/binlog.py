@@ -52,6 +52,7 @@ class BinLog:
     log_debug = False
     logger = logging.getLogger("binlog")
     id_gen = IdGenerator(_table_name)
+    record_old_value = False
 
     def __init__(self) -> None:
         """正常要使用单例模式使用"""
@@ -144,7 +145,7 @@ class BinLog:
             new_id = self.id_gen.create_increment_id_int()
             binlog_id = self._pack_id(new_id)
             binlog_body = dict(optype=optype, key=key)
-            if old_value != None:
+            if self.record_old_value and old_value != None:
                 binlog_body["old_value"] = old_value
             if record_value and value != None:
                 binlog_body["value"] = value

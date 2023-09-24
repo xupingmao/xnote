@@ -689,3 +689,17 @@ class TestMain(BaseTestCase):
         assert note_info != None
         assert note_info.level == 1
     
+    def test_checklist_search(self):
+        delete_note_for_test("checklist-test")
+        note_id = create_note_for_test("list", "checklist-test")
+        from handlers.note.dao_comment import CommentDao, CommentDO
+        comment = CommentDO()
+        comment.type = "list_item"
+        comment.content = "comment content"
+        comment.user_id = xauth.current_user_id()
+        comment.note_id = note_id
+        comment_id = CommentDao.create(comment)
+        
+        self.check_OK(f"/note/checklist/search?note_id={note_id}")
+
+        CommentDao.delete_by_id(comment_id)

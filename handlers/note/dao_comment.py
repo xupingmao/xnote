@@ -36,6 +36,46 @@ class CommentDO(xutils.Storage):
 class CommentDao:
 
     valid_type_set = set(["", None, "list_item"])
+    
+    @classmethod
+    def check(cls, comment):
+        assert comment != None, "comment is None"
+        assert comment.user != None, "comment.user is None"
+        assert comment.type in cls.valid_type_set, "comment.type is invalid"
+        assert comment.note_id != None
+        assert comment.content != None
+        assert comment.content != ""
+    
+    @classmethod
+    def create(cls, comment):
+        assert isinstance(comment, CommentDO)
+        check_comment(comment)
+        comment.ctime = dateutil.format_datetime()
+        index_id = comment_service.create(type=comment.type, user_id=comment.user_id, target_id=int(comment.note_id))
+        _comment_db.update_by_id(str(index_id), comment)
+        xmanager.fire("comment.create", comment)
+        return index_id
+        
+    @classmethod
+    def update(cls, comment):
+        assert comment != None
+        assert comment.user != None
+        assert comment.note_id != None
+        comment.mtime = dateutil.format_datetime()
+
+        _comment_db.update(comment)
+        xmanager.fire("comment.update", comment)
+
+        
+    @classmethod
+    def delete_by_id(cls, comment_id):
+        comment = get_comment(comment_id)
+        if comment != None:
+            _comment_db.delete(comment)
+            xmanager.fire("comment.delete", comment)
+        comment_service.delete_by_id(int(comment_id))
+
+
 
 def list_comments_by_idx_list(idx_list, user_name=""):
     """通过索引查询评论
@@ -90,38 +130,16 @@ def get_comment(comment_id = ""):
 
 
 def check_comment(comment):
-    assert comment != None, "comment is None"
-    assert comment.user != None, "comment.user is None"
-    assert comment.type in CommentDao.valid_type_set, "comment.type is invalid"
-    assert comment.note_id != None
-    assert comment.content != None
-    assert comment.content != ""
+    return CommentDao.check(comment)
 
 def create_comment(comment):
-    assert isinstance(comment, CommentDO)
-    check_comment(comment)
-    comment.ctime = dateutil.format_datetime()
-    index_id = comment_service.create(type=comment.type, user_id=comment.user_id, target_id=int(comment.note_id))
-    _comment_db.update_by_id(str(index_id), comment)
-    xmanager.fire("comment.create", comment)
-
+    return CommentDao.create(comment)
 
 def update_comment(comment):
-    assert comment != None
-    assert comment.user != None
-    assert comment.note_id != None
-    comment.mtime = dateutil.format_datetime()
-
-    _comment_db.update(comment)
-    xmanager.fire("comment.update", comment)
-
+    return CommentDao.update(comment)
 
 def delete_comment(comment_id):
-    comment = get_comment(comment_id)
-    if comment != None:
-        _comment_db.delete(comment)
-        xmanager.fire("comment.delete", comment)
-    comment_service.delete_by_id(int(comment_id))
+    return CommentDao.delete_by_id(comment_id)
 
 def delete_index(comment_id):
     comment_service.delete_by_id(int(comment_id))

@@ -1,5 +1,6 @@
 /**
  * 更新笔记的类目
+ * @deprecated 已废弃
  * @param {object} req 更新请求
  */
 xnote.updateNoteCategory = function(req) {

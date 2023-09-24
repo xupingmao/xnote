@@ -256,10 +256,14 @@ class NoteIndexDao:
         return cls.fix_result(result)
     
     @classmethod
-    def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, is_deleted=0, 
+    def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, type_list=[], is_deleted=0, 
             level=None, date=None, name_like=None, order="id desc"):
         if order=="dtime_asc":
             order = "dtime"
+        if type == "table":
+            type = None
+            type_list = ["csv", "table"]
+        
         date_like = ""
         where = "1=1"
         if creator_id != 0:
@@ -277,8 +281,10 @@ class NoteIndexDao:
             where += " AND ctime LIKE $date_like"
         if name_like != None:
             where += " AND name LIKE $name_like"
+        if len(type_list) > 0:
+            where += " AND type IN $type_list"
         vars = dict(creator_id=creator_id, parent_id=parent_id, type=type, level=level, 
-                    is_deleted=is_deleted, date_like=date_like, name_like=name_like)
+                    is_deleted=is_deleted, date_like=date_like, name_like=name_like, type_list=type_list)
         result = cls.db.select(where=where, vars=vars, offset=offset, limit=limit, order=order)
         return cls.fix_result(result)
     
@@ -290,7 +296,10 @@ class NoteIndexDao:
             yield batch_records
 
     @classmethod
-    def count(cls, creator_id=0, type=None, level=None, is_deleted=0, parent_id=0, is_not_group=False):
+    def count(cls, creator_id=0, type=None, type_list=[], level=None, is_deleted=0, parent_id=0, is_not_group=False):
+        if type == "table":
+            type = None
+            type_list = ["csv", "table"]
         where = "1=1"
         if creator_id != 0:
             where += " AND creator_id=$creator_id"
@@ -304,9 +313,11 @@ class NoteIndexDao:
             where += " AND parent_id = $parent_id"
         if is_not_group:
             where += " AND type != $group_type"
+        if len(type_list)>0:
+            where += " AND type IN $type_list"
         
         vars = dict(creator_id=creator_id, type=type, level=level, is_deleted=is_deleted, 
-        parent_id=parent_id, group_type="group")
+        parent_id=parent_id, group_type="group", type_list=type_list)
         return cls.db.count(where=where, vars=vars)
     
     @classmethod
