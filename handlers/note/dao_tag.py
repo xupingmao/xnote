@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-19 23:52:00
+@LastEditTime : 2023-09-24 18:57:35
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -19,7 +19,7 @@ from xutils import functions
 from xutils import dbutil
 from xutils import attrget, Storage
 from handlers.note.dao_api import NoteDao
-from xnote_core.service_tag import TagBindService, TagTypeEnum
+from xnote.service import TagBindService, TagTypeEnum
 
 tag_bind_db = dbutil.get_table("note_tags")
 tag_meta_db = dbutil.get_table("note_tag_meta")

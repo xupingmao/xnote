@@ -337,7 +337,7 @@ class TestMain(BaseTestCase):
 
         self.assertEqual(note_info.tags, ["ABC", "DEF"])
 
-        from xnote_core.service_tag import TagBindService, TagTypeEnum
+        from xnote.service import TagBindService, TagTypeEnum
         user_info = xauth.current_user()
         assert user_info != None
 

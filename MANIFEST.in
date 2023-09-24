@@ -1,0 +1,12 @@
+recursive-include static * 
+recursive-include lib *
+recursive-include config *
+recursive-include docs *
+recursive-include handlers *
+
+global-exclude htmlcov/*
+global-exclude data/*
+global-exclude *.py[cod]
+global-exclude __pycache__
+
+recursive-exclude data *

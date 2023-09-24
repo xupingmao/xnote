@@ -234,6 +234,7 @@ class HandlerManager:
         self.report_loading = False
         self.report_unload = True
         self.task_manager = CronTaskManager(app)
+
         # stdout装饰器，方便读取print内容
         if not isinstance(sys.stdout, MyStdout):
             sys.stdout = MyStdout(sys.stdout)
@@ -278,8 +279,8 @@ class HandlerManager:
 
         # 重新加载HTTP处理器
         # 先全部卸载，然后全部加载，否则可能导致新的module依赖旧的module
-        self.load_model_dir(xconfig.HANDLERS_DIR, unload=True, mod_name="handlers")
-        self.load_model_dir(xconfig.HANDLERS_DIR, load=True, mod_name="handlers")
+        self.load_model_dir(dirname=xconfig.HANDLERS_DIR, unload=True, mod_name="handlers")
+        self.load_model_dir(dirname=xconfig.HANDLERS_DIR, load=True, mod_name="handlers")
 
         # 重新加载定时任务
         self.load_tasks()
@@ -308,20 +309,18 @@ class HandlerManager:
             mod = getattr(mod, name)
         return mod
 
-    def load_model_dir(self, parent=xconfig.HANDLERS_DIR, unload=False, load=False, mod_name="handlers"):
-        if parent.startswith("./"):
-            parent = parent[2:] 
-        dirname = parent.replace(".", "/")
+    def load_model_dir(self, unload=False, load=False, mod_name="handlers", dirname=""):
         if not os.path.exists(dirname):
             logging.error("model_dir not found:%s", dirname)
             sys.exit(1)
             return
+        
         for filename in os.listdir(dirname):
             filepath = os.path.join(dirname, filename)
             try:
                 if os.path.isdir(filepath):
-                    self.load_model_dir(
-                        parent + "." + filename, unload=unload, load=load, mod_name=mod_name+"."+filename)
+                    subdir = os.path.join(dirname, filepath)
+                    self.load_model_dir(mod_name=mod_name+"."+filename, unload=unload, load=load, dirname=subdir)
                     continue
                 name, ext = os.path.splitext(filename)
                 if os.path.isfile(filepath) and ext == ".py":

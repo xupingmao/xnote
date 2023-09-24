@@ -15,7 +15,7 @@ from xutils import dateutil
 from xutils.db.dbutil_helper import PageBuilder, batch_iter
 from .dao_api import NoteDao
 from . import dao as note_dao
-from xnote_core.service_comment import CommentService
+from xnote.service import CommentService
 
 NOTE_DAO = xutils.DAO("note")
 

@@ -77,3 +77,8 @@ start-cmd.bat
 
 # npm模块
 /static/lib/node_modules/
+
+# pypi构建临时目录
+/build/
+/xnote.egg-info/
+/dist/

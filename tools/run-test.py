@@ -107,7 +107,7 @@ def run_test(args):
 	check_and_install_pkg("lmdb", "lmdb==1.4.1")
 	if os.name != "nt":
 		check_and_install_pkg("leveldb", "leveldb==0.201")
-	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --cov xnote_core --ff" % executable)
+	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --cov xnote --ff" % executable)
 	os.system("%s -m coverage html -i" % executable)
 
 def main():
