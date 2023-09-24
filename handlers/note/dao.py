@@ -247,7 +247,7 @@ class NoteIndexDao:
 
     @classmethod
     def get_by_id_list(cls, id_list=[]):
-        if len(id_list) == None:
+        if len(id_list) == 0:
             return []
         int_list = []
         for id_str in id_list:
