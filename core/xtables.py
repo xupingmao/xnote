@@ -486,7 +486,9 @@ def init_backup_table(tablename, db):
         for args, kw in table_info.indexes:
             manager.add_index(*args, **kw)
 
-    return TableProxy(db, tablename)
+    proxy = TableProxy(db, tablename)
+    proxy.enable_binlog = False
+    return proxy
 
 
 def get_table(table_name, dbpath=None):
