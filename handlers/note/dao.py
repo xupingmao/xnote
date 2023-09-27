@@ -655,6 +655,7 @@ def list_path(file, limit=5):
         file.url = "/note/%s" % file.id
         if len(pathlist) >= limit:
             break
+        
         if str(file.id) == "0":
             break
 
@@ -834,7 +835,7 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     assert is_not_empty(name), "笔记名称不能为空"
 
     if "parent_id" not in note_dict:
-        note_dict["parent_id"] = "0"
+        note_dict["parent_id"] = 0
     if "priority" not in note_dict:
         note_dict["priority"] = 0
     if "data" not in note_dict:

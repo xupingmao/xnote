@@ -36,8 +36,7 @@ NOTE_DAO = xutils.DAO("note")
 def visit_by_id(ctx):
     note_id = ctx.id
     user_name = ctx.user_name
-    with dbutil.get_write_lock(user_name):
-        note_dao.visit_note(user_name, note_id)
+    note_dao.visit_note(user_name, note_id)
 
 
 def check_auth(file, user_name):
@@ -331,7 +330,7 @@ class ViewHandler:
         kw.page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby)
         kw.is_public_page = is_public_page
 
-        if id == "0":
+        if id == 0 or id == "0":
             raise web.found("/")
 
         if skey != None and skey != "":
