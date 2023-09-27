@@ -21,17 +21,18 @@
             {% else %}
             <span class="todo-tag">{{item.tag_text}}</span>
             {% end %}
+            <div class="float-right">
+                {% if item.tag == "task" %}
+                    <button class="btn-default" data-id="{{item.id}}" onclick="onMessageDone(this)">完成</button>
+                {% end %}
+
+                {% if item.tag == "done" %}
+                    <button class="btn-default" data-id="{{item.id}}" onclick="xnote.action.message.reopen(this)">重做</button>
+                {% end %}
+            </div>
         </div>
         <div class="todo-content">{% raw item.html %}</div>
         <div class="todo-foot">
-            {% if item.tag == "task" %}
-            <button class="btn-default" data-id="{{item.id}}" onclick="onMessageDone(this)">完成</button>
-            {% end %}
-
-            {% if item.tag == "done" %}
-                <button class="btn-default" data-id="{{item.id}}" onclick="xnote.action.message.reopen(this)">重做</button>
-            {% end %}
-            
             {% if show_edit_btn %}
             <a class="todo-edit-btn btn btn-default" data-id="{{item.id}}" 
                 onclick="xnote.action.message.edit(this);"
