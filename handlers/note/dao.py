@@ -260,6 +260,9 @@ class NoteIndexDao:
             level=None, date=None, name_like=None, order="id desc"):
         if order=="dtime_asc":
             order = "dtime"
+        if order=="ctime_desc":
+            order = "ctime desc"
+
         if type == "table":
             type = None
             type_list = ["csv", "table"]
@@ -622,6 +625,9 @@ def build_note_info(note, orderby=None):
     
     if orderby == "mtime_desc":
         note.badge_info = format_date(note.mtime)
+
+    if orderby == "ctime_desc":
+        note.badge_info = format_date(note.ctime)
 
     if note.badge_info is None:
         note.badge_info = note.create_date
@@ -1403,6 +1409,7 @@ def list_by_parent(creator="", parent_id=None, offset=0, limit=1000,
     
     # TODO 优化其他筛选条件
     notes = NoteIndexDao.list(parent_id=parent_id_int, offset=offset, limit=limit, creator_id=creator_id)
+    build_note_list_info(notes, orderby=orderby)
     notes = list(filter(filter_note_func, notes))
     if orderby == "db":
         note = get_by_id_creator(parent_id, creator)
