@@ -1,2 +1,2 @@
 six==1.14.0
-mysql-connector==2.2.9
+pymysql==1.02

@@ -74,8 +74,8 @@ def get_default_db_instance():
     return get_db_instance(xconfig.FileConfig.record_db_file)
 
 def get_db_instance(dbpath=""):
-    db_driver = xconfig.DatabaseConfig.db_driver
-    if db_driver == "mysql":
+    db_driver_sql = xconfig.DatabaseConfig.db_driver_sql
+    if db_driver_sql == "mysql":
         if DBPool.mysql_instance == None:
             db_host = xconfig.get_system_config("mysql_host")
             db_name = xconfig.get_system_config("mysql_database")
@@ -545,7 +545,7 @@ def init():
     # 通用的分享记录
     init_share_info_table()
     
-    if xconfig.DatabaseConfig.db_driver == "mysql":
+    if xconfig.DatabaseConfig.db_driver_sql == "mysql":
         init_kv_store_table()
         init_kv_zset_table(get_db_instance())
     

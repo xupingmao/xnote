@@ -152,7 +152,7 @@ def init_kv_engine():
                           max_open_files=max_open_files)
 
         db_instance = None
-        db_driver = xconfig.DatabaseConfig.db_driver
+        db_driver = xconfig.DatabaseConfig.db_driver_kv
 
         if db_driver == "sqlite":
             from xutils.db.driver_sqlite import SqliteKV

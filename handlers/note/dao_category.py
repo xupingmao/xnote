@@ -13,9 +13,6 @@ from xutils import dateutil
 from xutils import dbutil, cacheutil
 import xutils
 
-dbutil.register_table("note_category", "笔记类目", category="note",
-                      check_user=True, user_attr="user_name")
-
 _db = dbutil.get_table("note_category")
 _cat_cache = cacheutil.PrefixedCache("note_category:")
 

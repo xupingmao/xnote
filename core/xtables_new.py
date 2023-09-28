@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-24 12:28:18
+@LastEditTime : 2023-09-28 20:53:05
 @FilePath     : /xnote/core/xtables_new.py
 @Description  : 数据库-表定义
 """
@@ -143,6 +143,10 @@ def init_note_tables():
     db.drop_index("ctime")
     db.rebuild_index("v1")
 
+    # 笔记类目（已删除）
+    db = dbutil.register_table("note_category", "笔记类目", category="note", 
+                               check_user=True, user_attr="user_name")
+    db.delete_table()
 
 def init_message_tables():
     dbutil.register_table("message", "短文本", check_user=True, user_attr="user")

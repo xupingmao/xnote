@@ -61,6 +61,11 @@ class DBInterface:
         """
         raise NotImplementedError("Put")
 
+    def BatchPut(self, kv_dict={}):
+        for key in kv_dict:
+            value = kv_dict.get(key)
+            self.Put(key, value)
+
     def Insert(self, key=b'', value=b'', sync=False):
         key_str = key.decode("utf-8")
         with get_write_lock(key_str):
@@ -82,11 +87,6 @@ class DBInterface:
         for key in keys:
             self.Delete(key)
     
-    def BatchPut(self, kv_dict={}):
-        for key in kv_dict:
-            value = kv_dict.get(key)
-            self.Put(key, value)
-
     def RangeIter(self, 
             key_from = b'', # type: bytes
             key_to = b'',  # type: bytes

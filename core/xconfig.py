@@ -385,9 +385,11 @@ class TemplateConfig:
 
 class DatabaseConfig:
 
-    db_driver="" # sqlite/leveldb/mysql/lmdb
+    db_driver = "" # sqlite/mysql/leveldb/ssdb
     db_driver_cache = "" # memory/redis
     db_driver_sql = "" # sqlite/mysql
+    db_driver_kv = ""  # sqlite/mysql/leveldb/ssdb
+
     user_max_log_size = 500 # 用户日志保留的最大条数
     db_debug = False
     db_log_debug = False
@@ -415,6 +417,7 @@ class DatabaseConfig:
     def init(cls):
         cls.db_driver = SystemConfig.get_str("db_driver")
         cls.db_driver_cache = SystemConfig.get_str("db_driver_cache", "")
+        cls.db_driver_kv = SystemConfig.get_str("db_driver_kv", "")
         cls.mysql_cloud_type = SystemConfig.get_str("mysql_cloud_type")
         cls.mysql_database = SystemConfig.get_str("mysql_database")
         cls.user_max_log_size = SystemConfig.get_int("user_max_log_size", 500)
@@ -435,6 +438,9 @@ class DatabaseConfig:
             cls.db_driver_sql = "mysql"
         else:
             cls.db_driver_sql = "sqlite"
+        
+        if cls.db_driver_kv == "":
+            cls.db_driver_kv = cls.db_driver
 
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
