@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-24 18:57:35
+@LastEditTime : 2023-09-29 18:41:24
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -23,8 +23,6 @@ from xnote.service import TagBindService, TagTypeEnum
 
 tag_bind_db = dbutil.get_table("note_tags")
 tag_meta_db = dbutil.get_table("note_tag_meta")
-# TODO 可以考虑使用 parent_id 代替 tag_meta.tag_type
-
 
 class TagBind(Storage):
     """标签绑定信息"""
@@ -47,6 +45,7 @@ class TagMeta(Storage):
     def __init__(self):
         self.user = ""
         self.tag_name = ""
+        self.tag_code = ""
         self.tag_type = "" # group - 笔记本标签 note-笔记标签 global-全局标签(不分区笔记本还是笔记)
         self.amount = 0
         self.book_id = ""
@@ -116,6 +115,9 @@ class TagMetaDao:
 
     @staticmethod
     def check_tag_type(tag_type):
+        # global包含全部的标签
+        # note是笔记上的标签
+        # TODO group用suggest可能更合适一些
         assert tag_type in ("group", "global", "note")
 
     @staticmethod
@@ -127,7 +129,7 @@ class TagMetaDao:
         tag_meta_db.delete(tag_info)
 
     @staticmethod
-    def create(tag_info: Storage):
+    def create(tag_info: TagMeta):
         assert tag_info.user != ""
         assert tag_info.tag_name != ""
         assert tag_info.tag_type != ""
@@ -179,6 +181,34 @@ class TagMetaDao:
                 tag_info.amount = amount
                 cls.create(tag_info)
 
+    @classmethod
+    def is_empty(cls, value):
+        return value == None or value == ""
+
+    @classmethod
+    def list_meta(cls, user_name, *, limit=1000, tag_type="group", tag_name=None, group_id=None):
+        if tag_type == "note":
+            assert group_id != None, "group_id不能为空"
+        
+        where = {
+            "tag_type": tag_type,
+        }
+
+        if tag_name != None:
+            where["tag_name"] = tag_name
+        if group_id != None:
+            where["group_id"] = str(group_id)
+        
+        result = tag_meta_db.list(
+            limit=limit, where = where, user_name=user_name)
+        
+        for item in result:
+            if cls.is_empty(item.tag_code):
+                item.tag_code = item.tag_name
+
+        result.sort(key=lambda x: x.amount or 0, reverse=True)
+        return result
+
 
 def get_tag_meta_by_name(user_name, tag_name, tag_type="group", group_id=None):
     result = list_tag_meta(
@@ -187,24 +217,7 @@ def get_tag_meta_by_name(user_name, tag_name, tag_type="group", group_id=None):
         return result[0]
     return None
 
-
-def list_tag_meta(user_name, *, limit=1000, tag_type="group", tag_name=None, group_id=None):
-    if tag_type == "note":
-        assert group_id != None, "group_id不能为空"
-    
-    where = {
-        "tag_type": tag_type,
-    }
-
-    if tag_name != None:
-        where["tag_name"] = tag_name
-    if group_id != None:
-        where["group_id"] = str(group_id)
-    
-    result = tag_meta_db.list(
-        limit=limit, where = where, user_name=user_name)
-    result.sort(key=lambda x: x.amount or 0, reverse=True)
-    return result
+list_tag_meta = TagMetaDao.list_meta
 
 
 def count_tag(user_name):
@@ -320,7 +333,7 @@ def list_tag(user):
 
 def get_system_tag_list(tag_list=None):
     result = [
-        Storage(code="$todo$", name="待办", amount=0),
+        TagInfo(code="$todo$", name="待办", amount=0),
     ]
     if tag_list != None:
         tag_count_map = dict()

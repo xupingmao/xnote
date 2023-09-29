@@ -703,3 +703,12 @@ class TestMain(BaseTestCase):
         self.check_OK(f"/note/checklist/search?note_id={note_id}")
 
         CommentDao.delete_by_id(comment_id)
+        
+    def test_note_tag(self):
+        delete_note_for_test("tag-test")
+        create_note_for_test("list", "tag-test", tags="tag1 tag2")
+        
+        dict = self.json_request_return_dict("/note/tag/list?tag_type=note&group_id=1&v=2")
+        assert dict["success"] == True
+        assert len(dict["data"]["all_list"]) > 0
+

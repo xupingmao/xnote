@@ -11,25 +11,12 @@ import xconfig
 import xmanager
 import json
 from xutils import Storage
-from xutils import dbutil
+from xutils import dbutil, webutil
 from xtemplate import T
 from . import dao_tag
 from . import dao as note_dao
 
 tag_db = dbutil.get_table("note_tag_meta")
-
-class TagAjaxHandler:
-
-    @xauth.login_required()
-    def GET(self, id):
-        creator = xauth.current_name()
-        tags = dao_tag.get_tags(creator, id)
-        if tags != None:
-            tags = [Storage(code=code, name=dao_tag.get_name_by_code(code)) for code in tags]
-        if not isinstance(tags, list):
-            tags = []
-        return dict(code="", message="", data=tags)
-
 
 class TagUpdateAjaxHandler:
 
@@ -130,7 +117,7 @@ class CreateTagAjaxHandler:
         if tag_meta != None:
             return dict(code="500", message="标签已经存在,请重新输入")
 
-        tag_db.insert(obj)
+        dao_tag.TagMetaDao.create(obj)
         return dict(code="success")
 
     @xauth.login_required()
@@ -169,17 +156,30 @@ class DeleteTagAjaxHandler:
 
 
 class TagListAjaxHandler:
+    
+    def list_tag_for_note_v2(self, user_name="", group_id=0):
+        suggest_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name, tag_type="note", group_id=group_id)
+        all_list = dao_tag.list_tag(user_name)
+        for tag_info in all_list:
+            tag_info.tag_name = tag_info.name
+            tag_info.tag_code = tag_info.code
+
+        data = Storage(suggest_list=suggest_list, all_list=all_list)
+        return webutil.SuccessResult(data=data)
 
     @xauth.login_required()
     def GET(self):
-        tag_type = xutils.get_argument("tag_type", "")
-        user_name = xauth.current_name()
+        tag_type = xutils.get_argument_str("tag_type", "")
+        user_name = xauth.current_name_str()
         if tag_type == "group":
             data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name)
             return dict(code="success", data = data_list)
         
         if tag_type == "note":
-            group_id = xutils.get_argument("group_id", "")
+            group_id = xutils.get_argument_int("group_id")
+            v = xutils.get_argument_str("v")
+            if v == "2":
+                return self.list_tag_for_note_v2(user_name=user_name, group_id=group_id)
             data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name, tag_type="note", group_id=group_id)
             return dict(code="success", data = data_list)
 
@@ -244,7 +244,6 @@ class BindTagAjaxHandler:
 
 xurls = (
     # ajax
-    r"/note/tag/(\d+)", TagAjaxHandler,
     r"/note/tag/update", TagUpdateAjaxHandler,
     r"/note/tag/create", CreateTagAjaxHandler,
     r"/note/tag/delete", DeleteTagAjaxHandler,

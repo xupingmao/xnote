@@ -115,6 +115,7 @@ xnote.api.note = noteAPI;
 noteAPI.bindTag = function (cmd) {
     var currentTags = cmd.currentTags;
     var tagList = cmd.tagList;
+    var allTagList = cmd.allTagList; // 全部的标签
     var targetId = cmd.targetId;
     
     if (cmd.tagType != "group" && cmd.tagType != "note") {
@@ -124,6 +125,7 @@ noteAPI.bindTag = function (cmd) {
     // 渲染绑定标签的html
     var html = $("#bindTagTemplate").render({
         tagList: tagList,
+        allTagList: allTagList,
         selectedNames: currentTags,
         manageLink: cmd.manageLink,
         globalTagList: [
@@ -180,6 +182,7 @@ NoteView.editNoteTag = function (target) {
     var listParams = {
         tag_type:tagType,
         group_id:parentId,
+        v:2,
     };
 
     xnote.http.get("/note/tag/list", listParams, function (resp) {
@@ -189,7 +192,10 @@ NoteView.editNoteTag = function (target) {
             noteId: noteId,
             manageLink: "/note/manage?parent_id=" + parentId,
         };
-        cmd.tagList = resp.data;
+        // 推荐的标签
+        cmd.tagList = resp.data.suggest_list;
+        // 全部的标签
+        cmd.allTagList = resp.data.all_list;
         // 调用绑定标签组件
         noteAPI.bindTag(cmd);
     })
