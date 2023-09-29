@@ -253,6 +253,14 @@ class NoteIndexDao:
             cls.compat_old(item)
             build_note_info(item)
         return result
+    
+    @classmethod
+    def fix_single_result(cls, result):
+        if result == None:
+            return
+        cls.compat_old(result)
+        build_note_info(result)
+        return result
 
     @classmethod
     def get_by_id_list(cls, id_list=[]):
@@ -343,6 +351,20 @@ class NoteIndexDao:
     @classmethod
     def delete_by_id(cls, note_id=0):
         return cls.db.delete(where=dict(id=note_id))
+    
+    @classmethod
+    def find_prev(cls, creator_id=0, parent_id=0, name=""):
+        where_sql = "creator_id = $creator_id AND parent_id = $parent_id AND name < $name"
+        vars = dict(creator_id=creator_id, parent_id=parent_id, name=name)
+        result = cls.db.select_first(where=where_sql, vars=vars, order="name desc", limit=1)
+        return cls.fix_single_result(result)
+    
+    @classmethod
+    def find_next(cls, creator_id=0, parent_id=0, name=""):
+        where_sql = "creator_id = $creator_id AND parent_id = $parent_id AND name > $name"
+        vars = dict(creator_id=creator_id, parent_id=parent_id, name=name)
+        result = cls.db.select_first(where=where_sql, vars=vars, order="name", limit=1)
+        return cls.fix_single_result(result)
 
 class ShareTypeEnum(enum.Enum):
     note_public = "note_public"
@@ -1232,17 +1254,19 @@ def list_group_with_count(creator=None,
     offset = kw.get("offset", 0)
     limit = kw.get("limit", 1000)
     parent_id = kw.get("parent_id")
-    category = kw.get("category") 
+    category = kw.get("category")
     tags = kw.get("tags")
     search_name = kw.get("search_name")
     count_total = kw.get("count_total", False)
     count_only = kw.get("count_only", False)
-
-    assert creator != None
-    check_group_status(status)
-
     creator_id = kw.get("creator_id", 0)
+
+    if creator == None and creator_id == 0:
+        raise Exception("creator和creator_id不能同时为空")
+    
+    check_group_status(status)
     if creator_id == 0:
+        assert isinstance(creator, str)
         creator_id = xauth.UserDao.get_id_by_name(creator)
 
     q_tags = tags
@@ -1255,6 +1279,9 @@ def list_group_with_count(creator=None,
 
     if q_name != None:
         q_name = q_name.lower()
+    
+    if category == "all":
+        category = None
 
     def filter_group_func(value):
         # print(f"note_id={value.id}, archived={value.archived}")
@@ -1262,9 +1289,6 @@ def list_group_with_count(creator=None,
         if skip_archived and value.archived:
             return False
         
-        if category != None and value.category != category:
-            return False
-
         if q_tags != None:
             if not isinstance(value.tags, list):
                 return False
@@ -1274,6 +1298,9 @@ def list_group_with_count(creator=None,
         if q_name != None:
             if q_name not in value.name.lower():
                 return False
+        
+        if category != None and value.category != category:
+            return False
         
         if status == "archived":
             return value.archived
@@ -1311,11 +1338,20 @@ def list_group_with_count(creator=None,
 
 
 def list_group(*args, **kw):
+    """@deprecated 废弃的方法, 替代方法
+    - list_group_v2
+    - list_group_with_count
+    """
     list, count = list_group_with_count(*args, **kw)
     if kw.get("count_only") == True:
         return count
     if kw.get("count_total") == True:
         return list, count
+    return list
+
+def list_group_v2(*args, **kw):
+    """查询笔记本列表"""
+    list, count = list_group_with_count(*args, **kw)
     return list
 
 @cacheutil.kw_cache_deco(prefix="note.count_group")
@@ -1476,37 +1512,16 @@ def count_dict(user_name):
 
 @xutils.timeit(name="NoteDao.FindPrev", logfile=True)
 def find_prev_note(note, user_name):
-    parent_id = str(note.parent_id)
-    note_name = note.name
-
-    def find_prev_func(key, value):
-        if value.is_deleted:
-            return False
-        return str(value.parent_id) == parent_id and value.name < note_name
-    result = dbutil.prefix_list("note_tiny:%s" % user_name, find_prev_func)
-    result.sort(key=lambda x: x.name, reverse=True)
-    if len(result) > 0:
-        return result[0]
-    else:
-        return None
+    assert isinstance(note, NoteDO)
+    parent_id = int(note.parent_id)
+    return NoteIndexDao.find_prev(creator_id=note.creator_id, name = note.name, parent_id=parent_id)
 
 
 @xutils.timeit(name="NoteDao.FindNext", logfile=True)
 def find_next_note(note, user_name):
-    parent_id = str(note.parent_id)
-    note_name = note.name
-
-    def find_next_func(key, value):
-        if value.is_deleted:
-            return False
-        return str(value.parent_id) == parent_id and value.name > note_name
-    result = dbutil.prefix_list("note_tiny:%s" % user_name, find_next_func)
-    result.sort(key=lambda x: x.name)
-    # print([x.name for x in result])
-    if len(result) > 0:
-        return result[0]
-    else:
-        return None
+    assert isinstance(note, NoteDO)
+    parent_id = int(note.parent_id)
+    return NoteIndexDao.find_next(creator_id=note.creator_id, name = note.name, parent_id=parent_id)
 
 
 def add_history_index(note_id, version, new_note):

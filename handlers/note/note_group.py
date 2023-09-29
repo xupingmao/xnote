@@ -334,23 +334,20 @@ class GroupListHandler:
 class GroupManageHandler:
 
     def handle_root(self, kw):
-        page = xutils.get_argument("page", 1, type=int)
-        orderby = xutils.get_argument("orderby", "default")
+        page = xutils.get_argument_int("page", 1)
+        orderby = xutils.get_argument_str("orderby", "default")
         category_code = xutils.get_argument("note_category", "all")
         q_key = xutils.get_argument("key", "")
-        q_tags_str = xutils.get_argument("tags", "[]")
-
-        assert isinstance(q_tags_str, str)
-        assert isinstance(page, int)
-        assert isinstance(orderby, str)
+        q_tags_str = xutils.get_argument_str("tags", "[]")
 
         q_tags = json.loads(q_tags_str)
 
         assert page > 0
-        limit = 50
+        limit = 1000
         offset = (page-1) * limit
 
         user_name = kw.user_name
+        user_id = kw.get("user_id", 0)
         parent_note = note_dao.get_root()
 
         list_group_kw = Storage()
@@ -359,7 +356,7 @@ class GroupManageHandler:
         list_group_kw.count_total = True
         list_group_kw.category = category_code
 
-        notes, total = note_dao.list_group_with_count(user_name, orderby=orderby, offset=offset,
+        notes, total = note_dao.list_group_with_count(creator_id=user_id, orderby=orderby, offset=offset,
                                            limit=limit, **list_group_kw)
         
         kw.parent_note = parent_note
@@ -388,11 +385,11 @@ class GroupManageHandler:
     @xauth.login_required()
     def GET(self):
         parent_id = xutils.get_argument("parent_id", "0")
-        user_name = xauth.current_name()
-        assert isinstance(user_name, str)
+        user_info = xauth.current_user()
+        assert user_info != None
 
-        xmanager.add_visit_log(user_name, "/note/group_list/edit")
-        kw = Storage(user_name=user_name, parent_id=parent_id)
+        xmanager.add_visit_log(user_info.name, "/note/group_list/edit")
+        kw = Storage(user_name=user_info.name, parent_id=parent_id, user_id=user_info.id)
 
         self.handle_root(kw)
         kw.current = Storage(url="#", name="整理")
