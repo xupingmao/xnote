@@ -106,18 +106,20 @@ def do_wrap_handler(pattern, handler_clz):
             start_time = time.time()
             WrappedHandler.visited_count += 1.0
             handler_local.handler_class = self.target
-            result = wrap_result(self.target.GET(*args), start_time)
-            handler_local.handler_class = None
-            return result
+            try:
+                return wrap_result(self.target.GET(*args), start_time)
+            finally:
+                handler_local.handler_class = None
 
         def POST(self, *args):
             """常用于提交HTML FORM表单、新增资源等"""
             xnote_trace.start_trace()
             WrappedHandler.visited_count += 1.0
             handler_local.handler_class = self.target
-            result = wrap_result(self.target.POST(*args))
-            handler_local.handler_class = None
-            return result
+            try:
+                return wrap_result(self.target.POST(*args))
+            finally:
+                handler_local.handler_class = None
 
         def HEAD(self, *args):
             return wrap_result(self.target.HEAD(*args))

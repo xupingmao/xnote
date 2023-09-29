@@ -231,8 +231,7 @@ class TestMain(BaseTestCase):
 
     def test_note_editor_md(self):
         group_id = get_default_group_id()
-
-        json_request("/note/remove?name=xnote-md-test")
+        delete_note_for_test("xnote-md-test")
         
         file = json_request("/note/add", method="POST",
             data=dict(name="xnote-md-test", type="md", content="hello markdown", parent_id = group_id))
@@ -248,7 +247,7 @@ class TestMain(BaseTestCase):
         json_request("/note/remove?id=%s" % id)
 
     def test_note_editor_html(self):
-        json_request("/note/remove?name=xnote-html-test")
+        delete_note_for_test("xnote-html-test")
 
         id = create_note_for_test("html", "xnote-html-test", content = "test")
         note_info = NoteDao.get_by_id(id)
