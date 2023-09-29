@@ -56,7 +56,7 @@ class Holder(threading.local):
 
 class SqliteKV(interfaces.DBInterface):
 
-    _lock = threading.RLock()
+    _lock = interfaces.get_write_lock()
     
     sql_logger = interfaces.SqlLoggerInterface()
 

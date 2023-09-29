@@ -54,7 +54,7 @@ def _update_log(user_name, note, increment = 1, insert_only = False):
     note_id = note.id
     atime = dateutil.format_datetime()
     db = UserNoteLogDao.db
-
+    
     with dbutil.get_write_lock(user_name):
         log = db.get_by_id(note_id, user_name = user_name)
         
@@ -235,6 +235,5 @@ xutils.register_func("note.add_edit_log", add_edit_log)
 xutils.register_func("note.add_visit_log", add_visit_log)
 xutils.register_func("note.add_create_log", add_create_log)
 xutils.register_func("note.delete_visit_log", delete_visit_log)
-xutils.register_func("note._update_log", _update_log)
 
 NoteDao.delete_visit_log = delete_visit_log

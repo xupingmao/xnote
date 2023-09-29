@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-09 17:23:33
+@LastEditTime : 2023-09-29 15:23:19
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -674,26 +674,6 @@ class TaskListHandler:
     @classmethod
     def get_task_by_keyword_page(cls, filter_key):
         return cls.get_task_create_page()
-    
-        user_name = xauth.current_name()
-        kw = cls.get_task_kw()
-        kw.message_tag = "task"
-        kw.show_system_tag = False
-        kw.show_sub_link = False
-        kw.show_input_box = True
-        kw.side_tag_tab_key = "filterKey"
-
-        if filter_key != "$no_tag":
-            kw.show_keyword_info = True
-
-        kw.is_keyword_marked = is_marked_keyword(user_name, filter_key)
-        kw.keyword = filter_key
-        kw.side_tags = list_task_tags(user_name)
-
-        if not is_system_tag(filter_key):
-            kw.default_content = filter_key
-
-        return xtemplate.render("message/page/message_list_view.html", **kw)
 
 
 class MessageListHandler:

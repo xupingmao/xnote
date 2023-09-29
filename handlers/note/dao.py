@@ -204,6 +204,15 @@ class NoteIndexDao:
         return cls.db.update(where=dict(id=note_id), **index_do)
 
     @classmethod
+    def update_visit_cnt(cls, note_id=0, user_id=0, visit_cnt=0):
+        # TODO 待定中: visit_cnt是记录所有的访问量还是当前用户的访问量
+        return cls.db.update(where=dict(id=note_id, user_id=user_id), visit_cnt=visit_cnt)
+    
+    @classmethod
+    def incr_visit_cnt(cls, note_id=0):
+        return cls.db.update(where=dict(id=note_id), visit_cnt=SQLLiteral("visit_cnt+1"))
+
+    @classmethod
     def update_level(cls, note_id=0, level=0):
         return cls.db.update(where=dict(id=note_id), level=level, mtime=xutils.format_datetime())
 
@@ -716,7 +725,8 @@ def get_by_id(id, include_full=True, creator=None):
         note.size = note_index.size
         note.tags = note_index.tags
         note.parent_id = note_index.parent_id
-        note.visited_cnt = note_index.visited_cnt
+        note.visited_cnt = note_index.visit_cnt
+        note.visit_cnt = note_index.visit_cnt
         note.hot_index = note_index.hot_index
         note.children_count = note_index.children_count
         note.path = note_index.path
@@ -1157,6 +1167,7 @@ def visit_note(user_name, id):
 
     # TODO 延迟更新索引
     # update_index(note)
+    NoteIndexDao.incr_visit_cnt(note.id)
 
 def visit_public(note_id):
     ShareInfoDao.incr_visit_cnt(target_id=note_id)

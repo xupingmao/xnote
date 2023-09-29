@@ -38,8 +38,6 @@ from .node_follower import Follower
 from .node_leader import Leader
 from . import system_sync_indexer
 
-LOCK = threading.Lock()
-
 dbutil.register_table("cluster_config", "集群配置")
 CONFIG = dbutil.get_hash_table("cluster_config")
 

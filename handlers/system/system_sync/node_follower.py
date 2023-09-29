@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-23 12:38:26
+@LastEditTime : 2023-09-29 15:20:53
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -324,6 +324,7 @@ class DBSyncer:
         CONFIG.put("follower_db_sync_state", state)
     
     def get_db_last_key(self):
+        # type: () -> str
         # 全量同步使用，按照key进行遍历
         value = CONFIG.get("follower_db_last_key", "")
         assert isinstance(value, six.string_types)
@@ -382,12 +383,12 @@ class DBSyncer:
         steps = 0
         while steps < self.FULL_SYNC_MAX_LOOPS:
             last_key = self.get_db_last_key()
-            count = self._sync_db_full_step(proxy, last_key)
+            count = self.sync_db_full_step(proxy, last_key)
             if count == 0:
                 break
             steps+=1
 
-    def _sync_db_full_step(self, proxy, last_key):
+    def sync_db_full_step(self, proxy, last_key):
         # type: (HttpClient, str) -> int
         result = proxy.list_db(last_key)
 
@@ -396,7 +397,7 @@ class DBSyncer:
 
         result_obj = textutil.parse_json(result)
         assert isinstance(result_obj, dict)
-        count = self._sync_db_full_step_work(result_obj, last_key)
+        count = self.sync_db_by_result(result_obj, last_key)
         return count
 
     @log_mem_info_deco("sync_by_binlog")
@@ -509,7 +510,7 @@ class DBSyncer:
             else:
                 table.update(where=where, **value)
 
-    def _sync_db_full_step_work(self, result_obj: dict, last_key):
+    def sync_db_by_result(self, result_obj: dict, last_key):
         # type: (dict, str) -> int
         code = result_obj.get("code")
         count = 0

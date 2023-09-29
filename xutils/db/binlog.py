@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-04 19:55:32
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-23 12:13:05
+@LastEditTime : 2023-09-29 15:31:55
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
@@ -141,17 +141,17 @@ class BinLog:
         if not self._is_enabled:
             return
 
-        with self._lock:
-            new_id = self.id_gen.create_increment_id_int()
-            binlog_id = self._pack_id(new_id)
-            binlog_body = dict(optype=optype, key=key)
-            if self.record_old_value and old_value != None:
-                binlog_body["old_value"] = old_value
-            if record_value and value != None:
-                binlog_body["value"] = value
-            if table_name != None:
-                binlog_body["table_name"] = table_name
-            self._put_log(binlog_id, binlog_body, batch=batch)
+        # 获取自增ID操作是并发安全的, 所以这里不需要加锁, 加锁过多不仅会导致性能下降, 还可能引发死锁问题
+        new_id = self.id_gen.create_increment_id_int()
+        binlog_id = self._pack_id(new_id)
+        binlog_body = dict(optype=optype, key=key)
+        if self.record_old_value and old_value != None:
+            binlog_body["old_value"] = old_value
+        if record_value and value != None:
+            binlog_body["value"] = value
+        if table_name != None:
+            binlog_body["table_name"] = table_name
+        self._put_log(binlog_id, binlog_body, batch=batch)
 
     def list(self, last_seq=0, limit=10, map_func=None):
         """从last_seq开始查询limit个binlog"""

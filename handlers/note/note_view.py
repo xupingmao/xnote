@@ -32,7 +32,7 @@ PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
 
 
-@xmanager.listen("note.view")
+@xmanager.listen("note.view", is_async=False)
 def visit_by_id(ctx):
     note_id = ctx.id
     user_name = ctx.user_name
