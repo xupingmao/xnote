@@ -43,11 +43,6 @@ class NoteException(Exception):
         self.code = code
         self.message = message
 
-@xmanager.listen(["note.add", "note.updated", "note.rename", "note.remove"])
-def update_note_cache(ctx):
-    type = ctx.get("type", "")
-    cacheutil.prefix_del("[%s]note" % xauth.get_current_name())
-
 def get_heading_by_type(type):
     title = u"创建" + NOTE_TYPE_DICT.get(type, u"笔记")
     return T(title)
