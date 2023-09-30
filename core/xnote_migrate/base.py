@@ -60,6 +60,12 @@ def execute_upgrade(key = "", fn = lambda:None):
     fn()
     mark_upgrade_done(key)
 
+def move_upgrade_key(old_key="", new_key=""):
+    """迁移升级的key,用于统一规范"""
+    if is_upgrade_done(old_key):
+        mark_upgrade_done(new_key)
+        delete_old_flag(old_key)
+
 def add_failed_log(table_name="", record=None, reason=""):
     failed_obj = MigradeFailedDO()
     failed_obj.table_name = table_name

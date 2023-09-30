@@ -11,6 +11,7 @@ from xutils.db.dbutil_helper import new_from_dict
 from handlers.message.dao import MsgIndex
 
 def do_upgrade():
+    # since 2.9.5
     base.execute_upgrade("20230826_msg_index", migrate_msg_index)
 
 class MsgInfoV1(Storage):

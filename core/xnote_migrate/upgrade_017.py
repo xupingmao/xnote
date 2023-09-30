@@ -1,7 +1,9 @@
 import xtables
 import xutils
 import xauth
+import xconfig
 import logging
+import os
 import handlers.note.dao as note_dao
 
 from . import base
@@ -10,11 +12,12 @@ from xutils import dbutil, dateutil
 from xutils.db.dbutil_helper import new_from_dict
 
 def do_upgrade():
+    # since v2.9.5
     handler = MigrateHandler()
     base.execute_upgrade("20230916_note_index", handler.migrate_note_index)
     base.execute_upgrade("20230917_note_share", handler.migrate_note_share)
     base.execute_upgrade("20230923_fix_creator_id", handler.fix_creator_id)
-
+    base.execute_upgrade("20230930_fix_gallery", handler.fix_gallery)
 
 
 class KvNoteIndexDO(Storage):
@@ -208,3 +211,19 @@ class MigrateHandler:
                 print(f"fix note_index, note_id={item.id}")
                 self.note_index_db.update(where=dict(id=item.id), creator_id=user_id)
 
+
+    def fix_gallery(self):
+        for user_info in xauth.iter_user(limit=-1):
+            gallery_dir = xconfig.FileConfig.get_gallery_dir_by_user(user_info.name)
+            if not os.path.exists(gallery_dir):
+                continue
+            for suffix_dir in os.listdir(gallery_dir):
+                dirname = os.path.join(gallery_dir, suffix_dir)
+                for note_id in os.listdir(dirname):
+                    if note_id[0] == "0":
+                        # 去掉0开始的文件夹
+                        new_note_id = note_id.lstrip("0")
+                        old_path = os.path.join(dirname, note_id)
+                        new_path = os.path.join(dirname, new_note_id)
+                        print(f"rename {old_path} -> {new_path}")
+                        os.rename(old_path, new_path)

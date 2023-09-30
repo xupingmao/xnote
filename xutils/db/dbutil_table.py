@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-24 18:30:46
+@LastEditTime : 2023-10-01 00:03:59
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -292,7 +292,7 @@ class LdbTable:
 
         return batch_result
 
-    def insert(self, obj, id_type="auto_increment", id_value=None):
+    def insert(self, obj, id_type="auto_increment", id_value=None, max_retry=10):
         """插入新数据
         @param {object} obj 插入的对象
         @param {string} id_type id类型
@@ -300,9 +300,7 @@ class LdbTable:
         self._check_value(obj)
 
         if id_value != None:
-            try_times = 1
-        else:
-            try_times = 10
+            max_retry = 1
 
         user_name = None
         if self._need_check_user:
@@ -311,7 +309,7 @@ class LdbTable:
         new_id = "1"
         with get_write_lock(self.table_name):
             # TODO 优化加锁逻辑
-            for i in range(try_times):
+            for i in range(max_retry):
                 new_id = self.id_gen.create_new_id(id_type, id_value)
                 key = self._build_key_with_user(new_id, user_name=user_name)
                 conflict = self.get_by_key(key)

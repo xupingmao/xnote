@@ -216,6 +216,7 @@ class FileConfig:
     backup_dir = ""
     backup_db_dir = ""
     db_dir = ""
+    files_dir = ""
 
     boot_lock_file = "" # 启动的锁文件
     record_db_file = "" # 默认的sqlite数据库
@@ -237,6 +238,9 @@ class FileConfig:
         data_dir = os.path.abspath(data_dir)
         cls.data_dir = os.path.abspath(data_dir)
         makedirs(cls.data_dir)
+
+        cls.files_dir = os.path.join(data_dir, "files")
+        makedirs(cls.files_dir)
 
         cls.db_dir = os.path.join(data_dir, "db")
         
@@ -273,6 +277,11 @@ class FileConfig:
             dbname += ".db"
         return os.path.join(cls.backup_db_dir, dbname)
 
+    @classmethod
+    def get_gallery_dir_by_user(cls, user_name=""):
+        assert isinstance(user_name, str)
+        assert len(user_name) > 0
+        return os.path.join(cls.files_dir, user_name, "gallery")
 
 class WebConfig:
 

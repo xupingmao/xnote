@@ -9,21 +9,35 @@
 import xutils
 from xutils import dbutil
 from xutils import dateutil
-from . import base as UPGRADE
-
-NOTE_DAO = xutils.DAO("note")
+from . import base
 
 def log_info(fmt, *args):
     print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
 
+class NoteIndex(xutils.Storage):
+    def __init__(self, **kw):
+        self.id = 0
+        self.is_public = False
+        self.is_deleted = False
+        self.share_time = None
+        self.hot_index = None # type: int|None
+        self.update(kw)
+
 def do_upgrade():
     """升级入口"""
-    if UPGRADE.is_upgrade_done("upgrade_002"):
-        log_info("upgrade_002 done")
-        return
+    old_flag = "upgrade_002"
+    new_flag = "20220101_public_note"
 
+    base.move_upgrade_key(old_key=old_flag, new_key=new_flag)
+    base.execute_upgrade(new_flag, fix_note_public)
+
+
+def fix_note_public():
     db = dbutil.get_table("note_index")
-    for note in db.iter(limit = -1):
+    public_db = dbutil.get_table("note_public")
+    for item in db.iter(limit = -1):
+        note = NoteIndex(**item)
+        note_id = note.id
         if note.is_deleted:
             continue
         if note.is_public:
@@ -32,6 +46,4 @@ def do_upgrade():
                 note.share_time = note.ctime
             if note.hot_index is None:
                 note.hot_index = 1
-            NOTE_DAO.update_public_index(note)
-            
-    UPGRADE.mark_upgrade_done("upgrade_002")
+            public_db.put_by_id(note_id, note)

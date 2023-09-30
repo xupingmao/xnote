@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-23 11:54:33
+@LastEditTime : 2023-09-30 23:43:38
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -531,10 +531,10 @@ class MySQLKV(interfaces.DBInterface):
                 log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
     
-    def Increase(self, key=b'', increment=1, start_id=1):
+    def Increase(self, key=b'', increment=1, start_id=1, max_retry=10):
         """自增方法"""
         assert len(key) > 0, "key can not be empty"
-        for retry in range(10):
+        for retry in range(max_retry):
             value, version = self.get_with_version(key)
             if value == None:
                 value_int = start_id

@@ -57,7 +57,7 @@ def get_user_config_db(name):
 
 class UserDO(xutils.Storage):
 
-    def __init__(self):
+    def __init__(self, **kw):
         self.id = 0
         self.name = ""
         self.password = ""
@@ -68,6 +68,7 @@ class UserDO(xutils.Storage):
         self.login_time = ""
         self.salt = ""
         self.mobile = ""
+        self.update(kw)
 
     @classmethod
     def from_dict(cls, dict_value):
@@ -332,10 +333,10 @@ def iter_user(limit=20):
     if limit < 0:
         for batch in db.iter_batch():
             for item in batch:
-                yield item
+                yield UserDO(**item)
     else:
         for user_info in db.select(limit=limit):
-            yield user_info
+            yield UserDO(**user_info)
 
 
 def count_user():

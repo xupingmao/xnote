@@ -7,19 +7,20 @@
 """note_public索引重建"""
 
 from xutils import dbutil
-from .base import log_info, is_upgrade_done, mark_upgrade_done
+from . import base
+
 
 def do_upgrade():
-    if is_upgrade_done("upgrade_004.2"):
-        log_info("upgrade_004 done")
-        return
+    mark_key = "upgrade_004.2"
+    new_key = "20220108_fix_share_time"
+    base.move_upgrade_key(old_key=mark_key, new_key=new_key)
+    base.execute_upgrade(new_key, fix_share_time)
 
+def fix_share_time():
     db = dbutil.get_table("note_public")
     for value in db.iter(limit = -1):
         if value.share_time is None:
             value.share_time = value.ctime
             db.update(value)
         db.rebuild_single_index(value)
-
-    mark_upgrade_done("upgrade_004.2")
 

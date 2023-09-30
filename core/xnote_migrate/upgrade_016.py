@@ -9,6 +9,7 @@ from xutils import dbutil, dateutil
 from xutils.db.dbutil_helper import new_from_dict
 
 def do_upgrade():
+    # since 2.9.5
     base.execute_upgrade("20230910_comment_index", migrate_comment_index)
 
 

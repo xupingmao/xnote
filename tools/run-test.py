@@ -121,7 +121,8 @@ def main():
 	parser.add_argument("--mysql_database", default="test")
 	args = parser.parse_args()
 
-	args.skip_mysql_test = (args.run_mysql_test == "False")
+	args.skip_mysql_test = (args.run_mysql_test.lower() == "false")
+	print(f"option: run_mysql_test={args.run_mysql_test}")
 
 	do_clean()
 

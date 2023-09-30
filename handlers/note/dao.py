@@ -77,6 +77,12 @@ NOTE_ICON_DICT = {
     "form": "fa-table",  # 开发中
 }
 
+class NoteLevelEnum(enum.Enum):
+    """笔记等级"""
+    archived = -1 # 归档
+    normal = 0 # 普通
+    sticky = 1 # 置顶
+
 class NoteIndexDO(Storage):
     def __init__(self):
         self.id = 0
@@ -1023,17 +1029,6 @@ def update_index(note):
         return
     NoteIndexDao.update(note)
 
-def update_public_index(note):
-    db = get_note_public_table()
-    note_id = format_note_id(note.id)
-
-    if note.is_public:
-        note_index = convert_to_index(note)
-        db.update_by_id(note_id, note_index)
-    else:
-        db.delete_by_id(note_id)
-
-
 def update_note(note_id, **kw):
     # 这里只更新基本字段，移动笔记使用 move_note
     logging.info("update_note, note_id=%s, kw=%s", note_id, kw)
@@ -1707,13 +1702,6 @@ def list_archived(creator, offset=0, limit=100):
     sort_notes(notes)
     return notes
 
-
-def list_by_func(creator, list_func, offset, limit):
-    notes = _tiny_db.list(user_name=creator, filter_func=list_func,
-                          offset=offset, limit=limit, reverse=True)
-    build_note_list_info(notes)
-    return notes
-
 class SearchHistory(Storage):
 
     def __init__(self) -> None:
@@ -1738,7 +1726,7 @@ def add_search_history(user, search_key: str, category="default", cost_time=0.0)
     value.category = category
     value.cost_time = cost_time
 
-    return _search_history_db.insert(value)
+    return _search_history_db.insert(value, max_retry=100)
 
 
 def list_search_history(user, limit=1000, orderby="time_desc"):
@@ -1912,7 +1900,6 @@ xutils.register_func("note.create_token", create_token)
 
 # 内部更新索引的接口，外部不要使用
 xutils.register_func("note.update_index", update_index)
-xutils.register_func("note.update_public_index", update_public_index)
 
 # query functions
 xutils.register_func("note.get_root", get_root)
@@ -1940,7 +1927,6 @@ xutils.register_func("note.list_removed", list_removed)
 xutils.register_func("note.list_sticky",  list_sticky)
 xutils.register_func("note.list_archived", list_archived)
 xutils.register_func("note.list_public", list_public)
-xutils.register_func("note.list_by_func", list_by_func)
 
 # count functions
 xutils.register_func("note.count_public", count_public)
