@@ -3,6 +3,7 @@ services:
  server:
      build:
        context: .
+    #image: docker.io/donjuanplatinum/xnote:latest   
      container_name: xnote
      volumes:
        - ./data:/xnote/data
