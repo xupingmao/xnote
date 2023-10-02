@@ -124,11 +124,15 @@ def format_weekday(date_str, fmt = "") -> str:
 format_wday = format_weekday
 
 def datetime_to_weekday(datetime_obj):
+    """把datetime转换成星期"""
     if isinstance(datetime_obj, datetime.datetime):
         weekday = str(datetime_obj.weekday()+1)
         return WDAY_DICT.get(weekday, "")
     if isinstance(datetime_obj, str):
-        date_str = datetime_obj.split()[0]
+        parts = datetime_obj.split()
+        if len(parts) == 0:
+            return ""
+        date_str = parts[0]
         return format_weekday(date_str)
     raise Exception("unsupported type: %r" % type(datetime_obj))
 
