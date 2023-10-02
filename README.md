@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 [![Coverage Status](https://coveralls.io/repos/github/xupingmao/xnote/badge.svg?branch=master)](https://coveralls.io/github/xupingmao/xnote?branch=master)
-
+[![Docker Image](https://img.shields.io/docker/pulls/donjuanplatinum/xnote)]
 xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据管理功能，致力于把个人从信息过载中解放出来。它主要有如下特性
 
 - 拥有丰富的数据管理能力，支持多种笔记格式以及文件管理功能
