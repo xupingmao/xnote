@@ -5,21 +5,18 @@
 # @filename upgrade_005.py
 
 import logging
-
 import xutils
+import handlers.note.dao as note_dao
 from xutils import dbutil
-from .base import is_upgrade_done, mark_upgrade_done
-from handlers.note.dao import update_children_count
+from . import base
 
 def do_upgrade():
-    if is_upgrade_done("upgrade_006"):
-        logging.info("upgrade_006 done")
-        return
-    
+    base.execute_upgrade("upgrade_006", fix_children_count)
+
+def fix_children_count():
     db = dbutil.get_table("notebook")
     
     for item in db.iter(limit=-1):
-        update_children_count(item.id)
+        note_dao.update_children_count(item.id)
 
-    mark_upgrade_done("upgrade_006")
 

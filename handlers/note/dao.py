@@ -84,7 +84,7 @@ class NoteLevelEnum(enum.Enum):
     sticky = 1 # 置顶
 
 class NoteIndexDO(Storage):
-    def __init__(self):
+    def __init__(self, **kw):
         self.id = 0
         self.name = ""
         self.creator = ""
@@ -101,6 +101,7 @@ class NoteIndexDO(Storage):
         self.level = 1 # 等级 (-1)-归档 0-正常, 1-置顶
         self.tag_str = ""
         self.visit_cnt = 0
+        self.update(kw)
 
     @staticmethod
     def from_dict(dict_value):
@@ -234,6 +235,7 @@ class NoteIndexDao:
     def get_by_name(cls, creator_id=0, name=""):
         result = cls.db.select_first(where=dict(creator_id=creator_id, name=name))
         if result != None:
+            result = NoteIndexDO(**result)
             cls.compat_old(result)
         return result
 
@@ -1518,9 +1520,16 @@ def find_next_note(note, user_name):
     parent_id = int(note.parent_id)
     return NoteIndexDao.find_next(creator_id=note.creator_id, name = note.name, parent_id=parent_id)
 
+class NoteHistoryIndexDO(xutils.Storage):
+    def __init__(self, **kw):
+        self.note_id = 0
+        self.name = ""
+        self.version = 0
+        self.mtime = DEFAULT_DATETIME
+        self.update(kw)
 
 def add_history_index(note_id, version, new_note):
-    brief = Storage()
+    brief = NoteHistoryIndexDO()
     brief.note_id = note_id
     brief.name = new_note.get("name")
     brief.version = version

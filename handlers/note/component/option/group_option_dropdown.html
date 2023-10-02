@@ -3,17 +3,17 @@
   <div class="dropdown-content">
     <a class="dropdown-option" href="{{_server_home}}/note/stick?id={{file.id}}">
         置顶
-        {% if file.priority == 1 %}<i class="fa fa-check"></i>{% end %}
+        {% if file.level == 1 %}<i class="fa fa-check"></i>{% end %}
     </a>
 
     <a class="dropdown-option" href="{{_server_home}}/note/reset?id={{file.id}}">
         普通
-        {% if file.priority == 0 %}<i class="fa fa-check"></i>{% end %}
+        {% if file.level == 0 %}<i class="fa fa-check"></i>{% end %}
     </a>
 
     <a class="dropdown-option link" href="{{_server_home}}/note/archive?id={{file.id}}">
         归档
-        {% if file.priority == -1 %}
+        {% if file.level == -1 %}
             <i class="fa fa-check"></i>
         {% end %}
     </a>

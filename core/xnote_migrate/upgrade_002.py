@@ -11,6 +11,14 @@ from xutils import dbutil
 from xutils import dateutil
 from . import base
 
+def do_upgrade():
+    """升级入口"""
+    old_flag = "upgrade_002"
+    new_flag = "20220101_public_note"
+
+    base.move_upgrade_key(old_key=old_flag, new_key=new_flag)
+    base.execute_upgrade(new_flag, fix_note_public)
+
 def log_info(fmt, *args):
     print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
 
@@ -22,14 +30,6 @@ class NoteIndex(xutils.Storage):
         self.share_time = None
         self.hot_index = None # type: int|None
         self.update(kw)
-
-def do_upgrade():
-    """升级入口"""
-    old_flag = "upgrade_002"
-    new_flag = "20220101_public_note"
-
-    base.move_upgrade_key(old_key=old_flag, new_key=new_flag)
-    base.execute_upgrade(new_flag, fix_note_public)
 
 
 def fix_note_public():
