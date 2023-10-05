@@ -99,6 +99,10 @@ class SqliteKV(interfaces.DBInterface):
         """PEP 249要求 Python 数据库驱动程序默认以手动提交模式运行"""
         pass
 
+    def log_sql(self, sql="", vars=None, prefix=""):
+        if self.sql_logger:
+            raw_sql = self.db.query(sql, vars=vars, _test=True)
+            self.sql_logger.append(f"{prefix} {raw_sql}")
 
     @log_mem_info_deco("db.Get")
     def Get(self, key):
@@ -106,9 +110,7 @@ class SqliteKV(interfaces.DBInterface):
         vars = dict(key=key)
         r_iter = self.db.query(sql, vars=vars)
         result = list(r_iter)
-        if self.debug:
-            raw_sql = self.db.query(sql, vars=vars, _test=True)
-            self.sql_logger.append(f"[Get] {raw_sql}")
+        self.log_sql(sql, vars=vars, prefix="[Get]")
         if len(result) > 0:
             return result[0].value
         return None
@@ -164,7 +166,9 @@ class SqliteKV(interfaces.DBInterface):
                     sql = "UPDATE kv_store SET value = $value WHERE `key` = $key;"
                 else:
                     sql = "INSERT INTO kv_store (`key`, value) VALUES ($key,$value);"
-                self.db.query(sql, vars=dict(key=key, value=value))
+                vars = dict(key=key, value=value)
+                self.db.query(sql, vars=vars)
+                self.log_sql(sql, vars=vars, prefix="[Put]")
             except Exception as e:
                 raise e
 

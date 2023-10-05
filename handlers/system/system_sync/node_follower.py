@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-29 15:20:53
+@LastEditTime : 2023-10-05 17:29:42
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -307,6 +307,9 @@ class DBSyncer:
             return dbutil.get_table(table_name)
         return None
     
+    def get_table_name_by_key(self, key):
+        return key.split(":")[0]
+    
     def get_binlog_last_seq(self):
         value = CONFIG.get("follower_binlog_last_seq", 0)
         if isinstance(value, int):
@@ -338,8 +341,17 @@ class DBSyncer:
         assert value != None
         done = False
         try:
-            table = self.get_table_by_key(key)
-            if table != None:
+            table_name = self.get_table_name_by_key(key)
+            table_info = dbutil.get_table_info(table_name)
+            if table_info == None:
+                logging.warning("table not exists: %s", table_name)
+                return
+            
+            if table_info.type == "hash":
+                dbutil.put(key, value)
+                done = True
+            else:
+                table = dbutil.get_table(table_name)
                 table.update_by_key(key, value)
                 done = True
         except:

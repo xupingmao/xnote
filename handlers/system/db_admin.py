@@ -368,7 +368,7 @@ class DatabaseDriverInfoHandler:
                 result += " (full)"
         return "\n\n%s: %s" % (pragma, result)
     
-    def get_mysql_variable(self, db: web.db.DB, var_name):
+    def get_mysql_variable(self, db: web.db.DB, var_name, format_size=False):
         # TODO 可以一次性取出所有的变量
         if not hasattr(self, "mysql_vars"):
             self.mysql_vars = {}
@@ -378,6 +378,9 @@ class DatabaseDriverInfoHandler:
                 self.mysql_vars[key] = value
                 
         result = self.mysql_vars.get(var_name)
+        if format_size:
+            value_int = int(result)
+            result += f" ({xutils.format_size(value_int)})"
         return "\n\n%s: %s" % (var_name, result)
     
     def get_sql_driver_info_text(self):
@@ -391,13 +394,14 @@ class DatabaseDriverInfoHandler:
     def get_mysql_info(self):
         db = xtables.get_default_db_instance()
         info = ""
-        info += self.get_mysql_variable(db, "key_buffer_size")
+        info += self.get_mysql_variable(db, "key_buffer_size", format_size=True)
         info += self.get_mysql_variable(db, "table_open_cache")
-        info += self.get_mysql_variable(db, "sort_buffer_size")
-        info += self.get_mysql_variable(db, "read_buffer_size")
+        info += self.get_mysql_variable(db, "sort_buffer_size", format_size=True)
+        info += self.get_mysql_variable(db, "read_buffer_size", format_size=True)
         info += self.get_mysql_variable(db, "open_files_limit")
-        info += self.get_mysql_variable(db, "innodb_buffer_pool_size")
+        info += self.get_mysql_variable(db, "innodb_buffer_pool_size", format_size=True)
         info += self.get_mysql_variable(db, "sync_binlog")
+        info += self.get_mysql_variable(db, "max_allowed_packet", format_size=True)
         return info
     
     def get_sqlite_info(self, db):

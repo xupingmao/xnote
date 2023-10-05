@@ -92,7 +92,7 @@ def init_note_tables():
                           category="note", user_attr="user")
     dbutil.register_table("note_tag_meta", "笔记标签",
                           category="note", user_attr="user")
-    dbutil.register_table("note_draft", "笔记草稿", category="note")
+    dbutil.register_table("note_draft", "笔记草稿", category="note", type="hash")
     dbutil.register_table("note_lock", "笔记编辑锁", category="note")
     dbutil.register_table("note_full", "笔记的完整信息", category="note")
 

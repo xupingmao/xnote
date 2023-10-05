@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-30 23:43:38
+@LastEditTime : 2023-10-05 16:34:33
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -167,6 +167,7 @@ class MySQLKV(interfaces.DBInterface):
     holder = Holder()
     lock = threading.RLock()
     max_value_length = 1024 * 1024 * 5 # 5MB
+    long_value_length = 1024 * 10 # 10K
 
     def __init__(self, *, host=None, port=3306, user=None,
                  password=None, database=None, pool_size=5, 
@@ -290,7 +291,7 @@ class MySQLKV(interfaces.DBInterface):
                 log_info = sql_info + " [%.2fms]" % (cost_time*1000)
                 self.sql_logger.append(log_info)
     
-    def log_sql(self, sql, vars, start_time, key):
+    def log_sql(self, sql, vars, start_time=0.0, key=None):
         if self.debug:
             sql_query = self.db.query(sql, vars=vars, _test=True)
             logging.debug("SQL:%s", sql_query)
@@ -301,11 +302,24 @@ class MySQLKV(interfaces.DBInterface):
             log_info = str(sql_query) + " [%.2fms]" % (cost_time*1000)
             self.sql_logger.append(log_info)
 
+    def put_long_value(self, key, value, sync=False, cursor=None):
+        vars = dict(key=key, value=value)
+        update_sql = "UPDATE kv_store SET value = $value, version=version+1 WHERE `key` = $key;"
+        rows = self.db.query(update_sql, vars=vars)
+        self.log_sql(update_sql, vars=vars, key="[Put:Update]")
+        assert isinstance(rows, int)
+        if rows == 0:
+            insert_sql = "INSERT INTO kv_store (`key`, value) VALUES ($key,$value);"
+            self.db.query(insert_sql, vars=vars)
+            self.log_sql(insert_sql, vars=vars, key="[Put:Insert]")
+            
     def doPut(self, key, value):
         # type: (bytes,bytes) -> None
-
         if len(value) > self.max_value_length:
             raise interfaces.DatabaseException(code=400, message="value too long")
+        
+        if len(value) > self.long_value_length:
+            return self.put_long_value(key, value)
 
         start_time = time.time()
         upsert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0) ON DUPLICATE KEY UPDATE value=$value, version=version+1";
@@ -313,6 +327,7 @@ class MySQLKV(interfaces.DBInterface):
         vars = dict(key=key,value=value)
 
         rowcount = self.db.query(upsert_sql, vars=vars)
+        assert isinstance(rowcount, int)
         self.log_sql(upsert_sql, vars, start_time=start_time, key=key)
         assert rowcount > 0
 

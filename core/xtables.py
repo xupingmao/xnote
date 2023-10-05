@@ -59,9 +59,9 @@ def create_table_manager_with_dbpath(table_name="", dbpath="", **kw):
     db = get_db_instance(dbpath)
     return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database, **kw)
 
-def create_table_manager_with_db(table_name="", db=None):
+def create_table_manager_with_db(table_name="", db=None, **kw):
     assert isinstance(db, web.db.DB)
-    return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database)
+    return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database, **kw)
 
 def create_record_table_manager(table_name=""):
     """默认使用 record.db 文件"""
@@ -396,7 +396,8 @@ def init_kv_store_table():
 
 def init_kv_zset_table(db=None):
     """使用关系型数据库模拟redis的zset结构"""
-    with create_table_manager_with_db("kv_zset", db=db) as manager:
+    comment = "模拟redis的zset"
+    with create_table_manager_with_db("kv_zset", db=db, comment=comment) as manager:
         manager.add_column("key", "varchar(512)", "")
         manager.add_column("member", "varchar(512)", "")
         manager.add_column("score", "bigint", default_value=0)

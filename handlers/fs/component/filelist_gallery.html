@@ -12,7 +12,7 @@
             <td>
                 <!-- <a href="{{fsutil.get_webpath(fpath)}}">{{display_name}}</a> -->
                 <img class="fs-thumbnail x-photo" src="{{get_file_thumbnail(fpath)}}" 
-                    data-src="{{get_file_download_link(fpath)}}"/>
+                    data-src="{{get_file_download_link(fpath)}}" title="{{fname}}"/>
             </td>
             <td class="option-td">
                 {{xutils.format_file_size(fpath)}}
