@@ -18,7 +18,7 @@ from xconfig import Storage
 from xutils import fsutil
 from xutils import textutil
 from xutils import webutil
-from xutils import dbutil
+from xutils import dbutil, dateutil
 from xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
@@ -256,9 +256,9 @@ def find_note_for_view0(token, id, name):
 def find_note_for_view(token, id, name):
     note = find_note_for_view0(token, id, name)
     if note != None:
-        note.mdate = note.mtime.split(" ")[0]
-        note.cdate = note.ctime.split(" ")[0]
-        note.adate = note.atime.split(" ")[0]
+        note.mdate = dateutil.format_date(note.mtime)
+        note.cdate = dateutil.format_date(note.ctime)
+        note.adate = dateutil.format_date(note.atime)
     return note
 
 
