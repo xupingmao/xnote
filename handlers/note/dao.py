@@ -179,9 +179,7 @@ def format_note_id(id):
 
 
 def format_date(date):
-    if date is None:
-        return date
-    return date.split(" ")[0].replace("-", "/")
+    return dateutil.format_date(date)
 
 
 class NoteIndexDao:

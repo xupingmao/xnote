@@ -6,7 +6,6 @@
 
 import leveldb
 import logging
-
 from xutils import interfaces
 
 class LevelDBImpl(interfaces.DBInterface):
@@ -17,7 +16,7 @@ class LevelDBImpl(interfaces.DBInterface):
         """通过leveldbpy来实现leveldb的接口代理，因为leveldb没有提供Windows环境的支持"""
         self._db = leveldb.LevelDB(path, **kw)
         self.config_dict = config_dict
-        self.driver_type = "sqlite"
+        self.driver_type = "leveldb"
 
     def Get(self, key):
         try:

@@ -152,6 +152,8 @@ def format_date(seconds=None, fmt = None):
         fmt = "%Y/%m/%d"
     if seconds is None:
         return time.strftime(fmt)
+    elif isinstance(seconds, datetime.datetime):
+        return seconds.strftime(fmt)
     elif is_str(seconds):
         date_str = seconds.split(" ")[0]
         if arg_fmt == "/":

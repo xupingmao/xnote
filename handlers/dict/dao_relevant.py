@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-01 11:22:35
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-21 23:55:51
+@LastEditTime : 2023-10-06 18:30:36
 @FilePath     : /xnote/handlers/dict/dao_relevant.py
 """
 import xutils
@@ -12,7 +12,7 @@ from xutils import dbutil
 from xutils.dateutil import is_str
 from xutils.functions import listremove
 
-dbutil.register_table("dict_relevant", "相关词词库")
+dbutil.register_table("dict_relevant", "相关词词库", type="hash")
 _db = dbutil.get_hash_table("dict_relevant")
 
 class RelevantWord:
