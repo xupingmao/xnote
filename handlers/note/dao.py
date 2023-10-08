@@ -98,6 +98,7 @@ class NoteIndexDO(Storage):
         self.children_count = 0
         self.version = 0
         self.is_deleted = 0
+        self.is_public = 0
         self.level = 1 # 等级 (-1)-归档 0-正常, 1-置顶
         self.tag_str = ""
         self.visit_cnt = 0
@@ -249,7 +250,6 @@ class NoteIndexDao:
         item.hot_index = item.visit_cnt
         item.badge_info = ""
         item.show_next = False
-        item.is_public = False
         item.archived = (item.level<0)
         item.atime = DEFAULT_DATETIME
     
@@ -294,6 +294,9 @@ class NoteIndexDao:
         where = "1=1"
         if creator_id != 0:
             where += " AND creator_id=$creator_id"
+        else:
+            # TODO 这里还是有问题
+            where += " AND is_public = 1"
         if parent_id != 0 and parent_id != None:
             where += " AND parent_id=$parent_id"
         if type != None and type != "all":

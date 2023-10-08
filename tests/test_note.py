@@ -291,6 +291,16 @@ class TestMain(BaseTestCase):
         assert file != None
         self.assertEqual(1, file["is_public"])
         
+        # 登出后可以搜索到
+        logout_test_user()
+        try:
+            result = note_dao.search_name(words=["share"])
+            assert len(result) > 0
+            assert result[0].name == "xnote-share-test"
+        finally:
+            login_test_user()
+        
+        
         self.check_OK("/note/share/cancel?id=" + str(id))
         file = json_request_return_dict("/note/view?id=%s&_format=json" % id).get("file")
         assert file != None
@@ -300,6 +310,11 @@ class TestMain(BaseTestCase):
         try:
             # 登出后无法访问
             self.check_303("/note/view/%s" % id)
+            
+            # 登出后无法搜索到数据
+            result = note_dao.search_name(["share"])
+            assert len(result) == 0
+            
             # clean up
             json_request("/note/remove?id=" + str(id))
         finally:
