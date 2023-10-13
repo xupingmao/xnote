@@ -544,28 +544,30 @@ def count_by_tag(user, tag):
     return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
 
 
-def get_message_stat0(user):
-    # type: (str) -> Storage|None
+def get_message_stat0(user=""):
     stat = dbutil.get("user_stat:%s:message" % user)
+    result = MessageStatDO()
     if stat != None:
         assert isinstance(stat, Storage)
-        if stat.canceled_count is None:
-            stat.canceled_count = 0
-    return stat
+        result.update(stat)
+    return result
 
+
+class MessageStatDO(xutils.Storage):
+    def __init__(self, **kw):
+        self.task_count = 0
+        self.log_count = 0
+        self.done_count = 0
+        self.cron_count = 0
+        self.key_count = 0
+        self.canceled_count = 0
+        self.update(kw)
 
 def get_empty_stat():
-    stat = Storage()
-    stat.task_count = 0
-    stat.log_count = 0
-    stat.done_count = 0
-    stat.cron_count = 0
-    stat.key_count = 0
-    stat.canceled_count = 0
-    return stat
+    return MessageStatDO()
 
 def get_message_stat(user):
-    # type: (str) -> Storage
+    # type: (str) -> MessageStatDO
     """读取随手记的状态"""
     if user == None:
         return get_empty_stat()
@@ -583,10 +585,10 @@ def get_message_stat(user):
     if value is None:
         return refresh_message_stat(user)
 
-    return value
+    return MessageStatDO(**value)
 
 
-def refresh_message_stat(user, tag_list=[]) -> Storage:
+def refresh_message_stat(user, tag_list=[]) -> MessageStatDO:
     if user == None:
         return get_empty_stat()
 
@@ -618,6 +620,14 @@ def refresh_message_stat(user, tag_list=[]) -> Storage:
     _msg_stat_cache.delete(user)
 
     return stat
+
+class MessageStatDao:
+
+    db = dbutil.get_table("user_stat")
+
+    @classmethod
+    def put_by_user(cls, user="", stat={}):
+        cls.db.put_by_id(f"{user}:message", stat)
 
 class MsgSearchLogDao:
 

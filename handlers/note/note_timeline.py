@@ -21,10 +21,6 @@ import handlers.note.dao as note_dao
 import handlers.note.dao_log as dao_log
 import xmanager
 
-NOTE_DAO = xutils.DAO("note")
-MSG_DAO = xutils.DAO("message")
-USER_DAO = xutils.DAO("user")
-
 
 class PathLink:
 
@@ -282,7 +278,7 @@ def list_by_type_func(context):
     user_name = context['user_name']
     if type == "group_list":
         type = "group"
-        
+
     rows = note_dao.list_by_type(user_name, type, offset, limit)
     return build_date_result(rows, 'ctime')
 

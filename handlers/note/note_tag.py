@@ -156,10 +156,12 @@ class DeleteTagAjaxHandler:
 
 
 class TagListAjaxHandler:
-    
+
     def list_tag_for_note_v2(self, user_name="", group_id=0):
-        suggest_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name, tag_type="note", group_id=group_id)
-        all_list = dao_tag.list_tag(user_name)
+        suggest_list = dao_tag.list_tag_meta(limit=1000, 
+                                             user_name=user_name, tag_type="note", 
+                                             group_id=group_id)
+        all_list = dao_tag.list_tag(user_name, exclude_sys_tag=True)
         for tag_info in all_list:
             tag_info.tag_name = tag_info.name
             tag_info.tag_code = tag_info.code
@@ -180,7 +182,8 @@ class TagListAjaxHandler:
             v = xutils.get_argument_str("v")
             if v == "2":
                 return self.list_tag_for_note_v2(user_name=user_name, group_id=group_id)
-            data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name, tag_type="note", group_id=group_id)
+            data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name, 
+                                              tag_type="note", group_id=group_id)
             return dict(code="success", data = data_list)
 
         return dict(code="400", message="无效的tag_type(%s)" % tag_type)

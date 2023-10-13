@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-01 00:49:20
+@LastEditTime : 2023-10-13 23:21:07
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -61,6 +61,13 @@ class NoteTagRelation(Storage):
         self.note_id = ""
         self.tag_code = ""
 
+class TagInfo(Storage):
+    def __init__(self, name = "", code = "", amount = 0) -> None:
+        self.name = name
+        self.code = code
+        self.amount = amount
+        self.url = ""
+
 def get_tags(creator, note_id):
     note_tags = tag_bind_db.get_by_id(note_id, user_name=creator)
     if note_tags:
@@ -109,6 +116,35 @@ class TagBindDao:
     @classmethod
     def update_tag_bind(cls, user_id=0, note_id="", new_tags=[]):
         cls.tag_bind_service.bind_tags(user_id=user_id, target_id=int(note_id), tags=new_tags)
+
+    @classmethod
+    def is_not_sys_tag(cls, tag_info: TagInfo):
+        return tag_info.name not in static_code_map
+
+    @classmethod
+    def list_tag(cls, user, exclude_sys_tag=False):
+        if user is None:
+            user = "public"
+
+        tags = dict()
+
+        def list_func(key, value):
+            if value.tags is None:
+                return False
+            for tag in value.tags:
+                count = tags.get(tag, 0)
+                count += 1
+                tags[tag] = count
+
+        tag_bind_db.count(filter_func=list_func, user_name=user)
+
+        tag_list = [TagInfo(name=k, amount=tags[k]) for k in tags]
+        
+        if exclude_sys_tag:
+            tag_list = list(filter(cls.is_not_sys_tag, tag_list))
+
+        tag_list.sort(key=lambda x: -x.amount)
+        return tag_list
 
 
 class TagMetaDao:
@@ -185,9 +221,15 @@ class TagMetaDao:
     @classmethod
     def is_empty(cls, value):
         return value == None or value == ""
+    
+    @classmethod
+    def is_not_sys_tag(cls, tag_info: TagMeta):
+        return tag_info.tag_code not in static_code_map
 
     @classmethod
-    def list_meta(cls, user_name, *, limit=1000, tag_type="group", tag_name=None, group_id=None):
+    def list_meta(cls, user_name, *, limit=1000, tag_type="group", 
+                  tag_name=None, group_id=None, 
+                  include_sys_tag=True):
         if tag_type == "note":
             assert group_id != None, "group_id不能为空"
         
@@ -203,6 +245,9 @@ class TagMetaDao:
         result = tag_meta_db.list(
             limit=limit, where = where, user_name=user_name)
         
+        if not include_sys_tag:
+            result = list(filter(cls.is_not_sys_tag, result))
+
         for item in result:
             if cls.is_empty(item.tag_code):
                 item.tag_code = item.tag_name
@@ -303,36 +348,6 @@ def batch_get_tags_by_notes(notes):
         note.tags_json = json.dumps(tags)
     return result
 
-
-class TagInfo(Storage):
-    def __init__(self, name = "", code = "", amount = 0) -> None:
-        self.name = name
-        self.code = code
-        self.amount = amount
-        self.url = ""
-
-
-def list_tag(user):
-    if user is None:
-        user = "public"
-
-    tags = dict()
-
-    def list_func(key, value):
-        if value.tags is None:
-            return False
-        for tag in value.tags:
-            count = tags.get(tag, 0)
-            count += 1
-            tags[tag] = count
-
-    tag_bind_db.count(filter_func=list_func, user_name=user)
-
-    tag_list = [TagInfo(name=k, amount=tags[k]) for k in tags]
-    tag_list.sort(key=lambda x: -x.amount)
-    return tag_list
-
-
 def get_system_tag_list(tag_list=None):
     result = [
         TagInfo(code="$todo$", name="待办", amount=0),
@@ -390,6 +405,9 @@ def append_tag(note_id=0, tag_code=""):
     assert isinstance(tags, list)
     tags.append(tag_code)
     bind_tags(note_info.creator, note_id, tags)
+
+list_tag = TagBindDao.list_tag
+
 
 xutils.register_func("note.list_tag", list_tag)
 xutils.register_func("note.list_by_tag", list_by_tag)
