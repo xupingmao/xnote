@@ -24,7 +24,10 @@
             <td><a href="{{_server_home}}/system/sqldb_detail?name={{db.name}}">{{db.name}}</a></td>
             <td>{{db.comment}}</td>
             <td>{{db.amount}}</td>
-            <td><a class="btn btn-default" href="{{_server_home}}/system/sqldb_operate?table_name={{db.name}}">操作</a></td>
+            <td>
+                <a class="btn btn-default" href="{{_server_home}}/system/sqldb_operate?table_name={{db.name}}">操作</a>
+                <a class="btn btn-default" href="{{_server_home}}/system/db/struct?table_name={{db.name}}">结构</a>
+            </td>
         </tr>
         {% end %}
     </table>

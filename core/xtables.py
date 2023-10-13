@@ -337,7 +337,7 @@ def init_file_info():
         manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
         manager.add_column("fpath", "text", "")
-        manager.add_column("ftype", "varchar(32)", "")
+        manager.add_column("ftype", "varchar(16)", "")
         manager.add_column("fsize", "bigint", 0)
         manager.add_column("user_id", "bigint", 0)
 

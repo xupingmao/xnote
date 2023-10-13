@@ -436,6 +436,29 @@ class DatabaseDriverInfoHandler:
 
         return info
 
+class StructHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        table_name = xutils.get_argument_str("table_name")
+        table_proxy = xtables.get_table_by_name(table_name)
+
+        result_list = table_proxy.query(f"pragma table_info({table_name})")
+        
+        if len(result_list) > 0:
+            keys = result_list[0].keys()
+        else:
+            keys = []
+        
+        # TODO 支持mysql
+        # TODO 索引信息
+        kw = Storage()
+        kw.table_name = table_name
+        kw.cols = keys
+        kw.result_list = result_list
+        kw.error = ""
+        return xtemplate.render("system/page/db/db_struct.html", **kw)
+
 xurls = (
     "/system/db_scan", DbScanHandler,
     "/system/db_admin", DbScanHandler,
@@ -445,4 +468,5 @@ xurls = (
     "/system/sqldb_operate", SqlDBOperateHandler,
     "/system/db/drop_table", DropTableHandler,
     "/system/db/driver_info", DatabaseDriverInfoHandler,
+    "/system/db/struct", StructHandler,
 )

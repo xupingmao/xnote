@@ -1,0 +1,58 @@
+{% extends base %}
+
+{% block body %}
+
+{% init table_name = "" %}
+{% init error     = "" %}
+{% init cost_time = None %}
+{% init path      = "" %}
+{% init path_list = [] %}
+{% init sql       = "" %}
+{% init keys      = [] %}
+
+<div class="card">
+    <div class="card-title">
+        <span>{{T("表结构")}} - {{table_name}}</span>
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    {% if error != "" %}
+        <pre class="col-md-12 error">
+        {{error}}
+        </pre>
+    {% end %}
+
+    <div class="row">
+    {% if len(cols) > 0 %}
+
+        <table class="table">
+            <tr>
+                {% for key in cols %}
+                <th>{{key}}</th>
+                {% end %} <!-- for end -->
+            </tr>
+
+            {% for record in result_list %}
+                <tr>
+                {% for key in cols %}
+                    <td>{{record.get(key)}}</td>
+                {% end %}
+                </tr>
+            {% end %}
+        </table>
+
+    {% end %} <!-- if end -->
+
+    </div>
+
+</div>
+
+{% end %}
+
+{% block body_right %}
+    {% include common/sidebar/default.html %}
+{% end %}
