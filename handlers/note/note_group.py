@@ -913,12 +913,6 @@ class DateListHandler:
         # 待办任务
         notes.append(msg_dao.get_message_tag(user_name, "task", priority=2))
         notes.append(msg_dao.get_message_tag(user_name, "log",  priority=2))
-        notes.append(NoteLink("我的人生", "/note/view?skey=my_life", priority=2))
-        notes.append(NoteLink("我的年报:%s" % year, "/note/view?skey=year_%s" % year,
-                              priority=2))
-        notes.append(NoteLink("我的月报:%s" % date, "/note/view?skey=month_%s" % date,
-                              priority=2))
-
         notes_new = note_dao.list_by_date(
             "ctime", user_name, date, orderby="ctime desc")
         for note in notes_new:

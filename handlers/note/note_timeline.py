@@ -280,6 +280,9 @@ def list_by_type_func(context):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
+    if type == "group_list":
+        type = "group"
+        
     rows = note_dao.list_by_type(user_name, type, offset, limit)
     return build_date_result(rows, 'ctime')
 
@@ -355,6 +358,7 @@ LIST_FUNC_DICT = {
     'table': list_by_type_func,
     'csv': list_by_type_func,
     'log': list_by_type_func,
+    "group_list": list_by_type_func,
 
     'plan': list_plan_func,
     'all': list_all_func,
@@ -367,7 +371,7 @@ class TimelineAjaxHandler:
     def GET(self):
         offset = xutils.get_argument("offset", 0, type=int)
         limit = xutils.get_argument("limit", 20, type=int)
-        type = xutils.get_argument("type", "root")
+        type = xutils.get_argument_str("type", "root")
         parent_id = xutils.get_argument("parent_id", "", type=str)
         search_key = xutils.get_argument("key", None, type=str)
         orderby = xutils.get_argument("orderby", "mtime_desc", type=str)
