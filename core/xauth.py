@@ -122,7 +122,10 @@ class UserDao:
     def get_by_token(cls, token=""):
         db = get_user_db()
         user_dict = db.select_first(where=dict(token=token))
-        return UserDO.from_dict(user_dict)
+        user_info = UserDO.from_dict(user_dict)
+        if user_info != None and user_info.status == UserStatusEnum.deleted.value:
+            return None
+        return user_info
 
     @classmethod
     def get_by_id(cls, user_id=0):
@@ -748,6 +751,9 @@ def has_login_by_sid(name, session_id):
     user = get_user_by_name(name_in_cookie)
     if user is None:
         return False
+    
+    if user.status == UserStatusEnum.deleted.value:
+        return False
 
     if user.token != session_info.token:
         return False
@@ -822,6 +828,9 @@ def login_user_by_name(user_name, login_ip="", write_cookie=True):
     user_info = UserDao.get_by_name(user_name)
     if user_info == None:
         raise Exception("用户不存在")
+    
+    if user_info.status == UserStatusEnum.deleted.value:
+        raise Exception("用户已注销")
 
     session_info = create_session_by_user(user_info, login_ip=login_ip)
     session_id = session_info.sid

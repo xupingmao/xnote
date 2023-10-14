@@ -159,7 +159,7 @@
                 xnote.alert("parentId is undefined");
                 return;
             }
-            $.post("/note/move", { id: noteId, parent_id: parentId }, function (resp) {
+            xnote.http.post("/note/move", { id: noteId, parent_id: parentId }, function (resp) {
                 console.log(resp);
                 window.location.reload();
             });

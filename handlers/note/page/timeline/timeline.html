@@ -95,6 +95,7 @@
             <!-- <input type="checkbox" class="icon-check" v-if="file.type == 'gallery'"/> -->
             <i class="fa" v-bind:class="file.icon"></i>
             <a v-bind:href="file.url">{{!file.name}}</a>
+            <span class="tag lightblue" v-for="tag_info in file.tag_info_list">{{!tag_info.name}}</span>
             <span v-if="file.is_public == 1" class="tag info">分享</span>
             <span v-if="file.type=='group' || file.type=='system'" 
               class="float-right gray-text">{{!file.children_count}}</span>
@@ -167,7 +168,7 @@
       }); 
 
       app.isLoading = true;
-      $.get("/note/api/timeline?_type=json", param,
+      xnote.http.get("/note/api/timeline?_type=json", param,
         function (resp, status) {
           app.isLoading = false;
           layer.close(loadingNoteIndex);

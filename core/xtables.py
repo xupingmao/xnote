@@ -57,10 +57,12 @@ def create_table_manager_with_dbpath(table_name="", dbpath="", **kw):
     assert table_name != ""
     assert dbpath != ""
     db = get_db_instance(dbpath)
+    kw["db_type"] = xconfig.DatabaseConfig.db_driver_sql
     return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database, **kw)
 
 def create_table_manager_with_db(table_name="", db=None, **kw):
     assert isinstance(db, web.db.DB)
+    kw["db_type"] = xconfig.DatabaseConfig.db_driver_sql
     return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database, **kw)
 
 def create_record_table_manager(table_name=""):
@@ -68,7 +70,6 @@ def create_record_table_manager(table_name=""):
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
 
 def create_default_table_manager(table_name="", **kw):
-    kw["db_type"] = xconfig.DatabaseConfig.db_driver_sql
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file, **kw)
 
 def get_default_db_instance():
