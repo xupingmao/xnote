@@ -4,9 +4,9 @@
 @email        : 578749341@qq.com
 @Date         : 2022-10-01 21:15:02
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-02 13:03:23
+@LastEditTime : 2023-10-14 17:21:33
 @FilePath     : /xnote/xutils/db/driver_mysql_enhance.py
-@Description  : 支持长key
+@Description  : 支持长key, 废弃了, 不推荐使用
 """
 import pdb
 from xutils.db import encode
