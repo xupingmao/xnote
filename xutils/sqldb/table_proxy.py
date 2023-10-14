@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-23 10:24:13
+@LastEditTime : 2023-10-14 08:54:29
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -31,6 +31,7 @@ class TableProxy:
 
     def __init__(self, db, tablename):
         self.tablename = tablename
+        self.table_name = tablename
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         assert isinstance(db, web.db.DB)
         self.db = db
@@ -96,6 +97,9 @@ class TableProxy:
 
     def query(self, *args, **kw):
         return list(self.db.query(*args, **kw))
+    
+    def raw_query(self, *args, **kw):
+        return self.db.query(*args, **kw)
 
     def count(self, where=None, sql=None, vars=None):
         self.fix_sql_keywords(where)

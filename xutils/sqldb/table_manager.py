@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-15 21:54:43
+@LastEditTime : 2023-10-14 08:42:11
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -305,6 +305,7 @@ class TableInfo:
     def __init__(self, tablename = ""):
         self.tablename = tablename
         self.pk_name = "id"
+        self.db_type = "" # 数据库类型, 比如 mysql/sqlite
         self.comment = "" # 表的描述
         self.column_names = []
         self.columns = []
@@ -342,6 +343,7 @@ class TableManagerFacade:
     def __init__(self, tablename, db = empty_db, is_backup = False, **kw):
         self.table_info = TableInfo(tablename)
         self.table_info.pk_name = kw.get("pk_name", "id")
+        self.table_info.db_type = kw.get("db_type", "")
         if db.dbname == "mysql":
             self.manager = MySQLTableManager(tablename, db = db, **kw)
         else:

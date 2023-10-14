@@ -68,6 +68,7 @@ def create_record_table_manager(table_name=""):
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
 
 def create_default_table_manager(table_name="", **kw):
+    kw["db_type"] = xconfig.DatabaseConfig.db_driver_sql
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file, **kw)
 
 def get_default_db_instance():

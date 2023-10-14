@@ -20,35 +20,45 @@
 </div>
 
 <div class="card">
-    {% if error != "" %}
-        <pre class="col-md-12 error">
-        {{error}}
-        </pre>
-    {% end %}
-
-    <div class="row">
-    {% if len(cols) > 0 %}
-
-        <table class="table">
-            <tr>
-                {% for key in cols %}
-                <th>{{key}}</th>
-                {% end %} <!-- for end -->
-            </tr>
-
-            {% for record in result_list %}
-                <tr>
-                {% for key in cols %}
-                    <td>{{record.get(key)}}</td>
-                {% end %}
-                </tr>
-            {% end %}
-        </table>
-
-    {% end %} <!-- if end -->
-
+    <div class="card-title">
+        <span>字段</span>
     </div>
+    <table class="table">
+        <tr>
+            {% for head_ in column_info.head %}
+                <th>{{head_}}</th>
+            {% end %} <!-- for end -->
+        </tr>
 
+        {% for item in column_info.items %}
+            <tr>
+                {% for head_ in column_info.head %}
+                    <td>{{item.get(head_)}}</td>
+                {% end %}
+            </tr>
+        {% end %}
+    </table>
+</div>
+
+<div class="card">
+    <div class="card-title">
+        <span>索引</span>
+    </div>
+    <table class="table">
+        <tr>
+            {% for head_ in index_info.head %}
+                <th>{{head_}}</th>
+            {% end %} <!-- for end -->
+        </tr>
+
+        {% for item in index_info.items %}
+            <tr>
+                {% for head_ in index_info.head %}
+                    <td>{{item.get(head_)}}</td>
+                {% end %}
+            </tr>
+        {% end %}
+    </table>
 </div>
 
 {% end %}

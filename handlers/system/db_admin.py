@@ -436,26 +436,67 @@ class DatabaseDriverInfoHandler:
 
         return info
 
+class TableData:
+    def __init__(self, head=[], items=[]):
+        self.head = head
+        self.items = items # items 是 list[dict] 结构
+
 class StructHandler:
+
+    def result_set_to_table(self, result_set: web.db.BaseResultSet):
+        result = TableData()
+        result.head = result_set.names
+        result.items = result_set.list()
+        return result
+
+    def get_index_info(self, table_proxy: xtables.TableProxy):
+        table_info = table_proxy.table_info
+        db_type = table_info.db_type
+
+        if db_type == "sqlite":
+            vars = dict(type="index", tbl_name=table_info.tablename)
+            result_set = table_proxy.raw_query("select name, sql from sqlite_master where type=$type AND tbl_name=$tbl_name", vars=vars)
+            assert isinstance(result_set, web.db.BaseResultSet)
+            return self.result_set_to_table(result_set)
+
+        if db_type == "mysql":
+            vars = dict(database=xconfig.DatabaseConfig.mysql_database, table_name=table_info.tablename)
+            # 完整字段查看 DESC information_schema.statistics
+            result_set = table_proxy.raw_query("SELECT index_name,seq_in_index,column_name,non_unique,nullable,index_type,comment,index_comment \
+                                               FROM information_schema.statistics WHERE table_schema=$database AND table_name = $table_name", vars=vars)
+            assert isinstance(result_set, web.db.BaseResultSet)
+            return self.result_set_to_table(result_set)
+        
+        return TableData()
+
+    def get_column_info(self, table_proxy: xtables.TableProxy):
+        table_name = table_proxy.table_name
+        table_info = table_proxy.table_info
+        db_type = table_info.db_type
+
+        if db_type == "sqlite":
+            result_set = table_proxy.raw_query(f"pragma table_info({table_name})")
+            assert isinstance(result_set, web.db.BaseResultSet)
+            return self.result_set_to_table(result_set)
+    
+        if db_type == "mysql":
+            result_set = table_proxy.raw_query(f"DESC `{table_name}`")
+            assert isinstance(result_set, web.db.BaseResultSet)
+            return self.result_set_to_table(result_set)
+        return TableData()
+    
 
     @xauth.login_required("admin")
     def GET(self):
         table_name = xutils.get_argument_str("table_name")
         table_proxy = xtables.get_table_by_name(table_name)
-
-        result_list = table_proxy.query(f"pragma table_info({table_name})")
-        
-        if len(result_list) > 0:
-            keys = result_list[0].keys()
-        else:
-            keys = []
         
         # TODO 支持mysql
         # TODO 索引信息
         kw = Storage()
         kw.table_name = table_name
-        kw.cols = keys
-        kw.result_list = result_list
+        kw.column_info = self.get_column_info(table_proxy)
+        kw.index_info = self.get_index_info(table_proxy)
         kw.error = ""
         return xtemplate.render("system/page/db/db_struct.html", **kw)
 

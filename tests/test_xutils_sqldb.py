@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:04:36
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 11:44:10
+@LastEditTime : 2023-10-14 09:29:31
 @FilePath     : /xnote/tests/test_xutils_sqldb.py
 @Description  : 描述
 """

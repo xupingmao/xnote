@@ -49,12 +49,14 @@ def run_test(args):
 	
 	if target == "xutils_db":
 		# py_exec("-m pytest tests/test_xutils_db.py::TestMain::test_dbutil_mysql_enhanced --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
-		py_exec("-m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py tests/test_xutils_db_hash_table.py --doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
+		py_exec("-m pytest tests/test_xutils_db.py tests/test_xutils_db_table.py tests/test_xutils_db_hash_table.py \
+	  			--doctest-modules --cov xutils.db --cov handlers.system.db_index --capture no")
 		py_exec("-m coverage html -i")
 		return
 	
 	if target == "xutils_sqldb":
-		py_exec("-m pytest tests/test_xutils_sqldb.py --doctest-modules --cov xutils.sqldb --cov handlers.system.db_index --capture no")
+		py_exec("-m pytest tests/test_xutils_sqldb.py --doctest-modules --cov xutils.sqldb --cov handlers.system.db_index \
+	  			--capture no")
 		py_exec("-m coverage html -i")
 		return
 	
@@ -113,7 +115,7 @@ def run_test(args):
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("target", default="all", nargs="?")
-	parser.add_argument("--run_mysql_test", default="True")
+	parser.add_argument("--run_mysql_test", default="true")
 	parser.add_argument("--test_mysql", action="store_true", default=False)
 	parser.add_argument("--mysql_host", default="192.168.50.96")
 	parser.add_argument("--mysql_user", default="test")
