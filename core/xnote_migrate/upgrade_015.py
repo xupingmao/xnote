@@ -56,7 +56,7 @@ def migrate_msg_index():
             continue
 
         msg_index.tag = msg_info.tag
-        if msg_index.tag == "":
+        if msg_index.tag in ("", None):
             msg_index.tag = "done"
         msg_index.ctime = fix_datetime(msg_info.ctime)
         msg_index.ctime_sys = fix_datetime(msg_info.ctime0)

@@ -54,8 +54,15 @@
             <td>{{user_info.login_time}}</td>
             <td>
                 {% if user_info.name != "admin" %}
+                    {% if user_info.status == 0 %}
                     <a data-name="{{user_info.name}}" data-id="{{user_info.id}}" 
+                        onclick="xnoteDeleteUser(this)"
                         class="btn danger delete-user-btn">删除</a>
+                    {% end %}
+
+                    {% if user_info.status == -1 %}
+                        <span class="red">已删除</span>
+                    {% end %}
                 {% end %}
             </td>
         </tr>

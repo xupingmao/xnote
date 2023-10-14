@@ -55,6 +55,10 @@ def get_user_config_db(name):
     return dbutil.get_hash_table("user_config", user_name=name)
 
 
+class UserStatusEnum(enum.Enum):
+    normal = 0
+    deleted = -1
+
 class UserDO(xutils.Storage):
 
     def __init__(self, **kw):
@@ -68,6 +72,7 @@ class UserDO(xutils.Storage):
         self.login_time = ""
         self.salt = ""
         self.mobile = ""
+        self.status = 0
         self.update(kw)
 
     @classmethod
@@ -181,7 +186,7 @@ class UserDao:
     @classmethod
     def delete(cls, user_info):
         db = get_user_db()
-        db.delete(where=dict(id=user_info.id))
+        db.update(where=dict(id=user_info.id), status=UserStatusEnum.deleted.value)
 
     @classmethod
     def delete_by_name(cls, name=""):
@@ -194,7 +199,7 @@ class UserDao:
 
     @classmethod
     def delete_by_id(cls, id=0):
-        get_user_db().delete(where=dict(id=id))
+        get_user_db().update(where=dict(id=id), status=UserStatusEnum.deleted.value)
 
 
 class UserModel(UserDao):

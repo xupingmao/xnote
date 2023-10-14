@@ -162,10 +162,8 @@ class SqliteKV(interfaces.DBInterface):
 
         with self._lock:
             try:
-                if self._exists(key, cursor=cursor):
-                    sql = "UPDATE kv_store SET value = $value WHERE `key` = $key;"
-                else:
-                    sql = "INSERT INTO kv_store (`key`, value) VALUES ($key,$value);"
+                # 参考leveldb的官方benchmark代码
+                sql = "REPLACE INTO kv_store (`key`, value) VALUES ($key,$value);"
                 vars = dict(key=key, value=value)
                 self.db.query(sql, vars=vars)
                 self.log_sql(sql, vars=vars, prefix="[Put]")

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-14 08:54:29
+@LastEditTime : 2023-10-14 12:39:47
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -47,12 +47,12 @@ class TableProxy:
         log.type = "db_profile"
         return log
 
-    def fix_sql_keywords(self, where):
+    def fix_sql_keywords(self, values):
         # 兼容关键字
-        if isinstance(where, dict):
-            key = where.pop("key", None)
+        if isinstance(values, dict):
+            key = values.pop("key", None)
             if key != None:
-                where["`key`"] = key
+                values["`key`"] = key
     
     def handle_result_set(self, result_set):
         # TODO 转换类型用于序列化

@@ -213,6 +213,7 @@ class SqlLoggerInterface:
         pass
 
 class ProfileLog(web.Storage):
+
     def __init__(self):
         self.type = ""
         self.ctime = ""
@@ -221,6 +222,7 @@ class ProfileLog(web.Storage):
         self.op_type = ""
 
 class ProfileLogger:
+    
     def log(self, log):
         pass
 

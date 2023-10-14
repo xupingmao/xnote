@@ -6,7 +6,7 @@ window.xnoteDeleteUser = function (target) {
 
     xnote.confirm("确定删除[" + name + "]?", function (ret) {        
         if (ret) {
-            $.post("/system/user/remove", 
+            xnote.http.post("/system/user/remove", 
                 {user_id: user_id},
                 function (result) {
                     window.location = "/user/list";
@@ -24,7 +24,7 @@ xnoteResetUserPassword = function (target) {
 
     xnote.confirm("确定要重置用户[" + name + "]的密码?", function (ret) {        
         if (ret) {
-            $.post("/system/user/reset_password", 
+            xnote.http.post("/system/user/reset_password", 
                 params,
                 function (result) {
                     xnote.alert("新密码为: " + result.data);
@@ -34,7 +34,6 @@ xnoteResetUserPassword = function (target) {
 };
 
 $(function () {
-
     $(".show-password-link").click(function (e) {
         var data = $(this).attr("data-value");
         var data = $("<div>").text(data).html();
