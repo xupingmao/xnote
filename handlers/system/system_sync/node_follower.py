@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-05 17:29:42
+@LastEditTime : 2023-10-14 09:55:27
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -517,10 +517,23 @@ class DBSyncer:
 
         if optype == BinLogOpType.sql_upsert:
             old = table.select_first(where=where)
-            if old == None:
-                table.insert(**value)
-            else:
-                table.update(where=where, **value)
+            try:
+                if old == None:
+                    table.insert(**value)
+                else:
+                    table.update(where=where, **value)
+            except Exception as err:
+                xutils.print_exc()
+                print(f"error value={value}")
+                self.ignore_or_raise(err)
+                
+    def ignore_or_raise(self, err: Exception):
+        err_msg = str(err)
+        print(f"err_msg={err_msg}")
+        if err_msg.lower().startswith("(1292, \"incorrect datetime value"):
+            # datetime异常,无法执行成功
+            return
+        raise err
 
     def sync_db_by_result(self, result_obj: dict, last_key):
         # type: (dict, str) -> int
