@@ -1,11 +1,13 @@
 import web
 import xutils
 import xtemplate
+import xauth
 
 class handler:
 
+    @xauth.login_required("admin")
     def GET(self):
-        name = xutils.get_argument("name")
+        name = xutils.get_argument_str("name")
         templates = xtemplate.get_templates()
         if name == "" or name is None:
             return xtemplate.render("system/page/template_cache.html", name=name, templates=templates)

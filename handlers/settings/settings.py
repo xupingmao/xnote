@@ -86,43 +86,6 @@ class SettingsHandler:
 
         return xtemplate.render("settings/page/settings.html", **kw)
 
-
-
-class StorageHandler:
-    """基于数据库的配置"""
-
-    @xauth.login_required()
-    def GET(self):
-        key  = xutils.get_argument("key")
-        db = xtables.get_storage_table()
-        config = db.select_first(where=dict(key=key, user=xauth.get_current_name()))
-        if config is None:
-            config = Storage(key=key, value="")
-        return xtemplate.render("system/properties.html", 
-            action = "/system/storage",
-            show_aside = False,
-            config = config)
-    
-    @xauth.login_required()
-    def POST(self):
-        key = xutils.get_argument("key")
-        value = xutils.get_argument("value")
-        user = xauth.get_current_name()
-        db = xtables.get_storage_table()
-        config = db.select_first(where=dict(key=key, user=user))
-        if config is None:
-            db.insert(user = user, key = key, value = value, 
-                ctime = xutils.format_datetime(), 
-                mtime = xutils.format_datetime())
-        else:
-            db.update(value=value, mtime = xutils.format_datetime(), where=dict(key=key, user=user))
-
-        config = Storage(key = key, value = value)
-        return xtemplate.render("system/properties.html", 
-            action = "/system/storage",
-            show_aside = False,
-            config = config)
-
 DEFAULT_SETTINGS = '''
 
 # 导航配置
@@ -139,7 +102,7 @@ About = /code/wiki/README.md
 class PropertiesHandler:
     """基于缓存的配置"""
 
-    @xauth.login_required()
+    @xauth.login_required("admin")
     def GET(self):
         key  = xutils.get_argument("key")
         user = xauth.get_current_name()
@@ -157,7 +120,7 @@ class PropertiesHandler:
             show_aside = False,
             config = config)
     
-    @xauth.login_required()
+    @xauth.login_required("admin")
     def POST(self):
         key = xutils.get_argument("key")
         value = xutils.get_argument("value")
@@ -206,8 +169,8 @@ def update_sys_config(key, value):
     setattr(xconfig, key, value)
 
 class ConfigHandler:
-
-    @xauth.login_required()
+    
+    @xauth.login_required("admin")
     def POST(self):
         key   = xutils.get_argument("key")
         value = xutils.get_argument_str("value", "")
@@ -285,6 +248,5 @@ xurls = (
 
     r"/system/settings", SettingsHandler,
     r"/system/properties", PropertiesHandler,
-    r"/system/storage", StorageHandler,
     r"/system/config",  ConfigHandler,
 )

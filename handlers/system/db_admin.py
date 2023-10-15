@@ -319,7 +319,7 @@ class SqlDBDetailHandler:
 
 class SqlDBOperateHandler:
 
-    @xauth.login_required()
+    @xauth.login_required("admin")
     def GET(self):
         table_name = xutils.get_argument_str("table_name")
         db = xtables.get_table_by_name(table_name)

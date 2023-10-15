@@ -236,6 +236,8 @@ class LogVisitHandler:
     def GET(self):
         site = xutils.get_argument_str("site", "xnote")
         ip = webutil.get_real_ip()
+        if ip == None:
+            return
         return self.do_get(site=site, ip=ip)
 
 

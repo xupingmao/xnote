@@ -43,6 +43,22 @@ SESSION_EXPIRE = 24 * 3600 * 7
 PRINT_DEBUG_LOG = False
 
 
+class TestEnv:
+    """用于测试的运行时环境"""
+    is_admin = False
+    has_login = False
+    
+    @classmethod
+    def login_admin(cls):
+        cls.is_admin = True
+        cls.has_login = True
+        
+    @classmethod
+    def logout(cls):
+        cls.has_login = False
+        cls.is_admin = False
+
+
 def get_user_db():
     return xtables.get_user_table()
 
@@ -545,7 +561,7 @@ def get_user_by_sid(session_id=""):
 
 
 def get_current_user():
-    if xconfig.IS_TEST:
+    if TestEnv.has_login:
         return get_user_by_name("test")
 
     user = get_user_from_token()
@@ -767,7 +783,9 @@ def has_login(name=None):
     """验证是否登陆
     如果``name``指定,则只能该用户名通过验证
     """
-    if xconfig.IS_TEST:
+    if TestEnv.has_login:
+        if name == "admin":
+            return TestEnv.is_admin
         return True
 
     # 优先使用token
@@ -782,7 +800,7 @@ def has_login(name=None):
 
 @logutil.timeit_deco(logargs=True, logret=True, switch_func=_is_debug_enabled)
 def is_admin():
-    return xconfig.IS_TEST or has_login("admin")
+    return TestEnv.is_admin or has_login("admin")
 
 
 def check_login(user_name=None):

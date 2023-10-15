@@ -8,6 +8,7 @@ import web
 import xtemplate
 import xutils
 import xmanager
+import xauth
 
 html = """
 {% extends base.html %}
@@ -59,7 +60,7 @@ class handler:
         timer.join()
         return self.stats
 
-
+    @xauth.login_required("admin")
     def GET(self):
         url = xutils.get_argument("url")
         result = ""

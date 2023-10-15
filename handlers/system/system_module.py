@@ -6,6 +6,7 @@ import xutils
 import xtemplate
 import sys
 import inspect
+import xauth
 from xutils import textutil
 from xutils import six
 
@@ -123,8 +124,9 @@ def do_class(functions, name, clz):
 
 class ModuleDetailHandler(object):
 
+    @xauth.login_required("admin")
     def GET(self):
-        name = xutils.get_argument("name")
+        name = xutils.get_argument_str("name")
         force = xutils.get_argument("force")
 
         if force == "true":
@@ -139,6 +141,7 @@ class ModuleDetailHandler(object):
 
 class ModuleListHandler(object):
     
+    @xauth.login_required("admin")
     def GET(self):
         return xtemplate.render("system/page/module_list.html", 
             show_aside = False,

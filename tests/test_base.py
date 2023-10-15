@@ -32,6 +32,10 @@ def init():
         return APP
     xconfig.init("./config/boot/boot.test.properties")
     xconfig.IS_TEST = True
+    
+    xauth.TestEnv.has_login = True
+    xauth.TestEnv.is_admin = True
+    
     xconfig.port = "1234"
     xconfig.DEV_MODE = True
     var_env = dict()
@@ -70,11 +74,11 @@ def get_test_file_path(path):
 
 
 def logout_test_user():
-    xconfig.IS_TEST = False
+    xauth.TestEnv.logout()
 
 
 def login_test_user():
-    xconfig.IS_TEST = True
+    xauth.TestEnv.login_admin()
 
 
 def json_request(*args, **kw):
@@ -144,7 +148,7 @@ class BaseTestCase(unittest.TestCase):
     def check_303(self, *args, **kw):
         response = APP.request(*args, **kw)
         self.assertEqual("303 See Other", response.status)
-
+        
     def check_404(self, url):
         response = APP.request(url)
         self.assertEqual("404 Not Found", response.status)
