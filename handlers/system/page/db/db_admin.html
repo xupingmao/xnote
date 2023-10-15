@@ -145,7 +145,7 @@ $(function () {
             q_user_name: userName,
         };
 
-        $.get("", params, function (resp) {
+        xnote.http.get("", params, function (resp) {
             console.log("search result", resp);
             if (resp.code != "success") {
                 xnote.alert(resp.message);

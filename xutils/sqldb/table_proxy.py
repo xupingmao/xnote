@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-14 12:39:47
+@LastEditTime : 2023-10-15 12:55:41
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -50,9 +50,15 @@ class TableProxy:
     def fix_sql_keywords(self, values):
         # 兼容关键字
         if isinstance(values, dict):
-            key = values.pop("key", None)
-            if key != None:
-                values["`key`"] = key
+            new_result = {}
+            for key in values:
+                value = values[key]
+                if "`" not in key:
+                    new_result[f"`{key}`"] = value
+                else:
+                    new_result[key] = value
+            return new_result
+        return values
     
     def handle_result_set(self, result_set):
         # TODO 转换类型用于序列化
@@ -64,7 +70,7 @@ class TableProxy:
         return result
 
     def insert(self, seqname=None, _test=False, **values):
-        self.fix_sql_keywords(values)
+        values = self.fix_sql_keywords(values)
         start_time = time.time()
         try:
             new_id = self.db.insert(self.tablename, seqname, _test, **values)
@@ -83,7 +89,7 @@ class TableProxy:
         
     def select(self, vars=None, what='*', where=None, order=None, group=None,
                limit=None, offset=None, _test=False):
-        self.fix_sql_keywords(where)
+        where = self.fix_sql_keywords(where)
         result_set = self.db.select(self.tablename, vars=vars, what=what, where=where, order=order, group=group,
                               limit=limit, offset=offset, _test=_test)
         records = list(result_set)
@@ -102,13 +108,13 @@ class TableProxy:
         return self.db.query(*args, **kw)
 
     def count(self, where=None, sql=None, vars=None):
-        self.fix_sql_keywords(where)
+        where = self.fix_sql_keywords(where)
         if sql is None:
             return self.select_first(what="COUNT(1) AS amount", where=where, vars=vars).amount
         return self.db.query(sql, vars=vars).first().amount
 
     def update(self, where, vars=None, _test=False, **values):
-        self.fix_sql_keywords(where)
+        where = self.fix_sql_keywords(where)
         
         start_time = time.time()
         try:
@@ -131,7 +137,7 @@ class TableProxy:
             # delete为了记录binlog会转换成按照主键删除的sql, 所以这里单独处理下_test场景
             return self.db.delete(self.tablename, where, using=using, vars=vars, _test=True)
         
-        self.fix_sql_keywords(where)
+        where = self.fix_sql_keywords(where)
 
         start_time = time.time()
         pk_name = self.table_info.pk_name
