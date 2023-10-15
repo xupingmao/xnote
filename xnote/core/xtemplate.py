@@ -15,9 +15,8 @@ import os
 import warnings
 import math
 import web
-import xconfig
-import xauth
 import xutils
+from . import xconfig, xauth, xnote_trace, xnote_hooks
 import time
 from xutils.tornado.template import Template, Loader
 from xutils import dateutil, u
@@ -25,9 +24,7 @@ from xutils import tojson
 from xutils import Storage
 from xutils import textutil
 from xutils.six.moves.urllib.parse import quote
-import xnote_trace
-import xnote_hooks
-from xconfig import TemplateConfig
+from .xconfig import TemplateConfig
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(

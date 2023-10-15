@@ -15,13 +15,11 @@ import os
 import hashlib
 import copy
 import web
-import xconfig
 import xutils
-import xmanager
 import warnings
 import time
 import datetime
-import xtables
+from . import xtables, xconfig, xmanager
 import enum
 from xutils import textutil, dbutil, fsutil, dateutil
 from xutils import Storage

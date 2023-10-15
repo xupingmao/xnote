@@ -43,8 +43,10 @@ __copyright__ = "(C) 2016-2023 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 def resolve_config_path(fpath):
-    core_dir = os.path.dirname(__file__)
-    xnote_root = os.path.dirname(core_dir)
+    xnote_core_dir = os.path.dirname(__file__)
+    xnote_dir = os.path.dirname(xnote_core_dir)
+    xnote_root = os.path.dirname(xnote_dir)
+    
     # print("xnote_root", xnote_root)
     result = os.path.join(xnote_root, fpath)
     result = os.path.abspath(result)
@@ -233,8 +235,10 @@ class FileConfig:
 
     @classmethod
     def init(cls, data_dir):
-        core_dir = os.path.dirname(__file__)
-        cls.source_root_dir = os.path.dirname(core_dir)
+        xnote_core_dir = os.path.dirname(__file__)
+        xnote_dir = os.path.dirname(xnote_core_dir)
+        cls.source_root_dir = os.path.dirname(xnote_dir)
+        
         data_dir = os.path.abspath(data_dir)
         cls.data_dir = os.path.abspath(data_dir)
         makedirs(cls.data_dir)
@@ -842,17 +846,17 @@ def get_user_config(user_name, config_key, default_value=None):
     if START_TIME is None:
         return default_value
 
-    import xauth
+    from . import xauth
     return xauth.get_user_config(user_name, config_key)
 
 
 def update_user_config(user_name, key, value):
-    import xauth
+    from . import xauth
     return xauth.update_user_config(user_name, key, value)
 
 
 def get_user_config_dict(user_name):
-    import xauth
+    from . import xauth
     value = xauth.get_user_config_dict(user_name)
     if value is None:
         return Storage()
@@ -860,7 +864,7 @@ def get_user_config_dict(user_name):
 
 
 def get_current_user_config(key, default_value=None):
-    import xauth
+    from . import xauth
     """默认值参考DEFAULT_USER_CONFIG"""
     return get_user_config(xauth.current_name(), key, default_value)
 
@@ -952,7 +956,7 @@ class NavItem:
         return True
 
     def is_visible(self):
-        import xauth
+        from . import xauth
         # 先判断高权限的
         if self.need_admin:
             return xauth.is_admin() and self.check_platform()

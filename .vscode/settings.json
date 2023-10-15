@@ -1,6 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./core",
+        "./xnote/core",
         "./lib",
     ],
     "fileheader.configObj": { // koroFileHeader

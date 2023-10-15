@@ -8,7 +8,7 @@
 import os
 import threading
 import xutils
-import xconfig
+from . import xconfig
 import web.db
 from xutils import dbutil
 from xutils.dbutil import interfaces

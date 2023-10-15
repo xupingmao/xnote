@@ -33,16 +33,9 @@ from xutils import dbutil
 from xutils import cacheutil, interfaces
 from xutils.sqldb import TableProxy
 from . import xnote_code_builder
-import xnote_hooks
+from . import xnote_hooks, xnote_trace, xtables, xtables_new, xconfig, xtemplate, xmanager, xauth
 import threading
-import xnote_trace
-import xtables_new
-import xtemplate
-import xmanager
-import xtables
-import xconfig
 import xutils
-import xauth
 import web
 import atexit
 

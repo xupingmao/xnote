@@ -16,13 +16,10 @@ import time
 import copy
 import inspect
 import web
-import xconfig
+from xnote.core import xconfig, xauth, xnote_trace, xnote_hooks
 import xutils
-import xauth
 import threading
-import xnote_trace
 import logging
-import xnote_hooks
 import xnote_migrate
 from collections import deque
 from threading import Thread
@@ -254,19 +251,6 @@ class HandlerManager:
         finally:
             pass
 
-    def do_reload_inner_modules(self):
-        del sys.modules['xtemplate']
-        import xtemplate
-        xtemplate.reload()
-
-        del sys.modules["xauth"]
-        import xauth
-        xauth.init()
-
-        del sys.modules["xtables_new"]
-        import xtables_new
-        xtables_new.init()
-
     def reload(self):
         """重启handlers目录下的所有的模块"""
         self.mapping = []
@@ -275,9 +259,6 @@ class HandlerManager:
 
         # 移除所有的事件处理器
         remove_event_handlers()
-
-        # 重新加载内部模块
-        self.do_reload_inner_modules()
 
         # 重新加载HTTP处理器
         # 先全部卸载，然后全部加载，否则可能导致新的module依赖旧的module

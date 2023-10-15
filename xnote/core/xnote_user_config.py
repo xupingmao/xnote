@@ -2,8 +2,7 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2020/04/06 11:55:29
 # @modified 2021/04/11 14:08:02
-import xconfig
-import xauth
+from . import xconfig, xauth
 from xutils import Storage
 
 class UserConfigKey:
