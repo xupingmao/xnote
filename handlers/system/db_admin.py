@@ -400,6 +400,7 @@ class DatabaseDriverInfoHandler:
         info += self.get_mysql_variable(db, "read_buffer_size", format_size=True)
         info += self.get_mysql_variable(db, "open_files_limit")
         info += self.get_mysql_variable(db, "innodb_buffer_pool_size", format_size=True)
+        info += self.get_mysql_variable(db, "innodb_flush_log_at_trx_commit")
         info += self.get_mysql_variable(db, "sync_binlog")
         info += self.get_mysql_variable(db, "max_allowed_packet", format_size=True)
         return info
