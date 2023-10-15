@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-01 00:03:59
+@LastEditTime : 2023-10-15 17:59:58
 @FilePath     : /xnote/xutils/db/dbutil_table.py
 @Description  : 数据库表-API
 """
@@ -37,7 +37,7 @@ db.register_index("ctime")
 class LdbTable:
     """基于leveldb的表, 比较常见的是以下2种
     * key = prefix:record_id           全局数据库
-    * key = prefix:user_name:record_id 用户维度数据
+    * key = prefix:user_name:record_id 用户(或者其他分片)维度数据
 
     字段说明: 
     * prefix    代表的是功能类型，比如猫和狗是两种不同的动物，锤子和手机是两种
@@ -355,13 +355,19 @@ class LdbTable:
 
         self._put_obj(obj_key, obj)
 
-    def put_by_id(self, id, obj, user_name=None):
-        """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)"""
+    def put_by_id(self, id, obj, user_name=None, encode_key=True):
+        """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)
+        :param {str} id: 指定ID
+        :param {dict} obj: 写入的对象
+        :param {str|None} user_name: 用户分片
+        :param encode_key=True: 是否对key进行编码,用于处理特殊字符
+        """
         id = str(id)
         if self.user_name != None and user_name != None:
             raise DBException("table实例已经设置了user_name，不能再通过参数设置")
 
-        id = encode_str(id)
+        if encode_key:
+            id = encode_str(id)
 
         if self.user_attr != None:
             user_name = obj.get(self.user_attr)

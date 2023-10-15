@@ -1,3 +1,4 @@
+# encoding=utf-8
 import xtables
 import xutils
 import xauth

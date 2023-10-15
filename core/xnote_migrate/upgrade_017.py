@@ -1,3 +1,4 @@
+# encoding=utf-8
 import xtables
 import xutils
 import xauth
@@ -18,6 +19,7 @@ def do_upgrade():
     base.execute_upgrade("20230917_note_share", handler.migrate_note_share)
     base.execute_upgrade("20230923_fix_creator_id", handler.fix_creator_id)
     base.execute_upgrade("20230930_fix_gallery", handler.fix_gallery)
+    base.execute_upgrade("20231015_fix_note_history", handler.fix_note_history)
 
 
 class KvNoteIndexDO(Storage):
@@ -92,6 +94,12 @@ class ShareInfoDO(Storage):
         self.to_id = 0
         self.visit_cnt = 0
 
+class SimpleKvDO(xutils.Storage):
+    def __init__(self, **kw):
+        self._key = ""
+        self._id = ""
+        self.update(kw)
+
 class MigrateHandler:
 
     share_db = xtables.get_table_by_name("share_info")
@@ -99,6 +107,7 @@ class MigrateHandler:
     user_dao = xauth.UserDao
     note_full_db = dbutil.get_table("note_full")
     note_index_db = xtables.get_table_by_name("note_index")
+    db_sep = ":"
 
     def migrate_note_index(self):
         """迁移笔记索引"""
@@ -227,3 +236,27 @@ class MigrateHandler:
                         new_path = os.path.join(dirname, new_note_id)
                         print(f"rename {old_path} -> {new_path}")
                         os.rename(old_path, new_path)
+    
+    def build_new_id(self, parts=[]):
+        new_parts = []
+        for part in parts:
+            if part.startswith("0") and part != "0":
+                new_parts.append(part.lstrip("0"))
+            else:
+                new_parts.append(part)
+        return self.db_sep.join(new_parts)
+        
+    def fix_zero_pad(self, db:dbutil.LdbTable):
+        for item in db.iter(limit=-1):
+            index_do = SimpleKvDO(**item)
+            parts = index_do._key.split(self.db_sep)
+            old_id = self.db_sep.join(parts[1:])
+            new_id = self.build_new_id(parts[1:])
+            if old_id != new_id:
+                logging.info("修复0前缀, old_id=%s, new_id=%s", old_id, new_id)
+                db.put_by_id(new_id, index_do, encode_key=False)
+                db.delete_by_id(old_id)
+
+    def fix_note_history(self):
+        self.fix_zero_pad(dbutil.get_table("note_history_index"))
+        self.fix_zero_pad(dbutil.get_table("note_history"))

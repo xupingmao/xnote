@@ -42,7 +42,6 @@ def register_note_table(name, description, check_user=False, user_attr=None):
     
 register_note_table("notebook", "笔记分组", check_user=True, user_attr="creator")
 register_note_table("token", "用于分享的令牌")
-register_note_table("note_history", "笔记的历史版本")
 
 NOTE_DAO = xutils.DAO("note")
 

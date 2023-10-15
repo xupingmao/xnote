@@ -132,8 +132,10 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
             date_time = row.mtime
         else:
             date_time = row.ctime
-
-        title = re.match(r"\d+\-\d+\-\d+", date_time).group(0)
+        
+        # MySQL返回 datetime 类型
+        date_time = str(date_time)
+        title = date_time.split()[0]
         # 优化返回数据大小
         row.content = ""
         if title not in tmp_result:
@@ -279,7 +281,7 @@ def list_by_type_func(context):
     if type == "group_list":
         type = "group"
 
-    rows = note_dao.list_by_type(user_name, type, offset, limit)
+    rows = note_dao.list_by_type(user_name, type, offset, limit, orderby="ctime_desc")
     return build_date_result(rows, 'ctime')
 
 

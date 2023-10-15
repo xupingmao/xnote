@@ -3,6 +3,8 @@
 # @since 2022/03/19 10:15:30
 # @modified 2022/03/20 21:42:58
 # @filename driver_leveldb.py
+# leveldb的驱动适配
+# leveldb库的源码参考 https://github.com/rjpower/py-leveldb
 
 import leveldb
 import logging
