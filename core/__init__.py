@@ -15,23 +15,6 @@ core模块依赖xutils模块，xutils提供更加底层的组件能力，比如�
 """
 import sys
 
-from . import xnote_pathfix
-
-xnote_pathfix.fix()
-
 from xnote.core import xconfig, xauth, autoreload, xmanager, xtemplate
 from xnote.core import xnote_hooks, xnote_event, xnote_trace, xnote_app, xnote_user_config
 from xnote.core import xtables, xtables_new
-
-sys.modules["xconfig"] = xconfig
-sys.modules["xauth"] = xauth
-sys.modules["autoreload"] = autoreload
-sys.modules["xmanager"] = xmanager
-sys.modules["xtemplate"] = xtemplate
-sys.modules["xnote_hooks"] = xnote_hooks
-sys.modules["xnote_event"] = xnote_event
-sys.modules["xnote_trace"] = xnote_trace
-sys.modules["xnote_app"] = xnote_app
-sys.modules["xtables"] = xtables
-sys.modules["xtables_new"] = xtables_new
-sys.modules["xnote_user_config"] = xnote_user_config

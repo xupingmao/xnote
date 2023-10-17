@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from __future__ import print_function
 
-from core import xnote_app
+from xnote.core import xnote_app
 
 
 if __name__ == "__main__":
