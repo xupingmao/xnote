@@ -2,8 +2,6 @@
 
 {% block body_left %}
 
-{% include common/layout/wide_left.html %}
-
 {% init plugins_status = "done" %}
 {% include plugin/header/plugin_header_normal.html %}
 
@@ -43,4 +41,9 @@
         {% end %}
     </div>
 </div>
+{% end %}
+
+
+{% block body_right %}
+    {% include common/sidebar/default.html %}
 {% end %}
