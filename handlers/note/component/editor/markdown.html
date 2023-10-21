@@ -1,5 +1,6 @@
 {% init can_edit = False %}
 {% init edit_token = "" %}
+{% init show_draft_edit = False %}
 
 <!-- 解析CSV依赖 -->
 <script type="text/javascript" src="{{_server_home}}/_static/lib/csv.js/csv.js"></script>
@@ -19,6 +20,13 @@
 <div class="card btn-line-height">
     {% include note/component/view_header_tag.html %}
 </div>
+
+{% if show_draft_edit %}
+<div class="card btn-line-height">
+    <span>发现未提交的草稿</span>
+    <a href="{{_server_home}}/note/edit?id={{file.id}}&is_iframe={{is_iframe}}&load_draft=true">前往编辑</a>
+</div>
+{% end %}
 
 <div class="card col-md-12">
     {% if file.content == "" %}

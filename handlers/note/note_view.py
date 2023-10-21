@@ -105,18 +105,20 @@ def view_html_func(file, kw):
 
 def view_or_edit_md_func(file, kw):
     device = xutils.get_argument("device", "desktop")
+    load_draft = xutils.get_argument_bool("load_draft")
     kw.content = file.content
     kw.show_recommend = True
     kw.show_pagination = False
     kw.edit_token = textutil.create_uuid()
 
     if kw.op == "edit":
-        # 读取草稿
-        draft_content = dao_draft.get_draft(file.id)
+        if load_draft:
+            # 读取草稿
+            draft_content = dao_draft.get_draft(file.id)
 
-        if draft_content != "" and draft_content != None:
-            kw.content = draft_content
-            file.content = draft_content
+            if draft_content != "" and draft_content != None:
+                kw.content = draft_content
+                file.content = draft_content
 
         kw.show_recommend = False
         kw.template_name = "note/component/editor/markdown_edit.html"
@@ -394,8 +396,13 @@ class ViewHandler:
         if is_public_page:
             note_dao.visit_public(id)
 
+        if can_edit:
+            kw.show_draft_edit = self.check_has_draft(id)
+
         return xtemplate.render_by_ua(template_name, **kw)
 
+    def check_has_draft(self, note_id=0):
+        return dao_draft.DraftDao.exists(note_id)
 
 class ViewByIdHandler(ViewHandler):
 

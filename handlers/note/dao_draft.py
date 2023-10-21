@@ -80,9 +80,17 @@ class NoteLockDao:
             return True
         else:
             return False
+        
+
+class DraftDao:
+    db = dbutil.get_hash_table("note_draft")
+
+    @classmethod
+    def exists(cls, note_id=0):
+        return cls.db.get(str(note_id)) not in (None, "")
 
 def get_note_draft_db():
-    return dbutil.get_hash_table("note_draft")
+    return DraftDao.db
 
 def get_note_lock_db():
     return NoteLockDao.db

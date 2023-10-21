@@ -40,7 +40,7 @@
 <script type="text/javascript">
     $(function () {
         $("body").on("click", ".note-option-btn", function (event) {
-            $.get("/note/ajax/option_dialog", function (resp) {
+            xnote.http.get("/note/ajax/option_dialog", function (resp) {
                 xnote.showDialog("选项", resp);
             })
         });
