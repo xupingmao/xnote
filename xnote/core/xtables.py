@@ -165,11 +165,11 @@ def init_note_index_table():
         # 上级目录
         manager.add_column("parent_id", "bigint", 0)
         # 创建时间ctime
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         # 修改时间mtime
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
         # 删除时间
-        manager.add_column("dtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("dtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("is_deleted", "tinyint", 0, comment="逻辑删除标记")
         manager.add_column("is_public", "tinyint", 0, comment="是否是公开的笔记")
         
@@ -214,10 +214,10 @@ def init_user_table():
         manager.add_column("password_md5", "varchar(64)", "")
         manager.add_column("mobile", "varchar(32)", "")
         manager.add_column("salt", "varchar(64)", "")
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("token", "varchar(32)", "")
-        manager.add_column("login_time", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("login_time", "datetime", DEFAULT_DATETIME)
         manager.add_column("status", "tinyint", 0)
         manager.add_index("name", is_unique=True)
         manager.add_index("token")
@@ -230,7 +230,7 @@ def init_user_op_log_table():
     # 2023/07/15 用户操作日志，从kv迁移到sql
     with create_default_table_manager("user_op_log") as manager:
         manager.add_column("user_name", "varchar(64)", "")
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         manager.add_column("ip", "varchar(32)", "")
         manager.add_column("type", "varchar(32)", "")
         manager.add_column("detail", "text", "")
@@ -244,8 +244,8 @@ def init_message_table():
     """
     table_name = "message"
     with create_table_manager_with_dbpath(table_name) as manager:
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("user",  "varchar(64)", "")
         # 用一个状态可以拍成一排
         # 消息的状态 0关注 50挂起 100已完成
@@ -265,7 +265,7 @@ def init_record_table():
     dbpath = xconfig.FileConfig.record_db_file
     comment = "通用日志记录"
     with create_table_manager_with_dbpath("record", dbpath=dbpath, comment=comment) as manager:
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         # 添加单独的日期，方便统计用，尽量减少SQL函数的使用
         manager.add_column("cdate", "date", "1970-01-01")
         manager.add_column("type",  "varchar(64)", "")
@@ -282,8 +282,8 @@ def init_dict_table():
     """
     comment = "词典"
     with create_default_table_manager("dictionary", comment=comment) as manager:
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("key", "varchar(100)", "")
         manager.add_column("value", "text", "")
         manager.add_index("key")
@@ -296,7 +296,7 @@ def init_note_tag_rel_table():
     table_name = "note_tag_rel"
     comment = "笔记标签绑定关系(废弃)"
     with create_default_table_manager(table_name, is_deleted=True, comment=comment) as manager:
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("note_id", "varchar(32)", "")
         manager.add_column("tag_code", "varchar(32)", "")
@@ -308,8 +308,8 @@ def init_tag_info_table():
     """
     table_name = "tag_info"
     with create_default_table_manager(table_name) as manager:
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("tag_type", "tinyint", 0)
         manager.add_column("tag_code",  "varchar(32)", "")
@@ -324,7 +324,7 @@ def init_tag_bind_table():
     table_name = "tag_bind"
     comment = "标签绑定关系"
     with create_default_table_manager(table_name, comment=comment) as manager:
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("tag_type", "tinyint", 0)
         manager.add_column("tag_code",  "varchar(32)", "")
@@ -338,8 +338,8 @@ def init_file_info():
     table_name = "file_info"
     comment = "文件索引信息"
     with create_default_table_manager(table_name, comment=comment) as manager:
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("fpath", "text", "")
         manager.add_column("ftype", "varchar(16)", "")
         manager.add_column("fsize", "bigint", 0)
@@ -373,11 +373,11 @@ def init_msg_index_table():
     comment = "随手记索引"
     with create_default_table_manager(table_name, comment=comment) as manager:
         # 展示创建时间
-        manager.add_column("ctime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         # 实际创建时间
-        manager.add_column("ctime_sys", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("ctime_sys", "datetime", DEFAULT_DATETIME)
         # 修改时间
-        manager.add_column("mtime", "datetime", "1970-01-01 00:00:00")
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("user_name", "varchar(64)", "")
         # 短信息的类型
