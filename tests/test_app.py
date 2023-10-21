@@ -4,19 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-23 00:30:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-08 12:09:29
+@LastEditTime : 2023-10-21 09:43:53
 @FilePath     : /xnote/tests/test_app.py
 @Description  : 描述
 """
 
-from .a import *
 import os
 import xutils
-import xtemplate
-import xconfig
-import xtables
-import xauth
-import xmanager
+from xnote.core import xtemplate, xconfig, xtables, xauth, xmanager
 from xutils import logutil
 from . import test_base
 from .test_base import ResponseWrapper

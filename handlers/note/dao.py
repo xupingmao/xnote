@@ -215,6 +215,8 @@ class NoteIndexDao:
     
     @classmethod
     def incr_visit_cnt(cls, note_id=0):
+        if not cls.db.writable:
+            return
         return cls.db.update(where=dict(id=note_id), visit_cnt=SQLLiteral("visit_cnt+1"))
 
     @classmethod
@@ -406,6 +408,8 @@ class ShareInfoDao:
 
     @classmethod
     def incr_visit_cnt(cls, target_id=0):
+        if not cls.db.writable:
+            return
         where = dict(target_id=target_id)
         cls.db.update(where=where, visit_cnt=SQLLiteral("visit_cnt + 1"))
 

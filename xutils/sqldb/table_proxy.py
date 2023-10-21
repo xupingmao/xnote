@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-15 12:55:41
+@LastEditTime : 2023-10-21 10:26:24
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -27,6 +27,7 @@ class TableProxy:
     """
     log_profile = False
     enable_binlog = False
+    writable = True
     profile_logger = ProfileLogger()
 
     def __init__(self, db, tablename):
@@ -68,8 +69,13 @@ class TableProxy:
             #     value = item.get(attr)
             result.append(item)
         return result
+    
+    def check_write_state(self):
+        if not self.writable:
+            raise Exception("当前状态不能写入")
 
     def insert(self, seqname=None, _test=False, **values):
+        self.check_write_state()
         values = self.fix_sql_keywords(values)
         start_time = time.time()
         try:
@@ -114,6 +120,7 @@ class TableProxy:
         return self.db.query(sql, vars=vars).first().amount
 
     def update(self, where, vars=None, _test=False, **values):
+        self.check_write_state()
         where = self.fix_sql_keywords(where)
         
         start_time = time.time()
@@ -133,6 +140,7 @@ class TableProxy:
                 self.profile_logger.log(profile_log)
 
     def delete(self,  where, using=None, vars=None, _test=False):
+        self.check_write_state()
         if _test:
             # delete为了记录binlog会转换成按照主键删除的sql, 所以这里单独处理下_test场景
             return self.db.delete(self.tablename, where, using=using, vars=vars, _test=True)
@@ -199,6 +207,9 @@ class TableProxy:
             col_value = record.get(colname)
             if col_value != None:
                 result[colname] = col_value
+        
+        pk_name = table_info.pk_name
+        result[pk_name] = record.get(pk_name)
         return result
 
     def add_row_binlog(self, row):
