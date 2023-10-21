@@ -295,9 +295,9 @@ class HandlerManager:
     def load_model_dir(self, unload=False, load=False, mod_name="handlers", dirname=""):
         dirname = os.path.abspath(dirname)
         if not os.path.exists(dirname):
-            logging.error("model_dir not found:%s", dirname)
-            sys.exit(1)
-            return
+            err_msg = f"model_dir not found: {dirname}"
+            logging.error(err_msg)
+            raise Exception(err_msg)
         
         for filename in os.listdir(dirname):
             filepath = os.path.join(dirname, filename)

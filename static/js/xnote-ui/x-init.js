@@ -43,6 +43,7 @@ if (window.xnote === undefined) {
     xnote.events = {};
     // resize事件回调
     xnote.events.resizeHooks = [];
+
     // 表格模块
     xnote.table = {};
     // 编辑器模块
@@ -51,6 +52,9 @@ if (window.xnote === undefined) {
     xnote.state = {};
     // 系统状态
     xnote.state.system = {};
+    // 按键弹起的时间
+    xnote.state.system.keyupTime = new Date().getTime();
+
     // http相关操作
     xnote.http = {};
 
@@ -161,6 +165,12 @@ xnote.http.get = function (url, data, callback, type) {
     return $.get(xnote.config.serverHome + url, data, callback, type).fail(xnote.http.defaultFailHandler);
 }
 
+xnote.isTyping = function() {
+    var now = new Date().getTime();
+    var typingGap = 200; // 200毫秒
+    return now - xnote.state.system.keyupTime < typingGap;
+}
+
 var XUI = function(window) {
     // 处理select标签选中情况
     function initSelect() {
@@ -269,4 +279,7 @@ var XUI = function(window) {
 
 $(document).ready(function() {
     XUI(window);
+    $("body").on("keyup", function (event) {
+        xnote.state.system.keyupTime = new Date().getTime();
+    });
 });

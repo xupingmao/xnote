@@ -129,6 +129,8 @@ class DBBackup:
         db = xtables.MySqliteDB(db = self.db_backup_file)
         # 备份可以关闭同步，加快速度
         db.query("PRAGMA synchronous = OFF")
+        db.query("PRAGMA journal_mode = WAL")
+        db.query("PRAGMA page_size = 16384") # 16K
         batch_size = 100
 
         try:

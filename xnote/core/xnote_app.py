@@ -45,7 +45,7 @@ class XnoteApp:
 
     def __init__(self) -> None:
         self.web_app = web.application()
-        self.handler_manager = None
+        self.handler_manager = None # type: None|xmanager.HandlerManager
 
 # 配置日志模块
 logging.basicConfig(
@@ -230,7 +230,7 @@ def init_autoreload():
         autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
         autoreload_thread.watch_dir(xconfig.resolve_config_path("static/js"), recursive=True)
         autoreload_thread.watch_dir(xconfig.resolve_config_path("static/css"), recursive=True)
-        autoreload_thread.watch_file(xconfig.resolve_config_path("core/xtemplate.py"))
+        autoreload_thread.watch_file(xconfig.resolve_config_path("xnote/core/xtemplate.py"))
         for fn in xnote_hooks.HookStore.autoreload_hooks:
             fn(autoreload_thread)
 

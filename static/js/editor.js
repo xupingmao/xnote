@@ -117,7 +117,7 @@ function initCodeMirror(selector, options) {
         $("#execute").show();
         $("#execute").click(function (event) {
             var content = editor.doc.getValue();
-            $.post("/system/command/python", 
+            xnote.http.post("/system/command/python", 
                 {content: content} ,
                 function (responseText) {
                     var data = responseText;
@@ -169,6 +169,24 @@ function initCodeMirror(selector, options) {
         return 1;
     }
 
+    // 判断是否是隔离行
+    function isSeperateLine(line) {
+        if (line.length==0) {
+            return false;
+        }
+        for (var i = 0; i < line.length; i++) {
+            var char = line[i];
+            if (char != "-") {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function makeSeperateLine(length) {
+        return "-".repeat(length);
+    }
+
     function getStringWidth(str) {
         if (!str) {
             return 0;
@@ -180,26 +198,37 @@ function initCodeMirror(selector, options) {
         return Math.round(width);
     }
 
+    function getStringWidthIgnoreLine(text) {
+        if (isSeperateLine(text)) {
+            return 3;
+        } else {
+            return getStringWidth(text);
+        }
+    }
+
     function formatTable(text) {
         // var text = "name|age|comment\n---|----|--\nCheck No|001|Nothing\nHello中文02|002|中文";
         var lines = text.split('\n');
         var table = [];
         var colWidth = [];
+        var defaultWidth = 3;
 
+        // 计算每一个单元格的最大宽度
         for (var i = 0; i < lines.length; i++) {
-            var row = lines[i];
-            var cols = row.split('|');
+            var line = lines[i];
+            var cols = line.split('|');
             table[i] = cols;
-            for (var j = 0; j < cols.length; j++) {
-                if (cols.length > 1) {                
+            if (cols.length > 1) {
+                // 命中了table的规则
+                for (var j = 0; j < cols.length; j++) {
                     var cell = cols[j].trim();
                     cols[j] = cell;
-                    var width = colWidth[j] || 0;
-                    colWidth[j] = Math.max(getStringWidth(cell), width);
+                    var width = colWidth[j] || defaultWidth;
+                    colWidth[j] = Math.max(getStringWidthIgnoreLine(cell), width);
                 }
             }
         }
-        console.log(colWidth);
+        console.log("colWidth:", colWidth);
 
         var newText = "";
         var newLines = [];
@@ -209,12 +238,12 @@ function initCodeMirror(selector, options) {
             if (row.length > 1) {            
                 for (var j = 0; j < row.length; j++) {
                     var cell = row[j].trim();
-                    if (cell.indexOf('---') >= 0) {
-                        row[j] = cell.padLeft(colWidth[j], '-');
+                    if (isSeperateLine(cell)) {
+                        // 分割符号
+                        row[j] = makeSeperateLine(colWidth[j]);
                     } else {
                         row[j] = cell.padLeft(colWidth[j], ' ');
                     }
-                    
                 }
             }
             newLines.push(row.join('|'));

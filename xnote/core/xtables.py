@@ -50,6 +50,8 @@ class DBPool:
         if db == None:
             db = MySqliteDB(db=dbpath)
             db.query("pragma journal_mode = %s" % xconfig.DatabaseConfig.sqlite_journal_mode)
+            if xconfig.DatabaseConfig.sqlite_page_size != 0:
+                db.query("pragma page_size = %s" % xconfig.DatabaseConfig.sqlite_page_size)
             cls.sqlite_pool[dbpath] = db
         return db
 
@@ -438,7 +440,7 @@ def get_note_table():
 
 
 def get_note_history_table():
-    dbpath = os.path.join(xconfig.DATA_DIR, "record.db")
+    dbpath = xconfig.FileConfig.record_db_file
     return DBWrapper(dbpath, "note_history")
 
 

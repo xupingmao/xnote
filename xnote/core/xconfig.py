@@ -220,7 +220,8 @@ class FileConfig:
     files_dir = ""
 
     boot_lock_file = "" # 启动的锁文件
-    record_db_file = "" # 默认的sqlite数据库
+    record_db_name = "" # 默认的sqlite数据库名称
+    record_db_file = "" # 默认的sqlite数据库路径
     kv_db_file = ""
 
     source_root_dir = "" # 源码根目录
@@ -256,7 +257,8 @@ class FileConfig:
         cls.backup_db_dir = os.path.join(cls.backup_dir, "db")
         makedirs(cls.backup_db_dir)
 
-        cls.record_db_file = cls.get_db_path("record")
+        cls.record_db_name = SystemConfig.get_str("record_db_name", "record")
+        cls.record_db_file = cls.get_db_path(cls.record_db_name)
         cls.kv_db_file = cls.get_db_path("kv_store")
         cls.db_backup_expire_days = SystemConfig.get_int("db_backup_expire_days", 5)
         cls.plugins_dir = os.path.join(cls.data_dir, "scripts", "plugins")
@@ -420,6 +422,7 @@ class DatabaseConfig:
 
     # sqlite配置 { DELETE, TRUNCATE, PERSIST, WAL, MEMORY, OFF }
     sqlite_journal_mode = "delete"
+    sqlite_page_size = 0
     
     # ssdb相关配置
     ssdb_host = ""
@@ -442,7 +445,10 @@ class DatabaseConfig:
         cls.max_open_files = SystemConfig.get_int("max_open_files")
         cls.db_profile_table_proxy = SystemConfig.get_int("db_profile_table_proxy")
         cls.db_sys_log_max_size = SystemConfig.get_int("db_sys_log_max_size", 100000)
+
         cls.sqlite_journal_mode = SystemConfig.get_str("sqlite_journal_mode", "delete")
+        cls.sqlite_page_size = SystemConfig.get_int("sqlite_page_size", 0)
+
         cls.ssdb_host = SystemConfig.get_str("ssdb_host", "127.0.0.1")
         cls.ssdb_port = SystemConfig.get_int("ssdb_port", 8888)
 
@@ -524,9 +530,6 @@ def init(boot_config_file=None, boot_config_kw = None):
     # 初始HTTP端口号
     init_http_port()
 
-    # 数据库地址
-    init_db_config()
-
     # 初始化文件配置
     FileConfig.init(DATA_DIR)
     # 初始化web配置
@@ -535,6 +538,9 @@ def init(boot_config_file=None, boot_config_kw = None):
     DatabaseConfig.init()
     # 初始化模板配置
     TemplateConfig.init()
+
+    # 数据库地址
+    init_db_config()
 
     # 备份数据地址
     BACKUP_DIR = make_data_dir("backup")
@@ -689,7 +695,7 @@ def init_db_config():
 
     DB_DIR = os.path.join(DATA_DIR, "db")
     DB_PATH = os.path.join(DATA_DIR, "data.db")
-    RECORD_FILE = os.path.join(DATA_DIR, "record.db")
+    RECORD_FILE = FileConfig.record_db_file
 
     makedirs(DB_DIR)
 
@@ -922,8 +928,9 @@ class SystemConfig:
     @classmethod
     def get_int(cls, name, default_value=0):
         value = get_system_config(name, default_value)
-        assert isinstance(value, int)
-        return value
+        if value == "":
+            return default_value
+        return int(value)
     
     @classmethod
     def get_str(cls, name, default_value=""):

@@ -18,8 +18,6 @@ import web
 from xutils import six
 from xutils.imports import PY2, getstatusoutput
 
-# 输出缓存区
-STDOUT_BUF_SIZE = 200
 
 def get_current_thread():
     return threading.current_thread()
@@ -29,6 +27,9 @@ def xutils_print_exc():
     xutils.print_exc()
 
 class MyStdout(threading.local):
+
+    # 输出缓存区
+    BUF_SIZE = 200
 
     """标准输出的装饰器，用来拦截标准输出内容
        
@@ -49,7 +50,7 @@ class MyStdout(threading.local):
         result = self.buf
         if result != None:
             result.append(value)
-            if len(result) > STDOUT_BUF_SIZE:
+            if len(result) > self.BUF_SIZE:
                 result.popleft()
         if self.do_print:
             print(value, file=self.outfile, end="")

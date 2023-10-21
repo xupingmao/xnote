@@ -199,7 +199,7 @@
                 version: "{{file.version}}"
             };
 
-            $.post("/note/draft", params, function (resp) {
+            xnote.http.post("/note/draft", params, function (resp) {
                 console.log(resp);
                 if (resp.code == "success") {
                     $("#autosaveResult").show().fadeOut(1000);
@@ -229,7 +229,7 @@
                 id: fileId,
                 token: "{{edit_token}}"
             }
-            $.post("/note/draft", params, function (resp) {
+            xnote.http.post("/note/draft", params, function (resp) {
                 if (resp.code == "success") {
                     if (resp.data != null) {
                         xnote.codeMirror.setValue(resp.data);
@@ -331,7 +331,7 @@
             };
 
 
-            $.post("/note/save", params, function (resp) {
+            xnote.http.post("/note/save", params, function (resp) {
                 if (resp.code == "success") {
                     window.SUBMIT_FORM = true;
                     xnote.toast("保存成功");
@@ -398,13 +398,11 @@
         };
 
         function autoFormat() {
-            var now = new Date().getTime();
-            var editGap = now - xnote.editor.lastKeyUpTime;
-            if (editGap > 1000) {
-                // 编辑间隔大于1秒，视为停顿
-                xnote.editor.formatMarkdownTable();
-            }
-            setTimeout(autoFormat, 500);
+            // 体验不行, 先关闭
+            // if (!xnote.isTyping()) {
+            //     xnote.editor.formatMarkdownTable();
+            // }
+            // setTimeout(autoFormat, 1000);
         }
 
         onPageLoad();

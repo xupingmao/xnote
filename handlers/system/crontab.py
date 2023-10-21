@@ -168,42 +168,6 @@ class ListHandler:
             task_list = task_list,
             display_time_rule = display_time_rule)
 
-
-    @xauth.login_required("admin")
-    def add_request_old(self):
-        url      = xutils.get_argument("url")
-        # interval = xutils.get_argument("interval", 10, type=int)
-        repeat_type = xutils.get_argument("repeat_type", "day")
-        pattern     = xutils.get_argument("pattern")
-
-        if repeat_type == "interval":
-            interval = int(pattern)
-        else:
-            interval = -1
-            if pattern.count(":") == 1:
-                # 如果是分钟默认加上秒
-                pattern = pattern + ":00"
-
-        db  = xtables.get_schedule_table()
-        rows = db.select(where="url=$url", vars=dict(url=url))
-        result = rows.first()
-        if result is None:
-            db.insert(url=url, 
-                interval=interval, 
-                pattern=pattern,
-                ctime=xutils.format_time(), 
-                mtime=xutils.format_time(),
-                repeat_type=repeat_type)
-        else:
-            db.update(where=dict(url=url), 
-                interval=interval, 
-                pattern=pattern,
-                mtime=xutils.format_time(), 
-                repeat_type=repeat_type)
-
-        xmanager.instance().load_tasks()
-        raise web.seeother("/system/crontab")
-
 class AddHandler:
     @xauth.login_required("admin")
     def POST(self):
