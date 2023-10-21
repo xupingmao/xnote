@@ -136,6 +136,8 @@ class DBBackup:
         try:
             for table in xtables.get_all_tables():
                 backup_table = xtables.init_backup_table(table.tablename, db)
+                backup_table.writable = True
+                
                 total_count = table.count()
                 logger.info("backup table:(%s) count:(%d)", table.tablename, total_count)
                 start_time = time.time()
