@@ -869,6 +869,9 @@ def get_user_config_dict(user_name):
 
 
 def get_current_user_config(key, default_value=None):
+    if START_TIME is None:
+        return default_value
+    
     from . import xauth
     """默认值参考DEFAULT_USER_CONFIG"""
     return get_user_config(xauth.current_name(), key, default_value)

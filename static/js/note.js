@@ -3,7 +3,7 @@
  * @deprecated 已废弃
  * @param {object} req 更新请求
  */
-xnote.updateNoteCategory = function(req) {
+xnote.updateNoteCategory = function (req) {
     if (req === undefined) {
         throw new Error("req is undefined");
     }
@@ -19,7 +19,7 @@ xnote.updateNoteCategory = function(req) {
         key: "category",
         value: req.value
     };
-    
+
     xnote.http.post("/note/attribute/update", params, function (resp) {
         console.log("update category", resp);
         if (resp.code == "success") {
@@ -54,8 +54,8 @@ xnote.updateCategoryName = function (req) {
             name: newName
         };
 
-        xnote.http.post("/api/note/category/update", params, function(resp) {
-            if (resp.code=="success") {
+        xnote.http.post("/api/note/category/update", params, function (resp) {
+            if (resp.code == "success") {
                 window.location.reload();
             } else {
                 xnote.alert(resp.message);
@@ -78,7 +78,7 @@ xnote.api["note.create"] = function (req) {
     createOption._format = "json";
 
     var title = req.name;
-    
+
     xnote.http.post("/note/create", createOption, function (resp) {
         if (resp.code == "success") {
             req.callback(resp);
@@ -117,7 +117,7 @@ noteAPI.bindTag = function (cmd) {
     var tagList = cmd.tagList;
     var allTagList = cmd.allTagList; // 全部的标签
     var targetId = cmd.targetId;
-    
+
     if (cmd.tagType != "group" && cmd.tagType != "note") {
         throw new TypeError("无效的tagType");
     }
@@ -129,7 +129,7 @@ noteAPI.bindTag = function (cmd) {
         selectedNames: currentTags,
         manageLink: cmd.manageLink,
         globalTagList: [
-            {tag_name: "待办", tag_code: "$todo$"}
+            { tag_name: "待办", tag_code: "$todo$" }
         ],
     });
 
@@ -165,7 +165,7 @@ var NoteView = {};
 xnote.action.note = NoteView;
 xnote.note = NoteView;
 
-NoteView.onTagClick = function(target) {
+NoteView.onTagClick = function (target) {
     $(target).toggleClass("active");
 }
 
@@ -180,9 +180,9 @@ NoteView.editNoteTag = function (target) {
     }
 
     var listParams = {
-        tag_type:tagType,
-        group_id:parentId,
-        v:2,
+        tag_type: tagType,
+        group_id: parentId,
+        v: 2,
     };
 
     xnote.http.get("/note/tag/list", listParams, function (resp) {
@@ -201,7 +201,7 @@ NoteView.editNoteTag = function (target) {
     })
 };
 
-NoteView.searchNote = function() {
+NoteView.searchNote = function () {
     var self = this;
     var searchText = $("#note-search-text").val();
     var api = "";
@@ -271,7 +271,7 @@ NoteView.renderNoteList = function (itemList) {
 
 NoteView.openDialogToAddNote = function (event) {
     var tagCode = $(event.target).attr("data-code");
-    xnote.http.get("/note/api/timeline?type=all&limit=100",  function (resp) {
+    xnote.http.get("/note/api/timeline?type=all&limit=100", function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
         } else {
@@ -296,7 +296,7 @@ NoteView.addNoteToTag = function (tagCode) {
         tag_code: tagCode,
         note_ids: selectedIds.join(",")
     };
-    xnote.http.post("/note/tag/bind", params, function(resp) {
+    xnote.http.post("/note/tag/bind", params, function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
         } else {
@@ -308,7 +308,7 @@ NoteView.addNoteToTag = function (tagCode) {
 
 // 选择笔记本-平铺视图
 // 这个函数需要配合group_select_script.html使用
-NoteView.selectGroupFlat =  function (req) {
+NoteView.selectGroupFlat = function (req) {
     var noteId = req.noteId;
     var respData;
 
@@ -369,9 +369,9 @@ NoteView.selectGroupFlat =  function (req) {
         last.title = "归档";
 
         var groups = [first, second, last];
-        var hasNoMatch = (data.length===0);
+        var hasNoMatch = (data.length === 0);
 
-        var html = $("#group-select-tpl").renderTemplate({
+        var html = $("#group_select_tpl").renderTemplate({
             groups: groups,
             noteId: noteId,
             hasNoMatch: hasNoMatch
@@ -429,6 +429,28 @@ NoteView.deleteTagMeta = function (tagMetaList) {
         });
     });
 };
+
+// 打开对话框移动笔记
+NoteView.openDialogToMove = function (note_id) {
+    var req = {};
+    req.callback = function (parentId) {
+        if (parentId === undefined || parentId == "") {
+            xnote.alert("parentId is undefined");
+            return;
+        }
+        xnote.http.post("/note/move", { id: note_id, parent_id: parentId }, function (resp) {
+            console.log(resp);
+            window.location.reload();
+        });
+    };
+    this.selectGroupFlat(req);
+};
+
+// 打开对话框移动笔记
+NoteView.openDialogToMoveByElement = function (target) {
+    return this.openDialogToMove($(target).attr("data-id"));
+}
+
 
 // 点击标签操作
 NoteView.onTagClick = function (target) {

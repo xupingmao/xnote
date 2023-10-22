@@ -1,11 +1,18 @@
 <!-- 笔记本设置的移动功能 -->
-<div class="note-group-select col-md-12 scroll-y">
+<!-- 废弃, see group_select_script.html -->
+
+<div class="note_group_tree_select col-md-12 scroll-y">
     
     <div class="group-select-search">
-        <input id="groupSelectInput" type="text" class="nav-search-input" placeholder="搜索"/>
-        <button class="nav-search-btn btn-default">
+        <input id="groupSelectInput" type="text" class="nav-search-input group_search_input" 
+            placeholder="搜索" onchange="xnote.note.onSearchGroupTree()"/>
+        <button class="nav-search-btn btn-default" onclick="xnote.note.onSearchGroupTree()">
             <i class="fa fa-search"></i>
         </button>
+    </div>
+
+    <div class="book-item hide no_match_result">
+        <span class="center">没有搜索到结果</span>
     </div>
 
     <div class="book-item">
@@ -40,35 +47,44 @@
     xnote.handleMoveTo = function (target) {
         var parentId = $(target).attr("data-id");
         var params = { id: "{{id}}", parent_id: parentId};
-        $.post("/note/move", params, function (resp){
+        xnote.http.post("/note/move", params, function (resp){
             console.log(resp);
             if (resp.code == "success") {
                 window.location.reload();
             } else {
                 xnote.alert(resp.message);
             }
-        }).fail(function (err) {
-            xnote.alert("服务繁忙，请稍后重试");
-        })
+        });
     };
 
-    $("#groupSelectInput").unbind("keyup");
-    $("#groupSelectInput").keyup(function(event) {
-        /* Act on the event */
-        var searchKey = $(this).val();
+    var noteSearchTree = $(".note_group_tree_select")
+
+    xnote.note.onSearchGroupTree = function () {
+        var searchKey = noteSearchTree.find(".group_search_input").val();
+        // console.log("search", searchKey);
+
         $(".book-item").show();
+        noteSearchTree.find(".no_match_result").hide();
 
         if (searchKey == "") {
             return;
         }
 
+        var hasMatch = false;
+
         $(".book-item").each(function (index, element) {
             var noteName = $(element).find("a").text();
             if (noteName.indexOf(searchKey) < 0) {
                 $(this).hide();
+            } else {
+                hasMatch = true;
             }
-        })
-    });
+        });
+
+        if (!hasMatch) {
+            noteSearchTree.find(".no_match_result").show();
+        }
+    }
 
     $(".move-link").click(function(e) {
         console.log("move-link clicked");
@@ -80,7 +96,7 @@
             "parent_id": parentId,
         };
 
-        $.get("/note/group/select", params, function(html) {
+        xnote.http.get("/note/group/select", params, function(html) {
             $(".note-group-select").parent().html(html);
         });
     });

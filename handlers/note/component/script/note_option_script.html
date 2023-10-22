@@ -255,12 +255,12 @@
                     return;
                 }
                 var noteId = "{{file.id}}";
-                $.post("/note/move", { id: noteId, parent_id: parentId }, function (resp) {
+                xnote.http.post("/note/move", { id: noteId, parent_id: parentId }, function (resp) {
                     console.log(resp);
                     window.location.reload();
                 });
             };
-            xnote.api["note.move.dialog"](req);
+            xnote.note.selectGroupFlat(req);
         });
     })
 </script>

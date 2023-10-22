@@ -16,7 +16,7 @@ import time
 import copy
 import inspect
 import web
-from xnote.core import xconfig, xauth, xnote_trace, xnote_hooks
+from xnote.core import xconfig, xauth, xnote_trace, xnote_hooks, xtemplate
 import xutils
 import threading
 import logging
@@ -257,6 +257,8 @@ class HandlerManager:
         self.model_list = []
         self.failed_mods = []
 
+        xtemplate.reload()
+        
         # 移除所有的事件处理器
         remove_event_handlers()
 

@@ -237,7 +237,7 @@ def init_autoreload():
     def reload_callback():
         xnote_code_builder.build()
         # 重新加载handlers目录下的所有模块
-        if xconfig.get_system_config("fast_reload"):
+        if xconfig.WebConfig.fast_reload:
             xmanager.reload()
         else:
             xmanager.restart()

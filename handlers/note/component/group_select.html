@@ -1,4 +1,5 @@
 <!-- 移动单个笔记 -->
+<!-- 废弃, see group_select_script.html -->
 {% init callback = "defaultMoveNoteCallback" %}
 
 <div class="group-select-search">
@@ -55,7 +56,7 @@ $(function () {
             xnote.alert("noteId is undefined");
             return;
         }
-        $.post("/note/move", {id:noteId, parent_id: parentId}, function (resp){
+        xnote.http.post("/note/move", {id:noteId, parent_id: parentId}, function (resp){
               console.log(resp);
               window.location.reload();
         });
