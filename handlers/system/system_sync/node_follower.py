@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-22 19:15:29
+@LastEditTime : 2023-10-22 19:55:39
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -517,6 +517,7 @@ class DBSyncer:
 
         if optype == BinLogOpType.sql_upsert:
             old = table.select_first(where=where)
+            # TODO 使用replace解决冲突的问题?
             try:
                 if old == None:
                     table.insert(**value)
@@ -536,6 +537,9 @@ class DBSyncer:
             return
         if err_msg.startswith("(1062, \"duplicate entry"):
             # mysql: 主键冲突
+            return
+        if err_msg.startswith("(1366, \"incorrect integer value:"):
+            # mysql: 类型错误
             return
         if err_msg.startswith("unique constraint failed:"):
             # sqlite: 主键冲突

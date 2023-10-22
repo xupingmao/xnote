@@ -23,7 +23,7 @@
 <link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/jquery.terminal/jquery.terminal-1.3.1.min.css">
 {% end %}
 
-{% block body %}
+{% block body_left %}
 
 <div class="card">
     {% set title = "在线终端" %}
@@ -41,7 +41,7 @@ $(document).ready(function() {
         if (command.indexOf("calc ")>=0) {
             term.echo(eval(command.substring(4)));
         } else {            
-            $.post("/system/command", {command: command}, function (data, status) {
+            xnote.http.post("/system/command", {command: command}, function (data, status) {
                 term.echo(data);
             }).fail(function (data) {
                 console.log(data);
@@ -52,4 +52,8 @@ $(document).ready(function() {
 });
 </script>
 
+{% end %}
+
+{% block body_right %}
+    {% include common/sidebar/default.html %}
 {% end %}
