@@ -4,15 +4,15 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-15 17:12:27
-@FilePath     : /xnote/core/xtables_new.py
-@Description  : 数据库-表定义
+@LastEditTime : 2023-10-22 15:18:04
+@FilePath     : /xnote/xnote/core/xtables_new.py
+@Description  : 数据库-KV表定义
 """
 
 import xutils
 from xutils import dbutil
 
-@xutils.log_init_deco("xtables_new")
+@xutils.log_init_deco("xtables_kv")
 def init():
     # 使用NoSQL风格的数据库接口
     # NoSQL适合的场景：大文档、配置、缓存、计数器、时序日志
@@ -148,6 +148,7 @@ def init_note_tables():
     db.drop_index("mtime")
     db.drop_index("ctime")
     db.rebuild_index("v1")
+    db.delete_table()
 
     # 笔记类目（已删除）
     db = dbutil.register_table("note_category", "笔记类目", category="note", 

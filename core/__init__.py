@@ -17,4 +17,4 @@ import sys
 
 from xnote.core import xconfig, xauth, autoreload, xmanager, xtemplate
 from xnote.core import xnote_hooks, xnote_event, xnote_trace, xnote_app, xnote_user_config
-from xnote.core import xtables, xtables_new
+from xnote.core import xtables

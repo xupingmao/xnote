@@ -33,7 +33,7 @@ from xutils import dbutil
 from xutils import cacheutil, interfaces
 from xutils.sqldb import TableProxy
 from . import xnote_code_builder
-from . import xnote_hooks, xnote_trace, xtables, xtables_new, xconfig, xtemplate, xmanager, xauth
+from . import xnote_hooks, xnote_trace, xtables, xtables_kv, xconfig, xtemplate, xmanager, xauth
 import threading
 import xutils
 import web
@@ -217,7 +217,7 @@ def init_kv_engine():
 @log_mem_info_deco("init_kv_engine")
 def init_kv_db():
     init_kv_engine()
-    xtables_new.init()
+    xtables_kv.init()
 
 def init_autoreload():
 

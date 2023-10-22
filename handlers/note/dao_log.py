@@ -15,6 +15,8 @@
 import xauth
 import xutils
 import xconfig
+import xtables
+
 from xutils import dbutil
 from xutils import dateutil
 from xutils import Storage
@@ -37,50 +39,66 @@ def get_user_note_log_table(user_name):
     return dbutil.get_table("user_note_log", user_name = user_name)
 
 class UserNoteLogDao:
-    db = dbutil.get_table("user_note_log")
+    db = xtables.get_table_by_name("user_note_log")
+
+    @classmethod
+    def get_by_user_and_note(cls, user_id=0, note_id=0):
+        row = cls.db.select_first(where=dict(user_id=user_id, note_id=note_id))
+        if row != None:
+            return NoteVisitLogDO(**row)
+        return None
+    
+    @classmethod
+    def update(cls, log):
+        where_dict = dict(id=log.id)
+        return cls.db.update(where=where_dict, **log)
+    
+    @classmethod
+    def insert(cls, log):
+        log.pop("id")
+        new_id = cls.db.insert(**log)
+        log.id = new_id
+        return new_id
+    
+    @classmethod
+    def list(cls, user_id=0, offset=0, limit=10, order="atime desc"):
+        where_dict = dict(user_id=user_id)
+        result = cls.db.select(where=where_dict, offset=offset, limit=limit, order=order)
+        return result
 
 class NoteVisitLogDO(Storage):
-    def __init__(self):
+    def __init__(self, **kw):
+        self.id = 0
         self.note_id = 0
+        self.user_id = 0
         self.visit_cnt = 0
-        self.ctime = dateutil.format_datetime()
-        self.mtime = dateutil.format_datetime()
         self.atime = dateutil.format_datetime()
-        self.user = ""
+        self.update(kw)
 
 @xutils.timeit_deco(name = "_update_log", switch_func = is_debug_enabled)
-def _update_log(user_name, note, increment = 1, insert_only = False):
+def _update_log(user_name, note, increment = 1, insert_only = False, user_id=0):
     # 部分历史数据是int类型，所以需要转换一下
     note_id = note.id
-    atime = dateutil.format_datetime()
-    db = UserNoteLogDao.db
-    
-    with dbutil.get_write_lock(user_name):
-        log = db.get_by_id(note_id, user_name = user_name)
-        
-        # print(f"_update_log={log}")
+    if user_id == 0:
+        user_id = xauth.UserDao.get_id_by_name(user_name)
 
-        if log is None:
-            log = NoteVisitLogDO()
-            log.note_id = note_id
-            log.visit_cnt  = increment
-            log.atime = atime
-            log.mtime = note.mtime
-            log.ctime = note.ctime
-            log.user = user_name
-            db.put_by_id(note_id, log)
-        else:
-            if insert_only:
-                log_debug("skip for insert_only mode, note_id:{!r}", note_id)
-                return
-            if log.visit_cnt is None:
-                log.visit_cnt = 1
-            log.visit_cnt += increment
-            log.atime = atime
-            log.mtime = note.mtime
-            log.ctime = note.ctime
-            log.user = user_name
-            db.update(log)
+    atime = dateutil.format_datetime()
+
+    log = UserNoteLogDao.get_by_user_and_note(user_id=user_id, note_id=note_id)
+    if log is None:
+        log = NoteVisitLogDO()
+        log.note_id = note_id
+        log.user_id = user_id
+        log.visit_cnt  = increment
+        log.atime = atime
+        UserNoteLogDao.insert(log)
+    else:
+        if insert_only:
+            log_debug("skip for insert_only mode, note_id:{!r}", note_id)
+            return
+        log.visit_cnt += increment
+        log.atime = atime
+        UserNoteLogDao.update(log)
 
 def get_note_ids_from_logs(logs):
     return list(map(lambda x:x.note_id, logs))
@@ -90,12 +108,8 @@ def list_recent_viewed(creator = None, offset = 0, limit = 10):
     if limit is None:
         limit = xconfig.PAGE_SIZE
 
-    user = xauth.current_name()
-    if user is None:
-        user = "public"
-
-    db = get_user_note_log_table(user)
-    logs = db.list_by_index("atime", offset = offset, limit = limit, reverse = True)
+    user_id = xauth.current_user_id()
+    logs = UserNoteLogDao.list(user_id=user_id, offset=offset, limit=limit, order="atime desc")
     atime_dict = dict()
     for log in logs:
         note_id = int(log.note_id)
@@ -120,9 +134,9 @@ def list_hot(user_name, offset = 0, limit = 100):
     if limit < 0:
         limit = MAX_VIEW_LOG
 
-    db = get_user_note_log_table(user_name)
-    logs = db.list_by_index("visit_cnt", 
-        offset = offset, limit = limit, reverse = True)
+    user_id = xauth.UserDao.get_id_by_name(user_name)
+    logs = UserNoteLogDao.list(user_id=user_id,  
+        offset = offset, limit = limit, order="visit_cnt desc")
 
     hot_dict = dict()
     log_dict = dict()

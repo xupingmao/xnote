@@ -46,7 +46,7 @@ fix()
 
 from xnote.core import xconfig, xauth, autoreload, xmanager, xtemplate
 from xnote.core import xnote_hooks, xnote_event, xnote_trace, xnote_app, xnote_user_config
-from xnote.core import xtables, xtables_new
+from xnote.core import xtables
 
 # 兼容历史代码
 sys.modules["xconfig"] = xconfig
@@ -59,5 +59,4 @@ sys.modules["xnote_event"] = xnote_event
 sys.modules["xnote_trace"] = xnote_trace
 sys.modules["xnote_app"] = xnote_app
 sys.modules["xtables"] = xtables
-sys.modules["xtables_new"] = xtables_new
 sys.modules["xnote_user_config"] = xnote_user_config

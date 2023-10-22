@@ -20,6 +20,7 @@ def do_upgrade():
     base.execute_upgrade("20230923_fix_creator_id", handler.fix_creator_id)
     base.execute_upgrade("20230930_fix_gallery", handler.fix_gallery)
     base.execute_upgrade("20231015_fix_note_history", handler.fix_note_history)
+    base.execute_upgrade("20231022_user_note_log", handler.migrate_user_note_log)
 
 
 class KvNoteIndexDO(Storage):
@@ -98,6 +99,26 @@ class SimpleKvDO(xutils.Storage):
     def __init__(self, **kw):
         self._key = ""
         self._id = ""
+        self.update(kw)
+
+class KvUserNoteLogDO(xutils.Storage):
+    def __init__(self, **kw):
+        self.note_id = 0
+        self.user = ""
+        self.visit_cnt = 0
+
+        self.ctime = xtables.DEFAULT_DATETIME
+        self.mtime = xtables.DEFAULT_DATETIME
+        self.atime = xtables.DEFAULT_DATETIME
+
+        self.update(kw)
+
+class NewUserNoteLogDO(Storage):
+    def __init__(self, **kw):
+        self.note_id = 0
+        self.user_id = 0
+        self.visit_cnt = 0
+        self.atime = xtables.DEFAULT_DATETIME
         self.update(kw)
 
 class MigrateHandler:
@@ -260,3 +281,28 @@ class MigrateHandler:
     def fix_note_history(self):
         self.fix_zero_pad(dbutil.get_table("note_history_index"))
         self.fix_zero_pad(dbutil.get_table("note_history"))
+
+
+    def migrate_user_note_log(self):
+        old_db = dbutil.get_table("user_note_log")
+        new_db = xtables.get_table_by_name("user_note_log")
+        for item_ in old_db.iter(limit=-1):
+            item = KvUserNoteLogDO(**item_)
+            user_id = xauth.UserDao.get_id_by_name(item.user)
+            note_id = item.note_id
+
+            if user_id != 0:
+                record = new_db.select_first(where=dict(user_id=user_id, note_id=note_id))
+                if record != None:
+                    record.visit_cnt = item.visit_cnt
+                    record.atime = item.atime
+                else:
+                    new_record = NewUserNoteLogDO()
+                    new_record.user_id = user_id
+                    new_record.note_id = note_id
+                    new_record.atime = item.atime
+                    new_record.visit_cnt = item.visit_cnt
+                    new_db.insert(**new_record)
+                print(f"migrate log {item}")
+            else:
+                print(f"can not migrate log {item}")

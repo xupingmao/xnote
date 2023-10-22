@@ -426,6 +426,20 @@ def init_comment_index_table():
         manager.add_index("target_id")
         manager.table_info.enable_binlog = True
 
+
+def init_user_note_log():
+    """用户笔记日志, 从kv数据迁移过来
+    @since 2023/10/22
+    """
+    table_name = "user_note_log"
+    comment = "笔记用户日志"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("note_id", "bigint", 0)
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("atime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("visit_cnt", "bigint", 0)
+        manager.add_index(["user_id", "note_id"], is_unique=True)
+
 def DBWrapper(dbpath, tablename):
     db = MySqliteDB(db=dbpath)
     return TableProxy(db, tablename)
@@ -545,8 +559,11 @@ def init():
 
     # 随手记
     init_msg_index_table()
+    
     # 笔记索引
     init_note_index_table()
+    init_user_note_log()
+
     # 通用的分享记录
     init_share_info_table()
     
