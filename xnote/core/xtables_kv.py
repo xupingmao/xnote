@@ -7,6 +7,8 @@
 @LastEditTime : 2023-10-22 15:18:04
 @FilePath     : /xnote/xnote/core/xtables_new.py
 @Description  : 数据库-KV表定义
+
+TODO 支持使用sql维护索引 index_type = sql
 """
 
 import xutils

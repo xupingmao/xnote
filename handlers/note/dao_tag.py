@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-13 23:21:07
+@LastEditTime : 2023-10-22 23:47:21
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
@@ -15,7 +15,7 @@ import xtables
 import xauth
 import logging
 import handlers.note.dao as note_dao
-from xutils import functions
+from xutils import functions, lists
 from xutils import dbutil
 from xutils import attrget, Storage
 from handlers.note.dao_api import NoteDao
@@ -80,7 +80,7 @@ class TagBindDao:
     tag_bind_service = TagBindService(TagTypeEnum.note_tag)
 
     @classmethod
-    def bind_tag(cls, user_name="", note_id="", tags=[], parent_id=None):
+    def bind_tag(cls, user_name="", note_id=0, tags=[], parent_id=None):
         tag_bind_db.update_by_id(note_id, Storage(
             note_id=note_id, user=user_name, tags=tags, parent_id=parent_id))
         
@@ -112,6 +112,10 @@ class TagBindDao:
     def iter_user_tag(user_name, limit=-1):
         for value in tag_bind_db.iter(user_name=user_name, limit=limit):
             yield TagBind(**value)
+        
+    @classmethod    
+    def get_uniq_tags(cls, new_tags=[]):
+        return lists.get_uniq_list(new_tags)
     
     @classmethod
     def update_tag_bind(cls, user_id=0, note_id="", new_tags=[]):
@@ -274,6 +278,8 @@ def bind_tags(creator, note_id, tags, tag_type="group"):
     assert isinstance(tags, list)
     note = note_dao.get_by_id(note_id)
     assert note != None, "笔记不存在"
+    
+    tags = TagBindDao.get_uniq_tags(tags)
     
     old_tag_bind = TagBindDao.get_by_note_id(creator, note_id)
     old_tags = []

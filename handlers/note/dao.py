@@ -34,6 +34,7 @@ from xutils import cacheutil
 from .dao_api import NoteDao
 from . import dao_log
 from xutils.db.dbutil_helper import new_from_dict
+from xutils import lists
 from web.db import SQLLiteral
 
 def register_note_table(name, description, check_user=False, user_attr=None):
@@ -881,7 +882,12 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     content = note_dict.content
     creator = note_dict.creator
     name = note_dict.name
-
+    
+    # 标签去重
+    tags = note_dict.tags
+    tags = lists.get_uniq_list(tags)
+    note_dict.tags = tags
+    
     assert is_not_empty(name), "笔记名称不能为空"
 
     if "parent_id" not in note_dict:
@@ -912,7 +918,6 @@ def create_note(note_dict, date_str=None, note_id=None, check_name=True):
         xutils.makedirs(dirname)
 
     # 处理标签
-    tags = note_dict.tags
     if tags != None and len(tags) > 0:
         from . import dao_tag
         dao_tag.TagBindDao.bind_tag(user_name = creator, note_id = note_id, tags=tags)

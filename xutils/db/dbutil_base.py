@@ -53,8 +53,9 @@ import xutils
 from xutils.imports import is_str
 from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json, convert_bytes_to_object_strict
-from ..interfaces import DBInterface, BatchInterface
 from .dbutil_id_gen import TimeSeqId
+
+from ..interfaces import DBInterface, BatchInterface
 from .. import interfaces
 
 try:
@@ -97,6 +98,13 @@ class TableTypeEnum(enum.Enum):
     sorted_set = "sorted_set"
     set = "set"
     index = "index"
+
+class IndexTypeEnum(enum.Enum):
+    """KV表索引类型"""
+    ref = "ref"
+    copy = "copy" 
+    sql = "sql" # TODO 待实现, 通SQL实现索引
+    
 
 get_write_lock = interfaces.get_write_lock
 
@@ -436,7 +444,8 @@ def register_table(table_name, description, **kw):  # type: (...)->TableInfo
 
 
 def _register_table_inner(table_name, description, **kw):
-    if not re.match(r"^[0-9a-z_\$]+$", table_name):
+    if not re.match(r"^[0-9a-z_\$\.]+$", table_name):
+        # 内部校验更加宽松一些
         raise Exception("无效的表名:%r" % table_name)
     
     info = TableInfo(table_name, description, kw.get("category", "default"))

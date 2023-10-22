@@ -343,8 +343,8 @@ class TestMain(BaseTestCase):
         self.assertEqual("success", resp["code"])
 
     def test_note_tag(self):
-        json_request("/note/remove?name=xnote-tag-test")
-        id = create_note_for_test("md", "xnote-tag-test", content = "hello", tags="ABC DEF")
+        delete_note_for_test("xnote-tag-test")
+        id = create_note_for_test("md", "xnote-tag-test", content = "hello", tags="ABC DEF ABC")
 
         note_info = note_dao.get_by_id(id)
         assert note_info != None
@@ -718,7 +718,7 @@ class TestMain(BaseTestCase):
 
         CommentDao.delete_by_id(comment_id)
         
-    def test_note_tag(self):
+    def test_note_tag_v2(self):
         delete_note_for_test("tag-test")
         create_note_for_test("list", "tag-test", tags="tag1 tag2")
         

@@ -27,7 +27,7 @@ class CommentDO(xutils.Storage):
     def __init__(self):
         self.user = ""
         self.user_id = 0
-        self.note_id = ""
+        self.note_id = 0
         self.type = ""
         self.content = ""
         self.ctime = dateutil.format_datetime()
