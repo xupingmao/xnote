@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-14 09:55:27
+@LastEditTime : 2023-10-22 19:15:29
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -530,8 +530,15 @@ class DBSyncer:
     def ignore_or_raise(self, err: Exception):
         err_msg = str(err)
         print(f"err_msg={err_msg}")
-        if err_msg.lower().startswith("(1292, \"incorrect datetime value"):
-            # datetime异常,无法执行成功
+        err_msg = err_msg.lower()
+        if err_msg.startswith("(1292, \"incorrect datetime value"):
+            # mysql: datetime异常,无法执行成功
+            return
+        if err_msg.startswith("(1062, \"duplicate entry"):
+            # mysql: 主键冲突
+            return
+        if err_msg.startswith("unique constraint failed:"):
+            # sqlite: 主键冲突
             return
         raise err
 

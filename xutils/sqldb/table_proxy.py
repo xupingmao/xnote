@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-21 10:26:24
+@LastEditTime : 2023-10-22 19:09:08
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -122,6 +122,7 @@ class TableProxy:
     def update(self, where, vars=None, _test=False, **values):
         self.check_write_state()
         where = self.fix_sql_keywords(where)
+        values = self.fix_sql_keywords(values)
         
         start_time = time.time()
         try:

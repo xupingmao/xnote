@@ -289,7 +289,13 @@ class MigrateHandler:
         for item_ in old_db.iter(limit=-1):
             item = KvUserNoteLogDO(**item_)
             user_id = xauth.UserDao.get_id_by_name(item.user)
-            note_id = item.note_id
+
+            try:
+                # 历史数据有非int类型的
+                note_id = int(item.note_id)
+            except:
+                print(f"invalid note_id: {item.note_id}")
+                continue
 
             if user_id != 0:
                 record = new_db.select_first(where=dict(user_id=user_id, note_id=note_id))
