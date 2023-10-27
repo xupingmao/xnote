@@ -631,7 +631,7 @@ class TestMain(BaseTestCase):
         print("recent_notes", recent_notes)
 
         self.assertTrue(len(recent_notes) > 0)
-        self.assertEqual(recent_notes[0].badge_info, "102")
+        self.assertEqual(recent_notes[0].badge_info, "100")
 
 
     def test_comment_search(self):

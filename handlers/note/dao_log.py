@@ -207,10 +207,12 @@ def add_visit_log(user_name, note):
     return _update_log(user_name, note)
 
 def add_edit_log(user_name, note):
-    return _update_log(user_name, note)
+    # 目前通过mtime记录
+    pass
 
 def add_create_log(user_name, note):
-    return _update_log(user_name, note)
+    # 目前通过ctime记录
+    pass
 
 def list_recent_events(user_name = None, offset = 0, limit = xconfig.PAGE_SIZE):
     create_events = list_recent_created(user_name, offset, limit)
