@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-22 19:09:08
+@LastEditTime : 2023-10-28 20:32:55
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -12,7 +12,7 @@ import time
 import xutils
 import web.db
 from . import table_manager
-from xutils.interfaces import ProfileLog, ProfileLogger
+from xutils.interfaces import ProfileLog, ProfileLogger, SQLDBInterface
 from xutils.db.binlog import BinLog, BinLogOpType
 
 
@@ -21,7 +21,7 @@ class TableConfig:
     log_profile = False
     enable_binlog = False
 
-class TableProxy:
+class TableProxy(SQLDBInterface):
     """基于web.db的装饰器
     SqliteDB是全局唯一的, 它的底层使用了连接池技术, 每个线程都有独立的sqlite连接
     """
@@ -250,3 +250,6 @@ class TableProxy:
         for pk_value in pk_list:
             BinLog.get_instance().add_log(BinLogOpType.sql_delete, pk_value, table_name=self.tablename)
         
+
+    def get_column_names(self):
+        return self.table_info.column_names

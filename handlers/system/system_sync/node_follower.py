@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-22 19:55:39
+@LastEditTime : 2023-10-28 20:41:50
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -335,6 +335,12 @@ class DBSyncer:
 
     def put_db_last_key(self, last_key):
         CONFIG.put("follower_db_last_key", last_key)
+
+    def get_table_v2_or_None(self, table_name):
+        try:
+            return dbutil.get_table_v2(table_name)
+        except:
+            return None
     
     def put_and_log(self, key, value):
         assert key != None
@@ -342,6 +348,11 @@ class DBSyncer:
         done = False
         try:
             table_name = self.get_table_name_by_key(key)
+            table_v2 = self.get_table_v2_or_None(table_name)
+            if table_v2 != None:
+                table_v2.put_by_key(key, value, fix_index=True)
+                return
+            
             table_info = dbutil.get_table_info(table_name)
             if table_info == None:
                 logging.warning("table not exists: %s", table_name)
@@ -358,6 +369,7 @@ class DBSyncer:
             xutils.print_exc()
         
         if not done:
+            # 失败才记录binlog
             batch = dbutil.create_write_batch()
             batch.put(key, value, check_table=False)
             self._binlog.add_log("put", key, value, batch = batch)
@@ -367,6 +379,12 @@ class DBSyncer:
         assert key != None
         done = False
         try:
+            table_name = self.get_table_name_by_key(key)
+            table_v2 = self.get_table_v2_or_None(table_name)
+            if table_v2 != None:
+                table_v2.delete_by_key(key)
+                return
+            
             table = self.get_table_by_key(key)
             if table != None:
                 table.delete_by_key(key)

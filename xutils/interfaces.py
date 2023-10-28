@@ -261,5 +261,8 @@ class SQLDBInterface:
     def delete(self,  where, using=None, vars=None, _test=False):
         pass
 
+    def get_column_names(self):
+        return []
+
 empty_db = DBInterface()
 empty_cache = CacheInterface()

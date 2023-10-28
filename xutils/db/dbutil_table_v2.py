@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-28 09:54:54
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-28 20:12:08
+@LastEditTime : 2023-10-28 20:44:20
 @FilePath     : /xnote/xutils/db/dbutil_table_v2.py
 @Description  : 数据库表-API
 """
@@ -28,6 +28,7 @@ class KvTableV2:
         # 参数检查
         table_info = get_table_info(table_name)
         assert table_info != None
+        assert table_info.index_db != None
 
         self.table_name = table_name
         self.key_name = "_key"
@@ -36,8 +37,7 @@ class KvTableV2:
         self.table_info = table_info
         self.binlog = BinLog.get_instance()
         self.binlog_enabled = True
-        self.index_column_names = get_table_index_names(table_name)
-        assert table_info.index_db != None
+        self.index_column_names = table_info.index_db.get_column_names()
         self.index_db = table_info.index_db
 
     def set_binlog_enabled(self, enabled=True):
@@ -91,10 +91,7 @@ class KvTableV2:
             raise Exception("invalid key:(%s), prefix:(%s)" %
                             (key, self.prefix))
 
-    def _get_prefix(self, user_name=None):
-        return self.table_name + ":"
-
-    def _put_obj(self, key, obj, sync=False):
+    def _put_obj(self, key, obj, sync=False, fix_index=False):
         # ~~写redo-log，启动的时候要先锁定检查redo-log，恢复异常关闭的数据~~
         # 不需要重新实现redo-log，直接用leveldb的批量处理功能即可
         # 使用leveldb的批量操作可以确保不会读到未提交的数据
@@ -107,7 +104,11 @@ class KvTableV2:
                 "put", key, obj, batch=batch, old_value=old_obj)
         # 更新批量操作
         batch.commit(sync)
-        self.update_index(obj)
+        
+        if fix_index:
+            self.rebuild_record_index(key, obj)
+        else:
+            self.update_index(obj)
 
     def is_valid_key(self, key=None):
         assert isinstance(key, str)
@@ -233,7 +234,7 @@ class KvTableV2:
         key = self._build_key(id)
         self.put_by_key(key, obj)
 
-    def put_by_key(self, key, obj):
+    def put_by_key(self, key, obj, fix_index=False):
         """直接通过`key`进行更新"""
         self._check_key(key)
         self._check_value(obj, key=key)
@@ -242,7 +243,7 @@ class KvTableV2:
         obj[self.id_name] = self._get_id_from_key(key)
         
         update_obj = obj
-        self._put_obj(key, update_obj)
+        self._put_obj(key, update_obj, fix_index=fix_index)
 
     def delete(self, obj):
         obj_key = self._get_key_from_obj(obj)
@@ -336,10 +337,14 @@ class KvTableV2:
     def rebuild_index_no_check(self):
         # TODO 可以通过复制表的方式重建索引,减少数据库的锁时间
         for key, item in prefix_iter(self.prefix, include_key=True):
-            sql_record = self.build_sql_record(item)
-            id = self._get_int_id_from_key(key)
-            old_index = self.index_db.select_first(where=dict(id=id))
-            if old_index == None:
-                self.index_db.insert(**sql_record)
-            else:
-                self.index_db.update(where=dict(id=id), **sql_record)
+            self.rebuild_record_index(key, item)
+
+    def rebuild_record_index(self, key, item):
+        """重建单条记录的索引"""
+        sql_record = self.build_sql_record(item)
+        id = self._get_int_id_from_key(key)
+        old_index = self.index_db.select_first(where=dict(id=id))
+        if old_index == None:
+            self.index_db.insert(**sql_record)
+        else:
+            self.index_db.update(where=dict(id=id), **sql_record)

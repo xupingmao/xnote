@@ -33,8 +33,7 @@ db.register_index("age")
 dbutil.register_table("test_user_db1", "测试数据库用户版v1")
 dbutil.register_table("test_user_db", "测试数据库用户版", user_attr="user")
 
-db = dbutil.register_table("test_table_v2", "测试数据表V2", index_db=xtables.get_table_by_name("test_index"))
-db.register_index("name")
+db = dbutil.register_table("test_v2_table", "测试V2表", index_db=xtables.get_table_by_name("test_index"))
 
 class RecordV2DO(Storage):
 
@@ -204,7 +203,7 @@ class TestMain(BaseTestCase):
 class TestMainV2(BaseTestCase):
     
     def test_crud(self):
-        db = dbutil.get_table_v2("test_table_v2")
+        db = dbutil.get_table_v2("test_v2_table")
         record = RecordV2DO(name = "test", age=20)
         new_id = db.insert(record)
 
@@ -229,7 +228,7 @@ class TestMainV2(BaseTestCase):
 
 
     def test_select(self):
-        db = dbutil.get_table_v2("test_table_v2")
+        db = dbutil.get_table_v2("test_v2_table")
         for item in db.iter():
             db.delete(item)
 
