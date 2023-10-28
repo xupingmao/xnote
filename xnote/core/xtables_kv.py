@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-22 15:18:04
-@FilePath     : /xnote/xnote/core/xtables_new.py
+@LastEditTime : 2023-10-28 11:47:11
+@FilePath     : /xnote/xnote/core/xtables_kv.py
 @Description  : 数据库-KV表定义
 
 TODO 支持使用sql维护索引 index_type = sql
@@ -13,6 +13,7 @@ TODO 支持使用sql维护索引 index_type = sql
 
 import xutils
 from xutils import dbutil
+from . import xtables
 
 @xutils.log_init_deco("xtables_kv")
 def init():

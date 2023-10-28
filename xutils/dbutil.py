@@ -9,6 +9,7 @@ from xutils.db.dbutil_hash import *
 from xutils.db.dbutil_sortedset import *
 from xutils.db.binlog import BinLog
 from xutils.db.dbutil_set import KvSetTable
+from xutils.db2 import TableV2
 
 def _get_table_no_lock(table_name):
     table = LDB_TABLE_DICT.get(table_name)
@@ -47,6 +48,8 @@ def get_table(table_name, user_name=None):
 def get_hash_table(table_name, user_name=None):
     return KvHashTable(table_name, user_name=user_name)
 
+def get_table_v2(table_name=""):
+    return TableV2(table_name)
 
 @xutils.log_init_deco("leveldb")
 def init(db_dir,

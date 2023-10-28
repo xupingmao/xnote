@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-14 17:17:50
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-27 13:33:36
+@LastEditTime : 2023-10-28 12:47:08
 @FilePath     : /xnote/tests/test_xutils_db_table.py
 @Description  : table测试
 """
@@ -23,6 +23,9 @@ json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
+with xtables.create_default_table_manager("test_index", check_table_define=False) as manager:
+    manager.add_column("name", "varchar(50)", "")
+
 db = dbutil.register_table("test", "测试数据库")
 db.register_index("name")
 db.register_index("age")
@@ -30,7 +33,15 @@ db.register_index("age")
 dbutil.register_table("test_user_db1", "测试数据库用户版v1")
 dbutil.register_table("test_user_db", "测试数据库用户版", user_attr="user")
 
+db = dbutil.register_table("test_table_v2", "测试数据表V2", index_db=xtables.get_table_by_name("test_index"))
+db.register_index("name")
 
+class RecordV2DO(Storage):
+
+    def __init__(self, **kw):
+        self.name = ""
+        self.age = 0
+        self.update(kw)
 
 class TestMain(BaseTestCase):
 
@@ -189,3 +200,31 @@ class TestMain(BaseTestCase):
         test_base.json_request("/system/db/drop_table", method="POST", data=dict(table_name=info.name))
         
         self.assertEqual(0, dbutil.count_table(info.name))
+
+class TestMainV2(BaseTestCase):
+    
+    def test_crud(self):
+        db = dbutil.get_table_v2("test_table_v2")
+        record = RecordV2DO(name = "test", age=20)
+        new_id = db.insert(record)
+
+        record = db.get_by_id(new_id)
+        assert record != None
+        assert record.name == "test"
+        assert record.age == 20
+
+        record = db.select_first(where=dict(name="test"))
+        assert record != None
+        assert record.age == 20
+
+        record.name = "test-2"
+        db.update(record)
+
+        record = db.select_first(where=dict(name="test-2"))
+        assert record != None
+        assert record.age == 20
+        assert record.name == "test-2"
+
+
+
+

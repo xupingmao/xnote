@@ -241,6 +241,25 @@ class SortedSetInterface:
     
     def list_by_score(self, **kw):
         return []
+    
+class SQLDBInterface:
+
+    def insert(self, seqname=None, _test=False, **values):
+        return 0
+
+    def select(self, vars=None, what='*', where=None, order=None, group=None,
+               limit=None, offset=None, _test=False):
+        return []
+    
+    def select_first(self, vars=None, what='*', where=None, order=None, group=None,
+               limit=None, offset=None, _test=False):
+        return None
+    
+    def update(self, where, vars=None, _test=False, **values):
+        pass
+
+    def delete(self,  where, using=None, vars=None, _test=False):
+        pass
 
 empty_db = DBInterface()
 empty_cache = CacheInterface()

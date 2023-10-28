@@ -55,7 +55,7 @@ from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json, convert_bytes_to_object_strict
 from .dbutil_id_gen import TimeSeqId
 
-from ..interfaces import DBInterface, BatchInterface
+from ..interfaces import DBInterface, BatchInterface, SQLDBInterface
 from .. import interfaces
 
 try:
@@ -103,7 +103,7 @@ class IndexTypeEnum(enum.Enum):
     """KV表索引类型"""
     ref = "ref"
     copy = "copy" 
-    sql = "sql" # TODO 待实现, 通SQL实现索引
+    sql = "sql" # 通SQL实现索引
     
 
 get_write_lock = interfaces.get_write_lock
@@ -313,6 +313,7 @@ class TableInfo:
         self.check_user = False
         self.user_attr = None
         self.is_deleted = False
+        self.index_db = None # type: None|SQLDBInterface
 
     def check_and_register(self):
         if self.user_attr != None:
@@ -452,6 +453,7 @@ def _register_table_inner(table_name, description, **kw):
     info.check_user = kw.get("check_user", False)
     info.user_attr = kw.get("user_attr")
     info.type = kw.get("type", "table")
+    info.index_db = kw.get("index_db")
     info.check_and_register()
 
     return info
