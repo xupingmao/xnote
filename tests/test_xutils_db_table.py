@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-14 17:17:50
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-28 12:47:08
+@LastEditTime : 2023-10-28 20:08:33
 @FilePath     : /xnote/tests/test_xutils_db_table.py
 @Description  : table测试
 """
@@ -225,6 +225,23 @@ class TestMainV2(BaseTestCase):
         assert record.age == 20
         assert record.name == "test-2"
 
+        db.rebuild_index("v1")
 
 
+    def test_select(self):
+        db = dbutil.get_table_v2("test_table_v2")
+        for item in db.iter():
+            db.delete(item)
 
+        record = RecordV2DO(name = "test-1", age=20)
+        db.insert(record)
+        record = RecordV2DO(name = "test-2", age=20)
+        db.insert(record)
+        record = RecordV2DO(name = "name-3", age=30)
+        db.insert(record)
+
+        values = db.select(where="name LIKE $name", vars=dict(name="test-%"), limit=20)
+        assert len(values) == 2
+        assert isinstance(values, list)
+        first = values[0]
+        assert first.age == 20

@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-28 09:54:54
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-28 12:47:54
-@FilePath     : /xnote/xutils/db2/table_v2.py
+@LastEditTime : 2023-10-28 20:12:08
+@FilePath     : /xnote/xutils/db/dbutil_table_v2.py
 @Description  : 数据库表-API
 """
 
@@ -18,7 +18,7 @@ from xutils.db.encode import (
 )
 from xutils.db.binlog import BinLog
 
-class TableV2:
+class KvTableV2:
     """基于SQL+KV的表
     - 索引使用SQL维护
     - 数据使用KV维护
@@ -61,10 +61,9 @@ class TableV2:
     def _get_id_from_key(self, key):
         return decode_str(key.rsplit(":", 1)[-1])
 
-    def _get_user_from_key(self, key):
-        parts = key.split(":")
-        assert len(parts) == 3, parts
-        return parts[1]
+    def _get_int_id_from_key(self, key):
+        id_str = self._get_id_from_key(key)
+        return int(id_str)
 
     def _format_value(self, key, value):
         if not isinstance(value, dict):
@@ -124,13 +123,10 @@ class TableV2:
         return self.get_by_key(key, default_value)
 
     def batch_get_by_id(self, row_id_list, default_value=None):
-        for row_id in row_id_list:
-            validate_str(row_id, "invalid row_id:{!r}", row_id)
-
         key_list = []
         key_id_dict = {}
         for row_id in row_id_list:
-            q_row_id = encode_str(row_id)
+            q_row_id = str(row_id)
             key = self._build_key(q_row_id)
             key_list.append(key)
             key_id_dict[key] = row_id
@@ -142,6 +138,22 @@ class TableV2:
             object = key_result.get(key)
             id = key_id_dict.get(key)
             result[id] = object
+        return result
+    
+    def batch_get_list_by_ids(self, row_id_list, default_value=None):
+        key_list = []
+        for row_id in row_id_list:
+            q_row_id = str(row_id)
+            key = self._build_key(q_row_id)
+            key_list.append(key)
+
+        dict_result = self.batch_get_by_key(
+            key_list, default_value=default_value)
+        result = []
+        for key in key_list:
+            object = dict_result.get(key)
+            if object != None:
+                result.append(object)
         return result
 
     def get_by_key(self, key, default_value=None):
@@ -175,7 +187,9 @@ class TableV2:
     def build_sql_record(self, obj):
         result = {}
         for attr in self.index_column_names:
-            result[attr] = obj.get(attr)
+            attr_value = obj.get(attr)
+            if attr_value != None:
+                result[attr] = obj.get(attr)
         return result
 
     def insert(self, obj):
@@ -231,10 +245,8 @@ class TableV2:
         self._put_obj(key, update_obj)
 
     def delete(self, obj):
-        id = self._get_int_id_from_obj(obj)
         obj_key = self._get_key_from_obj(obj)
         self.delete_by_key(obj_key)
-        self.index_db.delete(where=dict(id=id))
 
     def batch_delete(self, obj_list=[]):
         if len(obj_list) == 0:
@@ -258,7 +270,7 @@ class TableV2:
         validate_str(key, "delete_by_key: invalid key")
         self._check_before_delete(key)
 
-        old_obj = get(key)
+        old_obj = self.get_by_key(key)
         if old_obj is None:
             self.delete_index_by_key(key)
             return
@@ -275,9 +287,8 @@ class TableV2:
         self.index_db.delete(where=dict(id=id))
 
     def delete_index_by_key(self, key):
-        id = self._get_id_from_key(key)
-        int_id = int(id)
-        self.index_db.delete(where=dict(id=int_id))
+        id = self._get_int_id_from_key(key)
+        self.index_db.delete(where=dict(id=id))
 
     def update_index(self, record):
         sql_record = self.build_sql_record(record)
@@ -287,10 +298,48 @@ class TableV2:
     def select(self, where=None, vars=None, offset=0, limit=10, order=None):
         rows = self.index_db.select(what="id", where=where, vars=vars, order=order, offset=offset, limit=limit)
         ids = [row.id for row in rows]
-        return self.batch_get_by_id(ids)
+        return self.batch_get_list_by_ids(ids)
 
     def select_first(self, where=None, vars=None, order=None):
         record = self.index_db.select_first(what="id", where=where, vars=vars, order=order, offset=0, limit=1)
         if record == None:
             return None
         return self.get_by_id(record.id)
+
+    def iter(self, where="", vars=None, batch_size=20):
+        assert isinstance(where, str)
+        
+        last_id = 0
+        while True:
+            this_vars = dict(last_id = last_id)
+            if vars != None:
+                this_vars.update(vars)
+            records = self.index_db.select(where = "id > $last_id " + where, vars = this_vars, limit = batch_size, order="id")
+            if len(records) == 0:
+                break
+            ids = [record.id for record in records]
+            result_list = self.batch_get_list_by_ids(ids)
+            for item in result_list:
+                yield item
+
+    def rebuild_index(self, version="v1"):
+        idx_version_key = "_idx_version:%s" % self.table_name
+        current_version = db_get(idx_version_key)
+        if current_version == version:
+            logging.info("当前索引已经是最新版本, table=%s, version=%s" %
+                            (self.table_name, version))
+            return
+        self.rebuild_index_no_check()
+        db_put(idx_version_key, version)
+        logging.info("索引重建完成, table=%s", self.table_name)
+
+    def rebuild_index_no_check(self):
+        # TODO 可以通过复制表的方式重建索引,减少数据库的锁时间
+        for key, item in prefix_iter(self.prefix, include_key=True):
+            sql_record = self.build_sql_record(item)
+            id = self._get_int_id_from_key(key)
+            old_index = self.index_db.select_first(where=dict(id=id))
+            if old_index == None:
+                self.index_db.insert(**sql_record)
+            else:
+                self.index_db.update(where=dict(id=id), **sql_record)
