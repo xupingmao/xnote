@@ -12,7 +12,7 @@
     - [x] 优化侧边栏模式
 - 系统功能
     - [x] 支持作为模块(xnote-web)发布到pip
-    - [x] 插件支持namespace唯一标识，支持本地开发远程部署
+    - [x] 插件支持 plugin_id 唯一标识，支持本地开发远程部署
     - [x] 支持sql数据库的binlog同步
     - [x] 笔记、评论、随手记拆分成sql存储索引，kv存储主数据
     - [x] 移动tornado模板库到`xutils`模块

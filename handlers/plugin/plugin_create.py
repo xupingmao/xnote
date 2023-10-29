@@ -25,7 +25,7 @@ PLUGIN_API = xutils.Module("plugin")
 DEFAULT_PLUGIN_TEMPLATE = '''# -*- coding:utf-8 -*-
 # @since $since
 # @author $author
-# @namespace $namespace
+# @plugin_id $plugin_id
 import os
 import re
 import math
@@ -82,7 +82,7 @@ class NewPluginHandler(BasePlugin):
             code = xconfig.get("NEW_PLUGIN_TEMPLATE", DEFAULT_PLUGIN_TEMPLATE)
             code = code.replace("$since", xutils.format_datetime())
             code = code.replace("$author", user_name)
-            code = code.replace("$namespace", xutils.create_uuid())
+            code = code.replace("$plugin_id", xutils.create_uuid())
             xutils.writefile(name, code)
             # 添加一个访问记录，使得新增的插件排在前面
             basename = os.path.basename(name)

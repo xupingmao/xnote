@@ -270,9 +270,6 @@ class HandlerManager:
         # 重新加载定时任务
         self.load_tasks()
 
-        # 清空缓存
-        cacheutil.clear_temp()
-
         for reload_func in xnote_hooks.get_reload_hooks():
             reload_func(self)
 
