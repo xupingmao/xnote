@@ -228,7 +228,6 @@ def inner_plugin(name, url, category="inner", url_query="", icon=None):
     context.name = name
     context.title = name
     context.url = url
-    context.link = url
     context.url_query = url_query
     context.editable = False
     context.category = category
@@ -247,7 +246,6 @@ def note_plugin(name, url, icon=None, size=None, required_role="user", url_query
     context.title = name
     context.url = url
     context.url_query = url_query
-    context.link = url
     context.icon = icon
     context.icon_class = "fa %s" % icon
     context.size = size
@@ -663,7 +661,6 @@ class PluginCategoryListHandler:
         root = PluginContext()
         root.title = T("全部")
         root.url = "/plugin_list?category=all&show_back=true"
-        root.link = root.url
         root.badge_info = total_count
         root.icon_class = DEFAULT_PLUGIN_ICON_CLASS
         plugins.append(root)
@@ -676,7 +673,6 @@ class PluginCategoryListHandler:
             url = get_category_url_by_code(key)
             url = textutil.add_url_param(url, "show_back", "true")
             p.url = url
-            p.link = url
             p.icon_class = get_category_icon_class_by_code(key)
             p.badge_info = count_dict[key]
             plugins.append(p)
@@ -754,9 +750,6 @@ class LoadPluginHandler:
     def GET(self, name=""):
         user_name = xauth.current_name()
         name = xutils.unquote(name)
-
-        if not name.endswith(".py"):
-            name += ".py"
         try:
             url = "/plugin/" + name
             force_reload = self.resolve_force_reload()
@@ -846,7 +839,6 @@ def reload_plugins_by_config(ctx=None):
         context.name = name
         context.title = name
         context.url = url
-        context.link = url
         context.editable = editable
         context.category = category
 

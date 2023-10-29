@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-29 15:43:50
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-29 16:04:18
+@LastEditTime : 2023-10-29 16:32:24
 @FilePath     : /xnote/xnote/plugin/plugin.py
 @Description  : 插件管理
 """
@@ -33,7 +33,6 @@ class PluginContext(Storage):
         
         self.url = ""  # 这个应该算是基础url，用于匹配访问日志
         self.url_query = ""  # 查询参数部分
-        self.link = ""  # URL的别名
         self.category = None
         self.category_list = []
         
@@ -49,6 +48,14 @@ class PluginContext(Storage):
         self.author = None
         self.version = None
         self.debug = False
+    
+    @property
+    def link(self):
+        return self.url
+    
+    @link.setter
+    def set_link(self, link=""):
+        self.url = link
 
     # sort方法重写__lt__即可
     def __lt__(self, other):
@@ -107,6 +114,8 @@ class PluginContext(Storage):
         if self.icon is None:
             self.icon = DEFAULT_PLUGIN_ICON_CLASS
             self.icon_class = DEFAULT_PLUGIN_ICON_CLASS
+        if self.url == "":
+            self.url = f"/plugin/{self.plugin_name}"
 
 
 def is_plugin_file(fpath):
@@ -190,7 +199,6 @@ def load_plugin_by_context_and_class(context: PluginContext, main_class=None):
         context.url = "/plugin/%s" % plugin_name
         context.clazz = main_class
         context.edit_link = "code/edit?path=" + fpath
-        context.link = context.url
 
         # 初始化插件
         if hasattr(main_class, 'on_init'):
