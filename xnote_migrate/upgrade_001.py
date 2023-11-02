@@ -20,6 +20,14 @@ def do_upgrade():
     base.move_upgrade_key(old_key=old_key, new_key=new_key)
     base.execute_upgrade(new_key, rebuild_visit_log)
 
+def get_user_note_log_table(user_name):
+    assert user_name != None, "invalid user_name:%r" % user_name
+    return dbutil.get_table("user_note_log", user_name = user_name)
+
+def delete_visit_log(user_name, note_id):
+    db = get_user_note_log_table(user_name)
+    db.delete_by_id(note_id)
+
 #### 重建访问日志
 def rebuild_visit_log():
     db = dbutil.get_table("note_index")
@@ -29,7 +37,7 @@ def rebuild_visit_log():
             log_info("invalid note:%r", note.id)
             continue
         if note.is_deleted:
-            dao_log.delete_visit_log(note.creator, note_id)
+            delete_visit_log(note.creator, note_id)
             continue
         increment = note.visited_cnt or 1
         dao_log._update_log(note.creator, note, increment)

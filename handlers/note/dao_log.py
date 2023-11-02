@@ -65,6 +65,10 @@ class UserNoteLogDao:
         where_dict = dict(user_id=user_id)
         result = cls.db.select(where=where_dict, offset=offset, limit=limit, order=order)
         return result
+    
+    @classmethod
+    def count(cls, user_id=0):
+        return cls.db.count(where=dict(user_id=user_id))
 
 class NoteVisitLogDO(Storage):
     def __init__(self, **kw):
@@ -197,7 +201,8 @@ def list_recent_created(user_name = None, offset = 0, limit = 10, skip_archived 
     return result
 
 def count_visit_log(user_name):
-    return get_user_note_log_table(user_name).count()
+    user_id = xauth.UserDao.get_id_by_name(user_name)
+    return UserNoteLogDao.count(user_id=user_id)
 
 def delete_visit_log(user_name, note_id):
     db = get_user_note_log_table(user_name)
