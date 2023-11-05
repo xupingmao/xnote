@@ -220,7 +220,7 @@ def on_reload(ctx = None):
         "THEME", 'FS_HIDE_FILES', 'OPTION_STYLE', 
         'PAGE_OPEN', 'RECENT_SEARCH_LIMIT', 
         "PAGE_SIZE", "RECENT_SIZE",
-        "RECORD_LOCATION", "TRASH_EXPIRE",
+        "TRASH_EXPIRE",
         "PAGE_WIDTH", "FS_VIEW_MODE",
         "HIDE_DICT_ENTRY"
     )

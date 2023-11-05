@@ -1,3 +1,13 @@
+# -*- coding:utf-8 -*-
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2023-10-27 21:17:40
+@LastEditors  : xupingmao
+@LastEditTime : 2023-11-04 08:47:44
+@FilePath     : /xnote/xnote/core/xconfig.py
+@Description  : 描述
+"""
 # encoding=utf-8
 # @author xupingmao
 # @modified 2022/03/19 18:10:06
@@ -80,9 +90,6 @@ USE_CACHE_SEARCH = False
 USE_URLENCODE = False
 # 初始化脚本
 INIT_SCRIPT = "init.py"
-RECORD_LOCATION = False  # 是否记录位置信息，可通过脚本配置打开
-FORCE_HTTPS = False  # 强制 HTTPS
-
 
 # *** 样式设置 ***
 # BASE_TEMPLATE = "common/theme/sidebar.html"
@@ -335,6 +342,8 @@ class WebConfig:
         cls.sync_files_from_leader = SystemConfig.get_bool("sync_files_from_leader", False)
         
         cls.cron_enabled = SystemConfig.get_bool("cron_enabled", True)
+        cls.force_https = SystemConfig.get_bool("force_https", False)
+        cls.record_location = SystemConfig.get_bool("record_location", False)
     
     @classmethod
     def load_nav_list(cls):
@@ -433,6 +442,8 @@ class DatabaseConfig:
         cls.db_driver = SystemConfig.get_str("db_driver")
         cls.db_driver_cache = SystemConfig.get_str("db_driver_cache", "")
         cls.db_driver_kv = SystemConfig.get_str("db_driver_kv", "")
+        cls.db_driver_sql = SystemConfig.get_str("db_driver_sql", "")
+
         cls.mysql_cloud_type = SystemConfig.get_str("mysql_cloud_type")
         cls.mysql_database = SystemConfig.get_str("mysql_database")
         cls.user_max_log_size = SystemConfig.get_int("user_max_log_size", 500)
@@ -452,10 +463,11 @@ class DatabaseConfig:
         cls.ssdb_host = SystemConfig.get_str("ssdb_host", "127.0.0.1")
         cls.ssdb_port = SystemConfig.get_int("ssdb_port", 8888)
 
-        if cls.db_driver == "mysql":
-            cls.db_driver_sql = "mysql"
-        else:
-            cls.db_driver_sql = "sqlite"
+        if cls.db_driver_sql == "":
+            if cls.db_driver == "mysql":
+                cls.db_driver_sql = "mysql"
+            else:
+                cls.db_driver_sql = "sqlite"
         
         if cls.db_driver_kv == "":
             cls.db_driver_kv = cls.db_driver
@@ -660,12 +672,10 @@ def init_boot_config(fpath, boot_config_kw=None):
         set_global_config("system.%s" % key, value)
 
     global PORT
-    global FORCE_HTTPS
     global DEBUG
     global DEV_MODE
 
     PORT = get_system_config("port")
-    FORCE_HTTPS = get_system_config("force_https")
     DEBUG = get_system_config("debug")
 
     if DEBUG:
@@ -933,6 +943,8 @@ class SystemConfig:
         value = get_system_config(name, default_value)
         if value == "":
             return default_value
+        if isinstance(value, str):
+            value = value.replace("_", "") # 支持 100_000 这种格式
         return int(value)
     
     @classmethod
@@ -943,8 +955,9 @@ class SystemConfig:
     @classmethod
     def get_bool(cls, name, default_value=False):
         value = get_system_config(name, default_value)
+        if isinstance(value, str):
+            return value.lower() == "true"
         return bool(value)
-
 
 system_config = SystemConfig()
 

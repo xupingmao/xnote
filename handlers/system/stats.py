@@ -81,7 +81,7 @@ class handler:
             # 采集数据时间区间
             save_ip(web.ctx.env.get("HTTP_X_FORWARDED_FOR"))
             save_ip(web.ctx.env.get("REMOTE_ADDR"))
-            if xconfig.RECORD_LOCATION:
+            if xconfig.WebConfig.record_location:
                 content = SCRIPT
 
         if not xauth.is_admin():
