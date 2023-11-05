@@ -9,64 +9,66 @@
 @Description  : 计划管理
 """
 import time
-from xutils import dbutil
-db = dbutil.get_table("month_plan")
+from xnote.core import xauth
+from xutils import dbutil, Storage
 
-class MonthPlanRecord:
+class MonthPlanRecord(Storage):
 
-    def __init__(self) -> None:
+    def __init__(self, **kw):
         self.user = ""
+        self.user_id = 0
         self.month = ""
         self.notes = []
         self.note_ids = []
         self.create_notes = []
         self.update_notes = []
-
-    @staticmethod
-    def from_dict(dict_value):
-        result = MonthPlanRecord()
-        result.__dict__.update(dict_value)
-        return result
-    
-    def to_dict(self):
-        return self.__dict__
+        self.update(kw)
     
     def save(self):
         MonthPlanDao.update(self)
 
 class MonthPlanDao:
 
-    @staticmethod
-    def get_or_create(user_name = "", month = "2020/03"):
+    db = dbutil.get_table_v2("month_plan")
+
+    @classmethod
+    def get_or_create(cls, user_info: xauth.UserDO, month = "2020-03"):
+        db = cls.db
         if month == "now":
-            month = time.strftime("%Y/%m")
-        record = db.first_by_index("user_month", where = dict(user=user_name, month = month))
+            month = time.strftime("%Y-%m")
+        user_id = user_info.id
+        user_name = user_info.name
+
+        record = db.select_first(where = dict(user_id=user_id, month = month))
         if record == None:
             record = MonthPlanRecord()
+            record.user_id = user_id
             record.user = user_name
             record.month = month
-            id = db.insert(record.to_dict())
+            id = db.insert(record)
             record = db.get_by_id(id)
         
         assert isinstance(record, dict)
-        return MonthPlanRecord.from_dict(record)
+        return MonthPlanRecord(**record)
 
-    @staticmethod
-    def get_by_id(user_name = "", id = ""):
+    @classmethod
+    def get_by_id(cls, user_id = 0, id = ""):
+        db = cls.db
         record = db.get_by_id(id)
         if record == None:
             return None
-        if record.user != user_name:
+        if record.user_id != user_id:
             return None
-        return MonthPlanRecord.from_dict(record)
+        return MonthPlanRecord(**record)
     
-    @staticmethod
-    def get_by_month(user_name = "", month = "2020/03"):
-        record = db.first_by_index("user_month", where = dict(user=user_name, month = month))
+    @classmethod
+    def get_by_month(cls, user_id = 0, month = "2020-03"):
+        db = cls.db
+        record = db.select_first(where = dict(user_id=user_id, month = month))
         if record == None:
             return None
-        return MonthPlanRecord.from_dict(record)
+        return MonthPlanRecord(**record)
     
-    @staticmethod
-    def update(record: MonthPlanRecord):
-        db.update(record.to_dict())
+    @classmethod
+    def update(cls, record: MonthPlanRecord):
+        return cls.db.update(record)

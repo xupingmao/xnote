@@ -681,9 +681,10 @@ class TestMain(BaseTestCase):
 
         delete_note_for_test("plan-test")
         note_id = create_note_for_test("md", "plan-test")
-        user_name = xauth.current_name_str()
-        month = time.strftime("%Y/%m")
-        plan_record = MonthPlanDao.get_or_create(user_name, month)
+        user_info = xauth.current_user()
+        assert user_info != None
+        month = time.strftime("%Y-%m")
+        plan_record = MonthPlanDao.get_or_create(user_info, month)
         plan_id = plan_record._id
         json_request_return_dict("/plan/month/add", method="POST", data=dict(id=plan_id, note_ids=str(note_id)))
         self.check_OK("/plan/month")

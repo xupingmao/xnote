@@ -440,6 +440,18 @@ def init_user_note_log():
         manager.add_column("visit_cnt", "bigint", 0)
         manager.add_index(["user_id", "note_id"], is_unique=True)
 
+def init_month_plan_index():
+    """月度计划索引
+    @since 2023/11/05
+    """
+    table_name = "month_plan_index"
+    comment = "月度计划索引"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("user_id", "bigint", default_value=0)
+        manager.add_column("month", "varchar(20)", default_value="")
+        manager.add_index("user_id")
+        manager.table_info.enable_binlog = False
+
 def DBWrapper(dbpath, tablename):
     db = MySqliteDB(db=dbpath)
     return TableProxy(db, tablename)
@@ -563,6 +575,7 @@ def init():
     # 笔记索引
     init_note_index_table()
     init_user_note_log()
+    init_month_plan_index()
 
     # 通用的分享记录
     init_share_info_table()

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-27 21:17:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-04 08:47:44
+@LastEditTime : 2023-11-05 13:24:36
 @FilePath     : /xnote/xnote/core/xconfig.py
 @Description  : 描述
 """
@@ -79,7 +79,7 @@ DEBUG_HTML_BOX = False
 
 PORT = "1234"
 port = PORT
-SITE_HOME = None
+
 # 线程数
 MIN_THREADS = 20
 # 打开浏览器

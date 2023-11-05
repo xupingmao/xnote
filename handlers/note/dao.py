@@ -282,7 +282,7 @@ class NoteIndexDao:
     
     @classmethod
     def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, type_list=[], is_deleted=0, 
-            level=None, date=None, name_like=None, order="id desc"):
+            level=None, date=None, date_start=None, date_end=None, name_like=None, order="id desc"):
         if order=="dtime_asc":
             order = "dtime"
         if order=="ctime_desc":
@@ -307,15 +307,22 @@ class NoteIndexDao:
             where += " AND level=$level"
         if is_deleted != None:
             where += " AND is_deleted=$is_deleted"
+
         if date != None:
             date_like = date + "%"
             where += " AND ctime LIKE $date_like"
+        if date_start != None:
+            where += " AND ctime >= $date_start"
+        if date_end != None:
+            where += " AND ctime < $date_end"
+
         if name_like != None:
             where += " AND name LIKE $name_like"
         if len(type_list) > 0:
             where += " AND type IN $type_list"
         vars = dict(creator_id=creator_id, parent_id=parent_id, type=type, level=level, 
-                    is_deleted=is_deleted, date_like=date_like, name_like=name_like, type_list=type_list)
+                    is_deleted=is_deleted, date_like=date_like, name_like=name_like, 
+                    type_list=type_list, date_start=date_start, date_end=date_end)
         result = cls.db.select(where=where, vars=vars, offset=offset, limit=limit, order=order)
         return cls.fix_result(result)
     
@@ -673,7 +680,7 @@ def build_note_info(note, orderby=None):
     if orderby == "ctime_desc":
         note.badge_info = format_date(note.ctime)
 
-    if note.badge_info is None:
+    if note.badge_info in (None, ""):
         note.badge_info = note.create_date
 
     if note.type == "group":

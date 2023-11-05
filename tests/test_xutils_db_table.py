@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-14 17:17:50
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-28 20:08:33
+@LastEditTime : 2023-11-05 22:27:59
 @FilePath     : /xnote/tests/test_xutils_db_table.py
 @Description  : table测试
 """
@@ -201,8 +201,16 @@ class TestMain(BaseTestCase):
         self.assertEqual(0, dbutil.count_table(info.name))
 
 class TestMainV2(BaseTestCase):
+
+    def drop_table(self, table_name):
+        db = dbutil.get_table_v2(table_name)
+        for item in db.iter_by_index():
+            db.delete(item)
+        for item in db.iter_by_kv():
+            db.delete(item)
     
     def test_crud(self):
+        self.drop_table("test_v2_table")
         db = dbutil.get_table_v2("test_v2_table")
         record = RecordV2DO(name = "test", age=20)
         new_id = db.insert(record)
@@ -229,8 +237,7 @@ class TestMainV2(BaseTestCase):
 
     def test_select(self):
         db = dbutil.get_table_v2("test_v2_table")
-        for item in db.iter():
-            db.delete(item)
+        self.drop_table("test_v2_table")
 
         record = RecordV2DO(name = "test-1", age=20)
         db.insert(record)
@@ -244,3 +251,27 @@ class TestMainV2(BaseTestCase):
         assert isinstance(values, list)
         first = values[0]
         assert first.age == 20
+
+    def test_broken_kv(self):
+        db = dbutil.get_table_v2("test_v2_table")
+        self.drop_table("test_v2_table")
+
+        record = RecordV2DO(name = "test-1", age=20)
+        new_id = db.insert(record)
+
+        # 构建kv数据插入失败的场景
+        dbutil.delete(db.prefix + str(new_id))
+
+        values = db.select(where="name LIKE $name", vars=dict(name="test-%"), limit=20)
+        assert len(values) == 1
+        assert isinstance(values, list)
+        first = values[0]
+        assert first.name == "test-1"
+        assert not hasattr(first, "age") # 没有age属性
+
+        record_by_id = db.get_by_id(new_id)
+        assert record_by_id != None
+        assert record_by_id.name == "test-1"
+        assert not hasattr(record_by_id, "age") # 没有age属性
+
+

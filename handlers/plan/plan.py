@@ -4,38 +4,55 @@
 @email        : 578749341@qq.com
 @Date         : 2023-02-12 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-01-22 00:07:43
-@FilePath     : /xnote/handlers/note/note_helper.py
+@LastEditTime : 2023-11-05 22:54:32
+@FilePath     : /xnote/handlers/plan/plan.py
 @Description  : 计划管理
 """
-import xtemplate
-import xauth
+from xnote.core import xauth, xtemplate
 import xutils
+import datetime
 from xutils import Storage
 from handlers.plan.dao import MonthPlanDao
 from handlers.note import dao as note_dao
-from xutils import functions
+from xutils import functions, dateutil
 
 class MonthPlanHandler:
 
     @xauth.login_required()
     def GET(self):
         kw = Storage()
-        user_name = xauth.current_name_str()
+        user_info = xauth.current_user()
+        assert user_info != None
+        
         date = xutils.get_argument_str("date", "now")
-        date = date.replace("-", "/")
-        record = MonthPlanDao.get_or_create(user_name, date)
+        date = date.replace("/", "-")
+        record = MonthPlanDao.get_or_create(user_info, date)
 
         if len(record.note_ids) > 0:
             note_ids = list(filter(lambda x:x!="", record.note_ids))
             record.notes = note_dao.batch_query_list(note_ids)
             record.notes.sort(key = lambda x:x.name)
 
-        year, month = record.month.split("/")
+        year, month = record.month.split("-")
+        int_year = int(year)
+        int_month = int(month)
+        user_id = user_info.id
 
         kw.record = record
-        kw.year = int(year)
-        kw.month = int(month)
+        kw.year = int_year
+        kw.month = int_month
+
+        next_year = int_year
+        next_month = int_month + 1
+        if next_month == 13:
+            next_year += 1
+            next_month = 1
+
+        date_start = datetime.datetime(year=int_year, month=int_month, day=1)
+        date_end = datetime.datetime(year=next_year, month=next_month, day=1)
+        kw.created_notes = note_dao.NoteIndexDao.list(creator_id=user_id, 
+                                                      date_start=dateutil.format_datetime(date_start), 
+                                                      date_end=dateutil.format_datetime(date_end))
         return xtemplate.render("plan/page/month_plan.html", **kw)
 
 
@@ -48,8 +65,8 @@ class MonthPlanAddAjaxHandler:
         if plan_id == "":
             return dict(code="400", message="参数id不能为空")
 
-        user_name = xauth.current_name_str()
-        record = MonthPlanDao.get_by_id(user_name, plan_id)
+        user_id = xauth.current_user_id()
+        record = MonthPlanDao.get_by_id(user_id, plan_id)
         if record != None:
             assert isinstance(note_ids, list)
             for id in note_ids:
@@ -70,8 +87,8 @@ class MonthPlanRemoveAjaxHandler:
         if note_id == "":
             return dict(code="400", message="参数note_id不能为空")
 
-        user_name = xauth.current_name_str()
-        record = MonthPlanDao.get_by_id(user_name, id)
+        user_id = xauth.current_user_id()
+        record = MonthPlanDao.get_by_id(user_id, id)
         if record != None:
             functions.listremove(record.note_ids, note_id)
             record.save()

@@ -6,7 +6,7 @@ PlanView.state = {
 xnote.action.plan = PlanView;
 
 PlanView.addNote = function (target) {
-    $.get("/note/api/timeline?type=all&limit=100",  function (resp) {
+    xnote.http.get("/note/api/timeline?type=all&limit=100",  function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
         } else {
@@ -53,20 +53,18 @@ PlanView.addSelectedToPlan = function () {
         id: PlanView.state.id,
         note_ids: selectedIds.join(",")
     }
-    $.post("/plan/month/add", params, function (resp) {
+    xnote.http.post("/plan/month/add", params, function (resp) {
         if (resp.code == "success") {
             xnote.toast("加入成功");
             window.location.reload();
         } else {
             xnote.alert(resp.message);
         }
-    }).fail(function (err) {
-        xnote.alert("调用接口失败:" + err);
     });
 };
 
 PlanView.renderNoteList = function (itemList) {
-    var html = $("#select-note-tpl").render({
+    var html = $("#select_note_tpl").render({
         itemList: itemList
     });
     $("#select-note-dialog-body").html(html);
@@ -80,13 +78,11 @@ PlanView.searchNote = function() {
     } else {
         api = "/note/api/timeline?type=search&key=" + searchText;
     }
-    $.get(api, function (resp) {
+    xnote.http.get(api, function (resp) {
         if (resp.code != "success") {
             xnote.toast(resp.message);
         } else {
             PlanView.renderNoteList(resp.data);
         }
-    }).fail(function (err) {
-        xnote.toast("调用接口失败");
     });
 }

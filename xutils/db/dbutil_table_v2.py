@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-28 09:54:54
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-28 20:44:20
+@LastEditTime : 2023-11-05 19:18:54
 @FilePath     : /xnote/xutils/db/dbutil_table_v2.py
 @Description  : 数据库表-API
 """
@@ -121,7 +121,12 @@ class KvTableV2:
         """
         row_id = str(row_id)
         key = self._build_key(row_id)
-        return self.get_by_key(key, default_value)
+        result = self.get_by_key(key, default_value)
+        if result == None:
+            index_result = self.index_db.select_first(where=dict(id=row_id))
+            if index_result != None:
+                return self._format_value(key, index_result)
+        return result
 
     def batch_get_by_id(self, row_id_list, default_value=None):
         key_list = []
@@ -141,15 +146,20 @@ class KvTableV2:
             result[id] = object
         return result
     
-    def batch_get_list_by_ids(self, row_id_list, default_value=None):
+    def batch_get_by_index_list(self, row_list, default_value=None):
         key_list = []
-        for row_id in row_id_list:
-            q_row_id = str(row_id)
+        dict_result = {}
+
+        for row in row_list:
+            q_row_id = str(row.id)
             key = self._build_key(q_row_id)
             key_list.append(key)
+            dict_result[key] = self._format_value(key, row)
 
-        dict_result = self.batch_get_by_key(
+        kv_dict_result = self.batch_get_by_key(
             key_list, default_value=default_value)
+        dict_result.update(kv_dict_result)
+        
         result = []
         for key in key_list:
             object = dict_result.get(key)
@@ -297,31 +307,39 @@ class KvTableV2:
         self.index_db.update(where=dict(id=id), **sql_record)
 
     def select(self, where=None, vars=None, offset=0, limit=10, order=None):
-        rows = self.index_db.select(what="id", where=where, vars=vars, order=order, offset=offset, limit=limit)
-        ids = [row.id for row in rows]
-        return self.batch_get_list_by_ids(ids)
+        rows = self.index_db.select(where=where, vars=vars, order=order, offset=offset, limit=limit)
+        return self.batch_get_by_index_list(rows)
 
-    def select_first(self, where=None, vars=None, order=None):
-        record = self.index_db.select_first(what="id", where=where, vars=vars, order=order, offset=0, limit=1)
-        if record == None:
+    def select_first(self, where=None, vars=None, order="id"):
+        index_record = self.index_db.select_first(where=where, vars=vars, order=order, offset=0, limit=1)
+        if index_record == None:
             return None
-        return self.get_by_id(record.id)
+        kv_record = self.get_by_id(index_record.id)
+        if kv_record == None:
+            key = self._build_key(index_record.id)
+            return self._format_value(key, index_record)
+        return kv_record
 
-    def iter(self, where="", vars=None, batch_size=20):
+    def iter_by_index(self, where="", vars=None, batch_size=20):
+        """内部接口"""
         assert isinstance(where, str)
-        
         last_id = 0
         while True:
             this_vars = dict(last_id = last_id)
             if vars != None:
                 this_vars.update(vars)
-            records = self.index_db.select(where = "id > $last_id " + where, vars = this_vars, limit = batch_size, order="id")
-            if len(records) == 0:
+            index_records = self.index_db.select(where = "id > $last_id " + where, vars = this_vars, limit = batch_size, order="id")
+            if len(index_records) == 0:
                 break
-            ids = [record.id for record in records]
-            result_list = self.batch_get_list_by_ids(ids)
+            result_list = self.batch_get_by_index_list(index_records)
             for item in result_list:
                 yield item
+            last_id = result_list[-1].id
+    
+    def iter_by_kv(self, limit=-1):
+        """内部接口"""
+        for key, item in prefix_iter(self.prefix, include_key=True, limit=limit):
+            yield self._format_value(key, item)
 
     def rebuild_index(self, version="v1"):
         idx_version_key = "_idx_version:%s" % self.table_name
@@ -345,6 +363,7 @@ class KvTableV2:
         id = self._get_int_id_from_key(key)
         old_index = self.index_db.select_first(where=dict(id=id))
         if old_index == None:
+            sql_record["id"] = id
             self.index_db.insert(**sql_record)
         else:
             self.index_db.update(where=dict(id=id), **sql_record)

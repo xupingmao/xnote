@@ -1,8 +1,6 @@
 # encoding=utf-8
-import xtables
 import xutils
-import xauth
-import xconfig
+from xnote.core import xtables, xauth, xconfig
 import logging
 import os
 import handlers.note.dao as note_dao
