@@ -103,6 +103,7 @@ class XnoteLoader(Loader):
                 return os.path.join(template_mapping.dirname, relative_path)
         
         if name.endswith(".str"):
+            # 字符串类型的模板,只在内存种存在
             return name
 
         return os.path.join(xconfig.HANDLERS_DIR, name)
@@ -126,18 +127,6 @@ def set_loader_namespace(namespace):
 
 def get_user_agent():
     return xutils.get_client_user_agent()
-
-
-@xutils.cache(prefix="message.count", expire=360)
-def get_message_count(user):
-    if user is None:
-        return 0
-    try:
-        return xutils.call("message.count", user, 0)
-    except:
-        # 数据库被锁
-        xutils.print_exc()
-        return 0
 
 
 def render_before_kw(kw: dict):
@@ -313,7 +302,12 @@ def init():
     _do_init()
 
 
-class Panel:
+class UIComponent:
+    """UI组件的基类"""
+    def render(self):
+        return ""
+
+class Panel(UIComponent):
 
     def __init__(self):
         self.children = []
@@ -329,7 +323,7 @@ class Panel:
         return html
 
 
-class Input:
+class Input(UIComponent):
     """输入文本框"""
 
     def __init__(self, label, name, value):

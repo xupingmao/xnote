@@ -75,8 +75,11 @@
       var styleText = "";
       var paddingLeft = 10;
       var paddingRight = 10;
+      var showLeftNav = (navStyle == "left" && xnote.isDesktop());
 
-      if (navStyle == "left" && xnote.isDesktop()) {
+      xnote.config.navStyle = navStyle;
+      
+      if (showLeftNav) {
         leftNavWidth = 180;
         xnote.device.leftNavWidth = leftNavWidth;
         contentWidth = winWidth - leftNavWidth;

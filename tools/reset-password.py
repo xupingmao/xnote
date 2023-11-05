@@ -9,10 +9,10 @@ import sys
 sys.path.append(".")
 
 def main():
-    from core import xnote_app
+    from xnote.core import xnote_app
     xnote_app.init_app()
 
-    import xauth
+    from xnote.core import xauth
 
     print("===== Before =====")
     print(xauth.get_user_by_name("admin"))
