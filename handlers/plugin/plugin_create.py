@@ -5,19 +5,17 @@
 
 """插件创建的工具，基于插件开发，但是其实已经不用了，实际创建插件的实现参考 fs/fs_add.py"""
 
-import xauth
 import xutils
 import os
-import xconfig
 import web
-
-from xtemplate import BasePlugin
+from xnote.core import xauth, xconfig
+from xnote.core.xtemplate import BasePlugin
 from xutils import History
 from xutils import cacheutil
 from xutils import Storage
 from xutils import fsutil
 from xutils import textutil, SearchResult, dateutil, dbutil, u
-from . import dao_visit_log
+from . import dao as dao_visit_log
 
 
 PLUGIN_API = xutils.Module("plugin")

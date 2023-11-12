@@ -11,11 +11,20 @@
 
 import os
 import xutils
+import enum
 
 from xnote.core import xconfig
 from xutils import mem_util, fsutil, Storage, attrget, ScriptMeta
 
 DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
+
+
+class PluginMetaKey(enum.Enum):
+    api_level = "api-level"
+    category = "category"
+    id = "id"
+    author = "author"
+
 
 class PluginContext(Storage):
     """插件上下文"""
@@ -123,7 +132,7 @@ def is_plugin_file(fpath):
 
 
 @mem_util.log_mem_info_deco("load_plugin_file", log_args=True)
-def load_plugin_file(fpath, fname=None):
+def load_plugin_file(fpath, fname=None, raise_exception=False):
     if not is_plugin_file(fpath):
         return
     if fname is None:
@@ -159,9 +168,11 @@ def load_plugin_file(fpath, fname=None):
         module = xutils.load_script(fname, vars, dirname=dirname)
         main_class = vars.get("Main")
         return load_plugin_by_context_and_class(context, main_class)
-    except:
+    except Exception as e:
         # TODO 增加异常日志
         xutils.print_exc()
+        if raise_exception:
+            raise e
 
 def load_plugin_by_context(context: PluginContext):
     assert isinstance(context, PluginContext)

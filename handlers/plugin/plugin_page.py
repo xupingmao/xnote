@@ -21,7 +21,7 @@ from xutils import textutil, SearchResult, dateutil, u
 from xutils import attrget
 from xutils import mem_util
 from xutils.imports import ConfigParser
-from handlers.plugin.dao_visit_log import (
+from handlers.plugin.dao import (
     add_visit_log, list_visit_logs, delete_visit_log)
 
 

@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2023-01-29 12:21:04
 @LastEditors  : xupingmao
-@LastEditTime : 2023-03-18 14:42:24
-@FilePath     : /xnote/handlers/plugin/dao_visit_log.py
+@LastEditTime : 2023-11-12 11:03:25
+@FilePath     : /xnote/handlers/plugin/dao.py
 @Description  : 描述
 """
 import xutils

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
+# @id $plugin_id
 # @api-level 2.8
-# @plugin_id $plugin_id
 # @since $since
 # @author $author
 # @version 1.0.0

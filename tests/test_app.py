@@ -445,7 +445,7 @@ class Main:
         user = xauth.get_user_by_name("admin")
         assert user != None
         content = """
-# @plugin_id test-upload-plugin
+# @id test-upload-plugin
 # @title test-upload-plugin
 # @api-level 2.8
         """

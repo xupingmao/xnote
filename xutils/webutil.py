@@ -43,6 +43,9 @@ def _detect_type(default_value, type):
     if isinstance(default_value, int):
         return int
     
+    if isinstance(default_value, float):
+        return float
+    
     return None
 
 def get_argument(key, default_value=None, type = None, strip=False):
@@ -96,6 +99,12 @@ def get_argument_int(key: str, default_value = 0) -> int:
     """获取int参数"""
     value = get_argument(key, default_value=default_value, type = int, strip = True)
     assert isinstance(value, int)
+    return value
+
+def get_argument_float(key: str, default_value = 0.0) -> float:
+    """获取float参数"""
+    value = get_argument(key, default_value=default_value, type = float, strip = True)
+    assert isinstance(value, float)
     return value
 
 def get_argument_bool(key: str, default_value = False) -> bool:
