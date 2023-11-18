@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-10 23:38:24
+@LastEditTime : 2023-11-18 17:21:30
 @FilePath     : /xnote/xnote/core/xtables_kv.py
 @Description  : 数据库-KV表定义
 
@@ -50,7 +50,7 @@ def init():
     # 月度计划
     month_plan_index = xtables.get_table_by_name("month_plan_index")
     db = dbutil.register_table("month_plan", "月度计划", index_db=month_plan_index)
-    dbutil.get_table_v2("month_plan").rebuild_index("v2", ignore_invalid_id=True)
+    dbutil.get_table_v2("month_plan").rebuild_index("v2", ignore_error=True)
 
 def init_system_table():
     dbutil.register_table("sys_log", "系统日志")

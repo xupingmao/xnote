@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-28 09:54:54
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-10 23:48:29
+@LastEditTime : 2023-11-18 17:20:23
 @FilePath     : /xnote/xutils/db/dbutil_table_v2.py
 @Description  : 数据库表-API
 """
@@ -339,36 +339,51 @@ class KvTableV2:
         for key, item in prefix_iter(self.prefix, include_key=True, limit=limit):
             yield self._format_value(key, item)
 
-    def rebuild_index(self, version="v1", ignore_invalid_id=False):
+    def rebuild_index(self, version="v1", **kw):
+        """重建索引
+        :param version="v1": 版本
+        :param ignore_error=False: 忽略错误
+        :param ignore_invalid_id=False: 忽略无效的ID
+        """
         idx_version_key = "_idx_version:%s" % self.table_name
         current_version = db_get(idx_version_key)
         if current_version == version:
             logging.info("当前索引已经是最新版本, table=%s, version=%s" %
                             (self.table_name, version))
             return
-        self.rebuild_index_no_check(ignore_invalid_id=ignore_invalid_id)
+        self.rebuild_index_no_check(**kw)
         db_put(idx_version_key, version)
         logging.info("索引重建完成, table=%s", self.table_name)
 
-    def rebuild_index_no_check(self, ignore_invalid_id=False):
+    def rebuild_index_no_check(self, **kw):
         # TODO 可以通过复制表的方式重建索引,减少数据库的锁时间
         for key, item in prefix_iter(self.prefix, include_key=True):
-            self.rebuild_record_index(key, item, ignore_invalid_id=ignore_invalid_id)
+            self.rebuild_record_index(key, item, **kw)
 
-    def rebuild_record_index(self, key, item, ignore_invalid_id=False):
+    def rebuild_record_index(self, key, item, **kw):
+        ignore_invalid_id = kw.get("ignore_invalid_id", False)
+        ignore_error = kw.get("ignore_error", False)
+        
         """重建单条记录的索引"""
         sql_record = self.build_sql_record(item)
         try:
             id = self._get_int_id_from_key(key)
         except ValueError as e:
-            if ignore_invalid_id:
+            if ignore_invalid_id or ignore_error:
                 logging.warning("invalid key=%s", key)
                 return
             else:
                 raise e
         old_index = self.index_db.select_first(where=dict(id=id))
-        if old_index == None:
-            sql_record["id"] = id
-            self.index_db.insert(**sql_record)
-        else:
-            self.index_db.update(where=dict(id=id), **sql_record)
+        try:
+            if old_index == None:
+                sql_record["id"] = id
+                self.index_db.insert(**sql_record)
+            else:
+                self.index_db.update(where=dict(id=id), **sql_record)
+        except Exception as e:
+            if ignore_error:
+                logging.warning("err=%s",e)
+                return
+            else:
+                raise e
