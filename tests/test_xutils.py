@@ -4,16 +4,16 @@ import os
 import time
 import random
 sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
 import unittest
 import xutils
-import xconfig
+from xnote.core import xconfig
 import doctest
+import datetime
 from xutils import textutil
 from xutils import cacheutil
 from xutils import fsutil
 from xutils import dbutil
-from xutils import Storage
+from xutils import Storage, dateutil
 
 def get_tmp_fpath():
     count = 0
@@ -199,7 +199,21 @@ class TestMain(unittest.TestCase):
         year = random.randint(2000, 3000)
         for month in range(1,13):
             xutils.dateutil.get_days_of_month(year, month)
+            
+    def test_dateutil_date_add(self):
+        st = dateutil.parse_date_to_struct("2023-10-01")
+        y, m, d = dateutil.date_add(tm=st, months=3)
+        assert (y,m,d) == (2024,1,1)
+        
+        y, m, d = dateutil.date_add(tm=st, months=-1)
+        assert (y,m,d) == (2023,9,1)
+        
+        y, m, d = dateutil.date_add(tm=st, months=-10)
+        assert (y,m,d) == (2022,12,1)
 
+        y, m, d = dateutil.date_add(tm=st, days=2)
+        assert (y,m,d) == (2023,10,3)
+        
     def test_fsutil(self):
         import doctest
         doctest.testmod(m=xutils.fsutil, verbose=True)

@@ -37,7 +37,7 @@ class AutoReloadThread(Thread):
     def __init__(self, *callbacks):
         global _callbacks
         super(AutoReloadThread, self).__init__(name="AutoReloadThread")
-        self.setDaemon(True)
+        self.daemon = True
         self.interval = 0.5
         self.watched_dirs = []
 

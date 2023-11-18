@@ -4,20 +4,19 @@
 @email        : 578749341@qq.com
 @Date         : 2023-09-09 11:04:21
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-09 17:29:09
-@FilePath     : /xnote/xnote_core/xnote_tag.py
+@LastEditTime : 2023-11-18 15:24:38
+@FilePath     : /xnote/xnote/service/service_tag.py
 @Description  : 描述
 """
 # encoding=utf-8
 import enum
-import xtables
+from xnote.core import xtables
 from xutils import Storage, dateutil
 
 class TagTypeEnum(enum.Enum):
     empty = 0
     note_tag = 1 # 笔记标签
     msg_tag = 2  # 随手记标签
-
 
 class TagBind(Storage):
     """标签绑定信息"""

@@ -11,11 +11,9 @@ import logging
 import time
 from collections import deque
 
-import xmanager
 import xutils
-import xconfig
-import xnote_event
-import xtables
+
+from xnote.core import xmanager, xconfig, xnote_event, xtables
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil

@@ -2,7 +2,7 @@
 
 import enum
 import xutils
-import xtables
+from xnote.core import xtables
 from xutils import dateutil
 
 class CommentTypeEnum(enum.Enum):

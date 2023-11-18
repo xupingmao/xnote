@@ -12,12 +12,11 @@
 
 import threading
 import time
-import xauth
-import xconfig
 import xutils
 import logging
-import xtables
 import os
+
+from xnote.core import xauth, xconfig, xtables
 
 from xutils import dateutil
 from xutils import textutil

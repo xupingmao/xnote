@@ -7,7 +7,7 @@
 
 from xutils import dbutil, cacheutil
 from xutils import Storage
-import xconfig
+from xnote.core import xconfig
 
 """节点管理的基类"""
 

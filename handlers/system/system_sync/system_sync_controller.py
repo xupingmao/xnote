@@ -18,13 +18,10 @@
 import time
 import threading
 import logging
-
-import xauth
 import xutils
-import xconfig
-import xtemplate
-import xmanager
 import web
+
+from xnote.core import xauth, xconfig, xtemplate, xmanager
 
 from xutils import webutil
 from xutils import Storage

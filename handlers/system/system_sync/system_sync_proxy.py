@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-27 19:04:10
+@LastEditTime : 2023-11-18 15:19:04
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -14,7 +14,7 @@ import time
 import logging
 
 import xutils
-import xconfig
+from xnote.core import xconfig
 
 from xutils import Storage
 from xutils import netutil

@@ -43,6 +43,7 @@ import datetime
 SECONDS_PER_DAY = 3600 * 24
 DEFAULT_FORMAT = '%Y-%m-%d %H:%M:%S'
 FORMAT = DEFAULT_FORMAT
+DATE_FORMAT = "%Y-%m-%d"
 
 WDAY_DICT = {
     "*": u"每天",
@@ -184,9 +185,11 @@ def format_millis(mills):
     return format_time(mills / 1000)
 
 def parse_date_to_timestamp(date_str):
-    st = time.strptime(date_str, "%Y-%m-%d")
+    st = time.strptime(date_str, DATE_FORMAT)
     return time.mktime(st)
 
+def parse_date_to_struct(date_str=""):
+    return time.strptime(date_str, DATE_FORMAT)
 
 def parse_date_to_object(date_str):
     """解析日期结构
@@ -268,18 +271,29 @@ def convert_date_to_wday(date_str):
     return format_wday(date_str)
 
 def date_add(tm, years = 0, months = 0, days = 0):
+    """date计算"""
     if tm is None:
         tm = time.localtime()
+    else:
+        assert isinstance(tm, time.struct_time)
+    
     year  = tm.tm_year
     month = tm.tm_mon
     day   = tm.tm_mday
     if years != 0:
         year += years
     if months != 0:
+        assert months > -12
+        if months < 0:
+            year -= 1
+            months += 12
         month += months
         year += math.floor((month - 1.0) / 12)
         month = (month - 1) % 12 + 1
-    # TODO days
+    if days != 0:
+        date_obj = datetime.datetime(year=year, month=month, day=day)
+        date_obj += datetime.timedelta(days=days)
+        return date_obj.year, date_obj.month, date_obj.day
     return int(year), month, day
 
 def is_leap_year(year):
