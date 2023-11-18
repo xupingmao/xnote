@@ -21,7 +21,8 @@
             <td>{{row}}</td>
             <td>
                 {% if kv_table_name != None %}
-                    <a data-url="/system/sqldb_detail?method=get_kv_detail&key={{kv_table_name}}:{{row.get(pk_name)}}" onclick="xnote.admin.viewMainRecord(this)">查看主数据</a>
+                    <a data-url="/system/sqldb_detail?method=get_kv_detail&key={{kv_table_name}}:{{row.get(pk_name)}}" 
+                        onclick="xnote.admin.viewMainRecord(this)">查看主数据</a>
                 {% end %}
             </td>
         </tr>

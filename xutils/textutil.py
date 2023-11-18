@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-04-17 17:04:15
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-18 10:24:38
+@LastEditTime : 2023-11-18 22:54:24
 @FilePath     : /xnote/xutils/textutil.py
 @Description  : 文本处理工具
 """
@@ -584,11 +584,11 @@ def _encode_json(obj):
         return "<module>"
     return str(obj)
 
-def tojson(obj, format=False):
+def tojson(obj, format=False, ensure_ascii=False):
     if format:
-        return json.dumps(obj, sort_keys=True, default=_encode_json, indent=2)
+        return json.dumps(obj, sort_keys=True, default=_encode_json, indent=2, ensure_ascii=ensure_ascii)
     else:
-        return json.dumps(obj, default=_encode_json)
+        return json.dumps(obj, default=_encode_json, ensure_ascii=ensure_ascii)
 
 def tojson_ignore_error(obj, format=False):
     try:

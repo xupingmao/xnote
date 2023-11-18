@@ -9,6 +9,7 @@
 </style>
 
 {% include system/component/db_nav.html %}
+<script src="{{_server_home}}/_static/js/admin.js"></script>
 
 <div class="card">
     <form>
@@ -83,8 +84,9 @@
                 <td style="width:60%">{{!item.valueShort}}</td>
                 <td style="width:20%">
                     <div class="float-right">
-                        <button class="btn btn-default view-btn" data-key="{{!item.key}}" 
-                            data-value="{{!item.value}}">查看</button>
+                        <button class="btn btn-default view-btn" 
+                            data-url="/system/sqldb_detail?method=get_kv_detail&key={{!item.key}}" 
+                            onclick="xnote.admin.viewMainRecord(this)">查看</button>
                         <button class="btn btn-danger delete-btn" data-key="{{!item.key}}">删除</button>
                     </div>
                 </td>
@@ -108,12 +110,6 @@ $(function () {
                 xnote.toast("删除失败，请稍后重试~");
             })
         });
-    }); 
-
-    $("body").on("click", ".view-btn", function (e) {
-        var value = $(this).attr("data-value");
-        var text = $("<textarea>").text(value).addClass("value-detail");
-        xnote.showDialog("数据详情", text.prop("outerHTML"), ["确定"]);
     }); 
 
     $(".do-search-btn").click(function (e) {
