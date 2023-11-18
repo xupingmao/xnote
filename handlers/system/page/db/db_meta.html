@@ -50,7 +50,7 @@ xnote.action.clearTable = function(event) {
         var params = {
             table_name: tableName
         };
-        $.post(xnote.config.serverHome + "/system/db/drop_table", params, function (resp) {
+        xnote.http.post("/system/db/drop_table", params, function (resp) {
             if (resp.code=="success") {
                 xnote.toast("清空完成");
                 window.location.reload();

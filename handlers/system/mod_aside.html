@@ -57,7 +57,7 @@ $(function () {
 
 function runCommand(path) {
     // alert("runCommand "+ path);
-    $.get("/system/command", {path: path}, function(data, status) {
+    xnote.http.get("/system/command", {path: path}, function(data, status) {
         alert(data);
     })
 }

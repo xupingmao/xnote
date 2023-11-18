@@ -24,8 +24,7 @@ $(function () {
 
     function moveFile(fpath, dirname, context) {
         var data = {old_path: fpath, dirname: dirname};
-
-        $.post("/fs_api/paste", data, function (resp) {
+        xnote.http.post("/fs_api/paste", data, function (resp) {
             if (resp.code != "success") {
                 layer.message("failed to paste " + dataPath);
             } else {
@@ -36,9 +35,6 @@ $(function () {
                     }, 500);
                 }
             }
-        }).fail(function (err) {
-            console.error(err);
-            xnote.alert("移动失败,请稍后重试");
         });
     }
 
@@ -46,7 +42,7 @@ $(function () {
         var params = {fpath: fpath, show_parent: true, filter: "dir"};
         
         $(".current-dirname").val(fpath);
-        $.get("/fs_api/list", params, function (resp) {
+        xnote.http.get("/fs_api/list", params, function (resp) {
             console.log(resp);
             if (resp.code != "success") {
                 layer.alert("查询文件列表失败:" + resp.message);
@@ -90,7 +86,6 @@ $(function () {
 
                 context = {count: selectedFiles.length};
                 // layer.msg("选择了移动");
-                // $.post("")
                 for (var i = 0; i < selectedFiles.length; i++) {
                     var fpath = selectedFiles[i];
                     moveFile(fpath, dirname, context);

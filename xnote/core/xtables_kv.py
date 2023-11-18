@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-18 17:21:30
+@LastEditTime : 2023-11-18 18:40:07
 @FilePath     : /xnote/xnote/core/xtables_kv.py
 @Description  : 数据库-KV表定义
 
@@ -30,7 +30,10 @@ def init():
     # 网络文件映射到本地文件
     dbutil.register_table("fs_map", "文件映射")
     dbutil.register_table("fs_ctype", "缓存的Content-Type")
-    dbutil.register_table("txt_info", "txt文件信息")
+    
+    txt_info_index = xtables.get_table_by_name("txt_info_index")
+    dbutil.register_table("txt_info", "txt文件信息", index_db=txt_info_index)
+    
     dbutil.register_table("fs_sync_index", "文件同步索引信息")
     
     dbutil.register_table("user_config", "用户配置表")

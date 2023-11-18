@@ -171,8 +171,8 @@
             var name     = $("[name=basename]").val();
             var dirname  = $("[name=dirname]").val();
             xnote.prompt("重命名为", name, function (new_name) {
-                $.post("/fs_api/rename", 
-                    {dirname: dirname, old_name: name, new_name: new_name}, 
+                var request =  {dirname: dirname, old_name: name, new_name: new_name};
+                xnote.http.post("/fs_api/rename", request,
                     function (resp) {
                         if (resp.code == "success") {
                             var location = resp.location;
@@ -180,9 +180,6 @@
                         } else {
                             showErrorMessage("重命名失败, %s".format(resp.message));
                         }
-                }).fail(function (e) {
-                    console.log(e);
-                    alert("重命名失败");
                 });
             });
         });
@@ -192,14 +189,12 @@
             var params = {};
             params.path = $("[name=path]").val();
             params.content = $("[name=content]").val();
-            $.post("/code/update", params, function (resp) {
+            xnote.http.post("/code/update", params, function (resp) {
                 if (resp.code == "success") {
                     xnote.toast("保存成功");
                 } else {
                     xnote.toast("保存失败: " + resp.message);
                 }
-            }).fail(function (err) {
-                xnote.toast("保存失败:" + err);
             })
         });
     });

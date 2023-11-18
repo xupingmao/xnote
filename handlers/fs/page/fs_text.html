@@ -27,6 +27,7 @@
         
         <div class="float-right">
             <a class="btn btn-default contents-btn">目录</a>
+            <a class="btn btn-default" href="{{_server_home}}/code/edit?path={{path}}">编辑</a>
             {% include common/button/back_button.html %}
         </div>
     </h3>
@@ -50,6 +51,7 @@
     <div class="reader-footer align-center">
         <button class="backward-btn">上一页</button>
         <button class="contents-btn">目录</button>
+        <button onclick="xnoteRefreshTxtInfo()">刷新</button>
         <button class="forward-btn">下一页</button>
     </div>
 </div>
@@ -107,7 +109,7 @@ $(function () {
             offset: offset,
             path: xnote.getUrlParam("path"),
         };
-        $.get("/fs_text", params, function (resp) {
+        xnote.http.get("/fs_text", params, function (resp) {
             if (resp.code != "success") {
                 xnote.alert(resp.message);
             } else {
@@ -124,7 +126,7 @@ $(function () {
 
     // 读取目录
     function readContents() {
-        $.get("/fs_text", params, function (resp) {
+        xnote.http.get("/fs_text", params, function (resp) {
             console.log(resp);
             if (resp.code != "success") {
                 xnote.alert(resp.message);
@@ -187,6 +189,20 @@ $(function () {
     // 初始化
     showContents();
 });
+
+window.xnoteRefreshTxtInfo = function () {
+    var path = xnote.getUrlParam("path");
+    var request = {};
+    request.path = path;
+    xnote.http.get("?method=refresh", request, function (resp) {
+        if (resp.success) {
+            xnote.toast("刷新成功");
+            window.location.reload();
+        } else {
+            xnote.toast(resp.message);
+        }
+    });
+}
 </script>
 
 {% end %}

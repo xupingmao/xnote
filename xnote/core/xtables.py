@@ -452,6 +452,18 @@ def init_month_plan_index():
         manager.add_index("user_id")
         manager.table_info.enable_binlog = False
 
+def init_txt_info_index():
+    """txt文件索引
+    @since 2023/11/18
+    """
+    table_name = "txt_info_index"
+    comment = "月度计划索引"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("user_id", "bigint", default_value=0)
+        manager.add_column("path", "varchar(255)", default_value="")
+        manager.add_index("user_id")
+        manager.table_info.enable_binlog = False
+        
 def DBWrapper(dbpath, tablename):
     db = MySqliteDB(db=dbpath)
     return TableProxy(db, tablename)
@@ -576,6 +588,7 @@ def init():
     init_note_index_table()
     init_user_note_log()
     init_month_plan_index()
+    init_txt_info_index()
 
     # 通用的分享记录
     init_share_info_table()

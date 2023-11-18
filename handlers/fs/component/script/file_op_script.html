@@ -220,7 +220,7 @@ $(function () {
     
         $(".command-btn").on("click", function () {
             var command = $(this).attr("data-command");
-            $.get("/system/command", {command: command, path: globalPath});
+            xnote.http.get("/system/command", {command: command, path: globalPath});
         })
     
         function doDeleteFile(path) {
