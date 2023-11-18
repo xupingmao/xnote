@@ -16,7 +16,7 @@ _db = dbutil.get_table_v2("txt_info")
 class TxtInfoDO(Storage):
     
     def __init__(self, **kw):
-        self.id = 0
+        self._id = 0
         self.user_id = 0
         self.user_name = ""
         self.offset = 0
@@ -72,10 +72,9 @@ class TextHandler:
         
     def save_txt_info(self, record:TxtInfoDO):
         assert len(record.path)>0
-        if record.id == 0:
-            record.pop("id")
+        if record._id == 0:
             new_id = self.get_table().insert(record)
-            record.id = new_id
+            record._id = new_id
         else:
             self.get_table().update(record)
 
