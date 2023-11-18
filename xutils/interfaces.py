@@ -243,7 +243,8 @@ class SortedSetInterface:
         return []
     
 class SQLDBInterface:
-
+    table_name = ""
+    
     def insert(self, seqname=None, _test=False, **values):
         return 0
 

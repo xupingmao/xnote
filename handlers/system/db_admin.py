@@ -3,15 +3,13 @@
 # @since 2021/02/12 23:04:00
 # @modified 2022/03/19 18:54:15
 import xutils
-import xauth
 from xutils import dbutil
 from xutils import Storage
-from xutils import textutil
-import xtables
-import xtemplate
+from xutils import textutil, webutil
 import math
-import xconfig
 import web.db
+
+from xnote.core import xauth, xtables, xtemplate, xconfig
 from xutils.sqldb import TableProxy
 
 def get_display_value(value):
@@ -289,12 +287,21 @@ class SqlDBDetailHandler:
     def get_table_by_name(self, name):
         # type: (str) -> TableProxy
         return xtables.get_table_by_name(name)
+    
+    def get_kv_detail(self):
+        key = xutils.get_argument("key")
+        value = dbutil.db_get(key)
+        return webutil.SuccessResult(data=xutils.tojson(value, format=True))
 
     @xauth.login_required("admin")
     def GET(self):
         name = xutils.get_argument_str("name")
         page = xutils.get_argument_int("page", 1)
         page_size = xutils.get_argument_int("page_size", 20)
+        method = xutils.get_argument_str("method")
+        if method == "get_kv_detail":
+            return self.get_kv_detail()
+        
         assert page_size <= 100
         db = self.get_table_by_name(name)
         table_info = xtables.TableManager.get_table_info(name)
@@ -315,6 +322,11 @@ class SqlDBDetailHandler:
         kw.page_size = page_size
         kw.page_max = page_max
         kw.page_url = "?name={name}&page_size={page_size}&page=".format(name = name, page_size=page_size)
+        kv_table_info = dbutil.TableInfo.get_kv_table_by_index(name)
+        if kv_table_info != None:
+            kw.kv_table_name = kv_table_info.name
+        else:
+            kw.kv_table_name = None
         return xtemplate.render("system/page/db/sqldb_detail.html", **kw)
 
 class SqlDBOperateHandler:

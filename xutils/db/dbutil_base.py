@@ -53,10 +53,10 @@ import xutils
 from xutils.imports import is_str
 from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json, convert_bytes_to_object_strict
-from .dbutil_id_gen import TimeSeqId
+from xutils.db.dbutil_id_gen import TimeSeqId
 
-from ..interfaces import DBInterface, BatchInterface, SQLDBInterface
-from .. import interfaces
+from xutils.interfaces import DBInterface, BatchInterface, SQLDBInterface
+from xutils import interfaces
 
 try:
     import leveldb
@@ -385,6 +385,15 @@ class TableInfo:
     def delete_table(self):
         self.is_deleted = True
 
+    @classmethod
+    def get_kv_table_by_index(cls, index_name=""):
+        for table_name in cls._info_dict:
+            table_info = cls._info_dict[table_name]
+            if table_info.index_db != None:
+                if table_info.index_db.table_name == index_name:
+                    return table_info
+        return None
+
 class IndexInfo:
 
     _table_dict = dict()  # type: dict[str, dict[str, IndexInfo]]
@@ -529,6 +538,24 @@ def db_get(key, default_value=None):
         if result is None:
             return default_value
         return result
+    except KeyError:
+        return default_value
+    
+def db_get_str(key, default_value=None, encoding="utf-8"):
+    check_leveldb()
+    try:
+        if key == "" or key == None:
+            return None
+        
+        if not isinstance(key, str):
+            # print("key=%r", key)
+            raise TypeError("expect str but see %r" % type(key))
+
+        key = key.encode(encoding)
+        value = _leveldb.Get(key)
+        if value != None:
+            return value.decode(encoding)
+        return None
     except KeyError:
         return default_value
 

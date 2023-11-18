@@ -4,12 +4,9 @@
 import sqlite3
 import os
 import xutils
-import xauth
-import xconfig
-import xtemplate
 import time
 import logging
-import xtables
+from xnote.core import xauth, xconfig, xtemplate, xtables
 
 from collections import OrderedDict
 

@@ -3,6 +3,10 @@
 {% block body_left %}
 {% include system/component/db_nav.html %}
 
+<script src="{{_server_home}}/_static/js/admin.js"></script>
+
+{% init kv_table_name = None %}
+
 <div class="card">
 
     <table class="table">
@@ -15,7 +19,11 @@
         <tr>
             <td>{{row.get(pk_name)}}</td>
             <td>{{row}}</td>
-            <td></td>
+            <td>
+                {% if kv_table_name != None %}
+                    <a data-url="/system/sqldb_detail?method=get_kv_detail&key={{kv_table_name}}:{{row.get(pk_name)}}" onclick="xnote.admin.viewMainRecord(this)">查看主数据</a>
+                {% end %}
+            </td>
         </tr>
         {% end %}
     </table>
