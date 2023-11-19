@@ -456,3 +456,21 @@ NoteView.openDialogToMoveByElement = function (target) {
 NoteView.onTagClick = function (target) {
     $(target).toggleClass("active");
 }
+
+// 打开对话框进行分享
+NoteView.openDialogToShare = function (target) {
+    var id = $(target).attr("data-id");
+    var type = $(target).attr("data-note-type");
+    var params = {note_id: id};
+    var ajax_dialog_url   = "/note/ajax/share_group_dialog";
+    var ajax_dialog_title = "分享笔记本";
+
+    if (type != "group") {
+        ajax_dialog_url = "/note/ajax/share_note_dialog";
+        ajax_dialog_title = "分享笔记";
+    }
+
+    xnote.http.get(ajax_dialog_url, params, function (resp) {
+        xnote.showDialog(ajax_dialog_title, resp);
+    });
+}

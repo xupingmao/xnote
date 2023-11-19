@@ -22,7 +22,8 @@
         <a class="dropdown-option" href="javascript:renameNote('{{file.id}}', '{{file.name}}')">重命名</a>
     {% end %}
 
-    <a class="dropdown-option note-share-btn" data-id="{{file.id}}">分享</a>
+    <a class="dropdown-option" data-id="{{file.id}}" data-note-type="{{file.type}}" 
+        onclick="xnote.note.openDialogToShare(this)">分享</a>
     <a class="dropdown-option" href="{{_server_home}}/note/management?parent_id={{file.id}}">批量操作</a>
     
     {% if file.size == 0 %}

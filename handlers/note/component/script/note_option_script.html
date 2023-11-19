@@ -183,27 +183,6 @@
             })
         });
 
-        function note_open_share_dialog(target) {
-            var id = $(target).attr("data-id");
-            var type = "{{file.type}}";
-            var params = {note_id: id};
-            var ajax_dialog_url   = "/note/ajax/share_group_dialog";
-            var ajax_dialog_title = "分享笔记本";
-
-            if (type != "group") {
-                ajax_dialog_url = "/note/ajax/share_note_dialog";
-                ajax_dialog_title = "分享笔记";
-            }
-
-            $.get(ajax_dialog_url, params, function (resp) {
-                xnote.showDialog(ajax_dialog_title, resp);
-            });
-        }
-
-        $(".note-share-btn").click(function (event) {
-            note_open_share_dialog(event.target);
-        });
-
         function note_share_by_link(target) {
             /* Act on the event */
             $.post("/note/link_share", {id: "{{file.id}}"}, function (resp) {

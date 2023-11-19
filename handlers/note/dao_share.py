@@ -6,9 +6,7 @@
 
 import json
 import xutils
-import xauth
-import xconfig
-import xtables
+from xnote.core import xauth, xconfig, xtables
 
 from xutils import Storage
 from xutils import dbutil
@@ -81,7 +79,7 @@ def share_note_to(note_id, from_user, to_user):
     return NoteShareDao.share_note_to(target_id=note_id, from_id=from_id, to_id=to_id)
 
 @logutil.log_deco("delete_share", log_args = True)
-def delete_share(note_id, to_user):
+def delete_share(note_id, to_user=""):
     record = get_share_by_note_and_to_user(note_id, to_user)
     if record != None:
         NoteShareDao.delete_by_id(record.id)
@@ -97,7 +95,14 @@ def list_share_to(to_user, offset = 0, limit = None, orderby = None):
     return notes
 
 def list_share_by_note_id(note_id):
-    return NoteShareDao.list(target_id = note_id)
+    result = NoteShareDao.list(target_id = note_id)
+    idset = set()
+    for item in result:
+        idset.add(item.to_id)
+    user_name_dict = xauth.UserDao.batch_get_name_by_ids(ids=idset)
+    for item in result:
+        item.to_user = user_name_dict.get(item.to_id)
+    return result
 
 def count_share_to(to_user):
     to_id = xauth.UserDao.get_id_by_name(to_user)

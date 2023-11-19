@@ -15,7 +15,8 @@
     {% comment include note/component/note_orderby_select.html %}
 
     <div class="pad5 group-detail-btn-box">
-        <a class="btn btn-default note-share-btn" data-id="{{file.id}}">分享</a>
+        <a class="btn btn-default" data-id="{{file.id}}" data-note-type="{{file.type}}"
+            onclick="xnote.note.openDialogToShare(this)">分享</a>
         <a class="btn btn-default" href="{{_server_home}}/note/management?parent_id={{file.id}}">批量管理</a>
         <a class="btn btn-default" onclick="xnote.note.openDialogToMoveByElement(this);" data-id="{{file.id}}">移动</a>
     </div>

@@ -1,13 +1,16 @@
-
 <div class="card">
-
     <p>说明：公开分享所有人可见，链接分享仅获取链接的人可见</p>
-
     {% if file.is_public %}
-        <a class="btn btn-default" onclick="javascript:visitAndRefresh(this)" data-href="{{_server_home}}/note/share/cancel?id={{file.id}}">取消公开分享</a>
+        <a class="btn btn-default" onclick="javascript:visitAndRefresh(this)" 
+            data-href="{{_server_home}}/note/share/cancel?id={{file.id}}">取消公开分享</a>
     {% else %}
-        <a class="btn btn-default" onclick="javascript:visitAndRefresh(this)" data-href="{{_server_home}}/note/share?id={{file.id}}">公开分享</a>
+        <a class="btn btn-default" onclick="javascript:visitAndRefresh(this)" 
+            data-href="{{_server_home}}/note/share?id={{file.id}}">公开分享</a>
     {% end %}
 
-    <a class="btn btn-default note-share-link-btn" href="javascript:note_share_by_link(this)" data-clipboard-text="">链接分享</a>
+    <a class="btn btn-default note-share-link-btn" href="javascript:note_share_by_link(this)" 
+        data-clipboard-text="">链接分享</a>
+    
 </div>
+
+{% include note/ajax/share_group_dialog.html %}

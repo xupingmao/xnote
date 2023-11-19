@@ -25,7 +25,8 @@ xnote.state.note = {
     <div class="dropdown-content {%if _is_mobile%}mobile{% end %}">
         <a class="dropdown-option link" href="javascript:rename('{{item.id}}', '{{item.name}}')">重命名</a>
         
-        <a class="dropdown-option link note-share-btn" data-id="{{item.id}}">分享</a>
+        <a class="dropdown-option link" data-id="{{item.id}}" data-note-type="{{item.type}}"
+            onclick="xnote.note.openDialogToShare(this)">分享</a>
 
         <a class="dropdown-option move-btn link">移动</a>
         <a class="dropdown-option copy-btn link">复制</a>

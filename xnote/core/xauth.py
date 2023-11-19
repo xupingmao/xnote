@@ -218,6 +218,16 @@ class UserDao:
     def delete_by_id(cls, id=0):
         get_user_db().update(where=dict(id=id), status=UserStatusEnum.deleted.value)
 
+    @classmethod
+    def batch_get_name_by_ids(cls, ids=[]):
+        if len(ids) == 0:
+            return {}
+        db = get_user_db()
+        result = db.select(what="id, name", where="id in $ids", vars=dict(ids=ids))
+        dict_result = {}
+        for item in result:
+            dict_result[item.id] = item.name
+        return dict_result
 
 class UserModel(UserDao):
     pass

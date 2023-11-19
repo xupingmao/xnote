@@ -510,7 +510,7 @@ class GetDialogHandler:
             kw.show_delete_btn = True
         kw.file = file
 
-    def get_share_group_dialog(self, kw):
+    def fill_share_data(self, kw):
         note_id = xutils.get_argument_int("note_id")
         file = note_dao.get_by_id(note_id)
         kw.file = file
@@ -518,11 +518,6 @@ class GetDialogHandler:
 
         if file != None:
             kw.share_to_list = dao_share.list_share_by_note_id(file.id)
-
-    def get_share_note_dialog(self, kw):
-        note_id = xutils.get_argument_int("note_id")
-        file = NoteDao.get_by_id(note_id)
-        kw.file = file
 
     @xauth.login_required()
     def GET(self, name=""):
@@ -532,10 +527,10 @@ class GetDialogHandler:
             self.get_group_option_dialog(kw)
 
         if name == "share_group_dialog":
-            self.get_share_group_dialog(kw)
+            self.fill_share_data(kw)
 
         if name == "share_note_dialog":
-            self.get_share_note_dialog(kw)
+            self.fill_share_data(kw)
 
         return xtemplate.render("note/ajax/%s.html" % name, **kw)
 

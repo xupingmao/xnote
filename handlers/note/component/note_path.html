@@ -1,5 +1,6 @@
 {% init file = None %}
 {% init show_rename_btn = True %}
+{% init can_edit = False %}
 
 {% if len(pathlist) > 0 %}
     <div class="btn-line-height pad-left-5">
@@ -13,7 +14,7 @@
 
     <div class="float-right">
         {% if file != None %}
-            {% if _has_login and _is_desktop and show_rename_btn %}
+            {% if can_edit and _is_desktop and show_rename_btn %}
                 <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>
             {% end %}
         {% end %}
