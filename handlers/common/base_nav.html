@@ -21,6 +21,15 @@
 </div>
 {% end %}
 
+{% if xconfig.WebConfig.ui_show_translate_js %}
+<!-- 展示translate.js组件 -->
+<div class="row warn">
+  <div class="x-center">
+    {% include common/script/translate_script.html %}
+  </div>
+</div>
+{% end %}
+
 <div class="toolbar homepage hide">
   <div class="action">
     回到<br/>顶部

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-27 21:17:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-05 13:24:36
+@LastEditTime : 2023-11-19 16:38:07
 @FilePath     : /xnote/xnote/core/xconfig.py
 @Description  : 描述
 """
@@ -309,6 +309,8 @@ class WebConfig:
     # 是否展示footer
     ui_show_footer = True
     ui_title_prefix = "Xnote"
+    # 是否展示translate.js组件
+    ui_show_translate_js = False
     
     nav_list = []
 
@@ -336,6 +338,7 @@ class WebConfig:
 
         cls.ui_show_footer = SystemConfig.get_bool("ui_show_footer")
         cls.ui_title_prefix = SystemConfig.get_str("ui_title_prefix", "Xnote")
+        cls.ui_show_translate_js = SystemConfig.get_bool("ui_show_translate_js")
 
         cls.sync_interval_seconds = SystemConfig.get_int("sync_interval_seconds", 3)
         cls.sync_db_from_leader = SystemConfig.get_bool("sync_db_from_leader", False)
