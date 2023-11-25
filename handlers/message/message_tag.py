@@ -1,8 +1,7 @@
 # encoding=utf-8
 
-import xauth
 import xutils
-import xtemplate
+from xnote.core import xauth, xtemplate
 from xutils import Storage, webutil
 from . import dao as msg_dao
 from . import message_utils

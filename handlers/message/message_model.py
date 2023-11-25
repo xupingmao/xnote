@@ -33,4 +33,4 @@ class MessageTag(Storage):
         self.mtime = mtime
 
 def is_task_tag(tag):
-    return tag in ("task", "done")
+    return tag in ("task", "done", "task.search", "done.search")

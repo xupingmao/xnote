@@ -45,11 +45,11 @@
     </div>
 
     {% if is_task_tag %}
-    <div class="card x-tab-box" data-tab-key="p" data-tab-default="all">
-        <a class="x-tab" href="{{_server_home}}/message?tag=search&p=task&key={{quote(key)}}" data-tab-value="task">
+    <div class="card x-tab-box" data-tab-key="tag" data-tab-default="all">
+        <a class="x-tab" href="{{_server_home}}/message?tag=task.search&key={{quote(key)}}" data-tab-value="task.search">
             待办
         </a>
-        <a class="x-tab" href="{{_server_home}}/message?tag=search&p=done&key={{quote(key)}}" data-tab-value="done">
+        <a class="x-tab" href="{{_server_home}}/message?tag=done.search&key={{quote(key)}}" data-tab-value="done.search">
             已完成
         </a>
     </div>
@@ -77,7 +77,7 @@
 
         $(function (e) {
             function getParamTag() {
-                return "{{tag}}";
+                return xnote.getUrlParam("tag");
             }
 
             function getParamPage() {

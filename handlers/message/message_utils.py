@@ -9,15 +9,15 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-09 10:02:45
+@LastEditTime : 2023-11-25 19:49:42
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
 
 import xutils
 import web
-import xconfig
-from xtemplate import T
+from xnote.core import xconfig
+from xnote.core.xtemplate import T
 from xutils import textutil
 from xutils import dateutil
 from xutils import Storage
@@ -72,16 +72,29 @@ class TopicTranslator:
         key = key.rstrip("")
         quoted_key = textutil.quote(key)
         value = textutil.escape_html(key0)
-        return f"<a class=\"link\" href=\"/message?tag=search&key={quoted_key}&p={self.tag}\">{value}</a>"
+        return f"<a class=\"link\" href=\"/message?tag={self.tag}&key={quoted_key}\">{value}</a>"
+    
+class TagHelper:
+
+    search_mapping = {
+        "log":"search",
+        "key":"search",
+        "task":"task.search",
+        "done":"done.search",
+    }
+
+    @classmethod
+    def get_search_tag(cls, tag):
+        return cls.search_mapping.get(tag, tag)
 
 def mark_text(content, tag="log"):
-    import xconfig
+    from xnote.core import xconfig
     from xutils.text_parser import TextParser
     from xutils.text_parser import set_img_file_ext
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 
-    marker = TopicTranslator(tag=tag)
+    marker = TopicTranslator(tag=TagHelper.get_search_tag(tag))
 
     parser = TextParser()
     parser.set_topic_translator(marker.mark)
@@ -353,10 +366,7 @@ class MessageListParser(object):
     def __init__(self, chatlist: list, tag="log"):
         self.chatlist = chatlist
         self.tag = tag
-        self.search_tag = tag
-
-        if tag == "key":
-            self.search_tag = "log"
+        self.search_tag = TagHelper.get_search_tag(tag)
 
     def parse(self):
         self.do_process_message_list(self.chatlist)
@@ -401,7 +411,7 @@ class MessageListParser(object):
             task = msg_dao.get_message_by_id(message.ref)
 
         if task != None:
-            html, keywords = mark_text(task.content, "done")
+            html, keywords = mark_text(task.content, "done.search")
             message.html = u("完成任务:<blockquote>") + html + "</blockquote>"
             message.keywords = keywords
         elif done_time is None:

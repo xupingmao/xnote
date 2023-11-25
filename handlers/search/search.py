@@ -8,11 +8,7 @@ import time
 import math
 import web
 import xutils
-import xconfig
-import xauth
-import xmanager
-import xtemplate
-import xnote_hooks
+from xnote.core import xconfig, xauth, xmanager, xtemplate, xnote_hooks
 import handlers.note.dao as note_dao
 import handlers.dict.dict_dao as dict_dao
 from xutils import textutil, u
@@ -20,7 +16,7 @@ from xutils import Storage
 from xutils import dateutil
 from xutils import mem_util
 from xutils import six
-from xtemplate import T
+from xnote.core.xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -487,7 +483,7 @@ def do_reload_search(ctx = None):
     register_search_handler("note.public", placeholder = u"搜索公共笔记", action = "/note/timeline", tag = "public")
     register_search_handler("dict", placeholder = u"搜索词典", action = "/search")
     register_search_handler("message", placeholder = u"搜索随手记", action = "/message")
-    register_search_handler("task", placeholder = u"搜索待办", action = "/search")
+    register_search_handler("task", placeholder = u"搜索待办", action = "/message")
     register_search_handler("note", placeholder = u"搜索笔记", action = "/search")
     register_search_handler("comment", placeholder = u"搜索评论")
     register_search_handler("default", placeholder = u"综合搜索", action = "/search")

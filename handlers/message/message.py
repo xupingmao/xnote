@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-29 15:23:19
+@LastEditTime : 2023-11-25 19:35:32
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -16,18 +16,15 @@ key/keyword: 短消息关键字
 import time
 import math
 import xutils
-import xauth
-import xconfig
-import xmanager
-import xtemplate
+from xnote.core import xauth, xconfig, xmanager, xtemplate
 import logging
 from xutils import BaseRule, Storage, functions, u, SearchResult
 from xutils import dateutil
-from xtemplate import T
+from xnote.core.xtemplate import T
 from xutils import netutil, webutil
 from xutils.functions import safe_list
+from handlers.message.message_task import TaskListHandler
 from handlers.message.message_utils import (
-    list_task_tags,
     process_message,
     filter_key,
     filter_msg_list_by_key,
@@ -137,8 +134,8 @@ class ListAjaxHandler:
     def GET(self):
         pagesize = xutils.get_argument_int("pagesize", xconfig.PAGE_SIZE)
         page = xutils.get_argument_int("page", 1)
-        tag = xutils.get_argument("tag", "task")
-        format = xutils.get_argument("format")
+        tag = xutils.get_argument_str("tag", "task")
+        format = xutils.get_argument_str("format")
         offset = get_offset_from_page(page, pagesize)
 
         assert isinstance(tag, str)
@@ -169,6 +166,12 @@ class ListAjaxHandler:
         key = xutils.get_argument("key", "")
         date = xutils.get_argument("date", "")
         filter_date = xutils.get_argument("filterDate", "")
+
+        if tag == "task.search":
+            return self.do_search(user_name, key, offset, pagesize,search_tags=["task"])
+        
+        if tag == "done.search":
+            return self.do_search(user_name, key, offset, pagesize, search_tags=["done"])
 
         if (tag == "search") or (key != "" and key != None):
             # 搜索
@@ -264,9 +267,8 @@ class ListAjaxHandler:
                 result.append(item)
         return result
 
-    def do_search(self, user_name, key, offset, pagesize):
+    def do_search(self, user_name, key, offset, pagesize, search_tags=None):
         # 搜索
-        search_tags = None
         no_tag = False
 
         input_search_tags = xutils.get_argument_str("searchTags")
@@ -274,14 +276,15 @@ class ListAjaxHandler:
         p = xutils.get_argument("p", "")
         date = xutils.get_argument_str("date")
 
-        if input_search_tags != "":
-            search_tags = input_search_tags.split(",")
-        if p == "task":
-            search_tags = ["task"]
-        if p == "done":
-            search_tags = ["done"]
-        if p == "log":
-            search_tags = ["log"]
+        if search_tags == None:
+            if input_search_tags != "":
+                search_tags = input_search_tags.split(",")
+            if p == "task":
+                search_tags = ["task"]
+            if p == "done":
+                search_tags = ["done"]
+            if p == "log":
+                search_tags = ["log"]
 
         if input_no_tag == "true":
             no_tag = True
@@ -641,41 +644,6 @@ class DateAjaxHandler:
                                 page_url="?date=%s&page=" % date,
                                 item_list=msg_list)
 
-
-class TaskListHandler:
-    
-    @staticmethod
-    def get_task_kw():
-        kw = Storage()
-        kw.title = T("待办任务")
-        kw.html_title = T("待办任务")
-        kw.search_type = "task"
-        kw.show_back_btn = True
-        kw.tag = "task"
-        kw.message_placeholder = T("添加待办任务")
-        kw.message_tab = "task"
-        return kw
-    
-    @classmethod
-    def get_task_create_page(cls):
-        kw = cls.get_task_kw()
-        kw.show_input_box = True
-        kw.show_system_tag = False
-        side_tags = list_task_tags(xauth.current_name())
-        for tag in side_tags:
-            tag.url = f"/message?tag=task&filterKey={xutils.quote(tag.content)}"
-        kw.side_tag_tab_key = "filterKey"
-        kw.side_tags = side_tags
-        kw.default_content = xutils.get_argument_str("filterKey")
-        # kw.show_right = False
-
-        return xtemplate.render("message/page/task_index.html", **kw)
-
-    @classmethod
-    def get_task_by_keyword_page(cls, filter_key):
-        return cls.get_task_create_page()
-
-
 class MessageListHandler:
 
     @xauth.login_required()
@@ -688,8 +656,7 @@ class MessageListHandler:
         key = xutils.get_argument("key", "")
         from_ = xutils.get_argument("from", "")
         type_ = xutils.get_argument("type", "")
-        show_tab = xutils.get_argument(
-            "show_tab", default_value=True, type=bool)
+        show_tab = xutils.get_argument_bool("show_tab", True)
         op = xutils.get_argument("op", "")
         date = xutils.get_argument("date", "")
         p = xutils.get_argument("p", "")
@@ -719,7 +686,7 @@ class MessageListHandler:
         if tag == "task_tags":
             return self.get_task_taglist_page()
 
-        if tag == "search" or type_ == "search":
+        if tag in ("search", "task.search", "done.search") or type_ == "search":
             return message_search.SearchHandler().get_page()
 
         if tag == "log" and p == "taglist":
