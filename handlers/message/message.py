@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-25 19:35:32
+@LastEditTime : 2023-11-25 23:03:19
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -177,7 +177,7 @@ class ListAjaxHandler:
             # 搜索
             return self.do_search(user_name, key, offset, pagesize)
 
-        if tag == "date":
+        if tag in ("date", "log.date"):
             # 日期
             return self.do_list_by_date(user_name, date, offset, pagesize)
 
@@ -684,7 +684,7 @@ class MessageListHandler:
             return self.get_task_page()
 
         if tag == "task_tags":
-            return self.get_task_taglist_page()
+            return TaskListHandler.get_task_taglist_page()
 
         if tag in ("search", "task.search", "done.search") or type_ == "search":
             return message_search.SearchHandler().get_page()
@@ -733,13 +733,6 @@ class MessageListHandler:
     def get_task_kw(self):
         return TaskListHandler.get_task_kw()
 
-    def get_task_done_page(self):
-        kw = self.get_task_kw()
-        kw.show_system_tag = False
-        kw.show_input_box = False
-        kw.show_side_tags = False
-        return xtemplate.render("message/page/message_list_view.html", **kw)
-
     def get_task_page(self):
         filter_key = xutils.get_argument_str("filterKey", "")
         page_name = xutils.get_argument_str("p", "")
@@ -748,10 +741,10 @@ class MessageListHandler:
             return TaskListHandler.get_task_create_page()
 
         if page_name == "done":
-            return self.get_task_done_page()
+            return TaskListHandler.get_task_done_page()
 
         if page_name == "taglist":
-            return self.get_task_taglist_page()
+            return TaskListHandler.get_task_taglist_page()
 
         if filter_key != "":
             return TaskListHandler.get_task_by_keyword_page(filter_key)
@@ -761,30 +754,6 @@ class MessageListHandler:
 
     def get_task_home_page(self):
         return TaskListHandler.get_task_create_page()
-
-    def get_task_taglist_page(self):
-        user_name = xauth.current_name()
-        msg_list, amount = msg_dao.list_task(user_name, 0, 1000)
-
-        tag_list = get_tags_from_message_list(
-            msg_list, "task", display_tag="taglist", search_tag="task")
-
-        for tag in tag_list:
-            tag.is_marked = is_marked_keyword(user_name, tag.name)
-
-        sort_keywords_by_marked(tag_list)
-
-        kw = self.get_task_kw()
-        kw.message_tag = "task"
-        kw.tag_list = tag_list
-        kw.html_title = T("待办任务")
-        kw.message_placeholder = T("添加待办任务")
-
-        kw.show_sub_link = False
-        kw.show_task_create_entry = True
-        kw.show_task_done_entry = True
-
-        return xtemplate.render("message/page/message_tag_view.html", **kw)
 
     def do_view_month_tags(self):
         user_name = xauth.current_name()
@@ -828,6 +797,8 @@ class MessageListHandler:
             message_placeholder="记录发生的事情/产生的想法",
             side_tags=message_utils.list_hot_tags(user_name, 20),
         )
+
+        kw.search_ext_dict = dict(tag="log.search")
 
         return xtemplate.render("message/page/message_list_view.html", **kw)
 
@@ -880,7 +851,7 @@ class CalendarHandler:
         date = "%s-%02d" % (year, month)
 
         kw = Storage()
-        kw.tag = "date"
+        kw.tag = "log.date"
         kw.year = year
         kw.month = month
         kw.date = date
@@ -963,6 +934,11 @@ class MessageListByDayHandler():
             user_name, date, limit=MAX_LIST_LIMIT)
         message_list = convert_message_list_to_day_folder(
             item_list, date, True)
+        
+        kw = Storage()
+        kw.tag = "log.date"
+        kw.search_type = "message"
+        kw.search_ext_dict = dict(tag="log.search")
 
         return xtemplate.render("message/page/message_list_by_day.html",
                                 date=date,
@@ -971,9 +947,8 @@ class MessageListByDayHandler():
                                 message_list=message_list,
                                 show_empty=show_empty,
                                 show_back_btn=True,
-                                search_type="message",
                                 month_size=count_month_size(message_list),
-                                tag="date")
+                                **kw)
 
 
 class MessageRefreshHandler:

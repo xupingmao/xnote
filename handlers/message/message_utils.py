@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-25 19:49:42
+@LastEditTime : 2023-11-25 23:06:17
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -76,16 +76,26 @@ class TopicTranslator:
     
 class TagHelper:
 
-    search_mapping = {
+    search_tag_mapping = {
         "log":"search",
         "key":"search",
         "task":"task.search",
         "done":"done.search",
     }
 
+    search_type_mapping = {
+        "log":"message",
+        "task.search":"task",
+        "done.search":"task",
+    }
+
     @classmethod
     def get_search_tag(cls, tag):
-        return cls.search_mapping.get(tag, tag)
+        return cls.search_tag_mapping.get(tag, tag)
+    
+    @classmethod
+    def get_search_type(cls, tag=""):
+        return cls.search_type_mapping.get(tag, tag)
 
 def mark_text(content, tag="log"):
     from xnote.core import xconfig
@@ -216,7 +226,7 @@ def get_tags_from_message_list(
             no_tag = "true"
 
         params = dict(
-            tag="search",
+            tag=TagHelper.get_search_tag(input_tag),
             date=input_date,
             key=search_key,
             displayTag=display_tag,

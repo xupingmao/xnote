@@ -52,7 +52,7 @@ $(function () {
         var content = $(".input-box").val();
         var date = getUrlParam("date");
         var params = {content:content, tag: "{{create_tag}}", date: date};
-        $.post("/message/save", 
+        xnote.http.post("/message/save", 
             params,
             function (respText) {
                 var data = respText;
@@ -64,10 +64,7 @@ $(function () {
                     // 发布创建消息
                     xnote.fire("message.created", "");
                 }
-        }).fail(function (data) {
-            console.log(data);
-            xnote.alert("创建记事失败，请稍后重试");
-        })
+        });
     });
          
     $('textarea[autoHeight]').autoHeight();    

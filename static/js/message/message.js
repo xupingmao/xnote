@@ -50,11 +50,7 @@ $(function() {
     }
 
     function getParamTag() {
-        var tag = xnote.state.message.messageTag;
-        if (tag != "") {
-            return tag;
-        }
-        return xnote.state.message.tag;
+        return xnote.getUrlParam("tag");
     }
 
     function getParamPage() {

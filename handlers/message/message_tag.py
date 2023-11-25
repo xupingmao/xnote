@@ -37,6 +37,7 @@ def get_log_tags_page():
     kw.show_input_box = False
     kw.show_sub_link = False
     kw.orderby = orderby
+    kw.search_ext_dict = dict(tag="search")
 
     return xtemplate.render("message/page/message_list_view.html", **kw)
 
