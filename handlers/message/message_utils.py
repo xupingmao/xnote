@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-25 23:06:17
+@LastEditTime : 2023-11-26 16:16:34
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -347,6 +347,26 @@ def filter_msg_list_by_key(msg_list, filter_key):
 
     return result
 
+def list_by_date_and_key(user_id=0, month="", offset=0, limit=20, filter_key=""):
+    date_start = ""
+    date_end = ""
+    if month != "":
+        date_start = month + "-01"
+        date_end = dateutil.date_str_add(date_start, months=1)
+    else:
+        raise Exception("month不能为空")
+    
+    list_limit = limit
+    if filter_key != "":
+        list_limit = MAX_LIST_LIMIT
+
+    msg_list, amount = msg_dao.list_by_date_range(
+                user_id=user_id, offset=offset, limit=list_limit, date_start=date_start, date_end=date_end)
+    if filter_key == "":
+        return msg_list, amount
+    msg_list = filter_msg_list_by_key(msg_list, filter_key)
+    return msg_list[offset:offset+limit], len(msg_list)
+
 
 def filter_key(key):
     if key == None or key == "":
@@ -442,11 +462,13 @@ class MessageListParser(object):
             message.html = build_search_html(message.content)
 
     def do_process_message_list(self, message_list):
-        keywords = set()
+        keywords = {}
         for message in message_list:
             self.process_message(message, search_tag=self.search_tag)
             if message.keywords != None:
-                keywords = message.keywords.union(keywords)
+                for keyword in message.keywords:
+                    count = keywords.get(keyword, 0)
+                    keywords[keyword] = count + 1
             if is_task_tag(message.tag):
                 message.time_info = message.mtime
             else:
@@ -455,13 +477,15 @@ class MessageListParser(object):
 
         self.keywords = []
         for word in keywords:
-            keyword_info = Storage(name=word, url=build_search_url(word))
+            amount = keywords[word]
+            keyword_info = MessageTag(name=word, url=build_search_url(word), amount=amount)
             self.keywords.append(keyword_info)
 
     def get_message_list(self):
         return self.chatlist
 
     def get_keywords(self):
+        # type: () -> list[MessageTag]
         return self.keywords
 
 

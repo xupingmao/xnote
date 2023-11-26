@@ -9,6 +9,7 @@
 {% end %}
 
 {% block body_left %}
+    {% init tag_list = [] %}
 
     {% include message/component/message_title.html %}
     <!-- Tab页 -->
@@ -20,6 +21,24 @@
     <!-- 二级目录 -->
     {% include message/component/message_sub_link.html %}
 
+    <!-- 当月的标签 -->
+    <div class="card">
+        <h3 class="card-title">标签</h3>
+        <span class="tag-span">
+            <a class="link" href="/message/calendar?date={{date}}">全部</a>
+        </span>
+        
+        {% for item in tag_list %}
+            <span class="tag-span">
+                <span>
+                    <a class="link" href="{{item.url}}">{{item.name}}</a>
+                    <span class="black">{{item.badge_info}}</span>
+                </span>
+            </span>
+        {% end %}
+    </div>
+
+    
     <!-- 文字区域 -->
     {% include message/component/message_list.html %}
 

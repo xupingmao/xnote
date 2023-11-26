@@ -3,17 +3,14 @@
 # @since 2019/06/12 22:59:33
 # @modified 2022/04/11 23:29:47
 import xutils
-import xconfig
-import xmanager
 import re
 import logging
-import xtables
-import xauth
+from xnote.core import xconfig, xmanager, xtables, xauth
 
 from xutils import dbutil, cacheutil, textutil, Storage, functions
 from xutils import dateutil
 from xutils.functions import del_dict_key
-from xtemplate import T
+from xnote.core.xtemplate import T
 from xutils.db.dbutil_helper import new_from_dict
 from xnote.service import TagBindService, TagTypeEnum
 from .message_model import is_task_tag
@@ -521,6 +518,14 @@ def list_by_date(user, date, offset=0, limit=xconfig.PAGE_SIZE):
     amount = MsgIndexDao.count(user_id=user_id, date_prefix=date)
     return msg_list, amount
 
+def list_by_date_range(user_id=0, tag="", date_start="", date_end="", offset=0, limit=1000):
+    user_info = xauth.UserDao.get_by_id(user_id)
+    assert user_info != None
+    user_name = user_info.name
+    index_list = MsgIndexDao.list(user_id=user_id, tag=tag, date_start=date_start, date_end=date_end, offset=offset, limit=limit)
+    msg_list = MessageDao.batch_get_by_index_list(index_list=index_list, user_name=user_name)
+    amount = MsgIndexDao.count(user_id=user_id, tag=tag, date_start=date_start, date_end=date_end)
+    return msg_list, amount
 
 def count_by_tag(user, tag):
     """内部方法"""
@@ -715,7 +720,7 @@ class MsgIndexDao:
         return cls.db.insert(**msg_index)
     
     @classmethod
-    def count(cls, user_id=0, tag = "", date_prefix=""):
+    def count(cls, user_id=0, tag = "", date_prefix="", date_start="", date_end=""):
         where = "1=1"
         if user_id != 0:
             where += " AND user_id=$user_id"
@@ -725,12 +730,16 @@ class MsgIndexDao:
         
         if date_prefix != "":
             where += " AND date LIKE $date_prefix"
+        if date_start != "":
+            where += " AND date >= $date_start"
+        if date_end != "":
+            where += " AND date < $date_end"
 
-        vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%")
+        vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%", date_start=date_start, date_end=date_end)
         return cls.db.count(where=where, vars=vars)
     
     @classmethod
-    def list(cls, user_id=0, tag="", date_prefix="",offset=0, limit=10, order="ctime desc"):
+    def list(cls, user_id=0, tag="", date_prefix="", date_start="", date_end="", offset=0, limit=10, order="ctime desc"):
         where = "1=1"
         if user_id != 0:
             where += " AND user_id=$user_id"
@@ -738,11 +747,15 @@ class MsgIndexDao:
             where += " AND tag=$tag"
         if date_prefix != "":
             where += " AND date LIKE $date_prefix"
+        if date_start != "":
+            where += " AND date >= $date_start"
+        if date_end != "":
+            where += " AND date < $date_end"
         
         if is_task_tag(tag):
             order = "mtime desc"
 
-        vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%")
+        vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%", date_start=date_start, date_end=date_end)
         return cls.db.select(where=where, vars=vars,offset=offset,limit=limit,order=order)
     
     @classmethod

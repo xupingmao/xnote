@@ -1,16 +1,19 @@
 # encoding=utf-8
 
 import xutils
-from xnote.core import xauth, xtemplate
-from xutils import Storage, webutil
+from xnote.core import xauth, xtemplate, xconfig
+from xutils import Storage, webutil, dateutil
+from xutils.textutil import quote
 from . import dao as msg_dao
 from . import message_utils
+from .message_model import MessageTag
 
 """
 随手记的标签处理
 页面对应的是 ajax/message_tag_ajax.html 
 """
 MAX_LIST_LIMIT = 1000
+
 
 def get_tag_list():
     user_name = xauth.current_name()
@@ -19,6 +22,24 @@ def get_tag_list():
         user_name, "key", offset, MAX_LIST_LIMIT)
     return webutil.SuccessResult(data=msg_list)
 
+def get_tag_list_by_msg_list(msg_list, date=""):
+    p = message_utils.MessageListParser(msg_list)
+    p.parse()
+    result = p.get_keywords()
+    server_home = xconfig.WebConfig.server_home
+    for tag_info in result:
+        tag_name = tag_info.name
+        tag_info.url = f"{server_home}/message/calendar?tag=log.date&date={date}&filterKey={quote(tag_name)}"
+        tag_info.badge_info = f"{tag_info.amount}"
+    result.sort(key = lambda x:x.amount, reverse=True)
+    return result
+
+def get_tag_list_by_month(user_id=0, month="2000-01"):
+    date_start = month + "-01"
+    date_end = dateutil.date_str_add(date_start, months=1)
+    msg_list, amount = msg_dao.list_by_date_range(user_id=user_id, date_start=date_start, date_end=date_end)
+    result = get_tag_list_by_msg_list(msg_list, date=month)
+    return result
 
 def get_log_tags_page():
     """随手记的话题标签页面"""

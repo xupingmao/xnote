@@ -23,6 +23,7 @@
             date: date,
             page: getCurrentPage()
         };
+        params.filterKey = xnote.getUrlParam("filterKey");
 
         xnote.http.get("/message/date", params,function (respText) {
             $(".message-list").html(respText);

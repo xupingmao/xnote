@@ -1,0 +1,23 @@
+<!-- 标签列表 -->
+{% init tag_list = [] %}
+
+<div class="card">
+    {% if len(tag_list) == 0 %}
+        {% include common/text/empty_text.html %}
+    {% end %}
+
+    {% for tag_item in tag_list %}
+        <a href="{{ tag_item.url }}" class="list-link">
+            {% if tag_item.is_marked %}
+                <span class="task-tag">置顶</span>
+            {% end %}
+
+            <span>{{ tag_item.name }}</span>
+            
+            <div class="float-right">
+                <span class="book-size-span">{{ tag_item.amount }}</span>
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+    {% end %}
+</div>

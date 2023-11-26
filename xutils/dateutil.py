@@ -270,6 +270,11 @@ def current_wday() -> str:
 def convert_date_to_wday(date_str):
     return format_wday(date_str)
 
+def date_str_add(date_str="1970-01-01", years=0, months=0, days=0):
+    tm = parse_date_to_struct(date_str)
+    year, month, day = date_add(tm, years=years, months=months, days=days)
+    return datetime.datetime(year, month, day).strftime(DATE_FORMAT)
+
 def date_add(tm, years = 0, months = 0, days = 0):
     """date计算"""
     if tm is None:

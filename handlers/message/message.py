@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-26 11:35:16
+@LastEditTime : 2023-11-26 16:00:46
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -23,6 +23,7 @@ from xutils import dateutil
 from xnote.core.xtemplate import T
 from xutils import netutil, webutil
 from xutils.functions import safe_list
+from xutils.textutil import quote
 from handlers.message.message_task import TaskListHandler
 from handlers.message.message_utils import (
     process_message,
@@ -33,13 +34,11 @@ from handlers.message.message_utils import (
     get_remote_ip,
     get_length,
     get_tags_from_message_list,
-    is_system_tag,
     do_split_date,
     success,
     failure,
     convert_message_list_to_day_folder,
     count_month_size,
-    is_marked_keyword,
     touch_key_by_content,
     TagHelper,
 )
@@ -312,7 +311,7 @@ class ListAjaxHandler:
             return msg_dao.list_task(user_name, offset, limit)
 
     def do_list_by_date(self, user_name, date, offset, pagesize):
-        filter_key = xutils.get_argument("filterKey", "")
+        filter_key = xutils.get_argument_str("filterKey", "")
 
         if filter_key != "":
             msg_list, amount = msg_dao.list_by_date(
@@ -616,9 +615,10 @@ class DateAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        date = xutils.get_argument("date", "")
+        date = xutils.get_argument_str("date", "")
         page = xutils.get_argument("page", 1, type=int)
-        user_name = xauth.current_name()
+        filter_key = xutils.get_argument_str("filterKey")
+        user_id = xauth.current_user_id()
 
         if date == "":
             return xtemplate.render("error.html", error="date参数为空")
@@ -626,8 +626,8 @@ class DateAjaxHandler:
         offset = get_offset_from_page(page)
         limit = xconfig.PAGE_SIZE
 
-        msg_list, msg_count = msg_dao.list_by_date(
-            user_name, date, offset, limit)
+        msg_list, msg_count = message_utils.list_by_date_and_key(
+            user_id=user_id, month=date, offset=offset, limit=limit, filter_key=filter_key)
 
         parser = MessageListParser(msg_list)
         parser.parse()
@@ -637,7 +637,7 @@ class DateAjaxHandler:
         return xtemplate.render("message/ajax/message_ajax.html",
                                 page_max=page_max,
                                 page=page,
-                                page_url="?date=%s&page=" % date,
+                                page_url=f"?date={date}&filterKey={quote(filter_key)}&page=",
                                 item_list=msg_list)
 
 class MessageListHandler:
@@ -833,7 +833,7 @@ class CalendarHandler:
 
     @xauth.login_required()
     def GET(self):
-        user = xauth.current_name()
+        user_id = xauth.current_user_id()
         date = xutils.get_argument("date")
 
         year, month, mday = do_split_date(date)
@@ -847,6 +847,7 @@ class CalendarHandler:
         kw.date = date
         kw.html_title = T("随手记")
         kw.search_type = "message"
+        kw.tag_list = message_tag.get_tag_list_by_month(user_id=user_id, month=date)
 
         return xtemplate.render("message/page/message_calendar.html", **kw)
 

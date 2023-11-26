@@ -21,16 +21,18 @@ class MessageFolder(Storage):
 class MessageTag(Storage):
 
     def __init__(self, 
-            name = None, 
-            tag = None, 
-            amount = None, 
-            url = None, 
-            mtime = None):
+            name = "", 
+            tag = "", 
+            amount = 0, 
+            url = "", 
+            mtime = "", **kw):
         self.name = name
         self.content = name
         self.amount = amount
         self.url = url
         self.mtime = mtime
+        self.badge_info = ""
+        self.update(kw)
 
 def is_task_tag(tag):
     return tag in ("task", "done", "task.search", "done.search")
