@@ -89,6 +89,11 @@ class TagHelper:
         "done.search":"task",
     }
 
+    create_tag_mapping = {
+        "todo": "task",
+        "log.date": "log",
+    }
+
     @classmethod
     def get_search_tag(cls, tag):
         return cls.search_tag_mapping.get(tag, tag)
@@ -96,6 +101,10 @@ class TagHelper:
     @classmethod
     def get_search_type(cls, tag=""):
         return cls.search_type_mapping.get(tag, tag)
+    
+    @classmethod
+    def get_create_tag(cls, tag=""):
+        return cls.create_tag_mapping.get(tag, tag)
 
 def mark_text(content, tag="log"):
     from xnote.core import xconfig

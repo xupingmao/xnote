@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-25 23:03:19
+@LastEditTime : 2023-11-26 11:35:16
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -41,6 +41,7 @@ from handlers.message.message_utils import (
     count_month_size,
     is_marked_keyword,
     touch_key_by_content,
+    TagHelper,
 )
 
 from .message_utils import sort_keywords_by_marked
@@ -163,9 +164,9 @@ class ListAjaxHandler:
                     current_user=xauth.current_name())
 
     def do_list_message(self, user_name, tag, offset, pagesize):
-        key = xutils.get_argument("key", "")
-        date = xutils.get_argument("date", "")
-        filter_date = xutils.get_argument("filterDate", "")
+        key = xutils.get_argument_str("key", "")
+        date = xutils.get_argument_str("date", "")
+        filter_date = xutils.get_argument_str("filterDate", "")
 
         if tag == "task.search":
             return self.do_search(user_name, key, offset, pagesize,search_tags=["task"])
@@ -173,9 +174,9 @@ class ListAjaxHandler:
         if tag == "done.search":
             return self.do_search(user_name, key, offset, pagesize, search_tags=["done"])
 
-        if (tag == "search") or (key != "" and key != None):
+        if (tag in ("search", "log.search")) or (key != "" and key != None):
             # 搜索
-            return self.do_search(user_name, key, offset, pagesize)
+            return self.do_search(user_name, key, offset, pagesize, search_tags=["log"])
 
         if tag in ("date", "log.date"):
             # 日期
@@ -536,14 +537,7 @@ def create_message(user_name, tag, content, ip):
     assert isinstance(tag, str)
     assert isinstance(content, str)
 
-    if tag == "todo":
-        tag = "task"
-
-    if tag == "key":
-        content = filter_key(content)
-        return msg_dao.MsgTagInfoDao.get_or_create(user=user_name, content=content)
-
-    date = xutils.get_argument("date", "")
+    date = xutils.get_argument_str("date", xutils.format_date())
     content = content.strip()
     ctime = xutils.format_datetime()
 
@@ -586,13 +580,15 @@ class SaveAjaxHandler:
     def do_post(self):
         id = xutils.get_argument("id")
         content = xutils.get_argument_str("content")
-        tag = xutils.get_argument("tag", DEFAULT_TAG)
+        tag = xutils.get_argument_str("tag", DEFAULT_TAG)
         location = xutils.get_argument_str("location", "")
         user_name = xauth.get_current_name()
         ip = get_remote_ip()
 
         if content == "":
             return dict(code="fail", message="输入内容为空!")
+        
+        tag = TagHelper.get_create_tag(tag)
 
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
         self.apply_rules(user_name, id, tag, content)
@@ -668,7 +664,7 @@ class MessageListHandler:
         if tag == "month_tags":
             return self.do_view_month_tags()
 
-        if tag == "date":
+        if tag in ("date", "log.date"):
             return self.do_view_by_date(date)
 
         if tag == "key" and op == "select":
@@ -683,25 +679,15 @@ class MessageListHandler:
         if tag == "task":
             return self.get_task_page()
 
-        if tag == "task_tags":
+        if tag == "task.tags":
             return TaskListHandler.get_task_taglist_page()
 
         if tag in ("search", "task.search", "done.search") or type_ == "search":
             return message_search.SearchHandler().get_page()
 
-        if tag == "log" and p == "taglist":
+        if tag == "log.tags":
             return self.get_log_tags_page()
-
-        if p in SYSTEM_TAG_TUPLE:
-            return self.get_system_tag_page(p)
-
-        if p == "date":
-            p2 = xutils.get_argument("p2", "")
-            if p2 == "detail":
-                date = xutils.get_argument("date", "")
-                return self.do_view_by_date(date)
-            return MessageListByDayHandler().GET()
-
+        
         return self.get_log_page()
 
     def do_select_key(self):
@@ -718,6 +704,10 @@ class MessageListHandler:
         return message_tag.get_tag_list()
 
     def get_log_tags_page(self):
+        sys_tag = xutils.get_argument_str("sys_tag")
+        if sys_tag in SYSTEM_TAG_TUPLE:
+            return self.get_system_tag_page(sys_tag)
+
         return message_tag.get_log_tags_page()
 
     def get_system_tag_page(self, tag):

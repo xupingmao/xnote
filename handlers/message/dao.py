@@ -150,10 +150,9 @@ def execute_after_delete(kw):
 def _create_message_with_date(kw):
     assert isinstance(kw, MessageDO)
     date = kw.date
-    kw.tag = "log"
     today = dateutil.get_today()
 
-    if today == date:
+    if today == date or date == "":
         return _create_message_without_date(kw)
 
     timestamp = dateutil.parse_date_to_timestamp(date)
@@ -211,12 +210,7 @@ def create_message(message):
     assert isinstance(message, MessageDO)
     message.check_before_create()
     message.fix_before_update()
-    tag = message.tag
-
-    if tag == "date":
-        return _create_message_with_date(message)
-    else:
-        return _create_message_without_date(message)
+    return _create_message_with_date(message)
 
 
 def update_message(message):
