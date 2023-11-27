@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-26 16:16:34
+@LastEditTime : 2023-11-27 23:01:57
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -92,6 +92,7 @@ class TagHelper:
     create_tag_mapping = {
         "todo": "task",
         "log.date": "log",
+        "date": "log",
     }
 
     @classmethod

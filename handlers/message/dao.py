@@ -19,9 +19,8 @@ VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
 CREATE_MAX_RETRY = 20
 MOBILE_LENGTH = 11
-VALID_TAG_SET = set(["task", "done", "log", "key", "date"])
+VALID_TAG_SET = set(["task", "done", "log", "key"])
 
-_keyword_db = dbutil.get_table("msg_key")
 _msg_db = dbutil.get_table("message")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
 _debug = False
