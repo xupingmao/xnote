@@ -85,6 +85,7 @@ class TagHelper:
 
     search_type_mapping = {
         "log":"message",
+        "log.search":"message",
         "task.search":"task",
         "done.search":"task",
     }

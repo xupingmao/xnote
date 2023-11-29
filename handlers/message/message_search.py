@@ -1,11 +1,8 @@
 # encoding=utf-8
 
 import time
-import xmanager
-import xconfig
 import xutils
-import xauth
-import xtemplate
+from xnote.core import xmanager, xconfig, xauth, xtemplate
 
 from . import dao, message_utils
 from xutils import SearchResult, u, Storage, functions
