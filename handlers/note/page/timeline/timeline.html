@@ -1,24 +1,5 @@
 ﻿{% extends base %}
 
-{% block head %}
-<style type="text/css">
-  .note-header-span {
-    line-height: 32px;
-  }
-
-  .things {
-    padding-left: 20px;
-  }
-
-  #loadMore {
-    text-align: center;
-    width: 100%;
-    float: left;
-    color: blue;
-  }
-</style>
-{% end %}
-
 {% block body_left %}
 
 {% init parent_link = None %}
@@ -31,9 +12,6 @@
 {% init show_recent_btn = False %}
 {% init show_back_btn = False %}
 {% init show_group_btn = False %}
-
-<script src="/static/lib/vue/vue-2.2.6.min.js"></script>
-
 
 <div class="card">
   <div class="note-header card-title">
@@ -77,146 +55,8 @@
 {% end %}
 
 
-<div id="app" class="content card">
-  <div class="note-timeline-body">
-    <article v-if="itemList.length == 0">
-      {% include common/text/empty_text.html %}
-    </article>
-    
-    <article class="row" v-for="item in itemList">
-      <h3 class="card-title-2">{{!item.title}}</h3>
-      <section v-for="file in item.files">
-        <span class="point-time point-green"></span>
-        <time datetime="">
-          <span>{{!item.ctime}}</span>
-        </time>
-        <aside>
-          <p class="things">
-            <!-- <input type="checkbox" class="icon-check" v-if="file.type == 'gallery'"/> -->
-            <i class="fa" v-bind:class="file.icon"></i>
-            <a v-bind:href="file.url">{{!file.name}}</a>
-            <span class="tag lightblue" v-for="tag_info in file.tag_info_list">{{!tag_info.name}}</span>
-            <span v-if="file.is_public == 1" class="tag info">分享</span>
-            <span v-if="file.type=='group' || file.type=='system'" 
-              class="float-right gray-text">{{!file.children_count}}</span>
-          </p>
-          <p class="brief"><span class="text-green"></span></p>
-        </aside>
-      </section>
-    </article>
-  </div>
-</div>
+{% include note/component/timeline/timeline_body.html %}
 
-<header class="site-footer card">
-  <div class="wrapper">
-    {% if type != "root" %}
-      <a id="loadMore" href="javascript:void(0)">加载更多</a>
-    {% end %}
-  </div>
-</header>
-
-<script type="text/javascript">
-  // 全局变量
-  var QUERY_LIMIT = 100;
-
-    var itemList = {};
-    
-    var app = new Vue({
-        el: "#app",
-        data: {
-            itemList: itemList,
-            offset: 0
-        },
-        isLoading: false
-    });
-
-    app.itemList = [];
-    app.offset = 0;
-
-    function mergeFiles(list, key, files) {
-      for (var i = 0; i < list.length; i++) {
-        var item = list[i];
-        if (item.title == key) {
-          item.files = item.files.concat(files);
-          return;
-        }
-      }
-      list.push({title: key, files: files});
-    }
-
-    /** 加载更多笔记
-     * @param {boolean} showToast 是否展示toast信息
-     */
-    function loadMore(showToast) {
-      if (app.isLoading) {
-        return;
-      }
-
-      var param = {};
-      param.type = "{{type}}" || getUrlParam("type");
-      param.parent_id = getUrlParam("parent_id");
-      param.search_tag = getUrlParam("search_tag");
-      param.key = "{{quote(key)}}";
-      param.orderby = xnote.getUrlParam("orderby", "ctime");
-      param.offset = app.offset;
-      param.limit = QUERY_LIMIT;
-
-      var loadingNoteIndex;
-      layer.ready(function(){
-        // 等待layer的资源加载完再显示，不然样式会漂移
-        loadingNoteIndex = layer.load(2);
-      }); 
-
-      app.isLoading = true;
-      xnote.http.get("/note/api/timeline?_type=json", param,
-        function (resp, status) {
-          app.isLoading = false;
-          layer.close(loadingNoteIndex);
-          var data = resp.data;
-          if (data.length == 0) {
-            // alert("没有更多了");
-            if (showToast) {
-              layer.msg("没有更多了");
-            }
-            return;
-          }
-          var resp = data;
-          // app.itemList = [];
-          var count = 0;
-          for (var i = 0; i < data.length; i++) {
-            // console.log(key, resp[key]);
-            var item  = data[i];
-            var files = item.children;
-            var title = item.title;
-            app.offset += files.length;
-            mergeFiles(app.itemList, title, files);
-            count++;
-            // app.itemList.push({title: key, files: files});
-          }
-          if (count == 0) {
-            // alert("没有更多了");
-            if (showToast) {
-              layer.msg("没有更多了");
-            }
-            return;
-          }
-      }).fail(function (error) {
-          app.isLoading = false;
-          layer.close(loadingNoteIndex);
-      });
-    }
-
-
-    $("#loadMore").on("click", function() {
-      loadMore(true);
-    })
-
-    layer.ready(function () {
-      // 等待layer资源加载
-      loadMore(false);
-    });
-
-</script>
 {% end %}
 
 {% block body_right %}

@@ -5,21 +5,16 @@
 import math
 import web
 import os
-
-import xauth
 import xutils
-import xconfig
-import xtables
-import xtemplate
-import xmanager
+from xnote.core import xauth, xconfig, xtables, xtemplate, xmanager
 from web import HTTPError
 
-from xconfig import Storage
+from xnote.core.xconfig import Storage
 from xutils import fsutil
 from xutils import textutil
 from xutils import webutil
 from xutils import dbutil, dateutil
-from xtemplate import T
+from xnote.core.xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
 from .dao_api import NoteDao
@@ -136,7 +131,6 @@ def view_group_timeline_func(note, kw):
 
 
 def view_group_detail_func(file, kw):
-    # 代码暂时不用
     orderby = kw.orderby
     user_name = kw.user_name
     page = kw.page

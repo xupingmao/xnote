@@ -4,22 +4,22 @@
 
 """时光轴视图"""
 import re
-import xauth
 import xutils
-import xtemplate
+from xnote.core import xauth
+from xnote.core import xtemplate
 import time
 import web
 from xutils import Storage, dateutil, textutil
 from xutils import webutil
 from xutils.textutil import split_words
-from xtemplate import T
+from xnote.core.xtemplate import T
 from handlers.note.constant import *
 from handlers.message.dao import MessageDao
 from handlers.note.dao_api import NoteDao
 from handlers.note import note_helper
 import handlers.note.dao as note_dao
 import handlers.note.dao_log as dao_log
-import xmanager
+from xnote.core import xmanager
 
 
 class PathLink:
@@ -28,6 +28,20 @@ class PathLink:
         self.name = name
         self.url = url
 
+class ListContext(Storage):
+    def __init__(self,**kw):
+        self.offset = 0
+        self.limit = 0
+        self.type = ""
+        self.parent_id = 0
+        self.search_key = ""
+        self.orderby = ""
+        self.search_tag = ""
+        self.filter_tag = "" # 笔记过滤的tag
+        self.user_name = ""
+        self.user_id = 0
+        self.url_type = ""
+        self.update(kw)
 
 def get_parent_link(user_name, type, priority=0):
     if priority < 0:
@@ -105,17 +119,22 @@ def search_group(user_name, words):
             result.append(row)
     return result
 
+def build_note_info_for_timeline(note, url_type=""):
+    if url_type == "default":
+        return
+    
+    if note.type == "group":
+        note.url = "/note/timeline?type=default&parent_id=%s" % note.id
 
-def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=False, archived_title=False):
+
+def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=False, archived_title=False, url_type="timeline"):
     tmp_result = dict()
     sticky_notes = []
     archived_notes = []
     project_notes = []
 
     for row in rows:
-        if row.type == "group":
-            row.url = "/note/timeline?type=default&parent_id=%s" % row.id
-
+        build_note_info_for_timeline(row, url_type)
         if sticky_title and row.priority != None and row.priority > 0:
             sticky_notes.append(row)
             continue
@@ -168,7 +187,7 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
     return dict(code='success', data=result)
 
 
-def list_search_func(context):
+def list_search_func(context: ListContext):
     # 主要是搜索
     offset = context['offset']
     limit = context['limit']
@@ -176,12 +195,9 @@ def list_search_func(context):
     type = context['type']
     user_name = context['user_name']
     search_tag = context["search_tag"]
-    parent_id = xutils.get_argument("parent_id", "")
+    parent_id = xutils.get_argument_int("parent_id")
     words = None
     rows = []
-
-    if parent_id == "":
-        parent_id = None
 
     start_time = time.time()
     if search_key != None and search_key != "":
@@ -312,20 +328,24 @@ def list_recent_edit_func(context):
     return build_date_result(rows, 'mtime')
 
 
-def default_list_func(context: Storage):
+def default_list_func(context: ListContext):
     offset = context['offset']
     limit = context['limit']
     user_name = context['user_name']
-    parent_id = context['parent_id']
-    if parent_id == "":
-        parent_id = "0"
+    parent_id = context.parent_id
+    tags = None
+    
+    if context.filter_tag != "":
+        tags = [context.filter_tag]
+    
     rows = note_dao.list_by_parent(
-        user_name, parent_id, offset, limit, 'ctime_desc')
+        user_name, parent_id, offset, limit, orderby = 'ctime_desc', tags=tags)
     
     orderby = "ctime"
     if context.orderby == "name":
         orderby = "name"
-    return build_date_result(rows, orderby=orderby, sticky_title=True, group_title=True)
+    url_type = context.url_type
+    return build_date_result(rows, orderby=orderby, sticky_title=True, group_title=True, url_type=url_type)
 
 
 def list_root_notes_func(context):
@@ -363,20 +383,22 @@ LIST_FUNC_DICT = {
     "search": list_search_func,
 }
 
-
 class TimelineAjaxHandler:
 
+    @xauth.login_required()
     def GET(self):
-        offset = xutils.get_argument("offset", 0, type=int)
-        limit = xutils.get_argument("limit", 20, type=int)
+        offset = xutils.get_argument_int("offset", 0)
+        limit = xutils.get_argument_int("limit", 20)
         type = xutils.get_argument_str("type", "root")
-        parent_id = xutils.get_argument("parent_id", "", type=str)
-        search_key = xutils.get_argument("key", None, type=str)
-        orderby = xutils.get_argument("orderby", "mtime_desc", type=str)
-        search_tag = xutils.get_argument("search_tag", None, type=str)
-        user_name = xauth.current_name()
+        parent_id = xutils.get_argument_int("parent_id")
+        search_key = xutils.get_argument_str("key")
+        orderby = xutils.get_argument_str("orderby", "mtime_desc")
+        search_tag = xutils.get_argument_str("search_tag")
+        user_info = xauth.current_user()
+        url_type = xutils.get_argument_str("url_type", "timeline")
+        assert user_info != None
 
-        kw = Storage()
+        kw = ListContext()
         kw.offset = offset
         kw.limit = limit
         kw.type = type
@@ -384,7 +406,10 @@ class TimelineAjaxHandler:
         kw.search_key = search_key
         kw.orderby = orderby
         kw.search_tag = search_tag
-        kw.user_name = user_name
+        kw.user_name = user_info.name
+        kw.user_id = user_info.id
+        kw.url_type = url_type
+        kw.filter_tag = xutils.get_argument_str("filter_tag")
 
         list_func = LIST_FUNC_DICT.get(type, default_list_func)
         return list_func(kw)
@@ -444,9 +469,9 @@ class BaseTimelineHandler:
         return None
 
     def do_get(self):
-        type = xutils.get_argument("type", self.note_type)
+        type = xutils.get_argument_str("type", self.note_type)
         parent_id = xutils.get_argument_str("parent_id", "0")
-        key = xutils.get_argument("key", "")
+        key = xutils.get_argument_str("key", "")
         title = u"最新笔记"
 
         # 检查登录态
@@ -497,14 +522,12 @@ class BaseTimelineHandler:
         kw.parent_link = parent_link
         kw.show_create = self.show_create
         kw.search_type = self.search_type
+        kw.search_ext_dict = dict(parent_id=parent_id)
+        kw.key = key
+        kw.pathlist = pathlist
+        kw.CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT
 
-        return xtemplate.render(
-            "note/page/timeline/timeline.html",
-            key=key,
-            pathlist=pathlist,
-            search_ext_dict=dict(parent_id=parent_id),
-            CREATE_BTN_TEXT_DICT=CREATE_BTN_TEXT_DICT,
-            **kw)
+        return xtemplate.render("note/page/timeline/timeline.html",**kw)
 
 
 class TimelineHandler(BaseTimelineHandler):
@@ -512,8 +535,8 @@ class TimelineHandler(BaseTimelineHandler):
     show_create_btn = True
 
     def before_get(self):
-        parent_id = xutils.get_argument("parent_id", "0")
-        if parent_id == "0":
+        parent_id = xutils.get_argument_int("parent_id")
+        if parent_id == 0:
             self.show_recent_btn = True
 
 

@@ -341,4 +341,19 @@
     font-weight: normal;
 }
 
+.note-header-span {
+    line-height: 32px;
+}
+
+.things {
+    padding-left: 20px;
+}
+
+#loadMore {
+    text-align: center;
+    width: 100%;
+    float: left;
+    color: blue;
+}
+
 /** markdown编辑的侧边菜单样式 END **/

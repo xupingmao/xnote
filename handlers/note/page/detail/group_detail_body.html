@@ -15,9 +15,12 @@
 {% init tags = "" %}
 {% init show_parent_link = True %}
 
-<div class="card">
-    {% include note/component/note_path.html %}
-</div>
+{% if show_orderby %}
+  <div class="card">
+    <!-- 排序功能 -->
+    {% include note/component/sort/note_sort_tab.html %}
+  </div>
+{% end %}
 
 {% include note/component/filter/note_tag_filter.html %}
 
