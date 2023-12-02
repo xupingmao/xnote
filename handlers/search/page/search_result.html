@@ -111,7 +111,7 @@
                         <span class="tag lightgray">{{file.creator}}</span>
                     {% end %}
 
-                    {% if file.parent_name != None %}
+                    {% if file.parent_name not in (None, "") %}
                         <span class="tag lightgray">
                             <a class="link" href="{{_server_home}}/note/view?id={{file.parent_id}}">{{file.parent_name}}</a>
                         </span>
