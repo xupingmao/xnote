@@ -9,6 +9,23 @@
         this.id = 0;
     }
 
+    function initExtOptions(options) {
+        if (options === undefined) {
+            options = {
+                hideMenu: false,
+                checkboxIndexMap: {},
+                checkboxIndex: 0,
+            };
+        }
+        if (options.checkboxIndexMap === undefined) {
+            options.checkboxIndexMap = {};
+        }
+        if (options.checkboxIndex === undefined) {
+            options.checkboxIndex = 0;
+        }
+        return options; 
+    }
+
     MarkedContents.prototype.createNewId = function () {
         this.id++;
         return "heading-" + this.id;
@@ -109,9 +126,7 @@
     var oldParse = marked.parse;
 
     // 扩展选项
-    var extOptions = {
-        hideMenu: false
-    };
+    var extOptions = initExtOptions();
 
     // 进度的正则匹配
     var regexPercent = /\d+(\.\d+)?\%/;
@@ -165,7 +180,7 @@
             return hljs.highlightAuto(code).value;
         }
         try {
-            return hljs.highlight(code, {language: lang}).value;
+            return hljs.highlight(code, { language: lang }).value;
         } catch (e) {
             return hljs.highlightAuto(code).value;
         }
@@ -189,6 +204,7 @@
         }
     }
 
+    // 处理待办的样式
     function processCheckbox(text, clickable) {
         var result = {};
         var disabled = false;
@@ -211,11 +227,19 @@
 
         // 调试日志
         console.info(extOptions.checkboxIndex, checkbox);
+        // 处理同名的待办索引
+        var index = extOptions.checkboxIndexMap[text]
+        if (index === undefined) {
+            index = 0;
+        } else {
+            index++;
+        }
+        extOptions.checkboxIndexMap[text] = index;
+        checkbox.attr("data-index", index); // 记录是第几个checkbox
 
         if (/^\[\]/.test(text)) {
             var content = text.substring(2);
             var tail = "";
-
             var parts = content.split("<ul>", 2); // content可能包含HTML
             if (parts.length == 2) {
                 content = parts[0];
@@ -441,11 +465,7 @@
 
     marked.parseAndRender = function (text, target, options) {
         // 处理扩展选项
-        extOptions = options;
-        if (extOptions === undefined) {
-            extOptions = {};
-        }
-        extOptions.checkboxIndex = 0;
+        extOptions = initExtOptions(options)
 
         var html = marked.parse(text);
         $(target).html(html);

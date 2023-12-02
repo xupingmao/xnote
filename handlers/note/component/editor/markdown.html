@@ -72,6 +72,7 @@
         function onCheckboxClicked(e) {
             // 按下单选项的行为
             var text = $(e.target).attr("data-text");
+            var index = parseInt($(e.target).attr("data-index"));
             console.log("onCheckboxClicked", text);
             text = trimText(text);
             var params = {};
@@ -87,7 +88,7 @@
             // console.log("text:", text, "newText:", newText);
 
             // TODO: 先简单用replace处理一下
-            newContent = oldContent.replace(text, newText);
+            newContent = xnote.string.replaceByIndex(oldContent, text, newText, index);
             params.id = "{{file.id}}";
             params.content = newContent;
             params.resp_type = "json";

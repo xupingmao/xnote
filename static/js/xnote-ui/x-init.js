@@ -60,6 +60,9 @@ if (window.xnote === undefined) {
 
     // 功能模块
     xnote.note = {};
+
+    // 字符串模块
+    xnote.string = {};
 }
 
 xnote.registerApiModule = function (name) {
@@ -283,3 +286,33 @@ $(document).ready(function() {
         xnote.state.system.keyupTime = new Date().getTime();
     });
 });
+
+/**
+ * 指定索引对文本进行替换
+ * @param {string} text 原始文本
+ * @param {string} target 被替换的文本
+ * @param {string} replacement 新的文本
+ * @param {int} index 索引位置
+ * @returns 
+ */
+xnote.string.replaceByIndex = function (text, target, replacement, index) {
+    var tokens = text.split(target);
+    var result = [];
+    for (var i = 0; i < tokens.length; i++) {
+        var token = tokens[i];
+        result.push(token);
+
+        if (i+1 == tokens.length) {
+            continue;
+        }
+
+        if (i == index) {
+            result.push(replacement);
+        } else {
+            result.push(target);
+        }
+    }
+    
+    return result.join("");
+};
+

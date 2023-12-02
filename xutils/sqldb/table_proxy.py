@@ -4,13 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-28 20:32:55
+@LastEditTime : 2023-12-02 19:19:51
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
 import time
 import xutils
 import web.db
+from web.db import SQLQuery, sqlparam
 from . import table_manager
 from xutils.interfaces import ProfileLog, ProfileLogger, SQLDBInterface
 from xutils.db.binlog import BinLog, BinLogOpType
@@ -253,3 +254,25 @@ class TableProxy(SQLDBInterface):
 
     def get_column_names(self):
         return self.table_info.column_names
+
+
+    def replace_values(self, seqname=None, _test=False, **values):
+        """XXX: 测试中
+        执行replace操作
+        """
+        assert len(values)>0
+        tablename = self.table_name
+        def q(x):
+            return "(" + x + ")"
+        
+        sorted_values = sorted(values.items(), key=lambda t: t[0])
+
+        _keys = SQLQuery.join(map(lambda t: t[0], sorted_values), ", ")
+        _values = SQLQuery.join(
+            [sqlparam(v) for v in map(lambda t: t[1], sorted_values)], ", "
+        )
+        sql_query = (
+            "REPLACE INTO %s " % tablename + q(_keys) + " VALUES " + q(_values)
+        )
+
+        return self.query(sql_query)

@@ -13,16 +13,14 @@ import threading
 import sqlite3
 
 import xutils
-import xconfig
-import xauth
-import xtemplate
+from xnote.core import xconfig, xauth, xtemplate
 import web.db
 
 from xutils import Storage
 from xutils import dbutil
 from xutils import fsutil, logutil
 from xutils.db.driver_sqlite import SqliteKV
-import xtables
+from xnote.core import xtables
 
 config = xconfig
 

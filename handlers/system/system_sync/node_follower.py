@@ -4,15 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-28 20:41:50
+@LastEditTime : 2023-12-02 18:20:42
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
 
 import time
 import logging
-import xconfig
-import xtables
+from xnote.core import xconfig, xtables
 
 from xutils import Storage
 from xutils import textutil, cacheutil
@@ -535,6 +534,7 @@ class DBSyncer:
 
         if optype == BinLogOpType.sql_upsert:
             old = table.select_first(where=where)
+            value = table.filter_record(value)
             # TODO 使用replace解决冲突的问题?
             try:
                 if old == None:

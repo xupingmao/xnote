@@ -205,10 +205,10 @@ class GroupListHandler:
             filter(lambda x: x.group_count != 0, list_category(user_name)))
 
     def load_group_list(self, user_name, status, kw):
-        parent_id = xutils.get_argument("parent_id", "0")
+        parent_id = xutils.get_argument_int("parent_id")
 
         if status in ("active", "archived"):
-            notes = dao.list_group(user_name,
+            notes = dao.list_group_v2(user_name,
                                    status=status,
                                    orderby="default",
                                    parent_id=parent_id,
@@ -220,8 +220,6 @@ class GroupListHandler:
             group = note_dao.get_virtual_group(user_name, "ungrouped")
             if group.size > 0:
                 notes.insert(0, group)
-
-            # self.load_category(kw, user_name)
 
         return notes
 
