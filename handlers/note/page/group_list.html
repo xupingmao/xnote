@@ -2,7 +2,7 @@
 
 {% block body_left %}
     {% init ext_groups = None %}
-
+    {% init show_sort = True %}
     {% include note/component/view_css.html %}
 
     <div class="card">
@@ -24,6 +24,13 @@
         {% include note/page/group_list_nav_mobile.html %}
     {% else %}
         {% include note/page/group_list_nav_desktop.html %}
+    {% end %}
+
+    {% if show_sort %}
+        <!-- 排序功能 -->
+        <div class="card">
+            {% include note/component/sort/note_sort_tab.html %}
+        </div>
     {% end %}
 
     <!-- 笔记本列表 -->

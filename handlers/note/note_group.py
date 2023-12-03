@@ -264,8 +264,8 @@ class GroupListHandler:
         notes.sort(key=lambda x: x.priority, reverse=True)
 
     def GET(self):
-        flag = xutils.get_argument("profile", "false")
-        if flag == "true":
+        flag = xutils.get_argument_bool("profile")
+        if flag:
             p = profile.Profile()
             r = [0]
             stats = p.runctx("r[0] = self.do_get()", globals(), locals())
@@ -315,6 +315,7 @@ class GroupListHandler:
         kw.groups = notes
         kw.parent_id = 0
         kw.show_back = show_back
+        kw.show_sort = (tab != "smart")
         kw.archived_count = dao.count_group(user_name, status="archived")
         kw.active_count = dao.count_group(user_name, status="active")
         kw.smart_count = SmartGroupService.count_smart_group()
