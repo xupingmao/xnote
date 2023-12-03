@@ -160,10 +160,13 @@ def view_group_detail_func(file, kw):
     if q_tag != "":
         q_tags = [q_tag]
 
-    offset = max(page-1, 0) * pagesize
-    files = note_dao.list_by_parent(file.creator, parent_id=file.id,
-                                    offset=offset, limit=pagesize,
-                                    orderby=orderby, tags=q_tags)
+    if orderby == "ctime_desc":
+        files = []
+    else:
+        offset = max(page-1, 0) * pagesize
+        files = note_dao.list_by_parent(file.creator, parent_id=file.id,
+                                        offset=offset, limit=pagesize,
+                                        orderby=orderby, tags=q_tags)
 
     if is_public_page:
         files = list(filter(lambda x: x.is_public, files))

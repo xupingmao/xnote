@@ -166,14 +166,15 @@ class DBLockInterface:
 
 class RecordInterface:
     """数据库记录的接口
-    @deprecated 使用 xutils.Storage 就可以了
+    一般情况下推荐继承 xutils.Storage
+    继承自Storage无法调用类的方法, 这种情况下可以继承当前的接口
     """
 
-    def from_storage(self, dict_value: dict):
+    def from_dict(self, dict_value: dict):
         """从数据库记录转为领域模型"""
         self.__dict__.update(dict_value)
 
-    def to_storage(self):
+    def to_dict(self):
         """从领域模型转为数据库记录"""
         return self.__dict__
 

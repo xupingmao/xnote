@@ -8,11 +8,45 @@
 """properties文件解析
 
 方法列表
+========
+parse_prop_text_to_pairs(text: str) -> list
+    * 解析properties文件成元组对
+
+parse_prop_text_to_dict(text: str) -> dict
+    * 解析properties文件成字典
 
 parse_prop_text(text:str, ret_type="dict") -> {dict|list}
     * 解析properties文件
-
 """
+
+class PropertyFile:
+    """property文件
+    TODO: 待实现
+    """
+
+    def load(self, file):
+        pass
+
+    def get_str(self, key="", default_value=""):
+        return default_value
+    
+    def get_int(self, key="", default_value=0):
+        return default_value
+    
+    def get_float(self, key="", default_value=0.0):
+        return default_value
+    
+    def get_list(self, key="", default_value=[]):
+        return default_value
+    
+    def get_dict(self, key="", default_value={}):
+        """
+        >>> p = PropertFile()
+        >>> p.load("a.name=test\na.age=20")
+        >>> p.get_dict("a")
+        {"name":"test","age":20}
+        """
+        return default_value
 
 def parse_prop_text_to_pairs(text: str) -> list:
     """解析key/value格式的配置文本
