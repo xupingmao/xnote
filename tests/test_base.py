@@ -101,6 +101,10 @@ def json_request(*args, **kw):
     return json.loads(data.decode("utf-8"))
 
 def json_request_return_dict(*args, **kw):
+    """请求接口,返回json,实例如下
+    - json_request_return_dict("/api/test", method="POST", data=dict(name="test"))
+    - json_request_return_dict("/api/get_info?p1=1&p2=test")
+    """
     ret = json_request(*args, **kw)
     assert isinstance(ret, dict)
     return ret

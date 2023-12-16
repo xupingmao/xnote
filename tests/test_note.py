@@ -537,7 +537,7 @@ class TestMain(BaseTestCase):
         print("files=%s" % len(files))
 
     def test_note_api_group(self):
-        json_data = json_request("/note/api/group")
+        json_data = json_request_return_dict("/note/api/group?list_type=all")
         self.assertEqual("success", json_data["code"])
 
     def test_workspace(self):

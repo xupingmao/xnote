@@ -385,7 +385,7 @@ NoteView.selectGroupFlat = function (req) {
         $(".group-select-data").html(html);
     }
 
-    xnote.http.get("/note/api/group?list_type=all", function (resp) {
+    xnote.http.get("/note/api/group?list_type=all&orderby=name", function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
             return;
