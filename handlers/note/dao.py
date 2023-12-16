@@ -99,7 +99,7 @@ class NoteIndexDO(Storage):
         self.version = 0
         self.is_deleted = 0
         self.is_public = 0
-        self.level = 1 # 等级 (-1)-归档 0-正常, 1-置顶
+        self.level = 0 # 等级 (-1)-归档 0-正常, 1-置顶
         self.tag_str = ""
         self.visit_cnt = 0
         self.update(kw)
@@ -282,7 +282,7 @@ class NoteIndexDao:
     
     @classmethod
     def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, type_list=[], is_deleted=0, 
-            level=None, date=None, date_start=None, date_end=None, name_like=None, order="id desc"):
+            level=None, date=None, date_start=None, date_end=None, name_like=None, query_root=False, order="id desc"):
         if order=="dtime_asc":
             order = "dtime"
         if order=="ctime_desc":
@@ -301,6 +301,8 @@ class NoteIndexDao:
             where += " AND is_public = 1"
         if parent_id != 0 and parent_id != None:
             where += " AND parent_id=$parent_id"
+        if query_root:
+            where += " AND parent_id=0"
         if type != None and type != "all":
             where += " AND type=$type"
         if level != None:
@@ -1273,6 +1275,7 @@ def list_group_with_count(creator=None,
     count_total = kw.get("count_total", False)
     count_only = kw.get("count_only", False)
     creator_id = kw.get("creator_id", 0)
+    query_root = kw.get("query_root", False)
 
     if creator == None and creator_id == 0:
         raise Exception("creator和creator_id不能同时为空")
@@ -1327,6 +1330,7 @@ def list_group_with_count(creator=None,
         creator_id=creator_id,
         type="group",
         parent_id=parent_id,
+        query_root=query_root,
     )
 
     notes = NoteIndexDao.list(

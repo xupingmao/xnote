@@ -208,10 +208,12 @@ class GroupListHandler:
         parent_id = xutils.get_argument_int("parent_id")
 
         if status in ("active", "archived"):
+            query_root = (status == "active")
             notes = dao.list_group_v2(user_name,
                                    status=status,
                                    orderby="default",
                                    parent_id=parent_id,
+                                   query_root=query_root,
                                    tags=kw.q_tags)
         else:
             notes = SmartGroupService.list_smart_group(user_name)
