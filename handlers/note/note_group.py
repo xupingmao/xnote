@@ -13,13 +13,13 @@ from .dao_book import SmartGroupService
 
 import web
 import xutils
-import xtemplate
-import xauth
-import xconfig
-import xmanager
+from xnote.core import xtemplate
+from xnote.core import xauth
+from xnote.core import xconfig
+from xnote.core import xmanager
 from xutils import Storage
 from xutils import dateutil, fsutil
-from xtemplate import T
+from xnote.core.xtemplate import T
 from .dao_category import list_category, get_category_by_code
 from . import dao_tag
 from . import dao
@@ -438,7 +438,7 @@ def load_note_index(user_name):
 
 
 def load_category(user_name, include_system=False):
-    data = note_dao.list_group(user_name, orderby="name")
+    data = note_dao.list_group_v2(user_name, orderby="name")
     sticky_groups = list(filter(lambda x: x.priority !=
                          None and x.priority > 0, data))
     archived_groups = list(filter(lambda x: x.archived == True, data))
