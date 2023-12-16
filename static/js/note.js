@@ -352,23 +352,29 @@ NoteView.selectGroupFlat = function (req) {
 
     // 渲染数据
     function renderData(data) {
-        var first = new Section(), second = new Section(), last = new Section();
+        var first = new Section();
+        var second = new Section();
+        var last = new Section();
+        var firstGroup = new Section(); // 一级笔记本
         for (var i = 0; i < data.length; i++) {
             var item = data[i];
-            if (item.priority >= 1) {
+            if (item.level >= 1) {
                 first.add(item);
-            } else if (item.priority < 0) {
+            } else if (item.level < 0) {
                 last.add(item);
+            } else if (item.parent_id == 0) {
+                firstGroup.add(item);
             } else {
                 second.add(item);
             }
         }
 
         first.title = "置顶";
-        second.title = "笔记本";
+        firstGroup.title = "一级笔记本";
+        second.title = "其他笔记本";
         last.title = "归档";
 
-        var groups = [first, second, last];
+        var groups = [first, firstGroup, second, last];
         var hasNoMatch = (data.length === 0);
 
         var html = $("#group_select_tpl").renderTemplate({

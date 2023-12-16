@@ -336,7 +336,7 @@ class NoteIndexDao:
             yield batch_records
 
     @classmethod
-    def count(cls, creator_id=0, type=None, type_list=[], level=None, is_deleted=0, parent_id=0, is_not_group=False):
+    def count(cls, creator_id=0, type=None, type_list=[], level=None, is_deleted=0, parent_id=0, is_not_group=False, query_root=False):
         if type == "table":
             type = None
             type_list = ["csv", "table"]
@@ -355,6 +355,8 @@ class NoteIndexDao:
             where += " AND type != $group_type"
         if len(type_list)>0:
             where += " AND type IN $type_list"
+        if query_root:
+            where += " AND parent_id=0"
         
         vars = dict(creator_id=creator_id, type=type, level=level, is_deleted=is_deleted, 
         parent_id=parent_id, group_type="group", type_list=type_list)
@@ -1372,18 +1374,18 @@ def list_group_v2(*args, **kw):
     return list
 
 @cacheutil.kw_cache_deco(prefix="note.count_group")
-def count_group(creator, status=None):
+def count_group(creator, status=None, query_root=False):
     check_group_status(status)
-    value = count_group_by_db(creator, status)
+    value = count_group_by_db(creator, status, query_root=query_root)
     return value
 
 
-def count_group_by_db(creator, status=None):
+def count_group_by_db(creator, status=None, query_root=False):
     if status is None:
         creator_id = xauth.UserDao.get_id_by_name(creator)
-        return NoteIndexDao.count(creator_id=creator_id, type="group")
+        return NoteIndexDao.count(creator_id=creator_id, type="group", query_root=query_root)
 
-    data, count = list_group_with_count(creator, status = status, count_only=True)
+    data, count = list_group_with_count(creator, status = status, count_only=True, query_root=query_root)
     return count
 
 
