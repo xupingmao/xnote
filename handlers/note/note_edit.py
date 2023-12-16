@@ -625,12 +625,12 @@ class UpdateOrderByHandler:
     def POST(self):
         id = xutils.get_argument("id")
         orderby = xutils.get_argument("orderby")
-        if orderby not in ("ctime_priority", "name", "name_priority", "hot_index"):
-            return dict(code = "fail", message = "无效的排序方式: %s" % orderby)
+        if orderby not in note_dao.ORDER_BY_SET:
+            return webutil.FailedResult(code = "fail", message = "无效的排序方式: %s" % orderby)
         note = check_get_note(id)
         
         note_dao.update_note(id, orderby = orderby, creator_id = note.creator_id)
-        return dict(code = "success", message = "更新排序方式成功")
+        return webutil.SuccessResult(message = "更新排序方式成功")
 
 class MoveAjaxHandler:
     

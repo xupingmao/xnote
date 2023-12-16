@@ -480,3 +480,41 @@ NoteView.openDialogToShare = function (target) {
         xnote.showDialog(ajax_dialog_title, resp);
     });
 }
+
+// 修改排序
+NoteView.changeOrderBy = function (target) {
+    var id = $(target).attr("data-id");
+    var orderby = $(target).val();
+
+    checkNotEmpty(id, "data-id为空");
+    checkNotEmpty(orderby, "data-orderby为空");
+
+    xnote.http.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
+        var code = resp.code;
+        if (code != "success") {
+            xnote.alert(resp.message);
+        } else {
+            xnote.toast(resp.message);
+            window.location.reload();
+        }
+    })
+};
+
+// 修改笔记的等级（置顶之类的）
+NoteView.changeLevel = function (target) {
+    var id = $(target).attr("data-id");
+    var status = $(target).val();
+
+    checkNotEmpty(id, "data-id为空");
+    checkNotEmpty(status, "data-status为空");
+
+    xnote.http.post("/note/status", {id: id, status: status}, function (resp) {
+        var code = resp.code;
+        if (code != "success") {
+            xnote.alert(resp.message);
+        } else {
+            xnote.toast(resp.message);
+            window.location.reload();
+        }
+    });
+}

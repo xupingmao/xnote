@@ -62,6 +62,13 @@ MAX_LIST_SIZE = 1000
 DEFAULT_DATETIME = "1970-01-01 00:00:00"
 _cache = cacheutil.PrefixedCache("note:")
 
+# 排序的枚举
+ORDER_BY_SET = set([
+    "ctime_desc", "ctime_priority", 
+    "name", "name_asc", "name_desc", "name_priority", 
+    "hot_index", "hot_desc",
+])
+
 NOTE_ICON_DICT = {
     "group": "fa-folder",
 

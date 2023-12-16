@@ -122,24 +122,6 @@
             })
         });
 
-        $(".status-select").change(function(event) {
-            var id = $(event.target).attr("data-id");
-            var status = $(event.target).val();
-
-            checkNotEmpty(id, "data-id为空");
-            checkNotEmpty(status, "data-status为空");
-
-            xnote.http.post("/note/status", {id: id, status: status}, function (resp) {
-                var code = resp.code;
-                if (code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    xnote.toast(resp.message);
-                    window.location.reload();
-                }
-            })
-        });
-
         $(".orderby-btn").each(function (index, element) {
             var orderby = $(element).attr("data-orderby");
             if (orderby == "{{file.orderby}}") {
@@ -154,25 +136,7 @@
             checkNotEmpty(id, "data-id为空");
             checkNotEmpty(orderby, "data-orderby为空");
 
-            $.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
-                var code = resp.code;
-                if (code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    xnote.toast(resp.message);
-                    window.location.reload();
-                }
-            })
-        });
-
-        $(".orderby-select").change(function (event) {
-            var id = $(event.target).attr("data-id");
-            var orderby = $(event.target).val();
-
-            checkNotEmpty(id, "data-id为空");
-            checkNotEmpty(orderby, "data-orderby为空");
-
-            $.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
+            xnote.http.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
                 var code = resp.code;
                 if (code != "success") {
                     xnote.alert(resp.message);

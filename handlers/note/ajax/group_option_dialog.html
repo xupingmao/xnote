@@ -1,3 +1,12 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2023-10-27 21:17:40
+@LastEditors  : xupingmao
+@LastEditTime : 2023-12-16 16:59:43
+@FilePath     : /xnote/handlers/note/ajax/group_option_dialog.html
+@Description  : 描述
+ #} -->
 {% comment 这是在笔记本详情页里面点击选项弹出的对话框 %}
 
 {% init share_to_list = [] %}
@@ -21,11 +30,11 @@
         <span class="btn-line-height">排序</span>
         <div class="float-right">
             <select class="orderby-select" 
-                onchange="xnote.api.note.changeOrderBySelect(this)"
+                onchange="xnote.note.changeOrderBy(this)"
                 data-id="{{file.id}}" value="{{file.orderby}}">
-                <option value="ctime_priority">最近创建</option>
-                <option value="name_priority">名称</option>
-                <option value="hot_index">访问热度</option>
+                <option value="ctime_desc">最近创建</option>
+                <option value="name_asc">名称</option>
+                <option value="hot_desc">访问热度</option>
             </select>
         </div>
     </div>
@@ -78,3 +87,8 @@
         </div>
     {% end %}
 </div>
+
+<script>
+    // 初始化一些默认值
+    xnote.refresh();
+</script>
