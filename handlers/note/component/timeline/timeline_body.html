@@ -2,6 +2,7 @@
 {% init show_orderby = False %}
 {% init url_type = "timeline" %}
 {% init parent_id = 0 %}
+{% init type = "default" %}
 
 <script src="/static/lib/vue/vue-2.2.6.min.js"></script>
 
@@ -95,7 +96,7 @@
     param.search_tag = getUrlParam("search_tag");
     param.filter_tag = getUrlParam("tag");
     param.key = "{{quote(key)}}";
-    param.orderby = xnote.getUrlParam("orderby", "ctime");
+    param.orderby = xnote.getUrlParam("orderby", "ctime_desc");
     param.offset = app.offset;
     param.limit = QUERY_LIMIT;
     param.url_type = "{{url_type}}";

@@ -62,6 +62,7 @@ class SystemGroup(Storage):
         self.name = name
         self.url = url
         self.priority = priority
+        self.level = priority
         self.size = 0
         self.mtime = dateutil.format_datetime()
 
@@ -77,6 +78,7 @@ class TaskGroup(Storage):
         self.mtime = dateutil.format_time()
         self.url = "/message?tag=task"
         self.priority = 1
+        self.level = self.priority
         self.size = MessageDao.get_message_stat(self.user).task_count
 
 
@@ -134,8 +136,12 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
     project_notes = []
 
     for row in rows:
+        if row.level == None:
+            # 可能是虚拟的对象
+            row.level = 0
+
         build_note_info_for_timeline(row, url_type)
-        if sticky_title and row.priority != None and row.priority > 0:
+        if sticky_title and row.level > 0:
             sticky_notes.append(row)
             continue
 
@@ -329,8 +335,8 @@ def list_recent_edit_func(context):
 
 
 def default_list_func(context: ListContext):
-    offset = context['offset']
-    limit = context['limit']
+    offset = context.offset
+    limit = context.limit
     user_name = context['user_name']
     parent_id = context.parent_id
     tags = None
@@ -339,7 +345,7 @@ def default_list_func(context: ListContext):
         tags = [context.filter_tag]
     
     rows = note_dao.list_by_parent(
-        user_name, parent_id, offset, limit, orderby = 'ctime_desc', tags=tags)
+        user_name, parent_id=parent_id, offset=offset, limit=limit, orderby = 'ctime_desc', tags=tags)
     
     orderby = "ctime"
     if context.orderby == "name":

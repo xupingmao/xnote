@@ -896,6 +896,7 @@ def is_not_empty(value):
 def create_note(note_dict, date_str=None, note_id=None, check_name=True):
     assert isinstance(note_dict, NoteDO)
     assert note_dict.creator_id != 0
+    assert isinstance(note_dict.level, int)
 
     content = note_dict.content
     creator = note_dict.creator
@@ -1481,7 +1482,7 @@ def list_by_parent(creator="", parent_id=None, offset=0, limit=1000,
         return True
     
     # TODO 优化其他筛选条件
-    notes = NoteIndexDao.list(parent_id=parent_id_int, offset=offset, limit=limit, creator_id=creator_id)
+    notes = NoteIndexDao.list(parent_id=parent_id_int, offset=offset, limit=1000, creator_id=creator_id)
     build_note_list_info(notes, orderby=orderby)
     notes = list(filter(filter_note_func, notes))
     if orderby == "db":
