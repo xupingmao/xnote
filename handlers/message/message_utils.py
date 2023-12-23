@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-27 23:01:57
+@LastEditTime : 2023-12-23 17:02:19
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -472,7 +472,7 @@ class MessageListParser(object):
                     count = keywords.get(keyword, 0)
                     keywords[keyword] = count + 1
             if is_task_tag(message.tag):
-                message.time_info = message.mtime
+                message.time_info = message.sort_value
             else:
                 message.time_info = message.ctime
             message.weekday = dateutil.datetime_to_weekday(message.time_info)

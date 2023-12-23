@@ -18,6 +18,7 @@ from xutils import fsutil
 
 
 DEFAULT_DATETIME = "1970-01-01 00:00:00"
+DEFAULT_DATE = "1970-01-01"
 
 class MySqliteDB(web.db.SqliteDB):
     _lock = threading.RLock()
@@ -382,9 +383,11 @@ def init_msg_index_table():
         manager.add_column("user_name", "varchar(64)", "")
         # 短信息的类型
         manager.add_column("tag", "varchar(16)", "")
-        manager.add_column("date", "date", default_value="1970-01-01")
+        manager.add_column("date", "date", default_value=DEFAULT_DATE)
+        manager.add_column("sort_value", "varchar(64)", default_value="", comment="排序字段")
         manager.add_index(["user_id", "ctime"])
         manager.add_index(["user_id", "mtime"])
+        manager.add_index(["user_id", "sort_value"])
 
 def init_kv_store_table():
     kw = dict()

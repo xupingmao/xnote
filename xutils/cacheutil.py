@@ -209,6 +209,13 @@ class PrefixedCache:
     def get(self, key, default_value=None):
         return self.cache.get(self.prefix + key, default_value=default_value)
     
+    def get_dict(self, key, default_value=None):
+        value = self.cache.get(self.prefix + key, default_value=default_value)
+        if value == None:
+            return None
+        assert isinstance(value, dict)
+        return value
+    
     def put(self, key, value, expire=60*5):
         return self.cache.put(self.prefix+key, value, expire)
     

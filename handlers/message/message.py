@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-26 16:00:46
+@LastEditTime : 2023-12-23 16:48:04
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -385,6 +385,7 @@ def update_message_tag(id, tag):
     data.pop("status", None)
     data.tag = tag
     data.mtime = xutils.format_datetime()
+    data.sort_value = data.mtime
     need_update = True
     
     if tag == "done":
@@ -402,12 +403,12 @@ def update_message_tag(id, tag):
         if origin_data != None:
             # 更新原始任务后删除当前的完成记录
             origin_data.append_comment("$reopen_task$")
-            MessageDao.update_tag(origin_data, tag)
+            MessageDao.update_tag(origin_data, tag, sort_value = origin_data.sort_value)
             MessageDao.delete_by_key(data.id)
             need_update = False
     
     if need_update:    
-        MessageDao.update_tag(data, tag)
+        MessageDao.update_tag(data, tag, sort_value=data.sort_value)
 
     xmanager.fire("message.updated", Storage(
         id=id, user=user_name, tag=tag, content=data.content))
@@ -549,7 +550,8 @@ def create_message(user_name, tag, content, ip):
     message.ctime = ctime
     message.mtime = ctime
     message.content = content
-
+    message.sort_value = ctime
+    
     id = MessageDao.create(message)
     MessageDao.refresh_message_stat(user_name, [message.tag])
 

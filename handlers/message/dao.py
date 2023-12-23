@@ -54,6 +54,7 @@ class MessageDO(Storage):
         self.no_tag = True
         self.amount = 0 # keyword对象的数量
         self.done_time = None # type: str|None
+        self.sort_value = ""
 
     @classmethod
     def from_dict(cls, dict_value: dict):
@@ -166,6 +167,7 @@ def _create_message_with_date(kw):
     msg_index.ctime_sys = xutils.format_datetime()
     msg_index.ctime = ctime
     msg_index.date = date
+    msg_index.sort_value = ctime
     msg_id = MsgIndexDao.insert(msg_index)
     _msg_db.update_by_id(str(msg_id), kw)
     kw.id = kw._key
@@ -185,6 +187,7 @@ def _create_message_without_date(kw):
     index.date = kw.date
     index.user_name = kw.user
     index.user_id = xauth.UserDao.get_id_by_name(kw.user)
+    index.sort_value = ctime
 
     msg_id = MsgIndexDao.insert(index)
     _msg_db.update_by_id(str(msg_id), kw)
@@ -571,7 +574,7 @@ def get_message_stat(user):
         return get_empty_stat()
     check_param_user(user)
 
-    value = _msg_stat_cache.get(user)
+    value = _msg_stat_cache.get_dict(user)
 
     if _debug:
         logging.debug("[get_message_stat] cacheValue=%s", value)
@@ -700,6 +703,7 @@ class MsgIndex(Storage):
         self.ctime = dateutil.format_datetime() # 展示创建时间
         self.mtime = dateutil.format_datetime() # 修改时间
         self.date = "1970-01-01"
+        self.sort_value = "" # 排序字段, 对于log/task,存储创建时间,对于done,存储完成时间
 
 class MsgIndexDao:
     """随手记索引表,使用SQL存储"""
@@ -738,7 +742,7 @@ class MsgIndexDao:
         return cls.db.count(where=where, vars=vars)
     
     @classmethod
-    def list(cls, user_id=0, tag="", date_prefix="", date_start="", date_end="", offset=0, limit=10, order="ctime desc"):
+    def list(cls, user_id=0, tag="", date_prefix="", date_start="", date_end="", offset=0, limit=10, order="sort_value desc"):
         where = "1=1"
         if user_id != 0:
             where += " AND user_id=$user_id"
@@ -750,9 +754,6 @@ class MsgIndexDao:
             where += " AND date >= $date_start"
         if date_end != "":
             where += " AND date < $date_end"
-        
-        if is_task_tag(tag):
-            order = "mtime desc"
 
         vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%", date_start=date_start, date_end=date_end)
         return cls.db.select(where=where, vars=vars,offset=offset,limit=limit,order=order)
@@ -762,9 +763,14 @@ class MsgIndexDao:
         return cls.db.delete(where=dict(id=id))
     
     @classmethod
-    def update_tag(cls, id=0, tag=""):
+    def update_tag(cls, id=0, tag="", sort_value=""):
         now = xutils.format_datetime()
-        return cls.db.update(tag=tag, mtime=now, where=dict(id=id))
+        updates = dict()
+        updates["tag"] = tag
+        updates["mtime"] = now
+        if sort_value != "":
+            updates["sort_value"] = sort_value
+        return cls.db.update(where=dict(id=id), **updates)
     
     @classmethod
     def touch(cls, id=0):
@@ -889,9 +895,9 @@ class MessageDao:
         MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.keywords)
     
     @classmethod
-    def update_tag(cls, message:MessageDO, tag=""):
+    def update_tag(cls, message:MessageDO, tag="", sort_value=""):
         message.tag = tag
-        MsgIndexDao.update_tag(id=int(message._id), tag=tag)
+        MsgIndexDao.update_tag(id=int(message._id), tag=tag, sort_value=sort_value)
         cls.update(message)
         cls.refresh_message_stat(message.user)
 
@@ -935,6 +941,7 @@ class MessageDao:
             msg = dict_result.get(str(index.id))
             if msg != None:
                 new_msg = MessageDO.from_dict(msg)
+                new_msg.sort_value = index.sort_value
                 result.append(new_msg)
         return result
 

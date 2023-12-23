@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-12-02 19:19:51
+@LastEditTime : 2023-12-23 16:37:00
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -120,7 +120,7 @@ class TableProxy(SQLDBInterface):
             return self.select_first(what="COUNT(1) AS amount", where=where, vars=vars).amount
         return self.db.query(sql, vars=vars).first().amount
 
-    def update(self, where, vars=None, _test=False, **values):
+    def update(self, where, vars=None, _test=False, _skip_binlog=False, _skip_profile=False, **values):
         self.check_write_state()
         where = self.fix_sql_keywords(where)
         values = self.fix_sql_keywords(values)
@@ -128,14 +128,15 @@ class TableProxy(SQLDBInterface):
         start_time = time.time()
         try:
             result = self.db.update(self.tablename, where, vars=vars, _test=_test, **values)
-            self.add_update_binlog(where=where, vars=vars, _test=_test)
+            if not _skip_binlog:
+                self.add_update_binlog(where=where, vars=vars, _test=_test)
             return result
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
         finally:
             cost_time = time.time() - start_time
-            if self.log_profile and self.table_info.log_profile:
+            if self.log_profile and self.table_info.log_profile and not _skip_profile:
                 profile_log = self._new_profile_log()
                 profile_log.cost_time = cost_time
                 profile_log.op_type = "update"

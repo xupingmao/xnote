@@ -133,7 +133,7 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
     tmp_result = dict()
     sticky_notes = []
     archived_notes = []
-    project_notes = []
+    group_notes = []
 
     for row in rows:
         if row.level == None:
@@ -150,7 +150,7 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
             continue
 
         if group_title and row.type == "group":
-            project_notes.append(row)
+            group_notes.append(row)
             continue
 
         if orderby == "mtime":
@@ -177,12 +177,14 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
     result = []
 
     if len(sticky_notes) > 0:
-        sticky_notes.sort(key = lambda x:x[orderby])
+        # sticky_notes.sort(key = lambda x:x[orderby])
+        sticky_notes.sort(key = lambda x: x.name)
         result.append(dict(title=u'置顶', children=sticky_notes))
 
-    if len(project_notes) > 0:
-        project_notes.sort(key = lambda x:x[orderby])
-        result.append(dict(title=u'笔记本', children=project_notes))
+    if len(group_notes) > 0:
+        # group_notes.sort(key = lambda x:x[orderby])
+        group_notes.sort(key = lambda x: x.name)
+        result.append(dict(title=u'笔记本', children=group_notes))
 
     result += tmp_sorted_result
 
