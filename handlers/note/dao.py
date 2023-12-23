@@ -20,12 +20,12 @@ note_public:<note_id>            = 公开的笔记索引
 """
 import time
 import os
-import xconfig
+from xnote.core import xconfig
 import xutils
-import xmanager
+from xnote.core import xmanager
 import logging
-import xauth
-import xtables
+from xnote.core import xauth
+from xnote.core import xtables
 import pdb
 import enum
 from xutils import Storage
@@ -60,7 +60,6 @@ MAX_SEARCH_SIZE = 1000
 MAX_SEARCH_KEY_LENGTH = 20
 MAX_LIST_SIZE = 1000
 DEFAULT_DATETIME = "1970-01-01 00:00:00"
-_cache = cacheutil.PrefixedCache("note:")
 
 # 排序的枚举
 ORDER_BY_SET = set([
@@ -1906,16 +1905,15 @@ def get_gallery_path(note):
     fsutil.makedirs(standard_dir)
     return standard_dir
 
-
 def get_virtual_group(user_name, name):
     if name == "ungrouped":
-        files = list_by_parent(user_name, parent_id = "0", offset = 0, limit = 1000,
-                               skip_group=True, include_public=False)
+        creator_id = xauth.UserDao.get_id_by_name(user_name)
+        files_count = NoteIndexDao.count(creator_id=creator_id, query_root=True, is_not_group=True)
         group = NoteDO()
         group.name = "未分类笔记"
         group.url = "/note/default"
-        group.size = len(files)
-        group.children_count = len(files)
+        group.size = files_count
+        group.children_count = files_count
         group.icon = "fa-folder"
         group.priority = 0
         return group
