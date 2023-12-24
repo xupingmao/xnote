@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-12-23 16:48:04
+@LastEditTime : 2023-12-24 17:43:12
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -66,8 +66,9 @@ def get_current_message_stat():
     return format_message_stat(message_stat)
 
 
-def update_keyword_amount(tag_info: msg_dao.MsgTagInfo, user_name, key):
-    msg_list, amount = dao.search_message(user_name, key, 0, 1)
+def update_keyword_amount(tag_info: msg_dao.MsgTagInfo, user_name="", key=""):
+    user_id = xauth.UserDao.get_id_by_name(user_name)
+    amount = dao.MsgTagBindDao.count_by_key(user_id=user_id, key=key)
     tag_info.amount = amount
     if amount == 0:
         msg_dao.MsgTagInfoDao.delete(tag_info)
@@ -111,13 +112,13 @@ def after_message_create_or_update(msg_item):
     else:
         MessageDao.update_user_tags(msg_item)
 
-    after_upsert_async(msg_item)
+    after_upsert(msg_item)
 
 def after_message_delete(msg_item):
     process_message(msg_item)
-    after_upsert_async(msg_item)
+    after_upsert(msg_item)
 
-def after_upsert_async(msg_item):
+def after_upsert(msg_item):
     """插入或者更新异步处理"""
     user_name = msg_item.user
 
@@ -595,22 +596,18 @@ class SaveAjaxHandler:
         self.apply_rules(user_name, id, tag, content)
 
         if id == "" or id is None:
-            item = touch_key_by_content(user_name, tag, content)
-            if item != None:
-                message = item
-            else:
-                message = create_message(user_name, tag, content, ip)
-            return dict(code="success", data=message)
+            message = create_message(user_name, tag, content, ip)
+            return webutil.SuccessResult(data=message)
         else:
             update_message_content(id, user_name, content)
-        return dict(code="success", data=dict(id=id))
+        return webutil.SuccessResult(data=dict(id=id))
 
     def POST(self):
         try:
             return self.do_post()
         except Exception as e:
             xutils.print_exc()
-            return dict(code="fail", message=str(e))
+            return webutil.FailedResult(code="fail", message=str(e))
 
 
 class DateAjaxHandler:

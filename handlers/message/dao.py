@@ -331,7 +331,6 @@ def kv_count_message(user, status):
 def count_message(user, status):
     return kv_count_message(user, status)
 
-
 def get_message_by_id(full_key, user_name=""):
     if full_key == None:
         return None
@@ -892,7 +891,13 @@ class MsgTagBindDao:
         if user_id == 0:
             logging.error("user_id=0")
             return
-        cls.tag_bind_service.bind_tags(user_id=user_id, target_id=msg_id, tags=tags)
+        cls.tag_bind_service.bind_tags(user_id=user_id, target_id=msg_id, tags=tags, update_only_changed=True)
+        
+    @classmethod
+    def count_by_key(cls, user_id=0, key=""):
+        assert isinstance(user_id, int)
+        assert isinstance(key, str)
+        return cls.tag_bind_service.count_user_tag(user_id=user_id, tag_code=key)
 
 class MessageDao:
     """message的主数据接口,使用KV存储"""

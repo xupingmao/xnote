@@ -331,6 +331,7 @@ def init_tag_bind_table():
         manager.add_column("tag_code",  "varchar(32)", "")
         manager.add_column("target_id", "bigint", 0)
         manager.add_index(["user_id", "tag_code"])
+        manager.add_index(["user_id", "target_id"])
 
 def init_file_info():
     """文件信息

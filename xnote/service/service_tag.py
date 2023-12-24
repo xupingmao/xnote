@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-09-09 11:04:21
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-18 15:24:38
+@LastEditTime : 2023-12-24 16:10:11
 @FilePath     : /xnote/xnote/service/service_tag.py
 @Description  : 描述
 """
@@ -56,6 +56,7 @@ class TagBindService:
         return TagBind.from_dict_list(results)
 
     def count_user_tag(self, user_id=0, tag_code = ""):
+        tag_code = tag_code.lower()
         return self.db.count(where=dict(tag_type=self.tag_type, user_id=user_id, tag_code=tag_code))
     
     def normalize_tags(self, tags=[]):
@@ -66,11 +67,22 @@ class TagBindService:
             result.add(tag.lower())
         return result
 
-    def bind_tags(self, user_id=0, target_id=0, tags=[]):
+    def bind_tags(self, user_id=0, target_id=0, tags=[], update_only_changed = False):
         tags = self.normalize_tags(tags)
-
+        
+        where_dict = dict(tag_type=self.tag_type, user_id=user_id, target_id=target_id)
+        
+        if update_only_changed:
+            old_tags = self.get_by_target_id(user_id=user_id, target_id=target_id)
+            old_tag_set = set()
+            for tag_info in old_tags:
+                old_tag_set.add(tag_info.tag_code)
+                
+            if old_tag_set == tags:
+                return
+        
         with self.db.transaction():
-            self.db.delete(where=dict(tag_type=self.tag_type, user_id=user_id, target_id=target_id))
+            self.db.delete(where=where_dict)
             for tag_code in tags:
                 new_bind = TagBind()
                 new_bind.ctime = dateutil.format_datetime()

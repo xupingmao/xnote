@@ -4,9 +4,9 @@
 @email        : 578749341@qq.com
 @Date         : 2021-12-04 21:22:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-15 17:59:58
+@LastEditTime : 2023-12-24 15:53:03
 @FilePath     : /xnote/xutils/db/dbutil_table.py
-@Description  : 数据库表-API
+@Description  : 数据库表-API, 不建议使用, 建议使用 dbutil_table_v2
 """
 
 from urllib.parse import quote
@@ -35,7 +35,8 @@ db = register_table("_repair_error", "修复错误记录")
 db.register_index("ctime")
 
 class LdbTable:
-    """基于leveldb的表, 比较常见的是以下2种
+    """Deprecated: 建议使用 dbutil_table_v2
+    基于leveldb的表, 比较常见的是以下2种
     * key = prefix:record_id           全局数据库
     * key = prefix:user_name:record_id 用户(或者其他分片)维度数据
 

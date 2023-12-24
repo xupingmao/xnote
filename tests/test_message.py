@@ -2,12 +2,11 @@
 # Created by xupingmao on 2017/05/23
 # @modified 2022/04/17 14:28:57
 
-import handlers.message.dao as msg_dao
 from .a import *
 import os
-import xtemplate
-import xconfig
-import xauth
+from xnote.core import xtemplate
+from xnote.core import xconfig
+from xnote.core import xauth
 
 from xutils import Storage
 from xutils import dbutil
@@ -27,6 +26,9 @@ request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
 # 必须init之后再import
+
+import handlers.message.dao as msg_dao
+
 
 MSG_DB = dbutil.get_table("message")
 
@@ -134,10 +136,8 @@ class TestMain(BaseTestCase):
 
         assert self.count_message_key() == 0
 
-        response = json_request(
-            "/message/save", method="POST", data=dict(content="#Xnote-Unit-Test#", tag="key"))
-
-        assert isinstance(response, dict)
+        response = json_request_return_dict(
+            "/message/save", method="POST", data=dict(content="#Xnote-Unit-Test#", tag="log"))
 
         self.assertEqual("success", response.get("code"))
         data = response.get("data")
