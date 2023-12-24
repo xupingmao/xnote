@@ -1,11 +1,12 @@
 # encoding=utf-8
 
-import enum
+
 import xutils
 from xnote.core import xtables
 from xutils import dateutil
 
-class CommentTypeEnum(enum.Enum):
+class CommentTypeEnum:
+    """枚举无法扩展,所以这里不用,从外部添加枚举值可以直接设置新的属性"""
     empty = ""
     note = "note"
     list_item = "list_item"

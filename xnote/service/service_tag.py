@@ -9,11 +9,11 @@
 @Description  : 描述
 """
 # encoding=utf-8
-import enum
 from xnote.core import xtables
 from xutils import Storage, dateutil
 
-class TagTypeEnum(enum.Enum):
+class TagTypeEnum:
+    """枚举无法扩展,所以这里不用,从外部添加枚举值可以直接设置新的属性"""
     empty = 0
     note_tag = 1 # 笔记标签
     msg_tag = 2  # 随手记标签
@@ -49,7 +49,8 @@ class TagBindService:
     max_tag_length = 30
 
     def __init__(self, tag_type = TagTypeEnum.empty):
-        self.tag_type = tag_type.value
+        assert isinstance(tag_type, int)
+        self.tag_type = tag_type
 
     def get_by_target_id(self, user_id=0, target_id=0):
         results = self.db.select(where=dict(tag_type=self.tag_type, user_id=user_id, target_id=target_id))

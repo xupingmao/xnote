@@ -6,9 +6,9 @@
 
 
 import xutils
-import xconfig
-import xmanager
-import xauth
+from xnote.core import xconfig
+from xnote.core import xmanager
+from xnote.core import xauth
 from xutils import dbutil
 from xutils import textutil
 from xutils import dateutil
