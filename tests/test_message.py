@@ -229,7 +229,6 @@ class TestMain(BaseTestCase):
         resp_data = response.get("data")
         assert isinstance(resp_data, dict)
         new_msg_id = resp_data.get("id")
-
         self.assertEqual("success", response.get("code"))
 
         from handlers.message.message_search import on_search_message, SearchHandler
@@ -244,6 +243,7 @@ class TestMain(BaseTestCase):
         assert amount == 1
         assert len(search_list) == 1
         assert search_list[0].id == new_msg_id
+        assert search_list[0].sort_value != ""
 
     def test_message_search_page(self):
         self.check_OK("/message?tag=search&key=123")

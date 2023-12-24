@@ -14,6 +14,7 @@ from xnote.core.xtemplate import T
 from xutils.db.dbutil_helper import new_from_dict
 from xnote.service import TagBindService, TagTypeEnum
 from .message_model import is_task_tag
+from xutils import numutil
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
@@ -66,6 +67,12 @@ class MessageDO(Storage):
         for item in result.comments:
             comment_text = item.get("content")
             item["content"] = sys_comment_dict.get(comment_text, comment_text)
+        if result.sort_value == "":
+            index = MsgIndexDao.get_by_id(numutil.parse_int(result._id))
+            if index != None:
+                result.sort_value = index.sort_value
+                MessageDao.update(result)
+            
         return result
     
     @classmethod
@@ -286,7 +293,7 @@ def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_t
         # 按照创建时间倒排 (按日期补充的随手记的key不是按时间顺序的)
     
     chatlist = MessageDO.from_dict_list(chatlist)
-    chatlist.sort(key = lambda x:x.ctime, reverse=True)
+    chatlist.sort(key = lambda x:x.sort_value, reverse=True)
     amount = _msg_db.count(filter_func=search_func, user_name=user_name)
     return chatlist, amount
 
@@ -694,7 +701,7 @@ class MessageComment(Storage):
         self.content = ""
 
 class MsgIndex(Storage):
-    def __init__(self):
+    def __init__(self, **kw):
         self.id = 0
         self.tag = ""
         self.user_id = 0
@@ -704,6 +711,7 @@ class MsgIndex(Storage):
         self.mtime = dateutil.format_datetime() # 修改时间
         self.date = "1970-01-01"
         self.sort_value = "" # 排序字段, 对于log/task,存储创建时间,对于done,存储完成时间
+        self.update(kw)
 
 class MsgIndexDao:
     """随手记索引表,使用SQL存储"""
@@ -763,6 +771,15 @@ class MsgIndexDao:
         return cls.db.delete(where=dict(id=id))
     
     @classmethod
+    def get_by_id(cls, id=0):
+        if id == 0:
+            return None
+        result = cls.db.select_first(where=dict(id=id))
+        if result == None:
+            return None
+        return MsgIndex(**result)
+    
+    @classmethod
     def update_tag(cls, id=0, tag="", sort_value=""):
         now = xutils.format_datetime()
         updates = dict()
@@ -787,6 +804,9 @@ class MsgIndexDao:
         vars = dict(user_id=user_id, tag=tag)
         return cls.db.select_first(where=where, vars=vars)
 
+    @classmethod
+    def iter_batch(cls, user_id=0, batch_size=20):
+        yield from cls.db.iter_batch(batch_size=batch_size, where="user_id=$user_id", vars=dict(user_id=user_id))
 
 class MsgTagInfo(Storage):
     def __init__(self):
