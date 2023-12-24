@@ -6,7 +6,7 @@ MySQL驱动
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 12:29:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-05 16:34:33
+@LastEditTime : 2023-12-24 21:51:21
 @FilePath     : /xnote/xutils/db/driver_mysql.py
 @Description  : mysql驱动
 """
@@ -17,7 +17,6 @@ import time
 from collections import deque
 from xutils import interfaces
 from xutils.interfaces import SqlLoggerInterface
-from xutils.base import Storage
 import web.db
 
 class Holder(threading.local):
@@ -26,141 +25,6 @@ class Holder(threading.local):
     def __del__(self):
         if self.db != None:
             self.db.close()
-
-class ConnectionWrapper:
-
-    TTL = 60 # 60秒有效期
-
-    def __init__(self, db, pool):
-        self.start_time = time.time()
-        self.db = db 
-        self.is_closed = False
-        self.pool = pool
-        self.driver = ""
-
-    def __enter__(self):
-        return self
-
-    def cursor(self, prepared=True):
-        if self.driver == "mysql.connector":
-            return self.db.cursor(prepared=True)
-        return self.db.cursor()
-
-    def commit(self):
-        return self.db.commit()
-    
-    def is_expired(self):
-        return time.time() - self.start_time > self.TTL
-    
-    def is_valid(self):
-        return self.is_closed == False and not self.is_expired()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.commit()
-        self.pool.append(self)
-
-    def close(self):
-        if self.is_closed:
-            return
-        self.is_closed = True
-        self.db.close()
-    
-    def __del__(self):
-        self.close()        
-
-
-class MySQLKVOld:
-    holder = Holder()
-    lock = threading.RLock()
-
-    def __init__(self, host=None, port=3306, user=None,
-                 password=None, database=None, pool_size=5, 
-                 db_instance=None, sql_logger=SqlLoggerInterface()):
-        assert pool_size > 0
-        self.db_host = host
-        self.db_user = user
-        self.db_port = port
-        self.db_password = password
-        self.db_database = database
-        self.db_pool_size = pool_size
-        self.db_auth_plugin = "mysql_native_password"
-        self.db_pool_size = pool_size
-        self.pool = deque()
-
-        self.debug = True
-        self.log_get_profile = True
-        self.log_put_profile = True
-        self.sql_logger = sql_logger  # type: SqlLoggerInterface
-        self.scan_limit = 200  # 扫描的分页大小
-        self.pool = deque()
-        self.pool_size = 0
-        self.debug_pool = False
-        self.driver = ""
-        self.driver_type = "mysql"
-       
-    def get_connection(self):
-        con = self.get_connection_no_check()
-        assert isinstance(con, ConnectionWrapper)
-        return con
-
-    def get_connection_no_check(self):
-        # 如果不缓存起来, 每次connect和close都会产生网络请求
-        wait_con = True
-        while wait_con:
-            with self.lock:
-                if len(self.pool)>0:
-                    db = self.pool.popleft()
-                    if db.is_valid():
-                        if self.debug_pool:
-                            logging.debug("复用连接:%s", db.db)
-                        return db
-                    else:
-                        self.pool_size-=1
-                        if self.debug_pool:
-                            logging.debug("释放连接:%s", db.db)
-                        del db
-                
-                if self.pool_size >= self.db_pool_size:
-                    if self.debug_pool:
-                        logging.debug("连接已满，等待中...")
-                    # 线程池满
-                    time.sleep(0.001)
-                    continue
-
-                con = self.do_connect()
-                db = ConnectionWrapper(con, self.pool)
-                db.driver = self.driver
-
-                if self.debug_pool:
-                    logging.debug("创建新连接:%s", db.db)
-
-                self.pool_size += 1
-                return db
-
-    def do_connect(self):
-        kw = Storage()
-        kw.host = self.db_host
-        kw.port = self.db_port
-        kw.user = self.db_user
-        kw.passwd = self.db_password
-        kw.database = self.db_database
-        mod = self.import_driver(["pymysql", "mysql.connector"])
-
-        if self.driver == "mysql.connector":
-            if self.db_pool_size > 0:
-                # 使用MySQL连接池
-                kw.pool_size = self.db_pool_size
-        
-        return mod.connect(**kw)
-
-    def import_driver(self, drivers):
-        for d in drivers:
-            try:
-                self.driver = d
-                return __import__(d, None, None, ["x"])
-            except ImportError:
-                pass
-        raise ImportError("Unable to import " + " or ".join(drivers))
 
 class MySQLKV(interfaces.DBInterface):
 
@@ -254,7 +118,7 @@ class MySQLKV(interfaces.DBInterface):
         value, version = self.get_with_version(key)
         return value
     
-    def Get(self, key):
+    def Get(self, key=b''):
         value, version = self.get_with_version(key)
         return value
 
@@ -309,7 +173,7 @@ class MySQLKV(interfaces.DBInterface):
         self.log_sql(update_sql, vars=vars, key="[Put:Update]")
         assert isinstance(rows, int)
         if rows == 0:
-            insert_sql = "INSERT INTO kv_store (`key`, value) VALUES ($key,$value);"
+            insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key,$value,1);"
             self.db.query(insert_sql, vars=vars)
             self.log_sql(insert_sql, vars=vars, key="[Put:Insert]")
             
@@ -322,7 +186,7 @@ class MySQLKV(interfaces.DBInterface):
             return self.put_long_value(key, value)
 
         start_time = time.time()
-        upsert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0) ON DUPLICATE KEY UPDATE value=$value, version=version+1";
+        upsert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 1) ON DUPLICATE KEY UPDATE value=$value, version=version+1";
         # update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key"
         vars = dict(key=key,value=value)
 
@@ -353,7 +217,7 @@ class MySQLKV(interfaces.DBInterface):
         if len(value) > self.max_value_length:
             raise interfaces.DatabaseException(code=400, message="value too long")
         update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key AND version=$version"
-        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 0)"
+        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 1)"
         vars = dict(key=key,value=value,version=version)
         rowcount = self.db.query(update_sql, vars=vars)
         assert isinstance(rowcount, int), "expect int rowcount"
@@ -362,10 +226,32 @@ class MySQLKV(interfaces.DBInterface):
             # 如果这里冲突了，按照默认规则抛出异常
             if version != 0:
                 return 0
+            # 只有version=0的情况下才能插入
             self.db.query(insert_sql, vars=vars)
+            self.log_sql(insert_sql, vars, start_time=start_time, key=key)
             return 1
         else:
             self.log_sql(update_sql, vars, start_time=start_time, key=key)
+        return rowcount
+    
+    def compare_and_put(self, key=b'', value=b'', old_value=None):
+        """比较之后再更新,如果old_value=None,则执行insert"""
+        # type: (bytes,bytes,bytes|None) -> int
+        start_time = time.time()
+        if len(value) > self.max_value_length:
+            raise interfaces.DatabaseException(code=400, message="value too long")
+        update_sql = "UPDATE kv_store SET value=$value, version=version+1 WHERE `key` = $key AND value=$old_value"
+        insert_sql = "INSERT INTO kv_store (`key`, value, version) VALUES ($key, $value, 1)"
+        vars = dict(key=key,value=value,old_value=old_value)
+        
+        if old_value == None:
+            self.db.query(insert_sql, vars=vars)
+            self.log_sql(insert_sql, vars, start_time=start_time, key=key)
+            return 1
+        
+        rowcount = self.db.query(update_sql, vars=vars)
+        assert isinstance(rowcount, int), "expect int rowcount"
+        self.log_sql(update_sql, vars, start_time=start_time, key=key)
         return rowcount
     
     def Insert(self, key=b'', value=b'', version=0):
@@ -379,7 +265,7 @@ class MySQLKV(interfaces.DBInterface):
         finally:
             self.log_sql(insert_sql, vars, start_time=start_time, key=key)
 
-    def doDeleteRaw(self, key, sync=False, cursor=None):
+    def doDeleteRaw(self, key=b'', sync=False, cursor=None):
         # type: (bytes, bool, object) -> None
         """删除Key-Value键值对
         @param {bytes} key
@@ -404,7 +290,7 @@ class MySQLKV(interfaces.DBInterface):
     def doDelete(self, key, sync=False, cursor=None):
         return self.doDeleteRaw(key, sync, cursor)
 
-    def Delete(self, key, sync=False):
+    def Delete(self, key=b'', sync=False):
         self.doDeleteRaw(key)
 
     def BatchDelete(self, keys=[]):
@@ -550,15 +436,15 @@ class MySQLKV(interfaces.DBInterface):
         """自增方法"""
         assert len(key) > 0, "key can not be empty"
         for retry in range(max_retry):
-            value, version = self.get_with_version(key)
-            if value == None:
+            old_value, version = self.get_with_version(key)
+            if old_value == None:
                 value_int = start_id
             else:
-                value_int = int(value)
+                value_int = int(old_value)
                 value_int += increment
 
             value_bytes = str(value_int).encode("utf-8")
-            rowcount = self.put_with_version(key, value_bytes, version=version)
+            rowcount = self.compare_and_put(key, value_bytes, old_value=old_value)
             if rowcount > 0:
                 return value_int
         raise Exception("too many retry")

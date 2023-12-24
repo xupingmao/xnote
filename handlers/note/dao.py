@@ -1794,8 +1794,8 @@ def expire_search_history(user_name, limit=1000):
     if count > limit:
         list_limit = min(20, count - limit)
         with dbutil.get_write_lock(user_name):
-            for value in db.list(where = dict(user=user_name), limit = list_limit, reverse=False):
-                db.delete(value)
+            obj_list = db.list(where = dict(user=user_name), limit = list_limit, reverse=False)
+            db.batch_delete(obj_list)
 
 
 class NoteStatDO(Storage):

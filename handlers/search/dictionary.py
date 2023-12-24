@@ -13,11 +13,11 @@ dictDTB结构
 import re
 import os
 import xutils
-import xmanager
-import xconfig
-import xtables
+from xnote.core import xmanager
+from xnote.core import xconfig
+from xnote.core import xtables
 from xutils import u, Storage, SearchResult, textutil
-from xtemplate import T
+from xnote.core.xtemplate import T
 
 def wrap_results(dicts, origin_key):
     files = []
@@ -58,7 +58,7 @@ def do_translate(ctx):
     user_name = ctx.user_name
     table     = xtables.get_dict_table()
     if textutil.isalpha(word):
-        dicts = table.select(where="key LIKE $key",
+        dicts = table.select(where="`key` LIKE $key",
             vars = dict(key = word + '%'))
     else:
         dicts = table.select(where="value LIKE $value", 
@@ -72,7 +72,7 @@ def do_translate_strict(ctx):
 
     user_name = ctx.user_name
     db = xtables.get_dict_table()
-    results = db.select(where="key = $key", vars=dict(key=ctx.input_text))
+    results = db.select(where="`key` = $key", vars=dict(key=ctx.input_text))
     for item in results:
         value = item.value.replace("\\n", "\n")
 

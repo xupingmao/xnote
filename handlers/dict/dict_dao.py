@@ -4,12 +4,12 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-15 14:39:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-17 20:10:17
+@LastEditTime : 2023-12-24 21:37:56
 @FilePath     : /xnote/handlers/dict/dict_dao.py
 @Description  : 描述
 """
-import xtables
-import xconfig
+from xnote.core import xtables
+from xnote.core import xconfig
 from xutils import Storage
 from xutils import dateutil, is_str
 
@@ -93,7 +93,7 @@ def search_dict(key, offset = 0, limit = None):
     if limit is None:
         limit = PAGE_SIZE
     db = xtables.get_dict_table()
-    where_sql = "key LIKE %s" % left_match_escape(key)
+    where_sql = "`key` LIKE %s" % left_match_escape(key)
     items = db.select(order="key", where = where_sql, limit=limit, offset=offset)
     items = list(map(convert_dict_func, items))
     count = db.count(where = where_sql)

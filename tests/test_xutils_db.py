@@ -297,8 +297,8 @@ class TestMain(BaseTestCase):
     def get_mysql_instance(self):
         host = os.environ.get("mysql_host")
         user = os.environ.get("mysql_user")
-        password = os.environ.get("mysql_password")
-        database = os.environ.get("mysql_database")
+        password = os.environ.get("mysql_password", "")
+        database = os.environ.get("mysql_database", "")
 
         print("host=%s, user=%s, password=%s" % (host, user, password))
 
@@ -307,7 +307,7 @@ class TestMain(BaseTestCase):
         db_instance.dbname = "mysql"
         return db_instance
 
-    def get_mysql_db2(self):
+    def get_mysql_kv(self):
         from xutils.db.driver_mysql import MySQLKV
         db = MySQLKV(db_instance = self.get_mysql_instance())
         return db
@@ -319,8 +319,34 @@ class TestMain(BaseTestCase):
             print("skip mysql test")
             return
         
-        db = self.get_mysql_db2()
+        db = self.get_mysql_kv()
         run_test_db_engine(self, db)
+        
+    def test_mysql_put_with_version(self):
+        key = b"test_key"
+        db = self.get_mysql_kv()
+        db.Delete(key)
+        value = b'value'
+        value_2 = b'value-2'
+        
+        db.Put(key, value)
+        _, version = db.get_with_version(key)
+        assert version == 1
+        
+        db.Put(key, value)
+        _, version = db.get_with_version(key)
+        assert version == 2
+        
+        rowcount = db.put_with_version(key, value_2, version=1)
+        assert rowcount == 0
+        
+        rowcount = db.put_with_version(key, value_2, version=2)
+        assert rowcount == 1
+        
+        query_value = db.Get(key)
+        assert query_value == value_2
+        
+        db.Delete(key)
 
     def test_ssdb_kv(self):
         if not xconfig.SystemConfig.get_bool("test_ssdb"):
@@ -875,7 +901,7 @@ class TestMain(BaseTestCase):
             print("skip mysql test")
             return
 
-        db = self.get_mysql_db2()
+        db = self.get_mysql_kv()
         xtables.init_kv_zset_table(self.get_mysql_instance())
         RdbSortedSet.init_class(db.db)
 
@@ -890,7 +916,7 @@ class TestMain(BaseTestCase):
             print("skip mysql test")
             return
 
-        engine = self.get_mysql_db2()
+        engine = self.get_mysql_kv()
         engine.scan_limit = 10
 
         dbutil.set_driver_name("mysql")
