@@ -7,18 +7,18 @@
 from handlers.note.dao_category import refresh_category_count
 import web
 import time
-import xauth
+from xnote.core import xauth
 import xutils
-import xtemplate
-import xmanager
-import xconfig
+from xnote.core import xtemplate
+from xnote.core import xmanager
+from xnote.core import xconfig
 from xutils import Storage
 from xutils import dateutil
 from xutils import cacheutil
 from xutils import dbutil
 from xutils import textutil
 from xutils import webutil
-from xtemplate import T
+from xnote.core.xtemplate import T
 from .constant import *
 from . import dao_delete
 from .dao_api import NoteDao
@@ -412,13 +412,16 @@ class UnshareHandler:
     def GET(self):
         id = xutils.get_argument_int("id")
         to_user = xutils.get_argument_str("share_to", "")
-        note = check_get_note(id)
-        if to_user != "":
-            dao_share.delete_share(id, to_user = to_user)
-        else:
-            note_dao.update_note(id, is_public = 0)
-            note_dao.ShareInfoDao.delete_by_target(share_type="note_public", target_id=id)
-        return dict(code = "success", message = "取消分享成功")
+        try:
+            note = check_get_note(id)
+            if to_user != "":
+                dao_share.delete_share(id, to_user = to_user)
+            else:
+                note_dao.update_note(id, is_public = 0)
+                note_dao.ShareInfoDao.delete_by_target(share_type="note_public", target_id=id)
+            return webutil.SuccessResult(message = "取消分享成功")
+        except Exception as e:
+            return webutil.FailedResult(message=str(e))
 
     def POST(self):
         return self.GET()

@@ -47,11 +47,19 @@ class TestEnv:
     """用于测试的运行时环境"""
     is_admin = False
     has_login = False
+    login_user_name = "test"
     
     @classmethod
     def login_admin(cls):
         cls.is_admin = True
         cls.has_login = True
+        cls.login_user_name = "admin"
+        
+    @classmethod
+    def login_user(cls, user_name=""):
+        cls.is_admin = (user_name == "admin")
+        cls.has_login = True
+        cls.login_user_name = user_name
         
     @classmethod
     def logout(cls):
@@ -572,7 +580,7 @@ def get_user_by_sid(session_id=""):
 
 def get_current_user():
     if TestEnv.has_login:
-        return get_user_by_name("test")
+        return get_user_by_name(TestEnv.login_user_name)
 
     user = get_user_from_token()
     if user != None:

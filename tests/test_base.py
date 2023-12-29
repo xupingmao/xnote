@@ -3,15 +3,15 @@ from .a import *
 import os
 import time
 import unittest
-import xconfig
+from xnote.core import xconfig
 import xutils
-import xtables
-import xmanager
-import xtemplate
+from xnote.core import xtables
+from xnote.core import xmanager
+from xnote.core import xtemplate
 from xnote.core import xtables_kv
 import web
 import json
-import xauth
+from xnote.core import xauth
 from xutils import dbutil
 from xutils import cacheutil
 from xutils import six
@@ -33,8 +33,7 @@ def init():
     xconfig.init("./config/boot/boot.test.properties")
     xconfig.IS_TEST = True
     
-    xauth.TestEnv.has_login = True
-    xauth.TestEnv.is_admin = True
+    xauth.TestEnv.login_admin()
     
     xconfig.port = "1234"
     xconfig.DEV_MODE = True
@@ -77,8 +76,8 @@ def logout_test_user():
     xauth.TestEnv.logout()
 
 
-def login_test_user():
-    xauth.TestEnv.login_admin()
+def login_test_user(user_name="admin"):
+    xauth.TestEnv.login_user(user_name)
 
 
 def json_request(*args, **kw):
@@ -136,8 +135,7 @@ class BaseTestCase(unittest.TestCase):
         response = APP.request(*args, **kw)
         status = response.status
         print("response.status:", status)
-        self.assertEqual(True, status == "200 OK" or status ==
-                         "303 See Other" or status == "302 Found")
+        self.assertIn(status, ("200 OK", "303 See Other", "302 Found"))
 
     def check_200(self, *args, **kw):
         response = APP.request(*args, **kw)

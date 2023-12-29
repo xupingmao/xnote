@@ -17,7 +17,7 @@ except ImportError:
     from tests import test_base
     from tests.test_base import login_test_user, logout_test_user
 
-import xauth
+from xnote.core import xauth
 
 from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
 from handlers.note import dao_comment
@@ -45,15 +45,18 @@ def get_default_group_id():
         return note.id
     return create_note_for_test("group", name)
 
-def create_note_for_test(type, name, *, content = "", tags="") -> int:
+def create_note_for_test(type, name, *, content = "", tags="", parent_id=0) -> int:
     assert type != None, "type cannot be None"
     assert name != None, "name cannot be None"
     assert isinstance(tags, str), "tags must be str"
 
     data = dict(name = name, type = type, content = content, tags=tags)
 
-    if type != "group":
-        data["parent_id"] = get_default_group_id()
+    if type != "group" and parent_id == 0:
+        data["parent_id"] = str(get_default_group_id())
+
+    if parent_id != 0:
+        data["parent_id"] = str(parent_id)
 
     note_result = json_request_return_dict("/note/add", 
         method = "POST",
@@ -61,6 +64,7 @@ def create_note_for_test(type, name, *, content = "", tags="") -> int:
     
     note_id = note_result.get("id")
     print("新笔记id:", note_id)
+    assert isinstance(note_id, int)
     return note_id
 
 def delete_note_for_test(name):
@@ -164,20 +168,20 @@ class TestMain(BaseTestCase):
 
     def test_create_name_empty(self):
         parent_id = get_default_group_id()
-        result = json_request("/note/create", method = "POST", data = dict(name = "", parent_id = parent_id))
+        result = json_request_return_dict("/note/create", method = "POST", data = dict(name = "", parent_id = parent_id))
         self.assertEqual(xutils.u('标题为空'), result['message'])
 
     def test_create_name_exits(self):
         delete_note_for_test("name-test")
         create_note_for_test("md", "name-test")
 
-        result = json_request("/note/create", method = "POST", data = dict(name = "name-test"))
+        result = json_request_return_dict("/note/create", method = "POST", data = dict(name = "name-test"))
         self.assertEqual(xutils.u('笔记【name-test】已存在'), result['message'])
 
         delete_note_for_test("name-test")
 
     def test_create_note_invalid_type(self):
-        result = json_request("/note/create", 
+        result = json_request_return_dict("/note/create", 
             method = "POST", 
             data = dict(type = "invalid", name = "invalid-test"))
         
@@ -185,7 +189,7 @@ class TestMain(BaseTestCase):
 
     def test_note_group_add_view(self):
         delete_note_for_test("xnote-unit-group")
-        group = json_request("/note/add", method="POST",
+        group = json_request_return_dict("/note/add", method="POST",
             data = dict(name="xnote-unit-group", type="group"))
         id = group['id']
         self.check_OK('/note/view?id=%s' % id)
@@ -205,6 +209,7 @@ class TestMain(BaseTestCase):
         json_request("/note/timeline/month?year=2018&month=1")
 
     def test_timeline_api(self):
+        default_group_id = get_default_group_id()
         assert_json_request_success(self, "/note/api/timeline")
         assert_json_request_success(self, "/note/api/timeline?type=public")
         assert_json_request_success(self, "/note/api/timeline?type=sticky")
@@ -214,7 +219,7 @@ class TestMain(BaseTestCase):
         assert_json_request_success(self, "/note/api/timeline?type=plan")
         assert_json_request_success(self, "/note/api/timeline?type=list")
         assert_json_request_success(self, "/note/api/timeline?type=gallery")
-        assert_json_request_success(self, u"/note/api/timeline?type=default&parent_id=012345")
+        assert_json_request_success(self, f"/note/api/timeline?type=default&parent_id={default_group_id}")
         assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
 
     def test_timeline_sort_func(self):
@@ -301,7 +306,9 @@ class TestMain(BaseTestCase):
             login_test_user()
         
         
-        self.check_OK("/note/share/cancel?id=" + str(id))
+        cancel_result = json_request_return_dict("/note/share/cancel?id=" + str(id))
+        assert cancel_result.get("success", False)
+        
         file = json_request_return_dict("/note/view?id=%s&_format=json" % id).get("file")
         assert file != None
         self.assertEqual(0, file["is_public"])
@@ -316,30 +323,64 @@ class TestMain(BaseTestCase):
             assert len(result) == 0
             
             # clean up
-            json_request("/note/remove?id=" + str(id))
+            json_request(f"/note/remove?id={id}")
         finally:
             login_test_user()
 
     def test_note_share_to(self):
+        """分享给指定用户"""
         delete_note_for_test("xnote-share-test")
         id = create_note_for_test("md", "xnote-share-test", content = "hello")
 
-        share_resp = json_request("/note/share", method="POST",
+        share_resp = json_request_return_dict("/note/share", method="POST",
             data=dict(id=id, share_to="test2"))
         print("share_resp:", share_resp)
         self.assertEqual("success", share_resp["code"])
 
-        delete_share_resp = json_request("/note/share/cancel", method="POST",
+        delete_share_resp = json_request_return_dict("/note/share/cancel", method="POST",
             data=dict(id=id, share_to="test2"))
         
         print("delete_share_resp:", delete_share_resp)
         self.assertEqual("success", delete_share_resp["code"])
         self.check_OK("/note/share_to_me")
+        
+    def test_note_share_group_to(self):
+        """分享笔记本"""
+        delete_note_for_test("xnote-share-group")
+        delete_note_for_test("xnote-share-group-child")
+        delete_note_for_test("xnote-private-group")
+        
+        target_user = "test2"
+        group_id = create_note_for_test("group", "xnote-share-group")
+        assert group_id > 0
+        note_id = create_note_for_test("md", "xnote-share-group-child", content = "child content", parent_id=group_id)
+        assert note_id > 0
+        
+        # 创建一个对照组，无授权
+        unauthorized_id = create_note_for_test("group", "xnote-private-group")
+        assert unauthorized_id > 0
+        
+        share_resp = json_request_return_dict("/note/share", method="POST",
+            data=dict(id=group_id, share_to=target_user))
+        print("share_resp:", share_resp)
+        
+        try:
+            login_test_user(target_user)
+            assert xauth.current_name_str() == target_user
+            result = json_request_return_dict(f"/note/api/timeline?_type=json&type=default&parent_id={group_id}")
+            data = result.get("data", [])
+            assert len(data) == 1
+            
+            no_auth_result = json_request_return_dict(f"/note/api/timeline?_type=json&type=default&parent_id={unauthorized_id}")
+            result_code = no_auth_result.get("code", "")
+            assert result_code == "403"
+        finally:
+            login_test_user()
 
     def test_link_share(self):
         delete_note_for_test("xnote-link-share-test")
         note_id = create_note_for_test(name = "xnote-link-share-test", type = "md")
-        resp = json_request("/note/link_share", method = "POST", data = dict(id = note_id))
+        resp = json_request_return_dict("/note/link_share", method = "POST", data = dict(id = note_id))
         self.assertEqual("success", resp["code"])
 
     def test_note_tag(self):

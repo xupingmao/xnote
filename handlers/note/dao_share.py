@@ -67,7 +67,7 @@ class NoteShareDao:
             where["target_id"] = target_id
         return cls.db.select(where=where, offset=offset, limit=limit, order=order)
 
-def get_share_by_note_and_to_user(note_id, to_user):
+def get_share_by_note_and_to_user(note_id=0, to_user=""):
     to_id = xauth.UserDao.get_id_by_name(to_user)
     return NoteShareDao.get_by_note_and_to_user(note_id, to_id=to_id)
 

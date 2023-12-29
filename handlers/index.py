@@ -3,8 +3,8 @@
 # @since 2017/02/19
 # @modified 2021/05/23 19:33:48
 import web
-import xtemplate
-import xauth
+from xnote.core import xtemplate
+from xnote.core import xauth
 import xutils
 
 INDEX_HTML = """
@@ -29,6 +29,10 @@ UNAUTHORIZED_HTML = """
     <div class="card">
         <h3>抱歉,您没有访问的权限</h3>
     </div>
+{% end %}
+
+{% block body_right %}
+    {% include common/sidebar/default.html %}
 {% end %}
 """
 

@@ -16,7 +16,7 @@ from xnote.core.xtemplate import T
 from handlers.note.constant import *
 from handlers.message.dao import MessageDao
 from handlers.note.dao_api import NoteDao
-from handlers.note import note_helper
+from handlers.note import note_helper, dao_share
 import handlers.note.dao as note_dao
 import handlers.note.dao_log as dao_log
 from xnote.core import xmanager
@@ -346,8 +346,17 @@ def default_list_func(context: ListContext):
     if context.filter_tag != "":
         tags = [context.filter_tag]
     
-    rows = note_dao.list_by_parent(
-        user_name, parent_id=parent_id, offset=offset, limit=limit, orderby = 'ctime_desc', tags=tags)
+    note_info = note_dao.get_by_id(parent_id)
+    if note_info == None:
+        return webutil.FailedResult(code="404", message="笔记不存在")
+    
+    if note_info.creator != user_name:
+        # 分享模式
+        share_info = dao_share.get_share_by_note_and_to_user(parent_id, user_name)
+        if share_info == None:
+            return webutil.FailedResult(code="403", message="无查看权限")
+    
+    rows = note_dao.list_by_parent(creator_id=note_info.creator_id, parent_id=parent_id, offset=offset, limit=limit, orderby = 'ctime_desc', tags=tags)
     
     orderby = "ctime"
     if context.orderby == "name":

@@ -6,10 +6,8 @@
 import sys
 import time
 import unittest
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
-import xauth
-import xnote_user_config
+from xnote.core import xauth
+from xnote.core import xnote_user_config
 from xutils import Storage
 from xutils import dateutil
 
@@ -26,8 +24,8 @@ app = test_base.init()
 class TestXauth(BaseTestCase):
 
     def test_current_user(self):
-        self.assertEqual("test", xauth.current_name())
-
+        self.assertEqual("admin", xauth.current_name())
+        
     def test_check_invalid_names(self):
         self.assertTrue(xauth.is_valid_username("t1234"))
         self.assertFalse(xauth.is_valid_username("public"))
@@ -137,8 +135,8 @@ class TestXauth(BaseTestCase):
         session_info = xauth.login_user_by_name(user_name, write_cookie=False)
         assert xauth.has_login_by_sid(user_name, session_info.sid)
 
-    def test_user_config(self):
-        from xnote_user_config import UserConfigKey
+    def test_user_config_2(self):
+        from xnote.core.xnote_user_config import UserConfigKey
         user_name = xauth.current_name_str()
         config_dict = xnote_user_config.get_config_dict(user_name)
         
