@@ -441,12 +441,14 @@ class BasePlugin:
     # 输入框的行数
     rows = 20
     CONTENT_WIDTH = 1000  # 内容的宽度
-
+    
+    # {输出配置}
     # 分页配置
     show_pagenation = False
     page_url = "?page="
     page = 1  # 当前分页，需要扩展方设置
     page_max = 1  # 最大分页，需要扩展方设置
+    _resp_type = "default" # response的类型, {default, iter}
 
     # 插件模板路径
     html_template_path = "plugin/base/base_plugin.html"
@@ -513,6 +515,9 @@ class BasePlugin:
     def response_text(self, template, **kw):
         """返回纯文本格式的内容"""
         return self.do_render_text(template, **kw)
+    
+    def set_response_type(self, resp_type = ""):
+        self._resp_type = resp_type
 
     def do_render_text(self, template, **kw):
         """这个方法用于渲染动态的HTML，用于局部刷新的场景"""
@@ -528,7 +533,7 @@ class BasePlugin:
 
     def get_format(self):
         """返回当前请求的数据格式"""
-        return xutils.get_argument("_format", "")
+        return xutils.get_argument_str("_format", "")
 
     def get_page(self):
         """返回当前页码"""
@@ -556,6 +561,11 @@ class BasePlugin:
             self.category_name = xnote_hooks.get_category_name_by_code(
                 self.category)
             output = self.handle(input) or u("")
+            
+            if self._resp_type == "iter":
+                yield from output
+                return
+            
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")
                 return self.output + output
@@ -575,15 +585,18 @@ class BasePlugin:
             error = xutils.print_exc()
             web.ctx.status = "500 Internal Server Error"
 
+        if not isinstance(output, str):
+            raise Exception("expect output to be <str>")
+
         # 转换内部属性
         kw = self.convert_attr_to_kw()
         kw.error = error
         kw.input = input
         kw.script_name = globals().get("script_name")
         kw.output = self.output + output
-
         return render(self.html_template_path, **kw)
-
+    
+    
     def convert_attr_to_kw(self):
         kw = Storage()
         kw.model = self

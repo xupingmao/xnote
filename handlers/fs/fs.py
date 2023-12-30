@@ -18,13 +18,13 @@ import datetime
 import mimetypes
 import web
 import xutils
-import xauth
-import xconfig
-import xtemplate
-import xmanager
+from xnote.core import xauth
+from xnote.core import xconfig
+from xnote.core import xtemplate
+from xnote.core import xmanager
 import logging
 import multiprocessing
-import xnote_event
+from xnote.core import xnote_event
 
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
