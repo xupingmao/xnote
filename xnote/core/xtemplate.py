@@ -396,7 +396,11 @@ class TextResponse:
 
     def __init__(self, text):
         self.text = text
-
+        
+class IterResponse:
+    
+    def __init__(self, iter):
+        self.iter = iter
 
 class BasePlugin:
     """插件的基类"""
@@ -448,7 +452,6 @@ class BasePlugin:
     page_url = "?page="
     page = 1  # 当前分页，需要扩展方设置
     page_max = 1  # 最大分页，需要扩展方设置
-    _resp_type = "default" # response的类型, {default, iter}
 
     # 插件模板路径
     html_template_path = "plugin/base/base_plugin.html"
@@ -516,9 +519,9 @@ class BasePlugin:
         """返回纯文本格式的内容"""
         return self.do_render_text(template, **kw)
     
-    def set_response_type(self, resp_type = ""):
-        """设置返回的内容类型"""
-        self._resp_type = resp_type
+    def response_iter(self, iter):
+        """返回迭代器(生成器)"""
+        return IterResponse(iter)
 
     def do_render_text(self, template, **kw):
         """这个方法用于渲染动态的HTML，用于局部刷新的场景"""
@@ -566,9 +569,6 @@ class BasePlugin:
                 self.category)
             output = self.handle(input) or u("")
             
-            if self._resp_type == "iter":
-                return self.iter_output(output)
-            
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")
                 return self.output + output
@@ -576,6 +576,10 @@ class BasePlugin:
             # 直接返回文本
             if isinstance(output, TextResponse):
                 return output.text
+            
+            # 返回迭代器
+            if isinstance(output, IterResponse):
+                return self.iter_output(output.iter)
 
             # 结构化对象交给框架处理
             if isinstance(output, (dict, list)):
@@ -590,7 +594,7 @@ class BasePlugin:
 
         if not isinstance(output, str):
             web.ctx.status = "500 Internal Server Error"
-            return f"expect output to be <str> but got {type(str)}"
+            return f"expect output to be <str> but got {type(output)}"
         
         # 转换内部属性
         kw = self.convert_attr_to_kw()
