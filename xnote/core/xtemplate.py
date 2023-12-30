@@ -547,6 +547,9 @@ class BasePlugin:
 
         if self.require_admin:
             xauth.check_login("admin")
+            
+    def iter_output(self, output):
+        yield from output
 
     def render(self):
         """图形界面入口,实际的调用入口请查看`plugins.py`文件"""
@@ -564,8 +567,7 @@ class BasePlugin:
             output = self.handle(input) or u("")
             
             if self._resp_type == "iter":
-                yield from output
-                return
+                return self.iter_output(output)
             
             if self.get_format() == "text":
                 web.header("Content-Type", "text/plain; charset:utf-8")
@@ -586,9 +588,9 @@ class BasePlugin:
             error = xutils.print_exc()
             web.ctx.status = "500 Internal Server Error"
 
-        # if not isinstance(output, str):
-        #     web.ctx.status = "500 Internal Server Error"
-        #     return f"expect output to be <str> but got {type(str)}"
+        if not isinstance(output, str):
+            web.ctx.status = "500 Internal Server Error"
+            return f"expect output to be <str> but got {type(str)}"
         
         # 转换内部属性
         kw = self.convert_attr_to_kw()
