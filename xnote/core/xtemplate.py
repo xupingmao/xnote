@@ -517,6 +517,7 @@ class BasePlugin:
         return self.do_render_text(template, **kw)
     
     def set_response_type(self, resp_type = ""):
+        """设置返回的内容类型"""
         self._resp_type = resp_type
 
     def do_render_text(self, template, **kw):
@@ -586,8 +587,9 @@ class BasePlugin:
             web.ctx.status = "500 Internal Server Error"
 
         if not isinstance(output, str):
-            raise Exception("expect output to be <str>")
-
+            web.ctx.status = "500 Internal Server Error"
+            return f"expect output to be <str> but got {type(str)}"
+        
         # 转换内部属性
         kw = self.convert_attr_to_kw()
         kw.error = error
