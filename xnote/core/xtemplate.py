@@ -586,9 +586,9 @@ class BasePlugin:
             error = xutils.print_exc()
             web.ctx.status = "500 Internal Server Error"
 
-        if not isinstance(output, str):
-            web.ctx.status = "500 Internal Server Error"
-            return f"expect output to be <str> but got {type(str)}"
+        # if not isinstance(output, str):
+        #     web.ctx.status = "500 Internal Server Error"
+        #     return f"expect output to be <str> but got {type(str)}"
         
         # 转换内部属性
         kw = self.convert_attr_to_kw()
