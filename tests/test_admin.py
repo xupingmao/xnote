@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-14 09:30:29
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-15 23:39:09
+@LastEditTime : 2024-01-01 17:38:55
 @FilePath     : /xnote/tests/test_admin.py
 @Description  : 描述
 """
@@ -31,8 +31,6 @@ class TestMain(test_base.BaseTestCase):
         raise Exception("发现权限拦截漏洞")
 
     def test_admin_auth(self):
-        xauth.TestEnv.is_admin = False
-        
         print("")
         
         skip_list = set([
@@ -48,13 +46,22 @@ class TestMain(test_base.BaseTestCase):
             "/system/todo",
         ])
 
+        check_list = set([
+            "/plugins_upload",
+            "/plugins_new",
+            "/plugins_new/command",
+        ])
+
         try:
+            # 登录普通用户
+            xauth.TestEnv.login_user("test")
+
             mapping = xmanager.get_handler_manager().mapping
             
             for pattern, raw_handler in web.utils.group(mapping, 2):
                 if pattern in skip_list:
                     continue
-                if pattern.startswith("/system/"):
+                if pattern.startswith("/system/") or pattern in check_list:
                     print(f"Check {pattern} ...")
                     handler = raw_handler.handler_class
                     check_pass = False
@@ -69,6 +76,6 @@ class TestMain(test_base.BaseTestCase):
                         check_pass = True
                     assert check_pass
         finally:
-            xauth.TestEnv.is_admin = True
+            xauth.TestEnv.login_user("admin")
         
     

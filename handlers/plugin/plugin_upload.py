@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-07-08 10:54:36
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-11 18:59:00
+@LastEditTime : 2024-01-01 17:20:58
 @FilePath     : /xnote/handlers/plugin/plugin_upload.py
 @Description  : 描述
 """
@@ -28,7 +28,7 @@ class PluginUploadHandler:
             return "plugin_id 必须满足%r规则" % self.pattern_str
         return None
 
-    xauth.login_required("admin")
+    @xauth.login_required("admin")
     def POST(self):
         content = xutils.get_argument_str("content")
         meta = xutils.load_script_meta_by_code(content)
