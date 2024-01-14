@@ -113,6 +113,20 @@ def get_argument_bool(key: str, default_value = False) -> bool:
     assert isinstance(value, bool)
     return value
 
+def get_argument_dict(key="", default_value={}):
+    """获取dict类型的参数"""
+    value = get_argument(key=key, default_value=default_value)
+    if not isinstance(value, dict):
+        raise Exception("expect dict but see %s" % type(value))
+    return value
+
+def get_argument_field_storage(key=""):
+    import cgi
+    value = get_argument(key=key, default_value={})
+    assert isinstance(value, cgi.FieldStorage)
+    return value
+
+
 def get_client_user_agent():
     if IS_TEST:
         return ""

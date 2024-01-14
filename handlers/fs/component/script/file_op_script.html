@@ -4,6 +4,8 @@
 {% set-global file_op_script_loaded = True %}
 {% include fs/component/move_file_dialog.html %}
 
+<input type="hidden" id="currentPath" value="{{path}}">
+
 <script type="text/template" id="fileItemOptionDialog">
     <div class="card">
         <div class="align-center">
@@ -29,13 +31,6 @@
 </script>
 
 <script type="text/javascript">
-if (xnote.api.fs == undefined) {
-    xnote.api.fs = {};
-}
-
-if (xnote.action.fs == undefined) {
-    xnote.action.fs = {};
-}
 
 xnote.action.fs.openOptionDialog = function (target) {
     console.log(window.event);
@@ -97,19 +92,8 @@ $(function () {
     });
 
     $(".delete-btn").click(function (e) {
-        var path = $(this).attr("data-path");
-        var name = $(this).attr("data-name");
-        xnote.confirm("删除【" + name + "】?", function (value) {
-            $.post("/fs_api/remove", {path: path}, function (resp) {
-                if (resp.code == "success") {
-                    window.location.reload();
-                } else {
-                    xnote.alert("删除失败:" + resp.message);
-                }
-            }).fail(function (resp) {
-                xnote.alert("系统繁忙，请稍后重试");
-            })
-        });
+        var target = $(e).target;
+        xnote.fs.delete(target);
     })
 })
 </script>
@@ -211,11 +195,13 @@ $(function () {
         });
     
         window.openByNative = function () {
-            $.post("/system/command/open", {path: "{{path}}"});
+            var path = getCurrentPath();
+            $.post("/system/command/open", {path: path});
         }
     
         window.openTerminal = function () {
-            $.post("/system/command/openTerminal", {command: "openTerminal", path: "{{path}}"});
+            var path = getCurrentPath();
+            $.post("/system/command/openTerminal", {command: "openTerminal", path: path});
         }
     
         $(".command-btn").on("click", function () {
@@ -298,7 +284,7 @@ $(function () {
             } else {
                 var name = checked.attr("data-name");
                 var path = checked.attr("data-path");
-                var dirname = "{{path}}";
+                var dirname = getCurrentPath();
                 xnote.prompt("重命名为", name, function (new_name) {
                     if (new_name) {
                         $.post("/fs_api/rename", 

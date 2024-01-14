@@ -4,16 +4,17 @@
 # @modified 2021/07/31 14:27:13
 import os
 import web
-import xauth
-import xconfig
+import logging
+from xnote.core import xauth
+from xnote.core import xconfig
 import xutils
-import xtemplate
-import xmanager
+from xnote.core import xtemplate
+from xnote.core import xmanager
 import time
 import math
 from xutils import fsutil, Storage
-from xtemplate import T
-from xnote_event import FileUploadEvent
+from xnote.core.xtemplate import T
+from xnote.core.xnote_event import FileUploadEvent
 try:
     from PIL import Image
 except ImportError:
@@ -118,7 +119,7 @@ def get_user_upload_dir(user):
 
 def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=False):
     """生成上传文件名"""
-    import xconfig
+    from xnote.core import xconfig
     if xconfig.USE_URLENCODE:
         filename = xutils.quote_unicode(filename)
     basename, ext = os.path.splitext(filename)
@@ -150,7 +151,7 @@ class UploadHandler:
 
     @xauth.login_required()
     def POST(self):
-        file = xutils.get_argument("file", {})
+        file = xutils.get_argument_field_storage("file")
         prefix = xutils.get_argument_str("prefix")
         name = xutils.get_argument_str("name")
         note_id = xutils.get_argument_str("note_id")
@@ -255,8 +256,8 @@ class RangeUploadHandler:
         chunksize = 5 * 1024 * 1024
         chunk = xutils.get_argument_int("chunk")
         chunks = xutils.get_argument("chunks", 1, type=int)
-        file = xutils.get_argument("file", {})
-        prefix = xutils.get_argument("prefix", "")
+        file = xutils.get_argument_field_storage("file")
+        prefix = xutils.get_argument_str("prefix", "")
         dirname = xutils.get_argument_str("dirname", xconfig.DATA_DIR)
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
         note_id = xutils.get_argument("note_id")
@@ -317,7 +318,7 @@ class RangeUploadHandler:
             with open(tmp_path, "wb") as fp:
                 fp.seek(seek)
                 if seek != 0:
-                    xutils.log("seek to {}", seek)
+                    logging.info("seek to %s", seek)
                 for file_chunk in file.file:
                     fp.write(file_chunk)
         else:
