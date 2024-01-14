@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-27 21:17:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-19 16:38:07
+@LastEditTime : 2024-01-14 21:21:38
 @FilePath     : /xnote/xnote/core/xconfig.py
 @Description  : 描述
 """
@@ -313,6 +313,8 @@ class WebConfig:
     ui_show_translate_js = False
     
     nav_list = []
+    # 自定义导航-开发中
+    custom_nav_list = []
 
     auth_max_session_size = 20
 

@@ -83,14 +83,24 @@
         <a href="{{_server_home}}/note/public">分享</a>
         <a href="{{_server_home}}/login" class="afinve"><span>登录</span></a>
         {% end %}
-
-      </div>
-
-      <div id="poweredBy">
-        <!-- 关于可以挂外链 -->
-        <div><a href="{{xconfig.WebConfig.about_url}}">{{T(xconfig.WebConfig.about_text)}}</a></div>
       </div>
     </div>
+
+    {% if len(xconfig.WebConfig.custom_nav_list) > 0 %}
+    <div class="nav-left-block">
+      <div class="navMenu">
+        {% for nav_info in xconfig.WebConfig.custom_nav_list %}
+          <a href="{{_server_home}}{{nav_info.url}}">{{T(nav_info.name)}}</a>
+        {% end %}
+      </div>
+    </div>
+    {% end %}
+
+  </div>
+
+  <div id="poweredBy">
+    <!-- 关于可以挂外链 -->
+    <div><a href="{{xconfig.WebConfig.about_url}}">{{T(xconfig.WebConfig.about_text)}}</a></div>
   </div>
 </div>
 
