@@ -154,7 +154,14 @@
             .replace(/'/g, '&#39;');
     }
 
-    function highlight_csv(code, lang) {
+    function getCsvRowText(text) {
+        if (text === undefined) {
+            return "-";
+        }
+        return text;
+    }
+
+    function highlightCsv(code, lang) {
         // 处理csv的展示
         extOptions.csvIndex++;
         var dupIndex = extOptions.csvIndexMap[code]
@@ -180,7 +187,7 @@
                 var headRow = rows[0];
                 var head = $("<tr>");
                 for (var j = 0; j < headRow.length; j++) {
-                    var th = $("<th>").html(headRow[j]);
+                    var th = $("<th>").text(getCsvRowText(headRow[j]));
                     head.append(th);
                 }
                 table.append(head);
@@ -189,7 +196,7 @@
                     var row = rows[i];
                     var tr = $("<tr>");
                     for (var j = 0; j < row.length; j++) {
-                        var td = $("<td>").html(row[j]);
+                        var td = $("<td>").text(getCsvRowText(row[j]));
                         tr.append(td);
                     }
                     table.append(tr);
@@ -238,13 +245,13 @@
             langUpper = lang.toUpperCase();
         }
         if (langUpper == "CSV") {
-            return highlight_csv(code, lang);
+            return highlightCsv(code, lang);
         } else if (langUpper == "EXCEL") {
             code = code.replace(/\t/g, ",");
             // some \t may be replaced by four space
             code = code.replace(/ {4}/g, ',');
             console.log(code);
-            return highlight_csv(code, lang);
+            return highlightCsv(code, lang);
         } else {
             return highlightKeywords(code, langUpper);
         }

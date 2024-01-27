@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="{{_server_home}}/_static/lib/highlight.js/11.6.0/styles/default.min.css">
 <link rel="stylesheet" href="{{_server_home}}/_static/lib/highlight.js/11.7.0/styles/a11y-dark.min.css">
 <script src="{{_server_home}}/_static/lib/highlight.js/11.6.0/highlight.min.js"></script>
+<!-- csv编辑依赖 -->
+<script type="text/javascript" src="{{_server_home}}/_static/js/editor-csv.js"></script>
 
 <div class="card">
     {% include "note/component/view_header.html" %}
@@ -74,8 +76,9 @@
             var oldCode = $(target).attr("data-code");
             var codeIndex = parseInt($(target).attr("data-index"));
             var lang = $(target).attr("data-lang");
+            var formattedCode = xnote.csv.formatCode(oldCode);
 
-            xnote.showTextDialog("编辑csv", oldCode, ["更新", "取消"], function (index, layero, dialogInfo) {
+            xnote.showTextDialog("编辑csv", formattedCode, ["更新", "取消"], function (index, layero, dialogInfo) {
                 var newCode = $(layero).find("textarea").val().trim();
                 // xnote.alert("newCode:" + newCode);
 
