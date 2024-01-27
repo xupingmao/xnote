@@ -59,6 +59,10 @@
             for (var j = 0; j < row.length; j++) {
                 // calculate max width
                 var cell = row[j];
+                if (cell === undefined) {
+                    cell = "-";
+                }
+                cell = cell.trim();
                 var cellWidth = getStringWidth(cell) + gapSize;
                 var oldWidth = widthMap[j];
                 if (oldWidth === undefined) {
@@ -77,6 +81,7 @@
                 if (cell === undefined) {
                     cell = "-";
                 }
+                cell = cell.trim();
                 var cellWidth = widthMap[j] || gapSize;
                 result += cell.padLeft(cellWidth, " ");
                 if (j != row.length-1) {
