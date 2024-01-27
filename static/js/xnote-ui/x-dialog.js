@@ -22,6 +22,7 @@
  *    xnote.prompt(title, defaultValue, callback)
  *    // 打开文本编辑的对话框
  *    xnote.showTextDialog(title, text, buttons, functions)
+ *    xnote.openTextDialog(title, text, buttons, functions)
  * 
  */
 
@@ -184,13 +185,14 @@ xnote.openDialogExInner = function (options) {
         params.btn = buttons
         params.yes = function (index, layero) {
             console.log(index, layero);
-            if (closeForYes) {
-                layer.close(index);
-            }
             var dialogInfo = {
                 id: dialogId
             };
-            functions[0](index, layero, dialogInfo);
+            var yesResult = functions[0](index, layero, dialogInfo);
+            if (yesResult === undefined && closeForYes) {
+                layer.close(index);
+            }
+            return yesResult;
         }
     }
 
@@ -224,14 +226,30 @@ xnote.showDialog = function () {
     return xnote.openDialog.apply(this, arguments);
 }
 
-xnote.showTextDialog = function(title, text, buttons, functions) {
-    var options = {};
-    options.title = title;
-    options.html  = "<textarea class=\"dialog-textarea\">" + text + "</textarea>";
-    options.buttons = buttons;
-    options.functions = functions;
-    return xnote.showDialogEx(options);
+// 打开文本对话框
+xnote.openTextDialog = function(title, text, buttons, functions, features) {
+    var req = {};
+    req.title = title;
+    req.html  = $("<textarea>").addClass("dialog-textarea").text(text).prop("outerHTML");
+    req.buttons = buttons;
+    req.functions = functions;
+    if (features != undefined) {
+        xnote._updateDialogFeatures(req, features);
+    }
+    return xnote.showDialogEx(req);
 }
+
+xnote._updateDialogFeatures = function (options, features) {
+    for (var i = 0; i < features.length; i++) {
+        var item = features[i];
+        if (item === "large") {
+            options.area = "large";
+        }
+    }
+}
+
+// 别名
+xnote.showTextDialog = xnote.openTextDialog;
 
 /**
  * 打开ajax对话框
@@ -429,7 +447,7 @@ xnote.showOptionDialog = function (option) {
         layer.close(dialogIndex);
         recoveryStyle();
     });
-}
+};
 
 // 老版本的对话框，先保留在这里
 window.ContentDialog = {

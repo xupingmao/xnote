@@ -15,6 +15,9 @@
                 hideMenu: false,
                 checkboxIndexMap: {},
                 checkboxIndex: 0,
+                csvIndex: 0,
+                csvIndexMap: {},
+                csvEditFunc: "alert"
             };
         }
         if (options.checkboxIndexMap === undefined) {
@@ -22,6 +25,15 @@
         }
         if (options.checkboxIndex === undefined) {
             options.checkboxIndex = 0;
+        }
+        if (options.csvIndex === undefined) {
+            options.csvIndex = 0;
+        }
+        if (options.csvIndexMap === undefined) {
+            options.csvIndexMap = {};
+        }
+        if (options.csvEditFunc === undefined) {
+            options.csvEditFunc = "alert";
         }
         return options; 
     }
@@ -142,23 +154,45 @@
     }
 
     function highlight_csv(code) {
+        extOptions.csvIndex++;
+        var dupIndex = extOptions.csvIndexMap[code]
+        if (dupIndex === undefined) {
+            dupIndex = 0;
+        } else {
+            dupIndex++;
+        }
+        extOptions.csvIndexMap[code] = dupIndex;
+
         try {
             // var csv = new CSV(code);
             var rows = CSV.parse(code);
-            // console.log(rows);
-            var table = $("<table>");
-            for (var i = 0; i < rows.length; i++) {
-                var col = rows[i];
-                var tr = $("<tr>");
-                for (var j = 0; j < col.length; j++) {
-                    var td = $("<td>").html(col[j]);
-                    tr.append(td);
+            var table = $("<table>").attr("data-index", dupIndex).addClass("table");
+            var editAction = $("<a>").text("编辑表格");
+            editAction.attr("onclick", extOptions.csvEditFunc + "(this)");
+            editAction.attr("data-code", code).attr("data-index", dupIndex);
+
+            if (rows.length > 0) {
+                var headRow = rows[0];
+                var head = $("<tr>");
+                for (var j = 0; j < headRow.length; j++) {
+                    var th = $("<th>").html(headRow[j]);
+                    head.append(th);
                 }
-                table.append(tr);
+                table.append(head);
+
+                for (var i = 1; i < rows.length; i++) {
+                    var row = rows[i];
+                    var tr = $("<tr>");
+                    for (var j = 0; j < row.length; j++) {
+                        var td = $("<td>").html(row[j]);
+                        tr.append(td);
+                    }
+                    table.append(tr);
+                }
             }
             console.log(table);
             window.csv_table = table;
-            return "<table class='table'>" + table.html() + "</table>";
+            return editAction.prop("outerHTML") + table.prop("outerHTML");
         } catch (e) {
             console.log(e);
             return escape(code);

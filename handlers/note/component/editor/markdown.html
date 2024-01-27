@@ -68,6 +68,48 @@
             }
             return newText;
         }
+
+        // 编辑csv事件
+        xnote.note.openEditCsvDialog = function(target) {
+            var oldCode = $(target).attr("data-code");
+            var codeIndex = parseInt($(target).attr("data-index"));
+            xnote.showTextDialog("编辑csv", oldCode, ["更新", "取消"], function (index, layero, dialogInfo) {
+                var newCode = $(layero).find("textarea").val();
+                // xnote.alert("newCode:" + newCode);
+
+                if (newCode === oldCode) {
+                    return;
+                }
+
+                var oldContent = $("#markdown-input").val();
+                if (oldContent.indexOf(oldCode) < 0) {
+                    console.log("text not match:", text);
+                    xnote.alert("笔记内容有变化，请刷新页面");
+                    return false;
+                }
+
+                var newContent = xnote.string.replaceByIndex(oldContent, oldCode, newCode, codeIndex);
+                console.log("newContent", newContent);
+
+                var params = {};
+                params.id = "{{file.id}}";
+                params.content = newContent;
+                params.resp_type = "json";
+                params.edit_token = "{{edit_token}}";
+                params.version = "{{file.version}}";
+
+                xnote.http.post("/note/update", params, function (resp) {
+                    if (resp.code == "success") {                    
+                        xnote.toast("更新成功，正在刷新页面");
+                        window.location.reload();
+                    } else {
+                        xnote.toast("更新失败:" + resp.message);
+                    }
+                });
+
+                return false;
+            }, ["large"]);
+        }
         
         function onCheckboxClicked(e) {
             // 按下单选项的行为
@@ -75,7 +117,7 @@
             var index = parseInt($(e.target).attr("data-index"));
             console.log("onCheckboxClicked", text);
             text = trimText(text);
-            var params = {};
+            
             var newText = convertTextToNew(text);
 
             var oldContent = $("#markdown-input").val();
@@ -88,7 +130,8 @@
             // console.log("text:", text, "newText:", newText);
 
             // TODO: 先简单用replace处理一下
-            newContent = xnote.string.replaceByIndex(oldContent, text, newText, index);
+            var newContent = xnote.string.replaceByIndex(oldContent, text, newText, index);
+            var params = {};
             params.id = "{{file.id}}";
             params.content = newContent;
             params.resp_type = "json";
@@ -112,6 +155,7 @@
         // 扩展选项
         var options = {};
         options.onCheckboxClicked = onCheckboxClicked;
+        options.csvEditFunc = "xnote.note.openEditCsvDialog";
         marked.parseAndRender(input, "#markdown-output-div", options);
     });
 </script>
