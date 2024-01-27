@@ -73,17 +73,25 @@
         xnote.note.openEditCsvDialog = function(target) {
             var oldCode = $(target).attr("data-code");
             var codeIndex = parseInt($(target).attr("data-index"));
+            var lang = $(target).attr("data-lang");
+
             xnote.showTextDialog("编辑csv", oldCode, ["更新", "取消"], function (index, layero, dialogInfo) {
-                var newCode = $(layero).find("textarea").val();
+                var newCode = $(layero).find("textarea").val().trim();
                 // xnote.alert("newCode:" + newCode);
 
                 if (newCode === oldCode) {
                     return;
                 }
 
+                var fenceLeft = "```" + lang + "\n";
+                var fenceRight = "\n```";
+
+                oldCode = fenceLeft + oldCode + fenceRight;
+                newCode = fenceLeft + newCode + fenceRight;
+
                 var oldContent = $("#markdown-input").val();
                 if (oldContent.indexOf(oldCode) < 0) {
-                    console.log("text not match:", text);
+                    console.log("text not match:", oldCode);
                     xnote.alert("笔记内容有变化，请刷新页面");
                     return false;
                 }

@@ -12,6 +12,7 @@
     function initExtOptions(options) {
         if (options === undefined) {
             options = {
+                text: "",
                 hideMenu: false,
                 checkboxIndexMap: {},
                 checkboxIndex: 0,
@@ -153,7 +154,8 @@
             .replace(/'/g, '&#39;');
     }
 
-    function highlight_csv(code) {
+    function highlight_csv(code, lang) {
+        // 处理csv的展示
         extOptions.csvIndex++;
         var dupIndex = extOptions.csvIndexMap[code]
         if (dupIndex === undefined) {
@@ -163,6 +165,8 @@
         }
         extOptions.csvIndexMap[code] = dupIndex;
 
+        var codeBlock = "```" + lang + "\n" + code + "\n```";
+
         try {
             // var csv = new CSV(code);
             var rows = CSV.parse(code);
@@ -170,6 +174,7 @@
             var editAction = $("<a>").text("编辑表格");
             editAction.attr("onclick", extOptions.csvEditFunc + "(this)");
             editAction.attr("data-code", code).attr("data-index", dupIndex);
+            editAction.attr("data-lang", lang);
 
             if (rows.length > 0) {
                 var headRow = rows[0];
@@ -192,7 +197,13 @@
             }
             console.log(table);
             window.csv_table = table;
-            return editAction.prop("outerHTML") + table.prop("outerHTML");
+
+            if (extOptions.text.indexOf(codeBlock) >= 0) {
+                // 符合csv标准格式, 返回编辑按钮
+                return editAction.prop("outerHTML") + table.prop("outerHTML");
+            }
+
+            return table.prop("outerHTML");
         } catch (e) {
             console.log(e);
             return escape(code);
@@ -222,19 +233,20 @@
 
     function highlight(code, lang) {
         console.log(code, lang);
+        var langUpper;
         if (lang) {
-            lang = lang.toUpperCase();
+            langUpper = lang.toUpperCase();
         }
-        if (lang == "CSV") {
-            return highlight_csv(code);
-        } else if (lang == "EXCEL") {
+        if (langUpper == "CSV") {
+            return highlight_csv(code, lang);
+        } else if (langUpper == "EXCEL") {
             code = code.replace(/\t/g, ",");
             // some \t may be replaced by four space
             code = code.replace(/ {4}/g, ',');
             console.log(code);
-            return highlight_csv(code);
+            return highlight_csv(code, lang);
         } else {
-            return highlightKeywords(code, lang);
+            return highlightKeywords(code, langUpper);
         }
     }
 
@@ -499,7 +511,8 @@
 
     marked.parseAndRender = function (text, target, options) {
         // 处理扩展选项
-        extOptions = initExtOptions(options)
+        extOptions = initExtOptions(options);
+        extOptions.text = text;
 
         var html = marked.parse(text);
         $(target).html(html);
