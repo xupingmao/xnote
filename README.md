@@ -79,11 +79,6 @@ markdown页面
 - 新浪SAE TODO
 - [CentOS - 百度BAE](https://blog.csdn.net/u011320646/article/details/126334377) 
 
-### 二次开发
-
-- xnote现在已经打包上传到pypi[xnote-web](https://pypi.org/project/xnote-web/), 这样可以通过模块化的方式进行二次开发
-
-
 ## 主要功能
 
 ### 笔记管理
@@ -114,6 +109,8 @@ markdown页面
 
 ## 系统扩展
 
+### 插件机制
+
 由于每个人的需求不同，单一系统很难满足，开发者可以根据自己需要编写插件来扩展系统的功能。具体可以参考文档 [插件扩展](./docs/plugins.md)。
 
 具体特性如下
@@ -121,6 +118,11 @@ markdown页面
 - 插件中可以监听系统消息，包括笔记、提醒、文件、时间、系统五种类型的消息
 - 插件可以通过`category`属性设置分类，显示在笔记、文件、系统等功能的选项入口中
 - 可以通过模板创建插件
+
+### 二次开发
+
+- xnote现在已经打包上传到pypi[xnote-web](https://pypi.org/project/xnote-web/), 这样可以通过模块化的方式进行二次开发
+
 
 ## 相关文档
 - [更新日志](./docs/changelog.md)
