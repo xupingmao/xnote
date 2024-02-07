@@ -20,13 +20,17 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 
 - 体验demo网址 https://1k5u680558.goho.co/
 - 测试账号 user01/123456, user02/123456 友情提示：管理员会不定期清理数据，请勿存放重要数据
-- 打一个广告, xnote现在已经打包上传到pypi[xnote-web](https://pypi.org/project/xnote-web/), 这样可以通过模块化的方式进行二次开发, 我们在它的基础上开发了一个AI工具网站 https://zhicikeji.com/
 
 以下是一些页面展示
 
-![笔记](./docs/screenshots/xnote_v2.9.2_home.png)
+功能列表
+![功能列表](https://enjoy.applinzi.com/data/files/admin/upload/2024/02/xnote_v2.9.6_home.png)
 
+笔记本
+![笔记](https://enjoy.applinzi.com/data/files/admin/upload/2024/02/xnote_v2.9.6_books.png)
 
+markdown页面
+![markdown](https://enjoy.applinzi.com/data/files/admin/upload/2024/02/xnote_v2.9.6_markdown.png)
 
 -----
 ## 项目地址
@@ -74,6 +78,11 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 
 - 新浪SAE TODO
 - [CentOS - 百度BAE](https://blog.csdn.net/u011320646/article/details/126334377) 
+
+### 二次开发
+
+- xnote现在已经打包上传到pypi[xnote-web](https://pypi.org/project/xnote-web/), 这样可以通过模块化的方式进行二次开发
+
 
 ## 主要功能
 
