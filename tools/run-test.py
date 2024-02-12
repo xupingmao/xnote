@@ -115,7 +115,7 @@ def run_test(args):
 	if os.name != "nt":
 		check_and_install_pkg("leveldb", "leveldb==0.201")
 	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --cov xnote --ff" % executable)
-	os.system("%s -m coverage html -i" % executable)
+	os.system(f"{executable} -m coverage html -i")
 
 def main():
 	parser = argparse.ArgumentParser()

@@ -1,0 +1,18 @@
+# .coveralls.yml
+service_name: my-travis
+  # Your CI service name (e.g. travis-pro, circleci, etc.)
+service_job_id: $MY_JOB_ID
+  # Build or Job ID (e.g. $CIRCLE_BUILD_NUM, $TRAVIS_JOB_ID, etc.). 
+  # `service_jobs_id` is the more modern option for identifying a build or job. 
+service_build_url: 
+  # URL to build details. (e.g. $CIRCLE_BUILD_URL, $TRAVIS_BUILD_WEB_URL, etc.)
+  # No longer required, but available for backwards compatibility.
+service_branch: $MY_BRANCH
+  # The branch of the current commit. (e.g. $CIRCLE_BRANCH, $TRAVIS_BRANCH, etc.)
+service_pull_request: 
+  # The pull request number (e.g. $CIRCLE_PR_NUMBER, $TRAVIS_PULL_REQUEST, etc.)
+  # Only required for pull requests.
+
+repo_token: H00VlH1xlKahwrp68Fhbv8e1K37zEjjrh
+  # We recommend only storing repo tokens for public repos in your .coveralls.yml file. 
+  # For private repos, we recommend storing them in your CI service's protected environment variables (aka. secrets).

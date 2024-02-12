@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-18 18:40:07
+@LastEditTime : 2024-02-12 21:41:25
 @FilePath     : /xnote/xnote/core/xtables_kv.py
 @Description  : 数据库-KV表定义
 
@@ -106,19 +106,19 @@ def init_note_tables():
     # ID维度笔记索引
     db = dbutil.register_table(
         "note_index", "笔记索引，不包含内容", category="note")
-    db.register_index("parent_id", comment = "父级笔记ID")
-    db.register_index("name", columns=["creator", "name"])
-    db.register_index("ctime", columns=["creator", "ctime"])
-    db.register_index("skey", columns=["creator", "skey"])
+    db.drop_index("parent_id", comment = "父级笔记ID")
+    db.drop_index("name", columns=["creator", "name"])
+    db.drop_index("ctime", columns=["creator", "ctime"])
+    db.drop_index("skey", columns=["creator", "skey"])
     db.rebuild_index("v5")
     db.delete_table()
 
     # 用户维度笔记索引
     db = dbutil.register_table("note_tiny", "用户维度的笔记索引",
                                category="note", check_user=True, user_attr="creator")
-    db.register_index("name")
-    db.register_index("ctime")
-    db.register_index("parent_id")
+    db.drop_index("name")
+    db.drop_index("ctime")
+    db.drop_index("parent_id")
     db.rebuild_index("v3")
     db.delete_table()
 
@@ -131,8 +131,8 @@ def init_note_tables():
 
     # 分享关系
     db = dbutil.register_table("note_share", "笔记分享", category="note")
-    db.register_index("note_id", comment = "笔记ID")
-    db.register_index("to_user", comment = "分享的目标用户")
+    db.drop_index("note_id", comment = "笔记ID")
+    db.drop_index("to_user", comment = "分享的目标用户")
     db.rebuild_index("v1")
     db.delete_table()
 
@@ -143,15 +143,15 @@ def init_note_tables():
 
     # 公共笔记
     db = dbutil.register_table("note_public", "公共笔记", category="note")
-    db.register_index("hot_index")
-    db.register_index("share_time")
+    db.drop_index("hot_index")
+    db.drop_index("share_time")
     db.rebuild_index("v1")
     db.delete_table()
 
     # 操作日志
     db = dbutil.register_table("user_note_log", "用户笔记操作日志", check_user=True, user_attr="user")
-    db.register_index("visit_cnt")
-    db.register_index("atime")
+    db.drop_index("visit_cnt")
+    db.drop_index("atime")
     db.drop_index("mtime")
     db.drop_index("ctime")
     db.rebuild_index("v1")

@@ -1,6 +1,5 @@
 # Xnote
 
-[![Build Status](https://travis-ci.org/xupingmao/xnote.svg?branch=master)](https://travis-ci.org/xupingmao/xnote)
 [![Coverage Status](https://coveralls.io/repos/github/xupingmao/xnote/badge.svg?branch=master)](https://coveralls.io/github/xupingmao/xnote?branch=master)
 ![Docker Image](https://img.shields.io/docker/pulls/donjuanplatinum/xnote)
 

@@ -461,7 +461,7 @@ def init_txt_info_index():
     @since 2023/11/18
     """
     table_name = "txt_info_index"
-    comment = "月度计划索引"
+    comment = "txt文件索引"
     with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("user_id", "bigint", default_value=0)
         manager.add_column("path", "varchar(255)", default_value="")
