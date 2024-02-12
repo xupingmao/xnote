@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-06 12:04:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-24 12:48:47
+@LastEditTime : 2024-02-12 22:10:17
 @FilePath     : /xnote/handlers/system/system_log.py
 @Description  : 描述
 """
@@ -15,14 +15,14 @@
 import os
 import time
 from collections import deque
-import xauth
+from xnote.core import xauth
 import xutils
-import xconfig
-import xmanager
-import xtables
+from xnote.core import xconfig
+from xnote.core import xmanager
+from xnote.core import xtables
 from xutils import logutil, dbutil, webutil, dateutil
 from xutils.imports import *
-from xtemplate import BasePlugin
+from xnote.core.xtemplate import BasePlugin
 from xutils.functions import iter_exists
 
 uv_db = dbutil.get_table("uv")

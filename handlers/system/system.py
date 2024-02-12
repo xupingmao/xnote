@@ -3,11 +3,11 @@
 # @modified 2022/02/26 11:27:37
 """System functions"""
 import os
-import xconfig
-import xtemplate
+from xnote.core import xconfig
+from xnote.core import xtemplate
 import xutils
-import xauth
-import xmanager
+from xnote.core import xauth
+from xnote.core import xmanager
 import web
 from xutils import Storage
 from xutils import webutil
@@ -133,7 +133,7 @@ NOTE_TOOLS = [
 DATA_TOOLS = [
     admin_link("数据库", "/system/sqldb_admin?p=sqldb", "database"),
     admin_link("缓存管理", "/system/cache", "database"),
-    admin_link("消息队列", "/system/todo", "database"),
+    # admin_link("消息队列", "/system/todo", "database"),
 ]
 
 # 所有功能配置
