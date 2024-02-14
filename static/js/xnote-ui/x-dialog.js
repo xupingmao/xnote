@@ -123,6 +123,7 @@ xnote.openDialogExInner = function (options) {
     var closeForYes = xnote.getOrDefault(options.closeForYes, true);
     var template = options.template;
     var defaultValues = options.defaultValues; // 模板的默认值
+    var yesFunction = function(index, layero, dialogInfo) {};
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数
@@ -153,8 +154,16 @@ xnote.openDialogExInner = function (options) {
         }
     }
 
+    if (functions === undefined) {
+        functions = [];
+    }
+
     if (!(functions instanceof Array)) {
         functions = [functions];
+    }
+
+    if (functions.length>0) {
+        yesFunction = functions[0];
     }
 
     if (area === undefined) {
@@ -188,7 +197,7 @@ xnote.openDialogExInner = function (options) {
             var dialogInfo = {
                 id: dialogId
             };
-            var yesResult = functions[0](index, layero, dialogInfo);
+            var yesResult = yesFunction(index, layero, dialogInfo);
             if (yesResult === undefined && closeForYes) {
                 layer.close(index);
             }

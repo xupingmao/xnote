@@ -104,7 +104,7 @@ $(function () {
         var key = $(this).attr("data-key");
         xnote.confirm("准备删除【" + key + "】，请确认", function (confirmed) {
             var params = {key: key};
-            $.post("?action=delete", params, function (resp) {
+            xnote.http.post("?action=delete", params, function (resp) {
                 search();
             }).fail(function () {
                 xnote.toast("删除失败，请稍后重试~");
