@@ -463,6 +463,20 @@ def init_user_note_log():
         manager.add_column("visit_cnt", "bigint", 0)
         manager.add_index(["user_id", "note_id"], is_unique=True)
 
+def init_user_op_log():
+    """用户操作日志, 从kv数据迁移过来
+    @since 2024/02/14
+    """
+    table_name = "user_op_log"
+    comment = "笔记操作日志"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("type", "varchar(64)", "")
+        manager.add_column("detail", "varchar(256)", "")
+        manager.add_column("ip", "varchar(64)", "")
+        manager.add_index(["user_id", "ctime"])
+
 def init_month_plan_index():
     """月度计划索引
     @since 2023/11/05
@@ -611,6 +625,7 @@ def init():
     # 笔记索引
     init_note_index_table()
     init_user_note_log()
+    init_user_op_log()
     init_month_plan_index()
     init_txt_info_index()
 

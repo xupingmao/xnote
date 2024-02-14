@@ -2,8 +2,8 @@
 # @modified 2022/04/06 12:39:18
 import web
 import xutils
-import xauth
-import xtemplate
+from xnote.core import xauth
+from xnote.core import xtemplate
 from xutils import cacheutil, dbutil
 from xutils import Storage
 from xutils import webutil
@@ -24,10 +24,14 @@ def save_login_info(name, error=None):
         detail = "登录IP: %s" % real_ip
         if error != None:
             detail += ",登录失败:%s" % error
+        user_id = xauth.UserDao.get_id_by_name(name)
+        if user_id == 0:
+            return
+        
         log = user_dao.UserOpLog()
         log.detail = detail
         log.type = user_dao.UserOpTypeEnum.login.value
-        log.user_name = name
+        log.user_id = user_id
         log.ip = real_ip
         user_dao.UserOpLogDao.create_op_log(log)
 

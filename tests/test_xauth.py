@@ -143,3 +143,33 @@ class TestXauth(BaseTestCase):
         assert config_dict[UserConfigKey.THEME] == "default"
         assert config_dict[UserConfigKey.HOME_PATH] == "/note/group"
         assert config_dict[UserConfigKey.nav_style] == "left"
+
+        
+    def test_user_oplog_clean(self):
+        user_id = xauth.current_user_id()
+        
+        oplog = xauth.UserOpLog()
+        oplog.user_id = user_id
+        oplog.type = "test"
+        oplog.detail = "test clean"
+        
+        xauth.UserOpLogDao.max_log_size = 5
+        xauth.UserOpLogDao.log_buf_size = 1
+        
+        for i in range(10):
+            oplog.detail = "test clean %s" % i
+            xauth.UserOpLogDao.create_op_log(oplog)
+        
+        assert xauth.UserOpLogDao.count(user_id=user_id) == 5
+        
+        xauth.UserOpLogDao.log_buf_size = 2
+        xauth.UserOpLogDao.create_op_log(oplog)
+        assert xauth.UserOpLogDao.count(user_id=user_id) == 6
+        
+        last_log_detail = "test clean last"
+        oplog.detail = last_log_detail
+        xauth.UserOpLogDao.create_op_log(oplog)
+        assert xauth.UserOpLogDao.count(user_id=user_id) == 5
+        
+        logs = xauth.UserOpLogDao.list_by_user(user_id=user_id)
+        assert logs[0].detail == last_log_detail

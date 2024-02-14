@@ -26,6 +26,7 @@ from xutils import Storage
 from xutils import logutil
 from xutils import cacheutil
 from xutils import six
+from xutils.sqldb.utils import safe_str
 
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
@@ -912,7 +913,7 @@ class UserOpLog(Storage):
 
     def __init__(self):
         self.ctime = dateutil.format_datetime()
-        self.user_name = ""
+        self.user_id = 0
         self.type = ""
         self.detail = ""
         self.ip = ""
@@ -921,24 +922,40 @@ class UserOpLogDao:
 
     @classmethod
     def init(cls):
-        cls.db = dbutil.get_table("user_op_log")
+        cls.db = xtables.get_table_by_name("user_op_log")
         cls.max_log_size = 500
+        cls.log_buf_size = 20
 
     @classmethod
     def create_op_log(cls, op_log):
         assert isinstance(op_log, UserOpLog)
-        assert op_log.user_name != ""
-        cls.db.insert(op_log)
-        if cls.db.count_by_user(op_log.user_name) > cls.max_log_size:
-            items = []
-            for item in cls.db.list_by_user(op_log.user_name, limit=20):
-                items.append(item)
-            cls.db.batch_delete(items)
+        assert op_log.user_id > 0
+        assert op_log.ctime != ""
+        assert op_log.type != ""
+        assert op_log.detail != ""
+        assert cls.log_buf_size > 0
+        
+        op_log.ip = safe_str(op_log.ip)
+        
+        cls.db.insert(**op_log)
+        if cls.db.count(where=dict(user_id=op_log.user_id)) >= cls.max_log_size + cls.log_buf_size:
+            ids = []
+            for item in cls.db.select(where=dict(user_id=op_log.user_id), limit=cls.log_buf_size, order="ctime"):
+                ids.append(item.id)
+            if len(ids) > 0:
+                cls.db.delete(where="id in $ids", vars=dict(ids=ids))
 
     @classmethod
-    def list_by_user(cls, user_name="", offset=0, limit=20, reverse=True):
-        return cls.db.list_by_user(user_name, offset=offset, limit=limit, reverse=reverse)
+    def list_by_user(cls, user_id=0, offset=0, limit=20, reverse=True):
+        order = "ctime desc"
+        if not reverse:
+            order = "ctime"
+        return cls.db.select(where=dict(user_id=user_id), offset=offset, limit=limit, order=order)
 
+    @classmethod
+    def count(cls, user_id=0):
+        return cls.db.count(where=dict(user_id=user_id))
+    
 def init():
     global USER_TABLE
     global INVALID_NAMES

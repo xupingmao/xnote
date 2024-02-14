@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-01-29 12:21:04
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-14 19:34:30
+@LastEditTime : 2024-02-14 20:53:48
 @FilePath     : /xnote/handlers/plugin/dao.py
 @Description  : 描述
 """
@@ -28,11 +28,17 @@ class PageVisitDao:
     db = xtables.get_table_by_name("page_visit_log")
     
     @classmethod
-    def create(cls, log):
+    def format_url(cls, url=""):
+        return url[:256]
+    
+    @classmethod
+    def create(cls, log: PageVisitLogDO):
+        log.url = cls.format_url(log.url)
         return cls.db.insert(**log)
     
     @classmethod
     def find_one(cls, user_id=0, url=""):
+        url = cls.format_url(url)
         result = cls.db.select_first(where = dict(user_id=user_id, url=url))
         if result != None:
             return PageVisitLogDO(**result)
@@ -49,6 +55,7 @@ class PageVisitDao:
     
     @classmethod
     def update(cls, log: PageVisitLogDO):
+        log.url = cls.format_url(log.url)
         return cls.db.update(where=dict(id=log.id), **log)
     
     @classmethod

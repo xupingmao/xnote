@@ -6,9 +6,7 @@
 import sys
 import time
 import unittest
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
-import xauth
+from xnote.core import xauth
 
 # cannot perform relative import
 try:
@@ -34,3 +32,5 @@ class TestUser(BaseTestCase):
 
     def test_user_session(self):
         self.check_OK("/user/session")
+
+        

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-14 19:36:47
+@LastEditTime : 2024-02-14 22:15:13
 @FilePath     : /xnote/xnote/core/xtables_kv.py
 @Description  : 数据库-KV表定义
 
@@ -42,9 +42,6 @@ def init():
     dbutil.register_table("sys_config", "系统配置表")
     
     dbutil.register_table("user_stat", "用户数据统计")
-
-    # 操作日志
-    dbutil.register_table("user_op_log", "用户操作日志表", user_attr="user_name")
 
     # 月度计划
     month_plan_index = xtables.get_table_by_name("month_plan_index")
@@ -95,6 +92,9 @@ def init_deleted_table():
     db.rebuild_index("v2")
     db.delete_table()
     
+    # 操作日志
+    db = dbutil.register_table("user_op_log", "用户操作日志表", user_attr="user_name")
+    db.delete_table()
     
 def init_note_tables():
     # 笔记信息

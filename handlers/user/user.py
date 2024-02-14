@@ -1,9 +1,9 @@
 # encoding=utf-8
 # @modified 2022/04/04 14:01:57
 import web
-import xauth
-import xtemplate
-import xmanager
+from xnote.core import xauth
+from xnote.core import xtemplate
+from xnote.core import xmanager
 import xutils
 import math
 from xutils import textutil
@@ -18,7 +18,7 @@ OP_LOG_TABLE = xauth.UserOpLogDao
 def create_op_log(user_name, op_type, detail):
     ip = webutil.get_real_ip()
     log = dao.UserOpLog()
-    log.user_name = user_name
+    log.user_id = xauth.UserDao.get_id_by_name(user_name)
     log.ip = ip
     log.type = op_type
     log.detail = detail
@@ -66,10 +66,12 @@ class UserHandler:
         user_info = None
         if name != "":
             user_info = xauth.get_user(name)
+        
+        user_id = xauth.UserDao.get_id_by_name(name)
         kw = Storage()
         kw.name = name
         kw.user_info = user_info
-        kw.log_list = OP_LOG_TABLE.list_by_user(name, limit=100)
+        kw.log_list = OP_LOG_TABLE.list_by_user(user_id=user_id, limit=100)
 
         return xtemplate.render("user/page/user_manage.html", **kw)
 
@@ -114,6 +116,7 @@ class UserInfoHandler:
 class UserInfoAjaxHandler:
     def getDesensitizedUserInfo(self):
         user = xauth.current_user()
+        assert user != None
         mobile = ''
         if (user.mobile != None and user.mobile != ''):
             mobile = user.mobile[:3] + '****' + user.mobile[7:]
@@ -182,7 +185,8 @@ class UserOpLogHandler:
     @xauth.login_required()
     def GET(self):
         user_name = xauth.current_name_str()
-        log_list = OP_LOG_TABLE.list_by_user(user_name, limit=100)
+        user_id = xauth.UserDao.get_id_by_name(user_name)
+        log_list = OP_LOG_TABLE.list_by_user(user_id, limit=100)
         return xtemplate.render("user/page/user_op_log.html", log_list=log_list)
 
 

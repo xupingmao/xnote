@@ -9,4 +9,4 @@
 @Description  : 用户的DAO对象
 """
 
-from xauth import UserOpLog, UserOpLogDao, UserOpTypeEnum
+from xnote.core.xauth import UserOpLog, UserOpLogDao, UserOpTypeEnum

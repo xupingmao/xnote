@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-11-05 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-14 19:03:02
+@LastEditTime : 2024-02-14 21:18:58
 @FilePath     : /xnote/xnote_migrate/upgrade_018.py
 @Description  : 描述
 """
@@ -22,6 +22,7 @@ def do_upgrade():
     base.execute_upgrade("20231105_month_plan", handler.migrate_month_plan)
     base.execute_upgrade("20231223_msg_index", handler.migrate_msg_index)
     base.execute_upgrade("20240214_plugin_visit", handler.migrate_plugin_visit)
+    base.execute_upgrade("20240214_user_op_log", handler.migrate_user_op_log)
 
 class MonthPlanRecord(Storage):
     def __init__(self, **kw):
@@ -70,7 +71,24 @@ class PageVisitLogDO(Storage):
         self.visit_cnt = 0
         self.visit_time = dateutil.format_datetime()
         self.update(kw)
-    
+        
+class UserOpLogV1(Storage):
+    def __init__(self, **kw):
+        self.ctime = dateutil.format_datetime()
+        self.user_name = ""
+        self.type = ""
+        self.detail = ""
+        self.ip = ""
+        self.update(kw)
+
+class UserOpLogV2(Storage):
+    def __init__(self, **kw):
+        self.ctime = dateutil.format_datetime()
+        self.user_id = 0
+        self.type = ""
+        self.detail = ""
+        self.ip = ""
+        self.update(kw)
     
 class MigrateHandler:
 
@@ -117,5 +135,26 @@ class MigrateHandler:
                 new_record.visit_cnt = item.visit_cnt
                 new_record.url = safe_str(item.url)
                 new_record.args = safe_str(item.args)
+                new_db.insert(**new_record)
+    
+    
+    @classmethod
+    def migrate_user_op_log(cls):
+        old_db = dbutil.get_table("user_op_log")
+        new_db = xtables.get_table_by_name("user_op_log")
+        for item0 in old_db.iter(limit=-1):
+            item = UserOpLogV1(**item0)
+            user_id = xauth.UserDao.get_id_by_name(item.user_name)
+            if user_id == 0:
+                logging.info("invalid user_op_log, %s", item0)
+                continue
+            exist = new_db.select_first(where=dict(user_id=user_id, ctime=item.ctime))
+            if exist == None:
+                new_record = UserOpLogV2()
+                new_record.user_id = user_id
+                new_record.ctime = item.ctime
+                new_record.type = item.type
+                new_record.detail = item.detail
+                new_record.ip = item.ip
                 new_db.insert(**new_record)
     
