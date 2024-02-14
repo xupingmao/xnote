@@ -3,16 +3,16 @@
 # @since 2019/08/10 23:44:48
 # @modified 2022/04/16 22:36:45
 import math
-import xconfig
+from xnote.core import xconfig
 import xutils
-import xauth
-import xtemplate
-import xmanager
+from xnote.core import xauth
+from xnote.core import xtemplate
+from xnote.core import xmanager
 from xutils import DAO
 from xutils import Storage
 from xutils import quote
 from xutils import textutil
-from xtemplate import T
+from xnote.core.xtemplate import T
 from . import dao as note_dao
 from . import dao_comment
 from xutils import webutil
@@ -115,7 +115,7 @@ class CommentListAjaxHandler:
         page = xutils.get_argument_int("page", 1)
         page_max  = 1
         page_size = xconfig.PAGE_SIZE
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         offset = max(0, page-1) * xconfig.PAGE_SIZE
 
         if list_type == "user":
@@ -152,7 +152,7 @@ class SaveCommentAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        note_id = xutils.get_argument_str("note_id")
+        note_id = xutils.get_argument_int("note_id")
         content = xutils.get_argument_str("content")
         type = xutils.get_argument_str("type")
         user_info = xauth.current_user()
@@ -232,7 +232,7 @@ class CommentAjaxHandler:
                 return dict(code = "404", message = "评论不存在")
             if comment.user != user_name:
                 return dict(code = "403", message = "无权限操作")
-            content = xutils.get_argument("content", "")
+            content = xutils.get_argument_str("content", "")
             comment.content = content
             dao_comment.update_comment(comment)
             return dict(code = "success")

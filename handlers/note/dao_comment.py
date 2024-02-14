@@ -24,13 +24,14 @@ _comment_db = dbutil.get_table("comment")
 comment_service = CommentService()
 
 class CommentDO(xutils.Storage):
-    def __init__(self):
+    def __init__(self, **kw):
         self.user = ""
         self.user_id = 0
         self.note_id = 0
         self.type = ""
         self.content = ""
         self.ctime = dateutil.format_datetime()
+        self.update(kw)
 
 
 class CommentDao:
@@ -126,7 +127,8 @@ def get_comment(comment_id = ""):
     value = _comment_db.get_by_id(comment_id)
     if value != None:
         value.id = comment_id
-    return value
+        return CommentDO(**value)
+    return None
 
 
 def check_comment(comment):

@@ -1881,7 +1881,7 @@ def get_note_stat(user_name):
 
 
 def get_gallery_path(note):
-    import xconfig
+    from xnote.core import xconfig
     # 新的位置, 增加一级子目录（100个，二级子目录取决于文件系统
     # 最少的255个，最多无上限，也就是最少2.5万个相册，对于一个用户应该够用了）
     note_id = str(note.id)

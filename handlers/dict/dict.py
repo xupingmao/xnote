@@ -2,12 +2,13 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2019/02/15 21:46:37
 # @modified 2022/04/18 23:25:56
-import xtables
-import xtemplate
+
+from xnote.core import xtables
+from xnote.core import xtemplate
 import xutils
-import xauth
-import xconfig
-import xmanager
+from xnote.core import xauth
+from xnote.core import xconfig
+from xnote.core import xmanager
 import math
 from xutils import Storage, encode_uri_component, dateutil
 

@@ -43,11 +43,6 @@ def init():
     
     dbutil.register_table("user_stat", "用户数据统计")
 
-    db = dbutil.register_table("plugin_visit", "插件访问日志")
-    db.drop_index("k_url", columns=["user", "url"])
-    db.rebuild_index("v2")
-    db.delete_table()
-
     # 操作日志
     dbutil.register_table("user_op_log", "用户操作日志表", user_attr="user_name")
 
@@ -93,7 +88,14 @@ def init_deleted_table():
     db = dbutil.register_table("fs_index", "文件索引")
     db.drop_index("ftype", comment = "类型索引")
     db.delete_table()
-
+    
+    # 插件访问日志,新的SQL表参考 page_visit_log
+    db = dbutil.register_table("plugin_visit", "插件访问日志")
+    db.drop_index("k_url", columns=["user", "url"])
+    db.rebuild_index("v2")
+    db.delete_table()
+    
+    
 def init_note_tables():
     # 笔记信息
     dbutil.register_table("note_tags", "笔记标签绑定",
