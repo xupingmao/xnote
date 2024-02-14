@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-12 21:41:25
+@LastEditTime : 2024-02-14 19:36:47
 @FilePath     : /xnote/xnote/core/xtables_kv.py
 @Description  : 数据库-KV表定义
 
@@ -44,8 +44,9 @@ def init():
     dbutil.register_table("user_stat", "用户数据统计")
 
     db = dbutil.register_table("plugin_visit", "插件访问日志")
-    db.register_index("k_url", columns=["user", "url"])
+    db.drop_index("k_url", columns=["user", "url"])
     db.rebuild_index("v2")
+    db.delete_table()
 
     # 操作日志
     dbutil.register_table("user_op_log", "用户操作日志表", user_attr="user_name")

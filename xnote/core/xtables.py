@@ -364,10 +364,29 @@ def init_site_visit_log():
         manager.add_column("ip", "varchar(64)", "")
         manager.add_column("count", "bigint", 0)
         manager.add_index(["date", "ip"])
-        # 日志数据, 关闭profile
-        manager.table_info.log_profile = False
-        manager.table_info.enable_binlog = False
+    
+    # 日志数据, 关闭profile
+    TableConfig.disable_profile(table_name)
+    TableConfig.disable_binlog(table_name)
 
+def init_page_visit_log():
+    """页面访问日志
+    @since 2024/02/14
+    """
+    table_name = "page_visit_log"
+    comment = "页面访问统计"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("visit_time", "datetime", DEFAULT_DATETIME)
+        manager.add_column("visit_cnt", "bigint", 0)
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("url", "varchar(256)", "")
+        manager.add_column("args", "text", "")
+        manager.add_index(["user_id", "url"])
+    
+    # 日志数据, 关闭profile
+    TableConfig.disable_profile(table_name)
+    TableConfig.disable_binlog(table_name)
+    
 
 def init_msg_index_table():
     """随手记索引"""
@@ -577,6 +596,7 @@ def init():
     init_user_table()
     init_file_info()
     init_site_visit_log()
+    init_page_visit_log()
     
     # 标签相关
     init_note_tag_rel_table() # 已删除, 占位防止冲突

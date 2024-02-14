@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-27 21:17:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-01-14 21:21:38
+@LastEditTime : 2024-02-14 19:15:31
 @FilePath     : /xnote/xnote/core/xconfig.py
 @Description  : 描述
 """
@@ -801,6 +801,10 @@ def get_system_config_int(name, default_value = 0):
 def get(key, default_value=None):
     return get_global_config(key, default_value)
 
+def get_str(key, default_value=""):
+    value = get(key, default_value=default_value)
+    assert isinstance(value, str)
+    return value
 
 def set(name, value):
     """和set函数冲突了，建议使用 set_global_config"""

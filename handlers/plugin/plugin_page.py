@@ -2,18 +2,18 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2018/09/30 20:53:38
 # @modified 2022/03/04 23:02:45
-import xconfig
 import os
-import os
-import xtemplate
 import xutils
-import xauth
-import xmanager
 import web
 import copy
-import xnote_hooks
 
-from xtemplate import T
+from xnote.core import xconfig
+from xnote.core import xtemplate
+from xnote.core import xauth
+from xnote.core import xmanager
+from xnote.core import xnote_hooks
+
+from xnote.core.xtemplate import T
 from xutils import Storage
 from xutils import fsutil
 from xutils import logutil
@@ -22,7 +22,7 @@ from xutils import attrget
 from xutils import mem_util
 from xutils.imports import ConfigParser
 from handlers.plugin.dao import (
-    add_visit_log, list_visit_logs, delete_visit_log)
+    add_visit_log, list_visit_logs, PageVisitLogDO)
 
 
 from xnote.plugin import load_plugin_file, PluginContext
@@ -379,6 +379,7 @@ class PluginSort:
     def get_log_by_url(self, url):
         for log in self.logs:
             if log.url == url:
+                assert isinstance(log, PageVisitLogDO)
                 return log
         return None
 
@@ -387,19 +388,16 @@ class PluginSort:
             log = self.get_log_by_url(p.url)
             if log:
                 p.visit_cnt = log.visit_cnt
-
-            if p.visit_cnt is None:
+            else:
                 p.visit_cnt = 0
-
         plugins.sort(key=lambda x: x.visit_cnt, reverse=True)
 
     def sort_by_recent(self, plugins):
         for p in plugins:
             log = self.get_log_by_url(p.url)
             if log:
-                p.visit_time = log.time
-
-            if p.visit_time is None:
+                p.visit_time = log.visit_time
+            else:
                 p.visit_time = ""
 
         plugins.sort(key=lambda x: x.visit_time, reverse=True)

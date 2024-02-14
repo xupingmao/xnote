@@ -4,66 +4,87 @@
 @email        : 578749341@qq.com
 @Date         : 2023-01-29 12:21:04
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-12 11:03:25
+@LastEditTime : 2024-02-14 19:34:30
 @FilePath     : /xnote/handlers/plugin/dao.py
 @Description  : 描述
 """
 import xutils
-from xutils import dbutil
+from xnote.core import xtables
+from xnote.core import xauth
 from xutils import dateutil
 from xutils import Storage
 
-_log_db = dbutil.get_table("plugin_visit")
+class PageVisitLogDO(Storage):
+    def __init__(self, **kw):
+        self.user_id = 0
+        self.url = ""
+        self.args = ""
+        self.visit_cnt = 0
+        self.visit_time = dateutil.format_datetime()
+        self.update(kw)
 
-class LogModel(Storage):
-    def __init__(self):
-        self.name = "test"
-        self.url = "/test"
-        self.args = "name=1&age=2"
-        self.user = ""
-        self.time = dateutil.format_datetime()
-
+class PageVisitDao:
+    
+    db = xtables.get_table_by_name("page_visit_log")
+    
+    @classmethod
+    def create(cls, log):
+        return cls.db.insert(**log)
+    
+    @classmethod
+    def find_one(cls, user_id=0, url=""):
+        result = cls.db.select_first(where = dict(user_id=user_id, url=url))
+        if result != None:
+            return PageVisitLogDO(**result)
+        return None
+    
+    @classmethod
+    def list_logs(cls, user_id=0, offset=0, limit=1000, order="visit_time desc"):
+        results = []
+        for item0 in cls.db.select(where=dict(user_id=user_id), offset=offset, limit=limit, order=order):
+            item = PageVisitLogDO(**item0)
+            results.append(item)
+        return results
+        
+    
+    @classmethod
+    def update(cls, log: PageVisitLogDO):
+        return cls.db.update(where=dict(id=log.id), **log)
+    
+    @classmethod
+    def delete_by_id(cls, log_id):
+        return cls.db.delete(where=dict(id=log_id))
+    
 def list_visit_logs(user_name, offset = 0, limit = -1):
-    logs = _log_db.list_by_index("k_url", where = dict(user=user_name), offset = offset, limit = limit, reverse = True)
-    logs.sort(key = lambda x: x.time, reverse = True)
-    return logs
+    user_id = xauth.UserDao.get_id_by_name(user_name)
+    return PageVisitDao.list_logs(user_id=user_id, offset=offset, limit=limit, order="visit_time desc")
 
-def find_visit_log(user_name, url):
-    return _log_db.first_by_index("k_url", where = dict(user = user_name, url=url))
-
-
-def update_visit_log(log, name):
-    log.name = name
-    log.time = dateutil.format_datetime()
-    if log.visit_cnt is None:
-        log.visit_cnt = 1
-    log.visit_cnt += 1
-    _log_db.update(log)
-
-
-def delete_visit_log(user_name, name, url):
-    exist_log = find_visit_log(user_name, url)
+def delete_visit_log(user_name="", name="", url=""):
+    user_id = xauth.UserDao.get_id_by_name(user_name)
+    exist_log = PageVisitDao.find_one(user_id=user_id, url=url)
     if exist_log != None:
-        _log_db.delete(exist_log)
+        PageVisitDao.delete_by_id(exist_log.id)
 
 
-def add_visit_log(user_name, url, name = "", args = ""):
+def add_visit_log(user_name="", url="", name = "", args = ""):
     if user_name == None:
         user_name = "guest"
         
-    exist_log = find_visit_log(user_name, url)
+    user_id = xauth.UserDao.get_id_by_name(user_name)
+    
+    exist_log = PageVisitDao.find_one(user_id=user_id, url=url)
     if exist_log != None:
-        exist_log.user = user_name
-        update_visit_log(exist_log, name)
+        exist_log.visit_cnt += 1
+        exist_log.visit_time = dateutil.format_datetime()
+        PageVisitDao.update(exist_log)
         return
 
-    log = Storage()
-    log.name = name
+    log = PageVisitLogDO()
+    log.user_id = user_id
     log.url  = url
     log.args = args
-    log.time = dateutil.format_datetime()
-    log.user = user_name
-
-    _log_db.insert(log)
+    log.visit_time = dateutil.format_datetime()
+    log.visit_cnt = 1
+    PageVisitDao.create(log)
 
 xutils.register_func("plugin.add_visit_log", add_visit_log)

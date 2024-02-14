@@ -76,8 +76,8 @@ class NewPluginHandler(BasePlugin):
                 name += ".py"
             if os.path.exists(name):
                 return u("文件[%s]已经存在!") % u(name)
-            user_name = xauth.current_name()
-            code = xconfig.get("NEW_PLUGIN_TEMPLATE", DEFAULT_PLUGIN_TEMPLATE)
+            user_name = xauth.current_name_str()
+            code = xconfig.get_str("NEW_PLUGIN_TEMPLATE", DEFAULT_PLUGIN_TEMPLATE)
             code = code.replace("$since", xutils.format_datetime())
             code = code.replace("$author", user_name)
             code = code.replace("$plugin_id", xutils.create_uuid())
@@ -115,8 +115,8 @@ class NewCommandPlugin(BasePlugin):
                 name += ".py"
             if os.path.exists(name):
                 return u("文件[%s]已经存在!") % u(name)
-            user_name = xauth.get_current_name()
-            code = xconfig.get("NEW_COMMAND_TEMPLATE", DEFAULT_COMMAND_TEMPLATE)
+            user_name = xauth.current_name_str()
+            code = xconfig.get_str("NEW_COMMAND_TEMPLATE", DEFAULT_COMMAND_TEMPLATE)
             code = code.replace("$since", xutils.format_datetime())
             code = code.replace("$author", user_name)
             xutils.writefile(name, code)

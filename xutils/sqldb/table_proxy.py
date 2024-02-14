@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2023-12-23 16:37:00
+@LastEditTime : 2024-02-14 18:14:04
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : 描述
 """
@@ -21,6 +21,18 @@ class TableConfig:
 
     log_profile = False
     enable_binlog = False
+    
+    _disable_profile_tables = set()
+    _disable_binlog_tables = set()
+    
+    @classmethod
+    def disable_profile(cls, table_name=""):
+        cls._disable_profile_tables.add(table_name)
+        
+    @classmethod
+    def disable_binlog(cls, table_name=""):
+        cls._disable_binlog_tables.add(table_name)
+    
 
 class TableProxy(SQLDBInterface):
     """基于web.db的装饰器
@@ -41,13 +53,6 @@ class TableProxy(SQLDBInterface):
         assert table_info != None
         self.table_info = table_info
         self.enable_binlog = TableConfig.enable_binlog and table_info.enable_binlog
-
-    def _new_profile_log(self):
-        log = ProfileLog()
-        log.ctime = xutils.format_datetime()
-        log.table_name = self.tablename
-        log.type = "db_profile"
-        return log
 
     def fix_sql_keywords(self, values):
         # 兼容关键字
@@ -88,11 +93,7 @@ class TableProxy(SQLDBInterface):
             raise e
         finally:
             cost_time = time.time() - start_time
-            if self.log_profile and self.table_info.log_profile:
-                profile_log = self._new_profile_log()
-                profile_log.cost_time = cost_time
-                profile_log.op_type = "insert"
-                self.profile_logger.log(profile_log)
+            self.add_profile_log(cost_time, "insert")
         
     def select(self, vars=None, what='*', where=None, order=None, group=None,
                limit=None, offset=None, _test=False):
@@ -136,11 +137,7 @@ class TableProxy(SQLDBInterface):
             raise e
         finally:
             cost_time = time.time() - start_time
-            if self.log_profile and self.table_info.log_profile and not _skip_profile:
-                profile_log = self._new_profile_log()
-                profile_log.cost_time = cost_time
-                profile_log.op_type = "update"
-                self.profile_logger.log(profile_log)
+            self.add_profile_log(cost_time, "update", _skip_profile=_skip_profile)
 
     def delete(self,  where, using=None, vars=None, _test=False):
         self.check_write_state()
@@ -170,11 +167,7 @@ class TableProxy(SQLDBInterface):
             raise e
         finally:
             cost_time = time.time() - start_time
-            if self.log_profile and self.table_info.log_profile:
-                profile_log = self._new_profile_log()
-                profile_log.cost_time = cost_time
-                profile_log.op_type = "delete"
-                self.profile_logger.log(profile_log)
+            self.add_profile_log(cost_time, "delete")
     
     def transaction(self):
         return self.db.transaction()
@@ -220,6 +213,10 @@ class TableProxy(SQLDBInterface):
             return
         if row == None:
             return
+        
+        if self.table_name in TableConfig._disable_binlog_tables:
+            return
+        
         pk_name = self.table_info.pk_name
         pk_value = row.get(pk_name)
 
@@ -230,6 +227,10 @@ class TableProxy(SQLDBInterface):
             return
         if not self.enable_binlog:
             return
+        
+        if self.table_name in TableConfig._disable_binlog_tables:
+            return
+        
         pk_name = self.table_info.pk_name
         where = {
             pk_name: new_id
@@ -242,6 +243,8 @@ class TableProxy(SQLDBInterface):
             return
         if not self.enable_binlog:
             return
+        if self.table_name in TableConfig._disable_binlog_tables:
+            return
                 
         for row in self.select(where=where, vars=vars):
             self.add_row_binlog(row)
@@ -249,6 +252,10 @@ class TableProxy(SQLDBInterface):
     def add_delete_binlog(self, pk_list=[]):
         if not self.enable_binlog:
             return
+
+        if self.table_name in TableConfig._disable_binlog_tables:
+            return
+        
         for pk_value in pk_list:
             BinLog.get_instance().add_log(BinLogOpType.sql_delete, pk_value, table_name=self.tablename)
         
@@ -277,3 +284,25 @@ class TableProxy(SQLDBInterface):
         )
 
         return self.query(sql_query)
+
+    def _new_profile_log(self):
+        log = ProfileLog()
+        log.ctime = xutils.format_datetime()
+        log.table_name = self.tablename
+        log.type = "db_profile"
+        return log
+    
+    def add_profile_log(self, cost_time=0.0, op_type="", _skip_profile=False):
+        if _skip_profile:
+            return
+        if not self.log_profile:
+            return
+        if not self.table_info.log_profile:
+            return
+        if self.table_name in TableConfig._disable_profile_tables:
+            return
+        
+        profile_log = self._new_profile_log()
+        profile_log.cost_time = cost_time
+        profile_log.op_type = op_type
+        self.profile_logger.log(profile_log)
