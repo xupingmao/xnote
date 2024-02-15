@@ -929,7 +929,7 @@ class UserOpLogDao:
     @classmethod
     def create_op_log(cls, op_log):
         assert isinstance(op_log, UserOpLog)
-        assert op_log.user_id > 0
+        assert op_log.user_id != 0
         assert op_log.ctime != ""
         assert op_log.type != ""
         assert op_log.detail != ""

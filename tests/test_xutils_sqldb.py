@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:04:36
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-14 09:29:31
+@LastEditTime : 2024-02-15 21:36:55
 @FilePath     : /xnote/tests/test_xutils_sqldb.py
 @Description  : 描述
 """
@@ -13,10 +13,11 @@ from . import test_base
 from xutils.sqldb import TableManagerFacade, TableProxy
 from xutils.db.binlog import BinLog
 from xutils.sqldb import TableConfig
-import xconfig
+from xnote.core import xconfig
 import os
-import xtables
+from xnote.core import xtables
 import web.db
+from xutils.sqldb import utils as sql_utils
 
 app = test_base.init()
 
@@ -87,3 +88,12 @@ class TestMain(test_base.BaseTestCase):
         assert last_log.get("key") == new_id
         assert last_log.get("table_name") == table.tablename
         assert last_log.get("optype") == "sql_delete"
+
+    def test_safe_str(self):
+        s = sql_utils.safe_str(None)
+        assert s == ""
+        s = sql_utils.safe_str("1234", max_length=2)
+        assert s == "12"
+        s = sql_utils.safe_str("1234")
+        assert s == "1234"
+

@@ -26,7 +26,8 @@ def save_login_info(name, error=None):
             detail += ",登录失败:%s" % error
         user_id = xauth.UserDao.get_id_by_name(name)
         if user_id == 0:
-            return
+            user_id = -1
+            detail += f",login_name:{name}"
         
         log = user_dao.UserOpLog()
         log.detail = detail
