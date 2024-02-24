@@ -8,12 +8,13 @@
 注: 叫fs_helpers是为了和fsutil名称混淆
 """
 
-import xutils
-import xconfig
-import xauth
-import xconfig
 import os
-import xtables
+import xutils
+
+from xnote.core import xconfig
+from xnote.core import xauth
+from xnote.core import xconfig
+from xnote.core import xtables
 from xutils import dbutil
 from xutils import format_size
 from xutils import fsutil, six
@@ -21,9 +22,6 @@ from xutils.dbutil import LdbTable
 from xutils.fsutil import FileItem
 from xutils.sqldb import TableProxy
 from xutils import Storage
-
-_index_db = xtables.get_table_by_name("file_info")
-
 
 class FileInfo(Storage):
 
@@ -36,42 +34,73 @@ class FileInfo(Storage):
         self.fsize = 0
 
 class FileInfoDao:
+    
+    data_root = "$data/"
+    db = xtables.get_table_by_name("file_info")
+    
+    @classmethod
+    def get_virtual_path(cls, fpath=""):
+        if fpath.startswith(cls.data_root):
+            return fpath
+        data_dir = xconfig.FileConfig.data_dir
+        fpath = os.path.abspath(fpath)
+        if fsutil.is_parent_dir(data_dir, fpath):
+            relative_path = fsutil.get_relative_path(fpath, data_dir)
+            fpath = cls.data_root + relative_path
+        return fpath
 
     @classmethod
     def get_by_fpath(cls, fpath = ""):
-        fpath = os.path.abspath(fpath)
-        return _index_db.select_first(where = dict(fpath = fpath))
+        fpath = cls.get_virtual_path(fpath)
+        return cls.db.select_first(where = dict(fpath = fpath))
     
     @classmethod
     def delete_by_fpath(cls, fpath=""):
-        fpath = os.path.abspath(fpath)
-        return _index_db.delete(where=dict(fpath=fpath))
+        fpath = cls.get_virtual_path(fpath)
+        return cls.db.delete(where=dict(fpath=fpath))
     
     @classmethod
     def delete_by_id(cls, id=0):
-        return _index_db.delete(where=dict(id=id))
+        return cls.db.delete(where=dict(id=id))
     
     @classmethod
     def upsert(cls, info: FileInfo):
-        info.fpath = os.path.abspath(info.fpath)
+        info.fpath = cls.get_virtual_path(info.fpath)
         old = cls.get_by_fpath(info.fpath)
         if old == None:
-            return _index_db.insert(**info)
+            return cls.db.insert(**info)
         else:
             updates = dict(**info)
             updates.pop("ctime") # 不更新创建时间
-            _index_db.update(**updates, where = dict(id=old.id))
+            cls.db.update(**updates, where = dict(id=old.id))
 
     @classmethod
-    def prefix_count(cls, fpath):
-        return _index_db.count(where = "fpath LIKE $fpath", vars = dict(fpath = fpath + "%"))
+    def list(cls, user_id=0, offset=0, limit=100, start_time_inclusive="", end_time_exclusive="", is_admin=False, order="ctime desc"):
+        if not is_admin:
+            assert user_id > 0
+        vars = dict(user_id=user_id, start_time_inclusive=start_time_inclusive, end_time_exclusive=end_time_exclusive)
+        where = "1=1"
+        if user_id != 0:
+            where += " AND user_id=$user_id"
+        if start_time_inclusive != "":
+            where += " AND ctime >= $start_time_inclusive"
+        if end_time_exclusive != "":
+            where += " AND ctime < $end_time_exclusive"
+        return cls.db.select(where=where, vars=vars, offset=offset, limit=limit, order=order)
+
+    @classmethod
+    def prefix_count(cls, fpath=""):
+        if fpath != "":
+            fpath = cls.get_virtual_path(fpath)
+        return cls.db.count(where = "fpath LIKE $fpath", vars = dict(fpath = fpath + "%"))
+
+
+def get_index_db(): # type: ()-> TableProxy
+    return FileInfoDao.db
 
 
 class FileInfoModel(FileInfoDao):
     pass
-
-def get_index_db(): # type: ()-> TableProxy
-    return _index_db
 
 def handle_file_item(item):
     """文件的后置处理器"""

@@ -11,15 +11,15 @@ import os
 import time
 import threading
 
-import xauth
-import xtemplate
-import xconfig
-import xmanager
+from xnote.core import xauth
+from xnote.core import xtemplate
+from xnote.core import xconfig
+from xnote.core import xmanager
 import xutils
 from xutils import Storage
 from xutils.sqldb import TableProxy
-from xutils import fsutil
-from .fs_helper import get_index_dirs, get_index_db, FileInfoModel, FileInfo
+from xutils import fsutil, webutil
+from .fs_helper import get_index_dirs, get_index_db, FileInfoDao, FileInfo
 
 class IndexBuilder:
 
@@ -41,7 +41,7 @@ class IndexBuilder:
         info.fpath = dirname
         info.fsize = size
         info.ftype = "dir"
-        FileInfoModel.upsert(info)
+        FileInfoDao.upsert(info)
         return size
 
 
@@ -68,14 +68,14 @@ class IndexBuilder:
             info.ctime = xutils.format_datetime(st.st_ctime)
             info.mtime = xutils.format_datetime(st.st_mtime)
             info.ftype = fsutil.get_file_ext(fpath)
-            FileInfoModel.upsert(info)
+            FileInfoDao.upsert(info)
             return st.st_size
         except:
             xutils.print_exc()
             info = FileInfo()
             info.fsize = -1
             info.fpath = fpath
-            FileInfoModel.upsert(info)
+            FileInfoDao.upsert(info)
             return 0
 
     @classmethod
@@ -124,19 +124,37 @@ class IndexHandler:
 
     @xauth.login_required("admin")
     def GET(self):
+        page = xutils.get_argument_int("page",1)
         user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/fs_index")
         path = self.get_arg_path()
-        page = xutils.get_argument("p")
+        action = xutils.get_argument("p")
+        page_size = 20
 
-        if page == "rebuild":
+        if action == "rebuild":
             return self.get_rebuild_page()
 
         tpl = "fs/page/fs_index.html"
-        index_size = FileInfoModel.prefix_count(path)
-        return xtemplate.render(tpl, 
-            index_dirs = get_index_dirs(),
-            index_size = index_size)
+        index_size = FileInfoDao.prefix_count(path)
+        
+        page_info = webutil.Pagination(page=page, total=index_size, page_size=page_size)
+        offset = (page-1) * page_size
+        
+        files = FileInfoDao.list(offset=offset, limit=20, is_admin=True)
+        for file_info in files:
+            file_info.fsize_str = "-"
+            if isinstance(file_info.fsize, int):
+                file_info.fsize_str = fsutil.format_size(file_info.fsize)
+                
+        kw = Storage()
+        kw.index_size = index_size
+        kw.files = files
+        kw.index_dirs = get_index_dirs()
+        kw.page = page
+        kw.page_max = page_info.page_max
+        kw.page_url = f"?page="
+        
+        return xtemplate.render(tpl, **kw)
 
     @xauth.login_required("admin")
     def POST(self):
@@ -157,7 +175,7 @@ class IndexHandler:
             if action == "config":
                 return self.do_config()
             
-            index_size = FileInfoModel.prefix_count(path)
+            index_size = FileInfoDao.prefix_count(path)
         except Exception as e:
             xutils.print_exc()
             err = str(e)
@@ -166,12 +184,15 @@ class IndexHandler:
             if err != "":
                 return dict(code="500", message=err)
             return dict(code="success", data = index_size)
+        
+        kw = Storage()
+        kw.index_dirs = index_dirs
+        kw.index_size = index_size
+        kw.action = action
+        kw.cost = cost
+        kw.err = err
 
-        return xtemplate.render(tpl, 
-            index_dirs = index_dirs,
-            index_size = index_size,
-            action = action, 
-            cost = cost)
+        return xtemplate.render(tpl, **kw)
     
     def create_kw(self):
         kw = Storage()
@@ -209,7 +230,7 @@ class IndexHandler:
         kw = self.create_kw()
         kw.path = path
         kw.show_index_dirs = False
-        kw.index_size = FileInfoModel.prefix_count(path)
+        kw.index_size = FileInfoDao.prefix_count(path)
 
         return xtemplate.render("fs/page/fs_index.html", **kw)
 

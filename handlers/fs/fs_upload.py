@@ -12,9 +12,10 @@ from xnote.core import xtemplate
 from xnote.core import xmanager
 import time
 import math
-from xutils import fsutil, Storage
+from xutils import fsutil, Storage, dateutil
 from xnote.core.xtemplate import T
 from xnote.core.xnote_event import FileUploadEvent
+from .fs_helper import FileInfoDao
 try:
     from PIL import Image
 except ImportError:
@@ -190,19 +191,24 @@ class UploadHandler:
 
     @xauth.login_required()
     def GET(self):
-        user_name = xauth.current_name_str()
-
+        return self.get_upload_page_v1()
+        
+    def get_upload_page_v1(self):
+        user_info = xauth.current_user()
+        assert user_info != None
+        user_name = user_info.name
         xmanager.add_visit_log(user_name, "/fs_upload")
 
         year = xutils.get_argument_str("year", time.strftime("%Y"))
         month = xutils.get_argument_str("month", time.strftime("%m"))
         if len(month) == 1:
             month = '0' + month
+        
 
         dirname = os.path.join(xconfig.FileConfig.data_dir, "files",
                                user_name, "upload", year, month)
         pathlist = fsutil.listdir_abs(dirname)
-
+        
         return xtemplate.render("fs/page/fs_upload.html",
                                 show_aside=False,
                                 html_title=T("文件"),
@@ -215,6 +221,22 @@ class UploadHandler:
                                 upload_link_by_month=upload_link_by_month,
                                 get_display_name=get_display_name)
 
+    def get_upload_page_v2(self):
+        # TODO 基于数据库数据的上传页面
+        user_info = xauth.current_user()
+        assert user_info != None
+        user_name = user_info.name
+        xmanager.add_visit_log(user_name, "/fs_upload")
+
+        user_id = user_info.id
+        files = FileInfoDao.list(user_id=user_id, limit=50)
+        
+        kw = Storage()
+        kw.html_title = T("文件")
+        kw.files = files
+        
+        return xtemplate.render("fs/page/fs_upload_v2.html",**kw)
+    
 
 class RangeUploadHandler:
 

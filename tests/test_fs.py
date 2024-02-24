@@ -5,8 +5,8 @@
 import xutils
 from .a import *
 import os
-import xconfig
-import xauth
+from xnote.core import xconfig
+from xnote.core import xauth
 from .test_base import json_request, BaseTestCase
 from .test_base import init as init_app, get_test_file_path
 from handlers.fs.fs_index import build_fs_index

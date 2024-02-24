@@ -6,9 +6,9 @@ import os
 import sys
 
 import xutils
-import xauth
-import xtemplate
-import xconfig
+from xnote.core import xauth
+from xnote.core import xtemplate
+from xnote.core import xconfig
 from fnmatch import fnmatch
 from xutils import dbutil
 from xutils import Storage
@@ -25,7 +25,7 @@ def get_fpath_from_key(key):
 
 def clear_file_index():
     index_db = get_index_db()
-    for index_obj in index_db.iter(limit = -1):
+    for index_obj in index_db.iter():
         # key的格式为 fs_index:fpath
         index_db.delete(index_obj)
 
@@ -59,7 +59,7 @@ class SearchHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        path = xutils.get_argument("path")
+        path = xutils.get_argument_str("path")
         if not path:
             path = xconfig.DATA_DIR
 
@@ -69,7 +69,9 @@ class SearchHandler:
         mode      = xutils.get_argument("mode")
 
         if find_key == "" or find_key is None:
-            find_key = xutils.get_argument("key", "")
+            find_key = xutils.get_argument_str("key", "")
+        
+        assert isinstance(find_key, str)
         find_key  = "*" + find_key + "*"
         path_name = os.path.join(path, find_key)
 

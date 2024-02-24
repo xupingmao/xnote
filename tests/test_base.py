@@ -15,7 +15,6 @@ from xnote.core import xauth
 from xutils import dbutil
 from xutils import cacheutil
 from xutils import six
-from handlers.fs.fs_upload import get_upload_file_path
 from xutils.db.driver_sqlite import SqliteKV
 
 config = xconfig
@@ -168,6 +167,7 @@ class BaseTestCase(unittest.TestCase):
 class BaseTestMain(unittest.TestCase):
 
     def test_get_upload_file_path(self):
+        from handlers.fs.fs_upload import get_upload_file_path
         remove_tmp_file("test.txt")
         path, webpath = get_upload_file_path("user", "test.txt")
         print()
@@ -178,6 +178,7 @@ class BaseTestMain(unittest.TestCase):
         self.assertEqual("/data/files/user/upload/%s/test.txt" % date, webpath)
 
     def test_get_upload_file_path_1(self):
+        from handlers.fs.fs_upload import get_upload_file_path
         remove_tmp_file("test_1.txt")
         create_tmp_file("test.txt")
         path, webpath = get_upload_file_path("user", "test.txt")
@@ -191,6 +192,7 @@ class BaseTestMain(unittest.TestCase):
         remove_tmp_file("test.txt")
 
     def test_get_upload_file_path_2(self):
+        from handlers.fs.fs_upload import get_upload_file_path
         create_tmp_file("test.txt")
         create_tmp_file("test_1.txt")
         remove_tmp_file("test_2.txt")

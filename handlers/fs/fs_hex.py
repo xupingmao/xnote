@@ -13,7 +13,7 @@ import os
 import math
 import xutils
 from xutils import Storage
-from xtemplate import BasePlugin
+from xnote.core.xtemplate import BasePlugin
 
 HTML = """
 <!-- Html -->

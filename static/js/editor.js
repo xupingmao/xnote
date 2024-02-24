@@ -131,11 +131,12 @@ function initCodeMirror(selector, options) {
 
 
 (function () {
-    // TODO 处理CJK的宽度, CJK认为是2个字符宽度
-    var _padding = '';
-    for (var i = 0; i < 1000; i++) {
-        _padding += ' ';
-    }
+    var colSpacingWidth = 2; // 列间隔的宽度
+
+    // var paddingCache = '';
+    // for (var i = 0; i < 1000; i++) {
+    //     paddingCache += ' ';
+    // }
 
     var _isMacOS = navigator.userAgent.indexOf("Mac OS") >= 0;
     function isMacOS() {
@@ -146,7 +147,6 @@ function initCodeMirror(selector, options) {
     }
 
     String.prototype.padLeft = function (size, value) {
-        // return _padding.substring(0, size-this.length) + this;
         var text = this;
         while (getStringWidth(text) < size) {
             text += value;
@@ -154,6 +154,7 @@ function initCodeMirror(selector, options) {
         return text;
     }
 
+    // 处理CJK的宽度, CJK认为是2个字符宽度
     function getCharWidth(c) {
         if (!c) {
             return 0;
@@ -224,7 +225,8 @@ function initCodeMirror(selector, options) {
                     var cell = cols[j].trim();
                     cols[j] = cell;
                     var width = colWidth[j] || defaultWidth;
-                    colWidth[j] = Math.max(getStringWidthIgnoreLine(cell), width);
+                    var thisWidth = getStringWidthIgnoreLine(cell) + colSpacingWidth; // 增加2个宽度
+                    colWidth[j] = Math.max(thisWidth, width);
                 }
             }
         }

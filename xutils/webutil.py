@@ -7,6 +7,7 @@ from http.server import BaseHTTPRequestHandler
 import profile
 import time
 import web
+import math
 from xutils.six import BytesIO
 from web import utils
 
@@ -260,3 +261,12 @@ class FailedResult(web.Storage):
         self.success = False
         self.code = code
         self.message = message
+
+
+class Pagination:
+    
+    def __init__(self, page=1, total=0, page_size=20):
+        self.page = 1
+        self.page_max = int(math.ceil(total/page_size))
+
+        

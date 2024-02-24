@@ -1,19 +1,15 @@
 {% extends base %}
 
-{% block head %}
-<style type="text/css">
-p {
-    margin: 0px;
-}
-</style>
-{% end %}
-
-{% block body %}
+{% block body_left %}
 
 {% init action = "" %}
 {% init path = "" %}
 {% init index_size = 0 %}
 {% init show_index_dirs = True %}
+{% init files = [] %}
+{% init page = 1 %}
+{% init page_max = 1 %}
+{% init page_url = "" %}
 
 <div class="card">
     <div class="card-title">
@@ -25,7 +21,6 @@ p {
     </div>
 </div>
 
-<div class="vueApp">
 <div class="card">
     <p>索引数量: {{index_size}}</p>
 
@@ -47,21 +42,29 @@ p {
     </div>
 </div>
 
-{% if show_index_dirs %}
 <div class="card">
-    <div class="card-title">
-        <span>索引目录</span>
-    </div>
-
-    <div class="info light">一行一个路径</div>
-    
-    <textarea name="index_config" class="row" rows=10>{{"\n".join(index_dirs)}}</textarea>
-    <input type="hidden" name="action" value="config">
-    <button class="update-index-dirs">更新索引目录</button>
+    <table class="table">
+        <tr>
+            <th>文件编号</th>
+            <th>文件路径</th>
+            <th>上传时间</th>
+            <th>文件大小</th>
+        </tr>
+        {% for file_info in files %}
+        <tr>
+            <td>{{file_info.id}}</td>
+            <td>{{file_info.fpath}}</td>
+            <td>{{file_info.ctime}}</td>
+            <td>{{file_info.fsize_str}}</td>
+        </tr>
+        {% end %}
+    </table>
 </div>
-{% end %}
 
+<div class="card">
+    {% include common/pagination.html %}
 </div>
+
 
 <script type="text/javascript">
 
@@ -71,14 +74,12 @@ $(".rebuild-index-btn").click(function () {
         path: xnote.getUrlParam("path"),
         is_ajax: true
     };
-    $.post("/fs_index", rebuildParams, function (resp) {
+    xnote.http.post("/fs_index", rebuildParams, function (resp) {
         if (resp.code == "success") {
             xnote.toast("重建中...");
         } else {
             xnote.alert(resp.message);
         }
-    }).fail(function (err) {
-        xnote.alert("重建失败，请稍后重试");
     });
 });
 
@@ -86,14 +87,11 @@ $(function () {
     $("body").on("click", ".update-index-dirs", function (e) {
         var index_config = $("[name=index_config]").val();
         var params = {"index_config": index_config};
-        $.post("?action=config", params, function (e) {
+        xnote.http.post("?action=config", params, function (e) {
             xnote.toast("更新成功");
             setTimeout(function () {
                 window.location.reload();                    
             }, 500);
-        }).fail(function (e) {
-            console.error("更新失败", e);
-            xnote.alert("更新失败");
         });
     });
 
@@ -102,4 +100,9 @@ $(function () {
     });
 });
 </script>
+{% end %}
+
+
+{% block body_right %}
+    {% include fs/component/fs_sidebar.html %}
 {% end %}
