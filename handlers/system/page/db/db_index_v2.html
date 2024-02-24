@@ -24,7 +24,7 @@
             <th>操作</th>
         </tr>
         {% for table_info in table_list %}
-            <tr>
+            <tr class="hover-tr">
                 <td><a href="{{table_info.table_url}}">{{table_info.table_name}}</a></td>
                 <td><a href="{{table_info.index_url}}">{{table_info.index_name}}</a></td>
                 <td>{{table_info.index_count}}</td>

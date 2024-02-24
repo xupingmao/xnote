@@ -217,6 +217,10 @@ RUNTIME_ID = None
 # 退出的编码
 EXIT_CODE = 0
 
+class FileReplacement:
+    "文件替换符"
+    data_dir = "$data"
+
 class FileConfig:
 
     data_dir = ""

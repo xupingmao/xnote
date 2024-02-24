@@ -47,13 +47,15 @@
         <tr>
             <th>文件编号</th>
             <th>文件路径</th>
+            <th>用户</th>
             <th>上传时间</th>
             <th>文件大小</th>
         </tr>
         {% for file_info in files %}
-        <tr>
+        <tr class="hover-tr">
             <td>{{file_info.id}}</td>
             <td>{{file_info.fpath}}</td>
+            <td>{{file_info.user_id}}</td>
             <td>{{file_info.ctime}}</td>
             <td>{{file_info.fsize_str}}</td>
         </tr>

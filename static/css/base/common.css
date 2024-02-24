@@ -212,6 +212,17 @@ h3.marked-heading {
     word-break: break-all;
 }
 
+/* 
+这种方式走不通,需要声明hover-tr
+.table tr:hover td{
+    background-color: none;
+}
+
+.table tr:hover{
+    background-color: #eee;
+}
+ */
+
 .row-no, .index-td {
     width: 50px;
 }

@@ -35,7 +35,7 @@ class FileInfo(Storage):
 
 class FileInfoDao:
     
-    data_root = "$data/"
+    data_root = xconfig.FileReplacement.data_dir + "/"
     db = xtables.get_table_by_name("file_info")
     
     @classmethod
@@ -72,6 +72,7 @@ class FileInfoDao:
         else:
             updates = dict(**info)
             updates.pop("ctime") # 不更新创建时间
+            updates.pop("user_id")
             cls.db.update(**updates, where = dict(id=old.id))
 
     @classmethod

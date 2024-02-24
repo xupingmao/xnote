@@ -20,7 +20,7 @@
             <th>操作</th>
         </tr>
         {% for db in db_info_list %}
-        <tr>
+        <tr class="hover-tr">
             <td><a href="{{_server_home}}/system/sqldb_detail?name={{db.name}}">{{db.name}}</a></td>
             <td>{{db.comment}}</td>
             <td>{{db.amount}}</td>

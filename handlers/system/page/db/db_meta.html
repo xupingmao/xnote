@@ -31,7 +31,7 @@
             <th class="admin-stat-th">操作</th>
         </tr>
         {% for table_info, table_count in admin_stat_list %}
-            <tr>
+            <tr class="hover-tr">
                 <td>{{table_info.category}}</td>
                 <td><a href="{{_server_home}}/system/db_scan?prefix={{table_info.name}}&reverse=true">{{table_info.name}}</a></td>
                 <td>{{table_info.description}}</td>
