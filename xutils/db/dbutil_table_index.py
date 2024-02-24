@@ -6,11 +6,10 @@
 @LastEditors  : xupingmao
 @LastEditTime : 2023-07-23 11:53:51
 @FilePath     : /xnote/xutils/db/dbutil_table_index.py
-@Description  : 表索引管理,不建议使用
+@Description  : 表索引管理,不建议继续使用,推荐使用关系型数据库或者搜索引擎构建索引
                 - [x] 引用索引
                 - [x] 聚集索引支持
                 - [x] 联合索引支持
-                - [] 列表索引支持
 """
 
 import logging

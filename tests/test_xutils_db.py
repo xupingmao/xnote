@@ -22,10 +22,10 @@ import threading
 import sqlite3
 import time
 import xutils
-import xconfig
+from xnote.core import xconfig
+from xnote.core import xtables
 import json
 import web.db
-import xtables
 
 from . import test_base
 
@@ -685,6 +685,8 @@ class TestMain(BaseTestCase):
         # 校验索引值是否正确
         obj1_name_index = dbutil.db_get(
             "index_test$name:Ada:" + obj1._id)
+        
+        assert isinstance(obj1_name_index, Storage)
         self.assertEqual(obj1_name_index.key, "index_test:" + obj1._id)
         self.assertEqual(obj1_name_index.value["name"], "Ada")
         self.assertEqual(obj1_name_index.value["age"], 20)
@@ -987,3 +989,7 @@ class TestMain(BaseTestCase):
     def test_db_admin(self):
         self.check_OK("/system/db/driver_info")
         self.check_OK("/system/db/driver_info?type=sql")
+        
+        
+    def test_index_v2_page(self):
+        self.check_OK("/system/db_index?p=meta&p2=index_v2")

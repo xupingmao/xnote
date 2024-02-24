@@ -265,6 +265,9 @@ class SQLDBInterface:
 
     def get_column_names(self):
         return []
+    
+    def count(self, where=None, sql=None, vars=None):
+        return 0
 
 empty_db = DBInterface()
 empty_cache = CacheInterface()

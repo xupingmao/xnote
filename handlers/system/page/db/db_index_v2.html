@@ -1,0 +1,43 @@
+{#
+<!--
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-05-14 12:33:09
+@LastEditors  : xupingmao
+@LastEditTime : 2022-05-14 17:18:33
+@FilePath     : /xnote/handlers/system/page/db/db_index.html
+@Description  : 描述
+--> #}
+{% extends base %}
+
+{% block body_left %}
+{% include system/component/db_nav.html %}
+{% include system/component/db_kv_nav.html %}
+
+<div class="card">
+
+    <table class="table">
+        <tr>
+            <th>表名</th>
+            <th>索引</th>
+            <th>记录数</th>
+            <th>操作</th>
+        </tr>
+        {% for table_info in table_list %}
+            <tr>
+                <td><a href="{{table_info.table_url}}">{{table_info.table_name}}</a></td>
+                <td><a href="{{table_info.index_url}}">{{table_info.index_name}}</a></td>
+                <td>{{table_info.index_count}}</td>
+                <td></td>
+            </tr>
+        {% end %}
+    </table>
+</div>
+
+<a href="{{_server_home}}/system/db_index?p=meta&p2=index_v1">查看老版本索引</a>
+
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
+{% end %}
