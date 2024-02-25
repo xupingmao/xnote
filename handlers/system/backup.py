@@ -135,6 +135,7 @@ class DBBackup:
             for table in xtables.get_all_tables():
                 backup_table = xtables.init_backup_table(table.tablename, db)
                 backup_table.writable = True
+                backup_table.log_profile = False # 备份的时候不需要profile
                 
                 total_count = table.count()
                 logger.info("backup table:(%s) count:(%d)", table.tablename, total_count)
