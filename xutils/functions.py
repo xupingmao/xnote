@@ -304,8 +304,7 @@ def get_dict_values(dict):
 def del_dict_key(dict_obj, key):
     """删除字典的key，如果key不存在也不抛异常"""
     assert isinstance(dict_obj, dict)
-    if key in dict_obj:
-        del dict_obj[key]
+    dict_obj.pop(key, None)
 
 def safe_list(item):
     if isinstance(item, list):

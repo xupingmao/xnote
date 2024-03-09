@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-11-05 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-14 21:18:58
+@LastEditTime : 2024-03-10 00:52:05
 @FilePath     : /xnote/xnote_migrate/upgrade_018.py
 @Description  : 描述
 """
@@ -23,6 +23,7 @@ def do_upgrade():
     base.execute_upgrade("20231223_msg_index", handler.migrate_msg_index)
     base.execute_upgrade("20240214_plugin_visit", handler.migrate_plugin_visit)
     base.execute_upgrade("20240214_user_op_log", handler.migrate_user_op_log)
+    base.execute_upgrade("20240308_msg_history", handler.migrate_msg_history)
 
 class MonthPlanRecord(Storage):
     def __init__(self, **kw):
@@ -89,7 +90,27 @@ class UserOpLogV2(Storage):
         self.detail = ""
         self.ip = ""
         self.update(kw)
-    
+
+class MessageHistoryV1(Storage):
+    def __init__(self, **kw):
+        self.id = ""
+        self.version = 0
+        self.user_id = 0
+        self.user = ""
+        self.content = ""
+        self.ctime = dateutil.format_datetime()
+        self.mtime = dateutil.format_datetime()
+        self.update(kw)
+
+class MessageHistoryV2(Storage):
+    def __init__(self, **kw):
+        self.msg_id = 0
+        self.msg_version = 0
+        self.user_id = 0
+        self.content = ""
+        self.ctime = dateutil.format_datetime()
+        self.update(kw)
+
 class MigrateHandler:
 
     @classmethod
@@ -158,3 +179,34 @@ class MigrateHandler:
                 new_record.ip = item.ip
                 new_db.insert(**new_record)
     
+    
+    @classmethod
+    def migrate_msg_history(cls):
+        db = dbutil.get_table_v2("msg_history")
+        for item0 in db.iter_by_kv():
+            item = MessageHistoryV1(**item0)
+            if item.id == "":
+                continue
+            
+            msg_id = int(db._get_id_from_key(item.id))
+            version = item.get("version", 0)
+            user_id = item.get("user_id", 0)
+            
+            assert msg_id > 0
+            assert version >= 0
+            if user_id == 0:
+                user_id = xauth.UserDao.get_id_by_name(item.user)
+            
+            first = db.select_first(where=dict(msg_id=msg_id, msg_version=version))
+            
+            new_item = MessageHistoryV2()
+            new_item.msg_id = msg_id
+            new_item.msg_version = version
+            new_item.user_id = user_id
+            new_item.ctime = item.mtime
+            new_item.content = item.content
+            
+            if first is None:
+                db.insert(new_item)
+            else:
+                db.put(new_item, fix_index=True)

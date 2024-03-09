@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2023-12-24 17:43:12
+@LastEditTime : 2024-03-07 23:35:01
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -105,7 +105,7 @@ def after_message_create_or_update(msg_item):
     assert isinstance(msg_item, dao.MessageDO)
     process_message(msg_item)
 
-    if get_length(msg_item.keywords) == 0:
+    if get_length(msg_item.full_keywords) == 0:
         msg_item.no_tag = True
         msg_item.keywords = None
         MessageDao.update(msg_item)

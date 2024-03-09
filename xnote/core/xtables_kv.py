@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/12/27 23:34:03
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-14 22:15:13
+@LastEditTime : 2024-03-07 23:44:05
 @FilePath     : /xnote/xnote/core/xtables_kv.py
 @Description  : 数据库-KV表定义
 
@@ -173,5 +173,7 @@ def init_message_tables():
     db.delete_table()
 
     dbutil.register_table("msg_search_history", "备忘搜索历史", check_user=True, user_attr="user")
-    dbutil.register_table("msg_history", "备忘历史")
+    
+    msg_history_index = xtables.get_table_by_name("msg_history_index")
+    dbutil.register_table("msg_history", "备忘历史", index_db=msg_history_index)
 

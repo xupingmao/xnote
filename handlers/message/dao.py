@@ -5,6 +5,7 @@
 import xutils
 import re
 import logging
+import copy
 from xnote.core import xconfig, xmanager, xtables, xauth
 
 from xutils import dbutil, cacheutil, textutil, Storage, functions
@@ -24,12 +25,22 @@ VALID_TAG_SET = set(["task", "done", "log", "key"])
 
 _msg_db = dbutil.get_table("message")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
+_msg_history_db = dbutil.get_table_v2("msg_history")
+
 _debug = False
 
 sys_comment_dict = {
     "$mark_task_done$": T("标记任务完成"),
     "$reopen_task$": T("重新开启任务"),
 }
+
+class MessageHistory:
+    def __init__(self):
+        self.msg_id = 0
+        self.msg_version = 0
+        self.user_id = 0
+        self.content = ""
+        self.ctime = dateutil.format_datetime()
 
 class MessageDO(Storage):
     def __init__(self):
@@ -52,6 +63,7 @@ class MessageDO(Storage):
         self.visit_cnt = 0
         self.status = None # 老的结构
         self.keywords = None
+        self.full_keywords = set()
         self.no_tag = True
         self.amount = 0 # keyword对象的数量
         self.done_time = None # type: str|None
@@ -103,6 +115,8 @@ class MessageDO(Storage):
 
         del_dict_key(self, "html")
         del_dict_key(self, "tag_text")
+        del_dict_key(self, "full_keywords")
+        
         if self.status == None:
             self.pop("status", None)
         if self.amount == None:
@@ -229,11 +243,14 @@ def update_message(message):
 
 
 def add_message_history(message):
-    id_str = message['id']
-    prefix, user, timeseq = id_str.split(':')
-    new_id = 'msg_history:%s:%s:%s' % (
-        user, timeseq, message.get('version', 0))
-    dbutil.put(new_id, message)
+    assert isinstance(message, MessageDO)
+    history_obj = MessageHistory()
+    history_obj.msg_id = message.get_int_id()
+    history_obj.msg_version = message.get("version", 0)
+    history_obj.content = message.content
+    history_obj.user_id = message.user_id
+    
+    _msg_history_db.insert(history_obj.__dict__)
 
 
 def get_words_from_key(key):
@@ -917,7 +934,7 @@ class MessageDao:
     @staticmethod
     def update_user_tags(message:MessageDO):
         msg_id = message.get_int_id()
-        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.keywords)
+        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.full_keywords)
     
     @classmethod
     def update_tag(cls, message:MessageDO, tag="", sort_value=""):

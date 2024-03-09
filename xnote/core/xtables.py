@@ -409,6 +409,18 @@ def init_msg_index_table():
         manager.add_index(["user_id", "mtime"])
         manager.add_index(["user_id", "sort_value"])
 
+def init_msg_history_index():
+    """随手记历史索引"""
+    table_name = "msg_history_index"
+    comment = "随手记历史索引"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        # 展示创建时间
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("user_id", "bigint", 0)
+        manager.add_column("msg_id", "bigint", 0)
+        manager.add_column("msg_version", "bigint", 0)
+        manager.add_index(["msg_id"])
+
 def init_kv_store_table():
     kw = dict()
     kw["pk_name"] = "key"
@@ -621,6 +633,7 @@ def init():
 
     # 随手记
     init_msg_index_table()
+    init_msg_history_index()
     
     # 笔记索引
     init_note_index_table()

@@ -126,6 +126,8 @@ format_wday = format_weekday
 
 def datetime_to_weekday(datetime_obj):
     """把datetime转换成星期"""
+    if datetime_obj is None:
+        return ""
     if isinstance(datetime_obj, datetime.datetime):
         weekday = str(datetime_obj.weekday()+1)
         return WDAY_DICT.get(weekday, "")

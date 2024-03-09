@@ -23,11 +23,11 @@ class IdGenerator:
         new_id = self.create_increment_id_int(start_id=start_id)
         return encode_id(new_id)
     
-    def create_increment_id_int(self, start_id=1):
+    def create_increment_id_int(self, start_id=1, increment=1):
         assert start_id > 0
         max_id_key = "_max_id:" + self.table_name
         key_bytes = max_id_key.encode("utf-8")
-        return base.get_db_instance().Increase(key_bytes, start_id=start_id)
+        return base.get_db_instance().Increase(key_bytes, start_id=start_id, increment=increment)
     
     def current_id_int(self):
         max_id_key = "_max_id:" + self.table_name

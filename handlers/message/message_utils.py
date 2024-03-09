@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2023-12-23 17:02:19
+@LastEditTime : 2024-03-07 23:34:44
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -109,6 +109,16 @@ class TagHelper:
         return cls.create_tag_mapping.get(tag, tag)
 
 def mark_text(content, tag="log"):
+    result = mark_text_v2(content, tag)
+    return result.result_text, result.keywords
+
+class MarkResult:
+    def __init__(self, result_text="", keywords=set(), full_keywords=set()):
+        self.result_text = result_text
+        self.keywords = keywords
+        self.full_keywords = full_keywords
+
+def mark_text_v2(content="", tag="log"):
     from xnote.core import xconfig
     from xutils.text_parser import TextParser
     from xutils.text_parser import set_img_file_ext
@@ -127,10 +137,7 @@ def mark_text(content, tag="log"):
     if keywords == None:
         keywords = set()
 
-    keywords = get_standard_tag_set(keywords)
-
-    return "".join(tokens), keywords
-
+    return MarkResult("".join(tokens), keywords=get_standard_tag_set(keywords), full_keywords=keywords)
 
 def process_message(message, search_tag="log"):
     parser = MessageListParser([])
@@ -432,9 +439,10 @@ class MessageListParser(object):
             message.content = ""
             return message
 
-        html, keywords = mark_text(message.content, message.tag)
-        message.html = html
-        message.keywords = keywords
+        result = mark_text_v2(message.content, message.tag)
+        message.html = result.result_text
+        message.keywords = result.keywords
+        message.full_keywords = result.full_keywords
 
         if message.tag == "done":
             self.build_done_html(message)

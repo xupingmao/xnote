@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-28 09:54:54
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-18 17:20:23
+@LastEditTime : 2024-03-10 00:42:58
 @FilePath     : /xnote/xutils/db/dbutil_table_v2.py
 @Description  : 数据库表-API
 """
@@ -208,6 +208,9 @@ class KvTableV2:
         """
         self._check_value(obj)
         sql_record = self.build_sql_record(obj)
+        # 必须先插入索引，有两个目的:
+        # 1. 获取主键ID
+        # 2. 如果插入索引成功，插入主数据失败，可以在列表上做删除操作
         new_id = self.index_db.insert(**sql_record)
         new_id_str = str(new_id)
         key = self._build_key(new_id_str)
@@ -217,7 +220,7 @@ class KvTableV2:
         self._put_obj(key, obj)
         return new_id
 
-    def put(self, obj):
+    def put(self, obj, fix_index=False):
         """从`obj`中获取主键`key`进行更新"""
         self._check_value(obj)
 
@@ -225,7 +228,7 @@ class KvTableV2:
         assert isinstance(obj_key, str), "obj_key must be str"
         
         self._check_key(obj_key)
-        self._put_obj(obj_key, obj)
+        self._put_obj(obj_key, obj, fix_index=fix_index)
 
     update = put
 
@@ -276,6 +279,7 @@ class KvTableV2:
         self.delete_by_key(key)
 
     def delete_by_key(self, key):
+        """通过key删除记录: 这里先删除记录，然后删除索引，如果删除记录成功，删除索引失败，还可以在列表发起重试"""
         validate_str(key, "delete_by_key: invalid key")
         self._check_before_delete(key)
 
