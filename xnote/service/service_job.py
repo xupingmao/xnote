@@ -19,6 +19,18 @@ class JobStatusEnum:
     success = 2  # 执行成功
     failed = 3 # 执行失败
     
+    @classmethod
+    def get_title_by_status(cls, status=0):
+        if status == cls.init:
+            return "初始化"
+        if status == cls.processing:
+            return "执行中"
+        if status == cls.success:
+            return "执行成功"
+        if status == cls.failed:
+            return "执行失败"
+        return str(status)
+    
 class SysJob:
     def __init__(self):
         self.id = 0
@@ -71,6 +83,10 @@ class JobService:
         if record != None:
             return cls.dict_to_obj(record)
         return None
+    
+    @classmethod
+    def delete_by_id(cls, job_id=0):
+        return cls.db.delete(where=dict(id=job_id))
     
     @classmethod
     def dict_to_obj(cls, record):

@@ -64,7 +64,7 @@ xnote.getNewDialogId = function () {
     return "_xnoteDialog" + dialogId;
 }
 
-xnote.showIframeDialog = function (title, url) {
+xnote.showIframeDialog = function (title, url, buttons, functions) {
     var area = getDialogArea();
     return layer.open({
         type: 2,
@@ -73,7 +73,9 @@ xnote.showIframeDialog = function (title, url) {
         maxmin: true,
         area: area,
         content: url,
-        scrollbar: false
+        scrollbar: false,
+        btn: buttons,
+        functions: functions
     });
 }
 

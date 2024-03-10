@@ -187,11 +187,9 @@ def decode_bytes(bytes):
 
 
 def obj2dict(obj):
-    v = {}
-    for k in dir(obj):
-        if k[0] != '_':
-            v[k] = getattr(obj, k)
-    return v
+    if obj == None:
+        return None
+    return dict(**obj.__dict__)
 
 
 def get_safe_file_name(filename):

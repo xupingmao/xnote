@@ -26,7 +26,15 @@
                 <td>
                     {% for action in _xnote_table.actions %}
                         {% if action.type == "link" %}
-                            <a href="{{row.get(action.link_url)}}">{{action.title}}</a>
+                            <a href="{{row.get(action.link_field)}}">{{action.title}}</a>
+                        {% end %}
+                        {% if action.type == "button" %}
+                            <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleAction(this)" 
+                            data-url="{{row.get(action.link_field)}}" data-title="{{action.get_title(row)}}">{{action.get_title(row)}}</button>
+                        {% end %}
+                        {% if action.type == "confirm" %}
+                            <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleConfirmAction(this)" 
+                            data-url="{{row.get(action.link_field)}}" data-msg="{{action.get_msg(row)}}">{{action.get_title(row)}}</button>
                         {% end %}
                     {% end %}
                 </td>
@@ -34,3 +42,26 @@
         </tr>
     {% end %}
 </table>
+
+<script>
+xnote.table.handleAction = function (target) {
+    var url = $(target).attr("data-url");
+    var title = $(target).attr("data-title");
+    var xnoteDialogId = xnote.showIframeDialog(title, url, ["确认", "取消"]);
+}
+
+xnote.table.handleConfirmAction = function (target) {
+    var url = $(target).attr("data-url");
+    var msg = $(target).attr("data-msg");
+    xnote.confirm(msg, function () {
+        xnote.http.get(url, function (resp) {
+            if (resp.success) {
+                xnote.toast("操作成功");
+                window.location.reload();
+            } else {
+                xnote.toast(resp.message);
+            }
+        }); 
+    });
+}
+</script>

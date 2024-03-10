@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-14 09:30:29
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-10 15:27:18
+@LastEditTime : 2024-03-10 21:41:32
 @FilePath     : /xnote/tests/test_admin.py
 @Description  : 描述
 """
@@ -12,6 +12,7 @@
 from . import test_base
 from xnote.core import xconfig, xmanager, xauth
 import web.utils
+from xnote.service import JobService
 
 app = test_base.init()
 
@@ -85,4 +86,12 @@ class TestMain(test_base.BaseTestCase):
         self.check_OK("/admin/test_job")
         self.check_OK("/admin/jobs")
         
+        job_list, amount = JobService.list_job_page()
+        assert len(job_list) > 0
+        assert amount > 0
+        
+        job_id = job_list[0].id
+        
+        self.check_OK(f"/admin/jobs?action=view&job_id={job_id}")
+        self.check_OK(f"/admin/jobs?action=delete&job_id={job_id}")
         
