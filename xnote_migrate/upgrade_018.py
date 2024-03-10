@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-11-05 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-10 00:52:05
+@LastEditTime : 2024-03-10 10:10:42
 @FilePath     : /xnote/xnote_migrate/upgrade_018.py
 @Description  : 描述
 """
@@ -104,6 +104,7 @@ class MessageHistoryV1(Storage):
 
 class MessageHistoryV2(Storage):
     def __init__(self, **kw):
+        self.id = 0
         self.msg_id = 0
         self.msg_version = 0
         self.user_id = 0
@@ -207,6 +208,8 @@ class MigrateHandler:
             new_item.content = item.content
             
             if first is None:
+                new_item.pop("id", None)
                 db.insert(new_item)
             else:
+                new_item.id = int(first.id)
                 db.put(new_item, fix_index=True)
