@@ -1,0 +1,36 @@
+{% init xnote_table_var = "table" %}
+{% set _xnote_table = globals()[xnote_table_var] %}
+
+<table class="table">
+    <tr>
+        {% for head in _xnote_table.heads %}
+            <th style="width:{{head.width}}">{{head.title}}</th>
+        {% end %}
+
+        {% if len(_xnote_table.actions) > 0 %}
+            <th>操作</th>
+        {% end %}
+    </tr>
+
+    {% for row in _xnote_table.rows %}
+        <tr class="hover-tr">
+            {% for head in _xnote_table.heads %}
+                {% if head.link_field != "" %}
+                <td><a href="{{row.get(head.link_field)}}">{{row.get(head.field)}}</a></td>
+                {% else %}
+                <td>{{row.get(head.field)}}</td>
+                {% end %}
+            {% end %} 
+
+            {% if len(_xnote_table.actions) > 0 %}
+                <td>
+                    {% for action in _xnote_table.actions %}
+                        {% if action.type == "link" %}
+                            <a href="{{row.get(action.link_url)}}">{{action.title}}</a>
+                        {% end %}
+                    {% end %}
+                </td>
+            {% end %}
+        </tr>
+    {% end %}
+</table>

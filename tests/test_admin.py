@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-14 09:30:29
 @LastEditors  : xupingmao
-@LastEditTime : 2024-01-01 17:38:55
+@LastEditTime : 2024-03-10 15:27:18
 @FilePath     : /xnote/tests/test_admin.py
 @Description  : 描述
 """
@@ -61,7 +61,7 @@ class TestMain(test_base.BaseTestCase):
             for pattern, raw_handler in web.utils.group(mapping, 2):
                 if pattern in skip_list:
                     continue
-                if pattern.startswith("/system/") or pattern in check_list:
+                if pattern.startswith("/system/") or pattern in check_list or pattern.startswith("/admin/"):
                     print(f"Check {pattern} ...")
                     handler = raw_handler.handler_class
                     check_pass = False
@@ -78,4 +78,11 @@ class TestMain(test_base.BaseTestCase):
         finally:
             xauth.TestEnv.login_user("admin")
         
-    
+    def test_admin_functions(self):
+        self.check_OK("/admin/functions")
+
+    def test_admin_job(self):
+        self.check_OK("/admin/test_job")
+        self.check_OK("/admin/jobs")
+        
+        

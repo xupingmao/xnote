@@ -386,7 +386,22 @@ def init_page_visit_log():
     # 日志数据, 关闭profile
     TableConfig.disable_profile(table_name)
     TableConfig.disable_binlog(table_name)
-    
+
+def init_sys_job():
+    """系统任务
+    @since 2024/03/10
+    """
+    table_name = "sys_job"
+    comment = "系统任务"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("job_type", "varchar(30)", "")
+        manager.add_column("job_status", "tinyint", 0, comment="日志状态,0-初始化,1-执行中,2-执行成功,3-执行失败")
+        manager.add_column("job_params", "text", "")
+        manager.add_column("job_result", "text", "")
+        manager.add_index(["job_type", "mtime"])
+
 
 def init_msg_index_table():
     """随手记索引"""
@@ -621,6 +636,11 @@ def init():
     init_record_table()
     init_user_table()
     init_file_info()
+    
+    # 系统任务
+    init_sys_job()
+    
+    # 统计信息
     init_site_visit_log()
     init_page_visit_log()
     

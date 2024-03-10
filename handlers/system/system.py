@@ -98,6 +98,7 @@ SYS_TOOLS = [
     admin_link("系统信息",   "/system/info", "info-circle"),
     admin_link("文件",       "/fs_list", "file-text-o"),
     admin_link("定时任务",   "/system/crontab", "clock-o"),
+    admin_link("任务列表", "/admin/jobs"),
     admin_link("事件注册", "/system/event"),
     admin_link("线程管理", "/system/thread_info"),
     admin_link("Menu_User",   "/system/user/list", "users"),

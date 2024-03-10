@@ -266,7 +266,10 @@ class FailedResult(web.Storage):
 class Pagination:
     
     def __init__(self, page=1, total=0, page_size=20):
-        self.page = 1
+        self.page = page
+        self.total = total
         self.page_max = int(math.ceil(total/page_size))
+        if self.page_max == 0:
+            self.page_max = 1
 
         

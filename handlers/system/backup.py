@@ -21,6 +21,7 @@ from xutils import dbutil
 from xutils import fsutil, logutil
 from xutils.db.driver_sqlite import SqliteKV
 from xnote.core import xtables
+from xnote.service import JobService, SysJob, JobStatusEnum
 
 config = xconfig
 
@@ -232,31 +233,39 @@ class DBBackup:
                 _backup_lock.release()
 
     def do_execute(self, backup_kv=True):
-        # 先做清理工作
-        self.clean()
-
-        start_time = time.time()
-        # 执行备份
-        count = self.dump_db(backup_kv=backup_kv)
-
-        cost_time = (time.time() - start_time) * 1000.0
-        logging.info("数据库记录总数:%s", count)
-
-        # 保存为压缩文件
-        dirname = os.path.join(xconfig.BACKUP_DIR, "db")
-        xutils.makedirs(dirname)
         
-        destfile = os.path.join(dirname, time.strftime("%Y-%m-%d.db"))
+        job_info = SysJob()
+        job_info.job_type = "db_backup"
+        
+        with JobService.run_with_job(job_info):
+            # 先做清理工作
+            self.clean()
 
-        if os.path.exists(destfile):
-            fsutil.rmfile(destfile)
+            start_time = time.time()
+            # 执行备份
+            count = self.dump_db(backup_kv=backup_kv)
 
-        fsutil.mvfile(self.db_backup_file, destfile)
+            cost_time = (time.time() - start_time) * 1000.0
+            logging.info("数据库记录总数:%s", count)
 
-        # 再次清理
-        self.clean()
+            # 保存为压缩文件
+            dirname = os.path.join(xconfig.BACKUP_DIR, "db")
+            xutils.makedirs(dirname)
+            
+            destfile = os.path.join(dirname, time.strftime("%Y-%m-%d.db"))
 
-        return dict(count = count, cost_time = "%sms" % cost_time)
+            if os.path.exists(destfile):
+                fsutil.rmfile(destfile)
+
+            fsutil.mvfile(self.db_backup_file, destfile)
+
+            # 再次清理
+            self.clean()
+            
+            job_info.job_status = JobStatusEnum.success
+            job_info.job_result = "备份任务完成"
+
+            return dict(count = count, cost_time = "%sms" % cost_time)
 
 def chk_db_backup():
     if not xconfig.get_system_config("db_backup"):

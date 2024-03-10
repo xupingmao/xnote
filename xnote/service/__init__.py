@@ -12,3 +12,4 @@
 
 from .service_comment import *
 from .service_tag import *
+from .service_job import *

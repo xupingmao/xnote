@@ -441,7 +441,11 @@ class BasePlugin:
     # {输入配置}
     placeholder = u("")
     btn_text = T("处理")
-    editable = True
+    
+    show_edit = True
+    # deprecated 使用 show_edit
+    editable = True 
+    
     # 输入框的行数
     rows = 20
     CONTENT_WIDTH = 1000  # 内容的宽度
