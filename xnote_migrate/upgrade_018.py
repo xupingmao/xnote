@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-11-05 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-10 10:14:29
+@LastEditTime : 2024-03-10 10:39:29
 @FilePath     : /xnote/xnote_migrate/upgrade_018.py
 @Description  : 描述
 """
@@ -23,7 +23,7 @@ def do_upgrade():
     base.execute_upgrade("20231223_msg_index", handler.migrate_msg_index)
     base.execute_upgrade("20240214_plugin_visit", handler.migrate_plugin_visit)
     base.execute_upgrade("20240214_user_op_log", handler.migrate_user_op_log)
-    base.execute_upgrade("20240308_msg_history", handler.migrate_msg_history)
+    # base.execute_upgrade("20240308_msg_history", handler.migrate_msg_history)
 
 class MonthPlanRecord(Storage):
     def __init__(self, **kw):
