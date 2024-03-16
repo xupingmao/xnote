@@ -30,7 +30,7 @@
 <div class="form-body">
     <form id="xnoteForm{{_xnote_form.id}}">
         {% for row in _xnote_form.rows %}
-            <div class="form-row">
+            <div class="form-row {{row.css_class}}">
                 <label>{{row.title}}</label>
                 {% if row.type == "input" %}
                     <input type="text" name="{{row.field}}" placeholder="{{row.placeholder}}" value="{{row.value}}">
