@@ -1,0 +1,75 @@
+{% init xnote_form_var = "form" %}
+{% set _xnote_form = globals()[xnote_form_var] %}
+
+<style>
+    .form-row {
+        margin-bottom: 10px;
+    }
+    .form-row label {
+        width: 100px;
+        display: block;
+        float: left;
+    }
+    .form-row textarea {
+        width: 300px;
+        height: 50px;
+    }
+    .form-body {
+        padding: 10px;
+    }
+    .form-footer {
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        height: 50px;
+        padding: 10px;
+    }
+</style>
+
+<div class="form-body">
+    <form id="xnoteForm{{_xnote_form.id}}">
+        {% for row in _xnote_form.rows %}
+            <div class="form-row">
+                <label>{{row.title}}</label>
+                {% if row.type == "input" %}
+                    <input type="text" name="{{row.field}}" placeholder="{{row.placeholder}}" value="{{row.value}}">
+                {% end %}
+                {% if row.type == "textarea" %}
+                    <textarea name="{{row.field}}" placeholder="{{row.placeholder}}">{{row.value}}</textarea>
+                {% end %}
+            </div>
+        {% end %}
+    </form>
+</div>
+
+<div class="form-footer">
+    <div class="float-right">
+        <button class="large" onclick="xnote.handleFormSubmit(this)" data-form-id="xnoteForm{{_xnote_form.id}}">保存</button>
+        <button class="large btn-default" onclick="xnote.closeFormDialog(this)" data-form-id="xnoteForm{{_xnote_form.id}}">关闭</button>
+    </div>
+</div>
+
+<script>
+    xnote.handleFormSubmit = function(target) {
+        var request = {};
+        var formId = $(target).attr("data-form-id");
+        var data = $("#"+formId).formData();
+        request.data = JSON.stringify(data);
+        console.log("request:", request);
+    
+        xnote.http.post("?action=save", request, function (resp) {
+            if (resp.success) {
+                xnote.toast("保存成功");
+                window.parent.location.reload();
+                // xnote.closeDialog("last");
+            } else {
+                xnote.toast(resp.message);
+            }
+        });
+    }
+
+    xnote.closeFormDialog = function (target) {
+        xnote.closeDialog("last");
+    }
+</script>

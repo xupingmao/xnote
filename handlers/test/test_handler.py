@@ -1,6 +1,6 @@
 
 import xutils
-import xtemplate
+from xnote.core import xtemplate
 
 class handler:    
     def GET(self):

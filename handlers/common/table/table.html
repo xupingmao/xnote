@@ -36,6 +36,10 @@
                             <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleConfirmAction(this)" 
                             data-url="{{row.get(action.link_field)}}" data-msg="{{action.get_msg(row)}}">{{action.get_title(row)}}</button>
                         {% end %}
+                        {% if action.type == "edit_form" %}
+                            <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleEditForm(this)"
+                            data-url="{{row.get(action.link_field)}}" data-title="{{action.get_title(row)}}">{{action.get_title(row)}}</button>
+                        {% end %}
                     {% end %}
                 </td>
             {% end %}
@@ -64,4 +68,13 @@ xnote.table.handleConfirmAction = function (target) {
         }); 
     });
 }
+
+xnote.table.handleEditForm = function (target) {
+    var url = $(target).attr("data-url");
+    var title = $(target).attr("data-title");
+    xnote.http.get(url, function (respHtml) {
+        xnote.showDialog(title, respHtml);
+    });
+}
+
 </script>
