@@ -25,6 +25,7 @@ class DataForm:
     def __init__(self):
         self.id = "0"
         self.rows = []
+        self.save_action = "save"
     
     def add_row(self, title="", field="", placeholder="", value="", type="input", css_class=""):
         row = FormRow()

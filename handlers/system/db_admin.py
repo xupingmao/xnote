@@ -84,7 +84,7 @@ class DbScanHandler:
                 prefix, key_from=key_from, key_to=key_to, include_key=True, limit=limit+1,
                 parse_json=False, reverse=reverse, scan_db=True):
             if scanned < limit and (textutil.contains_all(key, keywords) or textutil.contains_all(value, keywords)):
-                item = Storage(key=key, value=value)
+                item = Storage(key=key, key_encoded=xutils.quote(key), value=value)
                 result.append(item)
             scanned += 1
             next_cursor = key
@@ -289,7 +289,7 @@ class SqlDBDetailHandler:
         return xtables.get_table_by_name(name)
     
     def get_kv_detail(self):
-        key = xutils.get_argument("key")
+        key = xutils.get_argument_str("key")
         value = dbutil.db_get(key)
         return webutil.SuccessResult(data=xutils.tojson(value, format=True))
 

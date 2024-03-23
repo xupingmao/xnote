@@ -25,6 +25,7 @@ from xutils import Storage
 from xutils import textutil
 from xutils.six.moves.urllib.parse import quote
 from .xconfig import TemplateConfig
+from xnote.core.template import DataTable, DataForm
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(
@@ -378,17 +379,6 @@ class PromptButton:
     """询问输入按钮"""
 
     def __init__(self, label, action, context=None):
-        pass
-
-
-class DataTable:
-    """数据表格"""
-
-    def __init__(self, headings, data):
-        """初始化数据表格
-        @param {dict} headings 表头
-        @param {dict} data 数据
-        """
         pass
 
 
