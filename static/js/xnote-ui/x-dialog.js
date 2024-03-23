@@ -68,7 +68,7 @@ xnote.showIframeDialog = function (title, url, buttons, functions) {
     var area = getDialogArea();
     return layer.open({
         type: 2,
-        shadeClose: true,
+        shadeClose: false,
         title: title,
         maxmin: true,
         area: area,
@@ -121,7 +121,7 @@ xnote.openDialogExInner = function (options) {
     var anim = options.anim;
     var closeBtn = options.closeBtn;
     var onOpenFn = options.onOpenFn;
-    var shadeClose = xnote.getOrDefault(options.shadeClose, true);
+    var shadeClose = xnote.getOrDefault(options.shadeClose, false);
     var closeForYes = xnote.getOrDefault(options.closeForYes, true);
     var template = options.template;
     var defaultValues = options.defaultValues; // 模板的默认值
