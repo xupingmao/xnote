@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-10 16:20:05
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-24 11:01:58
+@LastEditTime : 2024-03-24 18:14:10
 @FilePath     : /xnote/xnote/core/template/form.py
 @Description  : 描述
 """
@@ -46,6 +46,7 @@ class DataForm:
         self.id = "0"
         self.rows = []
         self.save_action = "save"
+        self.model_name = "default"
     
     def add_row(self, title="", field="", placeholder="", value="", type="input", css_class=""):
         row = FormRow()
