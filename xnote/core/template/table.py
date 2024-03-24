@@ -11,6 +11,7 @@
 
 
 class TableHead:
+    """表格的标题单元"""
     def __init__(self):
         self.title = ""
         self.field = ""
@@ -19,6 +20,7 @@ class TableHead:
         self.width = "auto"
 
 class TableAction:
+    """表格的操作单元"""
     def __init__(self):
         self.title = ""
         self.type = ""
@@ -75,7 +77,8 @@ class DataTable:
         action.title_field = title_field
         action.css_class = css_class
         action.msg_field = msg_field
-        
         self.actions.append(action)
+        return action
+
 
 

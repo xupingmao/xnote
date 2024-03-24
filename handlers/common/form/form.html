@@ -38,6 +38,13 @@
                 {% if row.type == "textarea" %}
                     <textarea name="{{row.field}}" placeholder="{{row.placeholder}}">{{row.value}}</textarea>
                 {% end %}
+                {% if row.type == "select" %}
+                    <select name="{{row.field}}" value="{{row.value}}">
+                        {% for option in row.options %}
+                            <option value="{{option.value}}">{{option.title}}</option>
+                        {% end %}
+                    </select>
+                {% end %}
             </div>
         {% end %}
     </form>
@@ -51,6 +58,8 @@
 </div>
 
 <script>
+    // 刷新默认值
+    xnote.refresh();
     xnote.handleFormSubmit = function(target) {
         var request = {};
         var formId = $(target).attr("data-form-id");

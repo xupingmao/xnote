@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-10 22:56:56
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-16 18:04:27
+@LastEditTime : 2024-03-24 11:13:40
 @FilePath     : /xnote/handlers/admin/job_admin.py
 @Description  : 描述
 """
@@ -73,7 +73,11 @@ class JobHandler(BasePlugin):
             form.add_row("ID", "id", value=str(job_info.id))
             form.add_row("创建时间", "ctime", value=job_info.ctime)
             form.add_row("更新时间", "mtime", value=job_info.mtime)
-            form.add_row("任务类型", "job_type", value=str(job_info.job_type))
+            
+            row = form.add_row("任务类型", "job_type", value=str(job_info.job_type), type="select")
+            row.add_option("数据库备份", "db_backup")
+            row.add_option("测试", "test")
+            
             form.add_row("任务参数", "job_params", value=job_info.job_params, type="textarea")
             form.add_row("任务结果", "job_result", value=job_info.job_result, type="textarea")
             kw.form = form
