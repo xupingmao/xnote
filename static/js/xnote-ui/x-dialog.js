@@ -126,6 +126,7 @@ xnote.openDialogExInner = function (options) {
     var template = options.template;
     var defaultValues = options.defaultValues; // 模板的默认值
     var yesFunction = function(index, layero, dialogInfo) {};
+    var successFunction = function(layero, index, that/*原型链的this对象*/) {};
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数
@@ -188,6 +189,7 @@ xnote.openDialogExInner = function (options) {
         area: area,
         content: html,
         anim: anim,
+        success: successFunction,
         // scrollbar是弹层本身的滚动条，不是整个页面的
         scrollbar: false
     }

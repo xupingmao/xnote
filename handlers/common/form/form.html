@@ -17,6 +17,15 @@
     .form-body {
         padding: 10px;
     }
+    .form-body {
+        position: absolute;
+        padding: 10px;
+        top: 0px;
+        bottom: 50px;
+        overflow-y: auto;
+        right: 0px;
+        left: 0px;
+    }
     .form-footer {
         position: absolute;
         bottom: 0px;
@@ -44,6 +53,10 @@
                             <option value="{{option.value}}">{{option.title}}</option>
                         {% end %}
                     </select>
+                {% end %}
+                {% if row.type == "date" %}
+                    <input id="{{row.id}}" name="{{row.field}}" class="form-date" data-date-type="{{row.date_type}}" 
+                        placeholder="{{row.placeholder}}" value="{{row.value}}" autocomplete="off">
                 {% end %}
             </div>
         {% end %}
@@ -81,4 +94,19 @@
     xnote.closeFormDialog = function (target) {
         xnote.closeDialog("last");
     }
+
+    $(".form-date").click(function(event) {
+        var elem = event.target;
+        if ($(elem).attr("data-laydate-bind")) {
+            return;
+        }
+
+        laydate.render({
+            elem: elem,
+            type: $(elem).attr("data-date-type"),
+            show: true
+        });
+        
+        $(elem).attr("data-laydate-bind", true);
+    });
 </script>

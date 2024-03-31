@@ -1,6 +1,8 @@
 {% init xnote_table_var = "table" %}
 {% set _xnote_table = globals()[xnote_table_var] %}
 
+<script type="text/javascript" src="/_static/lib/layDate-v5.0.9/laydate.js"></script>
+
 <table class="table">
     <tr>
         {% for head in _xnote_table.heads %}

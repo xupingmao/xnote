@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-14 09:30:29
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-24 11:20:47
+@LastEditTime : 2024-03-31 14:37:13
 @FilePath     : /xnote/tests/test_admin.py
 @Description  : 描述
 """
@@ -96,3 +96,5 @@ class TestMain(test_base.BaseTestCase):
         self.check_OK(f"/admin/jobs?action=edit&job_id={job_id}")
         self.check_OK(f"/admin/jobs?action=delete&job_id={job_id}")
         
+    def test_example(self):
+        self.check_OK("/test/example/table")

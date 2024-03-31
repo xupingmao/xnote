@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-10 22:56:56
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-24 11:13:40
+@LastEditTime : 2024-03-31 11:21:40
 @FilePath     : /xnote/handlers/admin/job_admin.py
 @Description  : 描述
 """
@@ -12,7 +12,7 @@
 from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import webutil
-from xnote.core.template import DataTable, DataForm
+from xnote.plugin import DataTable, DataForm
 from xnote.service import JobService, SysJob, JobStatusEnum
 from xnote.core import xauth
 import xutils

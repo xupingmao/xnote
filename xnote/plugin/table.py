@@ -9,6 +9,12 @@
 @Description  : 描述
 """
 
+class TableActionType:
+    """表格动作的类型"""
+    link = "link"
+    button = "button"
+    confirm = "confirm"
+    edit_form = "edit_form"
 
 class TableHead:
     """表格的标题单元"""

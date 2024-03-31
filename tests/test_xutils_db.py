@@ -323,6 +323,11 @@ class TestMain(BaseTestCase):
         run_test_db_engine(self, db)
         
     def test_mysql_put_with_version(self):
+        skip_mysql_test = os.environ.get("skip_mysql_test")
+        if skip_mysql_test == "True":
+            print("skip mysql test")
+            return
+        
         key = b"test_key"
         db = self.get_mysql_kv()
         db.Delete(key)

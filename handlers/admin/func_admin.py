@@ -3,7 +3,8 @@
 from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import func_util
-from xnote.core.template import DataTable
+from xnote.plugin import DataTable
+
 HTML = r"""
 <style>
     .card-body {
