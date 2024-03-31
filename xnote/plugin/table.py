@@ -48,6 +48,9 @@ class TableAction:
             return self.default_msg
         return row.get(self.msg_field)
     
+    def get_link(self, row):
+        return row.get(self.link_field)
+
 class DataTable:
     """数据表格"""
     

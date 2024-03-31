@@ -27,20 +27,20 @@
             {% if len(_xnote_table.actions) > 0 %}
                 <td>
                     {% for action in _xnote_table.actions %}
-                        {% if action.type == "link" %}
-                            <a href="{{row.get(action.link_field)}}">{{action.title}}</a>
+                        {% if action.type == "link" and action.get_link(row) != None %}
+                            <a href="{{action.get_link(row)}}">{{action.title}}</a>
                         {% end %}
-                        {% if action.type == "button" %}
+                        {% if action.type == "button" and action.get_link(row) != None %}
                             <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleAction(this)" 
-                            data-url="{{row.get(action.link_field)}}" data-title="{{action.get_title(row)}}">{{action.get_title(row)}}</button>
+                            data-url="{{action.get_link(row)}}" data-title="{{action.get_title(row)}}">{{action.get_title(row)}}</button>
                         {% end %}
-                        {% if action.type == "confirm" %}
+                        {% if action.type == "confirm" and action.get_link(row) != None %}
                             <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleConfirmAction(this)" 
-                            data-url="{{row.get(action.link_field)}}" data-msg="{{action.get_msg(row)}}">{{action.get_title(row)}}</button>
+                            data-url="{{action.get_link(row)}}" data-msg="{{action.get_msg(row)}}">{{action.get_title(row)}}</button>
                         {% end %}
-                        {% if action.type == "edit_form" %}
+                        {% if action.type == "edit_form" and action.get_link(row) != None %}
                             <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleEditForm(this)"
-                            data-url="{{row.get(action.link_field)}}" data-title="{{action.get_title(row)}}">{{action.get_title(row)}}</button>
+                            data-url="{{action.get_link(row)}}" data-title="{{action.get_title(row)}}">{{action.get_title(row)}}</button>
                         {% end %}
                     {% end %}
                 </td>
