@@ -272,7 +272,8 @@ def render_text(text, template_name="<string>", **kw):
 
     # 使用hash不能保证唯一性
     name = "template@%s.str" % id(text)
-    _loader.init_template(name, text)
+    if name not in _loader.templates:
+        _loader.init_template(name, text)
     return _loader.load(name).generate(**nkw)
 
 

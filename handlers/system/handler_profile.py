@@ -5,25 +5,35 @@ import io
 import profile
 import threading
 import web
-import xtemplate
 import xutils
-import xmanager
-import xauth
+from xnote.core import xmanager
+from xnote.core import xauth
+from xnote.core import xtemplate
 
 html = """
-{% extends base.html %}
+{% extends base %}
 
-{% block body %}
+{% block body_left %}
 {% init url = "" %}
 {% init result = "" %}
 
-<h3>性能分析</h3>
-<form method="GET">
-<textarea class="col-md-12" name="url">{{url}}</textarea>
-<button>submit</button>
-</form>
+<div class="col-md-12 card">
+    {% set title = "性能分析" %}
+    {% include common/base_title.html %}
+</div>
 
-<pre>{{result}}</pre>
+
+<div class="card">
+    <form method="GET">
+    <textarea class="col-md-12" name="url">{{url}}</textarea>
+    <button>开始分析</button>
+    </form>
+</div>
+
+<div class="card">
+    <span>结果</span>
+    <textarea class="row" rows=20>{{result}}</textarea>
+</div>
 
 {% end %}
 """
@@ -47,7 +57,8 @@ def runctx(statement, globals, locals):
     finally:
         return get_stats(prof)
 
-class handler:
+class ProfileHandler:
+
     def profile(self, url):
         headers = web.ctx.env
         data = web.data()
@@ -68,3 +79,6 @@ class handler:
             result = self.profile(url)
         return xtemplate.render_text(html, url=url, result=result)
 
+xurls = (
+    r"/system/handler_profile", ProfileHandler,
+)
