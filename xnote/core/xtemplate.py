@@ -103,7 +103,7 @@ class XnoteLoader(Loader):
                 return os.path.join(template_mapping.dirname, relative_path)
         
         if name.endswith(".str"):
-            # 字符串类型的模板,只在内存种存在
+            # 字符串类型的模板,只在内存中存在
             return name
 
         return os.path.join(xconfig.HANDLERS_DIR, name)
@@ -271,7 +271,8 @@ def render_text(text, template_name="<string>", **kw):
     nkw = do_render_kw(kw)
 
     # 使用hash不能保证唯一性
-    name = "template@%s.str" % id(text)
+    text_md5 = xutils.md5_hex(text)
+    name = f"template@{template_name}_{text_md5}.str"
     if name not in _loader.templates:
         _loader.init_template(name, text)
     return _loader.load(name).generate(**nkw)
@@ -408,8 +409,8 @@ class BasePlugin:
         这个方法现在和 `writetemplate` 等价"""
         return self.writetemplate(html, **kw)
 
-    def writetemplate(self, template, **kw):
-        html = render_text(template, **kw)
+    def writetemplate(self, template_text, **kw):
+        html = render_text(template_text, template_name=self.title, **kw)
         self.html += u(html.decode("utf-8"))
         return self.html
 
@@ -448,7 +449,7 @@ class BasePlugin:
         raise NotImplementedError()
 
     def get_input(self):
-        return xutils.get_argument("input", "")
+        return xutils.get_argument_str("input", "")
 
     def get_format(self):
         """返回当前请求的数据格式"""
@@ -456,7 +457,7 @@ class BasePlugin:
 
     def get_page(self):
         """返回当前页码"""
-        return xutils.get_argument("page", 1, type=int)
+        return xutils.get_argument_int("page", 1)
 
     def check_access(self):
         role = xauth.get_current_role()

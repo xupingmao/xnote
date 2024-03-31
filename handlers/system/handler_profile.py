@@ -25,7 +25,7 @@ html = """
 
 <div class="card">
     <form method="GET">
-    <textarea class="col-md-12" name="url">{{url}}</textarea>
+    <textarea class="col-md-12" name="url" placeholder="请输入PATH,比如/note/index">{{url}}</textarea>
     <button>开始分析</button>
     </form>
 </div>
