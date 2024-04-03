@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-14 08:42:11
+@LastEditTime : 2024-04-04 01:26:20
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : 描述
 """
@@ -365,6 +365,13 @@ class TableManagerFacade:
     
     def add_column(self, colname, coltype,
                    default_value=None, not_null=True, comment=""):
+        coltype_lower = coltype.lower()
+
+        if "varchar" in coltype_lower:
+            assert default_value != None, f"varchar column {colname} default value cant be NULL"
+        if coltype_lower in ("int", "tinyint", "bigint"):
+            assert default_value != None, f"{coltype} column {colname} default value cant be NULL"
+        
         self.table_info.add_column(colname, coltype, default_value, not_null)
         self.manager.add_column(colname, coltype, default_value, not_null, comment=comment)
     
