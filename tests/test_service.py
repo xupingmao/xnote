@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-04-04 00:01:38
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-04 00:23:20
+@LastEditTime : 2024-04-04 01:07:22
 @FilePath     : /xnote/tests/test_service.py
 @Description  : 描述
 """
@@ -56,7 +56,7 @@ class TestMain(test_base.BaseTestCase):
             assert t2.got_lock
             current_lock = self.get_lock_record_by_key(lock_key)
             assert current_lock != None
-            assert current_lock.token == t2.token
+            assert current_lock.lock_token == t2.lock_token
         
         current_lock = self.get_lock_record_by_key(lock_key)
         assert current_lock != None

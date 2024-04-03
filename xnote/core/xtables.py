@@ -412,7 +412,7 @@ def init_lock_table():
         manager.add_column("ctime", "datetime", default_value=DEFAULT_DATETIME)
         manager.add_column("mtime", "datetime", default_value=DEFAULT_DATETIME)
         manager.add_column("lock_key", "varchar(128)", "")
-        manager.add_column("token", "varchar(36)", comment="锁的token")
+        manager.add_column("lock_token", "varchar(36)", comment="锁的token")
         manager.add_column("timeout_time", "bigint", default_value=0, comment="锁超时时间,毫秒时间戳")
         manager.add_index("lock_key", is_unique=True)
 

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-04-03 22:58:18
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-04 00:45:42
+@LastEditTime : 2024-04-04 01:01:19
 @FilePath     : /xnote/xnote/service/lock_service.py
 @Description  : 分布式锁服务
 """
@@ -17,7 +17,7 @@ from xnote.core import xtables, xconfig
 
 DEFAULT_LOCK_TIMEOUT_SECONDS = 60.0
 
-def release_func(lock_key="", token=""):
+def release_func(lock_key="", lock_token=""):
     pass
 
 class LockObject:
@@ -25,13 +25,13 @@ class LockObject:
     def __init__(self):
         self.lock_key = ""
         self.timeout_time = 0
-        self.token = ""
+        self.lock_token = ""
         self.got_lock = False
         self._release_func = release_func
 
     def release(self):
         if self.got_lock:
-            self._release_func(self.lock_key, self.token)
+            self._release_func(self.lock_key, self.lock_token)
             self.got_lock = False
 
     def __enter__(self):
@@ -78,9 +78,9 @@ class DatabaseLockService:
             # lock is valid
             raise Exception(f"acquire lock failed, lock_key={lock_key}")
         
-        token = xutils.create_uuid()
+        lock_token = xutils.create_uuid()
         try:
-            cls.db.insert(ctime=now_time, mtime=now_time, lock_key=lock_key, token=token, 
+            cls.db.insert(ctime=now_time, mtime=now_time, lock_key=lock_key, lock_token=lock_token, 
                           timeout_time=timeout_time)
         except:
             # create lock failed
@@ -89,12 +89,12 @@ class DatabaseLockService:
         lock = LockObject()
         lock.lock_key = lock_key
         lock.timeout_time = timeout_time
-        lock.token = token
+        lock.lock_token = lock_token
         lock._release_func = cls.release
         lock.got_lock = True
         return lock
     
     @classmethod
-    def release(cls, lock_key="", token=""):
-        cls.db.delete(where=dict(lock_key=lock_key, token=token))
+    def release(cls, lock_key="", lock_token=""):
+        cls.db.delete(where=dict(lock_key=lock_key, lock_token=lock_token))
     
