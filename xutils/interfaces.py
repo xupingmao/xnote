@@ -149,20 +149,19 @@ class DBInterface:
             return value_int
 
 
-class DBLockInterface:
-    """基于数据库的锁的接口"""
+class LockInterface:
+    """分布式锁接口"""
 
-    def Acquire(self, resource_id, timeout):
-        """返回token
-        @return {str} token
+    def acquire(self, resource_key="", expires=60*1000):
+        """返回锁对象
         """
-        raise NotImplementedError("Acquire")
+        raise NotImplementedError("acquire")
     
-    def Release(self, resource_id, token):
-        raise NotImplementedError("Release")
+    def release(self, resource_id, token):
+        raise NotImplementedError("release")
     
-    def Refresh(self, resource_id, token, refresh_time):
-        raise NotImplementedError("Refresh")
+    def refresh(self, resource_id, token, refresh_time):
+        raise NotImplementedError("refresh")
 
 class RecordInterface:
     """数据库记录的接口

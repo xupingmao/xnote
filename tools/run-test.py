@@ -99,6 +99,11 @@ def run_test(args):
 		py_exec("-m pytest tests/test_admin.py --doctest-modules --cov handlers --capture no")
 		py_exec("-m coverage html -i")
 		return
+	
+	if target == "service":
+		py_exec("-m pytest tests/test_service.py --doctest-modules --cov xnote.service --capture no")
+		py_exec("-m coverage html -i")
+		return
 
 	if target != "all":
 		print("未知的操作:", target)

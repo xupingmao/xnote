@@ -2,11 +2,9 @@
 """
 展示系统使用的线程信息
 """
-import xauth
+from xnote.core import xauth, xtemplate, xmanager
 import threading
-import xtemplate
 import xutils
-import xmanager
 from xutils import MyStdout
 
 def get_thread_log(thread):

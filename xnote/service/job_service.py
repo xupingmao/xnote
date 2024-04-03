@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-10 15:34:47
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-10 16:01:25
-@FilePath     : /xnote/xnote/service/service_job.py
+@LastEditTime : 2024-04-03 23:59:03
+@FilePath     : /xnote/xnote/service/job_service.py
 @Description  : 描述
 """
 
@@ -63,7 +63,7 @@ class JobManager:
 
 class JobService:
     
-    db = xtables.get_table_by_name("sys_job")
+    db = xtables.get_table_by_name("t_job")
     
     @classmethod
     def create_job(cls, job_info):

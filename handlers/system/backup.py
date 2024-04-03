@@ -21,7 +21,7 @@ from xutils import dbutil
 from xutils import fsutil, logutil
 from xutils.db.driver_sqlite import SqliteKV
 from xnote.core import xtables
-from xnote.service import JobService, SysJob, JobStatusEnum
+from xnote.service import JobService, SysJob, JobStatusEnum, DatabaseLockService
 
 config = xconfig
 
@@ -31,8 +31,6 @@ _zipname = "xnote.zip"
 _dest_path = os.path.join(_dirname, "static", _zipname)
 
 # 删除备份在 cron/diskclean 任务里面
-# 备份的锁
-_backup_lock = threading.RLock()
 _import_logger = logutil.new_mem_logger("import_db", size = 20)
 
 def zip_xnote(nameblacklist = [_zipname]):
@@ -73,6 +71,8 @@ class DBBackup:
     _progress = 0.0
     _start_time = -1
     _total = 0
+    lock_key = "backup_job"
+    expire_seconds = 3600
 
     def __init__(self):
         self.db_backup_file = os.path.join(xconfig.TMP_DIR, "temp.db")
@@ -220,17 +220,13 @@ class DBBackup:
 
     def execute(self, backup_kv=True):
         logger = self.get_backup_logger()
-        got_lock = False
         try:
-            if _backup_lock.acquire(blocking = False):
-                got_lock = True
+            with DatabaseLockService.lock(self.lock_key, self.expire_seconds):
                 self.do_execute(backup_kv=backup_kv)
-            else:
-                logger.log("backup is busy")
-                return "backup is busy"
-        finally:
-            if got_lock:
-                _backup_lock.release()
+            return "backup success"
+        except:
+            logger.log("backup is busy")
+            return "backup is busy"
 
     def do_execute(self, backup_kv=True):
         
@@ -299,24 +295,21 @@ def calc_qps(count, cost_time):
 
 class DBImporter:
 
+    lock_key = "db_import"
+    expire_seconds = 3600
+
     def import_db(self, db_file):
         self.db_backup_file = db_file
-        got_lock = False
         try:
-            if _backup_lock.acquire(blocking = False):
-                got_lock = True
+            with DatabaseLockService.lock(self.lock_key, self.expire_seconds):
                 self.import_sql(db_file)
                 return self.import_kv(db_file)
-            else:
-                logging.warning("import_db is busy")
-                return "import_db is busy"
         except:
             exc_info = xutils.print_exc()
             _import_logger.info(exc_info)
-        finally:
-            if got_lock:
-                _backup_lock.release()
-
+            logging.warning("import_db is busy")
+            return "import_db is busy"
+    
     def get_logger(self):
         return _import_logger
 
@@ -428,8 +421,7 @@ class BackupHandler:
 
         if p == "backup_sql":
             backup = DBBackup()
-            backup.execute(backup_kv=False)
-            return "backup_sql"
+            return backup.execute(backup_kv=False)
 
         # 备份所有的
         chk_db_backup()

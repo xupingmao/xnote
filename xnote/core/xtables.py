@@ -387,11 +387,11 @@ def init_page_visit_log():
     TableConfig.disable_profile(table_name)
     TableConfig.disable_binlog(table_name)
 
-def init_sys_job():
+def init_job_table():
     """系统任务
     @since 2024/03/10
     """
-    table_name = "sys_job"
+    table_name = "t_job" # 避免关键字冲突
     comment = "系统任务"
     with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
@@ -402,6 +402,19 @@ def init_sys_job():
         manager.add_column("job_result", "text", "")
         manager.add_index(["job_type", "mtime"])
 
+def init_lock_table():
+    """分布式锁的表
+    @since 2024/04/03
+    """
+    table_name = "t_lock" # 避免和关键字冲突
+    comment = "系统任务"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("ctime", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("lock_key", "varchar(128)", "")
+        manager.add_column("token", "varchar(36)", comment="锁的token")
+        manager.add_column("timeout_time", "bigint", default_value=0, comment="锁超时时间,毫秒时间戳")
+        manager.add_index("lock_key", is_unique=True)
 
 def init_msg_index_table():
     """随手记索引"""
@@ -638,7 +651,8 @@ def init():
     init_file_info()
     
     # 系统任务
-    init_sys_job()
+    init_job_table()
+    init_lock_table()
     
     # 统计信息
     init_site_visit_log()
