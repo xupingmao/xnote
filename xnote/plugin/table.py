@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-10 16:20:05
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-16 17:21:32
-@FilePath     : /xnote/xnote/core/template/table.py
+@LastEditTime : 2024-04-03 18:30:43
+@FilePath     : /xnote/xnote/plugin/table.py
 @Description  : 描述
 """
 
@@ -24,6 +24,10 @@ class TableHead:
         self.link_field = ""
         self.type = ""
         self.width = "auto"
+        self.css_class_field = ""
+    
+    def get_css_class(self, row):
+        return row.get(self.css_class_field, "")
 
 class TableAction:
     """表格的操作单元"""
@@ -59,13 +63,14 @@ class DataTable:
         self.rows = []
         self.actions = []
     
-    def add_head(self, title="", field = "", type="", link_field="", width="auto"):
+    def add_head(self, title="", field = "", type="", link_field="", width="auto", css_class_field=""):
         head = TableHead()
         head.title = title
         head.field = field
         head.type = type
         head.width = width
         head.link_field = link_field
+        head.css_class_field = css_class_field
         self.heads.append(head)
         
     def add_row(self, obj):

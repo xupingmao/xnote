@@ -17,11 +17,13 @@
     {% for row in _xnote_table.rows %}
         <tr class="hover-tr">
             {% for head in _xnote_table.heads %}
+                <td class="{{head.get_css_class(row)}}">
                 {% if head.link_field != "" %}
-                <td><a href="{{row.get(head.link_field)}}">{{row.get(head.field)}}</a></td>
+                    <a href="{{row.get(head.link_field)}}">{{row.get(head.field)}}</a></td>
                 {% else %}
-                <td>{{row.get(head.field)}}</td>
+                    {{row.get(head.field)}}
                 {% end %}
+                </td>
             {% end %} 
 
             {% if len(_xnote_table.actions) > 0 %}

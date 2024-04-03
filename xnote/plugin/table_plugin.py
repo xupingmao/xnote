@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-31 11:17:36
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-31 12:01:04
+@LastEditTime : 2024-04-03 18:32:06
 @FilePath     : /xnote/xnote/plugin/table_plugin.py
 @Description  : 描述
 """
@@ -85,7 +85,7 @@ class BaseTablePlugin(BasePlugin):
     def handle_page(self):
         table = DataTable()
         table.add_head("类型", "type")
-        table.add_head("标题", "title")
+        table.add_head("标题", "title", css_class_field="title_class")
         table.add_head("日期", "date")
         table.add_head("内容", "content")
 
@@ -95,6 +95,7 @@ class BaseTablePlugin(BasePlugin):
         row = {}
         row["type"] = "类型1"
         row["title"] = "测试"
+        row["title_class"] = "red"
         row["date"] = "2020-01-01"
         row["content"] = "测试内容"
         row["edit_url"] = "?action=edit"

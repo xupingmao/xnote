@@ -79,44 +79,9 @@ def log_debug(msg):
 def log_error(msg):
     print(msg)
 
+class JsonSerializer:
+    """缓存编码器"""
 
-class MemoryCache(interfaces.CacheInterface):
-    """缓存实现,一般情况下不要直接用它,优先使用 PrefixedCache, 这样便于迁移到Redis之类的分布式缓存"""
-
-    def __init__(self, max_size = -1):
-        self.dict = OrderedDict()
-        self.expire_dict = dict()
-        self.max_size = max_size
-        self.lock = threading.RLock()
-
-    def _fix_storage(self, obj):
-        if isinstance(obj, dict):
-            return Storage(**obj)
-        if isinstance(obj, list):
-            for index, item in enumerate(obj):
-                if isinstance(item, dict):
-                    obj[index] = Storage(**item)
-            return obj
-        return obj
-
-    def get(self, key, default_value=None):
-        assert isinstance(key, str), key
-        value = self.dict.get(key)
-        if value != None:
-            if self.is_alive(key):
-                self.dict[key] = value # 移到最后面
-                if isinstance(value, bytes):
-                    obj = value
-                else:
-                    obj = json.loads(value)
-                return self._fix_storage(obj)
-            else:
-                self.delete(key)
-        return default_value
-    
-    def get_raw(self, key):
-        return self.dict.get(key)
-    
     def format_value(self, value):
         if isinstance(value, dict):
             result = dict()
@@ -128,15 +93,59 @@ class MemoryCache(interfaces.CacheInterface):
                     result[key] = item_value
             return result
         return value
+    
+    def _fix_storage(self, obj):
+        if isinstance(obj, dict):
+            return Storage(**obj)
+        if isinstance(obj, list):
+            for index, item in enumerate(obj):
+                if isinstance(item, dict):
+                    obj[index] = Storage(**item)
+            return obj
+        return obj
+
+    def encode(self, value):
+        if isinstance(value, bytes):
+            return value
+        else:
+            formatted_value = self.format_value(value)
+            return json.dumps(formatted_value) # 转成json，要保证能够序列化
+
+    def decode(self, value):
+        if isinstance(value, bytes):
+            obj = value
+        else:
+            obj = json.loads(value)
+        return self._fix_storage(obj)
+
+class MemoryCache(interfaces.CacheInterface):
+    """缓存实现,一般情况下不要直接用它,优先使用 PrefixedCache, 这样便于迁移到Redis之类的分布式缓存"""
+
+    def __init__(self, max_size = -1, serializer=JsonSerializer()):
+        self.dict = OrderedDict()
+        self.expire_dict = dict()
+        self.max_size = max_size
+        self.lock = threading.RLock()
+        self.serializer = serializer
+
+    def get(self, key, default_value=None):
+        assert isinstance(key, str), key
+        value = self.dict.get(key)
+        if value != None:
+            if self.is_alive(key):
+                self.dict[key] = value # 移到最后面
+                return self.serializer.decode(value)
+            else:
+                self.delete(key)
+        return default_value
+    
+    def get_raw(self, key):
+        return self.dict.get(key)
 
     def put(self, key, value, expire=60*5, random_range=60*5):
         assert expire > 0
         with self.lock:
-            if isinstance(value, bytes):
-                self.dict[key] = value
-            else:
-                value = self.format_value(value)
-                self.dict[key] = json.dumps(value) # 转成json，要保证能够序列化
+            self.dict[key] = self.serializer.encode(value)
             self.expire_dict[key] = time.time() + expire + random.randint(0, random_range)
             
             if self.max_size > 0:
