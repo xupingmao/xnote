@@ -58,9 +58,6 @@ class TestXutilCache(BaseTestCase):
         cacheutil.delete("name")
         self.assertEqual(None, cacheutil.get("name"))
 
-    def test_cache_load_dump(self):
-        cacheutil.load_dump()
-
     def test_cache_hash(self):
         cacheutil.hset("h01", "key", "value", expire = 600)
         value = cacheutil.hget("h01", "key")

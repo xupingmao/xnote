@@ -6,6 +6,14 @@ import copy
 import sys
 import traceback
 
+IS_PY2 = sys.version_info[0] == 2
+
+if IS_PY2:
+    string_types = (basestring,)
+else:
+    string_types = (str,)
+
+
 class Storage(dict):
     """
     A Storage object is like a dictionary except `obj.foo` can be used
@@ -68,3 +76,6 @@ def print_exc():
 
 def print_stacktrace():
     print_exc()
+
+def is_str(s):
+    return isinstance(s, string_types)

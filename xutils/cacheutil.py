@@ -34,16 +34,27 @@ PS: 标准库 functools提供了缓存的方法， 参考 https://docs.python.or
 import threading
 import random
 import datetime
+import time
+import re
+import os
+import json
+import inspect
+import sys
+import traceback
+import base64
+
 from xutils import dateutil
 from collections import OrderedDict, deque
-from xutils.imports import *
-from xutils import interfaces
+from xutils import interfaces, Storage
 from xutils.db.dbutil_cache import DatabaseCache
+from xutils.base import is_str
 
 _cache_dict = dict()
 _cache_queue = deque()
-STORAGE_DIR = None
 
+class CacheConfig:
+    """缓存配置"""
+    storage_dir = ""
 
 def encode_key(text):
     """编码key为文件名"""
@@ -337,8 +348,8 @@ class CacheObj:
         return self.valid_key_pattern.match(key) != None
 
     def _get_path(self, key):
-        assert STORAGE_DIR != None
-        return os.path.join(STORAGE_DIR, key + ".json")
+        assert CacheConfig.storage_dir != ""
+        return os.path.join(CacheConfig.storage_dir, key + ".json")
 
     def get_dump_value(self):
         if self.type == "zset":
@@ -762,34 +773,6 @@ def json_object_hook(dict_obj):
     return Storage(**dict_obj)
 
 
-def load_dump():
-    dirname = STORAGE_DIR
-    valid_ext_tuple = (".json")
-    for fname in os.listdir(dirname):
-        if not fname.endswith(valid_ext_tuple):
-            continue
-        try:
-            fpath = os.path.join(dirname, fname)
-            with open(fpath, "rb") as fp:
-                pickled = fp.read()
-                if pickled == b'':
-                    continue
-                if fname.endswith(".json"):
-                    dict_obj = json.loads(pickled.decode(
-                        "utf-8"), object_hook=json_object_hook)
-                else:
-                    dict_obj = pickle.loads(pickled)
-                # 持久化的都是不失效的数据
-                obj_type = dict_obj.get("type", "object")
-                obj = CacheObj(
-                    dict_obj["key"], dict_obj["value"], -1, type=obj_type, need_save=False)
-                if obj.is_temp():
-                    os.remove(fpath)
-        except:
-            log_error("failed to load cache %s" % fname)
-            print_exc()
-
-
 def clear_temp():
     for key in _cache_dict.copy():
         value = _cache_dict.get(key)
@@ -797,6 +780,6 @@ def clear_temp():
             value.clear()
 
 
-def init(storage_dir):
-    global STORAGE_DIR
-    STORAGE_DIR = storage_dir
+def init(storage_dir=""):
+    CacheConfig.storage_dir = storage_dir
+

@@ -640,6 +640,8 @@ def init():
     web.db.config.debug_sql = xconfig.DatabaseConfig.db_debug
 
     TableConfig.enable_binlog = xconfig.DatabaseConfig.binlog
+    TableConfig.enable_auto_ddl = xconfig.DatabaseConfig.db_auto_ddl
+
     if xconfig.DatabaseConfig.db_profile_table_proxy:
         dbutil.register_table("sys_log", "系统日志")
         TableProxy.profile_logger = DBProfileLogger()
@@ -650,8 +652,9 @@ def init():
     init_user_table()
     init_file_info()
     
-    # 系统任务
+    # 持久化任务表
     init_job_table()
+    # 分布式锁表
     init_lock_table()
     
     # 统计信息
@@ -683,5 +686,5 @@ def init():
         init_kv_store_table()
         init_kv_zset_table(get_db_instance())
     
-    if xconfig.DatabaseConfig.db_driver == "sqlite":
+    if xconfig.DatabaseConfig.db_driver_sql == "sqlite":
         init_kv_store_table()

@@ -4,35 +4,20 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-14 18:14:04
+@LastEditTime : 2024-04-05 12:47:10
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
-@Description  : 描述
+@Description  : SQL表查询代理
 """
 import time
 import xutils
 import web.db
 from web.db import SQLQuery, sqlparam
 from . import table_manager
+from .table_config import TableConfig
 from xutils.interfaces import ProfileLog, ProfileLogger, SQLDBInterface
 from xutils.db.binlog import BinLog, BinLogOpType
 
 
-class TableConfig:
-
-    log_profile = False
-    enable_binlog = False
-    
-    _disable_profile_tables = set()
-    _disable_binlog_tables = set()
-    
-    @classmethod
-    def disable_profile(cls, table_name=""):
-        cls._disable_profile_tables.add(table_name)
-        
-    @classmethod
-    def disable_binlog(cls, table_name=""):
-        cls._disable_binlog_tables.add(table_name)
-    
 
 class TableProxy(SQLDBInterface):
     """基于web.db的装饰器

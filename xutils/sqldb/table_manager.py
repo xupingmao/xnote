@@ -4,14 +4,15 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-04 01:26:20
+@LastEditTime : 2024-04-05 11:58:25
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
-@Description  : 描述
+@Description  : SQL表结构管理
 """
 
 import logging
 import xutils
 import web.db
+from .table_config import TableConfig
 
 empty_db = web.db.DB(None, {})
 
@@ -197,6 +198,8 @@ class MySQLTableManager(BaseTableManager):
             return
         
         logging.info("%s", sql)
+        if not TableConfig.enable_auto_ddl:
+            raise Exception("db_auto_ddl is disabled")
         self.execute(sql)
         
     

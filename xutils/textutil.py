@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-04-17 17:04:15
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-18 22:54:24
+@LastEditTime : 2024-04-04 11:39:23
 @FilePath     : /xnote/xutils/textutil.py
 @Description  : 文本处理工具
 """
@@ -763,9 +763,13 @@ def encode_uri_component(text):
     # quoted = quoted.replace("#", "%23")
     return quote(text)
 
-def md5_hex(string):
+def md5_hex(string=""):
+    """生成MD5哈希校验码, 长度是32"""
     return hashlib.md5(string.encode("utf-8")).hexdigest()
 
+def sha1_hex(string=""):
+    """生产SHA-1哈希校验码, 长度是40"""
+    return hashlib.sha1(string.encode("utf-8")).hexdigest()
         
 class Properties(object): 
     

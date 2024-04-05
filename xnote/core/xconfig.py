@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-27 21:17:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-14 19:15:31
+@LastEditTime : 2024-04-05 12:00:09
 @FilePath     : /xnote/xnote/core/xconfig.py
 @Description  : 描述
 """
@@ -426,6 +426,7 @@ class DatabaseConfig:
     db_debug = False
     db_log_debug = False
     db_profile_table_proxy = False
+    db_auto_ddl = True # 自动执行DDL
 
     binlog = False
     binlog_max_size = 10000
@@ -465,6 +466,7 @@ class DatabaseConfig:
         cls.max_open_files = SystemConfig.get_int("max_open_files")
         cls.db_profile_table_proxy = SystemConfig.get_int("db_profile_table_proxy")
         cls.db_sys_log_max_size = SystemConfig.get_int("db_sys_log_max_size", 100000)
+        cls.db_auto_ddl = SystemConfig.get_bool("db_auto_ddl", True)
 
         cls.sqlite_journal_mode = SystemConfig.get_str("sqlite_journal_mode", "delete")
         cls.sqlite_page_size = SystemConfig.get_int("sqlite_page_size", 0)
