@@ -1,6 +1,6 @@
 {% extends base %}
 
-{% block body %}
+{% block body_left %}
     <div class="card">
         <h3 class="card-title btn-line-height">
             <a href="{{note.url}}" class="link2">{{note.name}}</a> / 管理
@@ -16,4 +16,8 @@
     <div class="card">    
         {% include fs/component/filelist_simple.html %}
     </div>
+{% end %}
+
+{% block body_right %}
+    {% include common/sidebar/default.html %}
 {% end %}

@@ -3,10 +3,15 @@
 {% init show_rename_file_link = True %}
 
 <table class="table row">
+    <tr>
+        <th>文件名</th>
+        <th>文件大小</th>
+        <th>操作</th>
+    </tr>
     {% for fpath in pathlist %}
         {% set fname = os.path.basename(fpath) %}
         {% set display_name = fsutil.get_display_name(fpath, dirname) %}
-        <tr>
+        <tr class="hover-tr">
             <td class="option-name"><a href="{{fsutil.get_webpath(fpath)}}">{{display_name}}</a></td>
             <td class="option-td">
                 {{xutils.format_file_size(fpath)}}
@@ -14,10 +19,10 @@
             <td class="option-td">
                 <div class="float-right">
                     {% if show_rename_file_link %}
-                        <a class="rename-btn" data-name="{{display_name}}" 
+                        <a class="btn btn-default" data-name="{{display_name}}" 
                             onclick="xnote.action.fs.rename(this);">重命名</a>
                     {% end %}
-                    <a class="danger-link" data-path="{{fpath}}" data-name="{{display_name}}" 
+                    <a class="btn danger" data-path="{{fpath}}" data-name="{{display_name}}" 
                         onclick="xnote.action.fs.delete(this);">删除</a>
                 </div>
             </td>
