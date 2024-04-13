@@ -68,9 +68,12 @@ class BaseTablePlugin(BasePlugin):
     def handle_edit(self):
         form = DataForm()
         form.add_row("id", "id", css_class="hide")
+        form.add_row("只读属性", "readonly_attr", value="test", readonly=True)
+
         row = form.add_row("类型", "type", type=FormRowType.select)
         row.add_option("类型1", "1")
         row.add_option("类型2", "2")
+        
         form.add_row("标题", "title")
         form.add_row("日期", "date", type=FormRowType.date)
         form.add_row("内容", "content", type=FormRowType.textarea)

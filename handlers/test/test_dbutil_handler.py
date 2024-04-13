@@ -4,7 +4,7 @@
 # @modified 2022/03/20 23:28:21
 # @filename test_dbutil_handler.py
 
-import xauth
+from xnote.core import xauth
 import xutils
 import random
 from xutils import Storage

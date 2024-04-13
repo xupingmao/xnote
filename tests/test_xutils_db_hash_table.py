@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-29 18:57:21
 @LastEditors  : xupingmao
-@LastEditTime : 2023-05-20 22:45:02
+@LastEditTime : 2024-04-13 20:34:44
 @FilePath     : /xnote/tests/test_xutils_db_hash_table.py
 @Description  : 描述
 """
@@ -14,6 +14,7 @@ from xutils import dbutil, Storage
 
 app = test_base.init()
 dbutil.register_table("hash_test", "测试数据库")
+dbutil.register_table("hash_test_v2", "测试数据库")
 
 class TestMain(test_base.BaseTestCase):
 
@@ -63,3 +64,12 @@ class TestMain(test_base.BaseTestCase):
         self.assertEqual("admin", first.name)
         self.assertEqual(20, first.age)
 
+
+    def test_hash_v2(self):
+        db = dbutil.KvHashTableV2(table_name="hash_test_v2")
+        db.put("test", 1)
+        value = db.get("test")
+        assert value == 1
+        db.delete("test")
+        assert db.get("test") == None
+        

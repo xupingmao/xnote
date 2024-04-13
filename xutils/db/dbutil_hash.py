@@ -5,6 +5,7 @@
 # @filename dbutil_hash.py
 
 from xutils import Storage
+from xutils import textutil
 from xutils.db import dbutil_base
 from xutils.db.dbutil_base import (
     db_get, db_put, db_delete, 
@@ -154,3 +155,80 @@ class KvHashTable:
 
 class LdbHashTable(KvHashTable):
     pass
+
+
+class KvHashTableV2:
+    def __init__(self, table_name=""):
+        check_table_name(table_name)
+        self.table_name = table_name
+        self.prefix = table_name + ":"
+
+    def build_key(self, key):
+        return self.prefix + textutil.md5_hex(key)
+    
+    def _check_key(self, key):
+        if not isinstance(key, str):
+            raise Exception("KvHashTableV2_param_error: expect str key")
+
+    def _check_value(self, value):
+        pass
+
+    def get(self, key, default_value = None):
+        """通过key来查询value，这个key是hash的key，不是ldb的key
+        @param {string} key hash的key
+        @param {object} default_value 如果值不存在，返回默认值
+        """
+        row_key = self.build_key(key)
+        item_dict = db_get(row_key)
+        if item_dict == None:
+            return default_value
+        assert isinstance(item_dict, dict)
+        return item_dict.get(key, default_value)
+    
+    def get_row_dict(self, row_key=""):
+        item_dict = db_get(row_key)
+        if item_dict == None:
+            return None
+        assert isinstance(item_dict, dict)
+        return item_dict
+
+    def put(self, key, value, batch = None):
+        """通过key来设置value，这个key是hash的key，不是ldb的key
+        @param {string} key hash的key
+        @param {object} value hash的value
+        """
+        self._check_key(key)
+        self._check_value(value)
+
+        row_key = self.build_key(key)
+        item_dict = self.get_row_dict(row_key)
+        if item_dict == None:
+            item_dict = {}
+        item_dict[key] = value
+
+        if batch != None:
+            batch.put(row_key, item_dict)
+        else:
+            db_put(row_key, item_dict)
+
+
+    def delete(self, key, batch = None):
+        row_key = self.build_key(key)
+        item_dict = self.get_row_dict(row_key)
+        if item_dict == None:
+            return
+        if len(item_dict) == 0:
+            return
+        
+        item_dict.pop(key, None)
+
+        if len(item_dict) > 0:
+            if batch != None:
+                batch.put(row_key, item_dict)
+            else:
+                db_put(row_key, item_dict)
+        else:
+            if batch != None:
+                batch.delete(row_key)
+            else:
+                db_delete(row_key)

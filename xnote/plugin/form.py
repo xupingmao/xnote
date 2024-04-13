@@ -43,6 +43,7 @@ class FormRow:
         self.css_class = ""
         self.options = []
         self.date_type = FormRowDateType.date # 用于日期组件
+        self.readonly = False
     
     def add_option(self, title="", value=""):
         option = FormRowOption()
@@ -50,6 +51,12 @@ class FormRow:
         option.value = value
         self.options.append(option)
         return self
+
+    def get_readonly_attr(self):
+        if self.readonly:
+            return "readonly"
+        else:
+            return ""
     
 class DataForm:
     """数据表格"""
@@ -61,7 +68,7 @@ class DataForm:
         self.save_action = "save"
         self.model_name = "default"
     
-    def add_row(self, title="", field="", placeholder="", value="", type="input", css_class=""):
+    def add_row(self, title="", field="", placeholder="", value="", type="input", css_class="", readonly=False):
         self.row_id += 1
         row = FormRow()
         row.id = f"row_{self.id}_{self.row_id}"
@@ -71,6 +78,7 @@ class DataForm:
         row.value = value
         row.type = type
         row.css_class = css_class
+        row.readonly = readonly
         
         self.rows.append(row)
         return row

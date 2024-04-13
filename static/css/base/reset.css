@@ -80,6 +80,10 @@ textarea:focus, input:focus {
     border: 1px solid #8cc;
 }
 
+textarea:read-only, input:read-only {
+    background-color: #eee;
+}
+
 select {
     padding: 5px;
     border: 1px solid #ccc;
