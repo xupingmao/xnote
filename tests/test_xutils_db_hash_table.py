@@ -14,7 +14,7 @@ from xutils import dbutil, Storage
 
 app = test_base.init()
 dbutil.register_table("hash_test", "测试数据库")
-dbutil.register_table("hash_test_v2", "测试数据库")
+dbutil.register_table("lk_hash_test", "测试数据库")
 
 class TestMain(test_base.BaseTestCase):
 
@@ -65,8 +65,8 @@ class TestMain(test_base.BaseTestCase):
         self.assertEqual(20, first.age)
 
 
-    def test_hash_v2(self):
-        db = dbutil.KvHashTableV2(table_name="hash_test_v2")
+    def test_large_key_hash(self):
+        db = dbutil.LargeKeyHashTable(table_name="lk_hash_test")
         db.put("test", 1)
         value = db.get("test")
         assert value == 1
