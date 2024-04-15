@@ -84,7 +84,7 @@ class DbScanHandler:
                 prefix, key_from=key_from, key_to=key_to, include_key=True, limit=limit+1,
                 parse_json=False, reverse=reverse, scan_db=True):
             if scanned < limit and (textutil.contains_all(key, keywords) or textutil.contains_all(value, keywords)):
-                item = Storage(key=key, key_encoded=xutils.quote(key), value=value)
+                item = Storage(key=key, key_encoded=xutils.quote(key), value=value, data_key=xutils.html_escape(key))
                 result.append(item)
             scanned += 1
             next_cursor = key

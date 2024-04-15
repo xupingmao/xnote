@@ -157,7 +157,9 @@ class LdbHashTable(KvHashTable):
     pass
 
 
-class KvHashTableV2:
+class LargeKeyHashTable:
+    """针对大key优化的hashtable,使用md5哈希后的值作为数据库的key"""
+    
     def __init__(self, table_name=""):
         check_table_name(table_name)
         self.table_name = table_name

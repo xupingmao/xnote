@@ -87,7 +87,8 @@
                         <button class="btn btn-default view-btn" 
                             data-url="/system/sqldb_detail?method=get_kv_detail&key={{!item.key_encoded}}" 
                             onclick="xnote.admin.viewMainRecord(this)">查看</button>
-                        <button class="btn btn-danger delete-btn" data-key="{{!item.key_encoded}}">删除</button>
+                        <button class="btn btn-danger delete-btn" data-key="{{!item.data_key}}" 
+                            onclick="xnote.admin.deleteRecord(this)">删除</button>
                     </div>
                 </td>
             </tr>
@@ -100,8 +101,8 @@
 $(function () {
     var globalVersion = 0;
 
-    $("body").on("click", ".delete-btn", function (e) {
-        var key = $(this).attr("data-key");
+    xnote.admin.deleteRecord = function (target) {
+        var key = $(target).attr("data-key");
         xnote.confirm("准备删除【" + key + "】，请确认", function (confirmed) {
             var params = {key: key};
             xnote.http.post("?action=delete", params, function (resp) {
@@ -110,7 +111,7 @@ $(function () {
                 xnote.toast("删除失败，请稍后重试~");
             })
         });
-    }); 
+    }
 
     $(".do-search-btn").click(function (e) {
         search();    

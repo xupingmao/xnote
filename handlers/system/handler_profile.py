@@ -6,7 +6,6 @@ import profile
 import threading
 import web
 import xutils
-from xnote.core import xmanager
 from xnote.core import xauth
 from xnote.core import xtemplate
 
@@ -35,6 +34,10 @@ html = """
     <textarea class="row" rows=20>{{result}}</textarea>
 </div>
 
+{% end %}
+
+{% block body_right %}
+    {% include common/sidebar/default.html %}
 {% end %}
 """
 
@@ -77,7 +80,7 @@ class ProfileHandler:
         result = ""
         if url is not None and url != "":
             result = self.profile(url)
-        return xtemplate.render_text(html, url=url, result=result)
+        return xtemplate.render_text(html, template_name="handler_profile", url=url, result=result)
 
 xurls = (
     r"/system/handler_profile", ProfileHandler,
