@@ -15,21 +15,28 @@ https://blog.csdn.net/halfclear/article/details/72783900
 
 import sys
 import os
+import time
+
+def get_current_time(format='%Y-%m-%d %H:%M:%S'):
+	return time.strftime(format)
+
+def print_log(*args):
+	print(get_current_time(), *args)
 
 def main():
 	args = sys.argv[1:]
 	args.insert(0, sys.executable)
 	cmd = " ".join(args)
-	print("Command", cmd)
+	print_log("command:", cmd)
 	while True:
 		# exit_code = subprocess.call(args, shell = True)
 		exit_code = os.system(cmd)
-		print("exit_code:", exit_code)
+		print_log("exit_code:", exit_code)
 		# Mac返回 52480
 		if exit_code in (205, 52480):
-			print("restart ...")
-			print("-" * 50)
-			print("-" * 50)
+			print_log("restart ...")
+			print_log("-" * 50)
+			print_log("-" * 50)
 		else:
 			return
 
