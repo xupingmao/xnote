@@ -363,7 +363,7 @@ def run_init_hooks(app):
         func(app)
 
 def get_file_lock():
-    if xconfig.FileConfig.enable_boot_lock_file:
+    if xconfig.FileConfig.enable_boot_lock:
         return FileLockAdapter(xconfig.FileConfig.boot_lock_file)
     return DummyLock()
 
