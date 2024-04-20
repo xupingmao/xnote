@@ -11,6 +11,9 @@
 # encoding=utf-8
 # @since 2016/12/04
 # @modified 2022/04/23 11:07:21
+
+from __future__ import print_function
+
 """xnote - Xnote is Not Only Text Editor
 Copyright (C) 2016-2022  xupingmao 578749341@qq.com
 
@@ -27,7 +30,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from __future__ import print_function
 
 from xnote.core import xnote_app
 
