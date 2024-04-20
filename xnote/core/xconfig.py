@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-27 21:17:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-20 20:52:15
+@LastEditTime : 2024-04-20 21:47:14
 @FilePath     : /xnote/xnote/core/xconfig.py
 @Description  : 描述
 """
@@ -43,6 +43,7 @@ import os
 import time
 import json
 import xutils
+import logging
 from xutils import textutil
 from xutils import fsutil
 from xutils.base import Storage
@@ -229,10 +230,12 @@ class FileConfig:
     backup_db_dir = ""
     db_dir = ""
     files_dir = ""
+    tmp_dir = ""
 
     boot_lock_file = "" # 启动的锁文件
     record_db_name = "" # 默认的sqlite数据库名称
     record_db_file = "" # 默认的sqlite数据库路径
+    kv_db_name = "kv_store"
     kv_db_file = ""
 
     source_root_dir = "" # 源码根目录
@@ -268,9 +271,15 @@ class FileConfig:
         cls.backup_db_dir = os.path.join(cls.backup_dir, "db")
         makedirs(cls.backup_db_dir)
 
+        cls.tmp_dir = os.path.join(data_dir, "tmp")
+        makedirs(cls.tmp_dir)
+
         cls.record_db_name = SystemConfig.get_str("record_db_name", "record")
         cls.record_db_file = cls.get_db_path(cls.record_db_name)
-        cls.kv_db_file = cls.get_db_path("kv_store")
+
+        cls.kv_db_name = SystemConfig.get_str("kv_db_name", "kv_store")
+        cls.kv_db_file = cls.get_db_path(cls.kv_db_name)
+
         cls.db_backup_expire_days = SystemConfig.get_int("db_backup_expire_days", 5)
         cls.plugins_dir = os.path.join(cls.data_dir, "scripts", "plugins")
         cls.plugins_upload_dir = os.path.join(cls.plugins_dir, "upload")
@@ -284,6 +293,10 @@ class FileConfig:
     @classmethod
     def get_db_path(cls, dbname=""):
         """dbname: sqlite数据库的文件名称"""
+        if dbname in ("$temp", "$tmp"):
+            tmp_file_path = fsutil.get_tmp_path(ext=".db")
+            logging.info("tmp_file_path=%s", tmp_file_path)
+            return tmp_file_path
         if not dbname.endswith(".db"):
             dbname += ".db"
         return os.path.join(cls.sqlite_dir, dbname)

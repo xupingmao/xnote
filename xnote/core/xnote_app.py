@@ -290,6 +290,7 @@ def init_xutils():
     from xutils.fsutil import FileUtilConfig
     FileUtilConfig.data_dir = xconfig.FileConfig.data_dir
     FileUtilConfig.use_urlencode = xconfig.USE_URLENCODE
+    FileUtilConfig.tmp_dir = xconfig.FileConfig.tmp_dir
 
 def init_app_internal(boot_config_kw=None):
     """初始化APP内部方法"""

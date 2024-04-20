@@ -22,6 +22,7 @@ except ImportError:
 from xutils import six
 from xutils.imports import *
 from xutils.base import Storage
+from xutils import textutil
 from fnmatch import fnmatch
 from xutils.six.moves.configparser import ConfigParser
 from xutils import logutil
@@ -41,8 +42,10 @@ WIN_MAXPATH = 260
 
 
 class FileUtilConfig:
+    """文件util配置"""
     use_urlencode = False
     data_dir = ""
+    tmp_dir = "/tmp"
 
 def get_real_path(path):
     """获取真实的path信息，如果配置了urlencode，强制进行urlencode，否则先按原路径检查，如果文件不存在，再进行urlencode
@@ -278,17 +281,20 @@ def path_equals(source, target):
     return os.path.abspath(source) == os.path.abspath(target)
 
 
-def tmp_path(fname="", prefix="", ext=""):
+def get_tmp_path(fname="", prefix="", ext=""):
     """生成临时文件路径
     TODO 多线程情况下加锁
     """
-    import xconfig
-    if fname != None:
-        return os.path.join(xconfig.TMP_DIR, fname)
+    if ext != "":
+        if ext[0] != ".":
+            raise Exception("expect ext like .xx")
+
+    if fname != "" and fname != None:
+        return os.path.join(FileUtilConfig.tmp_dir, fname)
 
     retry_times = 10
-    name = prefix + time.strftime("%Y_%m_%d_%H%M%S")
-    base_path = os.path.join(xconfig.TMP_DIR, name)
+    name = prefix + time.strftime("%Y_%m_%d_") + textutil.create_uuid()
+    base_path = os.path.join(FileUtilConfig.tmp_dir, name)
     path = base_path + ext
 
     for i in range(1, retry_times + 1):
@@ -297,6 +303,7 @@ def tmp_path(fname="", prefix="", ext=""):
         path = "%s_%s" % (base_path, i) + ext
     raise Exception("创建临时文件失败, 请手动重试")
 
+tmp_path = get_tmp_path
 
 def data_path(fname):
     """获取data目录文件路径"""
