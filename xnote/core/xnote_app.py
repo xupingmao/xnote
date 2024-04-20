@@ -369,6 +369,9 @@ def main(boot_config_kw=None):
     # 处理初始化参数
     handle_args_and_init_config(boot_config_kw=boot_config_kw)
 
+    xnote_version = xconfig.SystemConfig.get_str("version")
+    print(f"starting xnote, version:{xnote_version}")
+
     file_lock = FileLock(xconfig.FileConfig.boot_lock_file)
 
     try:
