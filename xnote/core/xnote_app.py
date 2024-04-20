@@ -388,7 +388,7 @@ def main(boot_config_kw=None):
             # 监听端口
             app.web_app.run()
             logging.info("服务器已关闭")
-            wait_thread_exit()
+            # wait_thread_exit()
             sys.exit(xconfig.EXIT_CODE)
         else:
             logging.error("get lock failed")
