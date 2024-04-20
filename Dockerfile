@@ -17,5 +17,5 @@ COPY . /home
 
 WORKDIR /home
 
-CMD ["python", "sentinel.py", "tools/hello-app.py", "--config", "config/boot/boot.sae.properties"]
+CMD ["python", "sentinel.py", "app.py", "--config", "config/boot/boot.sae.properties"]
 
