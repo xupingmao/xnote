@@ -4,17 +4,18 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-10 22:56:56
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-31 11:21:40
+@LastEditTime : 2024-04-20 16:50:19
 @FilePath     : /xnote/handlers/admin/job_admin.py
 @Description  : 描述
 """
-
+import time
 from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import webutil
 from xnote.plugin import DataTable, DataForm
 from xnote.service import JobService, SysJob, JobStatusEnum
 from xnote.core import xauth
+from xutils import dateutil
 import xutils
 import json
 
@@ -70,9 +71,9 @@ class JobHandler(BasePlugin):
 
         if job_info != None:
             form = DataForm()
-            form.add_row("ID", "id", value=str(job_info.id))
-            form.add_row("创建时间", "ctime", value=job_info.ctime)
-            form.add_row("更新时间", "mtime", value=job_info.mtime)
+            form.add_row("ID", "id", value=str(job_info.id), readonly=True)
+            form.add_row("创建时间", "ctime", value=job_info.ctime, readonly=True)
+            form.add_row("更新时间", "mtime", value=job_info.mtime, readonly=True)
             
             row = form.add_row("任务类型", "job_type", value=str(job_info.job_type), type="select")
             row.add_option("数据库备份", "db_backup")
@@ -138,7 +139,7 @@ class JobHandler(BasePlugin):
             row["view_url"] = f"?action=view&job_id={job_info.id}"
             row["edit_url"] = f"?action=edit&job_id={job_info.id}"
             row["delete_url"] = f"?action=delete&job_id={job_info.id}"
-            row["delete_msg"] = "确认删除记录吗?"
+            row["delete_msg"] = f"确认删除记录【{job_info.id}】吗?"
             table.add_row(row)
         
         pagination = webutil.Pagination(page=1, total=total)
@@ -158,7 +159,9 @@ class JobTestHandler:
         job_info = SysJob()
         job_info.job_type = "test"
         with JobService.run_with_job(job_info):
+            time.sleep(1)
             job_info.job_result = "success"
+            job_info.mtime = dateutil.format_datetime()
         return webutil.SuccessResult()
     
 xurls = (

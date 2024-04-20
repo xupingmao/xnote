@@ -28,7 +28,10 @@ class TableHead:
     
     def get_css_class(self, row):
         return row.get(self.css_class_field, "")
-
+    
+    def get_link(self, row):
+        return row.get(self.link_field)
+    
 class TableAction:
     """表格的操作单元"""
     def __init__(self):

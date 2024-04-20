@@ -541,6 +541,14 @@ def db_get(key, default_value=None):
     except KeyError:
         return default_value
     
+def db_get_object(key, default_value=None):
+    value = db_get(key)
+    if value is None:
+        return value
+    assert isinstance(value, xutils.Storage)
+    return value
+
+    
 def db_get_str(key, default_value=None, encoding="utf-8"):
     check_leveldb()
     try:

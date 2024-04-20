@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-23 00:30:19
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-29 17:02:22
+@LastEditTime : 2024-04-20 16:42:38
 @FilePath     : /xnote/tests/test_app.py
 @Description  : 描述
 """
@@ -296,18 +296,6 @@ class TestMain(BaseTestCase):
 
     def test_cron_list(self):
         self.check_200("/system/crontab")
-
-    def test_cron_add_url(self):
-        result = json_request("/system/crontab/add", method="POST",
-                              data=dict(url="test", tm_wday="*", tm_hour="*", tm_min="*"))
-        sched_id = result["data"]["id"]
-        self.check_OK("/system/crontab/remove?id={}".format(sched_id))
-
-    def test_cron_add_script(self):
-        result = json_request("/system/crontab/add", method="POST",
-                              data=dict(script_url="script://test.py", tm_wday="1", tm_hour="*", tm_min="*"))
-        sched_id = result["data"]["id"]
-        self.check_OK("/system/crontab/remove?id={}".format(sched_id))
 
     def test_BaseTextPlugin(self):
         TextPage().render()

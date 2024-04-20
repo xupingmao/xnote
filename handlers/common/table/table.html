@@ -18,8 +18,8 @@
         <tr class="hover-tr">
             {% for head in _xnote_table.heads %}
                 <td class="{{head.get_css_class(row)}}">
-                {% if head.link_field != "" %}
-                    <a href="{{row.get(head.link_field)}}">{{row.get(head.field)}}</a></td>
+                {% if head.link_field != "" and head.get_link(row) != None %}
+                    <a href="{{head.get_link(row)}}">{{row.get(head.field)}}</a></td>
                 {% else %}
                     {{row.get(head.field)}}
                 {% end %}

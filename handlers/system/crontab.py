@@ -5,12 +5,17 @@
 """xnote定时任务配置"""
 import os
 import web
-import xauth
-import xtemplate
-import xmanager
-import xtables
+import json
+from xutils import webutil
+from xnote.core import xauth
+from xnote.core import xtemplate
+from xnote.core import xmanager
 import xutils
-import xconfig
+from xnote.core import xconfig
+from xnote.plugin.table_plugin import BaseTablePlugin
+from xnote.plugin import DataTable, TableActionType, DataForm, FormRowType
+from .dao_cron import CronJobDao
+
 from xutils import dbutil
 
 SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
@@ -96,36 +101,123 @@ class CronEditHandler:
         return xtemplate.render("system/page/crontab_edit.html", 
             item = sched, 
             links = get_cron_links())
-        
-class CronSaveHandler:
+
+class ListHandler(BaseTablePlugin):
+
+    title = "定时任务"
+    require_admin = True
+    show_aside = True
+    PAGE_HTML = BaseTablePlugin.TABLE_HTML
+
+    def handle_page(self):
+        table = DataTable()
+        table.add_head("编号", "index")
+        table.add_head("任务", "display_name", link_field="script_url")
+        table.add_head("时间", "time_rule")
+
+        table.add_action("编辑", type=TableActionType.edit_form, link_field="edit_url")
+        table.add_action("删除", type=TableActionType.confirm, link_field="delete_url", 
+                         msg_field="delete_msg", css_class="btn danger")
+
+        task_list = xmanager.get_task_list()
+        index = 0
+        for task in task_list:
+            index += 1
+            if task.url is None: 
+                task.url = ""
+            
+            task.url = xutils.unquote(task.url)
+            parts = task.url.split("://")
+            task.protocol = "unknown"
+            if len(parts) == 2:
+                protocol = parts[0]
+                name   = parts[1]
+                task.protocol = protocol
+                if protocol == "script":
+                    task.script_name = name
+            
+            if task.name != "":
+                task.display_name = task.name
+            else:
+                task.display_name = task.url
+
+            if task.protocol == "script":
+                task.display_name = task.url
+            
+            if task.protocol == "script":
+                task.script_url = f"{xconfig.WebConfig.server_home}/code/edit?path={task.script_name}&type=script"
+            else:
+                task.script_url = None
+
+            task.index = index
+            task.time_rule = display_time_rule(task)
+
+            if task.id:
+                task.edit_url = f"?action=edit&id={task.id}"
+                task.delete_url = f"?action=delete&id={task.id}"
+                task.delete_msg = f"确认删除任务【{task.display_name}】吗?"
+
+            table.add_row(task)
+
+        kw = xutils.Storage()
+        kw.table = table
+        return self.response_page(**kw)
     
-    @xauth.login_required("admin")
-    def POST(self):
-        id   = xutils.get_argument("id")
-        name = xutils.get_argument("name")
-        url  = xutils.get_argument("url")
-        tm_wday = xutils.get_argument("tm_wday")
-        tm_hour = xutils.get_argument("tm_hour")
-        tm_min  = xutils.get_argument("tm_min")
-        message = xutils.get_argument("message")
-        sound_value = xutils.get_argument("sound")
-        webpage_value = xutils.get_argument("webpage")
-        sound = 1 if sound_value == "on" else 0
-        webpage = 1 if webpage_value == "on" else 0
+    def handle_edit(self):
+        id  = xutils.get_argument("id")
+        key = f"schedule:{id}"
+        sched = dbutil.db_get_object(key)
+        assert sched != None
+
+        form = DataForm()
+        form.add_row("id", "id", value=str(sched.id), css_class="hide")
+        form.add_row("标题", "name", value=str(sched.name))
+
+        row = form.add_row("触发链接", "url", type=FormRowType.select, value=str(sched.url))
+        for link in get_cron_links():
+            row.add_option(link, link)
+
+        row = form.add_row("周", "tm_wday", type=FormRowType.select, value=str(sched.tm_wday))
+        for wday in xutils.wday_map:
+            row.add_option(xutils.wday_map[wday], wday)
+
+        row = form.add_row("小时", "tm_hour", type=FormRowType.select, value=str(sched.tm_hour))
+        row.add_option("每小时", "*")
+        for hour in range(24):
+            row.add_option(str(hour), str(hour))
+
+        row = form.add_row("分钟", "tm_min", type=FormRowType.select, value=str(sched.tm_min))
+        row.add_option("每分钟", "*")
+        row.add_option("每5分钟", "mod5")
+        for tm_min in range(0, 60, 5):
+            row.add_option(str(tm_min), str(tm_min))
+
+        form.add_row("信息", "message", type=FormRowType.textarea, value=str(sched.message))
+        
+        kw = xutils.Storage()
+        kw.form = form
+        return self.response_form(**kw)
+    
+    def handle_save(self):
+        data = xutils.get_argument_str("data")
+        data_dict = json.loads(data)
+
+        id   = data_dict.get("id")
+        name = data_dict.get("name")
+        url  = data_dict.get("url")
+        tm_wday = data_dict.get("tm_wday")
+        tm_hour = data_dict.get("tm_hour")
+        tm_min  = data_dict.get("tm_min")
+        message = data_dict.get("message")
+        sound = int(data_dict.get("sound", "0"))
+        webpage = int(data_dict.get("webpage", "0"))
 
         # db = xtables.get_schedule_table()
         if id == "" or id is None:
-            id = add_cron_task(name=name, url=url, mtime=xutils.format_datetime(), 
-                ctime   = xutils.format_datetime(),
-                tm_wday = tm_wday,
-                tm_hour = tm_hour,
-                tm_min  = tm_min,
-                message = message,
-                sound   = sound,
-                webpage = webpage)
+            return webutil.FailedResult(code="403", message="不允许新增任务")
         else:
             key = "schedule:%s" % id
-            data = dbutil.get(key)
+            data = dbutil.db_get_object(key)
             if data is not None:
                 data.mtime = xutils.format_datetime()
                 data.name  = name
@@ -137,36 +229,21 @@ class CronSaveHandler:
                 data.sound   = sound
                 data.webpage = webpage
                 dbutil.put(key, data)
+            else:
+                return webutil.FailedResult(code="404", message="记录不存在")
+            
         xmanager.load_tasks()
-        raise web.seeother("/system/crontab")
+        return webutil.SuccessResult()
 
-class ListHandler:
+    def handle_delete(self):
+        id = xutils.get_argument_str("id")
+        job_info = CronJobDao.get_by_id(id)
+        if job_info == None:
+            return webutil.FailedResult(code="404", message="记录不存在")
+        CronJobDao.delete_by_id(id)
+        xmanager.load_tasks()
+        return webutil.SuccessResult()
 
-    @xauth.login_required("admin")
-    def GET(self):
-        task_list = xmanager.get_task_list()
-        for task in task_list:
-            if task.url is None: task.url = ""
-            task.url = xutils.unquote(task.url)
-            parts = task.url.split("://")
-            task.protocol = "unknown"
-            if len(parts) == 2:
-                protocol = parts[0]
-                name   = parts[1]
-                task.protocol = protocol
-                if protocol == "script":
-                    task.script_name = name
-
-        def set_display_name(file):
-            file.display_name = file.name if file.name != "" else file.url
-            if file.protocol == "script":
-                file.display_name = file.url
-            return file
-        task_list = list(map(set_display_name, task_list))
-        return xtemplate.render("system/page/crontab.html", 
-            show_aside = False,
-            task_list = task_list,
-            display_time_rule = display_time_rule)
 
 class AddHandler:
     @xauth.login_required("admin")
@@ -212,9 +289,6 @@ class RemoveHandler:
 
 xurls=(
     r"/system/crontab",     ListHandler, 
-    r"/system/crontab/add", AddHandler,
     r"/system/crontab/remove", RemoveHandler,
-    r"/system/crontab/edit", CronEditHandler,
-    r"/system/crontab/save", CronSaveHandler
 )
 

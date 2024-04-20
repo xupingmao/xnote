@@ -19,6 +19,7 @@ import web.db
 from xutils import Storage
 from xutils import dbutil
 from xutils import fsutil, logutil
+from xutils import dateutil
 from xutils.db.driver_sqlite import SqliteKV
 from xnote.core import xtables
 from xnote.service import JobService, SysJob, JobStatusEnum, DatabaseLockService
@@ -260,6 +261,7 @@ class DBBackup:
             
             job_info.job_status = JobStatusEnum.success
             job_info.job_result = "备份任务完成"
+            job_info.mtime = dateutil.format_datetime()
 
             return dict(count = count, cost_time = "%sms" % cost_time)
 
