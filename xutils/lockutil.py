@@ -99,11 +99,8 @@ class WinLockOld:
 class FileLockAdapter(FileLockInterface):
 	"""文件锁，注意目前只支持posix系统"""
 
-	def __init__(self, fpath, lock_impl = None):
-		if lock_impl != None:
-			assert isinstance(lock_impl, FileLockInterface)
-			self.impl = lock_impl
-		elif fcntl != None:
+	def __init__(self, fpath):
+		if fcntl != None:
 			self.impl = UnixLock(fpath)
 		else:
 			self.impl = WinLock(fpath)
