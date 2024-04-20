@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-27 21:17:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-05 12:00:09
+@LastEditTime : 2024-04-20 20:52:15
 @FilePath     : /xnote/xnote/core/xconfig.py
 @Description  : 描述
 """
@@ -279,6 +279,7 @@ class FileConfig:
         cls.template_base_nav_top = SystemConfig.get_str("template_base_nav_top", "common/nav/base_nav_top.html")
 
         cls.boot_lock_file = SystemConfig.get_str("boot_lock_file", "pid.lock")
+        cls.enable_boot_lock = SystemConfig.get_bool("enable_boot_lock", True)
 
     @classmethod
     def get_db_path(cls, dbname=""):

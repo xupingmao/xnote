@@ -163,6 +163,17 @@ class LockInterface:
     def refresh(self, resource_id, token, refresh_time):
         raise NotImplementedError("refresh")
 
+class FileLockInterface:
+    """文件锁接口"""
+    def lock(self):
+        return True
+
+    def try_lock(self):
+        return True
+    
+    def unlock(self):
+        pass
+
 class RecordInterface:
     """数据库记录的接口
     一般情况下推荐继承 xutils.Storage

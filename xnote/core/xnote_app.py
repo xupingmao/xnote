@@ -25,7 +25,7 @@ import sys
 import os
 from .autoreload import AutoReloadThread
 from xutils.db import dbutil_cache
-from xutils.lockutil import FileLock
+from xutils.lockutil import FileLockAdapter, DummyLock
 from xutils.mem_util import log_mem_info_deco
 from xutils import mem_util
 from xutils import Storage
@@ -362,6 +362,10 @@ def run_init_hooks(app):
     for func in xnote_hooks.get_init_hooks():
         func(app)
 
+def get_file_lock():
+    if xconfig.FileConfig.enable_boot_lock_file:
+        return FileLockAdapter(xconfig.FileConfig.boot_lock_file)
+    return DummyLock()
 
 def main(boot_config_kw=None):
     global app
@@ -372,10 +376,10 @@ def main(boot_config_kw=None):
     xnote_version = xconfig.SystemConfig.get_str("version")
     print(f"starting xnote, version:{xnote_version}")
 
-    file_lock = FileLock(xconfig.FileConfig.boot_lock_file)
+    file_lock = get_file_lock()
 
     try:
-        if file_lock.acquire():
+        if file_lock.try_lock():
             # 初始化
             init_app_internal(boot_config_kw=boot_config_kw)
             # 执行钩子函数
@@ -390,7 +394,7 @@ def main(boot_config_kw=None):
             logging.error("xnote进程已启动，请不要重复启动!")
             sys.exit(1)
     finally:
-        file_lock.release()
+        file_lock.unlock()
 
 
 if __name__ == '__main__':

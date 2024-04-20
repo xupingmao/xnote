@@ -5,13 +5,14 @@
 # @filename lockutil.py
 import os
 import xutils
+from xutils.interfaces import FileLockInterface
 
 try:
 	import fcntl
 except ImportError:
 	fcntl = None
 
-class UnixLock:
+class UnixLock(FileLockInterface):
 	"""Unix环境的锁实现"""
 
 	def __init__(self, fpath):
@@ -44,7 +45,7 @@ class UnixLock:
 			self.got_lock = False
 		return True
 
-class WinLock:
+class WinLock(FileLockInterface):
 
 	def __init__(self, fpath):
 		self.fpath = fpath
@@ -53,7 +54,7 @@ class WinLock:
 		return True
 
 	def unlock(self):
-		pass
+		return
 
 class WinLockOld:
 	"""Windows环境的锁实现"""
@@ -95,19 +96,24 @@ class WinLockOld:
 			self.fp = None
 
 
-class FileLock:
+class FileLockAdapter(FileLockInterface):
 	"""文件锁，注意目前只支持posix系统"""
 
-	def __init__(self, fpath):
-		if fcntl != None:
+	def __init__(self, fpath, lock_impl = None):
+		if lock_impl != None:
+			assert isinstance(lock_impl, FileLockInterface)
+			self.impl = lock_impl
+		elif fcntl != None:
 			self.impl = UnixLock(fpath)
 		else:
 			self.impl = WinLock(fpath)
 
-	def acquire(self):
+	def try_lock(self):
 		return self.impl.try_lock()
 
-	def release(self):
+	def unlock(self):
 		return self.impl.unlock()
 
 
+class DummyLock(FileLockInterface):
+	pass
