@@ -1,3 +1,13 @@
+# -*- coding:utf-8 -*-
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2023-10-27 21:17:40
+@LastEditors  : xupingmao
+@LastEditTime : 2024-04-21 00:35:40
+@FilePath     : /xnote/app.py
+@Description  : 描述
+"""
 # encoding=utf-8
 # @since 2016/12/04
 # @modified 2022/04/23 11:07:21
