@@ -322,6 +322,9 @@ class DBImporter:
 
         try:
             for table in xtables.get_all_tables():
+                if table.table_name == xconfig.FileConfig.kv_db_name:
+                    logger.info(f"skip kv_store table: {table.table_name}")
+                    continue
                 backup_table = xtables.init_backup_table(table.tablename, backup_db)
                 total_count = backup_table.count()
                 logger.info("import table:(%s) count:(%d)", table.tablename, total_count)
