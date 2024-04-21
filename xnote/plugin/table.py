@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-10 16:20:05
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-03 18:30:43
+@LastEditTime : 2024-04-21 19:15:41
 @FilePath     : /xnote/xnote/plugin/table.py
 @Description  : 描述
 """
@@ -32,6 +32,12 @@ class TableHead:
     def get_link(self, row):
         return row.get(self.link_field)
     
+    def has_link(self, row):
+        if self.link_field == "":
+            return False
+        link = self.get_link(row)
+        return link not in (None, "")
+    
 class TableAction:
     """表格的操作单元"""
     def __init__(self):
@@ -57,6 +63,12 @@ class TableAction:
     
     def get_link(self, row):
         return row.get(self.link_field)
+    
+    def has_link(self, row):
+        if self.link_field == "":
+            return False
+        link = self.get_link(row)
+        return link not in (None, "")
 
 class DataTable:
     """数据表格"""
