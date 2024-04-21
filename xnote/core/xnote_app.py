@@ -375,7 +375,7 @@ def main(boot_config_kw=None):
     handle_args_and_init_config(boot_config_kw=boot_config_kw)
 
     xnote_version = xconfig.SystemConfig.get_str("version")
-    print(f"starting xnote, version:{xnote_version}")
+    logging.info("starting xnote, version: %s", xnote_version)
 
     file_lock = get_file_lock()
 
@@ -388,7 +388,7 @@ def main(boot_config_kw=None):
             # 监听端口
             app.web_app.run()
             logging.info("服务器已关闭")
-            # wait_thread_exit()
+            wait_thread_exit()
             sys.exit(xconfig.EXIT_CODE)
         else:
             logging.error("get lock failed")
