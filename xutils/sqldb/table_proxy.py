@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-05 12:47:10
+@LastEditTime : 2024-04-21 21:48:50
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : SQL表查询代理
 """
@@ -166,16 +166,21 @@ class TableProxy(SQLDBInterface):
     def iter_batch(self, batch_size=20, where="", vars=None):
         assert isinstance(where, str)
         
-        last_id = 0
+        pk_name = self.table_info.pk_name
+        if pk_name == "id":
+            last_id = 0
+        else:
+            last_id = ""
+            
         while True:
             this_vars = dict(last_id = last_id)
             if vars != None:
                 this_vars.update(vars)
-            records = self.select(where = "id > $last_id " + where, vars = this_vars, limit = batch_size, order="id")
+            records = self.select(where = f"`{pk_name}` > $last_id " + where, vars = this_vars, limit = batch_size, order=pk_name)
             if len(records) == 0:
                 break
             yield records
-            last_id = records[-1].id
+            last_id = records[-1].get(pk_name)
     
     def get_table_info(self):
         return self.table_info
