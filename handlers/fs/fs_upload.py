@@ -182,7 +182,11 @@ class UploadHandler:
             filename = generate_filename(None, prefix, ext)
 
         if upload_type == "recovery":
+            if not xauth.is_admin():
+                return webutil.FailedResult(code="403", message="recovery mode is only allowed by admin")
             filepath, webpath = self.get_recovery_path(filename)
+            dirs = os.path.dirname(filepath)
+            fsutil.makedirs(dirs)
         else:
             filepath, webpath = get_upload_file_path(user_name, filename)
 
