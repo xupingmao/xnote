@@ -435,6 +435,7 @@ class DatabaseConfig:
     db_driver_cache = "" # memory/redis
     db_driver_sql = "" # sqlite/mysql
     db_driver_kv = ""  # sqlite/mysql/leveldb/ssdb
+    kv_store = "kv_store" # SQL模拟KV的表名
 
     user_max_log_size = 500 # 用户日志保留的最大条数
     db_debug = False

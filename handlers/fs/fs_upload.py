@@ -13,6 +13,7 @@ from xnote.core import xmanager
 import time
 import math
 from xutils import fsutil, Storage, dateutil
+from xutils import webutil
 from xnote.core.xtemplate import T
 from xnote.core.xnote_event import FileUploadEvent
 from .fs_helper import FileInfoDao
@@ -150,44 +151,58 @@ def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=Fal
 
 class UploadHandler:
 
+    def get_recovery_path(self, fpath=""):
+        fpath = fpath.replace("$data", xconfig.FileConfig.data_dir)
+        return fpath, fsutil.get_webpath(fpath)
+
     @xauth.login_required()
     def POST(self):
         file = xutils.get_argument_field_storage("file")
         prefix = xutils.get_argument_str("prefix")
         name = xutils.get_argument_str("name")
         note_id = xutils.get_argument_str("note_id")
+        upload_type = xutils.get_argument_str("upload_type")
+
         user_info = xauth.current_user()
         assert user_info != None
         user_name = user_info.name
         webpath = ""
         filename = ""
 
-        if file.filename != None:            
-            filename = get_safe_file_name(file.filename)
-            if file.filename == "":
-                return dict(code="400", message="filename is empty")
-            
-            basename, ext = os.path.splitext(filename)
-            if name == "auto":
-                # iOS上传文件截图文件固定是image.png
-                filename = generate_filename(None, prefix, ext)
+        if file.file is None:
+            return webutil.FailedResult(code="400", message="file.file is None")
+        
+        if file.filename is None:
+            return webutil.FailedResult(code="400", message="file.filename is None")
+        
+        filename = get_safe_file_name(file.filename)
+        basename, ext = os.path.splitext(filename)
+        if name == "auto":
+            # iOS上传文件截图文件固定是image.png
+            filename = generate_filename(None, prefix, ext)
 
+        if upload_type == "recovery":
+            filepath, webpath = self.get_recovery_path(filename)
+        else:
             filepath, webpath = get_upload_file_path(user_name, filename)
 
-            with open(filepath, "wb") as fout:
-                for chunk in file.file:
-                    fout.write(chunk)
-            
-            event = FileUploadEvent()
-            event.fpath = filepath
-            event.user_name = user_info.name
-            event.user_id = user_info.id
-            xmanager.fire("fs.upload", event)
+        with open(filepath, "wb") as fout:
+            for chunk in file.file:
+                fout.write(chunk)
+        
+        event = FileUploadEvent()
+        event.fpath = filepath
+        event.user_name = user_info.name
+        event.user_id = user_info.id
+        xmanager.fire("fs.upload", event)
 
-            try_fix_orientation(filepath)
-            try_touch_note(note_id)
+        try_fix_orientation(filepath)
+        try_touch_note(note_id)
 
-        return dict(code="success", webpath=webpath, link=get_link(filename, webpath))
+        result = webutil.SuccessResult()
+        result.webpath = webpath
+        result.link = get_link(filename, webpath)
+        return result
 
     @xauth.login_required()
     def GET(self):
@@ -296,7 +311,10 @@ class RangeUploadHandler:
         if hasattr(file, "filename"):
             origin_name = file.filename
             xutils.trace("UploadFile", file.filename)
-            filename = os.path.basename(file.filename)
+            if origin_name is None:
+                return webutil.FailedResult(code="400", message="file.filename is None")
+            
+            filename = os.path.basename(origin_name)
             filename = get_safe_file_name(filename)
             filename = xutils.get_real_path(filename)
             if dirname == "auto":
@@ -345,6 +363,7 @@ class RangeUploadHandler:
                     fp.write(file_chunk)
         else:
             return dict(code="fail", message=u"请选择文件")
+        
         if part_file and chunk+1 == chunks:
             self.merge_files(dirname, filename, chunks)
 

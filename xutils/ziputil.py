@@ -10,7 +10,7 @@ import os
 import sys
 
 def quote_unicode(url):
-    import xconfig
+    from xnote.core import xconfig
     if not xconfig.USE_URLENCODE:
         return url
     def quote_char(c):

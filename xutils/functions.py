@@ -2,6 +2,7 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2018/05/25 10:52:11
 # @modified 2022/04/11 23:05:34
+import time
 from collections import deque
 from xutils.dateutil import format_time
 
@@ -198,7 +199,7 @@ class History(MemTable):
         MemTable.__init__(self, maxsize=maxsize)
 
     def add(self, key, rt=-1):
-        import xauth
+        from xnote.core import xauth
         self._insert(type = self.type,
             ctime = format_time(), 
             user = xauth.get_current_name(), 
@@ -222,18 +223,6 @@ class History(MemTable):
         found.time = format_time()
         self.data.append(found)
 
-
-class SortedSet:
-    """仿照redis的SortedSet，但是是基于内存的，不会持久化"""
-
-    def __init__(self):
-        raise NotImplementedError()
-    
-    def zadd(self, member, score):
-        pass
-
-    def zrange(self, start_index, stop_index):
-        pass
 
 def listremove(list: list, obj) -> None:
     return remove_list_item(list, obj)
@@ -324,6 +313,33 @@ def iter_exists(func, iter_obj):
         if func(item):
             return True
     return False
+
+class Timer:
+    """计时器"""
+    def __init__(self, name = "[unknown]"):
+        self.name = name
+
+    def start(self):
+        self.start_time = time.time()
+
+    def stop(self):
+        self.stop_time = time.time()
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        import xutils
+        self.stop()
+        xutils.log("%s cost time: %s" % (self.name, self.cost()))
+
+
+    def cost(self):
+        return "%s ms" % int((self.stop_time - self.start_time) * 1000)
+
+    def cost_millis(self):
+        return int((self.stop_time - self.start_time) * 1000)
 
 if __name__ == '__main__':
     import doctest

@@ -6,7 +6,7 @@ import time
 import argparse
 import sys
 
-APP_VERSION_PREFIX: str = "v2.9.5-dev-"
+APP_VERSION_PREFIX: str = "v2.9.6-dev-"
 
 def do_clean():
 	print("一些清理工作...")

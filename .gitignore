@@ -70,6 +70,7 @@ config/boot/boot.local.*
 config/boot/boot.winxp.properties
 config/boot/*.local.properties
 boot.local.*
+upload.config.json
 
 # 锁文件
 pid.lock

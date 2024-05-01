@@ -67,6 +67,19 @@ class DateClass:
     def __repr__(self):
         return "(%r,%r,%r)" % (self.year, self.month, self.day)
 
+def to_py_date(date_info):
+    """转换成python内置的date类型"""
+    if isinstance(date_info, str):
+        return datetime.date.fromisoformat(date_info)
+    assert isinstance(date_info, datetime.date)
+    return date_info
+
+def to_py_datetime(datetime_info):
+    """转换成python内置的datetime类型"""
+    if isinstance(datetime_info, str):
+        return datetime.datetime.fromisoformat(datetime_info)
+    assert isinstance(datetime_info, datetime.datetime)
+    return datetime_info
 
 def is_str(s):
     return isinstance(s, str)
@@ -80,6 +93,7 @@ def before(days=None, month=None, format=False):
     return None
 
 def days_before(days, format=False):
+    """获取N天前的日期"""
     seconds = time.time()
     seconds -= days * 3600 * 24
     if format:
@@ -303,10 +317,24 @@ def date_add(tm, years = 0, months = 0, days = 0):
         return date_obj.year, date_obj.month, date_obj.day
     return int(year), month, day
 
+def get_last_day_of_month(date_info: datetime.date):
+    """获取一个月的最后一天"""
+    new_day = get_days_of_month(date_info.year, date_info.month)
+    return datetime.date(date_info.year, date_info.month, new_day)
+
+def get_first_day_of_month(date_info: datetime.date):
+    """获取一个月的第一天"""
+    return datetime.date(date_info.year, date_info.month, 1)
+
+def get_last_day_of_year(date: datetime.date):
+    """获取一年的最后一天"""
+    return datetime.date(date.year, 12, 31)
+
 def is_leap_year(year):
+    """判断是否是闰年"""
     return ((year % 4 == 0) and (year % 100 != 0)) or (year % 400 == 0)
 
-def get_days_of_month(year, month):
+def get_days_of_month(year=2020, month=1):
     """获取指定月份的天数 (get days of a month)
         >>> get_days_of_month(2000, 2)
         29
@@ -325,35 +353,7 @@ def get_days_of_month(year, month):
             d = 28
     else:
         d = days[month-1]
-    return d;
-
-class Timer:
-
-    def __init__(self, name = "[unknown]"):
-        self.name = name
-
-    def start(self):
-        self.start_time = time.time()
-
-    def stop(self):
-        self.stop_time = time.time()
-
-    def __enter__(self):
-        self.start()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        import xutils
-        self.stop()
-        xutils.log("%s cost time: %s" % (self.name, self.cost()))
-
-
-    def cost(self):
-        return "%s ms" % int((self.stop_time - self.start_time) * 1000)
-
-    def cost_millis(self):
-        return int((self.stop_time - self.start_time) * 1000)
-
+    return d
 
 def match_time(year = None, month = None, day = None, wday = None, tm = None):
     if tm is None:

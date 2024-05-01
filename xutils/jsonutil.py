@@ -4,7 +4,7 @@
 @email        : kylen66
 @Date         : 2023-06-27 23:19:07
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-29 23:19:54
+@LastEditTime : 2024-05-02 00:02:36
 @FilePath     : /xnote/xutils/jsonutil.py
 @Description  : 描述
 """
@@ -20,9 +20,15 @@ class MyEncoder(json.JSONEncoder):
             return obj.strftime('%Y-%m-%d %H:%M:%S')
         elif isinstance(obj, date):
             return obj.strftime('%Y-%m-%d')
-        elif isinstance(obj, type(bytes)):
+        elif isinstance(obj, bytes):
             return str(obj, encoding='utf-8')
         elif isinstance(obj,uuid.UUID):
             return obj.hex
         else:
             return json.JSONEncoder.default(self, obj)
+
+
+def parse_json_to_dict(text=""):
+    result = json.loads(text)
+    assert isinstance(result, dict)
+    return result
