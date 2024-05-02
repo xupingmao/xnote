@@ -91,11 +91,12 @@ class TestMain(unittest.TestCase):
     def test_decode_name(self):
         self.assertEqual("a.txt", xutils.decode_name("a.txt"))
         self.assertEqual("a.txt", xutils.decode_name("YS50eHQ=.x0"))
+        self.assertEqual("a.txt", xutils.decode_name("YS50eHQ.x0"))
         self.assertEqual("a.txt", xutils.decode_name("YS50eHQ=.xenc"))
 
     def test_encode_name(self):
-        self.assertEqual("YS50eHQ=.x0", xutils.encode_name("a.txt"))
-        self.assertEqual("YS50eHQ=.x0", xutils.encode_name("YS50eHQ=.x0"))
+        self.assertEqual("YS50eHQ.x0", xutils.encode_name("a.txt"))
+        self.assertEqual("YS50eHQ.x0", xutils.encode_name("YS50eHQ.x0"))
 
     def test_edit_distance(self):
         self.assertEqual(1, xutils.edit_distance("abcd","abc"))
