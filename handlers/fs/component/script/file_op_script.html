@@ -9,43 +9,30 @@
 <script type="text/template" id="fileItemOptionDialog">
     <div class="card">
         <div class="align-center">
-            <button class="btn btn-default large" data-path="{{!filePath}}" 
+            <button class="btn btn-default huge" data-path="{{!filePath}}" 
                 onclick="xnote.action.fs.download(this);">下载</button>
-            <button class="btn btn-default large" 
+            <button class="btn btn-default huge" 
                 data-path="{{!filePath}}" 
                 data-name="{{!fileName}}"
+                data-realname="{{!fileRealName}}"
                 onclick="xnote.action.fs.rename(this);">重命名</button>
-            <button class="btn btn-default large" 
+            <button class="btn btn-default huge" 
                 data-path="{{!filePath}}"
                 data-name="{{!fileName}}"
+                data-realname="{{!fileRealName}}"
                 onclick="xnote.action.fs.delete(this);">删除</button>
-            <button class="btn btn-default large"
+            <button class="btn btn-default huge"
                 data-path="{{!filePath}}"
                 onclick="xnote.action.fs.move(this);">移动</button>
-            <button class="btn btn-default large"
+            <button class="btn btn-default huge"
                 onclick="xnote.action.fs.copy(this);">复制</button>
-            <button class="btn btn-default large"
+            <button class="btn btn-default huge"
                 onclick="xnote.action.fs.showDetail(this);">详细信息</button>
         </div>
     </div>
 </script>
 
 <script type="text/javascript">
-
-xnote.action.fs.openOptionDialog = function (target) {
-    console.log(window.event);
-    window.event.preventDefault();
-    window.event.stopPropagation();
-    console.log(target);
-    var filePath = $(target).attr("data-path");
-    var fileName = $(target).attr("data-name");
-    var html = $("#fileItemOptionDialog").render({
-        "filePath": filePath,
-        "fileName": fileName
-    });
-
-    xnote.openDialog("选项", html);
-};
 
 xnote.action.fs.download = function(target) {
     var path = $(target).attr("data-path");

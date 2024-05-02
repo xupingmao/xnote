@@ -43,7 +43,7 @@ WIN_MAXPATH = 260
 
 class FileUtilConfig:
     """文件util配置"""
-    use_urlencode = False
+    encode_name = False
     data_dir = ""
     tmp_dir = "/tmp"
 
@@ -54,7 +54,7 @@ def get_real_path(path):
     if path == "":
         return path
 
-    if FileUtilConfig.use_urlencode:
+    if FileUtilConfig.encode_name:
         return get_real_path_encode_first(path)
 
     # 如果文件存在,直接返回
@@ -206,7 +206,7 @@ def get_file_size(fpath, format=False):
     return size
 
 def list_file_objects(dirname, webpath=False):
-    import xconfig
+    from xnote.core import xconfig
     filelist = [
         FileItem(os.path.join(dirname, child)) for child in os.listdir(dirname)
     ]
@@ -255,6 +255,8 @@ def decode_name(name):
     namepart, ext = os.path.splitext(basename)
     if ext in (".xenc", ".x0"):
         try:
+            pad_size = 4 - len(namepart)%4
+            namepart += '=' * pad_size
             basename = base64.urlsafe_b64decode(
                 namepart.encode("utf-8")).decode("utf-8")
             return os.path.join(dirname, basename)
@@ -267,8 +269,9 @@ def encode_name(name):
     namepart, ext = os.path.splitext(name)
     if ext in (".xenc", ".x0"):
         return name
-    return base64.urlsafe_b64encode(
-        name.encode("utf-8")).decode("utf-8") + ".x0"
+    result = base64.urlsafe_b64encode(name.encode("utf-8")).decode("utf-8")
+    result = result.strip("=")
+    return result + ".x0"
 
 
 def path_equals(source, target):
@@ -591,7 +594,9 @@ class FileItem(Storage):
                  encode_path=True,
                  name=None):
         self.path = path
-        self.name = fixed_basename(path)
+        realname = fixed_basename(path)
+        self.name = realname
+        self.realname = realname
 
         self.size = '-'
         self.cdate = '-'
@@ -857,3 +862,14 @@ def get_free_space(folder):
 
 def is_same_file(path1, path2):
     return os.path.abspath(path1) == os.path.abspath(path2)
+
+
+def get_safe_file_name(filename: str):
+    """处理文件名中的特殊符号"""
+    for c in " @$:#\\|=&?":
+        filename = filename.replace(c, "_")
+    
+    quote_name = xutils.quote_unicode(filename)
+    if quote_name != filename:
+        return encode_name(filename)
+    return filename

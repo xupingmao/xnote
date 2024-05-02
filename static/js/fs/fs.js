@@ -30,6 +30,7 @@ FileAPI.rename = function(dirname, oldName, newName, callback) {
 FileView.delete = function(target) {
     var path = $(target).attr("data-path");
     var name = $(target).attr("data-name");
+        
     xnote.confirm("确定删除【" + name + "】?", function (value) {
         xnote.http.post("/fs_api/remove", {path: path}, function (resp) {
             if (resp.code == "success") {
@@ -45,10 +46,33 @@ FileView.delete = function(target) {
 FileView.rename = function(target) {
     var filePath = $(target).attr("data-path");
     var oldName = $(target).attr("data-name");
+    var realname = $(target).attr("data-realname");
+    if (xnote.isEmpty(realname)) {
+        realname = oldName;
+    }
+
     var dirname = $("#currentDir").val();
     xnote.prompt("输入新的文件名", oldName, function (newName) {
-        FileAPI.rename(dirname, oldName, newName, function(resp) {
+        FileAPI.rename(dirname, realname, newName, function(resp) {
             window.location.reload();
         });
     });
+};
+
+// 打开选项对话框
+FileView.openOptionDialog = function (target) {
+    console.log(window.event);
+    window.event.preventDefault();
+    window.event.stopPropagation();
+    console.log(target);
+    var filePath = $(target).attr("data-path");
+    var fileName = $(target).attr("data-name");
+    var fileRealName = $(target).attr("data-realname");
+    var html = $("#fileItemOptionDialog").render({
+        "filePath": filePath,
+        "fileName": fileName,
+        "fileRealName": fileRealName
+    });
+
+    xnote.openDialog("选项", html);
 };

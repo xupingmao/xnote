@@ -18,16 +18,17 @@ import datetime
 import mimetypes
 import web
 import xutils
+import logging
+
 from xnote.core import xauth
 from xnote.core import xconfig
 from xnote.core import xtemplate
 from xnote.core import xmanager
-import logging
-import multiprocessing
 from xnote.core import xnote_event
 
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
+from xutils import webutil
 from .fs_mode import get_fs_page_by_mode
 from .fs_helper import sort_files_by_size
 from . import fs_image
@@ -127,6 +128,7 @@ class FileSystemHandler:
         if type == "text":
             web.header("Content-Type", 'text/plain; charset=utf-8')
             return
+        
         if type == "blob":
             web.header("Content-Type", self.mime_types[""])
             fname = os.path.basename(path)
@@ -437,30 +439,30 @@ class RenameAjaxHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        dirname  = xutils.get_argument("dirname")
-        old_name = xutils.get_argument("old_name", "")
-        new_name = xutils.get_argument("new_name", "")
+        dirname  = xutils.get_argument_str("dirname")
+        old_name = xutils.get_argument_str("old_name", "")
+        new_name = xutils.get_argument_str("new_name", "")
         user_info = xauth.current_user()
         assert user_info != None
 
         user_name = user_info.name
 
-        assert isinstance(old_name, str)
-        assert isinstance(new_name, str)
-        assert isinstance(dirname, str)
-
         if dirname is None or dirname == "":
             return dict(code="fail", message="dirname is blank")
+        
         if old_name is None or old_name == "":
             return dict(code="fail", message="old_name is blank")
 
         if ".." in new_name:
             return dict(code="fail", message="invalid new name")
+        
         if new_name == "":
-            new_name = os.path.basename(old_name)
+            return webutil.FailedResult(code="400", message="新的文件名称为空")
+        
+        logging.info("encode_name=%s, new_name=%s", xconfig.USE_URLENCODE, new_name)
+
         if xconfig.USE_URLENCODE:
-            old_name = xutils.quote_unicode(old_name)
-            new_name = xutils.quote_unicode(new_name)
+            new_name = fsutil.get_safe_file_name(new_name)
 
         old_path = os.path.join(dirname, old_name)
         new_path = os.path.join(dirname, new_name)
@@ -533,7 +535,7 @@ class ListAjaxHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        fpath = xutils.get_argument("fpath")
+        fpath = xutils.get_argument_str("fpath")
         show_parent = xutils.get_argument_str("show_parent")
 
         if fpath == "" or fpath == None:

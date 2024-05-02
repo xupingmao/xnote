@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-27 21:17:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-20 21:47:14
+@LastEditTime : 2024-05-02 22:05:57
 @FilePath     : /xnote/xnote/core/xconfig.py
 @Description  : 描述
 """
@@ -88,7 +88,7 @@ OPEN_IN_BROWSER = False
 # 启用数据库的缓存搜索
 USE_CACHE_SEARCH = False
 # 文件系统使用urlencode方式,适用于只支持ASCII字符的系统
-USE_URLENCODE = False
+USE_URLENCODE = True
 # 初始化脚本
 INIT_SCRIPT = "init.py"
 
@@ -289,6 +289,10 @@ class FileConfig:
 
         cls.boot_lock_file = SystemConfig.get_str("boot_lock_file", "pid.lock")
         cls.enable_boot_lock = SystemConfig.get_bool("enable_boot_lock", True)
+
+        global USE_URLENCODE
+        USE_URLENCODE = SystemConfig.get_bool("fs_encode_name", True)
+        fsutil.FileUtilConfig.encode_name = USE_URLENCODE
 
     @classmethod
     def get_db_path(cls, dbname=""):

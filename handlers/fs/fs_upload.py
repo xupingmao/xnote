@@ -17,6 +17,7 @@ from xutils import webutil
 from xnote.core.xtemplate import T
 from xnote.core.xnote_event import FileUploadEvent
 from .fs_helper import FileInfoDao
+from xutils.fsutil import get_safe_file_name
 try:
     from PIL import Image
 except ImportError:
@@ -32,13 +33,6 @@ def get_link(filename, webpath):
     if xutils.is_img_file(filename):
         return "![%s](%s)" % (filename, webpath)
     return "[%s](%s)" % (filename, webpath)
-
-
-def get_safe_file_name(filename):
-    """处理文件名中的特殊符号"""
-    for c in " @$:#\\|=&?":
-        filename = filename.replace(c, "_")
-    return filename
 
 
 def generate_filename(filename, prefix="", ext=None):
@@ -123,7 +117,11 @@ def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=Fal
     """生成上传文件名"""
     from xnote.core import xconfig
     if xconfig.USE_URLENCODE:
+        origin_filename = filename
         filename = xutils.quote_unicode(filename)
+        if origin_filename != filename:
+            filename = xutils.encode_name(filename)
+
     basename, ext = os.path.splitext(filename)
     date = time.strftime("upload/%Y/%m")
     dirname = os.path.join(xconfig.DATA_PATH, upload_dir, user, date)
@@ -277,6 +275,7 @@ class RangeUploadHandler:
 
         with open(dest_path, "wb") as fp:
             for chunk in range(chunks):
+                filename = get_safe_file_name(filename)
                 tmp_path = os.path.join(dirname, filename)
                 tmp_path = "%s_%d.part" % (tmp_path, chunk)
                 if not os.path.exists(tmp_path):
@@ -317,66 +316,69 @@ class RangeUploadHandler:
         if ".." in dirname:
             return dict(code="fail", message="can not access parent directory")
 
+        if not hasattr(file, "filename"):
+            return webutil.FailedResult(code="400", message="请选择文件")
+        
+        if file.file is None:
+            return webutil.FailedResult(code="400", message="file.file is None")
+
         filename = None
         webpath = ""
         origin_name = ""
         filepath = ""
 
-        if hasattr(file, "filename"):
-            origin_name = file.filename
-            xutils.trace("UploadFile", file.filename)
-            if origin_name is None:
-                return webutil.FailedResult(code="400", message="file.filename is None")
-            
-            filename = os.path.basename(origin_name)
-            filename = get_safe_file_name(filename)
-            filename = xutils.get_real_path(filename)
-            if dirname == "auto":
-                filename = generate_filename(None, prefix)
-                filepath, webpath = get_upload_file_path(
-                    user_name, filename, rename_conflict=True)
-                dirname = os.path.dirname(filepath)
-                filename = os.path.basename(filepath)
-            else:
-                # check permission.
-                if xauth.current_role() != "admin":
-                    # 普通用户操作
-                    user_upload_dir = get_user_upload_dir(user_name)
-                    if not fsutil.is_parent_dir(user_upload_dir, dirname):
-                        return dict(code="403", message="无权操作")
+        origin_name = file.filename
+        xutils.trace("UploadFile", file.filename)
+        if origin_name is None:
+            return webutil.FailedResult(code="400", message="file.filename is None")
+        
+        filename = os.path.basename(origin_name)
+        filename = get_safe_file_name(filename)
 
-                filepath = os.path.join(dirname, filename)
-            
-            if self.is_fixed_name(origin_name):
-                filename = self.find_available_path(origin_name)
-                filepath = os.path.join(dirname, filename)
-
-            if chunk == 0:
-                lock = try_lock_file(filepath)
-
-            if os.path.exists(filepath):
-                # return dict(code = "fail", message = "文件已存在")
-                web.ctx.status = "500 Server Error"
-                return dict(code="fail", message="文件已存在")
-
-            if part_file:
-                tmp_name = "%s_%d.part" % (filename, chunk)
-                seek = 0
-            else:
-                tmp_name = filename
-                seek = chunk * chunksize
-
-            xutils.makedirs(dirname)
-            tmp_path = os.path.join(dirname, tmp_name)
-
-            with open(tmp_path, "wb") as fp:
-                fp.seek(seek)
-                if seek != 0:
-                    logging.info("seek to %s", seek)
-                for file_chunk in file.file:
-                    fp.write(file_chunk)
+        if dirname == "auto":
+            filename = generate_filename(None, prefix)
+            filepath, webpath = get_upload_file_path(
+                user_name, filename, rename_conflict=True)
+            dirname = os.path.dirname(filepath)
+            filename = os.path.basename(filepath)
         else:
-            return dict(code="fail", message=u"请选择文件")
+            # check permission.
+            if xauth.current_role() != "admin":
+                # 普通用户操作
+                user_upload_dir = get_user_upload_dir(user_name)
+                if not fsutil.is_parent_dir(user_upload_dir, dirname):
+                    return dict(code="403", message="无权操作")
+
+            filepath = os.path.join(dirname, filename)
+        
+        if self.is_fixed_name(origin_name):
+            filename = self.find_available_path(origin_name)
+            filepath = os.path.join(dirname, filename)
+
+        if chunk == 0:
+            lock = try_lock_file(filepath)
+
+        if os.path.exists(filepath):
+            # return dict(code = "fail", message = "文件已存在")
+            web.ctx.status = "500 Server Error"
+            return dict(code="fail", message="文件已存在")
+
+        if part_file:
+            tmp_name = "%s_%d.part" % (filename, chunk)
+            seek = 0
+        else:
+            tmp_name = filename
+            seek = chunk * chunksize
+
+        xutils.makedirs(dirname)
+        tmp_path = os.path.join(dirname, tmp_name)
+
+        with open(tmp_path, "wb") as fp:
+            fp.seek(seek)
+            if seek != 0:
+                logging.info("seek to %s", seek)
+            for file_chunk in file.file:
+                fp.write(file_chunk)
         
         if part_file and chunk+1 == chunks:
             self.merge_files(dirname, filename, chunks)

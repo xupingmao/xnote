@@ -192,14 +192,6 @@ def obj2dict(obj):
         return None
     return dict(**obj.__dict__)
 
-
-def get_safe_file_name(filename):
-    """处理文件名中的特殊符号"""
-    for c in " @$:#\\|":
-        filename = filename.replace(c, "_")
-    return filename
-
-
 #################################################################
 ##   Platform/OS Utilities, Python 2 do not have this file
 #################################################################
