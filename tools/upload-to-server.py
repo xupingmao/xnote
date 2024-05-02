@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-05-01 20:48:16
 @LastEditors  : xupingmao
-@LastEditTime : 2024-05-02 00:35:30
+@LastEditTime : 2024-05-02 20:59:13
 @FilePath     : /xnote/tools/upload-to-server.py
 @Description  : 上传文件到服务器
 """
@@ -62,7 +62,6 @@ class Uploader:
                 target_file = self.get_target_file(fpath, dirname, target_dirname)
                 print(f"upload {fpath} to {target_file}")
                 self.do_upload(fpath, target_file)
-                sys.exit(0)
     
     def do_upload(self, fpath="", target_file=""):
         record = self.db.select_first(where=dict(remote_file=target_file))
