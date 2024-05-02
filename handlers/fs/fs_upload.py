@@ -157,6 +157,16 @@ class UploadHandler:
 
     @xauth.login_required()
     def POST(self):
+        try:
+            return self.do_post()
+        except Exception as e:
+            err_stack = xutils.print_exc()
+            err_msg = str(e)
+            if xauth.is_admin():
+                err_msg = err_stack
+            return webutil.FailedResult(code="500", message=err_msg)
+        
+    def do_post(self):
         file = xutils.get_argument_field_storage("file")
         prefix = xutils.get_argument_str("prefix")
         name = xutils.get_argument_str("name")
