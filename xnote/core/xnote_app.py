@@ -111,7 +111,6 @@ def handle_args_and_init_config(boot_config_kw=None):
     web.config.minthreads = xconfig.MIN_THREADS
 
     xconfig.USE_CACHE_SEARCH = get_bool_by_sys_arg(args.useCacheSearch)
-    xconfig.USE_URLENCODE = get_bool_by_sys_arg(args.useUrlencode)
     xconfig.IS_TEST = get_bool_by_sys_arg(args.test)
 
     if xconfig.DEBUG:
@@ -289,7 +288,7 @@ def init_xutils():
     xutils.init(xconfig)
     from xutils.fsutil import FileUtilConfig
     FileUtilConfig.data_dir = xconfig.FileConfig.data_dir
-    FileUtilConfig.use_urlencode = xconfig.USE_URLENCODE
+    FileUtilConfig.encode_name = xconfig.USE_URLENCODE
     FileUtilConfig.tmp_dir = xconfig.FileConfig.tmp_dir
 
 def init_app_internal(boot_config_kw=None):

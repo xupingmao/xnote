@@ -68,11 +68,34 @@ FileView.openOptionDialog = function (target) {
     var filePath = $(target).attr("data-path");
     var fileName = $(target).attr("data-name");
     var fileRealName = $(target).attr("data-realname");
+    var dialogId = xnote.dialog.createNewId();
+
     var html = $("#fileItemOptionDialog").render({
         "filePath": filePath,
         "fileName": fileName,
-        "fileRealName": fileRealName
+        "fileRealName": fileRealName,
+        "dialogId": dialogId,
     });
 
-    xnote.openDialog("选项", html);
+    var options = {};
+    options.title = "选项";
+    options.html  = html;
+    options.dialogId = dialogId;
+
+    xnote.openDialogEx(options);
+};
+
+// 查看文件详情
+FileView.showDetail = function(target) {
+    var dataPath = $(target).attr("data-path");
+    var params = {fpath: dataPath};
+    xnote.http.get("/fs_api/detail", params, function(resp) {
+        var message = ""
+        if (resp.success) {
+            message = resp.data;
+        } else {
+            message = resp.message;
+        }
+        xnote.showTextDialog("文件详情", message);
+    })
 };

@@ -76,8 +76,12 @@ xnote.table.handleConfirmAction = function (target) {
 xnote.table.handleEditForm = function (target) {
     var url = $(target).attr("data-url");
     var title = $(target).attr("data-title");
+
     xnote.http.get(url, function (respHtml) {
-        xnote.showDialog(title, respHtml);
+        var options = {};
+        options.title = title;
+        options.html = respHtml;
+        xnote.showDialogEx(options);
     });
 }
 

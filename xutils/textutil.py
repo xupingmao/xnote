@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-04-17 17:04:15
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-04 11:39:23
+@LastEditTime : 2024-05-03 12:41:40
 @FilePath     : /xnote/xutils/textutil.py
 @Description  : 文本处理工具
 """
@@ -21,6 +21,7 @@ import hashlib
 import base64
 from xutils.imports import is_str, ConfigParser
 from xutils.textutil_url import *
+from collections import OrderedDict
 
 try:
     from urllib.parse import quote, unquote
@@ -383,6 +384,7 @@ def byte2str(buf):
 def edit_distance0(a, b, la, lb, cache=None, replace_step=2):
     # 典型的可以使用动态规划，为了可读性，依旧保持原来的递归求解结构
     # 对于这种纯粹的函数，提供装饰器或者在虚拟机进行优化更方便理解
+    assert isinstance(cache, list)
     if cache[la][lb] >= 0:
         return cache[la][lb]
     if la == 0:
@@ -617,12 +619,12 @@ def get_doctype(text):
 def is_img_file(filename):
     """根据文件后缀判断是否是图片"""
     import os
-    import xconfig
+    from xnote.core import xconfig
     name, ext = os.path.splitext(filename)
     return ext.lower() in xconfig.FS_IMG_EXT_LIST
 
 def mark_text(content):
-    import xconfig
+    from xnote.core import xconfig
     from xutils.text_parser import TextParser, set_img_file_ext
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
@@ -672,19 +674,6 @@ def split_words(search_key):
     # print(words)
     return words
 
- 
-def escape_html(text):
-    """html转义, 参考`lib/tornado/escape.py`"""
-    # 必须先处理&
-    text = text.replace("&", "&amp;")
-    text = text.replace("<", "&lt;")
-    text = text.replace(">", "&gt;")
-    text = text.replace('"', "&quot;")
-    text = text.replace(" ", "&nbsp;")
-    text = text.replace("'", "&#39;")
-    text = text.replace("\n", "<br/>")
-    return text
-
 
 def try_split_key_value(line, token=":"):
     if line is None:
@@ -723,6 +712,18 @@ def html_escape(s, quote=True):
         s = s.replace('"', "&quot;")
         s = s.replace('\'', "&#x27;")
     return s
+
+def escape_html(text):
+    """html转义, 参考`lib/tornado/escape.py`"""
+    # 必须先处理&
+    text = text.replace("&", "&amp;")
+    text = text.replace("<", "&lt;")
+    text = text.replace(">", "&gt;")
+    text = text.replace('"', "&quot;")
+    text = text.replace(" ", "&nbsp;")
+    text = text.replace("'", "&#39;")
+    text = text.replace("\n", "<br/>")
+    return text
 
 def urlsafe_b64encode(text):
     """URL安全的base64编码，注意Python自带的方法没有处理填充字符=
@@ -777,8 +778,8 @@ class Properties(object):
     def __init__(self, fileName, ordered = True): 
         self.ordered = ordered
         self.fileName = fileName
-        self.properties = None
-        self.properties_list = None
+        self.properties = None     # 层次化的属性
+        self.flat_properties = {}  # 摊平的属性键值对
         self.load_properties()
 
     def new_dict(self):
@@ -805,7 +806,7 @@ class Properties(object):
 
     def load_properties(self): 
         self.properties = self.new_dict()
-        self.properties_list = self.new_dict()
+        self.flat_properties = self.new_dict()
         with open(self.fileName, 'r', encoding="utf-8") as pro_file: 
             for line in pro_file.readlines(): 
                 line = line.strip().replace('\n', '') 
@@ -815,14 +816,14 @@ class Properties(object):
                     strs = line.split('=') 
                     strs[1]= line[len(strs[0])+1:] 
                     self._set_dict(strs[0], self.properties,strs[1]) 
-                    self.properties_list[strs[0].strip()] = strs[1].strip()
+                    self.flat_properties[strs[0].strip()] = strs[1].strip()
         return self.properties
 
     def get_properties(self):
         return self.properties
 
     def get_property(self, key, default_value=None):
-        return self.properties_list.get(key, default_value)
+        return self.flat_properties.get(key, default_value)
 
     def reload(self):
         self.load_properties()

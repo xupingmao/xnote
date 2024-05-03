@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-01-10 14:36:09
 @LastEditors  : xupingmao
-@LastEditTime : 2023-08-19 11:48:48
+@LastEditTime : 2024-05-03 12:48:22
 @FilePath     : /xnote/xutils/text_parser.py
 @Description  : 描述
 """
@@ -22,7 +22,9 @@
 import os
 from urllib.parse import quote, unquote
 
-IMG_EXT_SET = set([".png", ".jpg", ".gif"])
+
+class TextParserConfig:
+    img_ext_set = set([".png", ".jpg", ".gif"])
 
 def invoke_deco(prefix = ""):
     """日志装饰器"""
@@ -40,12 +42,13 @@ def invoke_deco(prefix = ""):
 
 def is_img_file(filename):
     """根据文件后缀判断是否是图片"""
-    name, ext = os.path.splitext(filename)
-    return ext.lower() in IMG_EXT_SET
+    from xutils import fsutil
+    realname = fsutil.decode_name(filename)
+    name, ext = os.path.splitext(realname)
+    return ext.lower() in TextParserConfig.img_ext_set
 
 def set_img_file_ext(img_set):
-    global IMG_EXT_SET
-    IMG_EXT_SET = img_set
+    TextParserConfig.img_ext_set = img_set
 
 def escape_html(text):
     # 必须先处理&
@@ -467,6 +470,7 @@ class TextParser(TextParserBase):
             self.tokens.append(token)
 
     def mark_file(self):
+        from xutils import fsutil
         self.profile("mark_file")
 
         self.save_str_token()
@@ -477,7 +481,7 @@ class TextParser(TextParserBase):
         else:
             name = href[href.rfind("/")+1:]
             # 尝试urldecode名称
-            name = unquote(name)
+            name = fsutil.decode_name(name)
             token = '<a href="%s">%s</a>' % (href, name)
             self.tokens.append(token)
 

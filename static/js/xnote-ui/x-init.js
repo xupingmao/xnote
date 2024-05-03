@@ -48,8 +48,13 @@ if (window.xnote === undefined) {
     xnote.table = {};
     // 编辑器模块
     xnote.editor = {};
+    // 对话框模块
+    xnote.dialog = {};
+
     // 业务状态
     xnote.state = {};
+    // ID计数器
+    xnote.state.currentId = 0;
     // 系统状态
     xnote.state.system = {};
     // 按键弹起的时间
@@ -70,6 +75,11 @@ xnote.registerApiModule = function (name) {
         xnote.api[name] = {};
     }
 };
+
+xnote.createNewId = function() {
+    xnote.state.currentId++;
+    return xnote.state.currentId;
+}
 
 /**
  * 注册API

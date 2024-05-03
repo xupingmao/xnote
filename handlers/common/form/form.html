@@ -15,9 +15,6 @@
         height: 50px;
     }
     .form-body {
-        padding: 10px;
-    }
-    .form-body {
         position: absolute;
         padding: 10px;
         top: 0px;
@@ -66,7 +63,7 @@
 <div class="form-footer">
     <div class="float-right">
         <button class="large" onclick="xnote.handleFormSubmit(this)" data-form-id="xnoteForm{{_xnote_form.id}}">保存</button>
-        <button class="large btn-default" onclick="xnote.closeFormDialog(this)" data-form-id="xnoteForm{{_xnote_form.id}}">关闭</button>
+        <button class="large btn-default" onclick="xnote.dialog.closeLast(this)" data-form-id="xnoteForm{{_xnote_form.id}}">关闭</button>
     </div>
 </div>
 
@@ -89,10 +86,6 @@
                 xnote.toast(resp.message);
             }
         });
-    }
-
-    xnote.closeFormDialog = function (target) {
-        xnote.closeDialog("last");
     }
 
     $(".form-date").click(function(event) {

@@ -46,6 +46,7 @@ class FileUtilConfig:
     encode_name = False
     data_dir = ""
     tmp_dir = "/tmp"
+    encode_name_ext = (".x0", ".xenc")
 
 def get_real_path(path):
     """获取真实的path信息，如果配置了urlencode，强制进行urlencode，否则先按原路径检查，如果文件不存在，再进行urlencode
@@ -154,7 +155,7 @@ def get_file_ext(fname):
         return ""
     return ext
 
-def format_size(size):
+def format_size(size: int):
     """格式化大小
 
     >>> format_size(10240)
@@ -180,7 +181,6 @@ def format_size(size):
         return '%.2fT' % (float(size) / 1024**4)
     else:
         return "%.2fP" % (float(size) / 1024**5)
-
 
 def format_file_size(fpath):
     """获取文件大小,返回文本格式"""
@@ -249,11 +249,12 @@ def splitpath(path):
     return split_path_to_objects(path)
 
 
-def decode_name(name):
+def decode_name(name: str):
+    """将文件名解码成可读的名称"""
     dirname = os.path.dirname(name)
     basename = os.path.basename(name)
     namepart, ext = os.path.splitext(basename)
-    if ext in (".xenc", ".x0"):
+    if ext in FileUtilConfig.encode_name_ext:
         try:
             pad_size = 4 - len(namepart)%4
             namepart += '=' * pad_size
@@ -261,13 +262,14 @@ def decode_name(name):
                 namepart.encode("utf-8")).decode("utf-8")
             return os.path.join(dirname, basename)
         except:
-            return name
-    return name
+            pass
+    return xutils.unquote(name)
 
 
-def encode_name(name):
+def encode_name(name: str):
+    """对文件名进行编码,以避免文件系统的编码问题"""
     namepart, ext = os.path.splitext(name)
-    if ext in (".xenc", ".x0"):
+    if ext in FileUtilConfig.encode_name_ext:
         return name
     result = base64.urlsafe_b64encode(name.encode("utf-8")).decode("utf-8")
     result = result.strip("=")

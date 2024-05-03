@@ -7,7 +7,7 @@
 <input type="hidden" id="currentPath" value="{{path}}">
 
 <script type="text/template" id="fileItemOptionDialog">
-    <div class="card">
+    <div class="card dialog-body">
         <div class="align-center">
             <button class="btn btn-default huge" data-path="{{!filePath}}" 
                 onclick="xnote.action.fs.download(this);">下载</button>
@@ -27,7 +27,14 @@
             <button class="btn btn-default huge"
                 onclick="xnote.action.fs.copy(this);">复制</button>
             <button class="btn btn-default huge"
+                data-path="{{!filePath}}"
                 onclick="xnote.action.fs.showDetail(this);">详细信息</button>
+        </div>
+    </div>
+
+    <div class="dialog-footer">
+        <div class="float-right">
+            <button class="large btn-default" data-dialog-id="{{!dialogId}}" onclick="xnote.dialog.closeByElement(this)">关闭</button>
         </div>
     </div>
 </script>
@@ -48,10 +55,6 @@ xnote.action.fs.move = function(target) {
 };
 
 xnote.action.fs.copy = function(target) {
-    xnote.alert("功能开发中...");
-};
-
-xnote.action.fs.showDetail = function(target) {
     xnote.alert("功能开发中...");
 };
 

@@ -1,9 +1,10 @@
 # encoding=utf-8
+
+from . import test_base
 import sys
 import os
 import time
 import random
-sys.path.insert(1, "lib")
 import unittest
 import xutils
 from xnote.core import xconfig
@@ -171,6 +172,10 @@ class TestMain(unittest.TestCase):
         # text = 'Link [name](/http)'
         # html = xutils.mark_text(text)
         # self.assertEqual('Link&nbsp;<a href="/http">name</a>', html)
+        text = "file:///data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0"
+        html = xutils.mark_text(text)
+        expect_html = """<div class="msg-img-box"><img class="msg-img x-photo" alt="/data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0" src="/data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0"></div>"""
+        self.assertEqual(expect_html, html)
 
     def test_marked_text_parser(self):
         from xutils.text_parser import runtest

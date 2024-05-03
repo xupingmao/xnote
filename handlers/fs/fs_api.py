@@ -4,13 +4,15 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-22 00:17:06
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-22 00:20:57
+@LastEditTime : 2024-05-03 13:35:45
 @FilePath     : /xnote/handlers/fs/fs_api.py
 @Description  : 文件API
 """
 
+import os
 import xutils
-import xauth
+from xutils import webutil, dateutil, fsutil
+from xnote.core import xauth
 
 class FileConfigHandler:
 
@@ -29,6 +31,29 @@ class FileConfigHandler:
         xauth.update_user_config(user_name, "fs_order", order)
         return dict(code = "success")
 
+
+class FileDetailHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        fpath = xutils.get_argument_str("fpath")
+        try:
+            basename = os.path.basename(fpath)
+            display_name = xutils.decode_name(basename)
+            stat = os.stat(fpath)
+            detail_msg = ""
+            detail_msg += f"文件路径: {fpath}"
+            detail_msg += f"\n展示名称: {display_name}"
+            detail_msg += f"\n修改时间: {dateutil.format_datetime(stat.st_mtime)}"
+            detail_msg += f"\n变更时间: {dateutil.format_datetime(stat.st_ctime)}"
+            detail_msg += f"\n访问时间: {dateutil.format_datetime(stat.st_atime)}"
+            detail_msg += f"\n文件大小: {fsutil.format_size(stat.st_size)}"
+            return webutil.SuccessResult(data=detail_msg)
+        except:
+            xutils.print_exc()
+            return webutil.FailedResult(code="500", message="读取文件信息失败")
+
 xurls = (
-    r"/fs_api/config", FileConfigHandler
+    r"/fs_api/config", FileConfigHandler,
+    r"/fs_api/detail", FileDetailHandler,
 )

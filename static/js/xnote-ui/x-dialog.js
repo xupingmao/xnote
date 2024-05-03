@@ -31,6 +31,19 @@ if (window.xnote === undefined) {
     throw new Error("xnote is undefined!");
 }
 
+var xnoteDialogModule = {}
+xnote.dialog = xnoteDialogModule;
+
+xnoteDialogModule.idToIndexMap = {};
+xnoteDialogModule.layerIndexStack = [];
+
+xnoteDialogModule.handleOptions = function (options) {
+    if (options.dialogId === undefined) {
+        options.dialogId = this.createNewId();
+    }
+    return options;
+}
+
 xnote.getDialogArea = function () {
     if (isMobile()) {
         return ['100%', '100%'];
@@ -64,7 +77,7 @@ xnote.getNewDialogId = function () {
     return "_xnoteDialog" + dialogId;
 }
 
-xnote.showIframeDialog = function (title, url, buttons, functions) {
+xnoteDialogModule.showIframeDialog = function (title, url, buttons, functions) {
     var area = getDialogArea();
     return layer.open({
         type: 2,
@@ -80,9 +93,9 @@ xnote.showIframeDialog = function (title, url, buttons, functions) {
 }
 
 // 关闭对话框的入口方法
-xnote.closeDialog = function (flag) {
+xnoteDialogModule.closeDialog = function (flag) {
     if (flag === "last") {
-        var lastId = xnote._dialogIdStack.pop();
+        var lastId = xnoteDialogModule.layerIndexStack.pop();
         layer.close(lastId);
     }
 
@@ -92,14 +105,15 @@ xnote.closeDialog = function (flag) {
     }
 }
 
-xnote.openDialogEx = function (options) {
-    var dialogId = xnote.openDialogExInner(options);
-    xnote._dialogIdStack.push(dialogId);
-    return dialogId;
+// 打开对话框
+xnoteDialogModule.openDialogEx = function (options) {
+    var layerIndex = xnoteDialogModule.openDialogExInner(options);
+    xnoteDialogModule.layerIndexStack.push(layerIndex);
+    return layerIndex;
 }
 
 xnote.showDialogEx = function () {
-    return xnote.openDialogEx.apply(this, arguments);
+    return xnoteDialogModule.openDialogEx.apply(xnoteDialogModule, arguments);
 }
 
 /**
@@ -112,7 +126,9 @@ xnote.showDialogEx = function () {
  * @param {boolean} options.closeForYes 成功后是否关闭对话框(默认关闭)
  * @returns index
  */
-xnote.openDialogExInner = function (options) {
+xnoteDialogModule.openDialogExInner = function (options) {
+    options = xnoteDialogModule.handleOptions(options);
+
     var area = options.area;
     var title = options.title;
     var html  = options.html;
@@ -127,6 +143,7 @@ xnote.openDialogExInner = function (options) {
     var defaultValues = options.defaultValues; // 模板的默认值
     var yesFunction = function(index, layero, dialogInfo) {};
     var successFunction = function(layero, index, that/*原型链的this对象*/) {};
+    var dialogId = options.dialogId;
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数
@@ -142,8 +159,6 @@ xnote.openDialogExInner = function (options) {
     if (template !== undefined && html !== undefined) {
         throw new Error("不能同时设置template和html选项");
     }
-
-    var dialogId = "";
 
     if (template !== undefined) {
         var templateBody = $(template).html();
@@ -211,6 +226,9 @@ xnote.openDialogExInner = function (options) {
 
     var index = layer.open(params);
 
+    // id映射
+    xnoteDialogModule.idToIndexMap[dialogId] = index;
+
     // 打开对话框的回调
     if (onOpenFn) {
         onOpenFn(index);
@@ -226,24 +244,52 @@ xnote.openDialogExInner = function (options) {
  * @param {array} functions 函数列表
  * @returns 弹层的索引
  */
-xnote.openDialog = function(title, html, buttons, functions) {
+xnoteDialogModule.openDialog = function(title, html, buttons, functions) {
     var options = {};
     options.title = title;
     options.html  = html;
     options.buttons = buttons;
     options.functions = functions;
-    return xnote.showDialogEx(options);
+    return xnoteDialogModule.openDialogEx(options);
 }
 
-xnote.showDialog = function () {
-    return xnote.openDialog.apply(this, arguments);
+xnoteDialogModule.showDialog = function () {
+    return xnoteDialogModule.openDialog.apply(xnoteDialogModule, arguments);
 }
 
 // 打开文本对话框
-xnote.openTextDialog = function(title, text, buttons, functions, features) {
+xnoteDialogModule.openTextDialog = function(title, text, buttons, functions, features) {
     var req = {};
+    var dialogId = xnoteDialogModule.createNewId();
+
     req.title = title;
-    req.html  = $("<textarea>").addClass("dialog-textarea").text(text).prop("outerHTML");
+    req.dialogId = dialogId;
+/*
+<div class="card dialog-body">
+    <textarea class="dialog-textarea"></textarea>
+</div>
+
+<div class="dialog-footer">
+    <div class="float-right">
+        <button class="large btn-default" data-dialog-id="{{!dialogId}}" onclick="xnote.dialog.closeByElement(this)">关闭</button>
+    </div>
+</div>
+ */
+    var div = $("<div>");
+    var textarea = $("<textarea>").addClass("dialog-textarea").text(text);
+    var dialogBody = $("<div>").addClass("card dialog-body").append(textarea);
+    var btnBox = $("<div>").addClass("float-right");
+    var closeBtn = $("<button>").attr("data-dialog-id", dialogId).addClass("large btn-default").attr("onclick", "xnote.dialog.closeByElement(this)").text("关闭");
+    var dialogFooter = $("<div>").addClass("dialog-footer").append(btnBox.append(closeBtn));
+
+    if (buttons === undefined) {
+        div.append(dialogBody);
+        div.append(dialogFooter);
+    } else {
+        div.append(textarea);
+    }
+
+    req.html = div.html();
     req.buttons = buttons;
     req.functions = functions;
     if (features != undefined) {
@@ -261,25 +307,20 @@ xnote._updateDialogFeatures = function (options, features) {
     }
 }
 
-// 别名
-xnote.showTextDialog = xnote.openTextDialog;
-
 /**
  * 打开ajax对话框
  * @param {object} options 打开选项
  */
-xnote.openAjaxDialogEx = function (options) {
+xnoteDialogModule.openAjaxDialogEx = function (options) {
     var respFilter = xnote.getOrDefault(options.respFilter, function (resp) {
         return resp;
     });
 
-    $.get(options.url, function (resp) {
+    xnote.http.get(options.url, function (resp) {
         options.html = respFilter(resp);
         xnote.showDialogEx(options);
         // 刷新各种组件的默认值
         xnote.refresh();
-    }).fail(function (error) {
-        xnote.alert("调用接口失败，请重试");
     });
 }
 
@@ -290,19 +331,19 @@ xnote.openAjaxDialogEx = function (options) {
  * @param {list<string>} buttons 按钮名称
  * @param {list<function>} functions 按钮对应的函数
  */
-xnote.openAjaxDialog = function(title, url, buttons, functions) {
+xnoteDialogModule.openAjaxDialog = function(title, url, buttons, functions) {
     var options = {};
     options.title = title;
     options.buttons = buttons;
     options.functions = functions;
     options.url = url;
     
-    return xnote.openAjaxDialogEx(options);
+    return xnoteDialogModule.openAjaxDialogEx(options);
 }
 
 // 函数别名
-xnote.showAjaxDialog = function () {
-    return xnote.openAjaxDialog.apply(this, arguments);
+xnoteDialogModule.showAjaxDialog = function () {
+    return xnoteDialogModule.openAjaxDialog.apply(xnoteDialogModule, arguments);
 }
 
 // 询问函数，原生prompt的替代方案
@@ -422,7 +463,7 @@ window.showToast = window.xnote.toast;
 /**
  * 展示选项对话框
  */
-xnote.showOptionDialog = function (option) {
+xnoteDialogModule.showOptionDialog = function (option) {
     var content = option.html;
     if (option.title === undefined) {
         option.title = false;
@@ -578,3 +619,36 @@ $(function () {
 
     xnote.initDialog = initDialog;
 });
+
+// 通过html元素来关闭对话框
+xnoteDialogModule.closeByElement = function (target) {
+    var dialogId = $(target).attr("data-dialog-id");
+    var index = xnoteDialogModule.idToIndexMap[dialogId];
+    layer.close(index);
+}
+
+xnoteDialogModule.closeLast = function () {
+    xnoteDialogModule.closeDialog("last");
+}
+
+xnoteDialogModule.createNewId = function() {
+    return "dialog_" + xnote.createNewId();
+}
+
+// 别名
+xnote.openAjaxDialog = xnoteDialogModule.openAjaxDialog;
+xnote.openAjaxDialogEx = xnoteDialogModule.openAjaxDialogEx;
+xnote.showAjaxDialog = xnoteDialogModule.showAjaxDialog;
+
+xnote.showDialog = xnoteDialogModule.showDialog;
+xnote.showDialogEx = xnoteDialogModule.openDialogEx;
+xnote.openDialogEx = xnoteDialogModule.openDialogEx; 
+xnote.openDialogExInner = xnoteDialogModule.openDialogExInner;
+xnote.openDialog = xnoteDialogModule.openDialog;
+xnote.closeDialog = xnoteDialogModule.closeDialog;
+
+xnote.showIframeDialog = xnoteDialogModule.showIframeDialog;
+
+xnote.showTextDialog = xnoteDialogModule.openTextDialog;
+xnote.openTextDialog = xnoteDialogModule.openTextDialog;
+xnote.showOptionDialog = xnoteDialogModule.showOptionDialog;

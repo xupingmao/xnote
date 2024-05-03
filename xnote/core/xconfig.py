@@ -191,7 +191,7 @@ FS_LINK = "/fs_list"
 FS_VIEW_MODE = "list"
 # 文本文件后缀
 FS_TEXT_EXT_LIST = set()
-FS_IMG_EXT_LIST = set()
+FS_IMG_EXT_LIST = set([".jpg", ".png", ".gif"])
 FS_CODE_EXT_LIST = set()
 MIME_TYPES = dict()
 

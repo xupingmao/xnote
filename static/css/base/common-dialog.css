@@ -8,8 +8,29 @@
 
 .dialog-textarea {
     position: absolute;
-    width: 100%;
+    left: 0px;
+    right: 0px;
     font-size: 14px;
     top: 0px;
     bottom: 0px;
+}
+
+
+.dialog-body {
+    position: absolute;
+    padding: 10px;
+    top: 0px;
+    bottom: 50px;
+    overflow-y: auto;
+    right: 0px;
+    left: 0px;
+}
+
+.dialog-footer {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    height: 50px;
+    padding: 10px;
 }
