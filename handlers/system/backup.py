@@ -260,7 +260,7 @@ class DBBackup:
             self.clean()
             
             job_info.job_status = JobStatusEnum.success
-            job_info.job_result = "备份任务完成"
+            job_info.job_result = f"备份任务完成, 耗时{cost_time}ms"
             job_info.mtime = dateutil.format_datetime()
 
             return dict(count = count, cost_time = "%sms" % cost_time)
