@@ -14,9 +14,11 @@ import time
 import math
 from xutils import fsutil, Storage, dateutil
 from xutils import webutil
+from xutils.base import XnoteException
 from xnote.core.xtemplate import T
 from xnote.core.xnote_event import FileUploadEvent
 from .fs_helper import FileInfoDao
+from handlers.fs import fs_checker
 from xutils.fsutil import get_safe_file_name
 try:
     from PIL import Image
@@ -157,6 +159,8 @@ class UploadHandler:
     def POST(self):
         try:
             return self.do_post()
+        except XnoteException as e:
+            return webutil.FailedResult(code=e.code, message=e.message)
         except Exception as e:
             err_stack = xutils.print_exc()
             err_msg = str(e)
@@ -183,6 +187,8 @@ class UploadHandler:
         if file.filename is None:
             return webutil.FailedResult(code="400", message="file.filename is None")
         
+        fs_checker.check_file_name(file.filename)
+
         filename = get_safe_file_name(file.filename)
         basename, ext = os.path.splitext(filename)
         if name == "auto":
@@ -299,8 +305,14 @@ class RangeUploadHandler:
         assert name == "image"
         return name + "_" + xutils.create_uuid() + ext
 
-    @xauth.login_required()
     def POST(self):
+        try:
+            return self.do_post()
+        except XnoteException as e:
+            return webutil.FailedResult(code=e.code, message=e.message)
+
+    @xauth.login_required()
+    def do_post(self):
         user_name = xauth.current_name()
         part_file = True
         chunksize = 5 * 1024 * 1024
@@ -321,6 +333,8 @@ class RangeUploadHandler:
         
         if file.file is None:
             return webutil.FailedResult(code="400", message="file.file is None")
+        if file.filename is None:
+            return webutil.FailedResult(code="400", message="file.filename is None")
 
         filename = None
         webpath = ""
@@ -328,9 +342,9 @@ class RangeUploadHandler:
         filepath = ""
 
         origin_name = file.filename
+        fs_checker.check_file_name(origin_name)
+
         xutils.trace("UploadFile", file.filename)
-        if origin_name is None:
-            return webutil.FailedResult(code="400", message="file.filename is None")
         
         filename = os.path.basename(origin_name)
         filename = get_safe_file_name(filename)

@@ -147,13 +147,13 @@ def detect_encoding(fpath, raise_error=True):
 
 def get_file_ext(fname):
     """获取文件扩展名,不带dot符号"""
-    if '.' not in fname:
-        return ''
-    ext = fname.split('.')[-1]
+    realname = decode_name(fname)
+    name, ext = os.path.splitext(realname)
+    ext = ext.strip(".")
     if len(ext) > 5:
         # 太长的扩展名视作无效
         return ""
-    return ext
+    return ext.lower()
 
 def format_size(size: int):
     """格式化大小
@@ -875,3 +875,29 @@ def get_safe_file_name(filename: str):
     if quote_name != filename:
         return encode_name(filename)
     return filename
+
+def do_check_file_type(filename, target_set):
+    """根据文件后缀判断是否是图片"""
+    realname = decode_name(filename)
+    name, ext = os.path.splitext(realname)
+    return ext.lower() in target_set
+
+def is_img_file(filename):
+    """根据文件后缀判断是否是图片"""
+    return do_check_file_type(filename, xutils.FS_IMG_EXT_LIST)
+
+def is_text_file(filename):
+    """根据文件后缀判断是否是文本文件"""
+    return do_check_file_type(filename, xutils.FS_TEXT_EXT_LIST)
+
+def is_audio_file(filename):
+    return do_check_file_type(filename, xutils.FS_AUDIO_EXT_LIST)
+
+def is_code_file(filename):
+    return do_check_file_type(filename, xutils.FS_CODE_EXT_LIST)
+
+def get_text_ext():
+    return xutils.FS_TEXT_EXT_LIST
+
+def is_editable(fpath):
+    return is_text_file(fpath) or is_code_file(fpath)

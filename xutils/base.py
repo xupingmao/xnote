@@ -67,6 +67,12 @@ class Storage(dict):
         return '<MyStorage ' + dict.__repr__(self) + '>'
 
 
+class XnoteException(Exception):
+    def __init__(self, code="500", message=""):
+        super(XnoteException, self).__init__(message)
+        self.code = code
+        self.message = message
+
 
 def print_exc():
     """打印系统异常堆栈"""

@@ -433,9 +433,11 @@ def init_msg_index_table():
         manager.add_column("tag", "varchar(16)", "")
         manager.add_column("date", "date", default_value=DEFAULT_DATE)
         manager.add_column("sort_value", "varchar(64)", default_value="", comment="排序字段")
+
         manager.add_index(["user_id", "ctime"])
         manager.add_index(["user_id", "mtime"])
         manager.add_index(["user_id", "sort_value"])
+        manager.add_index(["user_id", "tag", "sort_value"])
 
 def init_msg_history_index():
     """随手记历史索引"""

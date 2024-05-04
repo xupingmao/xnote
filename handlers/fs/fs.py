@@ -29,10 +29,13 @@ from xnote.core import xnote_event
 from xutils import FileItem, u, Storage, fsutil
 from xutils import dbutil
 from xutils import webutil
+from xutils import XnoteException
+
 from .fs_mode import get_fs_page_by_mode
 from .fs_helper import sort_files_by_size
 from . import fs_image
 from . import fs_helper
+from . import fs_checker
 
 def is_stared(path):
     return xconfig.has_config("STARED_DIRS", path)
@@ -437,8 +440,14 @@ class RemoveAjaxHandler:
 
 class RenameAjaxHandler:
 
-    @xauth.login_required("admin")
     def POST(self):
+        try:
+            return self.do_post()
+        except XnoteException as e:
+            return webutil.FailedResult(code=e.code, message=e.message)
+
+    @xauth.login_required("admin")
+    def do_post(self):
         dirname  = xutils.get_argument_str("dirname")
         old_name = xutils.get_argument_str("old_name", "")
         new_name = xutils.get_argument_str("new_name", "")
@@ -453,11 +462,7 @@ class RenameAjaxHandler:
         if old_name is None or old_name == "":
             return dict(code="fail", message="old_name is blank")
 
-        if ".." in new_name:
-            return dict(code="fail", message="invalid new name")
-        
-        if new_name == "":
-            return webutil.FailedResult(code="400", message="新的文件名称为空")
+        fs_checker.check_file_name(new_name)
         
         logging.info("encode_name=%s, new_name=%s", xconfig.USE_URLENCODE, new_name)
 

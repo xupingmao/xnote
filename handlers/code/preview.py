@@ -3,10 +3,10 @@
 import os
 import web
 import xutils
-import xtemplate
-import xconfig
-import xauth
-from xtemplate import render
+from xnote.core import xtemplate
+from xnote.core import xconfig
+from xnote.core import xauth
+from xnote.core.xtemplate import render
 from xutils import Storage
 from xutils import fsutil
 
@@ -87,8 +87,10 @@ class PreviewHandler:
             check_resource(path)
             type = "file"
             content = xutils.readfile(path)
-            _, ext = os.path.splitext(path)
-            if ext == ".csv" and not content.startswith("```csv"):
+            assert isinstance(content, str)
+
+            ext = fsutil.get_file_ext(path)
+            if ext == "csv" and not content.startswith("```csv"):
                 content = "```csv\n" + content + "\n```"
         else:
             # file not exists or not readable

@@ -247,6 +247,8 @@ class FileConfig:
     template_base_nav_left = "" # 左侧菜单自定义模板
     template_base_nav_top = ""
 
+    fs_max_name_length = 50
+
     @classmethod
     def init(cls, data_dir):
         xnote_core_dir = os.path.dirname(__file__)

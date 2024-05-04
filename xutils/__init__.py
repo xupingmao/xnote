@@ -36,7 +36,7 @@ from xutils.cacheutil import cache, cache_get, cache_put, cache_del
 from xutils.functions import History, MemTable, listremove
 
 # TODO xutils是最基础的库，后续会移除对xconfig的依赖，xutils会提供配置的函数出去在上层进行配置
-from xutils.base import Storage, print_exc, print_stacktrace
+from xutils.base import Storage, print_exc, print_stacktrace, XnoteException
 from xutils.logutil import *
 from xutils.webutil import *
 from xutils.exeutil import *
@@ -103,38 +103,6 @@ class SearchResult(dict):
             del self[key]
         except KeyError as k:
             raise AttributeError(k)
-
-#################################################################
-##   File System Utilities
-##   @see fsutil
-#################################################################
-
-def do_check_file_type(filename, target_set):
-    """根据文件后缀判断是否是图片"""
-    if filename.endswith(".x0"):
-        filename = fsutil.decode_name(filename)
-    name, ext = os.path.splitext(filename)
-    return ext.lower() in target_set
-
-def is_img_file(filename):
-    """根据文件后缀判断是否是图片"""
-    return do_check_file_type(filename, FS_IMG_EXT_LIST)
-
-def is_text_file(filename):
-    """根据文件后缀判断是否是文本文件"""
-    return do_check_file_type(filename, FS_TEXT_EXT_LIST)
-
-def is_audio_file(filename):
-    return do_check_file_type(filename, FS_AUDIO_EXT_LIST)
-
-def is_code_file(filename):
-    return do_check_file_type(filename, FS_CODE_EXT_LIST)
-
-def get_text_ext():
-    return FS_TEXT_EXT_LIST
-
-def is_editable(fpath):
-    return is_text_file(fpath) or is_code_file(fpath)
 
 def attrget(obj, attr, default_value = None):
     if hasattr(obj, attr):

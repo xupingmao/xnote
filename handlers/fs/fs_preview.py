@@ -5,9 +5,9 @@
 import os
 import web
 import xutils
-import xtemplate
-import xauth
-import xconfig
+from xnote.core import xtemplate
+from xnote.core import xauth
+from xnote.core import xconfig
 from xutils import fsutil
 
 preview_dict = xconfig.load_config_as_dict("./config/file/preview.properties")
@@ -38,11 +38,13 @@ class PreviewHandler:
         # TODO 使用文件扩展
         path = xutils.get_argument_str("path", "")
         embed = xutils.get_argument_str("embed", "true")
+        realname = fsutil.decode_name(path)
 
         path = xutils.get_real_path(path)
         path = path.replace("\\", "/")
         encoded_path = xutils.encode_uri_component(path)
-        _, ext = os.path.splitext(path)
+        
+        _, ext = os.path.splitext(realname)
         ext = ext.lower()
         
         open_url = preview_dict.get(ext)
