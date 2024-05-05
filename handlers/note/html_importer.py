@@ -181,9 +181,9 @@ class ImportNoteHandler:
     @xauth.login_required()
     def POST(self):
         try:
-            file = xutils.get_argument("file", {})
-            address = xutils.get_argument("url", "")
-            name = xutils.get_argument("name", "")
+            file = xutils.get_argument_field_storage("file")
+            address = xutils.get_argument_str("url", "")
+            name = xutils.get_argument_str("name", "")
             filename = ""
 
             if hasattr(file, "filename"):
@@ -199,8 +199,7 @@ class ImportNoteHandler:
                 for chunk in file.file:
                     html += chunk.decode("utf-8")
 
-            logging.info("import html, filename={}, length={}, type={}".format(
-                filename, len(html), type(html)))
+            logging.info("import html, filename=%s, length=%s, type=%s", filename, len(html), type(html))
 
             result = import_from_html(html, address)
 
@@ -251,7 +250,7 @@ class MarkdownImageParser(TextParserBase):
             logging.error("download (%s) failed", url)
             raise e
 
-    def handle_image(self, url, user_name):
+    def handle_image(self, url: str, user_name: str):
         # TODO 注意越权问题 host不能是内部地址
         # 1. host不能是内网地址
         # 2. 防止缓存数据过大拖垮服务器
@@ -268,6 +267,10 @@ class MarkdownImageParser(TextParserBase):
         
         if url.startswith("data:"):
             # 数据编码
+            return url
+
+        if not url.startswith(("https://", "http://")):
+            # 无效的网址
             return url
         
         if self.check_only:

@@ -21,6 +21,8 @@ _ignored_name_set = set()
 _ignored_group_set = set()
 
 def get_mem_info_by_psutil():
+    if psutil is None:
+        return Storage()
     p                 = psutil.Process(pid=os.getpid())
     mem_info          = p.memory_info()
     mem_used          = xutils.format_size(mem_info.rss)
