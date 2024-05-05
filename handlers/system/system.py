@@ -227,7 +227,9 @@ class PullCodeHandler:
         if check_git != 0:
             return webutil.FailedResult(code="400", message="系统没有安装git,无法升级")
         
-        process = subprocess.Popen("git pull")
+        process = subprocess.Popen("git pull", shell=True, 
+                                 stdout=subprocess.PIPE, 
+                                 stderr=subprocess.PIPE)
         if process.returncode not in (0, None):
             err_msg = f"returncode:({process.returncode})"
             if process.stderr != None:
