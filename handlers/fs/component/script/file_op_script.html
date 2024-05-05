@@ -16,11 +16,6 @@
                 data-name="{{!fileName}}"
                 data-realname="{{!fileRealName}}"
                 onclick="xnote.action.fs.rename(this);">重命名</button>
-            <button class="btn btn-default huge" 
-                data-path="{{!filePath}}"
-                data-name="{{!fileName}}"
-                data-realname="{{!fileRealName}}"
-                onclick="xnote.action.fs.delete(this);">删除</button>
             <button class="btn btn-default huge"
                 data-path="{{!filePath}}"
                 onclick="xnote.action.fs.move(this);">移动</button>
@@ -29,6 +24,11 @@
             <button class="btn btn-default huge"
                 data-path="{{!filePath}}"
                 onclick="xnote.action.fs.showDetail(this);">详细信息</button>
+            <button class="btn danger huge" 
+                data-path="{{!filePath}}"
+                data-name="{{!fileName}}"
+                data-realname="{{!fileRealName}}"
+                onclick="xnote.action.fs.delete(this);">删除</button>
         </div>
     </div>
 

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-11-05 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-10 15:21:20
+@LastEditTime : 2024-05-05 11:33:04
 @FilePath     : /xnote/xnote_migrate/upgrade_018.py
 @Description  : 描述
 """
@@ -24,8 +24,7 @@ def do_upgrade():
     base.execute_upgrade("20231223_msg_index", handler.migrate_msg_index)
     base.execute_upgrade("20240214_plugin_visit", handler.migrate_plugin_visit)
     base.execute_upgrade("20240214_user_op_log", handler.migrate_user_op_log)
-    # base.execute_upgrade("20240308_msg_history", handler.migrate_msg_history)
-    xutils.register_func("upgrade.20240308_msg_history",handler.migrate_msg_history)
+    base.execute_upgrade("20240308_msg_history", handler.migrate_msg_history)
     
 
 class MonthPlanRecord(Storage):
@@ -186,8 +185,8 @@ class MigrateHandler:
     @classmethod
     def migrate_msg_history(cls):
         db = dbutil.get_table_v2("msg_history")
-        for item0 in db.iter_by_kv():
-            item = MessageHistoryV1(**item0)
+        for old_item in db.iter_by_kv():
+            item = MessageHistoryV1(**old_item)
             if item.id == "":
                 continue
             
@@ -210,4 +209,9 @@ class MigrateHandler:
             new_item.content = item.content
             
             if first is None:
+                logging.info("insert {}", new_item)
                 db.insert(new_item)
+                db.delete(old_item)
+            else:
+                logging.info("delete {}", old_item)
+                db.delete(old_item)
