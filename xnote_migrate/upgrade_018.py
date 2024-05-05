@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-11-05 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-05-05 12:09:11
+@LastEditTime : 2024-05-05 12:10:43
 @FilePath     : /xnote/xnote_migrate/upgrade_018.py
 @Description  : 描述
 """
@@ -193,14 +193,14 @@ class MigrateHandler:
             try:
                 msg_id = int(db._get_id_from_key(item.id))
             except:
-                logging.error("invalid msg_id:{}", item.id)
+                logging.error("invalid msg_id: %s", item.id)
                 continue
 
             version = item.get("version", 0)
             user_id = item.get("user_id", 0)
             
             if msg_id <= 0 or version < 0:
-                logging.error("invalid msg: {}", old_item)
+                logging.error("invalid msg: %s", old_item)
                 continue
 
             if user_id == 0:
@@ -216,9 +216,9 @@ class MigrateHandler:
             new_item.content = item.content
             
             if first is None:
-                logging.info("insert {}", new_item)
+                logging.info("insert %s", new_item)
                 db.insert(new_item)
                 db.delete(old_item)
             else:
-                logging.info("delete {}", old_item)
+                logging.info("delete %s", old_item)
                 db.delete(old_item)
