@@ -68,6 +68,9 @@ if (window.xnote === undefined) {
 
     // 字符串模块
     xnote.string = {};
+
+    // 临时的空间
+    xnote.tmp = {};
 }
 
 xnote.registerApiModule = function (name) {

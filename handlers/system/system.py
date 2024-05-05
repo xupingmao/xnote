@@ -11,7 +11,7 @@ from xnote.core import xmanager
 import web
 from xutils import Storage
 from xutils import webutil
-
+import subprocess
 
 class AppLink:
     def __init__(self):
@@ -219,6 +219,28 @@ class ReloadHandler:
         return self.GET()
 
 
+class PullCodeHandler:
+
+    @xauth.login_required("admin")
+    def GET(self):
+        check_git = os.system("git --version")
+        if check_git != 0:
+            return webutil.FailedResult(code="400", message="系统没有安装git,无法升级")
+        
+        process = subprocess.Popen("git pull")
+        if process.returncode not in (0, None):
+            err_msg = f"returncode:({process.returncode})"
+            if process.stderr != None:
+                err_msg = process.stderr.read()
+            elif process.stdout != None:
+                err_msg = process.stdout.read()
+            return webutil.FailedResult(code="500", message=f"升级失败:{err_msg}")
+        
+        return webutil.SuccessResult()
+    
+    def POST(self):
+        return self.GET()
+
 class UserCssHandler:
 
     def GET(self):
@@ -259,6 +281,7 @@ xurls = (
     r"/system/admin", AdminHandler,
     r"/system/system", IndexHandler,
     r"/system/reload", ReloadHandler,
+    r"/system/pull_code", PullCodeHandler,
     r"/system/user\.css", UserCssHandler,
     r"/system/user\.js", UserJsHandler,
 )
