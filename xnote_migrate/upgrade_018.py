@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-11-05 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-05-05 11:33:04
+@LastEditTime : 2024-05-05 12:09:11
 @FilePath     : /xnote/xnote_migrate/upgrade_018.py
 @Description  : 描述
 """
@@ -190,12 +190,19 @@ class MigrateHandler:
             if item.id == "":
                 continue
             
-            msg_id = int(db._get_id_from_key(item.id))
+            try:
+                msg_id = int(db._get_id_from_key(item.id))
+            except:
+                logging.error("invalid msg_id:{}", item.id)
+                continue
+
             version = item.get("version", 0)
             user_id = item.get("user_id", 0)
             
-            assert msg_id > 0
-            assert version >= 0
+            if msg_id <= 0 or version < 0:
+                logging.error("invalid msg: {}", old_item)
+                continue
+
             if user_id == 0:
                 user_id = xauth.UserDao.get_id_by_name(item.user)
             
