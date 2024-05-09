@@ -8,7 +8,6 @@ import web
 import json
 from xutils import webutil
 from xnote.core import xauth
-from xnote.core import xtemplate
 from xnote.core import xmanager
 import xutils
 from xnote.core import xconfig
@@ -91,16 +90,6 @@ def add_cron_task(url, mtime, ctime, tm_wday, tm_hour, tm_min,
     dbutil.put(key, data)
     return id
 
-class CronEditHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        id  = xutils.get_argument("id")
-        key = "schedule:%s" % id
-        sched = dbutil.get(key)
-        return xtemplate.render("system/page/crontab_edit.html", 
-            item = sched, 
-            links = get_cron_links())
 
 class ListHandler(BaseTablePlugin):
 
@@ -161,6 +150,7 @@ class ListHandler(BaseTablePlugin):
 
         kw = xutils.Storage()
         kw.table = table
+        self.write_aside("""{% include system/component/admin_nav.html %}""")
         return self.response_page(**kw)
     
     def handle_edit(self):
@@ -274,21 +264,7 @@ class AddHandler:
             return dict(code = "success", data = dict(id = sched_id))
         raise web.seeother("/system/crontab")
 
-class RemoveHandler:
-
-    @xauth.login_required("admin")
-    def POST(self):
-        id = xutils.get_argument("id")
-        key = "schedule:%s" % id
-        dbutil.delete(key)
-        xmanager.load_tasks()
-        raise web.seeother("/system/crontab")
-
-    def GET(self):
-        return self.POST()
-
 xurls=(
     r"/system/crontab",     ListHandler, 
-    r"/system/crontab/remove", RemoveHandler,
 )
 

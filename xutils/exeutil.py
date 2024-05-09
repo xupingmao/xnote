@@ -12,10 +12,11 @@ import sys
 import os
 import re
 import threading
+import logging
 from collections import deque
 
 import web
-from xutils import six
+from xutils import six, u
 from xutils.imports import PY2, getstatusoutput
 
 
@@ -114,6 +115,7 @@ def exec_python_code(
         #     log("gc.objects_count %s -> %s" % (before_count, after_count))
         return ret
     except Exception as e:
+        logging.error("exception script.name=%s", name)
         xutils_print_exc()
         if raise_err:
             raise e
@@ -130,7 +132,7 @@ def fix_py2_code(code):
 
 def exec_script(name, new_window=True, record_stdout = True, vars = None):
     """执行script目录下的脚本"""
-    import xconfig
+    from xnote.core import xconfig
     import xutils
 
     dirname = xconfig.SCRIPTS_DIR
@@ -177,7 +179,7 @@ def _load_script_code_by_fpath(fpath):
 
 def _load_script_code(name, dirname = None):
     """加载脚本代码"""
-    import xconfig
+    from xnote.core import xconfig
     if dirname is None:
         # 必须实时获取dirname
         dirname = xconfig.SCRIPTS_DIR
@@ -308,6 +310,3 @@ def load_script_meta_by_code(code):
     meta_object = ScriptMeta()
     meta_object.load_meta_by_code(code)
     return meta_object
-
-def exec_command(command, confirmed = False):
-    pass

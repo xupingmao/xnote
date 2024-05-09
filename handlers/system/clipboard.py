@@ -3,10 +3,10 @@
 # @since 2019/07/18 22:55:08
 # @modified 2019/07/20 22:42:44
 import xutils
-import xmanager
+from xnote.core import xmanager
 import logging
 
-from xtemplate import BasePlugin
+from xnote.core.xtemplate import BasePlugin
 from xutils import dateutil
 from xutils import dbutil
 
