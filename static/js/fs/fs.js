@@ -60,10 +60,10 @@ FileView.rename = function(target) {
 };
 
 // 打开选项对话框
-FileView.openOptionDialog = function (target) {
-    console.log(window.event);
-    window.event.preventDefault();
-    window.event.stopPropagation();
+FileView.openOptionDialog = function (target, event) {
+    // console.log(event);
+    event.preventDefault();
+    event.stopPropagation();
     console.log(target);
     var filePath = $(target).attr("data-path");
     var fileName = $(target).attr("data-name");
