@@ -7,7 +7,6 @@ var FileAPI = {};
 xnote.action.fs = FileView;
 xnote.api.fs = FileAPI;
 
-
 // 调用重命名的API
 FileAPI.rename = function(dirname, oldName, newName, callback) {
     if (newName != oldName && newName) {
@@ -99,3 +98,23 @@ FileView.showDetail = function(target) {
         xnote.showTextDialog("文件详情", message);
     })
 };
+
+// 移除收藏夹
+FileView.removeBookmark = function(event) {
+    event.preventDefault();
+    var path = $(event.target).attr("data-path")
+    var params = {
+        action:"remove",
+        path: path,
+    }
+
+    xnote.confirm("确定要取消收藏文件<code color=red>" + path + "</code>?", function () {        
+        xnote.http.post("/fs_api/bookmark", params, function (resp) {
+            if (resp.code == "success") {
+                window.location.reload()
+            } else {
+                xnote.alert("取消收藏失败，请稍后重试!")
+            }
+        })
+    })
+}
