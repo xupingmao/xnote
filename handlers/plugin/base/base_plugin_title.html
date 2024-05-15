@@ -1,9 +1,9 @@
 {% init category_url = xutils.call("plugin.get_category_url_by_code", model.category) %}
 
 
-{% if model.html_header != None %}
+{% if model.header_html != "" %}
     <!-- 自定义Header -->
-    {% raw model.html_header %}
+    {% raw model.header_html %}
 {% elif model.show_title %}
     <!-- 插件默认的header -->
     <div class="plugin-head card">
@@ -14,6 +14,8 @@
             {% end %}
             <span>{{title}}</span>
             <span class="float-right">
+                {% raw model.option_html %}
+
                 {% if _is_admin and model.show_edit and model.editable %}
                     <a class="btn" href="{{_server_home}}/code/edit?path={{fpath}}">编辑</a>
                 {% end %}

@@ -92,8 +92,8 @@ class PluginCategory:
         return xauth.current_role() in self.required_roles
 
 
-def define_plugin_category(code,
-                           name,
+def define_plugin_category(code: str,
+                           name: str,
                            url=None,
                            raise_duplication=True,
                            required_roles=None,
@@ -132,7 +132,7 @@ def get_category_url_by_code(code):
     return "/plugin_list?category=%s" % code
 
 
-def get_category_name_by_code(code):
+def get_category_name_by_code(code: str):
     category = get_category_by_code(code)
     if category != None:
         return category.name
@@ -142,7 +142,7 @@ def get_category_name_by_code(code):
 
 xnote_hooks.get_category_name_by_code = get_category_name_by_code
 
-def get_category_by_code(code):
+def get_category_by_code(code: str):
     for item in PLUGIN_CATEGORY_LIST:
         if item.code == code:
             return item

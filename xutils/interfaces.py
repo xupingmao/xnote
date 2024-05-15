@@ -180,13 +180,16 @@ class RecordInterface:
     继承自Storage无法调用类的方法, 这种情况下可以继承当前的接口
     """
 
-    def from_dict(self, dict_value: dict):
+    @classmethod
+    def from_dict(cls, dict_value: dict):
         """从数据库记录转为领域模型"""
-        self.__dict__.update(dict_value)
+        result = cls()
+        result.__dict__.update(dict_value)
+        return result
 
     def to_dict(self):
         """从领域模型转为数据库记录"""
-        return self.__dict__
+        return dict(**self.__dict__)
 
 class BatchInterface:
     """批量操作"""

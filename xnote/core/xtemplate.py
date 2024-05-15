@@ -263,6 +263,9 @@ def render(template_name, **kw):
             return tojson(nkw)
     return _loader.load(template_name).generate(**nkw)
 
+def compile_template(text: str, name="<string>"):
+    """预编译模板"""
+    return Template(text, name=name, loader=_loader)
 
 def render_text(text, template_name="<string>", **kw):
     """使用模板引擎渲染文本信息,使用缓存
@@ -314,6 +317,12 @@ class IterResponse:
     def __init__(self, iter):
         self.iter = iter
 
+
+class PluginOptionLink:
+    def __init__(self, text="", href=""):
+        self.text = text
+        self.href = href
+
 class BasePlugin:
     """插件的基类"""
 
@@ -339,7 +348,10 @@ class BasePlugin:
     # {侧边栏自定义HTML}
     show_aside = False
     show_right = False
-    aside_html = u("")
+    aside_html = ""
+    header_html = ""
+    footer_html = ""
+    option_html = ""
 
     # {搜索配置}
     show_search = True
@@ -370,19 +382,18 @@ class BasePlugin:
     page_max = 1  # 最大分页，需要扩展方设置
 
     # 插件模板路径
-    html_template_path = "plugin/base/base_plugin.html"
+    base_template_path = "plugin/base/base_plugin.html"
 
     def __init__(self):
         # 提交请求的方法
         self.method = "POST"
         self.output = u("")
         self.html = u("")
-        self.html_header = None
         self.css_style = u("")
         self.option_links = []
 
-    def add_option_link(self, name, url):
-        self.option_links.append(dict(name=name, url=url))
+    def add_option_link(self, text="", href=""):
+        self.option_links.append(PluginOptionLink(text, href))
 
     def write(self, text):
         self.output += u(text)
@@ -394,7 +405,7 @@ class BasePlugin:
         self.output += u(text)
 
     def writeheader(self, html, **kw):
-        self.html_header = render_text(html, **kw)
+        self.header_html = render_text(html, **kw)
 
     def writebody(self, html, **kw):
         """写内容区"""
@@ -402,7 +413,7 @@ class BasePlugin:
 
     def writefooter(self, html, **kw):
         """TODO: 模板上还没有渲染"""
-        self.html_footer = render_text(html, **kw)
+        self.footer_html = render_text(html, **kw)
 
     def writehtml(self, html, **kw):
         """@deprecated 请使用 #writebody
@@ -518,7 +529,7 @@ class BasePlugin:
         kw.input = input
         kw.script_name = globals().get("script_name")
         kw.output = self.output + output
-        return render(self.html_template_path, **kw)
+        return render(self.base_template_path, **kw)
     
     
     def convert_attr_to_kw(self):
