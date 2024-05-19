@@ -59,6 +59,7 @@ class XnoteLoader(Loader):
 
     path_mapping = {}
     template_mapping_list = []
+    memory_prefix = "memory:"
 
     def init_path_mapping(self):
         self.path_mapping = {
@@ -102,15 +103,23 @@ class XnoteLoader(Loader):
                 relative_path = name[len(template_mapping.prefix):]
                 return os.path.join(template_mapping.dirname, relative_path)
         
+        if name.startswith(self.memory_prefix):
+            # 内存中的模板
+            return name
+        
         if name.endswith(".str"):
             # 字符串类型的模板,只在内存中存在
             return name
 
         return os.path.join(xconfig.HANDLERS_DIR, name)
 
-    def _create_template(self, name):
+    def _create_template(self, name: str):
+        if name.startswith(self.memory_prefix):
+            return Template("<blank>", name=name, loader=self)
+        
         if name.endswith(".str"):
-            return Template(name, name=name, loader=self)
+            return Template("<blank>", name=name, loader=self)
+        
         path = name
         with open(path, "rb") as f:
             template = Template(f.read(), name=name, loader=self)
@@ -269,8 +278,8 @@ def compile_template(text: str, name="<string>"):
 
 def register_memory_template(name: str, text: str):
     """注册内存模板"""
-    if not name.endswith(".str"):
-        raise Exception("template name must endswith .str")
+    if not name.startswith(XnoteLoader.memory_prefix):
+        raise Exception(f"template name must startswith `{XnoteLoader.memory_prefix}`")
     _loader.init_template(name=name, text=text)
 
 def render_text(text, template_name="<string>", **kw):
@@ -281,7 +290,7 @@ def render_text(text, template_name="<string>", **kw):
 
     # 使用hash不能保证唯一性
     text_md5 = xutils.md5_hex(text)
-    name = f"template@{template_name}_{text_md5}.str"
+    name = f"{XnoteLoader.memory_prefix}{template_name}_{text_md5}"
     if name not in _loader.templates:
         _loader.init_template(name, text)
     return _loader.load(name).generate(**nkw)

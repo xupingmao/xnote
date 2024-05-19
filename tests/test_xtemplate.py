@@ -9,6 +9,6 @@ class TestMain(unittest.TestCase):
 
     def test_memory_template(self):
         TEMPLATE_HTML = """hello, {{name}}"""
-        xtemplate.register_memory_template("test.simple.str", TEMPLATE_HTML)
-        value = xtemplate.render_text("{% include test.simple.str %}", name="world")
+        xtemplate.register_memory_template("memory:test.simple", TEMPLATE_HTML)
+        value = xtemplate.render_text("{% include memory:test.simple %}", name="world")
         assert value == b"hello, world"
