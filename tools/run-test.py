@@ -7,7 +7,7 @@ import argparse
 import sys
 
 git_branch = os.popen("git branch --show-current").read().strip()
-APP_VERSION_PREFIX: str = f"{git_branch}-dev-"
+APP_VERSION_PREFIX: str = f"{git_branch}-"
 
 def do_clean():
 	print("一些清理工作...")
