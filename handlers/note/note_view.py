@@ -296,7 +296,13 @@ class ViewHandler:
             return note_dao.list_path(file)
 
     @xutils.timeit(name="Note.View", logfile=True)
-    def GET(self, op, id=0, is_public_page=False):
+    def GET(self, op:str, id=0, is_public_page=False):
+        try:
+            return self.do_get(op, id, is_public_page)
+        except Exception as e:
+            return xtemplate.render("error.html", error=str(e))
+
+    def do_get(self, op:str, id=0, is_public_page=False):
         if id == 0:
             id = xutils.get_argument_int("id")
         else:
