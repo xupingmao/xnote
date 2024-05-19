@@ -152,15 +152,15 @@ class DBInterface:
 class LockInterface:
     """分布式锁接口"""
 
-    def acquire(self, resource_key="", expires=60*1000):
+    def lock(self, resource_key="", expire_seconds=60.0):
         """返回锁对象
         """
-        raise NotImplementedError("acquire")
+        raise NotImplementedError("lock")
     
-    def release(self, resource_id, token):
-        raise NotImplementedError("release")
+    def unlock(self, resource_key="", token=""):
+        raise NotImplementedError("unlock")
     
-    def refresh(self, resource_id, token, refresh_time):
+    def refresh(self, resource_key="", token="", refresh_seconds=60.0):
         raise NotImplementedError("refresh")
 
 class FileLockInterface:

@@ -273,8 +273,8 @@ class FileSystemHandler:
         # HTTP/1.1的缓存首部是Cache-Control
         expire_seconds = expire_days * 3600 * 24
         expire_time = datetime.datetime.utcnow() + datetime.timedelta(days=expire_days)
-
-        web.header("Cache-Control", "max-age=%s" % expire_seconds)
+        # 强制开启缓存
+        web.header("Cache-Control", f"public, max-age={expire_seconds}")
 
         # DEBUG模式会刷新ts
         # 在发布缓存副本之前，强制要求缓存把请求提交给原始服务器进行验证 (协商缓存验证)。

@@ -195,7 +195,8 @@ class TestMain(unittest.TestCase):
 
     def test_netutil(self):
         import doctest
-        doctest.testmod(m=xutils.netutil, verbose=True)
+        from xutils import netutil
+        doctest.testmod(m=netutil, verbose=True)
 
     def test_dateutil(self):
         import doctest
@@ -315,6 +316,7 @@ class TestMain(unittest.TestCase):
         table.insert(name='t3', age=10)
         table.insert(name='t4', age=12)
         result = table.first(lambda x:x.get('age')>=10)
+        assert result != None
         self.assertEqual('t3', result['name'])
 
     def test_tokenizer(self):
@@ -328,9 +330,10 @@ class TestMain(unittest.TestCase):
         tokens = tokenizer.tokenize(content)
 
     def test_listmerge(self):
+        from xutils import functions
         l1 = [1,2,3]
         l2 = [3,4,5]
-        self.assertEqual([1,2,3,4,5], xutils.functions.listmerge(l1, l2))
+        self.assertEqual([1,2,3,4,5], functions.listmerge(l1, l2))
 
     def test_dbutil_ldb_table(self):
         dbutil.register_table("unit_test", "单元测试")
@@ -352,7 +355,9 @@ class TestMain(unittest.TestCase):
         # 更新测试
         table.update_by_key(new_key, Storage(value = "value333"))
         # 确认更新成功
-        self.assertEqual("value333", table.get_by_key(new_key).value)
+        record = table.get_by_key(new_key)
+        assert record != None
+        self.assertEqual("value333", record["value"])
 
         # 删除测试
         table.delete_by_key(new_key)
@@ -387,7 +392,9 @@ class TestMain(unittest.TestCase):
         # 更新测试
         found_row.value = "value222"
         table.update(found_row)
-        self.assertEqual("value222", table.get_by_key(found_row._key).value)
+        record = table.get_by_key(found_row._key)
+        assert record != None
+        self.assertEqual("value222", record["value"])
 
         # 删除测试
         table.delete(found_row)
@@ -435,8 +442,8 @@ class TestMain(unittest.TestCase):
         mod = xutils.Module("test")
 
         # 运行两次触发缓存
-        mod.method("test")
-        method_result = mod.method("test")
+        mod.invoke("method", "test")
+        method_result = mod.invoke("method", "test")
         self.assertTrue(method_result)
         self.assertTrue(len(mod._meth) == 1)
 
@@ -458,3 +465,26 @@ class TestMain(unittest.TestCase):
         self.assertEqual(tokens[0], "test")
         self.assertEqual(tokens[1], "<span class=\"msg-strong\">mark</span>")
         self.assertEqual(tokens[2], "end")
+
+    def test_random_int64(self):
+        """测试下随机数的冲突"""
+        values = set()
+        times = 1000
+
+        from xutils import numutil
+        for i in range(times):
+            values.add(numutil.create_random_int64())
+        assert len(values) == times
+
+
+    def test_json(self):
+        from xutils import jsonutil
+        obj = Storage(name="test",age=10,clazz=Storage)
+        json_str = jsonutil.tojson(obj)
+        assert """{"name":"test","age":10,"clazz":"<class>"}""" == json_str
+        parsed_obj = jsonutil.parse_json_to_dict(json_str)
+        assert parsed_obj.get("name") == "test"
+        assert parsed_obj.get("age") == 10
+        assert parsed_obj.get("clazz") == "<class>"
+
+        

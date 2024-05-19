@@ -116,7 +116,7 @@ class XnoteLoader(Loader):
             template = Template(f.read(), name=name, loader=self)
             return template
 
-    def init_template(self, name, text):
+    def init_template(self, name: str, text: str):
         self.templates[name] = Template(text, name=name, loader=self)
 
 
@@ -266,6 +266,12 @@ def render(template_name, **kw):
 def compile_template(text: str, name="<string>"):
     """预编译模板"""
     return Template(text, name=name, loader=_loader)
+
+def register_memory_template(name: str, text: str):
+    """注册内存模板"""
+    if not name.endswith(".str"):
+        raise Exception("template name must endswith .str")
+    _loader.init_template(name=name, text=text)
 
 def render_text(text, template_name="<string>", **kw):
     """使用模板引擎渲染文本信息,使用缓存

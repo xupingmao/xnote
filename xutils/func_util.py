@@ -67,6 +67,12 @@ class Module:
         func = _FUNC_DICT[func_name]
         self._meth[key] = func
         return func
+    
+    def invoke(self, method="", *args, **kw):
+        m = getattr(self, method)
+        if m != None:
+            return m(*args, **kw)
+        raise AttributeError(f"method {method} not exists")
 
 # DAO是模块的别名
 class DAO(Module):

@@ -37,7 +37,7 @@ class UnixLock(FileLockInterface):
 			# raise Exception("lock file failed, locked by pid:%s" % pid)
 			return False
 
-	def unlock(self):
+	def unlock(self):		
 		if self.got_lock:
 			fcntl.flock(self.fp, fcntl.LOCK_UN)
 			# 不需要重置为空
@@ -72,6 +72,7 @@ class WinLockOld:
 
 	def do_get_lock(self):
 		# 关闭读，重新打开为写模式
+		assert self.fp != None
 		self.fp.close()
 		self.fp = open(self.fpath, "w+")
 		self.fp.write(str(os.getpid()))
@@ -79,6 +80,7 @@ class WinLockOld:
 		self.got_lock = True
 
 	def try_lock(self):
+		assert self.fp != None
 		data = self.fp.read(1024)
 		if data == str(os.getpid()) or data == "":
 			self.do_get_lock()
@@ -87,6 +89,7 @@ class WinLockOld:
 		return False
 
 	def unlock(self):
+		assert self.fp != None
 		if self.got_lock:
 			self.fp.write("")
 			self.got_lock = False

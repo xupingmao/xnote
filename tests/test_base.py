@@ -1,5 +1,6 @@
 # encoding=utf-8
 from .a import *
+import typing
 import os
 import time
 import unittest
@@ -20,7 +21,7 @@ from xutils.db.driver_sqlite import SqliteKV
 config = xconfig
 date = time.strftime("%Y/%m")
 
-APP: web.application = None
+APP: typing.Union[web.application,None] = None
 
 DEFAULT_HEADERS = dict()
 

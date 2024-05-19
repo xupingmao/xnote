@@ -149,7 +149,7 @@ def get_logger(name):
     return SimpleLogger(name)
 
 def get_log_path(level = "INFO"):
-    import xconfig
+    from xnote.core import xconfig
     date_time = time.strftime("%Y-%m")
     dirname = os.path.join(xconfig.LOG_DIR, date_time)
     fsutil.makedirs(dirname)
@@ -165,7 +165,12 @@ def log(fmt, show_logger = False, print_std = True, fpath = None, *argv):
         message = fmt
     
     if show_logger:
-        f_back    = inspect.currentframe().f_back
+        frame = inspect.currentframe()
+        assert frame != None
+
+        f_back = frame.f_back
+        assert f_back != None
+        
         f_code    = f_back.f_code
         f_modname = f_back.f_globals.get("__name__")
         f_name    = f_code.co_name
@@ -187,7 +192,7 @@ def log_simple(fmt, *args):
 
 
 def _write_log_sync(level, metric, message, cost):
-    import xauth
+    from xnote.core import xauth
     fpath = get_log_path(level)
     user_name = xauth.current_name()
     if user_name is None:
@@ -198,7 +203,7 @@ def _write_log_sync(level, metric, message, cost):
     do_log_sync(fpath, full_message)
 
 def _write_log(level, metric, message, cost):
-    import xauth
+    from xnote.core import xauth
     fpath = get_log_path(level)
     user_name = xauth.current_name()
     if user_name is None:
@@ -316,7 +321,7 @@ def timeit_deco(repeat=1, logfile=False, logargs=False, name="", logret=False, s
 
 def profile_deco():
     """Profile装饰器,打印信息到标准输出,不支持递归函数"""
-    import xconfig
+    from xnote.core import xconfig
     def deco(func):
         def handle(*args, **kw):
             if xconfig.OPEN_PROFILE:
@@ -387,12 +392,16 @@ class MemLogger:
 
     def log(self, message, *args):
         MemLogger.clear_expired()
+        frame = inspect.currentframe()
+        assert frame != None
 
-        f_back    = inspect.currentframe().f_back
-        f_code    = f_back.f_code
-        f_modname = f_back.f_globals.get("__name__")
+        caller = frame.f_back
+        assert caller != None
+
+        f_code    = caller.f_code
+        f_modname = caller.f_globals.get("__name__")
         func_name    = f_code.co_name
-        func_lineno  = f_back.f_lineno
+        func_lineno  = caller.f_lineno
 
         head = "%s|%s:%s" % (_format_time(), func_name, func_lineno)
         if len(args) > 0:

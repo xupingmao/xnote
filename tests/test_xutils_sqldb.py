@@ -48,9 +48,11 @@ class TestMain(test_base.BaseTestCase):
         table.insert(name = "test-2", age = 30)
 
         age10 = table.select_first(where = dict(age=10))
+        assert age10 != None
         self.assertEqual("test-1", age10.name)
 
         first = table.select_first(where = "age=$age", vars=dict(age=10))
+        assert first != None
         self.assertEqual("test-1", first.name)
 
         count = table.count(where="age=$age", vars=dict(age=10))
