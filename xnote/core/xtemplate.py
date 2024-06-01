@@ -16,14 +16,16 @@ import warnings
 import math
 import web
 import xutils
-from . import xconfig, xauth, xnote_trace, xnote_hooks
+import functools
 import time
+
+from . import xconfig, xauth, xnote_trace, xnote_hooks
 from xutils.tornado.template import Template, Loader
 from xutils import dateutil, u
 from xutils import tojson
 from xutils import Storage
 from xutils import textutil
-from xutils.six.moves.urllib.parse import quote
+from urllib.parse import quote
 from .xconfig import TemplateConfig
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
@@ -34,7 +36,6 @@ NAMESPACE = dict(
 )
 
 _mobile_name_dict = dict()
-_loader = None  # type: XnoteLoader
 LOAD_TIME = int(time.time())
 
 def T(text, lang=None):
@@ -57,9 +58,28 @@ class TemplateMapping:
 class XnoteLoader(Loader):
     """定制Template Loader"""
 
+    _instance = None # type: XnoteLoader|None
     path_mapping = {}
     template_mapping_list = []
     memory_prefix = "memory:"
+
+    def __init__(self, *args, **kw):
+        super(XnoteLoader, self).__init__(*args, **kw)
+        self.reset()
+        self.init_path_mapping()
+
+    @classmethod
+    def get_instance(cls):
+        # type: () -> XnoteLoader
+        assert cls._instance != None
+        return cls._instance
+    
+    @classmethod
+    def init_instance(cls, root_directory="", namespace={}):
+        cls._instance = XnoteLoader(root_directory, namespace=namespace)
+
+    def set_namespace(self, namespace):
+        self.namespace = namespace
 
     def init_path_mapping(self):
         self.path_mapping = {
@@ -129,14 +149,8 @@ class XnoteLoader(Loader):
         self.templates[name] = Template(text, name=name, loader=self)
 
 
-def set_loader_namespace(namespace):
-    """ set basic namespace """
-    _loader.namespace = namespace
-
-
 def get_user_agent():
     return xutils.get_client_user_agent()
-
 
 def render_before_kw(kw: dict):
     """模板引擎预处理过程"""
@@ -261,6 +275,7 @@ def do_render_kw(kw):
 
 @xutils.timeit_deco(name="Template.Render", logfile=True)
 def render(template_name, **kw):
+    _loader = XnoteLoader.get_instance()
     # 处理上下文渲染
     nkw = do_render_kw(kw)
 
@@ -274,22 +289,31 @@ def render(template_name, **kw):
 
 def compile_template(text: str, name="<string>"):
     """预编译模板"""
-    return Template(text, name=name, loader=_loader)
+    return Template(text, name=name, loader=XnoteLoader.get_instance())
 
 def register_memory_template(name: str, text: str):
     """注册内存模板"""
+    loader=XnoteLoader.get_instance()
+
     if not name.startswith(XnoteLoader.memory_prefix):
         raise Exception(f"template name must startswith `{XnoteLoader.memory_prefix}`")
-    _loader.init_template(name=name, text=text)
+    loader.init_template(name=name, text=text)
 
-def render_text(text, template_name="<string>", **kw):
+@functools.lru_cache(maxsize=128)
+def get_md5_hex_with_cache(text=""):
+    return xutils.md5_hex(text)
+
+def render_text(text: str, template_name="<string>", **kw):
     """使用模板引擎渲染文本信息,使用缓存
-    TODO 控制缓存大小，使用FIFO或者LRU淘汰
     """
+    _loader = XnoteLoader.get_instance()
+
     nkw = do_render_kw(kw)
 
+    # 通过缓存加快md5的计算
     # 使用hash不能保证唯一性
-    text_md5 = xutils.md5_hex(text)
+    text_md5 = get_md5_hex_with_cache(text)
+
     name = f"{XnoteLoader.memory_prefix}{template_name}_{text_md5}"
     if name not in _loader.templates:
         _loader.init_template(name, text)
@@ -297,20 +321,18 @@ def render_text(text, template_name="<string>", **kw):
 
 
 def get_code(name):
+    _loader = XnoteLoader.get_instance()
     return _loader.load(name).code
 
 
 def get_templates():
     """获取所有模板的浅拷贝"""
-    return _loader.templates.copy()
+    loader = XnoteLoader.get_instance()
+    return loader.templates.copy()
 
 
 def _do_init():
-    global _loader
-    _loader = XnoteLoader(TEMPLATE_DIR, namespace=NAMESPACE)
-    _loader.reset()
-    _loader.init_path_mapping()
-
+    XnoteLoader.init_instance(TEMPLATE_DIR, namespace=NAMESPACE)
 
 @xutils.log_init_deco("xtemplate.reload")
 def reload():

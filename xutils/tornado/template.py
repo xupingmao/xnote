@@ -570,7 +570,7 @@ class _IncludeBlock(_Node):
 
 
 class _ApplyBlock(_Node):
-    def __init__(self, method, line, body=None):
+    def __init__(self, method, line, body: _ChunkList):
         self.method = method
         self.line = line
         self.body = body
@@ -592,7 +592,7 @@ class _ApplyBlock(_Node):
 
 
 class _ControlBlock(_Node):
-    def __init__(self, statement, line, body=None):
+    def __init__(self, statement: str, line: int, body: _Node):
         self.statement = statement
         self.line = line
         self.body = body
@@ -600,7 +600,7 @@ class _ControlBlock(_Node):
     def each_child(self):
         return (self.body,)
 
-    def generate(self, writer):
+    def generate(self, writer: "_CodeWriter"):
         writer.write_line("%s:" % self.statement, self.line)
         with writer.indent():
             self.body.generate(writer)
@@ -763,7 +763,7 @@ class _CodeWriter(object):
 
         return IncludeTemplate()
 
-    def write_line(self, line, line_number, indent=None):
+    def write_line(self, line, line_number:int, indent=None):
         if indent is None:
             indent = self._indent
         line_comment = '  # %s:%d' % (self.current_template.name, line_number)
@@ -775,7 +775,7 @@ class _CodeWriter(object):
 
 
 class _TemplateReader(object):
-    def __init__(self, name, text, whitespace):
+    def __init__(self, name:str, text: str, whitespace: str):
         self.name = name
         self.text = text
         self.whitespace = whitespace
@@ -840,7 +840,7 @@ def _format_code(code):
     return "".join([format % (i + 1, line) for (i, line) in enumerate(lines)])
 
 
-def _parse(reader, template, in_block=None, in_loop=None):
+def _parse(reader: _TemplateReader, template, in_block=None, in_loop=None):
     body = _ChunkList([])
     while True:
         # Find next template directive

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-31 11:17:36
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-03 18:32:06
+@LastEditTime : 2024-06-01 12:48:38
 @FilePath     : /xnote/xnote/plugin/table_plugin.py
 @Description  : 描述
 """
@@ -56,14 +56,10 @@ class BaseTablePlugin(BasePlugin):
 
     def handle(self, input=""):
         action = xutils.get_argument_str("action")
-        if action == "edit":
-            return self.handle_edit()
-        if action == "save":
-            return self.handle_save()
-        if action == "delete":
-            return self.handle_delete()
+        method = getattr(self, "handle_" + action, None)
+        if method != None:
+            return method()
         return self.handle_page()
-    
 
     def handle_edit(self):
         form = DataForm()
