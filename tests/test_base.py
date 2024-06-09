@@ -21,7 +21,7 @@ from xutils.db.driver_sqlite import SqliteKV
 config = xconfig
 date = time.strftime("%Y/%m")
 
-APP: typing.Union[web.application,None] = None
+APP: typing.Optional[web.application] = None
 
 DEFAULT_HEADERS = dict()
 

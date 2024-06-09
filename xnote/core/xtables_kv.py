@@ -105,6 +105,8 @@ def init_note_tables():
     dbutil.register_table("note_draft", "笔记草稿", category="note", type="hash")
     dbutil.register_table("note_lock", "笔记编辑锁", category="note")
     dbutil.register_table("note_full", "笔记的完整信息", category="note")
+    dbutil.register_table("notebook", "笔记分组", category="note", check_user=True, user_attr="creator")
+    dbutil.register_table("token", "用于分享的令牌")
 
     # ID维度笔记索引
     db = dbutil.register_table(

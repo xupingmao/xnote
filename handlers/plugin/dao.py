@@ -12,16 +12,7 @@ import xutils
 from xnote.core import xtables
 from xnote.core import xauth
 from xutils import dateutil
-from xutils import Storage
-
-class PageVisitLogDO(Storage):
-    def __init__(self, **kw):
-        self.user_id = 0
-        self.url = ""
-        self.args = ""
-        self.visit_cnt = 0
-        self.visit_time = dateutil.format_datetime()
-        self.update(kw)
+from handlers.plugin.models import PageVisitLogDO
 
 class PageVisitDao:
     

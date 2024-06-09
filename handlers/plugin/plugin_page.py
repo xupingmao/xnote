@@ -7,6 +7,7 @@ import xutils
 import web
 import copy
 
+from typing import Optional
 from xnote.core import xconfig
 from xnote.core import xtemplate
 from xnote.core import xauth
@@ -15,15 +16,13 @@ from xnote.core import xnote_hooks
 
 from xnote.core.xtemplate import T
 from xutils import Storage
-from xutils import fsutil
 from xutils import logutil
 from xutils import textutil, SearchResult, dateutil, u
-from xutils import attrget
 from xutils import mem_util
-from xutils.imports import ConfigParser
+from configparser import ConfigParser
 from handlers.plugin.dao import (
     add_visit_log, list_visit_logs, PageVisitLogDO)
-
+from handlers.plugin.service import CategoryService
 
 from xnote.plugin import load_plugin_file, PluginContext
 
@@ -50,7 +49,6 @@ from xnote.plugin import load_plugin_file, PluginContext
 
 """
 
-PLUGIN_CATEGORY_LIST = list()
 
 CONFIG_TOOLS = list()
 
@@ -58,75 +56,14 @@ PLUGINS_STATUS = "loading"
 
 DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
 
-
-def get_current_platform():
-    return xtemplate.get_device_platform()
-
-
-class PluginCategory:
-    """插件分类"""
-    required_roles = None
-    icon_class = "fa fa-cube"
-
-    def __init__(self, code, name, url=None, required_roles=None):
-        self.code = code
-        self.name = name
-        self.required_roles = required_roles
-        self.platforms = None
-        if url is None:
-            self.url = "/plugin_list?category=%s" % self.code
-        else:
-            self.url = url
-
-    def is_visible(self):
-        return self.is_visible_by_roles() and self.is_visible_by_platform()
-
-    def is_visible_by_platform(self):
-        if self.platforms is None:
-            return True
-        return get_current_platform() in self.platforms
-
-    def is_visible_by_roles(self):
-        if self.required_roles is None:
-            return True
-        return xauth.current_role() in self.required_roles
-
-
-def define_plugin_category(code: str,
-                           name: str,
-                           url=None,
-                           raise_duplication=True,
-                           required_roles=None,
-                           platforms=None,
-                           icon_class=None):
-    global PLUGIN_CATEGORY_LIST
-    for item in PLUGIN_CATEGORY_LIST:
-        if item.code == code:
-            if raise_duplication:
-                raise Exception("code: %s is defined" % code)
-            else:
-                return
-        if item.name == name:
-            if raise_duplication:
-                raise Exception("name: %s is defined" % name)
-            else:
-                return
-    category = PluginCategory(code, name, url, required_roles)
-    category.platforms = platforms
-    if icon_class != None:
-        category.icon_class = icon_class
-    PLUGIN_CATEGORY_LIST.append(category)
-
-
 def get_plugin_category_list():
-    global PLUGIN_CATEGORY_LIST
-    return PLUGIN_CATEGORY_LIST
+    return CategoryService.category_list
 
 
 def get_category_url_by_code(code):
     if code is None:
         return "/plugin_list?category=all"
-    for item in PLUGIN_CATEGORY_LIST:
+    for item in CategoryService.category_list:
         if item.code == code:
             return item.url
     return "/plugin_list?category=%s" % code
@@ -143,7 +80,7 @@ def get_category_name_by_code(code: str):
 xnote_hooks.get_category_name_by_code = get_category_name_by_code
 
 def get_category_by_code(code: str):
-    for item in PLUGIN_CATEGORY_LIST:
+    for item in CategoryService.category_list:
         if item.code == code:
             return item
     return None
@@ -223,7 +160,7 @@ def find_plugins(category, orderby=None):
     return sorted_plugins(user_name, plugins, orderby)
 
 
-def inner_plugin(name, url, category="inner", url_query="", icon=None):
+def inner_plugin(name, url, category="inner", url_query="", icon= "fa fa-cube"):
     context = PluginContext()
     context.name = name
     context.title = name
@@ -231,7 +168,6 @@ def inner_plugin(name, url, category="inner", url_query="", icon=None):
     context.url_query = url_query
     context.editable = False
     context.category = category
-    context.icon_class = "fa fa-cube"
     context.permitted_role_list = ["admin", "user"]
     context.require_admin = False
     context.icon = icon
@@ -262,7 +198,7 @@ def index_plugin(name, url, url_query=""):
     return inner_plugin(name, url, "index", url_query=url_query)
 
 
-def file_plugin(name, url, icon=None):
+def file_plugin(name, url, icon= "fa fa-cube"):
     return inner_plugin(name, url, "dir", icon=icon)
 
 
@@ -581,7 +517,7 @@ class PluginListHandler:
     @xauth.login_required()
     def GET(self):
         global PLUGINS_STATUS
-        category = xutils.get_argument("category", "")
+        category = xutils.get_argument_str("category", "")
         key = xutils.get_argument("key", "")
         header = xutils.get_argument("header", "")
         version = xutils.get_argument("version", "")
@@ -732,7 +668,7 @@ class LoadPluginHandler:
         need_reload = xutils.get_argument_bool("_reload", False)
         return xauth.is_admin() and need_reload
 
-    def load_plugin(self, name, force_reload=False):
+    def load_plugin(self, name, force_reload=False) -> Optional[PluginContext]:
         context = xconfig.PLUGINS_DICT.get(name)
 
         if context == None or force_reload:
@@ -746,7 +682,7 @@ class LoadPluginHandler:
             return context
 
     def GET(self, name=""):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         name = xutils.unquote(name)
         try:
             url = "/plugin/" + name
@@ -826,9 +762,8 @@ def reload_plugins_by_config(ctx=None):
 
     tmp_tools = []
     for section in parser.sections():
-        name = parser.get(section, "name", fallback=None)
-        icon = parser.get(section, "icon", fallback=None)
-        url = parser.get(section, "url", fallback=None)
+        name = parser.get(section, "name", fallback="")
+        url = parser.get(section, "url", fallback="")
         category = parser.get(section, "category", fallback=None)
         editable = parser.getboolean(section, "editable", fallback=False)
 
@@ -851,29 +786,7 @@ xutils.register_func("plugin.get_category_url_by_code",
                      get_category_url_by_code)
 xutils.register_func("plugin.get_category_name_by_code",
                      get_category_name_by_code)
-xutils.register_func("plugin.define_category", define_plugin_category)
-
-define_plugin_category("all",      u"常用", icon_class="fa fa-th-large")
-define_plugin_category("recent",   u"最近")
-define_plugin_category("note",   u"笔记")
-define_plugin_category("dir",      u"文件", required_roles=[
-                       "admin"], icon_class="fa fa-folder")
-define_plugin_category("system",   u"系统", required_roles=["admin"], platforms=[
-                       "desktop"],  icon_class="fa fa-gear")
-define_plugin_category("network",  u"网络", required_roles=["admin"], platforms=[
-                       "desktop"], icon_class="icon-network-14px")
-define_plugin_category("develop",  u"开发", required_roles=[
-                       "admin", "user"], platforms=["desktop"])
-define_plugin_category("datetime", u"日期和时间", platforms=[],
-                       icon_class="fa fa-clock-o")
-define_plugin_category("work",     u"工作", platforms=[
-                       "desktop"], icon_class="icon-work")
-define_plugin_category("inner",    u"内置工具", platforms=[])
-define_plugin_category("money",    u"理财", platforms=["desktop"])
-define_plugin_category("test",     u"测试", platforms=[])
-define_plugin_category("other",    u"其他", platforms=[])
-define_plugin_category(
-    "index",    u"全部分类", url="/plugin_category_list?category=index", icon_class="fa fa-th-large")
+xutils.register_func("plugin.define_category", CategoryService.define_plugin_category)
 
 xurls = (
     r"/plugin/(.+)", LoadPluginHandler,
