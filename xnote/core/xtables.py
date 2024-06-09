@@ -184,6 +184,7 @@ def init_note_index_table():
         # 各种索引
         manager.add_index("parent_id")
         manager.add_index(["creator_id", "mtime"])
+        manager.add_index(["creator_id", "ctime"])
         manager.add_index(["creator_id", "type"])
 
 def init_share_info_table():

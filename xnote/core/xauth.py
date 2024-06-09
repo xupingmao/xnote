@@ -19,7 +19,7 @@ import xutils
 import warnings
 import time
 import datetime
-from . import xtables, xconfig, xmanager
+from xnote.core import xtables, xconfig, xmanager
 import enum
 from xutils import textutil, dbutil, fsutil, dateutil
 from xutils import Storage
@@ -186,6 +186,8 @@ class UserDao:
         if fire_event:
             event = Storage(user_name=name)
             xmanager.fire("user.create", event)
+
+        assert isinstance(user_id, int)
         return user_id
 
     @classmethod
@@ -255,7 +257,7 @@ class SessionInfo(Storage):
         self.mobile = ""
 
 
-class SessionModel:
+class SessionDao:
 
     @classmethod
     def init(cls):
@@ -305,6 +307,8 @@ class SessionModel:
         cls.db.delete_by_id(sid)
         session_cache.delete(sid)
 
+class SessionModel(SessionDao):
+    pass
 
 def dict_to_session_info(dict_value):
     info = SessionInfo()
@@ -408,11 +412,11 @@ def is_session_expired(session_info):
 
 
 def get_valid_session_by_id(sid):
-    return SessionModel.get_by_sid(sid)
+    return SessionDao.get_by_sid(sid)
 
 
 def list_user_session_detail(user_name):
-    return SessionModel.list_by_user_name(user_name)
+    return SessionDao.list_by_user_name(user_name)
 
 
 def create_user_session(user_name, expires=SESSION_EXPIRE, login_ip=""):
@@ -450,14 +454,14 @@ def create_session_by_user(user_detail, expires=SESSION_EXPIRE, login_ip=""):
     else :
         session_info.mobile = ""
 
-    SessionModel.create(session_info)
+    SessionDao.create(session_info)
 
     return session_info
 
 
 def delete_user_session_by_id(sid):
     # 登录的时候会自动清理无效的sid关系
-    SessionModel.delete_by_sid(sid)
+    SessionDao.delete_by_sid(sid)
 
 
 def find_by_name(name):
@@ -964,7 +968,7 @@ def init():
     INVALID_NAMES = xconfig.load_invalid_names()
     USER_CONFIG_PROP = xconfig.load_user_config_properties()
 
-    SessionModel.init()
+    SessionDao.init()
     UserOpLogDao.init()
 
     _create_temp_user("admin")

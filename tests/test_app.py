@@ -323,6 +323,8 @@ class Main:
 
     def test_plugin_category_list(self):
         self.check_200("/plugin_category_list")
+        from handlers.plugin.service import CategoryService
+        assert len(CategoryService.category_list) > 0
 
     def test_plugin_search(self):
         self.check_200("/plugin_list?key=123")

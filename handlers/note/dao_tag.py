@@ -4,15 +4,15 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-22 23:47:21
+@LastEditTime : 2024-06-09 23:02:33
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
 
 import json
 import xutils
-import xtables
-import xauth
+from xnote.core import xtables
+from xnote.core import xauth
 import logging
 import handlers.note.dao as note_dao
 from xutils import functions, lists
@@ -118,7 +118,7 @@ class TagBindDao:
         return lists.get_uniq_list(new_tags)
     
     @classmethod
-    def update_tag_bind(cls, user_id=0, note_id="", new_tags=[]):
+    def update_tag_bind(cls, user_id=0, note_id=0, new_tags=[]):
         cls.tag_bind_service.bind_tags(user_id=user_id, target_id=int(note_id), tags=new_tags)
 
     @classmethod

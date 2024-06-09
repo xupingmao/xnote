@@ -89,6 +89,8 @@ class TableProxy(SQLDBInterface):
         return records
     
     def select_first(self, *args, **kw):
+        if "limit" not in kw:
+            kw["limit"] = 1
         records = self.select(*args, **kw)
         if len(records) > 0:
             return records[0]

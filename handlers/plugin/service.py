@@ -54,3 +54,5 @@ class CategoryService:
         cls.define_plugin_category("other",    u"其他", platforms=[])
         cls.define_plugin_category(
             "index",    u"全部分类", url="/plugin_category_list?category=index", icon_class="fa fa-th-large")
+
+CategoryService.init_category_list()

@@ -2,9 +2,10 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2020/12/17 23:18:20
 # @modified 2020/12/17 23:25:30
-import xmanager
-import xauth
-import xtemplate
+
+from xnote.core import xmanager
+from xnote.core import xauth
+from xnote.core import xtemplate
 
 class NoteCalendarHandler:
     """日历视图"""
