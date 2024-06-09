@@ -16,11 +16,12 @@ from xnote.core.xtemplate import T
 from handlers.note.constant import *
 from handlers.message.dao import MessageDao
 from handlers.note.dao_api import NoteDao
+from handlers.note.dao import NoteIndexDao
 from handlers.note import note_helper, dao_share
 import handlers.note.dao as note_dao
 import handlers.note.dao_log as dao_log
 from xnote.core import xmanager
-
+from datetime import datetime
 
 class PathLink:
 
@@ -41,6 +42,7 @@ class ListContext(Storage):
         self.user_name = ""
         self.user_id = 0
         self.url_type = ""
+        self.year = 0
         self.update(kw)
 
 def get_parent_link(user_name, type, priority=0):
@@ -308,6 +310,16 @@ def list_by_type_func(context):
     rows = note_dao.list_by_type(user_name, type, offset, limit, orderby="ctime_desc")
     return build_date_result(rows, 'ctime')
 
+def list_year_group_func(context: ListContext):
+    offset = context.offset
+    limit = context.limit
+    year = context.year
+
+    date_start = dateutil.format_datetime(datetime(year=year, month=1, day=1))
+    date_end_exclusive = dateutil.format_datetime(datetime(year=year+1, month=1, day=1))
+    notes = NoteIndexDao.list(creator_id=context.user_id, date_start=date_start, 
+                              date_end_exclusive=date_end_exclusive, offset=offset, limit=limit, order="ctime desc")
+    return build_date_result(notes, "ctime")
 
 def list_plan_func(context):
     offset = context['offset']
@@ -394,6 +406,7 @@ LIST_FUNC_DICT = {
     'csv': list_by_type_func,
     'log': list_by_type_func,
     "group_list": list_by_type_func,
+    "year_group": list_year_group_func,
 
     'plan': list_plan_func,
     'all': list_all_func,
@@ -427,6 +440,7 @@ class TimelineAjaxHandler:
         kw.user_id = user_info.id
         kw.url_type = url_type
         kw.filter_tag = xutils.get_argument_str("filter_tag")
+        kw.year = xutils.get_argument_int("year")
 
         list_func = LIST_FUNC_DICT.get(type, default_list_func)
         return list_func(kw)
@@ -444,7 +458,9 @@ class DateTimelineAjaxHandler:
             "ctime", user_name, "%s-%s" % (year, month))
         result = dict()
         for row in rows:
-            date = re.match(r"\d+\-\d+", row.ctime).group(0)
+            match_result = re.match(r"\d+\-\d+", row.ctime)
+            assert match_result != None
+            date = match_result.group(0)
             # 优化数据大小
             row.content = ""
             if date not in result:
@@ -685,7 +701,6 @@ xurls = (
 
     # 时光轴视图
     r"/note/timeline", TimelineHandler,
-    r"/note/timeline/recent", TimelineRecentHandler,
     r"/note/timeline/month", DateTimelineAjaxHandler,
     
     r"/note/plan", PlanListHandler,

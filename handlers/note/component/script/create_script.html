@@ -7,15 +7,12 @@ function createNote0(title, type) {
         createOption.parent_id = "{{parent_id}}";
         createOption.type = type;
         createOption._format = "json";
-        $.post("/note/create", createOption, function (resp) {
+        xnote.http.post("/note/create", createOption, function (resp) {
             if (resp.code == "success") {
                 window.location.href = resp.url;
             } else {
-                alert(title + "失败:" + resp.message);
+                xnote.alert(title + "失败:" + resp.message);
             }
-        }).fail(function (e) {
-            console.error(title + "失败", e);
-            alert(title + "失败:" + e);
         });
     });
 }
@@ -52,15 +49,12 @@ function createLogOld() {
     createOption.type = "text";
     createOption._format = "json";
 
-    $.post("/note/create", createOption, function (resp) {
+    xnote.http.post("/note/create", createOption, function (resp) {
         if (resp.code == "success") {
             window.location.href = resp.url;
         } else {
             xnote.alert(title + "失败:" + resp.message);
         }
-    }).fail(function (e) {
-        console.error(title + "失败", e);
-        xnote.alert(title + "失败:" + e);
     });
 }
 /** 创建分组 **/
@@ -72,15 +66,12 @@ function createGroup() {
         createOption.parent_id = "{{parent_id}}";
         createOption.type = "group";
         createOption._format = "json";
-        $.post("/note/create", createOption, function (resp) {
+        xnote.http.post("/note/create", createOption, function (resp) {
             if (resp.code == "success") {
                 window.location = resp.url;
             } else {
                 xnote.alert(opName + "失败:" + resp.message);
             }
-        }).fail(function (e) {
-            console.error(opName + "失败", e);
-            xnote.alert(opName + "失败:" + e);
         });
     });
 }

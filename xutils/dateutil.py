@@ -217,9 +217,13 @@ def parse_date_to_object(date_str):
         (2020,None,None)
         >>> parse_date_to_object("2020-01-01")
         (2020,1,1)
+        >>> parse_date_to_object("2020-01-01 00:00:00")
+        (2020,1,1)
     """
     assert date_str != None
     assert is_str(date_str)
+    
+    date_str = date_str.split(" ")[0]
     parts = date_str.split("-")
     
     date_object = DateClass()

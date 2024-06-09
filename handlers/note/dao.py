@@ -185,7 +185,8 @@ class NoteIndexDao:
     
     @classmethod
     def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, type_list=[], is_deleted=0, 
-            level=None, date=None, date_start=None, date_end=None, name_like=None, query_root=False, order="id desc"):
+            level=None, date=None, date_start=None, date_end=None, date_end_exclusive=None, 
+            name_like=None, query_root=False, order="id desc"):
         if order=="dtime_asc":
             order = "dtime"
         if order=="ctime_desc":
@@ -220,6 +221,8 @@ class NoteIndexDao:
             where += " AND ctime >= $date_start"
         if date_end != None:
             where += " AND ctime < $date_end"
+        if date_end_exclusive != None:
+            where += " AND ctime < $date_end_exclusive"
 
         if name_like != None:
             where += " AND name LIKE $name_like"
@@ -227,7 +230,8 @@ class NoteIndexDao:
             where += " AND type IN $type_list"
         vars = dict(creator_id=creator_id, parent_id=parent_id, type=type, level=level, 
                     is_deleted=is_deleted, date_like=date_like, name_like=name_like, 
-                    type_list=type_list, date_start=date_start, date_end=date_end)
+                    type_list=type_list, date_start=date_start, date_end=date_end, 
+                    date_end_exclusive=date_end_exclusive)
         result = cls.db.select(where=where, vars=vars, offset=offset, limit=limit, order=order)
         return cls.fix_result(result)
     
@@ -239,7 +243,8 @@ class NoteIndexDao:
             yield batch_records
 
     @classmethod
-    def count(cls, creator_id=0, type=None, type_list=[], level=None, is_deleted=0, parent_id=0, is_not_group=False, query_root=False):
+    def count(cls, creator_id=0, type=None, type_list=[], level=None, is_deleted=0, parent_id=0, 
+              is_not_group=False, query_root=False, date_start=None, date_end_exclusive=None):
         if type == "table":
             type = None
             type_list = ["csv", "table"]
@@ -260,9 +265,14 @@ class NoteIndexDao:
             where += " AND type IN $type_list"
         if query_root:
             where += " AND parent_id=0"
+        if date_start != None:
+            where += " AND ctime >= $date_start"
+        if date_end_exclusive != None:
+            where += " AND ctime < $date_end_exclusive"
         
         vars = dict(creator_id=creator_id, type=type, level=level, is_deleted=is_deleted, 
-        parent_id=parent_id, group_type="group", type_list=type_list)
+        parent_id=parent_id, group_type="group", type_list=type_list, 
+        date_start=date_start, date_end_exclusive=date_end_exclusive)
         return cls.db.count(where=where, vars=vars)
     
     @classmethod
@@ -290,6 +300,22 @@ class NoteIndexDao:
         vars = dict(creator_id=creator_id, parent_id=parent_id, name=name)
         result = cls.db.select_first(where=where_sql, vars=vars, order="name", limit=1)
         return cls.fix_single_result(result)
+    
+    @classmethod
+    def get_min_year(cls, creator_id=0):
+        min_record = cls.db.select_first(what="ctime", where=dict(creator_id=creator_id, is_deleted=0), order="ctime", limit=1)
+        if min_record != None:
+            date_obj = dateutil.parse_date_to_object(min_record.ctime)
+            return date_obj.year
+        return -1
+    
+    @classmethod
+    def get_max_year(cls, creator_id=0):
+        min_record = cls.db.select_first(what="ctime", where=dict(creator_id=creator_id, is_deleted=0), order="ctime desc", limit=1)
+        if min_record != None:
+            date_obj = dateutil.parse_date_to_object(min_record.ctime)
+            return date_obj.year
+        return -1
 
 class ShareTypeEnum(enum.Enum):
     note_public = "note_public"

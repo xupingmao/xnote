@@ -23,27 +23,38 @@
           {% include note/component/timeline/timeline_create_option.html %}
         {% end %}
 
-        {% if show_create_btn %}
-          <a class="btn" href="{{_server_home}}/note/create?parent_id={{parent_id}}">新建笔记</a>
-        {% end %}
-
-        {% if show_group_btn %}
+        {% if type == "all" %}
+          <!-- 最近的笔记 -->
+          <a class="btn btn-default" href="{{_server_home}}/note/group?type=year">笔记日历</a>
           <a href="{{_server_home}}/note/timeline?type=group_list&orderby=name" class="btn btn-default">笔记本</a>
         {% end %}
 
-        {% if show_recent_btn %}
-          <a href="{{_server_home}}/note/timeline/recent" class="btn btn-default">最新笔记</a>
+        {% if type == "year_group" %}
+          <!-- 笔记日历视图 -->
+          <a class="btn btn-default" href="{{_server_home}}/note/group?type=year">笔记日历</a>
+        {% end %}
+
+        {% if type == "group" %}
+          <!-- 笔记本视图 -->
+          <a class="btn" href="{{_server_home}}/note/create?parent_id={{parent_id}}">新建笔记</a>
+        {% end %}
+
+        {% if type == "group_list" %}
+          <!-- 笔记本视图 -->
+          <a href="{{_server_home}}/note/timeline?type=all" class="btn btn-default">最新笔记</a>
         {% end %}
 
         {% if type == "default" %}
+          <!-- 笔记列表视图 -->
+          <a class="btn" href="{{_server_home}}/note/create?parent_id={{parent_id}}">新建笔记</a>
           {% include note/component/option/group_option.html %}
-        {% elif type == "public" %}
+        {% end %}
+        
+        {% if type == "public" %}
           {% include note/component/share_dialog.html %}
         {% end %}
 
-        {% if show_back_btn %}
-          {% include common/button/back_button.html %}
-        {% end %}
+        {% include common/button/back_button.html %}
     </div>
   </div>
 </div>

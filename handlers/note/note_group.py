@@ -27,8 +27,10 @@ from . import dao_book
 from . import dao_share
 from . import dao_log
 from .dao_api import NoteDao
+from handlers.note.note_service import NoteService
 import handlers.note.dao as note_dao
 import handlers.message.dao as msg_dao
+from xnote.plugin import DataTable
 
 VIEW_TPL = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -279,8 +281,7 @@ class GroupListHandler:
 
     @xauth.login_required()
     def do_get(self):
-        user_name = xauth.current_name()
-        assert isinstance(user_name, str)
+        user_name = xauth.current_name_str()
 
         orderby_default = xconfig.get_user_config(
             user_name, "group_list_order_by", "name_asc")
@@ -330,6 +331,63 @@ class GroupListHandler:
             kw.show_note_types = False
 
         return xtemplate.render("note/page/group_list.html", **kw)
+
+class GroupByYearHandler:
+
+    LIST_HTML = """
+{% extends base %}
+
+{% block body_left %}
+    <div class="card">
+        {% include common/base_title.html %}
+    </div>
+
+    <div class="card">
+        {% include common/table/table.html %}
+    </div>
+{% end %}
+
+{% block body_right %}
+    {% include note/component/sidebar/group_list_sidebar.html %}
+{% end %}
+"""
+    
+    @xauth.login_required()
+    def GET(self):
+        creator_id = xauth.current_user_id()
+        result = NoteService.get_year_group_list(creator_id=creator_id)
+
+        table = DataTable()
+        table.add_head("年份", "year", link_field="href", width="50%")
+        table.add_head("笔记数量", "amount", width="50%")
+
+        for item in result:
+            table.add_row(item.to_dict())
+
+        return xtemplate.render_text(self.LIST_HTML, table = table, title="笔记日历")
+
+
+class GroupListFacadeHandler:
+
+    def get_handler(self):
+        type = xutils.get_argument_str("type")
+        if type == "year":
+            return GroupByYearHandler()
+        return GroupListHandler()
+    
+    def GET(self):
+        handler = self.get_handler()
+        method = getattr(handler, "GET")
+        if method is None:
+            raise Exception("%s has not GET method" % type(handler))
+        return method()
+    
+    def POST(self):
+        handler = self.get_handler()
+        method = getattr(handler, "POST")
+        if method is None:
+            raise Exception("%s has not POST method" % type(handler))
+        return method()
 
 
 class GroupManageHandler:
@@ -939,10 +997,10 @@ xutils.register_func("url:/note/date",  DateListHandler)
 xutils.register_func("url:/note/all", AllNoteListHandler)
 
 xurls = (
-    r"/note/group", GroupListHandler,
-    r"/note/group_list", GroupListHandler,
+    r"/note/group", GroupListFacadeHandler,
+    r"/note/group_list", GroupListFacadeHandler,
     r"/note/group/manage", GroupManageHandler,
-    r"/note/books", GroupListHandler,
+    r"/note/books", GroupListFacadeHandler,
     r"/note/default", DefaultListHandler,
     r"/note/ungrouped", DefaultListHandler,
     r"/note/archived", ArchivedHandler,
