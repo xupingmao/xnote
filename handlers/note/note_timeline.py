@@ -471,7 +471,7 @@ class DateTimelineAjaxHandler:
 
 class BaseTimelineHandler:
 
-    note_type = "group"
+    note_type = "all"
     search_type = "note"
     show_create = True
     check_login = True
@@ -564,7 +564,7 @@ class BaseTimelineHandler:
 
 
 class TimelineHandler(BaseTimelineHandler):
-    note_type = "group"
+    note_type = "all"
     show_create_btn = True
 
     def before_get(self):

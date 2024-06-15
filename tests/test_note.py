@@ -717,6 +717,9 @@ class TestMain(BaseTestCase):
         note_id = create_note_for_test("group", "group-manage-test")
         self.check_OK(f"/note/manage?parent_id={note_id}")
 
+    def test_group_by_year(self):
+        self.check_OK("/note/group_list?type=year")
+
     def test_month_plan(self):
         from handlers.plan.dao import MonthPlanDao
 

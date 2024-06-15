@@ -20,11 +20,7 @@
         {% include note/component/script/create_script.html %}
     </div>
 
-    {% if _is_mobile %}
-        {% include note/page/group_list_nav_mobile.html %}
-    {% else %}
-        {% include note/page/group_list_nav_desktop.html %}
-    {% end %}
+    {% include note/page/group_list_nav.html %}
 
     {% if show_sort %}
         <!-- 排序功能 -->

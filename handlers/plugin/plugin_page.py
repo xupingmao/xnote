@@ -692,8 +692,10 @@ class LoadPluginHandler:
                 # 访问日志
                 add_visit_log(user_name, url)
                 check_and_load_class(plugin)
+                clazz = plugin.clazz
+                assert clazz != None
                 # 渲染页面
-                return plugin.clazz().render()
+                return clazz().render()
             else:
                 # 加载插件失败，删除日志，插件开发过程中出现误删，先不处理
                 # delete_visit_log(user_name, name, url)

@@ -350,8 +350,7 @@ class GroupByYearHandler:
 {% block body_right %}
     {% include note/component/sidebar/group_list_sidebar.html %}
 {% end %}
-"""
-    
+"""    
     @xauth.login_required()
     def GET(self):
         creator_id = xauth.current_user_id()
@@ -363,8 +362,12 @@ class GroupByYearHandler:
 
         for item in result:
             table.add_row(item.to_dict())
+        
+        kw = Storage()
+        kw.table = table
+        kw.title = "笔记日历"
 
-        return xtemplate.render_text(self.LIST_HTML, table = table, title="笔记日历")
+        return xtemplate.render_text(self.LIST_HTML, **kw)
 
 
 class GroupListFacadeHandler:
