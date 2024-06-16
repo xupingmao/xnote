@@ -55,7 +55,7 @@ $(function () {
     var loadingIndex;
 
     function checkSystemStatus() {
-        xnote.http.post("/system/reload?runtime_id={{runtime_id}}", function (resp) {
+        xnote.http.internalPost("/system/reload?runtime_id={{runtime_id}}", function (resp) {
             console.log(resp)
             if (resp.code == "success") {
                 xnote.toast("重启成功!");
@@ -63,16 +63,16 @@ $(function () {
             } else {
                 setTimeout(checkSystemStatus, checkInterval)
             }
-        });
+        }).fail(function (err) {
+            console.error("checkSystemStatus failed, wait to retry", err);
+            setTimeout(checkSystemStatus, checkInterval);
+        })
     }
 
     function doRestart() {
         xnote.toast("重启中，请等待2-5分钟...")
         loadingIndex = layer.load(1);
-        xnote.http.post("/system/reload?runtime_id={{runtime_id}}", function (resp) {
-            console.log(resp);
-            setTimeout(checkSystemStatus, checkInterval)
-        })
+        checkSystemStatus();
     }
 
     xnote.tmp.restart = function () {

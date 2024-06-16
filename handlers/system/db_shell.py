@@ -107,6 +107,7 @@ class handler:
         path = xutils.get_argument_str("path")
         action = xutils.get_argument_str("action")
         type = xutils.get_argument_str("type")
+        is_embed = xutils.get_argument_bool("embed")
 
         t_start = time.time()
         if type == "mysql":
@@ -124,6 +125,9 @@ class handler:
         kw.error = error
         kw.cost_time = int((t_stop-t_start)*1000)
         kw.path = path
+        kw.is_embed = is_embed
+        if is_embed:
+            kw.show_nav = False
 
         return xtemplate.render("system/page/sqlite.html", **kw)
 

@@ -4,9 +4,17 @@
 {% init search_action = "/search/search" %}
 {% init nav_type = "default" %}
 
+{% if not show_nav %}
+<style>
+  .main-content {
+    padding-left: 10px;
+  }
+</style>
+{% end %}
+
 {% include $base_nav_top %}
 
-{% if _user_config.nav_style == "left" %}
+{% if _user_config.nav_style == "left" and show_nav %}
   {% include $base_nav_left %}
 {% end %}
 

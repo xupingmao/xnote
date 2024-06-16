@@ -187,13 +187,15 @@ def format_file_size(fpath):
     return get_file_size(fpath, format=True)
 
 
-def get_file_size_int(fpath):
+def get_file_size_int(fpath, raise_exception=False):
     """读取文件大小,返回数字"""
     try:
         st = os.stat(fpath)
         if st and st.st_size >= 0:
             return st.st_size
     except OSError as e:
+        if raise_exception:
+            raise e
         return -1
     return 0
 
@@ -596,6 +598,7 @@ class FileItem(Storage):
                  encode_path=True,
                  name=None):
         self.path = path
+        self.path_b64 = textutil.encode_base64(path)
         realname = fixed_basename(path)
         self.name = realname
         self.realname = realname

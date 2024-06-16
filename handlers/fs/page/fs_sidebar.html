@@ -130,7 +130,8 @@
 {% end %}
 
 {% block search_form %}
-<input type="text" name="path" class="hide" value="{{?path}}" />
+    {% init path = "" %}
+    <input type="text" name="path" class="hide" value="{{path}}" />
 {% end %}
 
 {% block body %}
@@ -159,7 +160,7 @@
                     <img src="/static/image/folder.gif" />
                     <a href="{{item.url}}?mode=sidebar" class="fs-folder">{{item.name}}</a>
                     {% else %}
-                    <a data-path="{{item.path}}" class="fs-file">{{item.name}}</a>
+                    <a data-path="{{item.path_b64}}" class="fs-file">{{item.name}}</a>
                     {% end %}
                 </td>
             </tr>
@@ -190,11 +191,23 @@
             $(".fs-file").removeClass("active");
             $(e.target).addClass("active");
             var path = $(e.target).attr("data-path");
-            var previewURL = "/fs_preview?path=" + path;
-            window.location.hash = previewURL;
+            window.location.hash = path;
+            var previewURL = "/fs_preview?b64=1&path=" + path;
             $("#previewIframe").attr("src", previewURL);
         })
+    });
+
+    $(function () {
+        var path = window.location.hash;
+        if (path) {
+            path = path.substring(1);
+            var previewURL = "/fs_preview?b64=1&path=" + path;
+            console.log("previewURL", previewURL);
+            $("#previewIframe").attr("src", previewURL);
+            $(".fs-file[data-path=" + path + "]").addClass("active");
+        }
     })
+
 </script>
 
 {% end %}

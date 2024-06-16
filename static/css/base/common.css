@@ -1098,6 +1098,7 @@ select.no-border {
 .top-offset-1{margin-top:5px;}
 .top-offset-2{margin-top:10px;}
 .bottom-offset-1{margin-bottom:5px;}
+.bottom-offset-2{margin-bottom:10px;}
 .row{float: left;width: 100%;overflow: auto;}
 .pad5 {padding: 5px;}
 .pad10 {padding: 10px;}

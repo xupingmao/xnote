@@ -5,14 +5,14 @@
 """显示代码原文"""
 import os
 import web
-import xauth
+from xnote.core import xauth
 import xutils
-import xtemplate
-import xconfig
-import xmanager
-import xnote_event
+from xnote.core import xtemplate
+from xnote.core import xconfig
+from xnote.core import xmanager
+from xnote.core import xnote_event
 from xutils import Storage, fsutil
-
+from xutils import textutil
 
 def can_preview(path):
     name, ext = os.path.splitext(path)
@@ -21,7 +21,7 @@ def can_preview(path):
 
 def handle_embed(kw):
     """处理嵌入式常见"""
-    embed = xutils.get_argument("embed", type=bool)
+    embed = xutils.get_argument_bool("embed")
 
     kw.show_aside = False
     kw.embed = embed
@@ -31,18 +31,24 @@ def handle_embed(kw):
         kw.show_menu = False
         kw.show_search = False
         kw.show_path = False
+        kw.show_nav = False
 
 
 def handle_args(kw):
-    show_path = xutils.get_argument("show_path")
-    if show_path:
-        kw.show_path = (show_path == "true")
+    show_path = xutils.get_argument_bool("show_path")
+    kw.show_path = show_path
 
 
 def resolve_path(path, type=''):
+    is_b64 = xutils.get_argument_bool("b64")
+    if is_b64:
+        path = textutil.decode_base64(path)
+
     if type == "script":
         path = os.path.join(xconfig.SCRIPTS_DIR, path)
     path = os.path.abspath(path)
+    if is_b64:
+        return path
     return xutils.get_real_path(path)
 
 
@@ -84,28 +90,30 @@ class ViewSourceHandler:
         warn = ""
         try:
             max_file_size = xconfig.MAX_TEXT_SIZE
-            if xutils.get_file_size(path, format=False) >= max_file_size:
+            if xutils.get_file_size_int(path, raise_exception=True) >= max_file_size:
                 warn = "文件过大，只显示部分内容"
                 readonly = True
 
             content = xutils.readfile(path, limit=max_file_size)
+            assert isinstance(content, str)
             plugin_name = fsutil.get_relative_path(path, xconfig.PLUGINS_DIR)
             # 使用JavaScript来处理搜索关键字高亮问题
             # if key != "":
             #     content = xutils.html_escape(content)
             #     key     = xhtml_escape(key)
             #     content = textutil.replace(content, key, htmlutil.span("?", "search-key"), ignore_case=True, use_template=True)
-            return xtemplate.render(template_name,
-                                    show_preview=can_preview(path),
-                                    readonly=readonly,
-                                    error=error,
-                                    warn=warn,
-                                    pathlist=xutils.splitpath(path),
-                                    name=os.path.basename(path),
-                                    path=path,
-                                    content=content,
-                                    plugin_name=plugin_name,
-                                    lines=content.count("\n")+1, **kw)
+            
+            kw.show_preview = can_preview(path)
+            kw.readonly = readonly
+            kw.error = error
+            kw.warn = warn
+            kw.pathlist = xutils.splitpath(path)
+            kw.name = os.path.basename(path)
+            kw.path = path
+            kw.content = content
+            kw.plugin_name = plugin_name
+            kw.lines = content.count("\n")+1
+            return xtemplate.render(template_name, **kw)
         except Exception as e:
             xutils.print_exc()
             error = e

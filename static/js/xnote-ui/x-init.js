@@ -176,9 +176,19 @@ xnote.http.post = function (url, data, callback, type) {
     return $.post(xnote.config.serverHome + url, data, callback, type).fail(xnote.http.defaultFailHandler);
 }
 
+// http-post内部请求
+xnote.http.internalPost = function(url, data, callback, type) {
+    return $.post(xnote.config.serverHome + url, data, callback, type);
+}
+
 // http-get请求
 xnote.http.get = function (url, data, callback, type) {
     return $.get(xnote.config.serverHome + url, data, callback, type).fail(xnote.http.defaultFailHandler);
+}
+
+// http-get内部请求
+xnote.http.internalGet = function(url, data, callback, type) {
+    return $.get(xnote.config.serverHome + url, data, callback, type);
 }
 
 xnote.isTyping = function() {

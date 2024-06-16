@@ -1,10 +1,28 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2023-06-30 20:24:59
+@LastEditors  : xupingmao
+@LastEditTime : 2024-06-16 11:12:27
+@FilePath     : /xnote/handlers/fs/component/fs_title.html
+@Description  : 描述
+ #} -->
 
 {% init fs_title = "文件管理" %}
+{% init fs_mode = "list" %}
 
 <h3 class="card-title btn-line-height">
     <span>{{fs_title}}</span>
     
     <div class="float-right">
+        {% if fs_mode == "sidebar" %}
+            <a class="btn btn-default" href="?mode=list">列表视图</a>
+        {% end %}
+
+        {% if fs_mode == "list" %}
+            <a class="btn btn-default" href="?mode=sidebar">侧边栏视图</a>
+        {% end %}
+
         <a class="btn btn-default" href="{{_server_home}}/fs_bookmark">收藏夹</a>
         <a class="btn btn-default" href="{{_server_home}}/plugin_list?category=dir&show_back=true">工具</a>
         {% include common/button/back_button.html %}

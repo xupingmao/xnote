@@ -9,6 +9,7 @@ from xnote.core import xtemplate
 from xnote.core import xauth
 from xnote.core import xconfig
 from xutils import fsutil
+from xutils import textutil
 
 preview_dict = xconfig.load_config_as_dict("./config/file/preview.properties")
 
@@ -16,7 +17,7 @@ class SidebarHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        path = xutils.get_argument("path", "")
+        path = xutils.get_argument_str("path")
         path = xutils.get_real_path(path)
         error = ""
         if path == None or path == "":
@@ -38,9 +39,15 @@ class PreviewHandler:
         # TODO 使用文件扩展
         path = xutils.get_argument_str("path", "")
         embed = xutils.get_argument_str("embed", "true")
-        realname = fsutil.decode_name(path)
-
-        path = xutils.get_real_path(path)
+        is_b64 = xutils.get_argument_bool("b64")
+        
+        if is_b64:
+            path = textutil.decode_base64(path)
+            realname = path
+        else:
+            realname = fsutil.decode_name(path)
+            path = xutils.get_real_path(path)
+        
         path = path.replace("\\", "/")
         encoded_path = xutils.encode_uri_component(path)
         
@@ -53,12 +60,12 @@ class PreviewHandler:
             return web.seeother(open_url.format(path=encoded_path, quoted_path=quoted_path, embed = embed))
 
         if xutils.is_img_file(path):
-            return """<html><img style="width: 100%%;" src="/fs/~%s"></html>""" % xutils.quote(path)
+            return """<html><img style="max-width: 100%%;" src="/fs/~%s"></html>""" % xutils.quote(path)
         
         if xutils.is_text_file(path):
             raise web.seeother("/code/edit?path={path}&embed={embed}".format(path=encoded_path, embed=embed))
 
-        raise web.seeother("/fs_hex?path={path}&embed={embed}".format(path=encoded_path, embed=embed))
+        raise web.seeother("/fs_hex?path={path}&embed={embed}&b64=1".format(path=textutil.encode_base64(path), embed=embed))
 
 
 class ViewHandler:

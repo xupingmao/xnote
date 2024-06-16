@@ -48,6 +48,9 @@ def T(text, lang=None):
     else:
         return mapping.get(text, text)
 
+class XnoteTemplateVars:
+    """xnote模板参数"""
+    show_nav = True
 
 class TemplateMapping:
 

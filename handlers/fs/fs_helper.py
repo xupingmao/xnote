@@ -150,7 +150,7 @@ def get_parent_file_object(path, name = ""):
 
 def get_index_dirs():
     index_dirs = xauth.get_user_config("admin", "fs_index_dirs")
-    assert isinstance(index_dirs, six.string_types)
+    assert isinstance(index_dirs, str)
     return index_dirs.split("\n")
 
 def get_file_thumbnail(fpath):

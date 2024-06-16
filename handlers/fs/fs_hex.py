@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2019-01-10 00:21:16
 @LastEditors  : xupingmao
-@LastEditTime : 2023-01-21 16:48:26
+@LastEditTime : 2024-06-16 11:56:55
 @FilePath     : /xnote/handlers/fs/fs_hex.py
 @Description  : 二进制查看工具
 """
@@ -12,6 +12,7 @@
 import os
 import math
 import xutils
+from xutils import textutil
 from xutils import Storage
 from xnote.core.xtemplate import BasePlugin
 
@@ -21,11 +22,6 @@ HTML = """
     .hex-text {
         font-family: monospace;
     }
-{% if embed == "true" %}
-    body {
-        background-color: transparent;
-    }
-{% end %}
 
     .lineno-text {
         width:10%;
@@ -43,12 +39,23 @@ HTML = """
     }
 </style>
 
-{% init plain_text = "" %}
-
 {% if embed == "true" %}
-    <a class="btn btn-default" href="{{_server_home}}/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
-{% else %}
-    <div class="card">
+<style>
+    body {
+        background-color: transparent;
+    }
+    .card.embed {
+        padding: 0px;
+    }
+    .x-body {
+        margin-top: 0px;
+    }
+</style>
+{% end %}
+
+{% init plain_text = "" %}
+{% if embed != "true"  %}
+    <div class="card embed">
         <div class="card-title btn-line-height">
             <span>二进制查看</span>
             
@@ -63,6 +70,10 @@ HTML = """
 <div class="card">
     {% if embed == "false" %}
         {% include mod_fs_path.html %}
+    {% else %}
+        <div class="row bottom-offset-2">
+            <a class="btn btn-default" href="{{_server_home}}/code/edit?path={{path}}&embed={{embed}}">编辑本文</a>
+        </div>
     {% end %}
 
     {% if error != "" %}
@@ -109,7 +120,7 @@ class Main(BasePlugin):
     category = 'dir'
     editable = False
 
-    def handle(self, input):
+    def handle(self, input=""):
         # 输入框的行数
         self.rows = 0
         self.show_pagenation = True
@@ -117,21 +128,22 @@ class Main(BasePlugin):
 
         pagesize = 16 * 30
 
-        path = xutils.get_argument("path", "")
-        page = xutils.get_argument("page", 1, type=int)
-
-        assert isinstance(path, str)
-        assert isinstance(page, int)
+        path = xutils.get_argument_str("path", "")
+        page = xutils.get_argument_int("page", 1)
+        is_b64 = xutils.get_argument_bool("b64")
+        if is_b64:
+            path = textutil.decode_base64(path)
+        else:
+            path = xutils.get_real_path(path)
 
         offset = max(page-1, 0) * pagesize
-        embed = xutils.get_argument("embed", "false")
+        embed = xutils.get_argument_str("embed", "false")
 
         self.page_url = "?path={path}&embed={embed}&page=".format(path=path, embed=embed)
-
+        
         if path == "":
             return
 
-        path = xutils.get_real_path(path)
         hex_text = ""
         plain_text = ""
         lineno_text = ""

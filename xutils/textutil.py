@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-04-17 17:04:15
 @LastEditors  : xupingmao
-@LastEditTime : 2024-05-03 12:41:40
+@LastEditTime : 2024-06-16 11:40:28
 @FilePath     : /xnote/xutils/textutil.py
 @Description  : 文本处理工具
 """
@@ -725,7 +725,7 @@ def escape_html(text):
     text = text.replace("\n", "<br/>")
     return text
 
-def urlsafe_b64encode(text):
+def encode_base64(text):
     """URL安全的base64编码，注意Python自带的方法没有处理填充字符=
     @param {str} text 待编码的字符
     """
@@ -733,7 +733,7 @@ def urlsafe_b64encode(text):
     return b64result.rstrip("=")
 
 
-def urlsafe_b64decode(text):
+def decode_base64(text):
     """URL安全的base64解码，注意Python自带的方法没有处理填充字符=
     @param {str} text 编码后的字符
     """
@@ -741,8 +741,10 @@ def urlsafe_b64decode(text):
     text = text + '=' * padding
     return base64.urlsafe_b64decode(text).decode("utf-8")
 
-b64encode = urlsafe_b64encode
-b64decode = urlsafe_b64decode
+urlsafe_b64decode = decode_base64
+urlsafe_b64encode = encode_base64
+b64encode = encode_base64
+b64decode = decode_base64
 
 
 def b32encode(text):

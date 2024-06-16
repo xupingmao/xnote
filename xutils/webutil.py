@@ -79,7 +79,7 @@ def get_argument(key, default_value=None, type = None, strip=False):
 
     if type == bool:
         # bool函数对非空字符串都默认返回true，需要处理一下
-        value = value.lower() in ("true", "yes", "y", "on")
+        value = value.lower() in ("true", "yes", "y", "on", "1")
         _input[key] = value
     elif type != None:
         value = type(value)
