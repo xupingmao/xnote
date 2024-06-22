@@ -63,9 +63,23 @@
             </div>
         </div>
 
-        <input type="file" id="uploadFileInput" class="hide"/>
-        <input type="button" id="addAttachmentBtn" class="send-button btn btn-default" value="添加附件"/>
-        <input type="submit" class="send-button btn save-note-btn" value="保存">
+        <div class="row">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="#">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="*">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="-">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="《">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="》">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="[">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="]">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="!">
+            <input type="button" class="btn-default" onclick="xnote.editor.insertByElement(this)" value="`">
+        </div>
+        
+        <div class="row">
+            <input type="file" id="uploadFileInput" class="hide"/>
+            <input type="button" id="addAttachmentBtn" class="send-button btn btn-default" value="添加附件"/>
+            <input type="submit" class="send-button btn save-note-btn" value="保存">
+        </div>
     </form>
 </div>
 
@@ -80,6 +94,11 @@ $(function () {
 
     function getEditor() {
         return $("#markdown-input")[0];
+    }
+
+    xnote.editor.insertByElement = function (ele) {
+        var value = $(ele).val();
+        textarea_insert(getEditor(), value);
     }
 
     // 记录初始内容
