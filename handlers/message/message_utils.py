@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-07 23:34:44
+@LastEditTime : 2024-06-22 22:00:35
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -429,6 +429,9 @@ class MessageListParser(object):
 
         if message.tag == "cron":
             message.tag = "task"
+        
+        if message.tag == None:
+            message.tag = self.tag
 
     def process_message(self, message, search_tag="log") -> Storage:
         self.prehandle_message(message)

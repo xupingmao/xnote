@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-07 23:35:01
+@LastEditTime : 2024-06-22 20:42:53
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -256,10 +256,16 @@ class ListAjaxHandler:
             assert isinstance(user_name, str)
             kw.top_keywords = []
             if orderby == "amount_desc" and page == 1:
-                kw.recent_keywords = message_tag.get_recent_keywords(user_name, tag = tag)
+                limit = self.get_recent_limit()
+                kw.recent_keywords = message_tag.get_recent_keywords(user_name, tag = "search", limit=limit)
                 
         return xtemplate.render(template_file, **kw)
     
+    def get_recent_limit(self):
+        if webutil.is_mobile_client():
+            return 5
+        return 20
+
     def get_top_keywords(self, msg_list):
         """返回热门的标签"""
         result = []
@@ -639,6 +645,7 @@ class DateAjaxHandler:
                                 page_url=f"?date={date}&filterKey={quote(filter_key)}&page=",
                                 item_list=msg_list)
 
+
 class MessageListHandler:
 
     @xauth.login_required()
@@ -647,17 +654,12 @@ class MessageListHandler:
         xxx_page 返回页面
         xxx_data 返回数据
         """
-        user = xauth.current_name()
-        key = xutils.get_argument("key", "")
-        from_ = xutils.get_argument("from", "")
+        user = xauth.current_name_str()
         type_ = xutils.get_argument("type", "")
-        show_tab = xutils.get_argument_bool("show_tab", True)
         op = xutils.get_argument("op", "")
         date = xutils.get_argument("date", "")
-        p = xutils.get_argument("p", "")
 
         # 记录日志
-        assert isinstance(user, str)
         xmanager.add_visit_log(user, "/message?tag=%s" % tag)
 
         if tag == "month_tags":
@@ -672,9 +674,6 @@ class MessageListHandler:
         if tag == "api.tag_list":
             return self.get_tag_list()
 
-        if tag == "key":
-            return self.get_log_tags_page()
-
         if tag == "task":
             return self.get_task_page()
 
@@ -684,7 +683,7 @@ class MessageListHandler:
         if tag in ("search", "task.search", "done.search") or type_ == "search":
             return message_search.SearchHandler().get_page()
 
-        if tag == "log.tags":
+        if tag == "key" or tag == "log.tags":
             return self.get_log_tags_page()
         
         return self.get_log_page()

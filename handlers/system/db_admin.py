@@ -322,6 +322,7 @@ class SqlDBDetailHandler:
         kw.page_size = page_size
         kw.page_max = page_max
         kw.page_url = "?name={name}&page_size={page_size}&page=".format(name = name, page_size=page_size)
+        kw.table_name = name
         kv_table_info = dbutil.TableInfo.get_kv_table_by_index(name)
         if kv_table_info != None:
             kw.kv_table_name = kv_table_info.name

@@ -43,7 +43,7 @@ def get_tag_list_by_month(user_id=0, month="2000-01"):
 
 def get_log_tags_page():
     """随手记的话题标签页面"""
-    orderby = xutils.get_argument("orderby", "")
+    orderby = xutils.get_argument_str("orderby", "")
 
     kw = Storage(
         tag="key",
@@ -83,9 +83,9 @@ def list_message_tags(user_name, offset, limit, *, orderby = "amount_desc", only
 
     return msg_list[offset:offset+limit], len(msg_list)
 
-def get_recent_keywords(user_name: str, tag: str):
+def get_recent_keywords(user_name: str, tag="search", limit =20):
     """获取最近访问的标签"""
-    msg_list, amount = list_message_tags(user_name, 0, 20, orderby = "recent", only_standard=True)
+    msg_list, amount = list_message_tags(user_name, 0, limit, orderby = "recent", only_standard=True)
     parser = message_utils.MessageListParser(msg_list, tag=tag)
     parser.parse()
     result = parser.get_message_list()

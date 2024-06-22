@@ -5,10 +5,11 @@
 
 <script src="{{_server_home}}/_static/js/admin.js"></script>
 
+{% init table_name = "" %}
 {% init kv_table_name = None %}
 
 <div class="card">
-
+    <a href="{{_server_home}}/system/db/struct?table_name={{table_name}}">查看表结构</a>
     <table class="table">
         <tr>
             <th style="width:20%">ID</th>
