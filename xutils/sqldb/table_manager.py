@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 20:36:45
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-05 11:58:25
+@LastEditTime : 2024-06-22 23:02:47
 @FilePath     : /xnote/xutils/sqldb/table_manager.py
 @Description  : SQL表结构管理
 """
@@ -325,6 +325,12 @@ class TableInfo:
     def add_index(self, *args, **kw):
         self.indexes.append([args, kw])
 
+    def get_column_comment(self, colname=""):
+        for args, kw in self.columns:
+            if args[0] == colname:
+                return kw.get("comment", "")
+        return ""
+
 class TableManagerFacade:
 
     table_dict = {}
@@ -375,7 +381,7 @@ class TableManagerFacade:
         if coltype_lower in ("int", "tinyint", "bigint"):
             assert default_value != None, f"{coltype} column {colname} default value cant be NULL"
         
-        self.table_info.add_column(colname, coltype, default_value, not_null)
+        self.table_info.add_column(colname, coltype, default_value, not_null, comment=comment)
         self.manager.add_column(colname, coltype, default_value, not_null, comment=comment)
     
     def drop_column(self, colname, coltype,

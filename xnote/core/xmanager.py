@@ -42,8 +42,8 @@ _debug_logger = logutil.new_mem_logger("xmanager.debug")
 _error_logger = logutil.new_mem_logger("xmanager.error")
 
 # 对外接口
-_manager = None # type: HandlerManager
-_event_manager = None # type: EventManager
+_manager = None # type: HandlerManager|None
+_event_manager = None # type: EventManager|None
 
 
 class HandlerLocal:
@@ -227,7 +227,7 @@ class HandlerManager:
         self.search_dict = {}
         self.task_dict = {}
         self.model_list = []
-        self.black_list = ["__pycache__"]
+        self.block_list = ["__pycache__"]
         self.failed_mods = []
         self.debug = True
         self.report_loading = False
@@ -675,7 +675,7 @@ class SearchHandler(EventHandler):
 
     pattern = re.compile(r".*")
 
-    def execute(self, ctx=None):        
+    def execute(self, ctx):
         try:
             matched = self.pattern.match(ctx.key)
             if not matched:
@@ -802,10 +802,12 @@ def put_task_async(func, *args, **kw):
 
 def get_handler_manager():
     # type: () -> HandlerManager
+    assert _manager != None
     return _manager
 
 def get_event_manager():
     # type: () -> EventManager
+    assert _event_manager != None
     return _event_manager
 
 def load_tasks():
@@ -829,13 +831,6 @@ def add_event_handler(handler):
 
 def remove_event_handlers(event_type=None):
     get_event_manager().remove_handlers(event_type)
-
-
-def set_event_handlers0(event_type, handlers, is_async=True):
-    manager = get_event_manager()
-    manager.remove_handlers(event_type)
-    for handler in handlers:
-        manager.add_handler(event_type, handler, is_async)
 
 def quick_sleep(seconds):
     """可以快速从睡眠中重启"""
@@ -878,9 +873,10 @@ def listen(event_type_list, is_async=True, description=None):
     return deco
 
 
-def searchable(pattern=r".*", description=None, event_type="search"):
+def searchable(pattern=r".*", description=None, event_type="search"):    
     """搜索装饰器"""
     def deco(func):
+        assert _event_manager != None
         handler = SearchHandler(event_type, func, description=description)
         # unicode_pat = r"^%s\Z" % u(pattern)
         unicode_pat = u(pattern)

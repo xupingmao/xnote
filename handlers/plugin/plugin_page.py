@@ -6,6 +6,7 @@ import os
 import xutils
 import web
 import copy
+import typing
 
 from typing import Optional
 from xnote.core import xconfig
@@ -50,9 +51,9 @@ from xnote.plugin import load_plugin_file, PluginContext
 """
 
 
-CONFIG_TOOLS = list()
-
-PLUGINS_STATUS = "loading"
+class PluginState:
+    status = "loading"
+    config_tools: typing.List[PluginContext] = []
 
 DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
 
@@ -296,12 +297,7 @@ def build_inner_tools(user_name=None):
     sort_plugins(user_name, tools_copy)
     return tools_copy
 
-
-def convert_plugins_to_links(plugins):
-    return plugins
-
-
-def get_plugin_values():
+def get_plugin_values() -> typing.List[PluginContext]:
     values = xconfig.PLUGINS_DICT.values()
     return list(values)
 
@@ -351,7 +347,7 @@ def sort_plugins(user_name, plugins, orderby=None):
     return plugins
 
 
-def sorted_plugins(user_name, plugins, orderby=None):
+def sorted_plugins(user_name, plugins: typing.List[PluginContext], orderby=None):
     sort_plugins(user_name, plugins, orderby)
     return plugins
 
@@ -391,28 +387,25 @@ def list_plugins(category, sort=True, orderby=None):
         # 所有插件
         plugins = list_all_plugins(user_name)
 
-    links = convert_plugins_to_links(plugins)
+    links = plugins
     if sort:
         return sorted_plugins(user_name, links, orderby=orderby)
     return links
-
-
-def find_plugin_by_url(url, plugins):
-    for p in plugins:
-        if u(p.url) == u(url):
-            return p
-    return None
-
 
 @logutil.timeit_deco(name="list_recent_plugins")
 def list_recent_plugins():
     user_name = xauth.current_name()
     plugins = list_all_plugins(user_name, sort=False)
-    links = convert_plugins_to_links(plugins)
-
+    links = plugins
     sort_plugins(user_name, links, "recent")
     return links
 
+
+def get_plugin_title_name(plugin: PluginContext):
+    """返回插件的title+name"""
+    if plugin.name == "":
+        return plugin.title
+    return u(plugin.title + "(" + plugin.name + ")")
 
 @xmanager.searchable()
 def on_search_plugins(ctx):
@@ -425,8 +418,7 @@ def on_search_plugins(ctx):
     if ctx.search_dict:
         return
 
-    global PLUGINS_STATUS
-    if PLUGINS_STATUS == "loading":
+    if PluginState.status == "loading":
         result = Storage()
         result.name = "插件加载中，暂时不可用"
         result.icon = "fa-th-large"
@@ -443,8 +435,7 @@ def on_search_plugins(ctx):
         result = SearchResult()
         result.category = "plugin"
         result.icon = "fa-cube"
-        result.name = u(plugin.name)
-        result.name = u(plugin.title + "(" + plugin.name + ")")
+        result.name = get_plugin_title_name(plugin)
         result.url = u(plugin.url)
         result.edit_link = plugin.edit_link
         temp_result.append(result)
@@ -470,7 +461,7 @@ def is_plugin_matched(p, words):
         or textutil.contains_all(p.fname, words)
 
 
-def search_plugins(key):
+def search_plugins(key) -> typing.List[PluginContext]:
     from xutils.functions import dictvalues
     user_name = xauth.current_name()
     words = textutil.split_words(key)
@@ -516,7 +507,6 @@ class PluginListHandler:
     @logutil.timeit_deco(name="PluginListHandler")
     @xauth.login_required()
     def GET(self):
-        global PLUGINS_STATUS
         category = xutils.get_argument_str("category", "")
         key = xutils.get_argument("key", "")
         header = xutils.get_argument("header", "")
@@ -556,7 +546,7 @@ class PluginListHandler:
         fill_plugins_badge_info(plugins, orderby)
 
         context.plugins = plugins
-        context.plugins_status = PLUGINS_STATUS
+        context.plugins_status = PluginState.status
 
         if category == "":
             context.plugin_category = "all"
@@ -744,19 +734,14 @@ class PluginLogHandler:
 @xmanager.listen("sys.reload")
 @mem_util.log_mem_info_deco("reload_plugins")
 def reload_plugins(ctx):
-    global PLUGINS_STATUS
-    PLUGINS_STATUS = "loading"
-
+    PluginState.status = "loading"
     reload_plugins_by_config()
-
     load_plugin_dir()
-
-    PLUGINS_STATUS = "done"
+    PluginState.status = "done"
 
 
 @xutils.log_init_deco("reload_plugins_by_config")
 def reload_plugins_by_config(ctx=None):
-    global CONFIG_TOOLS
     parser = ConfigParser()
 
     fpath = "config/plugin/plugins.ini"
@@ -779,7 +764,7 @@ def reload_plugins_by_config(ctx=None):
 
         tmp_tools.append(context)
 
-    CONFIG_TOOLS = tmp_tools
+    PluginState.config_tools = tmp_tools
 
 
 xutils.register_func("plugin.find_plugins", find_plugins)

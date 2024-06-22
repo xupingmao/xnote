@@ -28,15 +28,17 @@ class TableProxy(SQLDBInterface):
     writable = True
     profile_logger = ProfileLogger()
 
-    def __init__(self, db, tablename):
-        self.tablename = tablename
-        self.table_name = tablename
+    def __init__(self, db: web.db.DB, tablename: str):
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         assert isinstance(db, web.db.DB)
+
+        self.tablename = tablename
+        self.table_name = tablename
         self.db = db
         table_info = table_manager.TableManagerFacade.get_table_info(tablename)
         assert table_info != None
         self.table_info = table_info
+        self.db_type = table_info.db_type
         self.enable_binlog = TableConfig.enable_binlog and table_info.enable_binlog
 
     def fix_sql_keywords(self, values):
@@ -179,7 +181,7 @@ class TableProxy(SQLDBInterface):
             yield records
             last_id = records[-1].id
     
-    def get_table_info(self):
+    def get_table_info(self) -> table_manager.TableInfo:
         return self.table_info
 
     def filter_record(self, record):

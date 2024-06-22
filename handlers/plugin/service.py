@@ -1,10 +1,11 @@
 # encoding=utf-8
 
+import typing
 from .models import PluginCategory
 
 class CategoryService:
 
-    category_list = []
+    category_list: typing.List[PluginCategory] = []
 
     @classmethod
     def define_plugin_category(cls, code: str,

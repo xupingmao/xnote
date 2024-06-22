@@ -7,7 +7,7 @@ from .a import *
 import os
 from xnote.core import xconfig
 from xnote.core import xauth
-from .test_base import json_request, BaseTestCase
+from .test_base import json_request, BaseTestCase, request_html
 from .test_base import init as init_app, get_test_file_path
 from handlers.fs.fs_index import build_fs_index
 
@@ -78,6 +78,10 @@ class TestMain(BaseTestCase):
 
         self.check_OK("/fs_sidebar?path={path}".format(path=path))
         self.check_OK("/fs_preview?path={txt_path}".format(txt_path=txt_path))
+        self.check_OK(f"/fs_preview?path={xutils.encode_base64(txt_path)}&b64=true")
+
+        img_resp = request_html(f"/fs_preview?path=test.png")
+        assert b"<img" in img_resp
 
     def test_fs_find(self):
         self.check_OK("/fs_find?key=test")
@@ -88,3 +92,11 @@ class TestMain(BaseTestCase):
 
     def test_fs_upload_search(self):
         self.check_OK("/fs_upload/search?key=" + xutils.quote("test"))
+
+    def test_fs_text(self):
+        txt_path = get_test_file_path("./fs_preview_test.txt")
+        with open(txt_path, "w+") as fp:
+            fp.write("test fs preview")
+        self.check_OK(f"/fs_text?method=contents&path={xutils.quote(txt_path)}")
+        self.check_OK(f"/fs_text?method=readpage&path={xutils.quote(txt_path)}")
+        self.check_OK(f"/fs_text?method=refresh&path={xutils.quote(txt_path)}")

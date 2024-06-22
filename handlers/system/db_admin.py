@@ -8,6 +8,7 @@ from xutils import Storage
 from xutils import textutil, webutil
 import math
 import web.db
+import typing
 
 from xnote.core import xauth, xtables, xtemplate, xconfig
 from xutils.sqldb import TableProxy
@@ -457,10 +458,25 @@ class TableData:
 
 class StructHandler:
 
-    def result_set_to_table(self, result_set: web.db.BaseResultSet):
+    def result_set_to_table(self, result_set: web.db.BaseResultSet, table_proxy: typing.Optional[xtables.TableProxy] = None):
         result = TableData()
-        result.head = result_set.names
-        result.items = result_set.list()
+        comment_name = []
+        items = list(result_set.list())
+
+        if table_proxy != None and table_proxy.db_type == "sqlite":
+            table_info = table_proxy.get_table_info()
+            for item_info in items:
+                # 仅在sqlite环境下生效
+                colname = item_info.get("name", "")
+                old_comment = item_info.get("comment")
+                if old_comment != None:
+                    continue
+                comment = table_info.get_column_comment(colname)
+                item_info.comment = comment
+            comment_name = ["comment"]
+
+        result.head = result_set.names + comment_name
+        result.items = items
         return result
 
     def get_index_info(self, table_proxy: xtables.TableProxy):
@@ -471,7 +487,7 @@ class StructHandler:
             vars = dict(type="index", tbl_name=table_info.tablename)
             result_set = table_proxy.raw_query("select name, sql from sqlite_master where type=$type AND tbl_name=$tbl_name", vars=vars)
             assert isinstance(result_set, web.db.BaseResultSet)
-            return self.result_set_to_table(result_set)
+            return self.result_set_to_table(result_set, table_proxy)
 
         if db_type == "mysql":
             vars = dict(database=xconfig.DatabaseConfig.mysql_database, table_name=table_info.tablename)
@@ -479,7 +495,7 @@ class StructHandler:
             result_set = table_proxy.raw_query("SELECT index_name,seq_in_index,column_name,non_unique,nullable,index_type,comment,index_comment \
                                                FROM information_schema.statistics WHERE table_schema=$database AND table_name = $table_name", vars=vars)
             assert isinstance(result_set, web.db.BaseResultSet)
-            return self.result_set_to_table(result_set)
+            return self.result_set_to_table(result_set, table_proxy)
         
         return TableData()
 
@@ -491,12 +507,12 @@ class StructHandler:
         if db_type == "sqlite":
             result_set = table_proxy.raw_query(f"pragma table_info({table_name})")
             assert isinstance(result_set, web.db.BaseResultSet)
-            return self.result_set_to_table(result_set)
+            return self.result_set_to_table(result_set, table_proxy)
     
         if db_type == "mysql":
             result_set = table_proxy.raw_query(f"DESC `{table_name}`")
             assert isinstance(result_set, web.db.BaseResultSet)
-            return self.result_set_to_table(result_set)
+            return self.result_set_to_table(result_set, table_proxy)
         return TableData()
     
 
@@ -504,9 +520,7 @@ class StructHandler:
     def GET(self):
         table_name = xutils.get_argument_str("table_name")
         table_proxy = xtables.get_table_by_name(table_name)
-        
-        # TODO 支持mysql
-        # TODO 索引信息
+
         kw = Storage()
         kw.table_name = table_name
         kw.column_info = self.get_column_info(table_proxy)

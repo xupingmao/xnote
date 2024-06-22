@@ -67,6 +67,9 @@ def init():
 
 APP = init()
 
+def get_test_app():
+    assert APP != None
+    return APP
 
 def get_test_file_path(path):
     return os.path.join("./testdata", path)
@@ -90,6 +93,7 @@ def json_request(*args, **kw):
     kw["_format"] = "json"
     kw["headers"] = DEFAULT_HEADERS
 
+    assert APP != None
     ret = APP.request(*args, **kw)
     if ret.status == "303 See Other":
         return
@@ -108,7 +112,8 @@ def json_request_return_dict(*args, **kw):
     assert isinstance(ret, dict)
     return ret
 
-def request_html(*args, **kw):
+def request_html(*args, **kw) -> bytes:
+    assert APP != None
     ret = APP.request(*args, **kw)
     return ret.data
 
@@ -129,34 +134,34 @@ def remove_tmp_file(name):
 class BaseTestCase(unittest.TestCase):
 
     def request_app(self, *args, **kw):
-        return APP.request(*args, **kw)
+        return get_test_app().request(*args, **kw)
 
     def check_OK(self, *args, **kw):
-        response = APP.request(*args, **kw)
+        response = get_test_app().request(*args, **kw)
         status = response.status
         print("response.status:", status)
         self.assertIn(status, ("200 OK", "303 See Other", "302 Found"))
 
     def check_200(self, *args, **kw):
-        response = APP.request(*args, **kw)
+        response = get_test_app().request(*args, **kw)
         self.assertEqual("200 OK", response.status)
 
     def check_200_debug(self, *args, **kw):
-        response = APP.request(*args, **kw)
+        response = get_test_app().request(*args, **kw)
         print(args, kw, response)
-        print(APP.mapping)
+        print(get_test_app().mapping)
         self.assertEqual("200 OK", response.status)
 
     def check_303(self, *args, **kw):
-        response = APP.request(*args, **kw)
+        response = get_test_app().request(*args, **kw)
         self.assertEqual("303 See Other", response.status)
         
     def check_404(self, url):
-        response = APP.request(url)
+        response = get_test_app().request(url)
         self.assertEqual("404 Not Found", response.status)
 
     def check_status(self, status, *args, **kw):
-        response = APP.request(*args, **kw)
+        response = get_test_app().request(*args, **kw)
         self.assertEqual(status, response.status)
 
     def json_request(self, *args, **kw):

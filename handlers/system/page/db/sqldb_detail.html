@@ -9,7 +9,12 @@
 {% init kv_table_name = None %}
 
 <div class="card">
-    <a href="{{_server_home}}/system/db/struct?table_name={{table_name}}">查看表结构</a>
+    <div class="row bottom-offset-1">
+        <span>表名称: {{table_name}}</span>
+        <a href="{{_server_home}}/system/db/struct?table_name={{table_name}}">查看表结构</a>
+        <a href="{{_server_home}}/system/sqldb_operate?table_name={{table_name}}">通过SQL查询</a>
+    </div>
+
     <table class="table">
         <tr>
             <th style="width:20%">ID</th>
