@@ -1,6 +1,6 @@
 # encoding=utf-8
 from . import base
-import xtables
+from xnote.core import xtables
 
 def do_upgrade():
     base.execute_upgrade("013.20230616_user", migrate_user_20230616)

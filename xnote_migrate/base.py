@@ -4,15 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2023-02-05 16:19:20
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-10 11:46:41
-@FilePath     : /xnote/core/xnote_migrate/base.py
+@LastEditTime : 2024-06-23 22:36:59
+@FilePath     : /xnote/xnote_migrate/base.py
 @Description  : 描述
 """
 
 import datetime
 import os
 import xutils
-import threading
 
 from xnote.core import xconfig
 from xnote.core import xtables
@@ -62,9 +61,6 @@ def execute_upgrade(key = "", fn = lambda:None):
         return
     fn()
     mark_upgrade_done(key)
-
-def execute_upgrade_async(key="", fn=lambda:None):
-    threading.Thread(target=fn).start()
 
 def move_upgrade_key(old_key="", new_key=""):
     """迁移升级的key,用于统一规范"""

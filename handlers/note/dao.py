@@ -769,7 +769,7 @@ def get_or_create_note(skey, creator, creator_id=0):
     return get_by_id(note_id)
 
 
-def create_note_base(note_dict, date_str=None, note_id=None):
+def create_note_base(note_dict, date_str=None, note_id=None) -> int:
     """创建笔记的基础部分，无锁"""
     # 真实的创建时间
     ctime0 = dateutil.format_datetime()
@@ -780,6 +780,7 @@ def create_note_base(note_dict, date_str=None, note_id=None):
     note_dict["version"] = 1
 
     if note_id is not None:
+        assert isinstance(note_id, int)
         # 指定id创建笔记
         note_dict["id"] = note_id
         put_note_to_db(note_id, note_dict)
@@ -817,7 +818,7 @@ def is_not_empty(value):
     return xutils.is_str(value) and value != ""
 
 
-def create_note(note_dict, date_str=None, note_id=None, check_name=True):
+def create_note(note_dict: NoteDO, date_str=None, note_id=None, check_name=True):
     assert isinstance(note_dict, NoteDO)
     assert note_dict.creator_id != 0
     assert isinstance(note_dict.level, int)
@@ -1261,10 +1262,10 @@ def list_group_with_count(creator=None,
         type="group",
         parent_id=parent_id,
         query_root=query_root,
+        limit = limit,
     )
 
-    notes = NoteIndexDao.list(
-        **where_dict, limit=limit)
+    notes = NoteIndexDao.list(**where_dict)
 
     notes = list(filter(filter_group_func, notes))
     

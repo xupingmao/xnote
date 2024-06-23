@@ -35,7 +35,7 @@ tm_yday  从每年的1月1日开始的天数 – 取值区间为[0,365]，其中
 
 
 """
-
+import typing
 import time
 import math
 import datetime
@@ -153,7 +153,7 @@ def datetime_to_weekday(datetime_obj):
         return format_weekday(date_str)
     raise Exception("unsupported type: %r" % type(datetime_obj))
 
-def format_date(seconds=None, fmt = None):
+def format_date(value: typing.Union[None, datetime.datetime, str, float]=None, fmt = ""):
     """格式化日期
     >>> format_date("2020-01-01 00:00:00", "/")
     '2020/02/01'
@@ -163,22 +163,24 @@ def format_date(seconds=None, fmt = None):
     '1970/01/01'
     """
     arg_fmt = fmt
-    if fmt is None:
+    if fmt == "":
         fmt = "%Y-%m-%d"
     if arg_fmt == "/":
         fmt = "%Y/%m/%d"
-    if seconds is None:
+    if value is None:
         return time.strftime(fmt)
-    elif isinstance(seconds, datetime.datetime):
-        return seconds.strftime(fmt)
-    elif is_str(seconds):
-        date_str = seconds.split(" ")[0]
+    elif isinstance(value, datetime.datetime):
+        return value.strftime(fmt)
+    elif isinstance(value, str):
+        date_str = value.split(" ")[0]
         if arg_fmt == "/":
             date_str = date_str.replace("-", "/")
         return date_str
-    else:
-        st = time.localtime(seconds)
+    elif isinstance(value, (float, int)):
+        st = time.localtime(value)
         return time.strftime(fmt, st)
+    raise Exception(f"invalid type: {type(value)}")
+        
 
 def format_mmdd(seconds=None):
     """格式化月/日
