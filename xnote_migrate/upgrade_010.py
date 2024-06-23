@@ -8,8 +8,7 @@
 @FilePath     : /xnote/core/xnote_migrate/upgrade_010.py
 @Description  : 描述
 """
-import xauth
-
+from xnote.core import xauth
 from . import base
 from handlers.note.dao import get_by_id
 from handlers.note.dao_tag import TagBindDao, TagMetaDao

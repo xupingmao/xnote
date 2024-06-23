@@ -717,12 +717,16 @@ class TouchHandler:
         user_name = xauth.current_name()
         # TODO 创建一个watch日志记录即可
         note = NoteDao.get_by_id_creator(id, user_name)
-        if note != None:
-            kw = Storage()
-            kw.version = note.version+1
-            kw.name = note.name
-            kw.mtime = xutils.format_datetime()
-            update_and_notify(note, kw)
+
+        if note == None:
+            return webutil.FailedResult(code="404", message="笔记不存在")
+
+        kw = Storage()
+        kw.version = note.version+1
+        kw.name = note.name
+        kw.mtime = xutils.format_datetime()
+        kw.creator_id = note.creator_id
+        update_and_notify(note, kw)
         
         if resp_type == "json":
             return dict(code="success")

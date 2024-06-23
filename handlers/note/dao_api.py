@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-11-19 15:16:04
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-09 11:36:02
+@LastEditTime : 2024-06-23 09:51:44
 @FilePath     : /xnote/handlers/note/dao_api.py
 @Description  : DAO接口定义
 """
@@ -14,8 +14,7 @@ class NoteDao:
     """笔记的DAO接口"""
 
     @staticmethod
-    def create(note_dict):
-        # type: (dict) -> str
+    def create(note_dict) -> int:
         """创建笔记接口"""
         from . import dao
         return dao.create_note(note_dict)
@@ -29,7 +28,8 @@ class NoteDao:
     @staticmethod
     def get_by_id_creator(id, creator):
         """通过ID+创建用户查询笔记信息"""
-        raise NotImplementedError()
+        from . import dao
+        return dao.get_by_id_creator(id, creator)
     
     @staticmethod
     def batch_query_list(id_list):
@@ -49,12 +49,6 @@ class NoteDao:
         """统计评论数量"""
         from . import dao_comment
         return dao_comment.count_comment(user_name)
-    
-    @staticmethod
-    def delete_visit_log(user_name, note_id):
-        # type: (str, str) -> None
-        """删除访问日志"""
-        raise NotImplementedError()
     
     @staticmethod
     def delete_note(id):

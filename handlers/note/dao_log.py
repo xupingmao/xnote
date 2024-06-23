@@ -12,15 +12,14 @@
     记录在 note_index.visit_cnt 中
 """
 
-import xauth
 import xutils
-import xconfig
-import xtables
 
-from xutils import dbutil
+from xnote.core import xauth
+from xnote.core import xconfig
+from xnote.core import xtables
+
 from xutils import dateutil
 from xutils import Storage
-from .dao_api import NoteDao
 from . import dao as note_dao
 
 
@@ -33,10 +32,6 @@ def log_debug(fmt, *args):
 
 def is_debug_enabled():
     return xconfig.DEBUG
-
-def get_user_note_log_table(user_name):
-    assert user_name != None, "invalid user_name:%r" % user_name
-    return dbutil.get_table("user_note_log", user_name = user_name)
 
 class UserNoteLogDao:
     db = xtables.get_table_by_name("user_note_log")
@@ -204,10 +199,6 @@ def count_visit_log(user_name):
     user_id = xauth.UserDao.get_id_by_name(user_name)
     return UserNoteLogDao.count(user_id=user_id)
 
-def delete_visit_log(user_name, note_id):
-    db = get_user_note_log_table(user_name)
-    db.delete_by_id(note_id)
-
 def add_visit_log(user_name, note):
     return _update_log(user_name, note)
 
@@ -255,6 +246,3 @@ xutils.register_func("note.list_recent_events", list_recent_events)
 xutils.register_func("note.add_edit_log", add_edit_log)
 xutils.register_func("note.add_visit_log", add_visit_log)
 xutils.register_func("note.add_create_log", add_create_log)
-xutils.register_func("note.delete_visit_log", delete_visit_log)
-
-NoteDao.delete_visit_log = delete_visit_log

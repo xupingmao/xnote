@@ -10,15 +10,16 @@
 """
 
 
-import logging
 from xutils import dbutil
 from . import base
 from handlers.note import dao_comment
 
 def do_upgrade():
     # 20220626
-    upgrade_key = "upgrade_007"
-    base.execute_upgrade(upgrade_key, upgrade_comment)
+    old_key = "upgrade_007"
+    new_key = "20220626_fix_comment"
+    base.move_upgrade_key(old_key, new_key)
+    base.execute_upgrade(new_key, upgrade_comment)
 
 def upgrade_comment():
     dbutil.register_table("note_comment", "笔记评论")

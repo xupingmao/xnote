@@ -12,7 +12,9 @@ from handlers.note.dao_share import share_note_to
 
 def do_upgrade():
     old_key = "upgrade_005"
-    base.execute_upgrade(old_key, fix_note_share)
+    new_key = "20220312_fix_note_share"
+    base.move_upgrade_key(old_key, new_key)
+    base.execute_upgrade(new_key, fix_note_share)
 
 
 def fix_note_share():

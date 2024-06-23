@@ -128,8 +128,10 @@ def init_note_tables():
     db.delete_table()
 
     # 笔记修改历史
-    dbutil.register_table("note_history_index", "笔记历史索引", category="note")
     dbutil.register_table("note_history", "笔记的历史版本", category="note")
+    # 索引数据迁移到了SQL数据库
+    db = dbutil.register_table("note_history_index", "笔记历史索引", category="note")
+    db.delete_table()
     
     db = dbutil.register_table("search_history", "搜索历史", user_attr="user", check_user=True)
     db.drop_index("user", comment = "使用二级key的表,不需要user索引")

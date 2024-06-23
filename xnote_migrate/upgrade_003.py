@@ -13,7 +13,10 @@ from handlers.note import dao as note_dao
 
 
 def do_upgrade():
-    base.execute_upgrade("upgrade_003.2", do_upgrade_note_tiny)
+    old_key = "upgrade_003.2"
+    new_key = "20220101_note_tiny"
+    base.move_upgrade_key(old_key, new_key)
+    base.execute_upgrade(new_key, do_upgrade_note_tiny)
 
 class NoteTinyDO(xutils.Storage):
 

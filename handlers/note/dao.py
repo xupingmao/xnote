@@ -20,6 +20,8 @@ note_public:<note_id>            = 公开的笔记索引
 """
 import time
 import os
+import typing
+
 from xnote.core import xconfig
 import xutils
 from xnote.core import xmanager
@@ -44,7 +46,7 @@ _full_db = dbutil.get_table("note_full")
 _search_history_db = dbutil.get_table("search_history")
 
 _note_history_db = dbutil.get_hash_table("note_history")
-_note_history_index_db = dbutil.get_hash_table("note_history_index")
+_note_history_index_db = xtables.get_table_by_name("note_history_index")
 _public_db = dbutil.get_table("note_public")
 _token_db = dbutil.get_table("token")
 
@@ -1473,17 +1475,30 @@ class NoteHistoryIndexDO(xutils.Storage):
         self.name = ""
         self.version = 0
         self.mtime = DEFAULT_DATETIME
+        self.creator_id = 0
         self.update(kw)
 
-def add_history_index(note_id, version, new_note):
+    @classmethod
+    def from_list(cls, dict_list) -> typing.List["NoteHistoryIndexDO"]:
+        result = []
+        for item in dict_list:
+            result.append(NoteHistoryIndexDO(**item))
+        return result
+
+def add_history_index(note_id, version: int, new_note):
     brief = NoteHistoryIndexDO()
     brief.note_id = note_id
     brief.name = new_note.get("name")
     brief.version = version
     brief.mtime = new_note.get("mtime")
+    brief.creator_id = new_note.get("creator_id")
 
-    version_str = str(version)
-    _note_history_index_db.with_user(str(note_id)).put(version_str, brief)
+    check_old = _note_history_index_db.select_first(where=dict(note_id=note_id, version=version))
+    if check_old != None:
+        return
+
+    assert brief.creator_id > 0
+    _note_history_index_db.insert(**brief)
 
 def add_history(note_id, version, new_note):
     # type: (int, int, dict) -> None
@@ -1500,11 +1515,8 @@ def add_history(note_id, version, new_note):
 
 def list_history(note_id, limit=1000):
     """获取笔记历史的列表"""
-    result_list = _note_history_index_db.with_user(str(note_id)).list(limit=limit, reverse = True)
-    history_list = [y for x,y in result_list]
-    history_list = sorted(
-        history_list, key=lambda x: x.mtime or "", reverse=True)
-    return history_list
+    result_list = _note_history_index_db.select(where=dict(note_id=note_id), limit=limit, order="version DESC")
+    return NoteHistoryIndexDO.from_list(result_list)
 
 def delete_history(note_id, version=None):
     pass

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 16:53:16
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-24 18:48:02
+@LastEditTime : 2024-06-23 09:48:23
 @FilePath     : /xnote/handlers/note/dao_delete.py
 @Description  : 删除的处理
 """
@@ -25,7 +25,7 @@ from .dao import (
 
 from .dao_tag import delete_tags
 
-def delete_note_physically(creator, note_id):
+def delete_note_physically(creator: str, note_id: int):
     assert creator != None, "creator can not be null"
     assert note_id != None, "note_id can not be null"
 
@@ -61,9 +61,6 @@ def delete_note(id):
 
     # 删除skey索引
     delete_note_skey(note)
-
-    # 删除访问日志
-    NoteDao.delete_visit_log(note.creator, note.id)
 
 def recover_note(id):
     """恢复删除的笔记"""

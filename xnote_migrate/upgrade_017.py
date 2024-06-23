@@ -225,11 +225,15 @@ class MigrateHandler:
     def fix_creator_id(self):
         """修复creator_id数据"""
         for item in self.note_full_db.iter(limit=-1):
-            if item.creator_id in (0, None) and item.creator != "":
-                user_name = item.creator
-                user_id = xauth.UserDao.get_id_by_name(user_name)
-                item.creator_id = user_id
-                print(f"fix note_full, note_id={item.id}")
+            assert isinstance(item, dict)
+            creator_id = item.get("creator_id", 0)
+            creator = item.get("creator", "")
+            note_id = item.get("id")
+
+            if creator_id in (0, None) and creator != "":
+                user_id = xauth.UserDao.get_id_by_name(creator)
+                item["creator_id"] = user_id
+                print(f"fix note_full, note_id={note_id}")
                 self.note_full_db.update(item)
 
         for batch_result in self.note_index_db.iter_batch(where=" AND creator_id = 0"):

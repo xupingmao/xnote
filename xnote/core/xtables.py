@@ -187,6 +187,18 @@ def init_note_index_table():
         manager.add_index(["creator_id", "ctime"])
         manager.add_index(["creator_id", "type"])
 
+def init_note_history_index():
+    comment = "笔记历史索引"
+    with create_default_table_manager("note_history_index", comment=comment) as manager:
+        manager.add_column("name", "varchar(255)", default_value="")
+        manager.add_column("note_id", "bigint", default_value=0)
+        manager.add_column("version", "int", default_value=0)
+        manager.add_column("mtime", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("creator_id", "bigint", default_value=0)
+
+        manager.add_index("note_id")
+        manager.add_index(["creator_id", "mtime"])
+
 def init_share_info_table():
     comment = "分享记录"
     table_name = "share_info"
@@ -677,6 +689,8 @@ def init():
     
     # 笔记索引
     init_note_index_table()
+    init_note_history_index()
+
     init_user_note_log()
     init_user_op_log()
     init_month_plan_index()

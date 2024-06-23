@@ -81,7 +81,7 @@ def delete_comment_for_test(id):
     json_request("/note/comment/delete", method = "POST", data = dict(comment_id = id))
 
 def assert_json_request_success(test_case, url):
-    result = json_request(url)
+    result = json_request_return_dict(url)
     test_case.assertEqual('success', result['code'])
 
 class TestMain(BaseTestCase):

@@ -4,16 +4,16 @@
 @email        : 578749341@qq.com
 @Date         : 2023-05-20 22:54:35
 @LastEditors  : xupingmao
-@LastEditTime : 2023-06-22 17:57:52
-@FilePath     : /xnote/core/xnote_migrate/upgrade_012.py
+@LastEditTime : 2024-06-23 10:04:58
+@FilePath     : /xnote/xnote_migrate/upgrade_012.py
 @Description  : 描述
 """
 
 from xutils import dbutil, Storage
 from . import base
-import xauth
-import xtables
-import xconfig
+from xnote.core import xauth
+from xnote.core import xtables
+from xnote.core import xconfig
 import os
 from xutils import sqldb
 

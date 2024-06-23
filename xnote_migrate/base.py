@@ -9,10 +9,13 @@
 @Description  : 描述
 """
 
-import xconfig
-import xtables
+import datetime
 import os
 import xutils
+import threading
+
+from xnote.core import xconfig
+from xnote.core import xtables
 from xutils import dbutil, Storage
 from xutils import dateutil
 
@@ -60,6 +63,9 @@ def execute_upgrade(key = "", fn = lambda:None):
     fn()
     mark_upgrade_done(key)
 
+def execute_upgrade_async(key="", fn=lambda:None):
+    threading.Thread(target=fn).start()
+
 def move_upgrade_key(old_key="", new_key=""):
     """迁移升级的key,用于统一规范"""
     if is_upgrade_done(old_key):
@@ -103,3 +109,24 @@ def migrate_sqlite_table(new_table: xtables.TableProxy, old_dbname="", check_exi
                     # 不存在
                     new_table.insert(**new_reocrd)
         print("migrate (%s): %d/%d" % (table_name, count, total))
+
+
+def is_valid_datetime(value):
+    try:
+        dateutil.parse_datetime(value)
+        return True
+    except:
+        return False
+
+
+def is_valid_int(value):
+    try:
+        return int(value)
+    except:
+        return False
+
+
+def validate_datetime(value):
+    if value == "":
+        raise Exception("invalid datetime")
+    return dateutil.parse_datetime(value)

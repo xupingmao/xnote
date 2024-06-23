@@ -4,8 +4,8 @@
 @email        : 578749341@qq.com
 @Date         : 2022-01-25 22:37:52
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-30 22:34:37
-@FilePath     : /xnote/core/xnote_migrate/upgrade_000.py
+@LastEditTime : 2024-06-23 10:15:00
+@FilePath     : /xnote/xnote_migrate/upgrade_000.py
 @Description  : 描述
 """
 
@@ -14,8 +14,10 @@
 from . import base
 
 def do_upgrade():
-    mark_flag = "20210101_demo"
-    base.execute_upgrade(mark_flag, upgrade_func)
+    old_key = "upgrade_000"
+    new_key = "20210101_demo"
+    base.move_upgrade_key(old_key, new_key)
+    base.execute_upgrade(new_key, upgrade_func)
 
 def upgrade_func():
     base.log_info("this is upgrade demo")
