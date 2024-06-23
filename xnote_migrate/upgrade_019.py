@@ -124,12 +124,11 @@ class MigrateHandler:
             kv_item = KvNoteIndexDO.from_dict(item)
             if base.is_valid_int(kv_item.id):
                 continue
-            if kv_item.is_deleted:
+            if kv_item.is_deleted == 1:
                 logging.info("note is deleted, note_id:%s, note_name:%s", kv_item.id, kv_item.name)
                 continue
 
             logging.info("find invalid note_id:%s, note_name:%s", kv_item.id, kv_item.name)
-
 
             creator_id = xauth.UserDao.get_id_by_name(kv_item.creator)
 

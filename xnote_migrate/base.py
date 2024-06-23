@@ -117,7 +117,8 @@ def is_valid_datetime(value):
 
 def is_valid_int(value):
     try:
-        return int(value)
+        int(value)
+        return True
     except:
         return False
 
