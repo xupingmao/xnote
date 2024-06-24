@@ -822,6 +822,7 @@ def create_note(note_dict: NoteDO, date_str=None, note_id=None, check_name=True)
     assert isinstance(note_dict, NoteDO)
     assert note_dict.creator_id != 0
     assert isinstance(note_dict.level, int)
+    assert isinstance(note_dict.tags, (list, set))
 
     content = note_dict.content
     creator = note_dict.creator

@@ -10,12 +10,12 @@ import logging
 import os
 import time
 import threading
+import xutils
 
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xconfig
 from xnote.core import xmanager
-import xutils
 from xutils import Storage
 from xutils.sqldb import TableProxy
 from xutils import fsutil, webutil

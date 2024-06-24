@@ -4,9 +4,9 @@ import traceback
 import sys
 import subprocess
 import base64
-import xconfig
 import os
 
+from xnote.core import xconfig
 from io import BytesIO
 from xutils import cacheutil
 

@@ -6,9 +6,10 @@
 """创建文件的选项背后的服务，包括创建文件、文件夹、插件等等"""
 
 import os
-import xauth
 import xutils
-import xconfig
+
+from xnote.core import xconfig
+from xnote.core import xauth
 
 PLUGIN_TEMPLATE      = xconfig.load_config_as_text("./config/plugin/plugin.tpl.py")
 FORM_PLUGIN_TEMPLATE = xconfig.load_config_as_text("./config/plugin/form_plugin.tpl.py")

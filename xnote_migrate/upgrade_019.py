@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-06-22 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-23 22:19:44
+@LastEditTime : 2024-06-25 00:33:37
 @FilePath     : /xnote/xnote_migrate/upgrade_019.py
 @Description  : 描述
 """
@@ -128,6 +128,9 @@ class MigrateHandler:
                 logging.info("note is deleted, note_id:%s, note_name:%s", kv_item.id, kv_item.name)
                 continue
 
+            if kv_item.tags is None:
+                kv_item.tags = []
+
             logging.info("find invalid note_id:%s, note_name:%s", kv_item.id, kv_item.name)
 
             creator_id = xauth.UserDao.get_id_by_name(kv_item.creator)
@@ -145,6 +148,7 @@ class MigrateHandler:
             new_note.tags = kv_item.tags
             new_note.visit_cnt = kv_item.visited_cnt
             new_note.priority = kv_item.priority
+            new_note.level = kv_item.priority
 
             date_str = dateutil.format_date(kv_item.ctime)
 
@@ -153,11 +157,8 @@ class MigrateHandler:
                 logging.info("note with same name found, creator_id:%s, name:%s", creator_id, kv_item.name)
                 continue
 
-            try:
-                new_note_id = create_note(new_note, date_str=date_str)
-                # 标记为删除
-                kv_item.is_deleted = 1
-                note_full_db.update(kv_item)
-                logging.info("fix note_id success, old_id:%s, new_id:%s", kv_item.id, new_note_id)
-            except Exception as e:
-                logging.error("fix note_id failed, err:%s", e)
+            new_note_id = create_note(new_note, date_str=date_str)
+            # 标记为删除
+            kv_item.is_deleted = 1
+            note_full_db.update(kv_item)
+            logging.info("fix note_id success, old_id:%s, new_id:%s", kv_item.id, new_note_id)
