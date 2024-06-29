@@ -8,11 +8,11 @@
 @FilePath     : /xnote/handlers/note/note_checklist.py
 @Description  : 清单列表
 """
-import xauth
-import xtemplate
 import xutils
-from xutils.base import Storage
 
+from xutils.base import Storage
+from xnote.core import xauth
+from xnote.core import xtemplate
 from .dao import get_by_id as get_note_by_id
 from .dao import list_path
 from . import dao_tag

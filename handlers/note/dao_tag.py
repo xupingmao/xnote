@@ -4,17 +4,19 @@
 @email        : 578749341@qq.com
 @Date         : 2022-08-20 15:46:37
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-09 23:02:33
+@LastEditTime : 2024-06-29 19:48:32
 @FilePath     : /xnote/handlers/note/dao_tag.py
 @Description  : 标签
 """
 
 import json
 import xutils
+import logging
+import typing
+import handlers.note.dao as note_dao
+
 from xnote.core import xtables
 from xnote.core import xauth
-import logging
-import handlers.note.dao as note_dao
 from xutils import functions, lists
 from xutils import dbutil
 from xutils import attrget, Storage
@@ -49,8 +51,8 @@ class TagMeta(Storage):
         self.tag_code = ""
         self.tag_type = "" # group - 笔记本标签 note-笔记标签 global-全局标签(不分区笔记本还是笔记)
         self.amount = 0
-        self.book_id = ""
-        self.group_id = ""
+        self.book_id: typing.Optional[str] = ""
+        self.group_id: typing.Optional[str] = ""
         self.update(kw)
 
 class NoteTagRelation(Storage):

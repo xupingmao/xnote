@@ -3,15 +3,16 @@
 # @since 2021/01/02 00:31:58
 # @modified 2022/04/22 23:07:55
 
-import xauth
-import xtemplate
 import xutils
-import xconfig
-from xtemplate import T
 import handlers.note.dao as note_dao
 import handlers.message.dao as msg_dao
 import handlers.note.dao_book as book_dao
 import handlers.note.dao_log as log_dao
+
+from xnote.core import xauth
+from xnote.core import xtemplate
+from xnote.core import xconfig
+from xnote.core.xtemplate import T
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -63,7 +64,7 @@ def list_note_types(user_name = None):
 
 def list_msg_types(user_name = None):
     if user_name is None:
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
 
     msg_stat  = msg_dao.get_message_stat(user_name)
 
@@ -74,7 +75,7 @@ def list_msg_types(user_name = None):
 
 def list_system_types(user_name = None):
     if user_name is None:
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
 
     msg_stat  = msg_dao.get_message_stat(user_name)
 
@@ -101,7 +102,7 @@ class NoteWorkspaceHandler:
 
     @xauth.login_required()
     def GET(self):
-        recent_update_limit = 50
+        recent_update_limit = 10
         if xtemplate.is_mobile_device():
             recent_update_limit = 10
 

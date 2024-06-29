@@ -21,16 +21,16 @@ note_public:<note_id>            = 公开的笔记索引
 import time
 import os
 import typing
-
-from xnote.core import xconfig
-import xutils
-from xnote.core import xmanager
-from xnote.core import xtables
-import logging
-from xnote.core import xauth
-from xnote.core import xtables
 import pdb
 import enum
+import xutils
+import logging
+
+from xnote.core import xconfig
+from xnote.core import xmanager
+from xnote.core import xtables
+from xnote.core import xauth
+from xnote.core import xtables
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
@@ -39,6 +39,7 @@ from . import dao_log
 from xutils import lists
 from web.db import SQLLiteral
 from .models import NoteIndexDO, NoteDO, NoteLevelEnum, del_dict_key, remove_virtual_fields
+from .models import NoteToken
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -721,7 +722,8 @@ def get_by_id_creator(id, creator, db=None):
 
 
 def get_by_token(token):
-    token_info = _token_db.get_by_id(token)
+    token_dict = _token_db.get_by_id(token)
+    token_info = NoteToken.from_dict(token_dict)
     if token_info != None and token_info.type == "note":
         return get_by_id(token_info.id)
     return None

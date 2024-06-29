@@ -3,9 +3,10 @@
 # @since 2020/01/05 21:00:07
 # @modified 2021/07/24 17:51:17
 import xutils
+import handlers.note.dao_log as dao_log
+
 from xnote.core import xauth
 from handlers.note import dao
-import handlers.note.dao_log as dao_log
 from handlers.note.note_helper import assemble_notes_by_date
 
 NOTE_DAO = xutils.DAO("note")

@@ -105,3 +105,20 @@ def remove_virtual_fields(note):
     del_dict_key(note, "create_date")
     del_dict_key(note, "update_date")
     del_dict_key(note, "tag_info_list")
+
+
+class NoteTokenType:
+    note = "note"
+
+class NoteToken(Storage):
+    def __init__(self):
+        self.type = ""
+        self.id = 0
+    
+    @classmethod
+    def from_dict(cls, dict_value):
+        if dict_value == None:
+            return None
+        result = NoteToken()
+        result.update(dict_value)
+        return result

@@ -9,13 +9,14 @@
 @Description  : 描述
 """
 import copy
-import xmanager
-from xutils import Storage
-from xutils import dateutil, dbutil, fsutil
 import xutils
-import xconfig
+
+from xnote.core import xconfig
+from xnote.core import xmanager
+from xutils import Storage
+from xutils import fsutil
 from . import dao as note_dao
-from .dao import get_by_id, check_and_create_default_book
+from .dao import check_and_create_default_book
 
 NOTE_DAO = xutils.DAO("note")
 

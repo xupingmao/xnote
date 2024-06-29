@@ -484,7 +484,7 @@ class TestMain(BaseTestCase):
 
 
         # 删除评论
-        result = json_request("/note/comment/delete", method = "POST", 
+        result = json_request_return_dict("/note/comment/delete", method = "POST", 
             data = dict(comment_id = comment_id))
         self.assertEqual("success", result["code"])
 
@@ -521,11 +521,13 @@ class TestMain(BaseTestCase):
         id = create_note_for_test("group", "archive-test")
         self.check_OK("/note/archive?id=%s" % id)
         note_info = get_note_info(id)
+        assert note_info != None
         self.assertEqual(True, note_info.archived)
 
         # 取消归档
         self.check_OK("/note/unarchive?id=%s" % id)
         note_info = get_note_info(id)
+        assert note_info != None
         self.assertEqual(False, note_info.archived)
 
     def test_move(self):
@@ -617,25 +619,29 @@ class TestMain(BaseTestCase):
 
 
     def test_lock_success(self):
+        from handlers.note import dao_draft
+
         note_id = "001"
         token = textutil.create_uuid()
 
-        r1 = NOTE_DAO.refresh_edit_lock(note_id, token, time.time() + 60)
+        r1 = dao_draft.refresh_edit_lock(note_id, token, time.time() + 60)
         self.assertTrue(r1)
 
-        r2 = NOTE_DAO.refresh_edit_lock(note_id, token, time.time() + 60)
+        r2 = dao_draft.refresh_edit_lock(note_id, token, time.time() + 60)
         self.assertTrue(r2)
 
 
     def test_lock_conflict(self):
+        from handlers.note import dao_draft
+
         note_id = "002"
         token1 = textutil.create_uuid()
         token2 = textutil.create_uuid()
 
-        r1 = NOTE_DAO.refresh_edit_lock(note_id, token1, time.time() + 60)
+        r1 = dao_draft.refresh_edit_lock(note_id, token1, time.time() + 60)
         self.assertTrue(r1)
 
-        r2 = NOTE_DAO.refresh_edit_lock(note_id, token2, time.time() + 60)
+        r2 = dao_draft.refresh_edit_lock(note_id, token2, time.time() + 60)
         self.assertFalse(r2)
 
 
@@ -649,6 +655,7 @@ class TestMain(BaseTestCase):
         from handlers.note.dao_read import get_note_depth
         note_id = create_note_for_test("group", "test-get-note-depth")
         note_info = get_by_id(note_id)
+        assert note_info != None
         note_depth = get_note_depth(note_info)
         self.assertEqual(1, note_depth)
     

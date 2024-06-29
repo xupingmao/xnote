@@ -9,11 +9,9 @@ import xutils
 from xnote.core import xauth, xconfig, xtables
 
 from xutils import Storage
-from xutils import dbutil
 from xutils import logutil
-import handlers.note.dao as note_dao
 from handlers.note.dao import ShareTypeEnum, ShareInfoDO
-from .dao import sort_notes, batch_query_list
+from .dao import batch_query_list
 
 def check_not_empty(value, method_name):
     if value == None or value == "":

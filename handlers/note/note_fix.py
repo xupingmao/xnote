@@ -8,8 +8,8 @@
 @FilePath     : /xnote/handlers/note/note_fix.py
 @Description  : 笔记修复
 """
-import xmanager
 
+from xnote.core import xmanager
 from .dao_book import fix_book_delete
 
 @xmanager.listen("note.notfound")
