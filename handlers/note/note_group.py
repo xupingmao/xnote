@@ -197,8 +197,18 @@ class ShareToMeListHandler(ShareListHandler):
         return dao_share.count_share_to(user_name)
 
     def list_notes(self, user_name, offset, limit):
-        return dao_share.list_share_to(user_name, offset, limit)
+        return dao_share.list_share_to(to_user=user_name, offset=offset, limit=limit)
 
+class MyShareListHandler(ShareListHandler):
+    share_type = "my_share"
+    title = T("我的分享")
+
+    def count_notes(self, user_name):
+        user_id = xauth.UserDao.get_id_by_name(user_name)
+        return dao_share.NoteShareDao.count(from_id=user_id)
+
+    def list_notes(self, user_name, offset, limit):
+        return dao_share.list_share_to(from_user=user_name, offset=offset, limit=limit)
 
 class GroupListHandler:
 
@@ -1028,6 +1038,7 @@ xurls = (
     r"/note/form", FormListHandler,
     r"/note/date", DateListHandler,
     r"/note/share_to_me", ShareToMeListHandler,
+    r"/note/my_share", MyShareListHandler,
 
     r"/note/text", TextListHandler,
     r"/note/tools", NotePluginHandler,

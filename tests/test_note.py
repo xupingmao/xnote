@@ -343,6 +343,7 @@ class TestMain(BaseTestCase):
         print("delete_share_resp:", delete_share_resp)
         self.assertEqual("success", delete_share_resp["code"])
         self.check_OK("/note/share_to_me")
+        self.check_OK("/note/my_share")
         
     def test_note_share_group_to(self):
         """分享笔记本"""

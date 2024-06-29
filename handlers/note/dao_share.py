@@ -50,21 +50,32 @@ class NoteShareDao:
         record.from_id = from_id
         record.to_id = to_id
         return cls.db.insert(**record)
+    
+    @classmethod
+    def get_where_dict(cls):
+        where = {}
+        where["share_type"] = cls.share_type
+        return where
+
 
     @classmethod
-    def count(cls, to_id=0):
-        where = dict(share_type = cls.share_type)
+    def count(cls, to_id=0, from_id=0):
+        where = cls.get_where_dict()
         if to_id != 0:
             where["to_id"] = to_id
+        if from_id != 0:
+            where["from_id"] = from_id
         return cls.db.count(where=where)
     
     @classmethod
-    def list(cls, target_id=0, to_id=0, offset=0, limit=20, order="id desc"):
-        where = dict(share_type = cls.share_type)
+    def list(cls, target_id=0, to_id=0, from_id=0, offset=0, limit=20, order="id desc"):
+        where = cls.get_where_dict()
         if to_id != 0:
             where["to_id"] = to_id
         if target_id != 0:
             where["target_id"] = target_id
+        if from_id != 0:
+            where["from_id"] = from_id
         return cls.db.select(where=where, offset=offset, limit=limit, order=order)
 
 def get_share_by_note_and_to_user(note_id=0, to_user=""):
@@ -84,12 +95,19 @@ def delete_share(note_id, to_user=""):
     if record != None:
         NoteShareDao.delete_by_id(record.id)
 
-def list_share_to(to_user, offset = 0, limit = None, orderby = None):
+def list_share_to(to_user = "", from_user="", offset = 0, limit = None, orderby = None):
     if limit is None:
         limit = xconfig.PAGE_SIZE
 
-    to_id = xauth.UserDao.get_id_by_name(to_user)
-    records = NoteShareDao.list(to_id=to_id, offset=offset, limit=limit, order="ctime desc")
+    from_id = 0
+    to_id = 0
+
+    if to_user != "":
+        to_id = xauth.UserDao.get_id_by_name(to_user)
+    if from_user != "":
+        from_id = xauth.UserDao.get_id_by_name(from_user)
+
+    records = NoteShareDao.list(to_id=to_id, from_id=from_id, offset=offset, limit=limit, order="ctime desc")
     id_list = list(map(lambda x:x.target_id, records))
     notes = batch_query_list(id_list)
     return notes

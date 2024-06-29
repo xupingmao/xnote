@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-05 12:47:10
+@LastEditTime : 2024-06-29 19:17:46
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : SQL表查询代理
 """
@@ -104,7 +104,7 @@ class TableProxy(SQLDBInterface):
     def raw_query(self, *args, **kw):
         return self.db.query(*args, **kw)
 
-    def count(self, where=None, sql=None, vars=None):
+    def count(self, where=None, sql=None, vars=None) -> int:
         where = self.fix_sql_keywords(where)
         if sql is None:
             return self.select_first(what="COUNT(1) AS amount", where=where, vars=vars).amount
