@@ -70,7 +70,6 @@
         {% if _has_login %}
         <a href="{{_server_home}}/system/index">{{T("应用")}}</a>
         <a href="{{_server_home}}/plugins_list">{{T("插件")}}</a>
-        <a href="{{_server_home}}/system/settings">{{T("设置")}}</a>
         {% end %}
 
         {% if _is_admin %}
@@ -83,6 +82,11 @@
         <a href="{{_server_home}}/note/public">分享</a>
         <a href="{{_server_home}}/login" class="afinve"><span>登录</span></a>
         {% end %}
+
+        {% if _has_login %}
+        <a href="{{_server_home}}/system/settings">{{T("设置")}}</a>
+        {% end %}
+        
       </div>
     </div>
 

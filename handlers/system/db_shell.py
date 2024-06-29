@@ -6,6 +6,8 @@ import os
 import xutils
 import time
 import logging
+import web.db
+
 from xnote.core import xauth, xconfig, xtemplate, xtables
 
 from collections import OrderedDict
@@ -90,6 +92,8 @@ class handler:
         except:
             error = xutils.print_exc()
             return [],[],error
+        
+        assert isinstance(result, web.db.ResultSet)
         result_list = []
 
         for record in result:

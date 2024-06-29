@@ -334,7 +334,7 @@ class FileSystemHandler:
         # fpath参数使用b64编码
         fpath = xutils.get_argument_str("fpath")
         if fpath != "":
-            return xutils.urlsafe_b64decode(fpath)
+            return xutils.decode_base64(fpath)
 
         if not xconfig.USE_URLENCODE:
             path = xutils.unquote(path)

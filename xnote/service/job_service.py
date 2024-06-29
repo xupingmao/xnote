@@ -74,6 +74,7 @@ class JobService:
         record.pop("id", None)
         
         db_id = cls.db.insert(record)
+        assert isinstance(db_id, int)
         job_info.id = db_id
         return db_id
     

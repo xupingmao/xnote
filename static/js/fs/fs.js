@@ -68,12 +68,14 @@ FileView.openOptionDialog = function (target, event) {
     var fileName = $(target).attr("data-name");
     var fileRealName = $(target).attr("data-realname");
     var dialogId = xnote.dialog.createNewId();
+    var filePathB64 = $(target).attr("data-path-b64");
 
     var html = $("#fileItemOptionDialog").render({
         "filePath": filePath,
         "fileName": fileName,
         "fileRealName": fileRealName,
         "dialogId": dialogId,
+        "filePathB64": filePathB64,
     });
 
     var options = {};

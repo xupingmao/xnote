@@ -9,7 +9,9 @@
 <script type="text/template" id="fileItemOptionDialog">
     <div class="card dialog-body">
         <div class="align-center">
-            <button class="btn btn-default huge" data-path="{{!filePath}}" 
+            <button class="btn btn-default huge" 
+                data-path="{{!filePath}}" 
+                data-path-b64="{{!filePathB64}}"
                 onclick="xnote.action.fs.download(this);">下载</button>
             <button class="btn btn-default huge" 
                 data-path="{{!filePath}}" 
@@ -42,8 +44,8 @@
 <script type="text/javascript">
 
 xnote.action.fs.download = function(target) {
-    var path = $(target).attr("data-path");
-    window.open("{{_server_home}}/fs/~" + path +"?type=blob", "_blank");
+    var path = $(target).attr("data-path-b64");
+    window.open("{{_server_home}}/fs_download?fpath=" + path +"&type=blob", "_blank");
 };
 
 xnote.action.fs.move = function(target) {
