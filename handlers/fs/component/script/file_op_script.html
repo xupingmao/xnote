@@ -26,6 +26,10 @@
             <button class="btn btn-default huge"
                 data-path="{{!filePath}}"
                 onclick="xnote.action.fs.showDetail(this);">详细信息</button>
+            <button class="btn btn-default huge"
+                data-path="{{!filePath}}"
+                data-path-b64="{{!filePathB64}}"
+                onclick="xnote.action.fs.viewHex(this);">查看二进制</button>
             <button class="btn danger huge" 
                 data-path="{{!filePath}}"
                 data-name="{{!fileName}}"

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 18:05:00
+@LastEditTime : 2024-06-30 19:28:48
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -205,12 +205,11 @@ class HttpClient:
             logging.info("文件不存在, fpath=%s", item.fpath)
             return
         
-        
         if item.ftype == "dir":
             logging.info("跳过目录, dir=%s", item.fpath)
             return
         
-        assert item.sha1_sum != ""
+        assert item.sha1_sum != "", item
         
         # 数据库文件不能下载
         if self.is_ignore_file(item.webpath):
@@ -260,51 +259,18 @@ class HttpClient:
         logging.debug("原始文件:%s", url)
         logging.debug("目标文件:%s", dest_path)
 
-        try:
-            netutil.http_download(url, dest_path)
-            local_sha1_sum = fsutil.get_sha1_sum(dest_path)
-            if local_sha1_sum != item.sha1_sum:
-                fsutil.rmfile(dest_path)
-                raise Exception("sha1校验码检查失败")
-            
-            os.utime(dest_path, times=(mtime, mtime))
-            self.delete_retry_task(item)
-            build_index_by_fpath(dest_path)
-        except:
-            item.err_msg = xutils.print_exc()
-            self.upsert_retry_task(item)
-            logging.error("下载文件失败:%s", dest_path)
+        netutil.http_download(url, dest_path)
+        os.utime(dest_path, times=(mtime, mtime))
+        local_sha1_sum = fsutil.get_sha1_sum(dest_path)
+        if local_sha1_sum != item.sha1_sum:
+            self.delete_retry_task(item) # 重试也不能成功了
+            raise Exception(f"sha1校验码检查失败, local={local_sha1_sum}, remote={item.sha1_sum}, webpath={item.webpath}, download_url={url}")
+
+        build_index_by_fpath(dest_path)
 
     def download_files(self, result):
         for item in result.data:
             self.download_file(FileIndexInfo(**item))
-
-    def retry_failed(self):
-        """TODO 这个应该是调度层的"""
-        for item_raw in self.get_failed_table().iter(limit = -1):
-            now = time.time()
-            item = FileIndexInfo(**item_raw)
-            if (now - item.last_try_time) < RETRY_INTERVAL:
-                continue
-
-            dest_path = self.get_dest_path(item.webpath) 
-            if xutils.is_windows() and len(dest_path) >= fsutil.WIN_MAXPATH:
-                logging.info("文件名过长, 取消重试, item=%s", item)
-                self.get_failed_table().delete(item_raw)
-                continue
-
-            if self.is_invalid_file(item.webpath):
-                logging.info("无效的文件名, item=%s", item)
-                self.get_failed_table().delete(item_raw)
-                continue
-
-            if self.is_ignore_file(item.webpath):
-                logging.info("忽略的文件, item=%s", item)
-                self.get_failed_table().delete(item_raw)
-                continue
-
-            logging.debug("正在重试:%s", item)
-            self.download_file(item)
 
     @log_mem_info_deco("proxy.http_get")
     def http_get(self, url, params=None):

@@ -391,7 +391,9 @@ class StaticFileHandler(FileSystemHandler):
             token_info = SystemSyncTokenDao.get_by_token(token)
             if token_info is None or token_info.is_expired():
                 raise web.Forbidden(message="无效的token")
-        xauth.check_login("admin")
+            # token is ok
+        else:
+            xauth.check_login("admin")
 
     """外置数据的静态文件支持"""
     def GET(self, path = ""):

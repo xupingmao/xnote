@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 16:00:10
+@LastEditTime : 2024-06-30 19:19:58
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -164,10 +164,7 @@ class Follower(NodeManagerBase):
         return ClusterConfigDao.get_fs_sync_last_id()
         
     def sync_file_step(self):
-        client = self.get_client()
-        # 先重试失败的任务
-        client.retry_failed()
-    
+        client = self.get_client()    
         last_id = self.get_fs_sync_last_id()
         
         logging.debug("fs_sync_last_id=%s", last_id)

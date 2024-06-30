@@ -120,3 +120,8 @@ FileView.removeBookmark = function(event) {
         })
     })
 }
+
+FileView.viewHex = function(target) {
+    var filePathB64 = $(target).attr("data-path-b64");
+    window.location.href = "/fs_hex?b64=true&path=" + filePathB64;
+}
