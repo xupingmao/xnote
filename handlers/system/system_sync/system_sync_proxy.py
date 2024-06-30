@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 18:03:53
+@LastEditTime : 2024-06-30 18:05:00
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -205,11 +205,12 @@ class HttpClient:
             logging.info("文件不存在, fpath=%s", item.fpath)
             return
         
-        assert item.sha1_sum != ""
         
         if item.ftype == "dir":
             logging.info("跳过目录, dir=%s", item.fpath)
             return
+        
+        assert item.sha1_sum != ""
         
         # 数据库文件不能下载
         if self.is_ignore_file(item.webpath):
