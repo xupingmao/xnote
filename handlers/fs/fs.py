@@ -351,13 +351,6 @@ class FileSystemHandler:
         # 如果存储结构不采用urlencode，那么这里也必须unquote回去
         path = self.resolve_fpath(path)
         return self.handle_get(path)
-        
-
-class DownloadHandler(FileSystemHandler):
-    pass
-
-class GetFileHandler(FileSystemHandler):
-    pass
 
 class DocFileHandler:
 
@@ -385,10 +378,10 @@ class StaticFileHandler(FileSystemHandler):
         return False
     
     def check_token_or_admin(self):
-        access_token = xutils.get_argument_str("access_token")
-        if access_token != "":
+        token = xutils.get_argument_str("token")
+        if token != "":
             from handlers.system.system_sync.dao import SystemSyncTokenDao
-            token_info = SystemSyncTokenDao.get_by_token(access_token)
+            token_info = SystemSyncTokenDao.get_by_token(token)
             if token_info is None or token_info.is_expired():
                 raise web.Forbidden(message="无效的token")
             # token is ok
@@ -419,6 +412,13 @@ class StaticFileHandler(FileSystemHandler):
             web.ctx.status = "404 Not Found"
             return "Invalid File Path: %s" % origin_path
         return self.handle_get(path)
+
+
+class DownloadHandler(StaticFileHandler):
+    pass
+
+class GetFileHandler(StaticFileHandler):
+    pass
 
 class RemoveAjaxHandler:
 
