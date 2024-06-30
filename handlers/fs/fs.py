@@ -384,11 +384,11 @@ class StaticFileHandler(FileSystemHandler):
                 return True
         return False
     
-    def check_sync_or_admin(self):
-        token = xutils.get_argument_str("token")
-        if token != "":
+    def check_token_or_admin(self):
+        access_token = xutils.get_argument_str("access_token")
+        if access_token != "":
             from handlers.system.system_sync.dao import SystemSyncTokenDao
-            token_info = SystemSyncTokenDao.get_by_token(token)
+            token_info = SystemSyncTokenDao.get_by_token(access_token)
             if token_info is None or token_info.is_expired():
                 raise web.Forbidden(message="无效的token")
             # token is ok
@@ -400,7 +400,7 @@ class StaticFileHandler(FileSystemHandler):
         origin_path = path
         path = xutils.unquote(path)
         if not self.is_path_allowed(path):
-            self.check_sync_or_admin()
+            self.check_token_or_admin()
 
         data_prefix = u(xconfig.DATA_DIR)
         if not path.startswith("static"):
