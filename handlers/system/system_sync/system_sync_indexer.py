@@ -21,6 +21,7 @@ from xutils import fsutil
 from xutils import textutil
 from xutils.db.binlog import BinLogOpType, FileLog
 from handlers.fs.fs_helper import FileInfoDao
+from .models import FileIndexInfo
 
 _binlog = dbutil.BinLog.get_instance()
 
@@ -108,14 +109,21 @@ class FileSyncIndexManager:
 
     def list_files(self, last_id = 0, offset = 0, limit = 20):
         db = xtables.get_file_info_table()
-        result = db.select(where="id > $last_id", vars=dict(last_id=last_id), 
+        record_list = db.select(where="id > $last_id", vars=dict(last_id=last_id), 
                                offset=offset, limit=limit, order="id")
-        for item in result:
+        result = []
+        for item0 in record_list:
+            item = FileIndexInfo(**item0)
             fpath = item.fpath
             if os.path.isdir(fpath):
                 item.ftype = "dir"
+            fpath = fpath.replace(xconfig.FileReplacement.data_dir, xconfig.FileConfig.data_dir)
+            if not os.path.exists(fpath):
+                logging.warn("file not exists: %s", fpath)
+                continue
             item.webpath = fsutil.get_webpath(fpath)
             item.fsize = fsutil.get_file_size_int(fpath)
+            result.append(item)
         return result
 
     def count_index(self):
