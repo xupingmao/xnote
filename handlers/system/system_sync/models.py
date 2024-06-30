@@ -16,6 +16,8 @@ class FileIndexInfo(Storage):
         self.fsize = kw.get("fsize", 0)
         self.ftype = kw.get("ftype", "")
         self.last_try_time = kw.get("last_try_time", 0.0)
+        self.exists = True # 默认存在
+        self.sha1_sum = ""
 
 class LeaderStat(Storage):
     """主节点信息"""

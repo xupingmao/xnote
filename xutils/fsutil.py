@@ -12,6 +12,7 @@ import platform
 import xutils
 import base64
 import time
+import hashlib
 
 # 部分系统没有ctypes（比如SAE的云引擎）
 try:
@@ -904,3 +905,51 @@ def get_text_ext():
 
 def is_editable(fpath):
     return is_text_file(fpath) or is_code_file(fpath)
+
+
+class FileHasher:
+
+    def __init__(self, fpath, hash_type="md5"):
+        self.fpath = fpath
+        self.hash_type = hash_type
+        self.chunksize = 8096
+
+    def get_hash_algo(self):
+        hash_type = self.hash_type
+        if hash_type == "md5":
+            return hashlib.md5()
+        if hash_type == "sha1":
+            return hashlib.sha1()
+        raise Exception(f"unsupported hash_type:{hash_type}")
+    
+    def get_hash_hex(self):
+        fpath = self.fpath
+        chunk_size = self.chunksize
+        if not os.path.exists(fpath):
+            return ""
+        if os.path.isdir(fpath):
+            return ""
+        def read_chunks(fh):
+            fh.seek(0)
+            chunk = fh.read(chunk_size)
+            while chunk:
+                yield chunk
+                chunk = fh.read(chunk_size)
+            else: #最后要将游标放回文件开头
+                fh.seek(0)
+        
+        m = self.get_hash_algo()
+        with open(fpath, "rb") as fh:
+            for chunk in read_chunks(fh):
+                m.update(chunk)
+        return m.hexdigest()
+
+def get_md5_sum(fpath):
+    """计算文件的MD5校验码"""
+    hasher = FileHasher(fpath=fpath, hash_type="md5")
+    return hasher.get_hash_hex()
+
+def get_sha1_sum(fpath):
+    """计算文件的SHA1校验码"""
+    hasher = FileHasher(fpath=fpath, hash_type="sha1")
+    return hasher.get_hash_hex()

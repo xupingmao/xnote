@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 16:31:47
+@LastEditTime : 2024-06-30 17:34:45
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -200,6 +200,10 @@ class HttpClient:
             logging.error("磁盘容量不足，跳过")
             raise Exception("磁盘容量不足")
         
+        if not item.exists:
+            logging.info("文件不存在, fpath=%s", item.fpath)
+            return
+        
         if item.ftype == "dir":
             logging.info("跳过目录, dir=%s", item.fpath)
             return
@@ -254,6 +258,10 @@ class HttpClient:
 
         try:
             netutil.http_download(url, dest_path)
+            local_sha1_sum = fsutil.get_sha1_sum(dest_path)
+            if local_sha1_sum != item.sha1_sum:
+                raise Exception("sha1校验码检查失败")
+            
             os.utime(dest_path, times=(mtime, mtime))
             self.delete_retry_task(item)
             build_index_by_fpath(dest_path)

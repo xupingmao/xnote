@@ -120,6 +120,8 @@ class FileSyncIndexManager:
             fpath = fpath.replace(xconfig.FileReplacement.data_dir, xconfig.FileConfig.data_dir)
             item.webpath = fsutil.get_webpath(fpath)
             item.fsize = fsutil.get_file_size_int(fpath)
+            item.exists = os.path.exists(fpath)
+            item.sha1_sum = fsutil.get_sha1_sum(fpath)
             result.append(item)
         return result
 
