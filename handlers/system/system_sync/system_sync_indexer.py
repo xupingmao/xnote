@@ -123,6 +123,11 @@ class FileSyncIndexManager:
             item.exists = os.path.exists(fpath)
             item.sha1_sum = fsutil.get_sha1_sum(fpath)
             result.append(item)
+
+            if not item.exists:
+                # 删除不存在的文件索引
+                FileInfoDao.delete_by_fpath(item.fpath)
+
         return result
 
     def count_index(self):
