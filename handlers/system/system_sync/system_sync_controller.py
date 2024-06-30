@@ -275,26 +275,8 @@ class LeaderHandler(SyncHandler):
         leader_token = xutils.get_argument_str("leader_token")
         node_id = xutils.get_argument_str("node_id")
         port = xutils.get_argument_str("port")
-        if node_id == "":
-            return webutil.FailedResult(code="404", message="node_id 为空")
-        if port == "":
-            return webutil.FailedResult(code="404", message="port为空")
-        
-        follower_name = LEADER.get_follower_url(node_id=node_id, port=port)
-        if leader_token ==  LEADER.get_leader_token():
-            # build token
-            token_info = SystemSyncTokenDao.get_by_holder(follower_name)
-            if token_info == None:
-                token_info = SystemSyncToken()
-                token_info.token_holder = follower_name
-            
-            unixtime = dateutil.get_seconds()
-            token_info.expire_time = dateutil.format_datetime(unixtime + 3600)
-            token_info.token = textutil.create_uuid()
-            SystemSyncTokenDao.upsert(token_info)
-            return webutil.SuccessResult(data=token_info)
-        else:
-            raise self.build_error("403", "无效的token")
+        return LEADER.refresh_token(leader_token=leader_token, node_id=node_id, port=port)
+
 
     def build_error(self, code="", message=""):
         error = webutil.FailedResult(code=code, message=message)

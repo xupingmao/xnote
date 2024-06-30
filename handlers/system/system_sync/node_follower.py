@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 14:15:20
+@LastEditTime : 2024-06-30 15:35:48
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -53,7 +53,8 @@ class Follower(NodeManagerBase):
         self.leader_info = None
         self.ping_error = None
         self.ping_result = None
-        self.admin_token = None
+        self.admin_token = ""
+        self.access_token = ""
         self.last_ping_time = -1
         self.fs_index_count = -1
         # 同步完成的时间
@@ -85,7 +86,7 @@ class Follower(NodeManagerBase):
     def is_token_active(self):
         now = time.time()
         is_active = (now - self.last_ping_time) < self.PING_INTERVAL
-        return self.admin_token != None and is_active
+        return self.access_token != "" and is_active
 
     def ping_leader(self, force=True):
         if self.is_token_active() and not force:
@@ -128,6 +129,7 @@ class Follower(NodeManagerBase):
         self.follower_list = convert_follower_dict_to_list(follower_dict)
         self.leader_info = result.get("leader")
         self.last_ping_time = time.time()
+        self.access_token = result.access_token
 
         if len(self.follower_list) > 0:
             item = self.follower_list[0]

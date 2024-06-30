@@ -75,9 +75,15 @@ def to_py_date(date_info):
     return date_info
 
 def to_py_datetime(datetime_info):
-    """转换成python内置的datetime类型"""
+    """转换成python内置的datetime类型
+    >>> to_py_datetime("2020-01-01 00:00:00")
+    datetime.datetime(2020, 1, 1, 0, 0)
+    >>> to_py_datetime(datetime.datetime(2020,1,2))
+    datetime.datetime(2020, 1, 2, 0, 0)
+    """
     if isinstance(datetime_info, str):
-        return datetime.datetime.fromisoformat(datetime_info)
+        timestamp = parse_datetime(datetime_info)
+        return datetime.datetime.fromtimestamp(timestamp)
     assert isinstance(datetime_info, datetime.datetime)
     return datetime_info
 

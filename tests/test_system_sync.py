@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 14:29:17
+@LastEditTime : 2024-06-30 15:33:48
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
@@ -297,6 +297,8 @@ class TestSystemSync(BaseTestCase):
         """
         result_dict = textutil.parse_json(result)
         result_obj = LeaderStat.from_dict(result_dict)
+        assert result_obj != None
+        result_obj.access_token = self.get_access_token()
         FOLLOWER.update_ping_result(result_obj)
         self.assertTrue(FOLLOWER.is_token_active())
 

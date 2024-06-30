@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 14:43:53
+@LastEditTime : 2024-06-30 14:58:54
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -29,7 +29,9 @@ from xutils.db.binlog import BinLog, BinLogOpType
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import get_system_port
 from .models import LeaderStat
+from .models import SystemSyncToken
 from .dao import ClusterConfigDao
+from .dao import SystemSyncTokenDao
 
 MAX_FOLLOWER_SIZE = 100
 EXPIRE_TIME = 60 * 60
@@ -281,3 +283,25 @@ class Leader(NodeManagerBase):
             record = dict(key=key, value=value)
             result.append(record)
         return dict(binlog_last_seq=self.binlog.last_seq, rows=result)
+
+    def refresh_token(self, leader_token="", node_id="", port=""):
+        if node_id == "":
+            return webutil.FailedResult(code="404", message="node_id 为空")
+        if port == "":
+            return webutil.FailedResult(code="404", message="port为空")
+        
+        follower_name = self.get_follower_url(node_id=node_id, port=port)
+        if leader_token == self.get_leader_token():
+            # build token
+            token_info = SystemSyncTokenDao.get_by_holder(follower_name)
+            if token_info == None:
+                token_info = SystemSyncToken()
+                token_info.token_holder = follower_name
+            
+            unixtime = dateutil.get_seconds()
+            token_info.expire_time = dateutil.format_datetime(unixtime + 3600)
+            token_info.token = textutil.create_uuid()
+            SystemSyncTokenDao.upsert(token_info)
+            return webutil.SuccessResult(data=token_info)
+        else:
+            return webutil.FailedResult(code="403", message="无效的token")

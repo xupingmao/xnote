@@ -25,6 +25,7 @@ class LeaderStat(Storage):
         self.timestamp = int(time.time())
         self.system_version = ""
         self.admin_token = ""
+        self.access_token = ""
         self.fs_index_count = 0
         self.follower_dict = {}
         super().__init__(**kw)

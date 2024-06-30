@@ -246,21 +246,28 @@ def init_webutil_env(is_test = False):
     global IS_TEST
     IS_TEST = is_test
 
-
-class SuccessResult(web.Storage):
-
-    def __init__(self, data=None, message=""):
+class WebResult(web.Storage):
+    def __init__(self):
         self.success = True
         self.code = "success"
-        self.data = data
+        self.data = None
+        self.message = ""
+
+def SuccessResult(data=None, message=""):
+    result = WebResult()
+    result.success = True
+    result.code = "success"
+    result.data = data
+    result.message = message
+    return result
 
 
-class FailedResult(web.Storage):
-
-    def __init__(self, code="500", message=""):
-        self.success = False
-        self.code = code
-        self.message = message
+def FailedResult(code="500", message=""):
+    result = WebResult()
+    result.success = False
+    result.code = code
+    result.message = message
+    return result
 
 
 class Pagination:

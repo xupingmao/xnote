@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 14:50:06
+@LastEditTime : 2024-06-30 15:10:45
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -103,12 +103,15 @@ class HttpClient:
         if self.check_failed():
             return None
 
-        params["token"] = self.token
+        params["token"] = self.access_token
 
         url = "{host}/system/sync/leader?p=get_stat".format(host = self.host)
         result = netutil.http_get(url, params = params, skip_empty_value = True)
         result_obj = textutil.parse_json(result, ignore_error = True)
-        return LeaderStat.from_dict(result_obj)    
+        result = LeaderStat.from_dict(result_obj)
+        if result != None:
+            result.access_token = self.access_token
+        return result
 
     def list_files(self, last_id=0):
         if self.check_failed():
