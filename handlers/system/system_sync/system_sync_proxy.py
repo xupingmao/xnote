@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 15:10:45
+@LastEditTime : 2024-06-30 16:31:47
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -79,6 +79,10 @@ class HttpClient:
 
         return False
     
+    def check_access_token(self):
+        if self.access_token == "" or self.access_token == None:
+            self.handle_token()
+        
     def handle_token(self):
         node_id = self.node_id
         port = self.port
@@ -114,6 +118,7 @@ class HttpClient:
         return result
 
     def list_files(self, last_id=0):
+        self.check_access_token()
         if self.check_failed():
             return
 
@@ -189,9 +194,7 @@ class HttpClient:
         return os.path.abspath(path)
 
     def download_file(self, item: FileIndexInfo):
-        if self.admin_token is None:
-            logging.warn("admin_token为空，跳过")
-            raise Exception("admin_token为空")
+        self.check_access_token()
 
         if not self.check_disk_space():
             logging.error("磁盘容量不足，跳过")
@@ -231,9 +234,9 @@ class HttpClient:
             item.err_msg = xutils.print_exc()
             self.upsert_retry_task(item)
 
-        encoded_fpath = xutils.urlsafe_b64encode(fpath)
+        encoded_fpath = xutils.encode_base64(fpath)
         url = "{host}/fs_download".format(host = self.host)
-        params = dict(token = self.admin_token, fpath = encoded_fpath)
+        params = dict(token = self.access_token, fpath = encoded_fpath)
         url = netutil._join_url_and_params(url, params)
 
         dest_path = self.get_dest_path(webpath)
@@ -298,6 +301,7 @@ class HttpClient:
     def list_binlog(self, last_seq=0) -> dict:
         assert isinstance(last_seq, int)
         params = dict(last_seq=str(last_seq), include_req_seq="false")
+        self.check_access_token()
 
         leader_host = self.host
         url = "{host}/system/sync/leader?p=list_binlog&token={token}".format(
@@ -314,7 +318,7 @@ class HttpClient:
     
     def list_db(self, last_key):
         # type: (str) -> str
-        leader_token = self.token
+        self.check_access_token()
         leader_host = self.host
         params = dict(last_key=last_key, token=self.access_token)
         url = "{host}/system/sync/leader?p=list_db".format(host=leader_host)

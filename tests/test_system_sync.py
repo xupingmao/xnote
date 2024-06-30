@@ -4,12 +4,13 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 15:33:48
+@LastEditTime : 2024-06-30 17:02:14
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
 
 import os
+import re
 
 from .a import *
 from urllib.parse import urlparse, parse_qs, unquote
@@ -37,21 +38,48 @@ BaseTestCase = test_base.BaseTestCase
 DBSyncer.MAX_LOOPS = 5
 DBSyncer.FULL_SYNC_MAX_LOOPS = 5
 
+def get_test_access_token(readonly=False):
+    from handlers.system.system_sync.models import SystemSyncToken
+    from handlers.system.system_sync.dao import SystemSyncTokenDao
+    follower_name = "test"
+    token_info = SystemSyncTokenDao.get_by_holder(follower_name)
+    if token_info == None:
+        token_info = SystemSyncToken()
+        token_info.token_holder = follower_name
+
+    if readonly:
+        return token_info.token
+
+    token_info.token = textutil.create_uuid()
+    unixtime = dateutil.get_seconds()
+    token_info.expire_time = dateutil.format_datetime(unixtime+3600)
+    SystemSyncTokenDao.upsert(token_info)
+    return token_info.token
+
 class LeaderNetMock:
 
     def http_get(self, url, charset=None, params=None):
         print("url:{url}, params:{params}".format(**locals()))
+        access_token = ""
 
         if params != None:
             url = netutil._join_url_and_params(url, params)
+            access_token = params.get("token", "")
+
+        if access_token == "":
+            struct_url = netutil.parse_url(url)
+            access_token = struct_url.get_single_param("token")
 
         if "get_stat" in url:
+            assert access_token == get_test_access_token(readonly=True)
             return self.http_get_stat()
 
         if "list_db" in url:
+            assert access_token == get_test_access_token(readonly=True)
             return self.http_list_db(url)
 
         if "list_binlog" in url:
+            assert access_token == get_test_access_token(readonly=True)
             return self.http_list_binlog(url)
         
         if "refresh_token" in url:
@@ -67,12 +95,9 @@ class LeaderNetMock:
         return jsonutil.tojson(result)
 
     def http_get_stat(self):
-        result = dict(code="success",
-                      leader=dict(
-                          node_id="master",
-                          fs_index_count=666,
-                          binlog_last_seq=333))
-        return textutil.tojson(result)
+        leader_stat = LeaderStat()
+        leader_stat.access_token = get_test_access_token(readonly=True)
+        return textutil.tojson(leader_stat)
 
     def http_list_db(self, url):
         result = urlparse(url)
@@ -150,19 +175,7 @@ class LeaderNetMock:
 class TestSystemSync(BaseTestCase):
 
     def get_access_token(self):
-        from handlers.system.system_sync.models import SystemSyncToken
-        from handlers.system.system_sync.dao import SystemSyncTokenDao
-        follower_name = "test"
-        token_info = SystemSyncTokenDao.get_by_holder(follower_name)
-        if token_info == None:
-            token_info = SystemSyncToken()
-            token_info.token_holder = follower_name
-
-        token_info.token = textutil.create_uuid()
-        unixtime = dateutil.get_seconds()
-        token_info.expire_time = dateutil.format_datetime(unixtime+3600)
-        SystemSyncTokenDao.upsert(token_info)
-        return token_info.token
+        return get_test_access_token()
     
     def get_leader_token(self):
         token = textutil.create_uuid()
@@ -202,11 +215,11 @@ class TestSystemSync(BaseTestCase):
             netutil.set_net_mock(None)
 
     def test_system_sync_db_full(self):
+        from handlers.system.system_sync.system_sync_controller import FOLLOWER
         netutil.set_net_mock(LeaderNetMock())
 
         try:
-            from handlers.system.system_sync.system_sync_controller import FOLLOWER
-            leader_token = self.get_leader_token()
+            self.get_access_token()
             self.init_leader_config()
 
             FOLLOWER._debug = True
@@ -223,11 +236,11 @@ class TestSystemSync(BaseTestCase):
             netutil.set_net_mock(None)
 
     def test_system_sync_db_binlog(self):
+        from handlers.system.system_sync.system_sync_controller import FOLLOWER
         netutil.set_net_mock(LeaderNetMock())
 
         try:
-            from handlers.system.system_sync.system_sync_controller import FOLLOWER
-            admin_token = self.get_access_token()
+            self.get_access_token()
             self.init_leader_config()
 
             FOLLOWER._debug = True

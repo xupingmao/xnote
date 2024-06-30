@@ -59,6 +59,10 @@ class SyncConfig:
     def set_need_sync_files(bool_value = False):
         xconfig.WebConfig.sync_files_from_leader = bool_value
 
+    @staticmethod
+    def is_leader():
+        return xconfig.WebConfig.node_role == "leader"
+
 def get_system_role():
     return xconfig.get_global_config("system.node_role")
 
@@ -256,6 +260,8 @@ class SyncHandler:
         return dict(code="success")
 
     def do_ping(self):
+        if SyncConfig.is_leader():
+            return webutil.SuccessResult(data=LEADER.get_stat(""))
         data = FOLLOWER.ping_leader(force=True)
         return webutil.SuccessResult(data)
 

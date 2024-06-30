@@ -344,6 +344,9 @@ class WebConfig:
 
     fast_reload = False
 
+    # 数据同步相关
+    node_id = ""
+    node_role = ""
     sync_interval_seconds = 3
     sync_db_from_leader = False
     sync_files_from_leader = False
@@ -366,6 +369,8 @@ class WebConfig:
         cls.ui_title_prefix = SystemConfig.get_str("ui_title_prefix", "Xnote")
         cls.ui_show_translate_js = SystemConfig.get_bool("ui_show_translate_js")
 
+        cls.node_id = SystemConfig.get_str("node_id")
+        cls.node_role = SystemConfig.get_str("node_role")
         cls.sync_interval_seconds = SystemConfig.get_int("sync_interval_seconds", 3)
         cls.sync_db_from_leader = SystemConfig.get_bool("sync_db_from_leader", False)
         cls.sync_files_from_leader = SystemConfig.get_bool("sync_files_from_leader", False)

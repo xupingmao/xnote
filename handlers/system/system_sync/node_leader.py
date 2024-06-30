@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 14:58:54
+@LastEditTime : 2024-06-30 16:12:18
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -178,7 +178,7 @@ class Leader(NodeManagerBase):
         if isinstance(key, int):
             return False
         skipped_prefix_tuple = ("_binlog:", "_index$", "cluster_config:",
-                                "fs_index:", "fs_sync_index:", "fs_sync_index_copy:")
+                                "fs_index:", "fs_sync_index:", "fs_sync_index_copy:", "sys_log:")
         table_name = key.split(":", 1)[0]
         if table_name.find("$")>=0:
             return True

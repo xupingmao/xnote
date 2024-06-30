@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2023-01-22 00:50:55
+@LastEditTime : 2024-06-30 16:52:25
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -21,8 +21,10 @@ import io
 import gzip
 import logging
 
+from urllib.parse import parse_qs
 from xutils.imports import try_decode, quote
 from xutils.base import print_exc
+
 
 # TODO fix SSLV3_ALERT_HANDSHAKE_FAILURE on MacOS
 try:
@@ -344,22 +346,51 @@ def tcp_send(domain, port, content, timeout=1, on_recv_func=None):
 
 
 def get_file_ext_by_content_type(content_type):
-        if content_type == "image/png":
-            return ".png"
+    if content_type == "image/png":
+        return ".png"
 
-        if content_type == "image/jpg":
-            return ".jpg"
+    if content_type == "image/jpg":
+        return ".jpg"
 
-        if content_type == "image/jpeg":
-            return ".jpeg"
+    if content_type == "image/jpeg":
+        return ".jpeg"
 
-        if content_type == "image/gif":
-            return ".gif"
+    if content_type == "image/gif":
+        return ".gif"
 
-        if content_type == "image/webp":
-            return ".webp"
+    if content_type == "image/webp":
+        return ".webp"
 
-        if content_type == "image/svg+xml":
-            return ".svg"
+    if content_type == "image/svg+xml":
+        return ".svg"
 
+    return None
+
+
+class StructURL:
+    def __init__(self):
+        self.params = {}
+
+    def get_single_param(self, name=""):
+        value = self.params.get(name)
+        if isinstance(value, list) and len(value) > 0:
+            return value[0]
         return None
+    
+    def get_list_param(self, name=""):
+        value = self.params.get(name)
+        if value == None:
+            return []
+        assert isinstance(value, list)
+        return value
+
+def parse_url(url=""):
+    qs_part = url
+    if "?" in url:
+        qs_part = url.split("?")[1]
+
+    params_dict = parse_qs(qs_part)
+    result = StructURL()
+    result.params = params_dict
+    return result
+

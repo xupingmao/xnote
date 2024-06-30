@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 15:35:48
+@LastEditTime : 2024-06-30 16:00:10
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -12,13 +12,15 @@
 import time
 import logging
 import typing
+import xutils
 
 from xnote.core import xconfig, xtables
 
 from xutils import Storage
 from xutils import textutil, cacheutil
 from xutils import dbutil, six
-import xutils
+from xnote.service import DatabaseLockService
+
 from xutils.db.binlog import BinLog, FileLog, BinLogOpType
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
@@ -247,6 +249,10 @@ class Follower(NodeManagerBase):
             db.delete(key)
 
     def sync_db_from_leader(self):
+        with DatabaseLockService.lock(lock_key="sync_db_from_leader", timeout_seconds=60):
+            return self.sync_db_from_leader_no_lock()
+
+    def sync_db_from_leader_no_lock(self):
         leader_host = self.get_leader_url()
         if leader_host == "":
             logging.debug("leader_host为空")
