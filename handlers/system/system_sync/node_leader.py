@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-02 11:41:54
+@LastEditTime : 2024-06-30 14:43:53
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -27,9 +27,9 @@ from xutils import fsutil
 from xutils.db.binlog import BinLog, BinLogOpType
 
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
-from .node_base import CONFIG
 from .node_base import get_system_port
 from .models import LeaderStat
+from .dao import ClusterConfigDao
 
 MAX_FOLLOWER_SIZE = 100
 EXPIRE_TIME = 60 * 60
@@ -59,6 +59,12 @@ class Leader(NodeManagerBase):
     FOLLOWER_DICT = dict()
     binlog = BinLog.get_instance()
     log_debug = False
+
+    def get_follower_url(self, node_id="", port=""):
+        client_ip = webutil.get_client_ip()
+        url = "{ip}:{port}#{node_id}".format(
+            ip=client_ip, port=port, node_id=node_id)
+        return url
 
     def get_follower_info(self, client_id):
         client_info = self.FOLLOWER_DICT.get(client_id)
@@ -92,10 +98,10 @@ class Leader(NodeManagerBase):
         return self.get_node_id()
 
     def get_leader_token(self):
-        token = CONFIG.get("leader.token")
+        token = ClusterConfigDao.get_leader_token()
         if token is None or token == "":
             token = textutil.create_uuid()
-            CONFIG.put("leader.token", token)
+            ClusterConfigDao.put_leader_token(token)
 
         return token
 
@@ -103,7 +109,7 @@ class Leader(NodeManagerBase):
         return xconfig.get("system.node_id")
 
     def get_ip_whitelist(self):
-        return CONFIG.get("follower.whitelist", "")
+        return ClusterConfigDao.get_follower_whitelist()
 
     def sync_for_home_page(self):
         pass
@@ -142,10 +148,7 @@ class Leader(NodeManagerBase):
 
         node_id = xutils.get_argument_str("node_id")
 
-        client_ip = webutil.get_client_ip()
-        url = "{ip}:{port}#{node_id}".format(
-            ip=client_ip, port=port, node_id=node_id)
-
+        url = self.get_follower_url(node_id=node_id, port=port)
         with self._lock:
             if not self.check_follower_count(url):
                 result.code = "403"

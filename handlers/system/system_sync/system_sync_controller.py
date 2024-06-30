@@ -34,6 +34,8 @@ from xutils import cacheutil
 from .node_follower import Follower
 from .node_leader import Leader
 from . import system_sync_indexer
+from .dao import SystemSyncTokenDao
+from .models import SystemSyncToken
 
 dbutil.register_table("cluster_config", "集群配置")
 CONFIG = dbutil.get_hash_table("cluster_config")
@@ -154,7 +156,7 @@ class SyncHandler:
         return self.GET()
 
     def GET(self):
-        p = xutils.get_argument("p", "")
+        p = xutils.get_argument_str("p", "")
         client_ip = webutil.get_client_ip()
         system_role = get_system_role()
 
@@ -270,16 +272,45 @@ class LeaderHandler(SyncHandler):
 
     def refresh_token(self):
         """刷新访问token"""
-        pass
+        leader_token = xutils.get_argument_str("leader_token")
+        node_id = xutils.get_argument_str("node_id")
+        port = xutils.get_argument_str("port")
+        if node_id == "":
+            return webutil.FailedResult(code="404", message="node_id 为空")
+        if port == "":
+            return webutil.FailedResult(code="404", message="port为空")
+        
+        follower_name = LEADER.get_follower_url(node_id=node_id, port=port)
+        if leader_token ==  LEADER.get_leader_token():
+            # build token
+            token_info = SystemSyncTokenDao.get_by_holder(follower_name)
+            if token_info == None:
+                token_info = SystemSyncToken()
+                token_info.token_holder = follower_name
+            
+            unixtime = dateutil.get_seconds()
+            token_info.expire_time = dateutil.format_datetime(unixtime + 3600)
+            token_info.token = textutil.create_uuid()
+            SystemSyncTokenDao.upsert(token_info)
+            return webutil.SuccessResult(data=token_info)
+        else:
+            raise self.build_error("403", "无效的token")
+
+    def build_error(self, code="", message=""):
+        error = webutil.FailedResult(code=code, message=message)
+        status = "401 Unauthorized"
+        headers = {"Content-Type": "application/json"}
+        return web.HTTPError(status, headers, textutil.tojson(error))
 
     def check_token(self):
-        token = xutils.get_argument("token", "")
-        leader_token = LEADER.get_leader_token()
-        if token != leader_token:
-            error = dict(code="403", message="无权访问,TOKEN校验不通过")
-            status = "401 Unauthorized"
-            headers = {"Content-Type": "application/json"}
-            raise web.HTTPError(status, headers, textutil.tojson(error))
+        token = xutils.get_argument_str("token", "")
+        if token == "":
+            raise self.build_error(code="404", message="token为空")
+        
+        token_info = SystemSyncTokenDao.get_by_token(token)
+        if token_info == None or token_info.is_expired():
+            raise self.build_error(code="404", message="token无效或者过期")
+
 
     def list_files(self):
         """(主节点)读取文件列表"""
@@ -295,20 +326,17 @@ class LeaderHandler(SyncHandler):
     def handle_leader_action(self):
         """主节点的提供的功能"""
         p = xutils.get_argument("p", "")
-        error = self.check_token()
-        if error != None:
-            return error
-
-        # 没有token不允许继续
-
         if p == "get_token":
             return self.get_token()
-
+        
         if p == "refresh_token":
             return self.refresh_token()
+        
+        # 没有token不允许继续
+        self.check_token()
 
         if p == "get_stat":
-            port = xutils.get_argument("port", "")
+            port = xutils.get_argument_str("port", "")
             return LEADER.get_stat(port)
 
         if p == "list_files":

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-11-18 15:19:04
+@LastEditTime : 2024-06-30 14:50:06
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -22,9 +22,11 @@ from xutils import textutil
 from xutils import dateutil
 from xutils import fsutil
 from xutils import dbutil
-from xutils.six.moves.urllib.parse import quote
+from xutils import jsonutil
 from xutils.mem_util import log_mem_info_deco
 from .models import FileIndexInfo
+from .models import LeaderStat
+from .models import SystemSyncToken
 from .system_sync_indexer import build_index_by_fpath
 
 RETRY_INTERVAL = 60
@@ -40,11 +42,15 @@ def print_debug_info(*args):
 
 class HttpClient:
 
-    def __init__(self, host, token, admin_token):
+    def __init__(self, host, token="", admin_token=""):
+        self.follower_name = ""
         self.host = host
-        self.token = token
+        self.token = token # leader_token
         self.admin_token = admin_token
+        self.access_token = "" # 临时访问令牌
         self.debug = True
+        self.node_id = xconfig.get_global_config("system.node_id", "unknown_node_id")
+        self.port = xconfig.get_global_config("system.port")
 
     def get_table(self):
         return dbutil.get_hash_table("fs_sync_index_copy")
@@ -72,18 +78,37 @@ class HttpClient:
             return True
 
         return False
+    
+    def handle_token(self):
+        node_id = self.node_id
+        port = self.port
+        url = f"{self.host}/system/sync?p=refresh_token&leader_token={self.token}&node_id={node_id}&port={port}"
+        result = netutil.http_get(url)
+        result_obj = jsonutil.parse_json_to_dict(result)
+        success = result_obj.get("success", False)
+        message = result_obj.get("message")
+        if not success:
+            raise Exception(f"refresh_token failed, err={message}")
+        data = result_obj.get("data")
+        token_info = SystemSyncToken.from_dict(data)
+        if token_info == None:
+            message = "token is empty"
+            raise Exception(f"refresh_token failed, err={message}")
+        self.access_token = token_info.token
 
     def get_stat(self, params):
         self.check_disk_space()
+        self.handle_token()
+
         if self.check_failed():
-            return
+            return None
 
         params["token"] = self.token
 
         url = "{host}/system/sync/leader?p=get_stat".format(host = self.host)
         result = netutil.http_get(url, params = params, skip_empty_value = True)
         result_obj = textutil.parse_json(result, ignore_error = True)
-        return result_obj    
+        return LeaderStat.from_dict(result_obj)    
 
     def list_files(self, last_id=0):
         if self.check_failed():
@@ -91,7 +116,7 @@ class HttpClient:
 
         last_id_str = str(last_id)
         url = "{host}/system/sync/leader?p=list_files&token={token}&last_id={last_id}".format(
-            host = self.host, token = self.token, last_id = last_id_str)
+            host = self.host, token = self.access_token, last_id = last_id_str)
         
         if self.debug:
             logging.info("sync_from_leader: %s", url)
@@ -272,9 +297,8 @@ class HttpClient:
         params = dict(last_seq=str(last_seq), include_req_seq="false")
 
         leader_host = self.host
-        leader_token = self.token
         url = "{host}/system/sync/leader?p=list_binlog&token={token}".format(
-            host=leader_host, token=leader_token)
+            host=leader_host, token=self.access_token)
         
         result = self.http_get(url, params=params)
         try:
@@ -289,7 +313,7 @@ class HttpClient:
         # type: (str) -> str
         leader_token = self.token
         leader_host = self.host
-        params = dict(last_key=last_key, token=leader_token)
+        params = dict(last_key=last_key, token=self.access_token)
         url = "{host}/system/sync/leader?p=list_db".format(host=leader_host)
         return netutil.http_get(url, params=params)
 

@@ -429,6 +429,22 @@ def init_lock_table():
         manager.add_column("timeout_time", "bigint", default_value=0, comment="锁超时时间,毫秒时间戳")
         manager.add_index("lock_key", is_unique=True)
 
+
+def init_system_sync_token_table():
+    """数据同步从节点
+    @since 2024/06/30
+    """
+    table_name = "system_sync_token"
+    comment = "系统同步令牌"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("ctime", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("token_holder", "varchar(128)", default_value="token的持有者")
+        manager.add_column("token", "varchar(36)", default_value="", comment="访问令牌")
+        manager.add_column("expire_time", "datetime", default_value=DEFAULT_DATETIME, comment="令牌有效期")
+        manager.add_index("token_holder")
+        manager.add_index("token")
+
 def init_msg_index_table():
     """随手记索引"""
     table_name = "msg_index"
@@ -671,6 +687,8 @@ def init():
     init_job_table()
     # 分布式锁表
     init_lock_table()
+    # 数据同步
+    init_system_sync_token_table()
     
     # 统计信息
     init_site_visit_log()

@@ -5,6 +5,7 @@ import shutil
 import time
 import argparse
 import sys
+from argparse import Namespace
 
 git_branch = os.popen("git branch --show-current").read().strip()
 APP_VERSION_PREFIX: str = f"{git_branch}-"
@@ -33,7 +34,7 @@ def check_and_install_pkg(py_module, pip_version = ""):
 def py_exec(cmd_line):
 	os.system("%s %s" % (sys.executable, cmd_line))
 
-def run_test(args):
+def run_test(args: Namespace):
 	target = args.target
 	if args.test_mysql:
 		args.skip_mysql_test = False
@@ -82,7 +83,7 @@ def run_test(args):
 		return
 	
 	if target == "system_sync":
-		py_exec("-m pytest tests/test_system_sync.py --doctest-modules --cov handlers.system.system_sync --capture no")
+		py_exec(f"-m pytest tests/test_system_sync.py --doctest-modules --cov handlers.system.system_sync --capture no")
 		py_exec("-m coverage html -i")
 		return
 	

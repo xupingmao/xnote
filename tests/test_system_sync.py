@@ -4,31 +4,35 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 22:28:31
 @LastEditors  : xupingmao
-@LastEditTime : 2023-09-02 12:03:36
+@LastEditTime : 2024-06-30 14:29:17
 @FilePath     : /xnote/tests/test_system_sync.py
 @Description  : 描述
 """
 
-from .a import *
 import os
+
+from .a import *
 from urllib.parse import urlparse, parse_qs, unquote
 
-import xauth
 from xutils import dbutil, fsutil
 from xutils import textutil
 from xutils import netutil
-import xconfig
-import xnote_event
+from xutils import dateutil
+from xutils import jsonutil
+from xutils import webutil
+from xnote.core import xauth
+from xnote.core import xconfig
+from xnote.core import xnote_event
 
 from . import test_base
 from handlers.system.system_sync.node_follower import DBSyncer
+from handlers.system.system_sync.dao import ClusterConfigDao
+from handlers.system.system_sync.models import LeaderStat
 
 app = test_base.init()
 json_request = test_base.json_request
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
-
-_config_db = dbutil.get_hash_table("cluster_config")
 
 DBSyncer.MAX_LOOPS = 5
 DBSyncer.FULL_SYNC_MAX_LOOPS = 5
@@ -49,8 +53,18 @@ class LeaderNetMock:
 
         if "list_binlog" in url:
             return self.http_list_binlog(url)
+        
+        if "refresh_token" in url:
+            return self.refresh_token(url)
 
         raise Exception("unsupported url:%s" % url)
+
+    def refresh_token(self, url):
+        from handlers.system.system_sync.dao import SystemSyncTokenDao
+        follower_name = "test"
+        token_info = SystemSyncTokenDao.get_by_holder(follower_name)
+        result = webutil.SuccessResult(token_info)
+        return jsonutil.tojson(result)
 
     def http_get_stat(self):
         result = dict(code="success",
@@ -135,16 +149,39 @@ class LeaderNetMock:
 
 class TestSystemSync(BaseTestCase):
 
+    def get_access_token(self):
+        from handlers.system.system_sync.models import SystemSyncToken
+        from handlers.system.system_sync.dao import SystemSyncTokenDao
+        follower_name = "test"
+        token_info = SystemSyncTokenDao.get_by_holder(follower_name)
+        if token_info == None:
+            token_info = SystemSyncToken()
+            token_info.token_holder = follower_name
+
+        token_info.token = textutil.create_uuid()
+        unixtime = dateutil.get_seconds()
+        token_info.expire_time = dateutil.format_datetime(unixtime+3600)
+        SystemSyncTokenDao.upsert(token_info)
+        return token_info.token
+    
+    def get_leader_token(self):
+        token = textutil.create_uuid()
+        ClusterConfigDao.put_leader_token(token)
+        return token
+    
+    def init_leader_config(self):
+        token = textutil.create_uuid()
+        ClusterConfigDao.put_leader_token(token)
+        ClusterConfigDao.put_leader_host("http://127.0.0.1:3333")
+
     def test_system_sync(self):
-        admin_token = xauth.get_user_by_name("admin").token
-        _config_db.put("leader.token", admin_token)
+        access_token = self.get_access_token()
         self.check_OK("/system/sync?p=home")
-        self.check_OK("/system/sync?p=get_stat&token=" + admin_token)
+        self.check_OK("/system/sync?p=get_stat&token=" + access_token)
 
     def test_system_get_stat(self):
-        admin_token = xauth.get_user_by_name("admin").token
-        _config_db.put("leader.token", admin_token)
-        _config_db.put("leader.host", "http://127.0.0.1:3333")
+        self.init_leader_config()
+        admin_token = self.get_access_token()
         resp = json_request("/system/sync?p=get_stat&token=" + admin_token)
 
         print("get_stat resp:{resp}".format(resp=resp))
@@ -155,9 +192,8 @@ class TestSystemSync(BaseTestCase):
     def test_system_ping(self):
         netutil.set_net_mock(LeaderNetMock())
         try:
-            admin_token = xauth.get_user_by_name("admin").token
-            _config_db.put("leader.token", admin_token)
-            _config_db.put("leader.host", "http://127.0.0.1:3333")
+            self.init_leader_config()
+            admin_token = self.get_access_token()
             resp = json_request("/system/sync?p=ping&token=" + admin_token)
             print("ping resp:{resp}".format(resp=resp))
             self.assertEqual("success", resp["code"])
@@ -170,9 +206,8 @@ class TestSystemSync(BaseTestCase):
 
         try:
             from handlers.system.system_sync.system_sync_controller import FOLLOWER
-            admin_token = xauth.get_user_by_name("admin").token
-            _config_db.put("leader.token", admin_token)
-            _config_db.put("leader.host", "http://127.0.0.1:3333")
+            leader_token = self.get_leader_token()
+            self.init_leader_config()
 
             FOLLOWER._debug = True
             db_syncer = FOLLOWER.db_syncer
@@ -192,9 +227,8 @@ class TestSystemSync(BaseTestCase):
 
         try:
             from handlers.system.system_sync.system_sync_controller import FOLLOWER
-            admin_token = xauth.get_user_by_name("admin").token
-            _config_db.put("leader.token", admin_token)
-            _config_db.put("leader.host", "http://127.0.0.1:3333")
+            admin_token = self.get_access_token()
+            self.init_leader_config()
 
             FOLLOWER._debug = True
             db_syncer = FOLLOWER.db_syncer
@@ -213,9 +247,8 @@ class TestSystemSync(BaseTestCase):
 
     def test_system_sync_db_broken(self):
         from handlers.system.system_sync.system_sync_controller import FOLLOWER
-        admin_token = xauth.get_user_by_name("admin").token
-        _config_db.put("leader.token", admin_token)
-        _config_db.put("leader.host", "http://127.0.0.1:3333")
+        admin_token = self.get_access_token()
+        self.init_leader_config()
 
         class MockedClient:
             def list_binlog(self, last_seq):
@@ -262,7 +295,8 @@ class TestSystemSync(BaseTestCase):
             }
         }
         """
-        result_obj = textutil.parse_json(result)
+        result_dict = textutil.parse_json(result)
+        result_obj = LeaderStat.from_dict(result_dict)
         FOLLOWER.update_ping_result(result_obj)
         self.assertTrue(FOLLOWER.is_token_active())
 

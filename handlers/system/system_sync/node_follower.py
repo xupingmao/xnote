@@ -4,13 +4,15 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2023-12-02 18:20:42
+@LastEditTime : 2024-06-30 14:15:20
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
 
 import time
 import logging
+import typing
+
 from xnote.core import xconfig, xtables
 
 from xutils import Storage
@@ -20,10 +22,11 @@ import xutils
 from xutils.db.binlog import BinLog, FileLog, BinLogOpType
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
-from .node_base import CONFIG
-from .system_sync_proxy import HttpClient, empty_http_client
+from .system_sync_proxy import HttpClient
+from .system_sync_proxy import empty_http_client
 from .models import FileIndexInfo, LeaderStat
 from xutils.mem_util import log_mem_info_deco
+from .dao import ClusterConfigDao
 
 fs_sync_index_db = dbutil.get_hash_table("fs_sync_index")
 
@@ -107,12 +110,11 @@ class Follower(NodeManagerBase):
 
         return None
 
-    def update_ping_result(self, result0):
-        if result0 is None:
+    def update_ping_result(self, result: typing.Optional[LeaderStat]):
+        if result is None:
             logging.error("PING主节点:返回None")
             return
 
-        result = LeaderStat(**result0)
         if result.code != "success":
             self.ping_error = result.message
             logging.error("PING主节点失败:%s", self.ping_error)
@@ -136,9 +138,8 @@ class Follower(NodeManagerBase):
     def get_follower_list(self):
         return self.follower_list
 
-    @cacheutil.cache_deco("sync.leader_host")
     def get_leader_url(self):
-        return CONFIG.get("leader.host")
+        return ClusterConfigDao.get_leader_host()
     
     def get_leader_info(self):
         if self.ping_result != None:
@@ -156,11 +157,7 @@ class Follower(NodeManagerBase):
         return last_sync >= self.PING_INTERVAL
 
     def get_fs_sync_last_id(self):
-        value = CONFIG.get("fs_sync_last_id")
-        try:
-            return int(value)
-        except:
-            return 0
+        return ClusterConfigDao.get_fs_sync_last_id()
         
     def sync_file_step(self):
         client = self.get_client()
@@ -196,7 +193,7 @@ class Follower(NodeManagerBase):
         logging.debug("result.sync_offset:%s", result.sync_offset)
         logging.debug("last_id = %s", last_id)
 
-        CONFIG.put("fs_sync_last_id", last_id)
+        ClusterConfigDao.put_fs_sync_last_id(last_id)
         return data
 
     def sync_files_from_leader(self):
@@ -240,11 +237,7 @@ class Follower(NodeManagerBase):
         return dbutil.count_table("fs_sync_index_failed")
 
     def reset_sync(self):
-        CONFIG.put("fs_sync_offset", "")
-        CONFIG.put("db_sync_offset", "")
-        CONFIG.put("follower_db_sync_state", "full")
-        CONFIG.delete("follower_binlog_last_seq")
-        CONFIG.delete("follower_db_last_key")
+        ClusterConfigDao.reset_sync()
         self.fs_sync_done_time = -1
 
         db = dbutil.get_hash_table("fs_sync_index_copy")
@@ -253,7 +246,7 @@ class Follower(NodeManagerBase):
 
     def sync_db_from_leader(self):
         leader_host = self.get_leader_url()
-        if leader_host == None:
+        if leader_host == "":
             logging.debug("leader_host为空")
             raise Exception("leader_host为空")
 
@@ -310,30 +303,24 @@ class DBSyncer:
         return key.split(":")[0]
     
     def get_binlog_last_seq(self):
-        value = CONFIG.get("follower_binlog_last_seq", 0)
-        if isinstance(value, int):
-            return value
-        return 0
+        return ClusterConfigDao.get_binlog_last_seq()
 
     def put_binlog_last_seq(self, last_seq):
-        return CONFIG.put("follower_binlog_last_seq", last_seq)
+        return ClusterConfigDao.put_binlog_last_seq(last_seq)
 
     def get_db_sync_state(self):
-        return CONFIG.get("follower_db_sync_state", "full")
+        return ClusterConfigDao.get_db_sync_state()
 
     def put_db_sync_state(self, state):
-        assert state in ("full", "binlog")
-        CONFIG.put("follower_db_sync_state", state)
+        ClusterConfigDao.put_db_sync_state(state)
     
     def get_db_last_key(self):
         # type: () -> str
         # 全量同步使用，按照key进行遍历
-        value = CONFIG.get("follower_db_last_key", "")
-        assert isinstance(value, six.string_types)
-        return value
+        return ClusterConfigDao.get_db_last_key()
 
     def put_db_last_key(self, last_key):
-        CONFIG.put("follower_db_last_key", last_key)
+        ClusterConfigDao.put_db_last_key(last_key)
 
     def get_table_v2_or_None(self, table_name):
         try:
@@ -399,7 +386,7 @@ class DBSyncer:
             batch.commit()
     
     @log_mem_info_deco("follower.sync_db")
-    def sync_db(self, proxy):
+    def sync_db(self, proxy: HttpClient):
         sync_state = self.get_db_sync_state()
         if sync_state == "binlog":
             # 增量同步
@@ -430,7 +417,7 @@ class DBSyncer:
         return count
 
     @log_mem_info_deco("sync_by_binlog")
-    def sync_by_binlog(self, proxy): # type: (HttpClient) -> object
+    def sync_by_binlog(self, proxy: HttpClient): # type: (HttpClient) -> object
         has_next = True
         loops = 0
         last_seq = ""

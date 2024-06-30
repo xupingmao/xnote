@@ -10,146 +10,24 @@ from xnote.core import xconfig, xmanager, xtables, xauth
 
 from xutils import dbutil, cacheutil, textutil, Storage, functions
 from xutils import dateutil
-from xutils.functions import del_dict_key
 from xnote.core.xtemplate import T
 from xutils.db.dbutil_helper import new_from_dict
 from xnote.service import TagBindService, TagTypeEnum
 from .message_model import is_task_tag
-from xutils import numutil
+from .message_model import MessageDO
+from .message_model import MsgIndex
+from .message_model import VALID_MESSAGE_PREFIX_TUPLE
+from .message_model import MessageHistory
 
-VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 # 带日期创建的最大重试次数
 CREATE_MAX_RETRY = 20
 MOBILE_LENGTH = 11
-VALID_TAG_SET = set(["task", "done", "log", "key"])
 
 _msg_db = dbutil.get_table("message")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
 _msg_history_db = dbutil.get_table_v2("msg_history")
 
 _debug = False
-
-sys_comment_dict = {
-    "$mark_task_done$": T("标记任务完成"),
-    "$reopen_task$": T("重新开启任务"),
-}
-
-class MessageHistory:
-    def __init__(self):
-        self.msg_id = 0
-        self.msg_version = 0
-        self.user_id = 0
-        self.content = ""
-        self.ctime = dateutil.format_datetime()
-
-class MessageDO(Storage):
-    def __init__(self):
-        self._key = "" # kv的主键
-        self._id = "" # kv的ID
-
-        self.id = "" # 主键
-        self.tag = "" # tag标签 {task, done, log, key}
-        self.user = "" # 用户名
-        self.user_id = 0 # 用户ID
-        self.ip = ""
-        self.ref = None # 引用的id
-        self.ctime = xutils.format_datetime()  # 展示的创建时间
-        self.ctime0 = xutils.format_datetime() # 实际的创建时间
-        self.mtime = xutils.format_datetime()
-        self.date = xutils.format_date()
-        self.content = ""
-        self.comments = [] # 评论信息
-        self.version = 0
-        self.visit_cnt = 0
-        self.status = None # 老的结构
-        self.keywords = None
-        self.full_keywords = set()
-        self.no_tag = True
-        self.amount = 0 # keyword对象的数量
-        self.done_time = None # type: str|None
-        self.sort_value = ""
-
-    @classmethod
-    def from_dict(cls, dict_value: dict):
-        result = MessageDO()
-        result.update(dict_value)
-        result.id = result._key
-        if result.comments == None:
-            result.comments = []
-        for item in result.comments:
-            comment_text = item.get("content")
-            item["content"] = sys_comment_dict.get(comment_text, comment_text)
-        if result.sort_value == "":
-            index = MsgIndexDao.get_by_id(numutil.parse_int(result._id))
-            if index != None:
-                result.sort_value = index.sort_value
-                MessageDao.update(result)
-            
-        return result
-    
-    @classmethod
-    def from_dict_list(cls, dict_list):
-        result = []
-        for item in dict_list:
-            result.append(cls.from_dict(item))
-        return result
-    
-    @classmethod
-    def from_dict_or_None(cls, dict_value):
-        if dict_value == None:
-            return None
-        return cls.from_dict(dict_value)
-
-    def check_before_update(self):
-        id = self.id
-        if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
-            raise Exception("[msg.update] invalid message id:%s" % id)
-
-    def fix_before_update(self):
-        if self.tag is None:
-            # 修复tag为空的情况，这种一般是之前的待办任务，只有状态没有tag
-            if self.status == 100:
-                self.tag = "done"
-            if self.status in (0, 50):
-                self.tag = "task"
-
-        del_dict_key(self, "html")
-        del_dict_key(self, "tag_text")
-        del_dict_key(self, "full_keywords")
-        
-        if self.status == None:
-            self.pop("status", None)
-        if self.amount == None:
-            self.pop("amount", None)
-        if self.ref == None:
-            self.pop("ref", None)
-        if self.keywords == None:
-            self.pop("keywords", None)
-
-    def check_before_create(self):
-        if self.id != "":
-            raise Exception("message.dao.create: can not set id")
-        
-        if self.user == "":
-            raise Exception("message.dao.create: key `user` is missing")
-
-        if self.ctime == "":
-            raise Exception("message.dao.create: key `ctime` is missing")
-
-        if self.tag != "done" and self.content == "":
-            raise Exception("message.dao.create: key `content` is missing")
-
-        if self.tag not in VALID_TAG_SET:
-            raise Exception("message.dao.create: tag `%s` is invalid" % self.tag)
-        
-    def append_comment(self, comment_text=""):
-        comment = MessageComment()
-        comment.content = comment_text
-        self.comments.append(comment)
-
-    def get_int_id(self):
-        return int(self._id)
-
 
 def build_task_index(kw):
     pass
@@ -218,7 +96,7 @@ def _create_message_without_date(kw):
     return kw._key
 
 
-def create_message(message):
+def create_message(message: MessageDO):
     # type: (MessageDO) -> str
     """创建信息
     :param {str} user: 用户名
@@ -233,7 +111,7 @@ def create_message(message):
     return _create_message_with_date(message)
 
 
-def update_message(message):
+def update_message(message: MessageDO):
     assert isinstance(message, MessageDO)
     message.check_before_update()
     message.fix_before_update()
@@ -242,7 +120,7 @@ def update_message(message):
     execute_after_update(message)
 
 
-def add_message_history(message):
+def add_message_history(message: MessageDO):
     assert isinstance(message, MessageDO)
     history_obj = MessageHistory()
     history_obj.msg_id = message.get_int_id()
@@ -710,24 +588,6 @@ def get_message_tag(user, tag, priority=0):
         return MessageTag(tag, msg_stat.task_count, priority=priority)
 
     raise Exception("unknown tag:%s" % tag)
-
-class MessageComment(Storage):
-    def __init__(self):
-        self.time = dateutil.format_datetime()
-        self.content = ""
-
-class MsgIndex(Storage):
-    def __init__(self, **kw):
-        self.id = 0
-        self.tag = ""
-        self.user_id = 0
-        self.user_name = ""
-        self.ctime_sys = dateutil.format_datetime() # 实际创建时间
-        self.ctime = dateutil.format_datetime() # 展示创建时间
-        self.mtime = dateutil.format_datetime() # 修改时间
-        self.date = "1970-01-01"
-        self.sort_value = "" # 排序字段, 对于log/task,存储创建时间,对于done,存储完成时间
-        self.update(kw)
 
 class MsgIndexDao:
     """随手记索引表,使用SQL存储"""

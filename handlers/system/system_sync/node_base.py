@@ -5,14 +5,12 @@
 # @filename node_base.py
 
 
-from xutils import dbutil, cacheutil
+from xutils import cacheutil
 from xutils import Storage
 from xnote.core import xconfig
+from .dao import ClusterConfigDao
 
 """节点管理的基类"""
-
-dbutil.register_table("cluster_config", "集群配置")
-CONFIG = dbutil.get_hash_table("cluster_config")
 
 def get_system_port():
     return xconfig.get_global_config("port")
@@ -34,10 +32,9 @@ def convert_follower_dict_to_list(follower_dict):
 
 class NodeManagerBase:
 
-    @cacheutil.cache_deco("sync.leader_token")
-    def get_leader_token(self):
-        return CONFIG.get("leader.token")
-
+    def get_leader_token(self) -> str:
+        return ClusterConfigDao.get_leader_token()
+    
     def get_ping_error(self):
         return None
     
