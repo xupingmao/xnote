@@ -18,6 +18,7 @@ class FileIndexInfo(Storage):
         self.last_try_time = kw.get("last_try_time", 0.0)
         self.exists = True # 默认存在
         self.sha1_sum = ""
+        self.update(kw)
 
 class LeaderStat(Storage):
     """主节点信息"""

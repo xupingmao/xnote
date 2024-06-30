@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 17:34:45
+@LastEditTime : 2024-06-30 18:03:53
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -157,7 +157,8 @@ class HttpClient:
         stat = os.stat(dest_path)
         remote_mtime = item.mtime
         local_mtime = xutils.format_datetime(stat.st_mtime)
-        is_same_file = (item.fsize == stat.st_size and remote_mtime == local_mtime)
+        local_sha1_sum = fsutil.get_sha1_sum(dest_path)
+        is_same_file = (item.fsize == stat.st_size and remote_mtime == local_mtime and local_sha1_sum == item.sha1_sum)
         logging.debug("远程文件: %s, 本地文件: %s, is_same_file: %s", (remote_mtime, item.fsize), 
                       (local_mtime, stat.st_size), is_same_file)
         return is_same_file
@@ -203,6 +204,8 @@ class HttpClient:
         if not item.exists:
             logging.info("文件不存在, fpath=%s", item.fpath)
             return
+        
+        assert item.sha1_sum != ""
         
         if item.ftype == "dir":
             logging.info("跳过目录, dir=%s", item.fpath)
@@ -260,6 +263,7 @@ class HttpClient:
             netutil.http_download(url, dest_path)
             local_sha1_sum = fsutil.get_sha1_sum(dest_path)
             if local_sha1_sum != item.sha1_sum:
+                fsutil.rmfile(dest_path)
                 raise Exception("sha1校验码检查失败")
             
             os.utime(dest_path, times=(mtime, mtime))
