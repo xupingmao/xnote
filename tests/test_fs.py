@@ -7,6 +7,7 @@ from .a import *
 import os
 from xnote.core import xconfig
 from xnote.core import xauth
+from xutils import textutil
 from .test_base import json_request, BaseTestCase, request_html
 from .test_base import init as init_app, get_test_file_path
 from handlers.fs.fs_index import build_fs_index
@@ -15,6 +16,12 @@ init_app()
 
 
 class TestMain(BaseTestCase):
+
+    def prepare_test_file(self, fname="", content=""):
+        fpath = get_test_file_path(fname)
+        with open(fpath, "w+") as fp:
+            fp.write(content)
+        return fpath
 
     def test_fs_view_mode(self):
         cwd = os.getcwd()
@@ -100,3 +107,16 @@ class TestMain(BaseTestCase):
         self.check_OK(f"/fs_text?method=contents&path={xutils.quote(txt_path)}")
         self.check_OK(f"/fs_text?method=readpage&path={xutils.quote(txt_path)}")
         self.check_OK(f"/fs_text?method=refresh&path={xutils.quote(txt_path)}")
+
+    def test_fs_download(self):
+        from handlers.system.system_sync.dao import SystemSyncTokenDao, SystemSyncToken
+        fpath = self.prepare_test_file("./test_download.txt", "test download")
+        fpath_b64 = textutil.encode_base64(fpath)
+        self.check_OK(f"/fs_download?fpath={fpath_b64}")
+        
+        xauth.TestEnv.logout()
+        try:
+            token_info = SystemSyncTokenDao.upsert_by_holder("test", 60)
+            self.check_OK(f"/fs_download?fpath={fpath_b64}&token={token_info.token}")
+        finally:
+            xauth.TestEnv.login_admin()

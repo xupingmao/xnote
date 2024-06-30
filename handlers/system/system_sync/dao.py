@@ -3,6 +3,7 @@
 from xutils import dateutil
 from xutils import dbutil
 from xutils import cacheutil
+from xutils import textutil
 from xnote.core import xtables
 from .models import SystemSyncToken
 
@@ -27,10 +28,27 @@ class SystemSyncTokenDao:
             token_info.mtime = dateutil.format_datetime()
             inserts = token_info.copy()
             inserts.pop("id", None)
-            return cls.db.insert(**inserts)
+            new_id = cls.db.insert(**inserts)
+            assert isinstance(new_id, int)
+            token_info.id = new_id
+            return new_id
         else:
             token_info.mtime = dateutil.format_datetime()
             return cls.db.update(**token_info, where=dict(id=token_info.id))
+        
+    @classmethod
+    def upsert_by_holder(cls, token_holder="", expire_seconds=3600):
+        token_info = cls.get_by_holder(token_holder)
+        if token_info == None:
+            token_info = SystemSyncToken()
+            token_info.token_holder = token_holder
+        
+        unixtime = dateutil.get_seconds()
+        token_info.expire_time = dateutil.format_datetime(unixtime + expire_seconds)
+        token_info.token = textutil.create_uuid()
+        cls.upsert(token_info)
+        return token_info
+
 
 dbutil.register_table("cluster_config", "集群配置")
 

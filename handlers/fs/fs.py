@@ -366,6 +366,19 @@ class DocFileHandler:
         fpath = os.path.join("./docs", fpath)
         return self.fs_handler.handle_get(fpath)
 
+
+def check_token_or_admin():
+    token = xutils.get_argument_str("token")
+    if token != "":
+        from handlers.system.system_sync.dao import SystemSyncTokenDao
+        token_info = SystemSyncTokenDao.get_by_token(token)
+        if token_info is None or token_info.is_expired():
+            raise web.Forbidden(message="invalid token")
+        # token is ok
+    else:
+        xauth.check_login("admin")
+        
+
 class StaticFileHandler(FileSystemHandler):
     allowed_prefix = ["static", "img", "app", "files", "tmp", "scripts"]
 
@@ -376,24 +389,13 @@ class StaticFileHandler(FileSystemHandler):
             if path.startswith(prefix):
                 return True
         return False
-    
-    def check_token_or_admin(self):
-        token = xutils.get_argument_str("token")
-        if token != "":
-            from handlers.system.system_sync.dao import SystemSyncTokenDao
-            token_info = SystemSyncTokenDao.get_by_token(token)
-            if token_info is None or token_info.is_expired():
-                raise web.Forbidden(message="无效的token")
-            # token is ok
-        else:
-            xauth.check_login("admin")
 
     """外置数据的静态文件支持"""
     def GET(self, path = ""):
         origin_path = path
         path = xutils.unquote(path)
         if not self.is_path_allowed(path):
-            self.check_token_or_admin()
+            check_token_or_admin()
 
         data_prefix = u(xconfig.DATA_DIR)
         if not path.startswith("static"):
@@ -410,14 +412,18 @@ class StaticFileHandler(FileSystemHandler):
         if not os.path.isfile(path):
             # 静态文件不允许访问文件夹
             web.ctx.status = "404 Not Found"
-            return "Invalid File Path: %s" % origin_path
+            return f"Invalid File Path: {origin_path}"
         return self.handle_get(path)
 
 
-class DownloadHandler(StaticFileHandler):
-    pass
+class DownloadHandler(FileSystemHandler):
 
-class GetFileHandler(StaticFileHandler):
+    def GET(self, path = ""):
+        check_token_or_admin()
+        path = self.resolve_fpath(path)
+        return self.handle_get(path)
+
+class GetFileHandler(DownloadHandler):
     pass
 
 class RemoveAjaxHandler:
