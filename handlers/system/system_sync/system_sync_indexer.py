@@ -118,9 +118,6 @@ class FileSyncIndexManager:
             if os.path.isdir(fpath):
                 item.ftype = "dir"
             fpath = fpath.replace(xconfig.FileReplacement.data_dir, xconfig.FileConfig.data_dir)
-            if not os.path.exists(fpath):
-                logging.warn("file not exists: %s", fpath)
-                continue
             item.webpath = fsutil.get_webpath(fpath)
             item.fsize = fsutil.get_file_size_int(fpath)
             result.append(item)
