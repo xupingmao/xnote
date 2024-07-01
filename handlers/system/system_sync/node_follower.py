@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 19:19:58
+@LastEditTime : 2024-07-01 01:53:06
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -293,7 +293,7 @@ class DBSyncer:
     MAX_LOOPS = 1000 # 最大循环次数
     FULL_SYNC_MAX_LOOPS = 10000 # 全量同步最大循环次数
 
-    def __init__(self, *, debug = True, file_syncer = empty_file_syncer):
+    def __init__(self, *, debug = True, file_syncer: FileSyncer):
         self._binlog = BinLog.get_instance()
         self.debug = debug
         self.file_syncer = file_syncer
@@ -392,6 +392,7 @@ class DBSyncer:
     
     @log_mem_info_deco("follower.sync_db")
     def sync_db(self, proxy: HttpClient):
+        proxy.handle_token()
         sync_state = self.get_db_sync_state()
         if sync_state == "binlog":
             # 增量同步

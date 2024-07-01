@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 16:12:18
+@LastEditTime : 2024-07-01 01:59:14
 @FilePath     : /xnote/handlers/system/system_sync/node_leader.py
 @Description  : 描述
 """
@@ -30,6 +30,7 @@ from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import get_system_port
 from .models import LeaderStat
 from .models import SystemSyncToken
+from .models import FileIndexInfo
 from .dao import ClusterConfigDao
 from .dao import SystemSyncTokenDao
 
@@ -233,13 +234,18 @@ class Leader(NodeManagerBase):
         return webutil.SuccessResult(data_list[:limit])
     
     def process_file_log(self, log):
-        value = log.value
-        fpath = value.get("fpath", "")
-        if os.path.isdir(fpath):
-            value["ftype"] = "dir"
-        else:
-            value["ftype"] = fsutil.get_file_ext(fpath)
+        value_dict = log.value
+        value = FileIndexInfo(**value_dict)
 
+        fpath = value.fpath
+        if os.path.isdir(fpath):
+            value.ftype = "dir"
+        else:
+            value.ftype = fsutil.get_file_ext(fpath)
+        value.exists = os.path.exists(fpath)
+        value.sha1_sum = fsutil.get_sha1_sum(fpath)
+        
+        log.value = value
         return log
     
     def process_log(self, log):

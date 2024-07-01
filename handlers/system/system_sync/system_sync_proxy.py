@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 20:10:59
+@LastEditTime : 2024-07-02 00:13:33
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -12,6 +12,7 @@
 import os
 import time
 import logging
+import typing
 
 import xutils
 from xnote.core import xconfig
@@ -48,6 +49,7 @@ class HttpClient:
         self.token = token # leader_token
         self.admin_token = admin_token
         self.access_token = "" # 临时访问令牌
+        self.token_info: typing.Optional[SystemSyncToken] = None
         self.debug = True
         self.node_id = xconfig.get_global_config("system.node_id", "unknown_node_id")
         self.port = xconfig.get_global_config("system.port")
@@ -80,7 +82,7 @@ class HttpClient:
         return False
     
     def check_access_token(self):
-        if self.access_token == "" or self.access_token == None:
+        if self.token_info is None or self.token_info.is_expired():
             self.handle_token()
         
     def handle_token(self):
@@ -99,6 +101,7 @@ class HttpClient:
             message = "token is empty"
             raise Exception(f"refresh_token failed, err={message}")
         self.access_token = token_info.token
+        self.token_info = token_info
 
     def get_stat(self, params):
         self.check_disk_space()
@@ -227,9 +230,6 @@ class HttpClient:
                 mtime = dateutil.parse_datetime(item.mtime)
             except:
                 mtime = time.time()
-        
-        # 先保存失败记录，成功后再删除
-        self.upsert_retry_task(item)
 
         table = self.get_table()
         item.last_try_time = time.time()
