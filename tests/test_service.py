@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-04-04 00:01:38
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-04 01:07:22
+@LastEditTime : 2024-07-06 16:20:57
 @FilePath     : /xnote/tests/test_service.py
 @Description  : 描述
 """
@@ -12,6 +12,8 @@ import time
 from . import test_base
 from xnote.core import xtables
 from xnote.service import DatabaseLockService
+from xnote.service import TagBindService
+from xnote.service import TagTypeEnum
 
 app = test_base.init()
 
@@ -61,3 +63,43 @@ class TestMain(test_base.BaseTestCase):
         current_lock = self.get_lock_record_by_key(lock_key)
         assert current_lock != None
 
+
+    def test_tag_service(self):
+        service = TagBindService(tag_type=TagTypeEnum.msg_tag)
+        user_id = 1
+        target_id = 1234
+        # delete all tag binds
+        service.bind_tags(user_id=user_id, target_id=target_id, tags=[])
+        count = service.count_user_tag(user_id=user_id, target_id=target_id)
+        assert count == 0
+
+        service.bind_tags(user_id=user_id, target_id=target_id, tags=["tag1", "tag2"])
+        count = service.count_user_tag(user_id=user_id, target_id=target_id)
+        assert count == 2
+        bindlist = service.get_by_target_id(user_id=user_id, target_id=target_id)
+        bindlist.sort(key = lambda x:x.tag_code)
+        assert len(bindlist) == 2
+        assert bindlist[0].tag_code == "tag1"
+        assert bindlist[1].tag_code == "tag2"
+
+    def test_tag_service_with_second_type(self):
+        service = TagBindService(tag_type=TagTypeEnum.msg_tag)
+        user_id = 1
+        target_id = 1234
+        type1 = 1
+
+        # delete all tag binds
+        service.bind_tags(user_id=user_id, target_id=target_id, tags=[])
+        count = service.count_user_tag(user_id=user_id, target_id=target_id)
+        assert count == 0
+
+        service.bind_tags(user_id=user_id, target_id=target_id, tags=["tag1", "tag2"], second_type=type1)
+        count = service.count_user_tag(user_id=user_id, target_id=target_id, second_type=type1)
+        assert count == 2
+        bindlist = service.get_by_target_id(user_id=user_id, target_id=target_id, second_type=type1)
+        bindlist.sort(key = lambda x:x.tag_code)
+        assert len(bindlist) == 2
+        assert bindlist[0].tag_code == "tag1"
+        assert bindlist[0].second_type == type1
+        assert bindlist[1].tag_code == "tag2"
+        assert bindlist[1].second_type == type1

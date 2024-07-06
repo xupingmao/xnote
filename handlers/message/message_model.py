@@ -5,6 +5,7 @@
 # @filename message_model.py
 
 import xutils
+import typing
 
 from xutils import Storage
 from xutils import dateutil
@@ -12,6 +13,7 @@ from xutils import numutil
 from xutils.functions import del_dict_key
 from xnote.core.xtemplate import T
 from xnote.core import xtables
+from xnote.service import TagTypeEnum
 
 """消息模型相关的内容
 任务：默认按照修改时间排序
@@ -27,6 +29,12 @@ MOBILE_LENGTH = 11
 sys_comment_dict = {
     "$mark_task_done$": T("标记任务完成"),
     "$reopen_task$": T("重新开启任务"),
+}
+
+second_type_dict = {
+    "log": 0,
+    "task": 1,
+    "done": 2,
 }
 
 class MessageSystemTag:
@@ -55,6 +63,33 @@ class MessageTag(Storage):
         self.badge_info = ""
         self.is_no_tag = False
         self.update(kw)
+
+
+class MessageTagDO(Storage):
+
+    def __init__(self, tag, size, priority=0):
+        self.type = type
+        self.size = size
+        self.url = "/message?tag=" + tag
+        self.priority = priority
+        self.show_next = True
+        self.is_deleted = 0
+        self.name = "Message"
+        self.icon = "fa-file-text-o"
+        self.category = None
+        self.badge_info = size
+
+        if tag == "log":
+            self.name = T("随手记")
+            self.icon = "fa-file-text-o"
+
+        if tag == "task":
+            self.name = T("待办任务")
+            self.icon = "fa-calendar-check-o"
+
+    @classmethod
+    def get_second_type_by_code(cls, code=""):
+        return second_type_dict.get(code, 0)
 
 def is_task_tag(tag):
     return tag in ("task", "done", "task.search", "done.search")
@@ -113,7 +148,7 @@ class MessageDO(Storage):
         return result
     
     @classmethod
-    def from_dict_list(cls, dict_list):
+    def from_dict_list(cls, dict_list) -> typing.List["MessageDO"]:
         result = []
         for item in dict_list:
             result.append(cls.from_dict(item))
@@ -174,6 +209,9 @@ class MessageDO(Storage):
 
     def get_int_id(self):
         return int(self._id)
+    
+    def get_second_type(self):
+        return second_type_dict.get(self.tag, 0)
 
 
 class MsgIndex(Storage):
@@ -188,6 +226,12 @@ class MsgIndex(Storage):
         self.date = xtables.DEFAULT_DATE
         self.sort_value = "" # 排序字段, 对于log/task,存储创建时间,对于done,存储完成时间
         self.update(kw)
+
+    @classmethod
+    def from_dict(cls, dict_value):
+        result = MsgIndex()
+        result.update(dict_value)
+        return result
     
 
 class MessageHistory:

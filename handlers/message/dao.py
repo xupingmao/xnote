@@ -5,7 +5,7 @@
 import xutils
 import re
 import logging
-import copy
+import typing
 from xnote.core import xconfig, xmanager, xtables, xauth
 
 from xutils import dbutil, cacheutil, textutil, Storage, functions
@@ -18,8 +18,8 @@ from .message_model import MessageDO
 from .message_model import MsgIndex
 from .message_model import VALID_MESSAGE_PREFIX_TUPLE
 from .message_model import MessageHistory
-from .message_model import MessageComment
-from .message_model import CREATE_MAX_RETRY
+from .message_model import MessageTagDO
+from .message_model import MOBILE_LENGTH
 
 
 _msg_db = dbutil.get_table("message")
@@ -142,8 +142,10 @@ def get_words_from_key(key):
 def has_tag_fast(content):
     return content.find("#") >= 0 or content.find("@") >= 0
 
+def is_user_tag(key=""):
+    return key.startswith("#") and key.endswith("#") and key.count("#") == 2
 
-def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_tag=None, count_only=False, date=""):
+def search_message(user_name: str, key: str, offset=0, limit=20, *, search_tags=None, no_tag=None, count_only=False, date=""):
     """搜索短信
     :param {str} user_name: 用户名
     :param {str} key: 要搜索的关键字
@@ -156,7 +158,15 @@ def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_t
     """
     assert user_name != None and user_name != ""
     assert date != None
+    assert key != None
 
+    if is_user_tag(key) and date == "":
+        second_type = 0
+        if search_tags != None:
+            assert len(search_tags) == 1
+            second_type = MessageTagDO.get_second_type_by_code(search_tags[0])
+        return search_message_by_user_tag(user_name=user_name, key=key, offset=offset, limit=limit, second_type=second_type)
+    
     words = get_words_from_key(key)
 
     def search_func_default(key, value):
@@ -190,6 +200,16 @@ def search_message(user_name, key, offset=0, limit=20, *, search_tags=None, no_t
     chatlist.sort(key = lambda x:x.sort_value, reverse=True)
     amount = _msg_db.count(filter_func=search_func, user_name=user_name)
     return chatlist, amount
+
+
+def search_message_by_user_tag(user_name="", key="", offset=0, limit=20, second_type=0):
+    user_id = xauth.UserDao.get_id_by_name(user_name)
+    bindlist = MsgTagBindDao.list_by_key(user_id=user_id, key=key, offset=offset, limit=limit, second_type=second_type)
+    count = MsgTagBindDao.count_by_key(user_id=user_id, key=key, second_type=second_type)
+    msg_ids = []
+    for item in bindlist:
+        msg_ids.append(item.target_id)
+    return MessageDao.batch_get_by_ids(user_name, msg_ids), count
 
 
 def check_before_delete(id):
@@ -555,36 +575,13 @@ def add_search_history(user="", search_key="", cost_time=0):
     MsgSearchLogDao.add_log(user_name=user, search_key=search_key, cost_time=cost_time)
 
 
-class MessageTag(Storage):
-
-    def __init__(self, tag, size, priority=0):
-        self.type = type
-        self.size = size
-        self.url = "/message?tag=" + tag
-        self.priority = priority
-        self.show_next = True
-        self.is_deleted = 0
-        self.name = "Message"
-        self.icon = "fa-file-text-o"
-        self.category = None
-        self.badge_info = size
-
-        if tag == "log":
-            self.name = T("随手记")
-            self.icon = "fa-file-text-o"
-
-        if tag == "task":
-            self.name = T("待办任务")
-            self.icon = "fa-calendar-check-o"
-
-
 def get_message_tag(user, tag, priority=0):
     msg_stat = get_message_stat(user)
 
     if tag == "log":
-        return MessageTag(tag, msg_stat.log_count, priority=priority)
+        return MessageTagDO(tag, msg_stat.log_count, priority=priority)
     if tag == "task":
-        return MessageTag(tag, msg_stat.task_count, priority=priority)
+        return MessageTagDO(tag, msg_stat.task_count, priority=priority)
 
     raise Exception("unknown tag:%s" % tag)
 
@@ -683,6 +680,11 @@ class MsgIndexDao:
     def iter_batch(cls, user_id=0, batch_size=20):
         yield from cls.db.iter_batch(batch_size=batch_size, where="user_id=$user_id", vars=dict(user_id=user_id))
 
+    @classmethod
+    def iter_all(cls):
+        for item in cls.db.iter():
+            yield MsgIndex.from_dict(item)
+
 class MsgTagInfo(Storage):
     def __init__(self):
         self._key = "" # kv的真实key
@@ -706,6 +708,13 @@ class MsgTagInfo(Storage):
         if dict_value == None:
             return None
         return cls.from_dict(dict_value)
+    
+    @classmethod
+    def from_dict_list(cls, dict_list) -> typing.List["MsgTagInfo"]:
+        result = []
+        for item in dict_list:
+            result.append(cls.from_dict(item))
+        return result
 
 class MsgTagInfoDao:
     """随手记标签元信息表,使用KV存储"""
@@ -726,7 +735,8 @@ class MsgTagInfoDao:
         where = {}
         if content != None:
             where["content"] = content
-        return cls.db.list(where=where, user_name=user,offset=offset,limit=limit,reverse=True)
+        records = cls.db.list(where=where, user_name=user,offset=offset,limit=limit,reverse=True)
+        return MsgTagInfo.from_dict_list(records)
     
     @classmethod
     def update(cls, tag_info: MsgTagInfo):
@@ -763,17 +773,25 @@ class MsgTagBindDao:
     tag_bind_service = TagBindService(TagTypeEnum.msg_tag)
 
     @classmethod
-    def bind_tags(cls, user_id=0, msg_id=0, tags=[]):
+    def bind_tags(cls, user_id=0, msg_id=0, tags=[], second_type=0):
         if user_id == 0:
             logging.error("user_id=0")
             return
-        cls.tag_bind_service.bind_tags(user_id=user_id, target_id=msg_id, tags=tags, update_only_changed=True)
+        cls.tag_bind_service.bind_tags(user_id=user_id, target_id=msg_id, tags=tags, update_only_changed=True, second_type=second_type)
+
+    @classmethod
+    def update_second_type(cls, user_id=0, msg_id=0, second_type=0):
+        cls.tag_bind_service.update_second_type(user_id=user_id, target_id=msg_id, second_type=second_type)
         
     @classmethod
-    def count_by_key(cls, user_id=0, key=""):
+    def count_by_key(cls, user_id=0, key="", second_type=0):
         assert isinstance(user_id, int)
         assert isinstance(key, str)
-        return cls.tag_bind_service.count_user_tag(user_id=user_id, tag_code=key)
+        return cls.tag_bind_service.count_user_tag(user_id=user_id, tag_code=key, second_type=second_type)
+    
+    @classmethod
+    def list_by_key(cls, user_id=0, key="", second_type=0, offset=0, limit=20):
+        return cls.tag_bind_service.list_by_tag(user_id=user_id, tag_code=key, second_type=second_type, offset=offset, limit=limit) 
 
 class MessageDao:
     """message的主数据接口,使用KV存储"""
@@ -781,6 +799,19 @@ class MessageDao:
     @staticmethod
     def get_by_id(full_key):
         return get_message_by_id(full_key)
+    
+    @staticmethod
+    def batch_get_by_ids(user_name="", ids=[]):
+        key_list = []
+        for item in ids:
+            key_list.append(_msg_db._build_key(user_name, str(item)))
+        result_dict = _msg_db.batch_get_by_key(key_list=key_list)
+        records = []
+        for row_id in key_list:
+            result_item = result_dict.get(row_id)
+            if result_item != None:
+                records.append(result_item)
+        return MessageDO.from_dict_list(records)
     
     @staticmethod
     def create(message):
@@ -793,12 +824,14 @@ class MessageDao:
     @staticmethod
     def update_user_tags(message:MessageDO):
         msg_id = message.get_int_id()
-        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.full_keywords)
+        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.full_keywords, second_type=message.get_second_type())
     
     @classmethod
     def update_tag(cls, message:MessageDO, tag="", sort_value=""):
         message.tag = tag
         MsgIndexDao.update_tag(id=int(message._id), tag=tag, sort_value=sort_value)
+        second_type = message.get_second_type()
+        MsgTagBindDao.update_second_type(user_id=message.user_id, msg_id=message.get_int_id(), second_type=second_type)
         cls.update(message)
         cls.refresh_message_stat(message.user)
 
@@ -831,7 +864,7 @@ class MessageDao:
         return get_message_tag(user, tag, priority)
     
     @classmethod
-    def batch_get_by_index_list(cls, index_list, user_name=""):
+    def batch_get_by_index_list(cls, index_list, user_name="") -> typing.List[MessageDO]:
         id_list = []
         for index in index_list:
             id_list.append(str(index.id))

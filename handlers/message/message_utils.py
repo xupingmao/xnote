@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-06 12:23:06
+@LastEditTime : 2024-07-06 16:02:52
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -564,17 +564,16 @@ def list_hot_tags(user_name:str, limit=20):
     msg_list, amount = msg_dao.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
     sort_message_list(msg_list, "amount_desc")
     for msg in msg_list:
-        msg.url = "/message?tag=search&key={key}".format(
-            key=quote(msg.content))
+        msg.url = f"/message?tag=log.search&key={quote(msg.content)}"
     return msg_list[:limit]
 
 
-def list_task_tags(user_name, limit=20, offset=0):
+def list_task_tags(user_name, limit=20, offset=0, tag="task"):
     assert isinstance(user_name, str)
 
     msg_list, amount = msg_dao.list_task(
         user_name, offset=0, limit=MAX_LIST_LIMIT)
-    return get_tags_from_message_list(msg_list, "task", display_tag="taglist")
+    return get_tags_from_message_list(msg_list, display_tag="taglist", input_tag=tag)
 
 def is_marked_keyword(user_name, keyword):
     obj = msg_dao.get_by_content(user_name, "key", keyword)

@@ -340,7 +340,8 @@ def init_tag_bind_table():
     with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         manager.add_column("user_id", "bigint", 0)
-        manager.add_column("tag_type", "tinyint", 0)
+        manager.add_column("tag_type", "tinyint", default_value=0, comment="一级类型")
+        manager.add_column("second_type", "tinyint", default_value=0, comment="二级类型")
         manager.add_column("tag_code",  "varchar(32)", "")
         manager.add_column("target_id", "bigint", 0)
         manager.add_index(["user_id", "tag_code"])

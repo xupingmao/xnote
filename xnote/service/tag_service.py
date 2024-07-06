@@ -4,11 +4,13 @@
 @email        : 578749341@qq.com
 @Date         : 2023-09-09 11:04:21
 @LastEditors  : xupingmao
-@LastEditTime : 2023-12-24 16:10:11
-@FilePath     : /xnote/xnote/service/service_tag.py
+@LastEditTime : 2024-07-06 16:20:36
+@FilePath     : /xnote/xnote/service/tag_service.py
 @Description  : 描述
 """
 # encoding=utf-8
+import typing
+
 from xnote.core import xtables
 from xutils import Storage, dateutil
 
@@ -26,9 +28,10 @@ class TagBind(Storage):
         self.tag_type = 0
         self.tag_code = ""
         self.target_id = 0
+        self.second_type = 0  # 二级类型
 
     @classmethod
-    def from_dict(cls, dict_value):
+    def from_dict(cls, dict_value) -> typing.Optional["TagBind"]:
         if dict_value == None:
             return None
         bind = TagBind()
@@ -36,7 +39,7 @@ class TagBind(Storage):
         return bind
 
     @classmethod
-    def from_dict_list(cls, dict_list):
+    def from_dict_list(cls, dict_list) -> typing.List["TagBind"]:
         result = []
         for item in dict_list:
             result.append(cls.from_dict(item))
@@ -50,15 +53,41 @@ class TagBindService:
 
     def __init__(self, tag_type = TagTypeEnum.empty):
         assert isinstance(tag_type, int)
-        self.tag_type = tag_type
-
-    def get_by_target_id(self, user_id=0, target_id=0):
-        results = self.db.select(where=dict(tag_type=self.tag_type, user_id=user_id, target_id=target_id))
+        self.default_tag_type = tag_type
+    
+    def get_by_target_id(self, **kw):
+        return self.list_by_target_id(**kw)
+    
+    def list_by_target_id(self, user_id=0, target_id=0, second_type=0):
+        where_dict = dict(tag_type=self.default_tag_type, user_id=user_id, target_id=target_id)
+        if second_type != 0:
+            where_dict["second_type"] = second_type
+        results = self.db.select(where=where_dict)
         return TagBind.from_dict_list(results)
-
-    def count_user_tag(self, user_id=0, tag_code = ""):
+    
+    def list_by_tag(self, user_id=0, tag_code="", second_type=0, offset=0, limit=20, order="ctime desc"):
         tag_code = tag_code.lower()
-        return self.db.count(where=dict(tag_type=self.tag_type, user_id=user_id, tag_code=tag_code))
+        vars = dict(tag_type=self.default_tag_type, user_id=user_id, tag_code=tag_code, second_type=second_type)
+        where_sql = "user_id = $user_id AND tag_code=$tag_code AND tag_type = $tag_type"
+        if second_type != 0:
+            where_sql += " AND second_type=$second_type"
+        records = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit, order=order)
+        return TagBind.from_dict_list(records)
+
+    def count_user_tag(self, user_id=0, tag_code = "", target_id=0, second_type=0):
+        if tag_code == "" and target_id == 0:
+            raise Exception("tag_code and target_id can not be both empty")
+        
+        tag_code = tag_code.lower()
+        vars = dict(tag_type=self.default_tag_type, second_type=second_type, user_id=user_id, tag_code=tag_code, target_id=target_id)
+        where_sql = "user_id = $user_id AND tag_type=$tag_type"
+        if tag_code != "":
+            where_sql += " AND tag_code=$tag_code"
+        if second_type != 0:
+            where_sql += " AND second_type=$second_type"
+        if target_id != 0:
+            where_sql += " AND target_id=$target_id"
+        return self.db.count(where_sql, vars=vars)
     
     def normalize_tags(self, tags=[]):
         result = set()
@@ -67,14 +96,29 @@ class TagBindService:
                 continue
             result.add(tag.lower())
         return result
+    
+    def get_tag_type(self, tag_type=0):
+        if tag_type == 0:
+            return self.default_tag_type
+        return tag_type
+    
+    def update_second_type(self, user_id=0, target_id=0, second_type=0):
+        where_dict = {}
+        where_dict["tag_type"] = self.default_tag_type
+        where_dict["user_id"] = user_id
+        where_dict["target_id"] = target_id
 
-    def bind_tags(self, user_id=0, target_id=0, tags=[], update_only_changed = False):
+        self.db.update(where=where_dict, second_type=second_type)
+
+    def bind_tags(self, user_id=0, target_id=0, tags=[], update_only_changed = False, second_type=0):
         tags = self.normalize_tags(tags)
-        
-        where_dict = dict(tag_type=self.tag_type, user_id=user_id, target_id=target_id)
+        tag_type = self.default_tag_type
+        where_dict = dict(tag_type=tag_type, user_id=user_id, target_id=target_id)
+        if second_type != 0:
+            where_dict["second_type"] = second_type
         
         if update_only_changed:
-            old_tags = self.get_by_target_id(user_id=user_id, target_id=target_id)
+            old_tags = self.get_by_target_id(user_id=user_id, target_id=target_id, second_type=second_type)
             old_tag_set = set()
             for tag_info in old_tags:
                 old_tag_set.add(tag_info.tag_code)
@@ -87,7 +131,8 @@ class TagBindService:
             for tag_code in tags:
                 new_bind = TagBind()
                 new_bind.ctime = dateutil.format_datetime()
-                new_bind.tag_type = self.tag_type
+                new_bind.tag_type = tag_type
+                new_bind.second_type = second_type
                 new_bind.user_id = user_id
                 new_bind.target_id = target_id
                 new_bind.tag_code = tag_code

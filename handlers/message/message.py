@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-06 11:59:18
+@LastEditTime : 2024-07-06 16:29:14
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -679,7 +679,7 @@ class MessagePageHandler:
         if tag == "task.tags":
             return TaskListHandler.get_task_taglist_page()
 
-        if tag in ("search", "task.search", "done.search") or type_ == "search":
+        if tag in ("search", "task.search", "done.search", "log.search") or type_ == "search":
             return message_search.SearchHandler().get_page()
 
         if tag == "key" or tag == "log.tags":

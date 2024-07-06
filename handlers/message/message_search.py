@@ -71,7 +71,7 @@ class SearchHandler:
         kw.key = key
         kw.keyword = key
         kw.default_content = message_utils.filter_key(key)
-        kw.side_tags = message_utils.list_hot_tags(user_name, 20)
+        kw.side_tags = self.list_side_tags(tag, user_name, 20)
         kw.create_tag = self.get_create_tag()
         kw.show_create_on_tag = kw.create_tag != "forbidden"
         kw.is_keyword_marked = message_utils.is_marked_keyword(user_name, key)
@@ -116,3 +116,9 @@ class SearchHandler:
 
         return "forbidden"
 
+    def list_side_tags(self, tag="", user_name="", limit=20):
+        if message_utils.is_task_tag(tag):
+            return message_utils.list_task_tags(user_name=user_name, limit=limit, tag=tag)
+        else:
+            return message_utils.list_hot_tags(user_name=user_name, limit=limit)
+    
