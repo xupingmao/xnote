@@ -1,0 +1,31 @@
+{% init is_task_tag = False %}
+    
+<div class="card">    
+    <div class="card-title btn-line-height">
+        {% if is_task_tag %}
+            <span>搜索待办</span>
+        {% else %}
+            <span>搜索随手记</span>
+        {% end %}
+
+        <div class="float-right">
+            {% if is_task_tag %}
+                <a class="btn btn-default" href="{{_server_home}}/message?tag=task">待办</a>
+            {% else %}
+                <a class="btn btn-default" href="{{_server_home}}/message?tag=log">随手记</a>
+            {% end %}
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+
+{% if is_task_tag %}
+<div class="card x-tab-box" data-tab-key="tag" data-tab-default="all">
+    <a class="x-tab" href="{{_server_home}}/message?tag=task.search&key={{quote(key)}}" data-tab-value="task.search">
+        待办
+    </a>
+    <a class="x-tab" href="{{_server_home}}/message?tag=done.search&key={{quote(key)}}" data-tab-value="done.search">
+        已完成
+    </a>
+</div>
+{% end %}

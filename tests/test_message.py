@@ -2,8 +2,9 @@
 # Created by xupingmao on 2017/05/23
 # @modified 2022/04/17 14:28:57
 
-from .a import *
 import os
+from .a import *
+
 from xnote.core import xtemplate
 from xnote.core import xconfig
 from xnote.core import xauth
@@ -27,8 +28,8 @@ BaseTestCase = test_base.BaseTestCase
 
 # 必须init之后再import
 
-import handlers.message.dao as msg_dao
-
+from handlers.message import dao as msg_dao
+from handlers.message import message_model
 
 MSG_DB = dbutil.get_table("message")
 
@@ -304,3 +305,15 @@ class TestMain(BaseTestCase):
 
     def test_message_calendar(self):
         self.check_OK("/message/calendar")
+
+    def test_message_comment(self):
+        response = json_request_return_dict(
+            "/message/save", method="POST", data=dict(content="Xnote-Unit-Test comment"))
+        self.assertEqual("success", response.get("code"))
+        resp_data = response.get("data")
+        assert isinstance(resp_data, dict)
+        msg_id = resp_data.get("id")
+
+        create_comment_data = dict(id=msg_id, content="this is a comment")
+        result = json_request_return_dict("/message/comment/create", method="POST", data=create_comment_data)
+        assert result["success"] == True

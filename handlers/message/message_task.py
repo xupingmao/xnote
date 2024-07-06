@@ -28,7 +28,10 @@ class TaskListHandler:
         kw.show_system_tag = False
         side_tags = list_task_tags(xauth.current_name())
         for tag in side_tags:
-            tag.url = f"/message?tag=task&filterKey={xutils.quote(tag.content)}"
+            if tag.is_no_tag:
+                tag.url = f"/message?tag=task&filterKey=$no_tag"
+            else:
+                tag.url = f"/message?tag=task&filterKey={xutils.quote(tag.content)}"
         kw.side_tag_tab_key = "filterKey"
         kw.side_tags = side_tags
         kw.default_content = xutils.get_argument_str("filterKey")
@@ -72,5 +75,7 @@ class TaskListHandler:
         kw = cls.get_task_kw()
         kw.show_system_tag = False
         kw.show_input_box = False
-        kw.show_side_tags = False
+        kw.show_side_tags = True
+        kw.message_left_class = "hide"
+        kw.message_right_class = "row"
         return xtemplate.render("message/page/message_list_view.html", **kw)

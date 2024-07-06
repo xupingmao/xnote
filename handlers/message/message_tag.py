@@ -59,6 +59,9 @@ def get_log_tags_page():
     kw.show_sub_link = False
     kw.orderby = orderby
     kw.search_ext_dict = dict(tag="search")
+    kw.show_left_tags = False
+    kw.message_left_class = "hide"
+    kw.message_right_class = "row"
 
     return xtemplate.render("message/page/message_list_view.html", **kw)
 

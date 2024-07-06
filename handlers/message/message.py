@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-22 20:42:53
+@LastEditTime : 2024-07-06 11:59:18
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -16,8 +16,11 @@ key/keyword: 短消息关键字
 import time
 import math
 import xutils
-from xnote.core import xauth, xconfig, xmanager, xtemplate
+import handlers.message.dao as msg_dao
 import logging
+
+
+from xnote.core import xauth, xconfig, xmanager, xtemplate
 from xutils import BaseRule, Storage, functions, u, SearchResult
 from xutils import dateutil
 from xnote.core.xtemplate import T
@@ -25,6 +28,10 @@ from xutils import netutil, webutil
 from xutils.functions import safe_list
 from xutils.textutil import quote
 from handlers.message.message_task import TaskListHandler
+from handlers.message.message_month_tags import MonthTagsPage
+from handlers.message.message_date import MessageDateHandler
+from handlers.message.message_date import MessageListByDayHandler
+
 from handlers.message.message_utils import (
     process_message,
     filter_key,
@@ -47,7 +54,7 @@ from .message_utils import sort_keywords_by_marked
 from . import dao, message_tag, message_search
 from .dao import MessageDao
 from handlers.message import message_utils
-import handlers.message.dao as msg_dao
+from .message_model import MessageComment
 
 MSG_DAO = xutils.DAO("message")
 # 消息处理规则
@@ -154,14 +161,14 @@ class ListAjaxHandler:
 
         if format == "html":
             return self.do_get_html(chatlist, page, page_max, tag)
-
-        return dict(code="success", message="",
-                    data=chatlist,
-                    keywords=parser.get_keywords(),
-                    amount=amount,
-                    page_max=page_max,
-                    pagesize=pagesize,
-                    current_user=xauth.current_name())
+        
+        result = webutil.SuccessResult(data=chatlist)
+        result.keywords = parser.get_keywords()
+        result.amount = amount
+        result.page_max = page_max
+        result.pagesize = pagesize
+        result.current_user = xauth.current_name()
+        return result
 
     def do_list_message(self, user_name, tag, offset, pagesize):
         key = xutils.get_argument_str("key", "")
@@ -318,15 +325,7 @@ class ListAjaxHandler:
             return msg_dao.list_task(user_name, offset, limit)
 
     def do_list_by_date(self, user_name, date, offset, pagesize):
-        filter_key = xutils.get_argument_str("filterKey", "")
-
-        if filter_key != "":
-            msg_list, amount = msg_dao.list_by_date(
-                user_name, date, 0, MAX_LIST_LIMIT)
-            msg_list = filter_msg_list_by_key(msg_list, filter_key)
-            return msg_list[offset:offset+pagesize], len(msg_list)
-        else:
-            return msg_dao.list_by_date(user_name, date, offset, pagesize)
+        return MessageDateHandler().do_list_by_date(user_name=user_name, date=date, offset=offset, limit=pagesize)
 
 
 def update_message_status(id, status):
@@ -646,7 +645,7 @@ class DateAjaxHandler:
                                 item_list=msg_list)
 
 
-class MessageListHandler:
+class MessagePageHandler:
 
     @xauth.login_required()
     def do_get(self, tag="task"):
@@ -663,7 +662,7 @@ class MessageListHandler:
         xmanager.add_visit_log(user, "/message?tag=%s" % tag)
 
         if tag == "month_tags":
-            return self.do_view_month_tags()
+            return MonthTagsPage().do_get()
 
         if tag in ("date", "log.date"):
             return self.do_view_by_date(date)
@@ -743,32 +742,10 @@ class MessageListHandler:
     def get_task_home_page(self):
         return TaskListHandler.get_task_create_page()
 
-    def do_view_month_tags(self):
-        user_name = xauth.current_name()
-        date = xutils.get_argument_str("date")
-
-        year, month, mday = do_split_date(date)
-
-        msg_list, amount = msg_dao.list_by_date(
-            user_name, date, limit=MAX_LIST_LIMIT)
-
-        tag_list = get_tags_from_message_list(msg_list, "date", date)
-
-        return xtemplate.render("message/page/message_tag_view.html",
-                                year=year,
-                                month=month,
-                                message_tag="calendar",
-                                search_type="message",
-                                show_back_btn=True,
-                                tag_list=tag_list,
-                                html_title=T("待办任务"),
-                                message_placeholder="添加待办任务")
-
     def get_log_page(self):
         key = xutils.get_argument("key", "")
         input_tag = xutils.get_argument("tag", "log")
-        p = xutils.get_argument("p", "")
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         default_content = filter_key(key)
 
         kw = Storage(
@@ -860,7 +837,7 @@ class StatAjaxHandler:
         return stat
 
 
-class MessageHandler(MessageListHandler):
+class MessageHandler(MessagePageHandler):
     pass
 
 
@@ -900,45 +877,6 @@ class TodoCanceledHandler(TodoHandler):
 
     def GET(self):
         return self.do_get("canceled", "已取消任务", show_input_box=False)
-
-
-def get_default_year_and_month():
-    return dateutil.format_date(None, "%Y-%m")
-
-
-class MessageListByDayHandler():
-
-    @xauth.login_required()
-    def GET(self):
-        user_name = xauth.current_name()
-        date = xutils.get_argument("date", "")
-        show_empty = xutils.get_argument("show_empty", True, type=bool)
-
-        if date == "":
-            date = get_default_year_and_month()
-
-        year, month, day = do_split_date(date)
-
-        item_list, amount = msg_dao.list_by_date(
-            user_name, date, limit=MAX_LIST_LIMIT)
-        message_list = convert_message_list_to_day_folder(
-            item_list, date, True)
-        
-        kw = Storage()
-        kw.tag = "log.date"
-        kw.search_type = "message"
-        kw.search_ext_dict = dict(tag="log.search")
-
-        return xtemplate.render("message/page/message_list_by_day.html",
-                                date=date,
-                                year=year,
-                                month=month,
-                                message_list=message_list,
-                                show_empty=show_empty,
-                                show_back_btn=True,
-                                month_size=count_month_size(message_list),
-                                **kw)
-
 
 class MessageRefreshHandler:
 
@@ -1002,7 +940,7 @@ class CreateCommentHandler:
         msg = dao.get_message_by_id(id, user_name=user_name)
         if msg == None:
             return webutil.FailedResult(message="随手记不存在")
-        comment = dao.MessageComment()
+        comment = MessageComment()
         comment.content = content
         msg.comments.append(comment)
         
@@ -1048,7 +986,7 @@ class ListCommentHandler:
 
 
 xurls = (
-    r"/message", MessageHandler,
+    r"/message", MessagePageHandler,
     r"/message/calendar", CalendarHandler,
     r"/message/todo", TodoHandler,
     r"/message/log", MessageLogHandler,

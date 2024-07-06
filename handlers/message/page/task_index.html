@@ -24,6 +24,8 @@
     {% init show_input_box = True %}
     {% init show_system_tag = True %}
     {% init show_keyword_info = False %}
+    {% init message_left_class = "message-left" %}
+    {% init message_right_class = "message-right" %}
 
     <!-- 标题 -->
     {% include message/component/message_title.html %}
@@ -36,12 +38,18 @@
 
     <!-- Tab页 -->
     {% include message/component/message_tab_task.html %}
+    
+    <div class="{{message_left_class}}">
+        {% include message/component/right/tags.html %}
+    </div>
 
-    <!-- 编辑器 -->
-    {% include message/component/message_input.html %}
-
-    <!-- 内容区域 -->
-    {% include message/component/message_list.html %}
+    <div class="{{message_right_class}}">
+        <!-- 编辑器 -->
+        {% include message/component/message_input.html %}
+    
+        <!-- 内容区域 -->
+        {% include message/component/message_list.html %}
+    </div>
 
     <script type="text/javascript">
         $(function (e) {
@@ -103,6 +111,5 @@
     <div class="desktop-only">
         {% include common/sidebar/app_index.html %}
         {% include note/component/group_special_folder.html %}
-        {% include message/component/right/tags.html %}
     </div>
 {% end %}

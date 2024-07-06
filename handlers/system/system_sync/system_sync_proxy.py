@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-02 00:13:33
+@LastEditTime : 2024-07-02 00:23:58
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -90,6 +90,7 @@ class HttpClient:
         port = self.port
         url = f"{self.host}/system/sync?p=refresh_token&leader_token={self.token}&node_id={node_id}&port={port}"
         result = netutil.http_get(url)
+        assert isinstance(result, (str, bytes))
         result_obj = jsonutil.parse_json_to_dict(result)
         success = result_obj.get("success", False)
         message = result_obj.get("message")

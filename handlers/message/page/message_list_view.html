@@ -22,12 +22,13 @@
     {% init show_input_box = True %}
     {% init show_system_tag = True %}
     {% init show_keyword_info = False %}
-
-    
-    {% include message/component/message_title.html %}
+    {% init message_left_class = "message-left" %}
+    {% init message_right_class = "message-right" %}
 
     <!-- 事件转换 -->
     {% include message/component/message_event.html %}
+    
+    {% include message/component/message_title.html %}
 
     <!-- 编辑 -->
     {% include message/component/message_edit.html %}
@@ -41,26 +42,32 @@
         {% end %}
     {% end %}
 
-    <!-- 编辑器 -->
-    {% if show_input_box %}
-        {% include message/component/message_input.html %}
-    {% end %}
+    <div class="{{message_left_class}}">
+        {% include message/component/right/tags.html %}
+    </div>
 
-    <!-- 系统标签 -->
-    {% if show_system_tag %}
-        {% include message/card/message_system_tag.html %}
-    {% end %}
-
-    <!-- 二级目录 -->
-    {% include message/component/message_sub_link.html %}
-
-    <!-- 标签信息 -->
-    {% if show_keyword_info %}
-        {% include message/component/message_keyword_info.html %}
-    {% end %}
-
-    <!-- 内容区域 -->
-    {% include message/component/message_list.html %}
+    <div class="{{message_right_class}}">
+        <!-- 编辑器 -->
+        {% if show_input_box %}
+            {% include message/component/message_input.html %}
+        {% end %}
+    
+        <!-- 系统标签 -->
+        {% if show_system_tag %}
+            {% include message/card/message_system_tag.html %}
+        {% end %}
+    
+        <!-- 二级目录 -->
+        {% include message/component/message_sub_link.html %}
+    
+        <!-- 标签信息 -->
+        {% if show_keyword_info %}
+            {% include message/component/message_keyword_info.html %}
+        {% end %}
+    
+        <!-- 内容区域 -->
+        {% include message/component/message_list.html %}
+    </div>
 
     <script type="text/javascript">
         $(function (e) {
@@ -122,6 +129,5 @@
     <div class="desktop-only">
         {% include common/sidebar/app_index.html %}
         {% include note/component/group_special_folder.html %}
-        {% include message/component/right/tags.html %}
     </div>
 {% end %}

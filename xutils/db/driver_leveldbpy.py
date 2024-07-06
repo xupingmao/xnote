@@ -133,7 +133,7 @@ class LevelDBProxy(interfaces.DBInterface):
     def CreateSnapshot(self):
         return LevelDBProxy(snapshot=self._db.snapshot())
 
-    def Write(self, batch_proxy, sync=False):
+    def Write(self, batch_proxy: interfaces.BatchInterface, sync=False):
         """执行批量操作"""
         assert isinstance(batch_proxy, interfaces.BatchInterface)
         batch = leveldbpy.WriteBatch()

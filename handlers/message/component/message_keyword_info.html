@@ -1,6 +1,7 @@
 {% init is_keyword_marked = False %}
 {% init show_create_on_tag = True %}
 {% init is_task_tag = False %}
+{% init date = "" %}
 
 {% if keyword != "" %}
 <div class="card btn-line-height">
@@ -30,5 +31,13 @@
                 onclick="xnote.action.message.markTagLevel(event);">置顶</button>
         {% end %}
     </div>
+</div>
+{% end %}
+
+
+{% if date != "" %}
+<div class="card btn-line-height">
+    <span class="tag info">日期</span>
+    <span>{{date}}</span>
 </div>
 {% end %}

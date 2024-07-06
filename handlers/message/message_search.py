@@ -62,7 +62,7 @@ class SearchHandler:
     """搜索逻辑处理"""
 
     def get_page(self):
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
         key = xutils.get_argument_str("key", "")
         tag = xutils.get_argument_str("tag", "search")
 

@@ -9,13 +9,15 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-22 22:00:35
+@LastEditTime : 2024-07-06 12:23:06
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
 
 import xutils
 import web
+import typing
+
 from xnote.core import xconfig
 from xnote.core.xtemplate import T
 from xutils import textutil
@@ -210,7 +212,7 @@ def get_tags_from_message_list(
         input_tag="",
         input_date="",
         display_tag=None,
-        search_tag="all"):
+        search_tag="all") -> typing.List[MessageTag]:
 
     assert isinstance(msg_list, list)
     assert isinstance(input_tag, str)
@@ -232,16 +234,18 @@ def get_tags_from_message_list(
             tag_counter.incr(tag)
             tag_sorter.update(tag, msg_item.mtime)
 
-    tag_list = []
+    tag_list: typing.List[MessageTag] = []
     for tag_name in tag_counter.dict:
         amount = tag_counter.get_count(tag_name)
         no_tag = None
+        is_no_tag = False
         search_key = tag_name
 
         if tag_name == "$no_tag":
             tag_name = "<无标签>"
             search_key = ""
             no_tag = "true"
+            is_no_tag = True
 
         params = dict(
             tag=TagHelper.get_search_tag(input_tag),
@@ -255,8 +259,6 @@ def get_tags_from_message_list(
         url = "/message?" + \
             netutil.build_query_string(params, skip_empty_value=True)
 
-            # url = "/message?tag=search&searchTags=%s&noTag=true" % input_tag
-
         mtime = tag_sorter.get_mtime(tag_name)
 
         tag_item = MessageTag(name=tag_name,
@@ -264,6 +266,7 @@ def get_tags_from_message_list(
                               amount=amount,
                               url=url,
                               mtime=mtime)
+        tag_item.is_no_tag = is_no_tag
         tag_list.append(tag_item)
 
     tag_list.sort(key=lambda x: x.amount, reverse=True)
@@ -555,7 +558,7 @@ def sort_keywords_by_marked(msg_list):
     msg_list.sort(key=key_func)
 
 
-def list_hot_tags(user_name, limit=20):
+def list_hot_tags(user_name:str, limit=20):
     assert isinstance(user_name, str)
 
     msg_list, amount = msg_dao.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)

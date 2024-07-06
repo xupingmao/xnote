@@ -18,10 +18,9 @@ from .message_model import MessageDO
 from .message_model import MsgIndex
 from .message_model import VALID_MESSAGE_PREFIX_TUPLE
 from .message_model import MessageHistory
+from .message_model import MessageComment
+from .message_model import CREATE_MAX_RETRY
 
-# 带日期创建的最大重试次数
-CREATE_MAX_RETRY = 20
-MOBILE_LENGTH = 11
 
 _msg_db = dbutil.get_table("message")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")

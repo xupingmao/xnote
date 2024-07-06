@@ -288,9 +288,29 @@
     background-color: #fff;
 }
 
+.message-left {
+    float: left;
+    width: 30%;
+    padding-right: 10px;
+    min-height: 100px;
+}
+
+.message-right {
+    float: left;
+    width: 70%;
+}
+
+.message-tag-card {
+    min-height: 500px;
+}
 
 /** 移动端样式放在最后 **/
-@media screen and (max-width: 360px) {
+@media screen and (max-width: 500px) {
     /** mobile **/
-
+    .message-left {
+        display: none;
+    }
+    .message-right {
+        width: 100%;
+    }
 }

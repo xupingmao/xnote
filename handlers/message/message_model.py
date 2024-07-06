@@ -20,6 +20,9 @@ from xnote.core import xtables
 
 VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
 VALID_TAG_SET = set(["task", "done", "log", "key"])
+# 带日期创建的最大重试次数
+CREATE_MAX_RETRY = 20
+MOBILE_LENGTH = 11
 
 sys_comment_dict = {
     "$mark_task_done$": T("标记任务完成"),
@@ -43,18 +46,14 @@ class MessageFolder(Storage):
 
 class MessageTag(Storage):
 
-    def __init__(self, 
-            name = "", 
-            tag = "", 
-            amount = 0, 
-            url = "", 
-            mtime = "", **kw):
-        self.name = name
-        self.content = name
-        self.amount = amount
-        self.url = url
-        self.mtime = mtime
+    def __init__(self, **kw):
+        self.name = ""
+        self.content = kw.get("name", "")
+        self.amount = 0
+        self.url = ""
+        self.mtime = xtables.DEFAULT_DATETIME
         self.badge_info = ""
+        self.is_no_tag = False
         self.update(kw)
 
 def is_task_tag(tag):

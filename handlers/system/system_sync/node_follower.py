@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-01 01:53:06
+@LastEditTime : 2024-07-02 00:23:15
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -277,6 +277,7 @@ class FileSyncer:
         self.http_client = http_client
 
     def handle_file_binlog(self, key, value):
+        self.http_client.handle_token()
         if value == None:
             logging.warning("value is None, key=%s", key)
             return
