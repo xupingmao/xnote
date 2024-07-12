@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-06 16:29:14
+@LastEditTime : 2024-07-13 01:49:59
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -708,12 +708,14 @@ class MessagePageHandler:
         return message_tag.get_log_tags_page()
 
     def get_system_tag_page(self, tag):
-        kw = Storage(
-            message_tag=tag,
-            search_type="message",
-            show_input_box=False,
-            show_side_tags=False,
-        )
+        kw = Storage()
+        
+        kw.message_tag=tag
+        kw.search_type="message"
+        kw.show_input_box=False
+        kw.show_side_tags=False
+        kw.message_left_class = "hide"
+        kw.message_right_class = "row"
 
         return xtemplate.render("message/page/message_list_view.html", **kw)
 

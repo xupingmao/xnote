@@ -1,11 +1,15 @@
 # encoding=utf-8
 
 import xutils
+import handlers.message.dao as msg_dao
+
 from xutils import Storage
 from xnote.core import xtemplate, xauth
 from xnote.core.xtemplate import T
-import handlers.message.dao as msg_dao
-from handlers.message.message_utils import list_task_tags, get_tags_from_message_list, is_marked_keyword, sort_keywords_by_marked
+from handlers.message.message_utils import list_task_tags
+from handlers.message.message_utils import get_tags_from_message_list
+from handlers.message.message_utils import is_marked_keyword
+from handlers.message.message_utils import sort_keywords_by_marked
 
 class TaskListHandler:
     

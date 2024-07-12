@@ -4,18 +4,19 @@
 @email        : 578749341@qq.com
 @Date         : 2022-09-12 20:41:26
 @LastEditors  : xupingmao
-@LastEditTime : 2023-07-01 10:53:48
+@LastEditTime : 2024-07-13 02:02:14
 @FilePath     : /xnote/handlers/system/cache_admin.py
 @Description  : 缓存管理
 """
-import xauth
-import xtemplate
 import sys
+import xutils
+
+from xnote.core import xauth
+from xnote.core import xtemplate
 from xutils import Storage
 from xutils import cacheutil
 from xutils import dateutil
 from xutils import dbutil
-import xutils
 
 class CacheHandler:
 

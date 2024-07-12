@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-02 00:23:58
+@LastEditTime : 2024-07-06 18:22:37
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -243,7 +243,7 @@ class HttpClient:
             item.err_msg = xutils.print_exc()
             self.upsert_retry_task(item)
 
-        encoded_fpath = xutils.encode_base64(fpath)
+        encoded_fpath = xutils.encode_base64(webpath)
         url = "{host}/fs_download".format(host = self.host)
         params = dict(token = self.access_token, fpath = encoded_fpath)
         url = netutil._join_url_and_params(url, params)

@@ -32,9 +32,9 @@ sys_comment_dict = {
 }
 
 second_type_dict = {
-    "log": 0,
-    "task": 1,
-    "done": 2,
+    "log": 1,
+    "task": 2,
+    "done": 3,
 }
 
 class MessageSystemTag:

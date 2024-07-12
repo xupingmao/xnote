@@ -98,13 +98,15 @@ class TagHelper:
         "date": "log",
     }
 
+    default_search_type = "message"
+
     @classmethod
     def get_search_tag(cls, tag):
         return cls.search_tag_mapping.get(tag, tag)
     
     @classmethod
     def get_search_type(cls, tag=""):
-        return cls.search_type_mapping.get(tag, tag)
+        return cls.search_type_mapping.get(tag, cls.default_search_type)
     
     @classmethod
     def get_create_tag(cls, tag=""):
