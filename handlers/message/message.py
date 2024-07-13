@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-13 12:23:38
+@LastEditTime : 2024-07-13 13:44:12
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -21,8 +21,7 @@ import logging
 
 
 from xnote.core import xauth, xconfig, xmanager, xtemplate
-from xutils import BaseRule, Storage, functions, u, SearchResult
-from xutils import dateutil
+from xutils import BaseRule, Storage
 from xnote.core.xtemplate import T
 from xutils import netutil, webutil
 from xutils.functions import safe_list
@@ -134,11 +133,17 @@ def after_upsert(msg_item):
 
 class ListAjaxHandler:
 
+    def get_argument_tag(self):
+        sys_tag = xutils.get_argument_str("sys_tag")
+        if sys_tag != "":
+            return sys_tag
+        return xutils.get_argument_str("tag", "task")
+
     @xauth.login_required()
     def GET(self):
         pagesize = xutils.get_argument_int("pagesize", xconfig.PAGE_SIZE)
         page = xutils.get_argument_int("page", 1)
-        tag = xutils.get_argument_str("tag", "task")
+        tag = self.get_argument_tag()
         format = xutils.get_argument_str("format")
         offset = get_offset_from_page(page, pagesize)
 
@@ -191,7 +196,7 @@ class ListAjaxHandler:
         if tag == "task":
             return self.do_list_task(user_name, offset, pagesize)
 
-        if tag == "key":
+        if tag == "key" or tag == "log.tags":
             orderby = xutils.get_argument_str("orderby", "amount_desc")
             return message_tag.list_message_tags(user_name, offset, pagesize, orderby = orderby, only_standard=True)
 
@@ -224,11 +229,11 @@ class ListAjaxHandler:
 
         if tag == "key":
             show_edit_btn = False
+        
+        if tag == "key" or tag == "log.tags":
+            return LogPageHandler().do_get_tags_ajax(msg_list, page, page_max)
 
-        if tag == "key":
-            template_file = "message/ajax/message_tag_ajax.html"
-        else:
-            template_file = "message/ajax/message_ajax.html"
+        template_file = "message/ajax/message_ajax.html"
 
         params = dict(
             tag=tag,
@@ -254,20 +259,7 @@ class ListAjaxHandler:
             item_list=msg_list
         )
 
-        if tag == "key":
-            user_name = xauth.current_name()
-            assert isinstance(user_name, str)
-            kw.top_keywords = []
-            if orderby == "amount_desc" and page == 1:
-                limit = self.get_recent_limit()
-                kw.recent_keywords = message_tag.get_recent_keywords(user_name, tag = "search", limit=limit)
-                
         return xtemplate.render(template_file, **kw)
-    
-    def get_recent_limit(self):
-        if webutil.is_mobile_client():
-            return 5
-        return 20
 
     def get_top_keywords(self, msg_list):
         """返回热门的标签"""
@@ -750,6 +742,7 @@ class MessagePageHandler:
         
         kw.message_left_class = "hide"
         kw.message_right_class = "row"
+        kw.show_side_tags = False
 
         return xtemplate.render("message/page/message_list_view.html",
                                 tag="date",
@@ -821,38 +814,6 @@ class MessageLogHandler(MessageHandler):
 
     def GET(self):
         return self.do_get("log")
-
-
-class TodoHandler(MessageHandler):
-
-    @xauth.login_required()
-    def do_get(self, tag="todo", title="待办任务", show_input_box=True):
-        user_name = xauth.current_name()
-        assert isinstance(user_name, str)
-        message_stat = msg_dao.get_message_stat(user_name)
-        xmanager.add_visit_log(user_name, "/message/todo")
-
-        return xtemplate.render("message/page/message_todo.html",
-                                search_type="task",
-                                tag=tag,
-                                title=T(title),
-                                show_input_box=show_input_box,
-                                message_stat=message_stat)
-
-    def GET(self):
-        return self.do_get("todo")
-
-
-class TodoDoneHandler(TodoHandler):
-
-    def GET(self):
-        return self.do_get("done", "已完成任务", show_input_box=False)
-
-
-class TodoCanceledHandler(TodoHandler):
-
-    def GET(self):
-        return self.do_get("canceled", "已取消任务", show_input_box=False)
 
 class MessageRefreshHandler:
 
@@ -964,10 +925,7 @@ class ListCommentHandler:
 xurls = (
     r"/message", MessagePageHandler,
     r"/message/calendar", CalendarHandler,
-    r"/message/todo", TodoHandler,
     r"/message/log", MessageLogHandler,
-    r"/message/done", TodoDoneHandler,
-    r"/message/canceled", TodoCanceledHandler,
     r"/message/detail", MessageDetailAjaxHandler,
 
     # 日记

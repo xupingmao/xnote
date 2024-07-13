@@ -152,10 +152,6 @@ class TestMain(BaseTestCase):
         result = json_request("/message/stat")
         self.assertTrue(result.get("cron_count") != None)
 
-    def test_message_todo(self):
-        self.check_OK("/message/todo")
-        self.check_OK("/message/done")
-
     def test_list_by_month(self):
         self.check_OK("/message/date?date=2021-05")
 

@@ -38,6 +38,7 @@ class StatHandler(BaseTablePlugin):
         stat_list.append(["我的笔记本", group_count])
         stat_list.append(["我的笔记", note_count])
         stat_list.append(["我的待办", message_stat.task_count])
+        stat_list.append(["完成待办", message_stat.done_count])
         stat_list.append(["我的记事", message_stat.log_count])
         stat_list.append(["搜索记录", search_count])
         stat_list.append(["我的评论", comment_count])

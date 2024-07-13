@@ -197,6 +197,12 @@ xnote.isTyping = function() {
     return now - xnote.state.system.keyupTime < typingGap;
 }
 
+window.xnote.assert = function (expression, message) {
+    if (!expression) {
+        xnote.alert(message);
+    }
+};
+
 var XUI = function(window) {
     // 处理select标签选中情况
     function initSelect() {
@@ -283,12 +289,6 @@ var XUI = function(window) {
         initRadio();
         initXRadio();
         xnote.table.adjustWidth(".default-table");
-    };
-
-    window.xnote.assert = function (expression, message) {
-        if (!expression) {
-            xnote.alert(message);
-        }
     };
 
     // 刷新各种默认值

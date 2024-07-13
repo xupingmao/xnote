@@ -15,11 +15,9 @@
     </div>
 {% end %}
 
-{% if tag == "key" and show_sub_link %}
-    <div class="card">
-        {% include message/component/tag/orderby_tab.html %}
-    </div>
-{% end %}
+<div class="card">
+    {% include message/component/tag/orderby_tab.html %}
+</div>
 
 {% if len(item_list) == 0 %}
     <div class="card">

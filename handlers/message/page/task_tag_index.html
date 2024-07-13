@@ -17,40 +17,6 @@
 
     {% include message/component/message_tag_list.html %}
 
-    <script type="text/javascript">
-        $(function (e) {
-            
-            function getInputTag() {
-                return getUrlParam("tag", "");
-            }
-
-            function getDisplayTag() {
-                return getUrlParam("displayTag", "");
-            }
-
-            function copyFromUrl() {
-                var url = "?"
-                for (var i = 0; i < arguments.length; i++) {
-                    var key = arguments[i];
-                    var value = getUrlParam(key, "");
-                    if (i !== 0) {
-                        url += "&";
-                    }
-                    url += key + "=" + value;
-                }
-                return url;
-            }
-
-            function onMonthSelected(event) {
-                var date = event.target;
-                window.location.href = copyFromUrl("tag", "displayTag", "orderby") + "&date=" + date;
-            }
-
-            xnote.on("date.month.selected", onMonthSelected);
-        })
-    </script>
-
-
 {% end %}
 
 {% block body_right %}

@@ -16,8 +16,10 @@ MessageView.state = {};
 MessageView.state.isEditDialog = false;
 xnote.action.message = MessageView;
 
-$(function() {
+
+MessageView.refreshList = function() {
     function doRefreshMessageList(params) {
+        console.log("doRefreshMessageList:", params);
         xnote.assert(typeof(params) == "object", "expect params to be object");
         xnote.assert(params.page, "params.page expected");
         xnote.assert(params.tag, "params.tag expected");
@@ -34,7 +36,11 @@ $(function() {
     }
 
     function getParamTag() {
-        return xnote.getUrlParam("tag");
+        var argTag = xnote.getUrlParam("tag", "");
+        if (argTag != "") {
+            return argTag;
+        }
+        return MessageState.messageTag;
     }
 
     function getParamPage() {
@@ -52,39 +58,15 @@ $(function() {
         return $(".msg-search-key").val();
     }
 
-    xnote.action.message.refreshList = function () {
-        // 刷新列表
-        var params = getUrlParams();
+    // 刷新列表
+    var params = getUrlParams();
 
-        params.tag  = getParamTag();
-        params.page = getParamPage();
-        params.key = getParamKey();
+    params.tag  = getParamTag();
+    params.page = getParamPage();
+    params.key = getParamKey();
 
-        doRefreshMessageList(params);
-    };
-
-    // 上传文件
-    xnote.createUploaderEx({
-        fileSelector: "#filePicker",
-        chunked: false,
-        successFn: function (resp) {
-            console.log("文件上传成功", resp);
-            var webpath = "file://" + resp.webpath
-            xnote.action.message.updateInputBox(webpath);
-        },
-        fixOrientation: true
-    });
-
-    $("body").on("paste", ".edit-box,.input-box", function (e) {
-        var filePrefix = "";
-        xnote.requestUploadByClip(e, filePrefix, function (resp) {
-            console.log(resp);
-            var webpath = "file://" + resp.webpath;
-            xnote.action.message.updateInputBox(webpath);
-        });
-    });
-
-});
+    doRefreshMessageList(params);
+}
 
 // 更新输入框
 MessageView.updateInputBox = function (webpath) {
@@ -449,7 +431,30 @@ $(function () {
 
     // 定义刷新消息列表函数
     xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
+});
 
-    // 触发更新事件
-    xnote.fire("message.updated");
+
+
+$(function() {
+    // 上传文件
+    xnote.createUploaderEx({
+        fileSelector: "#filePicker",
+        chunked: false,
+        successFn: function (resp) {
+            console.log("文件上传成功", resp);
+            var webpath = "file://" + resp.webpath
+            xnote.action.message.updateInputBox(webpath);
+        },
+        fixOrientation: true
+    });
+
+    $("body").on("paste", ".edit-box,.input-box", function (e) {
+        var filePrefix = "";
+        xnote.requestUploadByClip(e, filePrefix, function (resp) {
+            console.log(resp);
+            var webpath = "file://" + resp.webpath;
+            xnote.action.message.updateInputBox(webpath);
+        });
+    });
+
 });

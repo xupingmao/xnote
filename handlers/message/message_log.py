@@ -4,10 +4,13 @@ import xutils
 
 
 from xutils import Storage
+from xutils import webutil
+from xutils import netutil
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core.xtemplate import T
 from handlers.message import message_utils
+from handlers.message import message_tag
 from handlers.message.message_utils import filter_key
 
 class LogPageHandler:
@@ -38,4 +41,47 @@ class LogPageHandler:
         
         return xtemplate.render("message/page/message_list_view.html", **kw)
     
+    def do_get_tags_ajax(self, msg_list, page=1, page_max=10):
+        tag = xutils.get_argument_str("tag")
+        display_tag = xutils.get_argument_str("displayTag")
+        date = xutils.get_argument_str("date")
+        key = xutils.get_argument_str("key")
+        orderby = xutils.get_argument_str("orderby")
+        filter_key = xutils.get_argument_str("filter_key")
+        template_file = "message/ajax/message_tag_ajax.html"
+        
+        params = dict(
+            tag=tag,
+            displayTag=display_tag,
+            key=key,
+            date=date,
+            filterKey=filter_key,
+            orderby=orderby,
+        )
 
+        page_url = "?" + \
+            netutil.build_query_string(
+                params=params, skip_empty_value=True) + "&page="
+
+        kw = Storage(
+            page=page,
+            page_url=page_url,
+            page_max=page_max,
+            item_list=msg_list
+        )
+
+        kw.page = page
+
+        user_name = xauth.current_name_str()
+
+        kw.top_keywords = []
+        if orderby == "amount_desc" and page == 1:
+            limit = self.get_recent_limit()
+            kw.recent_keywords = message_tag.get_recent_keywords(user_name, tag = "search", limit=limit)
+            
+        return xtemplate.render(template_file, **kw)
+    
+    def get_recent_limit(self):
+        if webutil.is_mobile_client():
+            return 5
+        return 20
