@@ -257,8 +257,9 @@ class MigrateHandler:
                         new_note_id = note_id.lstrip("0")
                         old_path = os.path.join(dirname, note_id)
                         new_path = os.path.join(dirname, new_note_id)
-                        print(f"rename {old_path} -> {new_path}")
-                        os.rename(old_path, new_path)
+                        if not os.path.exists(new_path):
+                            print(f"rename {old_path} -> {new_path}")
+                            os.rename(old_path, new_path)
     
     def build_new_id(self, parts=[]):
         new_parts = []

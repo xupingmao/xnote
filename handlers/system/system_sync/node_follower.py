@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-02-12 18:13:41
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-02 00:23:15
+@LastEditTime : 2024-07-14 00:20:28
 @FilePath     : /xnote/handlers/system/system_sync/node_follower.py
 @Description  : 从节点管理
 """
@@ -102,7 +102,7 @@ class Follower(NodeManagerBase):
         fs_sync_offset = str(self.get_fs_sync_last_id())
 
         leader_host = self.get_leader_url()
-        if leader_host != None:
+        if leader_host != "":
             client = self.get_client()
             params = dict(port=port, fs_sync_offset=fs_sync_offset,
                           node_id=self.get_node_id())

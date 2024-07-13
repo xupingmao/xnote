@@ -393,7 +393,7 @@ def init_page_visit_log():
         manager.add_column("visit_time", "datetime", DEFAULT_DATETIME)
         manager.add_column("visit_cnt", "bigint", 0)
         manager.add_column("user_id", "bigint", 0)
-        manager.add_column("url", "varchar(256)", "")
+        manager.add_column("url", "varchar(100)", "")
         manager.add_column("args", "text", "")
         manager.add_index(["user_id", "url"])
     
@@ -429,6 +429,7 @@ def init_lock_table():
         manager.add_column("lock_token", "varchar(36)", default_value="", comment="锁的token")
         manager.add_column("timeout_time", "bigint", default_value=0, comment="锁超时时间,毫秒时间戳")
         manager.add_index("lock_key", is_unique=True)
+    TableConfig.disable_binlog(table_name)
 
 
 def init_system_sync_token_table():
@@ -490,7 +491,7 @@ def init_kv_store_table():
     kw["comment"] = "kv存储"
     dbpath = xconfig.FileConfig.kv_db_file
     with create_table_manager_with_dbpath("kv_store", dbpath=dbpath, **kw) as manager:
-        manager.add_column("value", "longblob", default_value="")
+        manager.add_column("value", "longblob")
         manager.add_column("version", "int", default_value=0)
 
 def init_kv_zset_table(db=None):

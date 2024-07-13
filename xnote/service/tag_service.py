@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-09-09 11:04:21
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-06 16:20:36
+@LastEditTime : 2024-07-13 15:31:27
 @FilePath     : /xnote/xnote/service/tag_service.py
 @Description  : 描述
 """
@@ -21,14 +21,14 @@ class TagTypeEnum:
     msg_tag = 2  # 随手记标签
 
 class TagBind(Storage):
-    """标签绑定信息"""
+    """标签绑定信息, 业务唯一键=tag_type+tag_code+target_id"""
     def __init__(self):
         self.ctime = dateutil.format_datetime()
         self.user_id = 0
         self.tag_type = 0
         self.tag_code = ""
-        self.target_id = 0
-        self.second_type = 0  # 二级类型
+        self.target_id = 0    # target_id 对应的是 tag_type
+        self.second_type = 0  # 二级类型, 这是target_id实体的一个属性
 
     @classmethod
     def from_dict(cls, dict_value) -> typing.Optional["TagBind"]:
@@ -111,11 +111,9 @@ class TagBindService:
         self.db.update(where=where_dict, second_type=second_type)
 
     def bind_tags(self, user_id=0, target_id=0, tags=[], update_only_changed = False, second_type=0):
+        assert target_id > 0
         tags = self.normalize_tags(tags)
         tag_type = self.default_tag_type
-        where_dict = dict(tag_type=tag_type, user_id=user_id, target_id=target_id)
-        if second_type != 0:
-            where_dict["second_type"] = second_type
         
         if update_only_changed:
             old_tags = self.get_by_target_id(user_id=user_id, target_id=target_id, second_type=second_type)
@@ -126,6 +124,9 @@ class TagBindService:
             if old_tag_set == tags:
                 return
         
+        # 删除的条件不加 second_type
+        where_dict = dict(tag_type=tag_type, user_id=user_id, target_id=target_id)
+
         with self.db.transaction():
             self.db.delete(where=where_dict)
             for tag_code in tags:
