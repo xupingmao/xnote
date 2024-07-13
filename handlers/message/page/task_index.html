@@ -52,56 +52,8 @@
     </div>
 
     <script type="text/javascript">
-        $(function (e) {
-            xnote.state.message.messageTag = "{{message_tag}}";
-            xnote.state.message.tag = "{{tag}}";
-
-            function getParamTag() {
-                var tag = "{{message_tag}}";
-                if (tag != "") {
-                    return tag;
-                }
-                return "{{tag}}";
-            }
-
-            function getParamPage() {
-                var page = getUrlParam("page");
-                if (page == undefined) {
-                    return 1;
-                } else {
-                    return page;
-                }
-            }
-
-            function getParamKey() {
-                // getUrlParam 获取参数空格会被处理成`+`
-                // return getUrlParam("key", "");
-                return $(".msg-search-key").val();
-            }
-
-            function onMessageRefresh() {
-                var params = getUrlParams();
-
-                params.tag  = getParamTag();
-                params.page = getParamPage();
-                params.key = getParamKey();
-
-                window.doRefreshMessageList(params);
-            }
-
-            function onMessageCreated() {
-                onMessageRefresh();
-            }
-
-            xnote.on("message.updated", onMessageRefresh);
-            xnote.on("message.created", onMessageCreated);
-
-            // 定义刷新消息列表函数
-            xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
-
-            // 触发更新事件
-            xnote.fire("message.updated");
-        })
+        xnote.state.message.messageTag = "{{message_tag}}";
+        xnote.state.message.tag = "{{tag}}";
     </script>
 
 {% end %}

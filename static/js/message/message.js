@@ -2,8 +2,13 @@ if (xnote.api.message === undefined) {
     xnote.api.message = {};
 }
 
+
+var MessageState = {};
+MessageState.messageTag = "";
+MessageState.tag = "";
+
 if (xnote.state.message === undefined) {
-    xnote.state.message = {};
+    xnote.state.message = MessageState;
 }
 
 var MessageView = {};
@@ -12,29 +17,6 @@ MessageView.state.isEditDialog = false;
 xnote.action.message = MessageView;
 
 $(function() {
-    var LAST_DATE;
-
-    function getCurrentPage() {
-        var page = getUrlParam("page");
-        if (page == undefined) {
-            return 1;
-        } else {
-            return parseInt(page);
-        }
-    }
-
-    function refreshMessageList(date) {
-        LAST_DATE = date;
-        var params = {
-            date: date,
-            page: getCurrentPage()
-        };
-
-        xnote.http.get("/message/date", params,function (respText) {
-            $(".message-list").html(respText);
-        });
-    };
-
     function doRefreshMessageList(params) {
         xnote.assert(typeof(params) == "object", "expect params to be object");
         xnote.assert(params.page, "params.page expected");
@@ -43,6 +25,8 @@ $(function() {
         params.format = "html";
         params.displayTag = getUrlParam("displayTag", "");
 
+        console.log("[message] refresh messageList");
+        
         xnote.http.get("/message/list", params, function (resp) {
             // console.log(resp);
             $(".message-list").html(resp);
@@ -417,3 +401,55 @@ $("body").on("focus", ".msg-edit-box textarea", function (e) {
         $(".layui-layer-content").height("50%");
     }
 })
+
+$(function () {
+    // 需要前置设置这两个参数
+    // xnote.state.message.messageTag = "{{message_tag}}";
+    // xnote.state.message.tag = "{{tag}}";
+
+    function getParamTag() {
+        var tag = MessageState.messageTag;
+        if (tag != "") {
+            return tag;
+        }
+        return MessageState.tag;
+    }
+
+    function getParamPage() {
+        var page = getUrlParam("page");
+        if (page == undefined) {
+            return 1;
+        } else {
+            return page;
+        }
+    }
+
+    function getParamKey() {
+        // getUrlParam 获取参数空格会被处理成`+`
+        // return getUrlParam("key", "");
+        return $(".msg-search-key").val();
+    }
+
+    function onMessageRefresh() {
+        var params = getUrlParams();
+
+        params.tag  = getParamTag();
+        params.page = getParamPage();
+        params.key = getParamKey();
+
+        window.doRefreshMessageList(params);
+    }
+
+    function onMessageCreated() {
+        onMessageRefresh();
+    }
+
+    xnote.on("message.updated", onMessageRefresh);
+    xnote.on("message.created", onMessageCreated);
+
+    // 定义刷新消息列表函数
+    xnote.setExtFunc("message.refreshMessageList", onMessageRefresh);
+
+    // 触发更新事件
+    xnote.fire("message.updated");
+});

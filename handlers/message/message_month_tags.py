@@ -24,7 +24,7 @@ class MonthTagsPage:
 
         tag_list = get_tags_from_message_list(msg_list, "date", date)
 
-        return xtemplate.render("message/page/message_tag_view.html",
+        return xtemplate.render("message/page/task_tag_index.html",
                                 year=year,
                                 month=month,
                                 message_tag="calendar",

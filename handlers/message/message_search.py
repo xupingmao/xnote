@@ -2,10 +2,12 @@
 
 import time
 import xutils
-from xnote.core import xmanager, xconfig, xauth, xtemplate
 
-from . import dao, message_utils
 from xutils import SearchResult, u, Storage, functions
+from xnote.core import xmanager, xconfig, xauth, xtemplate
+from xnote.core.models import SearchContext
+from handlers.message import dao, message_utils
+
 
 @xmanager.searchable()
 def on_search_message(ctx):
@@ -47,15 +49,6 @@ def on_search_message(ctx):
 
     if len(search_result) > 0:
         ctx.messages += search_result
-
-
-
-
-class SearchContext:
-
-    def __init__(self, key):
-        self.key = key
-
 
 
 class SearchHandler:

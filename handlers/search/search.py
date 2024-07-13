@@ -17,6 +17,7 @@ from xutils import dateutil
 from xutils import mem_util
 from xutils import six
 from xnote.core.xtemplate import T
+from xnote.core.models import SearchContext
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -54,42 +55,6 @@ class BaseRule:
         self.pattern = pattern
         self.func    = func
         self.scope   = scope
-
-class SearchContext:
-
-    def __init__(self):
-        # 输入的文本
-        self.key              = ''
-        self.input_text       = ''
-        self.words = [] # 根据key分割的token
-        self.category = "" # 搜索类型
-        # 正则匹配的分组
-        self.groups           = []
-        self.user_name        = ''
-        self.search_message   = False
-        self.search_note      = True
-        self.search_note_content = False
-        self.search_dict      = False
-        # 精确搜索字典
-        self.search_dict_strict = True
-        self.search_tool      = True
-        # 是否继续执行，用于最后兜底的搜索，一般是性能消耗比较大的
-        self.stop             = False
-        
-        # 处理的结果集，优先级: 系统功能 > 字典 > 个人数据
-        self.commands = [] # 命令
-        self.tools    = [] # 工具
-        self.dicts    = [] # 词典 -- 公共
-        self.messages = [] # 待办/记事/通知/评论
-        self.notes    = [] # 笔记
-        self.files    = [] # 文件
-
-        # 分页信息
-        self.offset = 1
-        self.limit = 20
-
-    def join_as_files(self):
-        return self.commands + self.tools + self.dicts + self.messages + self.notes + self.files
 
 def fill_note_info(files):
     ids = []
@@ -296,8 +261,9 @@ class SearchHandler:
 
         return item_list, amount
 
-    def do_search_comment(self, ctx, key):
-        NOTE_DAO.search_comment_detail(ctx)
+    def do_search_comment(self, ctx:SearchContext, key):
+        from handlers.note import comment
+        comment.search_comment_detail(ctx)
         return ctx.messages, len(ctx.messages)
 
     def do_search_by_type(self, ctx, key, search_type):

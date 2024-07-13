@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-06 16:02:52
+@LastEditTime : 2024-07-13 11:37:14
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -382,7 +382,7 @@ def list_by_date_and_key(user_id=0, month="", offset=0, limit=20, filter_key="")
     return msg_list[offset:offset+limit], len(msg_list)
 
 
-def filter_key(key):
+def filter_key(key: str) -> str:
     if key == None or key == "":
         return ""
     if key[0] == '#':

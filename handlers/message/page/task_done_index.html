@@ -24,35 +24,17 @@
     {% init show_keyword_info = False %}
     {% init message_left_class = "message-left" %}
     {% init message_right_class = "message-right" %}
-
-    <!-- 事件转换 -->
-    {% include message/component/message_event.html %}
     
     {% include message/component/message_title.html %}
 
-    <!-- 编辑 -->
-    {% include message/component/message_edit.html %}
-
     <!-- Tab页 -->
-    {% if show_tab %}
-        {% include message/component/message_tab_log.html %}
-    {% end %}
+    {% include message/component/message_tab_task.html %}
 
     <div class="{{message_left_class}}">
         {% include message/component/right/tags.html %}
     </div>
 
     <div class="{{message_right_class}}">
-        <!-- 编辑器 -->
-        {% if show_input_box %}
-            {% include message/component/message_input.html %}
-        {% end %}
-    
-        <!-- 系统标签 -->
-        {% if show_system_tag %}
-            {% include message/card/message_system_tag.html %}
-        {% end %}
-    
         <!-- 二级目录 -->
         {% include message/component/message_sub_link.html %}
     
@@ -65,11 +47,10 @@
         {% include message/component/message_list.html %}
     </div>
 
-    <script type="text/javascript">
-        xnote.state.message.messageTag = "{{message_tag}}";
-        xnote.state.message.tag = "{{tag}}";
+    <script>
+        MessageState.messageTag = "{{message_tag}}";
+        MessageState.tag = "{{tag}}";
     </script>
-
 {% end %}
 
 
@@ -77,6 +58,5 @@
     <div class="desktop-only">
         {% include common/sidebar/app_index.html %}
         {% include note/component/group_special_folder.html %}
-        {% include message/component/right/tags.html %}
     </div>
 {% end %}

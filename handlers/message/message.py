@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-13 01:49:59
+@LastEditTime : 2024-07-13 12:23:38
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -31,26 +31,22 @@ from handlers.message.message_task import TaskListHandler
 from handlers.message.message_month_tags import MonthTagsPage
 from handlers.message.message_date import MessageDateHandler
 from handlers.message.message_date import MessageListByDayHandler
+from handlers.message.message_log import LogPageHandler
 
 from handlers.message.message_utils import (
     process_message,
-    filter_key,
     filter_msg_list_by_key,
     format_message_stat,
     MessageListParser,
     get_remote_ip,
     get_length,
-    get_tags_from_message_list,
     do_split_date,
     success,
     failure,
-    convert_message_list_to_day_folder,
-    count_month_size,
     touch_key_by_content,
     TagHelper,
 )
 
-from .message_utils import sort_keywords_by_marked
 from . import dao, message_tag, message_search
 from .dao import MessageDao
 from handlers.message import message_utils
@@ -685,7 +681,7 @@ class MessagePageHandler:
         if tag == "key" or tag == "log.tags":
             return self.get_log_tags_page()
         
-        return self.get_log_page()
+        return LogPageHandler().do_get()
 
     def do_select_key(self):
         user_name = xauth.current_name()
@@ -744,31 +740,6 @@ class MessagePageHandler:
     def get_task_home_page(self):
         return TaskListHandler.get_task_create_page()
 
-    def get_log_page(self):
-        key = xutils.get_argument("key", "")
-        input_tag = xutils.get_argument("tag", "log")
-        user_name = xauth.current_name_str()
-        default_content = filter_key(key)
-
-        kw = Storage(
-            tag=input_tag,
-            message_tag=input_tag,
-            search_type="message",
-            show_system_tag=False,
-            show_side_system_tags=True,
-            show_sub_link=False,
-            html_title=T("随手记"),
-            default_content=default_content,
-            show_back_btn=False,
-            message_tab="log",
-            message_placeholder="记录发生的事情/产生的想法",
-            side_tags=message_utils.list_hot_tags(user_name, 20),
-        )
-
-        kw.search_ext_dict = dict(tag="log.search")
-
-        return xtemplate.render("message/page/message_list_view.html", **kw)
-
     def do_view_by_date(self, date):
         kw = Storage()
         kw.message_placeholder = "补充%s发生的事情" % date
@@ -776,6 +747,9 @@ class MessagePageHandler:
         filter_key = xutils.get_argument("filterKey", "")
         if filter_key != "":
             kw.show_input_box = False
+        
+        kw.message_left_class = "hide"
+        kw.message_right_class = "row"
 
         return xtemplate.render("message/page/message_list_view.html",
                                 tag="date",

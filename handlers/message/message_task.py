@@ -72,14 +72,14 @@ class TaskListHandler:
         kw.search_type = "task"
         kw.search_ext_dict = dict(tag="task.search")
 
-        return xtemplate.render("message/page/message_tag_view.html", **kw)
+        return xtemplate.render("message/page/task_tag_index.html", **kw)
 
     @classmethod
     def get_task_done_page(cls):
         kw = cls.get_task_kw()
         kw.show_system_tag = False
         kw.show_input_box = False
-        kw.show_side_tags = True
+        kw.show_side_tags = False
         kw.message_left_class = "hide"
         kw.message_right_class = "row"
-        return xtemplate.render("message/page/message_list_view.html", **kw)
+        return xtemplate.render("message/page/task_done_index.html", **kw)

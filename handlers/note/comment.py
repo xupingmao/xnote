@@ -10,12 +10,13 @@ from xnote.core import xtemplate
 from xnote.core import xmanager
 from xutils import DAO
 from xutils import Storage
-from xutils import quote
+from urllib.parse import quote
 from xutils import textutil
 from xnote.core.xtemplate import T
 from . import dao as note_dao
 from . import dao_comment
 from xutils import webutil
+from xnote.core.models import SearchContext
 
 from .dao_comment import search_comment
 
@@ -58,7 +59,7 @@ def process_comments(comments, show_note = False):
                 comment.note_name = note.name
                 comment.note_url  = note.url
 
-def search_comment_summary(ctx):
+def search_comment_summary(ctx: SearchContext):
     comments = dao_comment.search_comment(user_name = ctx.user_name, keywords = ctx.words)
     if len(comments) > 0:
         result = Storage()
@@ -68,7 +69,7 @@ def search_comment_summary(ctx):
         result.show_more_link = True
         ctx.messages.append(result)
 
-def search_comment_detail(ctx):
+def search_comment_detail(ctx: SearchContext):
     """搜索评论详细列表接口
     @param {SearchContext} ctx 搜索上下文
     @return None
@@ -88,7 +89,7 @@ def search_comment_detail(ctx):
     ctx.messages += result
 
 @xmanager.searchable(r".+")
-def on_search_comments(ctx):
+def on_search_comments(ctx: SearchContext):
     if ctx.category == "default":
         search_comment_summary(ctx)
 
