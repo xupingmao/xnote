@@ -13,8 +13,6 @@ from xutils import dbutil
 from xutils import textutil
 from xutils import dateutil
 from xutils.db.dbutil_helper import PageBuilder, batch_iter
-from .dao_api import NoteDao
-from . import dao as note_dao
 from xnote.service import CommentService
 
 NOTE_DAO = xutils.DAO("note")
@@ -48,7 +46,7 @@ class CommentDao:
         assert comment.content != ""
     
     @classmethod
-    def create(cls, comment):
+    def create(cls, comment: CommentDO):
         assert isinstance(comment, CommentDO)
         check_comment(comment)
         comment.ctime = dateutil.format_datetime()
@@ -134,7 +132,7 @@ def get_comment(comment_id = ""):
 def check_comment(comment):
     return CommentDao.check(comment)
 
-def create_comment(comment):
+def create_comment(comment: CommentDO):
     return CommentDao.create(comment)
 
 def update_comment(comment):
@@ -202,5 +200,3 @@ xutils.register_func("note.list_comments_by_user", list_comments_by_user)
 xutils.register_func("note.count_comment", count_comment)
 xutils.register_func("note.count_comment_by_user", count_comments_by_user)
 xutils.register_func("note.count_comment_by_note", count_comment_by_note)
-
-NoteDao.count_comment = count_comment

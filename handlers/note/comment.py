@@ -161,11 +161,11 @@ class SaveCommentAjaxHandler:
         if user_info == None:
             return webutil.FailedResult(code="403", message="请登录进行操作~")
 
-        if note_id == "":
+        if note_id == 0:
             return webutil.FailedResult(message="note_id参数为空")
         
         if content == "":
-            return dict(code = "400", message = "content参数为空")
+            return webutil.FailedResult(code = "400", message = "content参数为空")
 
         comment = dao_comment.CommentDO()
         comment.user = user_info.name
@@ -175,6 +175,7 @@ class SaveCommentAjaxHandler:
         comment.note_id = note_id
 
         dao_comment.create_comment(comment)
+        note_dao.touch_note(note_id)
         
         return dict(code = "success", success = True)
 

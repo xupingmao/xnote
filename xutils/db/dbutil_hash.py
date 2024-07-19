@@ -14,7 +14,8 @@ from xutils.db.dbutil_base import (
     count_table, prefix_iter
 )
 from xutils.db.encode import encode_str, decode_str
-from . import filters
+from xutils.db import filters
+from xutils import interfaces
 
 class KvHashTable:
     """基于Kv存储的哈希表结构
@@ -23,7 +24,8 @@ class KvHashTable:
     get -> LdbTable.get_by_id
     """
 
-    def __init__(self, table_name = "", user_name = None, key_name = "_key"):
+    def __init__(self, table_name = "", user_name = None, key_name = "_key", 
+                 cache = interfaces.empty_cache, cache_expire=60):
         first_table = table_name.split(":")[0]
         check_table_name(first_table)
 
@@ -35,6 +37,8 @@ class KvHashTable:
         self.user_name = user_name
         self.prefix = table_name
         self.first_table = first_table
+        self.cache = cache
+        self.cache_expire = cache_expire
 
         if user_name != None and user_name != "":
             self.prefix += ":" + encode_str(user_name)
@@ -83,14 +87,22 @@ class KvHashTable:
             batch.put(row_key, value)
         else:
             db_put(row_key, value)
+        
+        self.cache.delete(key)
 
     def get(self, key, default_value = None):
         """通过key来查询value，这个key是hash的key，不是ldb的key
         @param {string} key hash的key
         @param {object} default_value 如果值不存在，返回默认值
         """
+        cache_value = self.cache.get(key)
+        if cache_value != None:
+            return cache_value
         row_key = self.build_key(key)
-        return db_get(row_key, default_value)
+        result = db_get(row_key, default_value)
+        if result != None:
+            self.cache.put(key, result, expire=self.cache_expire)
+        return result
 
     def iter(self, offset = 0, limit = 20, reverse = False, filter_func = None, where=None):
         """hash表的迭代器
@@ -121,6 +133,8 @@ class KvHashTable:
             batch.delete(row_key)
         else:
             db_delete(row_key)
+        
+        self.cache.delete(key)
     
     def batch_delete(self, keys=[]):
         if len(keys) == 0:
@@ -129,6 +143,8 @@ class KvHashTable:
         for key in keys:
             db_keys.append(self.build_key(key))
         dbutil_base.db_batch_delete(db_keys)
+
+        self.cache.batch_delete(keys)
 
     def count(self, prefix = None):
         if prefix != None:

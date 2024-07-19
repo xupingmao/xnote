@@ -217,7 +217,7 @@ class Cache(MemoryCache):
 
 _global_cache = MemoryCache(max_size=1000)
 
-class PrefixedCache:
+class PrefixedCache(interfaces.CacheInterface):
 
     def __init__(self, prefix="", cache_engine=interfaces.empty_cache):
         self.prefix = prefix

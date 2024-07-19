@@ -53,7 +53,8 @@ class SystemSyncTokenDao:
 dbutil.register_table("cluster_config", "集群配置")
 
 class ClusterConfigDao:
-    db = dbutil.get_hash_table("cluster_config")
+    cache = cacheutil.PrefixedCache("system_sync:")
+    db = dbutil.KvHashTable("cluster_config", cache = cache, cache_expire=30)
 
     @classmethod
     def get_leader_token(cls):
@@ -68,7 +69,6 @@ class ClusterConfigDao:
     @classmethod
     def put_leader_host(cls, host):
         cls.db.put("leader.host", host)
-        cacheutil.delete("sync.leader_host")
 
     @classmethod
     def get_leader_host(cls):

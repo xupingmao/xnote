@@ -28,7 +28,9 @@ class CommentService:
     
     def create(self, user_id=0, target_id=0, type=""):
         now = dateutil.format_datetime()
-        return self.db.insert(ctime=now, mtime=now, type=type, user_id=user_id, target_id=target_id)
+        new_id = self.db.insert(ctime=now, mtime=now, type=type, user_id=user_id, target_id=target_id)
+        assert isinstance(new_id, int)
+        return new_id
     
     def build_where(self, user_id=0, target_id=0, date=None, type=""):
         date_like = date

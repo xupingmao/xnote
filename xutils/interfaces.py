@@ -221,6 +221,10 @@ class CacheInterface:
     def delete(self, key):
         warnings.warn("CacheInterface.delete is not implemented")
 
+    def batch_delete(self, keys: list[str]):
+        for key in keys:
+            self.delete(key)
+
 class SqlLoggerInterface:
 
     def append(self, sql):

@@ -948,7 +948,7 @@ def put_note_to_db(note_id, note):
     # 更新索引
     update_index(note)
 
-def touch_note(note_id):
+def touch_note(note_id: int):
     if is_root_id(note_id):
         return
 
