@@ -10,6 +10,7 @@ PS: 接口是以Leveldb的接口为模板定义的
 import web
 import warnings
 import threading
+import typing
 
 _write_lock = threading.RLock()
 
@@ -221,7 +222,7 @@ class CacheInterface:
     def delete(self, key):
         warnings.warn("CacheInterface.delete is not implemented")
 
-    def batch_delete(self, keys: list[str]):
+    def batch_delete(self, keys: typing.List[str]):
         for key in keys:
             self.delete(key)
 
