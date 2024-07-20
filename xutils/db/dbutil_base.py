@@ -41,6 +41,7 @@ import re
 import time
 import logging
 import enum
+import typing
 
 try:
     import sqlite3
@@ -639,7 +640,7 @@ def create_write_batch(db_instance=None):
 
 def scan(key_from=None,
          key_to=None,
-         func=None,
+         func=None, # type: typing.Callable[[str, object], bool]|None
          reverse=False,
          parse_json=True):
     """扫描数据库
@@ -651,6 +652,7 @@ def scan(key_from=None,
     check_leveldb()
     assert isinstance(key_from, (str, bytes))
     assert isinstance(key_to, (str, bytes))
+    assert func != None
 
     if isinstance(key_from, str):
         key_from = key_from.encode("utf-8")
@@ -662,9 +664,11 @@ def scan(key_from=None,
         key_from, key_to,
         include_value=True, reverse=reverse)
 
-    for key, value in iterator:
-        key = key.decode("utf-8")
-        value = convert_bytes_to_object(value, parse_json)
+    for key_bytes, value_bytes in iterator:
+        key_bytes: bytes
+        value_bytes: bytes
+        key = key_bytes.decode("utf-8")
+        value = convert_bytes_to_object(value_bytes, parse_json)
         if not func(key, value):
             break
 
@@ -746,6 +750,8 @@ def prefix_iter(prefix,  # type: str
         def convert_value_func(bytes_value): return bytes_value.decode("utf-8")
 
     for key_bytes, value_bytes in iterator:
+        key_bytes: bytes
+        value_bytes: bytes
         if not key_bytes.startswith(prefix_bytes):
             break
         key = key_bytes.decode("utf-8")

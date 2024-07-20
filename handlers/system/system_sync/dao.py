@@ -72,7 +72,6 @@ class ClusterConfigDao:
 
     @classmethod
     def get_leader_host(cls):
-        # TODO cache
         result = cls.db.get("leader.host", default_value="")
         assert isinstance(result, str)
         return result

@@ -4,7 +4,6 @@ import xutils
 import web
 import time
 
-
 from xnote.core import xtemplate
 from xnote.plugin.table_plugin import BaseTablePlugin
 

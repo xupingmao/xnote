@@ -98,3 +98,7 @@ class TestMain(test_base.BaseTestCase):
         
     def test_example(self):
         self.check_OK("/test/example/table")
+    
+    def test_admin_test(self):
+        self.check_OK("/admin/test?type=lock")
+

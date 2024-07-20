@@ -719,9 +719,5 @@ def init():
     # 通用的分享记录
     init_share_info_table()
     
-    if xconfig.DatabaseConfig.db_driver_sql == "mysql":
-        init_kv_store_table()
-        init_kv_zset_table(get_db_instance())
-    
-    if xconfig.DatabaseConfig.db_driver_sql == "sqlite":
-        init_kv_store_table()
+    # KV表
+    init_kv_store_table()

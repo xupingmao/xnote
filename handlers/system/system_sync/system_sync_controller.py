@@ -36,10 +36,7 @@ from .node_leader import Leader
 from . import system_sync_indexer
 from .dao import SystemSyncTokenDao
 from .models import SystemSyncToken
-
-dbutil.register_table("cluster_config", "集群配置")
-CONFIG = dbutil.get_hash_table("cluster_config")
-
+from handlers.system.system_sync.dao import ClusterConfigDao
 
 class SyncConfig:
 
@@ -125,13 +122,11 @@ class ConfigHandler:
 
         if not netutil.is_http_url(host):
             return dict(code="400", message="无效的URL地址(%s)" % host)
-        CONFIG.put("leader.host", host)
-        cacheutil.delete("sync.leader_host")
+        ClusterConfigDao.put_leader_host(host)
         return dict(code="success")
 
     def set_leader_token(self, token):
-        CONFIG.put("leader.token", token)
-        cacheutil.delete("sync.leader_token")
+        ClusterConfigDao.put_leader_token(token)
         return dict(code="success")
     
     def set_sync_status(self, value):
@@ -150,8 +145,7 @@ class ConfigHandler:
 def get_leader_url():
     if get_system_role() == "leader":
         return "127.0.0.1"
-
-    return CONFIG.get("leader.host")
+    return ClusterConfigDao.get_leader_host()
 
 
 class SyncHandler:
@@ -210,7 +204,7 @@ class SyncHandler:
             xutils.print_exc()
 
         kw.node_role = get_system_role()
-        kw.leader_host = CONFIG.get("leader.host", "未设置")
+        kw.leader_host = ClusterConfigDao.get_leader_host()
         kw.leader_token = role_manager.get_leader_token()
         kw.leader_url = role_manager.get_leader_url()
         kw.leader_node_id = role_manager.get_leader_node_id()

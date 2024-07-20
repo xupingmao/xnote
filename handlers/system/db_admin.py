@@ -338,9 +338,10 @@ class SqlDBOperateHandler:
         table_name = xutils.get_argument_str("table_name")
         db = xtables.get_table_by_name(table_name)
         if isinstance(db.db, xtables.MySqliteDB):
-            raise web.found("/system/sqlite?path=" + xutils.quote(db.db.dbpath))
+            dbpath = xutils.quote(db.db.dbpath)
+            raise web.found(f"/system/sqlite?table_name={table_name}&path={dbpath}")
         if isinstance(db.db, web.db.MySQLDB):
-            raise web.found("/system/sqlite?type=mysql")
+            raise web.found(f"/system/sqlite?type=mysql&table_name={table_name}")
         return "not ready"
 
 class DropTableHandler:

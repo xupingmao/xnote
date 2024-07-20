@@ -4,11 +4,14 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-10 22:56:56
 @LastEditors  : xupingmao
-@LastEditTime : 2024-04-20 16:50:19
+@LastEditTime : 2024-07-20 00:52:19
 @FilePath     : /xnote/handlers/admin/job_admin.py
 @Description  : 描述
 """
 import time
+import xutils
+import json
+
 from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import webutil
@@ -16,8 +19,6 @@ from xnote.plugin import DataTable, DataForm
 from xnote.service import JobService, SysJob, JobStatusEnum
 from xnote.core import xauth
 from xutils import dateutil
-import xutils
-import json
 
 HTML = r"""
 <div class="card">

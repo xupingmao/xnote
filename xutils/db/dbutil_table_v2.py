@@ -4,27 +4,25 @@
 @email        : 578749341@qq.com
 @Date         : 2023-10-28 09:54:54
 @LastEditors  : xupingmao
-@LastEditTime : 2024-03-10 00:42:58
+@LastEditTime : 2024-07-20 01:37:42
 @FilePath     : /xnote/xutils/db/dbutil_table_v2.py
 @Description  : 数据库表-API
 """
 
 from xutils import Storage
 from xutils.db.dbutil_base import *
-from xutils.db.encode import (
-    decode_str,
-    encode_str,
-    clean_value_before_update
-)
+from xutils.db.encode import decode_str
+from xutils.db.encode import encode_str
+from xutils.db.encode import clean_value_before_update
 from xutils.db.binlog import BinLog
 
 class KvTableV2:
     """基于SQL+KV的表
+    - 数据使用KV维护,KV拥有完整的数据
     - 索引使用SQL维护
-    - 数据使用KV维护
     """
 
-    def __init__(self, table_name):
+    def __init__(self, table_name: str):
         # 参数检查
         table_info = get_table_info(table_name)
         assert table_info != None
@@ -46,15 +44,17 @@ class KvTableV2:
     def _build_key(self, id):
         return self.prefix + str(id)
 
-    def _get_key_from_obj(self, obj):
+    def _get_key_from_obj(self, obj:dict):
         validate_dict(obj, "obj is not dict")
-        return obj.get(self.key_name)
+        key = obj.get(self.key_name)
+        assert isinstance(key, str)
+        return key
 
-    def _get_id_from_obj(self, obj):
+    def _get_id_from_obj(self, obj:dict):
         key = self._get_key_from_obj(obj)
         return key.rsplit(":", 1)[-1]
     
-    def _get_int_id_from_obj(self, obj):
+    def _get_int_id_from_obj(self, obj:dict):
         id = self._get_id_from_obj(obj)
         return int(id)
 
@@ -73,7 +73,7 @@ class KvTableV2:
         value[self.id_name] = self._get_id_from_key(key)
         return value
 
-    def _convert_to_db_row(self, obj):
+    def _convert_to_db_row(self, obj: dict):
         obj_copy = dict(**obj)
         clean_value_before_update(obj_copy)
         return obj_copy
@@ -91,7 +91,7 @@ class KvTableV2:
             raise Exception("invalid key:(%s), prefix:(%s)" %
                             (key, self.prefix))
 
-    def _put_obj(self, key, obj, sync=False, fix_index=False):
+    def _put_obj(self, key: str, obj: dict, sync=False, fix_index=False):
         # ~~写redo-log，启动的时候要先锁定检查redo-log，恢复异常关闭的数据~~
         # 不需要重新实现redo-log，直接用leveldb的批量处理功能即可
         # 使用leveldb的批量操作可以确保不会读到未提交的数据
@@ -195,13 +195,13 @@ class KvTableV2:
 
         return batch_result
     
-    def build_sql_record(self, obj):
+    def build_sql_record(self, obj:dict):
         result = {}
         for attr in self.index_column_names:
             result[attr] = obj.get(attr) # None值也需要写入
         return result
 
-    def insert(self, obj):
+    def insert(self, obj:dict):
         """插入新数据
         @param {object} obj 插入的对象
         @param {string} id_type id类型
@@ -220,7 +220,7 @@ class KvTableV2:
         self._put_obj(key, obj)
         return new_id
 
-    def put(self, obj, fix_index=False):
+    def put(self, obj:dict, fix_index=False):
         """从`obj`中获取主键`key`进行更新"""
         self._check_value(obj)
 
@@ -232,7 +232,7 @@ class KvTableV2:
 
     update = put
 
-    def put_by_id(self, id, obj, encode_key=True):
+    def put_by_id(self, id, obj:dict, encode_key=True):
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)
         :param {str} id: 指定ID
         :param {dict} obj: 写入的对象
@@ -245,7 +245,7 @@ class KvTableV2:
         key = self._build_key(id)
         self.put_by_key(key, obj)
 
-    def put_by_key(self, key, obj, fix_index=False):
+    def put_by_key(self, key, obj:dict, fix_index=False):
         """直接通过`key`进行更新"""
         self._check_key(key)
         self._check_value(obj, key=key)
@@ -256,7 +256,7 @@ class KvTableV2:
         update_obj = obj
         self._put_obj(key, update_obj, fix_index=fix_index)
 
-    def delete(self, obj):
+    def delete(self, obj:dict):
         obj_key = self._get_key_from_obj(obj)
         self.delete_by_key(obj_key)
 
@@ -364,7 +364,7 @@ class KvTableV2:
         for key, item in prefix_iter(self.prefix, include_key=True):
             self.rebuild_record_index(key, item, **kw)
 
-    def rebuild_record_index(self, key, item, **kw):
+    def rebuild_record_index(self, key: str, item: dict, **kw):
         ignore_invalid_id = kw.get("ignore_invalid_id", False)
         ignore_error = kw.get("ignore_error", False)
         

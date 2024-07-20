@@ -4,16 +4,17 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-29 19:17:46
+@LastEditTime : 2024-07-20 00:39:24
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : SQL表查询代理
 """
 import time
 import xutils
 import web.db
+
 from web.db import SQLQuery, sqlparam
-from . import table_manager
-from .table_config import TableConfig
+from xutils.sqldb import table_manager
+from xutils.sqldb.table_config import TableConfig
 from xutils.interfaces import ProfileLog, ProfileLogger, SQLDBInterface
 from xutils.db.binlog import BinLog, BinLogOpType
 
@@ -137,26 +138,32 @@ class TableProxy(SQLDBInterface):
         where = self.fix_sql_keywords(where)
 
         start_time = time.time()
-        pk_name = self.table_info.pk_name
-        pk_list = []
-        
         try:
-            for row in self.select(what=pk_name, where=where, vars=vars, _test=_test):
-                pk_value = row.get(pk_name)
-                pk_list.append(pk_value)
-            
-            if len(pk_list) > 0:
-                new_where = f"`{pk_name}` in $pk_list"
-                new_vars = dict(pk_list=pk_list)
-                result = self.db.delete(self.tablename, where=new_where, using=using, vars=new_vars, _test=_test)
-                self.add_delete_binlog(pk_list)
-                return result
+            if self.enable_binlog:
+                return self._delete_with_binlog(where=where, vars=vars)
+            else:
+                return self.db.delete(self.tablename, where=where, using=using, vars=vars)
         except Exception as e:
             del self.db.ctx.db # 尝试重新连接
             raise e
         finally:
             cost_time = time.time() - start_time
             self.add_profile_log(cost_time, "delete")
+
+    def _delete_with_binlog(self, where, vars):
+        pk_name = self.table_info.pk_name
+        pk_list = []
+
+        for row in self.select(what=pk_name, where=where, vars=vars):
+            pk_value = row.get(pk_name)
+            pk_list.append(pk_value)
+        
+        if len(pk_list) > 0:
+            new_where = f"`{pk_name}` in $pk_list"
+            new_vars = dict(pk_list=pk_list)
+            result = self.db.delete(self.tablename, where=new_where, vars=new_vars)
+            self.add_delete_binlog(pk_list)
+            return result
     
     def transaction(self):
         return self.db.transaction()
