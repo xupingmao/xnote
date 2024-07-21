@@ -1,5 +1,6 @@
 # encoding=utf-8
 
+import typing
 import xutils
 import handlers.message.dao as msg_dao
 
@@ -10,8 +11,16 @@ from handlers.message.message_utils import list_task_tags
 from handlers.message.message_utils import get_tags_from_message_list
 from handlers.message.message_utils import is_marked_keyword
 from handlers.message.message_utils import sort_keywords_by_marked
+from handlers.message.message_model import MessageTag
 
 class TaskListHandler:
+
+    @classmethod
+    def hide_side_tags(cls, kw: Storage):
+        kw.show_side_tags = False
+        kw.message_left_class = "hide"
+        kw.message_right_class = "row"
+    
     
     @staticmethod
     def get_task_kw():
@@ -26,22 +35,31 @@ class TaskListHandler:
         return kw
     
     @classmethod
-    def get_task_create_page(cls):
-        kw = cls.get_task_kw()
-        kw.show_input_box = True
-        kw.show_system_tag = False
-        side_tags = list_task_tags(xauth.current_name())
+    def fix_side_tags(cls, side_tags: typing.List[MessageTag]):
         for tag in side_tags:
             if tag.is_no_tag:
                 tag.url = f"/message?tag=task&filterKey=$no_tag"
             else:
                 tag.url = f"/message?tag=task&filterKey={xutils.quote(tag.content)}"
+    
+    @classmethod
+    def get_task_create_page(cls):
+        show_side_tags = xutils.get_argument_bool("show_side_tags")
+        kw = cls.get_task_kw()
+        kw.show_input_box = True
+        kw.show_system_tag = False
+        side_tags = list_task_tags(xauth.current_name())
+        cls.fix_side_tags(side_tags)
         kw.side_tag_tab_key = "filterKey"
         kw.side_tags = side_tags
         kw.default_content = xutils.get_argument_str("filterKey")
         kw.search_type = "task"
         kw.search_placeholder = "搜索待办"
         kw.search_ext_dict = dict(tag = "task.search")
+        
+        if not show_side_tags:
+            cls.hide_side_tags(kw)
+        
         return xtemplate.render("message/page/task_index.html", **kw)
 
     @classmethod
@@ -79,7 +97,5 @@ class TaskListHandler:
         kw = cls.get_task_kw()
         kw.show_system_tag = False
         kw.show_input_box = False
-        kw.show_side_tags = False
-        kw.message_left_class = "hide"
-        kw.message_right_class = "row"
+        cls.hide_side_tags(kw)
         return xtemplate.render("message/page/task_done_index.html", **kw)
