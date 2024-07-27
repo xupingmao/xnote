@@ -5,6 +5,7 @@ import shutil
 import time
 import argparse
 import sys
+from xutils import fsutil
 from argparse import Namespace
 
 git_branch = os.popen("git branch --show-current").read().strip()
@@ -43,6 +44,7 @@ def run_test(args: Namespace):
 	os.environ["mysql_password"] = str(args.mysql_password)
 	os.environ["mysql_database"] = str(args.mysql_database)
 	os.environ["mysql_user"] = str(args.mysql_user)
+	os.environ["mysql_port"] = str(args.mysql_port)
 
 	if target == "xutils":
 		py_exec("-m pytest tests/test_xutils.py --doctest-modules --cov xutils --capture no")
@@ -124,6 +126,22 @@ def run_test(args: Namespace):
 	os.system("%s -m pytest tests --doctest-modules --cov handlers --cov xutils --cov core --cov xnote --ff" % executable)
 	os.system(f"{executable} -m coverage html -i")
 
+def set_mysql_config(args, props, prop_key):
+	if prop_key in props:
+		prop_value = props[prop_key]
+		print(f"set_mysql_config {prop_key}={prop_value}")
+		setattr(args, prop_key, prop_value)
+
+def load_config_from_test_prop_file(args: Namespace):
+	test_prop_file = "test.local.properties"
+	if os.path.exists(test_prop_file):
+		props = fsutil.load_prop_config(test_prop_file)
+		set_mysql_config(args, props, "mysql_host")
+		set_mysql_config(args, props, "mysql_password")
+		set_mysql_config(args, props, "mysql_database")
+		set_mysql_config(args, props, "mysql_user")
+		set_mysql_config(args, props, "mysql_port")
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("target", default="all", nargs="?")
@@ -134,6 +152,7 @@ def main():
 	parser.add_argument("--mysql_password", default="gR4!KTO@9q")
 	parser.add_argument("--mysql_database", default="test")
 	args = parser.parse_args()
+	load_config_from_test_prop_file(args)
 
 	args.skip_mysql_test = (args.run_mysql_test.lower() == "false")
 	print(f"option: run_mysql_test={args.run_mysql_test}")

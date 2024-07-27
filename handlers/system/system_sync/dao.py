@@ -79,13 +79,16 @@ class ClusterConfigDao:
     @classmethod
     def get_fs_sync_last_id(cls):
         value = cls.db.get("fs_sync_last_id")
+        if value == None:
+            cls.put_fs_sync_last_id(0)
+            return 0
         try:
             return int(value)
         except:
             return 0
         
     @classmethod
-    def put_fs_sync_last_id(cls, last_id):
+    def put_fs_sync_last_id(cls, last_id:int):
         cls.db.put("fs_sync_last_id", last_id)
 
     @classmethod

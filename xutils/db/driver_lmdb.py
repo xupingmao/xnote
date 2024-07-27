@@ -7,6 +7,7 @@
 import lmdb
 import logging
 import threading
+import warnings
 from xutils import interfaces
 from xutils.db.encode import convert_bytes_dict_to_bytes, convert_bytes_to_dict
 
@@ -171,6 +172,7 @@ class LmdbEnhancedKV(interfaces.DBInterface):
     """
 
     def __init__(self, *args, **kw):
+        warnings.warn("LmdbEnhancedKV is deprecated")
         self.kv = LmdbKV(*args, **kw)
         self.max_key_size = self.kv.env.max_key_size()
 

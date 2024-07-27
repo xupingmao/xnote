@@ -4,10 +4,11 @@
 @email        : 578749341@qq.com
 @Date         : 2022-10-01 21:15:02
 @LastEditors  : xupingmao
-@LastEditTime : 2023-10-14 17:21:33
+@LastEditTime : 2024-07-27 23:47:21
 @FilePath     : /xnote/xutils/db/driver_mysql_enhance.py
 @Description  : 支持长key, 废弃了, 不推荐使用
 """
+import warnings
 import pdb
 from xutils.db import encode
 from xutils.db.driver_mysql import MySQLKV
@@ -15,6 +16,7 @@ from xutils.db.driver_mysql import MySQLKV
 class EnhancedMySQLKV(MySQLKV):
 
     def init(self):
+        warnings.warn("EnhancedMySQLKV is deprecated")
         super().init()
         self.max_key_len = 200
 

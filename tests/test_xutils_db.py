@@ -299,11 +299,12 @@ class TestMain(BaseTestCase):
         user = os.environ.get("mysql_user")
         password = os.environ.get("mysql_password", "")
         database = os.environ.get("mysql_database", "")
+        port = int(os.environ.get("mysql_port", "3306"))
 
-        print("host=%s, user=%s, password=%s" % (host, user, password))
+        print(f"host={host}, user={user}, password={password}, port={port}")
 
         xconfig.DatabaseConfig.mysql_database = database
-        db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database)
+        db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database, port=port)
         db_instance.dbname = "mysql"
         return db_instance
 
@@ -373,8 +374,9 @@ class TestMain(BaseTestCase):
         user = os.environ.get("mysql_user")
         password = os.environ.get("mysql_password")
         database = os.environ.get("mysql_database")
+        port = int(os.environ.get("mysql_port", "3306"))
 
-        db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database)
+        db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database, port=port)
         db = EnhancedMySQLKV(db_instance=db_instance)
         self.do_test_lmdb_large_key(db)
 
