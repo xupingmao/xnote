@@ -3,9 +3,9 @@
 # @since 2019/07/18 22:55:08
 # @modified 2019/07/20 22:42:44
 import xutils
-from xnote.core import xmanager
 import logging
 
+from xnote.core import xmanager
 from xnote.core.xtemplate import BasePlugin
 from xutils import dateutil
 from xutils import dbutil
@@ -176,6 +176,7 @@ class Main(BasePlugin):
         kw.page_size = page_size
         kw.page_total = ClipLogDao.count()
         kw.records = ClipLogDao.list_recent(offset=offset, limit=page_size)
+        kw.page_url = "?log_type=clip&page="
         self.writehtml(HTML, **kw)
         self.write_aside(ASIDE_HTML)
 

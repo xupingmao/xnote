@@ -24,11 +24,6 @@ class RefreshHandler:
     
     @xauth.login_required("admin")
     def GET(self):
-        result = []
-        for table_info in dbutil.get_table_dict_copy().values():
-            count = dbutil.count_table(table_info.name, use_cache=True)
-            result.append((table_info.name, count))
-        
         db_cache = dbutil_cache.DatabaseCache()
         db_cache.clear_expired()
 
@@ -38,6 +33,12 @@ class RefreshHandler:
         
         # 清理sys_log
         self.delete_expired_sys_log()
+
+        # 更新表数量统计
+        result = []
+        for table_info in dbutil.get_table_dict_copy().values():
+            count = dbutil.count_table(table_info.name, use_cache=False)
+            result.append((table_info.name, count))
 
         return result
 
