@@ -1,5 +1,11 @@
 {% init right_link = None %}
+{% init parent_link = None %}
+
 <div class="card-title btn-line-height">
+    {% if parent_link != None %}
+        <a href="{{parent_link.href}}">{{parent_link.text}}</a>
+        <span>/</span>
+    {% end %}
     <span>{{title}}</span>
     <div class="float-right">
     {% if right_link is not None %}

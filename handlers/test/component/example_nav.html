@@ -7,8 +7,13 @@
 @FilePath     : /xnote/handlers/test/component/example_nav.html
 @Description  : 描述
 --> #}
+
+{% include common/layout/wide_left.html %}
+
 <div class="card">
 	<div class="card-title">
+		<a href="{{_server_home}}/system/develop">开发者工具</a>
+		<span>/</span>
 		<span>组件示例</span>
 	</div>
 </div>

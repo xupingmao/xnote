@@ -30,7 +30,7 @@ class ExampleHandler:
         if name == "":
             return xtemplate.render("test/page/example_index.html")
         else:
-            return xtemplate.render("test/page/example_%s.html" % name)
+            return xtemplate.render(f"test/page/example_{name}.html")
 
     def POST(self):
         return self.GET()

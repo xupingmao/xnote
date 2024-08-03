@@ -86,3 +86,10 @@ class PromptButton:
 
     def __init__(self, label, action, context=None):
         pass
+
+
+class TextLink:
+    """文本链接"""
+    def __init__(self, text="", href=""):
+        self.text = text
+        self.href = href

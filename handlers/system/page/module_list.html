@@ -8,6 +8,8 @@
 
 <div class="card">
     {% set title = "模块信息" %}
+    {% from xnote.plugin import TextLink %}
+    {% set parent_link = TextLink(text="开发者工具", href=f"{_server_home}/system/develop") %}
     {% include "tools/base_title.html" %}
 </div>
 

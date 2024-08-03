@@ -4,13 +4,13 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-06 12:40:55
 @LastEditors  : xupingmao
-@LastEditTime : 2022-05-06 12:45:28
+@LastEditTime : 2024-08-04 00:12:50
 @FilePath     : /xnote/handlers/system/develop_controller.py
 @Description  : 开发者模块
 """
 
-import xauth
-import xtemplate
+from xnote.core import xauth
+from xnote.core import xtemplate
 
 class DevelopHandler:
 
