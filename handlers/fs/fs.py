@@ -328,6 +328,7 @@ class FileSystemHandler:
             return self.not_readable(path)
 
     def not_readable(self, path):
+        web.ctx.status = "404 Not Found"
         return xtemplate.render("fs/page/fs_not_readable.html", path = path)
 
     def resolve_fpath(self, path):

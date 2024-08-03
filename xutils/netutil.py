@@ -8,7 +8,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/28 19:47:17
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-30 16:52:25
+@LastEditTime : 2024-08-03 10:36:24
 @FilePath     : /xnote/xutils/netutil.py
 """
 
@@ -268,6 +268,9 @@ def http_post(url, body='', charset='utf-8'):
 def http_download_by_requests(url, destpath):
     assert requests != None
     resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
+    if resp.status_code == 404:
+        raise FileNotFoundError(f"file {url} not found")
+
     with open(destpath, "wb") as fp:
         for chunk in resp.iter_content(chunk_size = BUFSIZE):
             fp.write(chunk)
@@ -278,6 +281,7 @@ def http_download(address, destpath = None, dirname = None):
         basename = os.path.basename(address)
         destpath = os.path.join(dirname, basename)
 
+    assert isinstance(destpath, str)
     destpath = os.path.abspath(destpath)
 
     if requests is not None:

@@ -13,6 +13,7 @@
 @Description  : 文本处理工具
 """
 
+import typing
 import re
 import random
 import json
@@ -35,8 +36,9 @@ Text Process Library
 
 ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 BLANK_CHAR_SET = set(" \n\t\r")
+SEQUENCE_TYPES = (list, tuple, set)
 
-def contains_all(text, words):
+def contains_all(text: str, words):
     """
         >>> contains_all("abc is good", "abc")
         True
@@ -47,7 +49,7 @@ def contains_all(text, words):
     """
     if is_str(words):
         return words in text
-    elif isinstance(words, list):
+    elif isinstance(words, SEQUENCE_TYPES):
         for word in words:
             if word not in text:
                 return False
@@ -60,7 +62,7 @@ text_contains = contains_all
 def contains_any(text, words):
     if is_str(words):
         return words in text
-    elif isinstance(words, (list, tuple)):
+    elif isinstance(words, SEQUENCE_TYPES):
         for word in words:
             if word in text:
                 return True
@@ -725,7 +727,7 @@ def escape_html(text):
     text = text.replace("\n", "<br/>")
     return text
 
-def encode_base64(text):
+def encode_base64(text: str):
     """URL安全的base64编码，注意Python自带的方法没有处理填充字符=
     @param {str} text 待编码的字符
     """
@@ -733,7 +735,7 @@ def encode_base64(text):
     return b64result.rstrip("=")
 
 
-def decode_base64(text):
+def decode_base64(text: str):
     """URL安全的base64解码，注意Python自带的方法没有处理填充字符=
     @param {str} text 编码后的字符
     """

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021/11/29 22:48:26
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-06 18:22:37
+@LastEditTime : 2024-08-03 10:39:34
 @FilePath     : /xnote/handlers/system/system_sync/system_sync_proxy.py
 @Description  : 网络代理
 """
@@ -261,7 +261,12 @@ class HttpClient:
         logging.debug("原始文件:%s", url)
         logging.debug("目标文件:%s", dest_path)
 
-        netutil.http_download(url, dest_path)
+        try:
+            netutil.http_download(url, dest_path)
+        except FileNotFoundError:
+            logging.error("file not found: %s", webpath)
+            return
+        
         os.utime(dest_path, times=(mtime, mtime))
         local_sha1_sum = fsutil.get_sha1_sum(dest_path)
         if local_sha1_sum != item.sha1_sum:
