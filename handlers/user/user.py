@@ -4,6 +4,7 @@ import web
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xmanager
+from xnote.core.xtemplate import T
 import xutils
 import math
 from xutils import textutil
@@ -144,31 +145,32 @@ class ChangePasswordHandler:
 
     def GET(self, error=""):
         """获取页面, 修改密码后也需要跳转到这里，所以不能校验登录态"""
-        old_password = xutils.get_argument("old_password", "")
-        new_password = xutils.get_argument("new_password", "")
+        old_password = xutils.get_argument_str("old_password", "")
+        new_password = xutils.get_argument_str("new_password", "")
         return xtemplate.render("user/page/change_password.html",
                                 old_password=old_password, new_password=new_password, error=error)
 
     @xauth.login_required()
     def POST(self):
         user_name = xauth.current_name()
-        old_password = xutils.get_argument("old_password", "")
-        new_password = xutils.get_argument("new_password", "")
-        error = ""
+        old_password = xutils.get_argument_str("old_password", "")
+        new_password = xutils.get_argument_str("new_password", "")
+        confirmed_password = xutils.get_argument_str("confirmed_password")
 
         if old_password == "":
-            return self.GET(error="旧的密码为空")
+            return webutil.FailedResult(message="旧的密码为空")
         if new_password == "":
-            return self.GET(error="新的密码为空")
+            return webutil.FailedResult(message="新的密码为空")
+        if new_password != confirmed_password:
+            return webutil.FailedResult(message="两次输入的密码不一致")
 
         try:
             xauth.check_old_password(user_name, old_password)
             xauth.update_user(user_name, Storage(password=new_password))
             create_op_log(user_name, "change_password", "修改密码")
+            return webutil.SuccessResult()
         except Exception as e:
-            return self.GET(error=str(e))
-
-        return self.GET(error=error)
+            return webutil.FailedResult(message=str(e))
 
 class ResetPasswordHandler:
 
