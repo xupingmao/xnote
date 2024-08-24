@@ -608,6 +608,19 @@ class TestMain(BaseTestCase):
         self.assertEqual("MyTitle", result.title)
         self.assertTrue(result.texts[0].find("# Head1") >= 0)
 
+    def test_markdown_img_parser(self):
+        from handlers.note.html_importer import MarkdownImageParser
+        parser = MarkdownImageParser()
+        md_content = """
+# title
+A example image
+
+![1.png](https://example.com/1.png)
+"""
+        parser.check_only = True
+        parser.parse(md_content, xauth.current_name_str())
+        assert parser.has_external_image() == True
+
     def test_get_dialog(self):
         delete_note_for_test("xnote-dialog-group")
 

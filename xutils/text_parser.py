@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-01-10 14:36:09
 @LastEditors  : xupingmao
-@LastEditTime : 2024-08-24 22:19:40
+@LastEditTime : 2024-08-24 22:59:25
 @FilePath     : /xnote/xutils/text_parser.py
 @Description  : 描述
 """
@@ -262,7 +262,7 @@ class TextParserBase(object):
     
     def append_token(self, token):
         self.save_str_token()
-        self.tokens.append(token)
+        self.tokens.append(TextToken(token))
 
     def profile(self, name):
         if not self.debug_flag:
