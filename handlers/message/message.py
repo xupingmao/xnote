@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2017-05-29 00:00:00
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-13 13:44:12
+@LastEditTime : 2024-08-24 22:37:09
 @FilePath     : /xnote/handlers/message/message.py
 @Description  : 描述
 """
@@ -921,6 +921,28 @@ class ListCommentHandler:
         comments = list(reversed(msg.comments))
         return webutil.SuccessResult(data=comments)
 
+class ParseMessageHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        content = xutils.get_argument_str("content")
+        msg_struct = message_utils.mark_text_to_tokens(content=content)
+        return webutil.SuccessResult(msg_struct.__dict__)
+
+    def GET(self):
+        return self.POST()
+
+class AddTagHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        content = xutils.get_argument_str("content")
+        new_tag = xutils.get_argument_str("new_tag")
+        result = message_tag.add_tag_to_content(content=content, new_tag=new_tag)
+        return webutil.SuccessResult(result)
+
+    def GET(self):
+        return self.POST()
 
 xurls = (
     r"/message", MessagePageHandler,
@@ -949,4 +971,6 @@ xurls = (
     r"/message/comment/create", CreateCommentHandler,
     r"/message/comment/delete", DeleteCommentHandler,
     r"/message/comment/list", ListCommentHandler,
+    r"/message/parse", ParseMessageHandler,
+    r"/message/add_tag", AddTagHandler,
 )

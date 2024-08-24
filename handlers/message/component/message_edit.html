@@ -86,11 +86,28 @@ $(function () {
         $(".input-box").val(newText);
     }
 
+    /**
+     * @param {string} text
+     * @param {string} topic
+     */
+    function insertTopicToText(text, topic) {
+        text = text.trim();
+        topic = topic.trim();
+
+        if (text[0] == "#") {
+            // TODO 已经有标签了,调服务器parse?
+            return text + topic;
+        } else {
+            return topic + " " + text;
+        }
+    }
+
     function onTopicSelected(event) {
         xnote.closeAllDialog();
         var topic = event.target;
         var oldText = $(".input-box").val();
-        $(".input-box").val(topic + " " + oldText);
+        var newText = insertTopicToText(oldText, topic);
+        $(".input-box").val(newText);
     }
 
     xnote.on("message.upload", onFileUploaded);

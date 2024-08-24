@@ -1,7 +1,8 @@
 # encoding=utf-8
-import xtables
+
+from xnote.core import xtables
+from xnote.core import xauth
 import xutils
-import xauth
 import logging
 
 from . import base

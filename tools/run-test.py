@@ -46,6 +46,11 @@ def run_test(args: Namespace):
 	os.environ["mysql_user"] = str(args.mysql_user)
 	os.environ["mysql_port"] = str(args.mysql_port)
 
+	if os.path.exists(target):
+		py_exec(f"-m pytest {target} --doctest-modules --cov xutils --capture no")
+		py_exec("-m coverage html -i")
+		return
+
 	if target == "xutils":
 		py_exec("-m pytest tests/test_xutils.py --doctest-modules --cov xutils --capture no")
 		py_exec("-m coverage html -i")

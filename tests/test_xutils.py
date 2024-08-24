@@ -177,10 +177,6 @@ class TestMain(unittest.TestCase):
         expect_html = """<div class="msg-img-box"><img class="msg-img x-photo" alt="/data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0" src="/data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0"></div>"""
         self.assertEqual(expect_html, html)
 
-    def test_marked_text_parser(self):
-        from xutils.text_parser import runtest
-        runtest()
-
     def test_count_alpha(self):
         text = "abc def 123"
         self.assertEqual(6, textutil.count_alpha(text))

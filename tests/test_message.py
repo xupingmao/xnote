@@ -13,6 +13,7 @@ from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil, dbutil
 from xutils import logutil
+from handlers.message import message_tag
 
 # cannot perform relative import
 try:
@@ -313,3 +314,11 @@ class TestMain(BaseTestCase):
         create_comment_data = dict(id=msg_id, content="this is a comment")
         result = json_request_return_dict("/message/comment/create", method="POST", data=create_comment_data)
         assert result["success"] == True
+
+    def test_message_add_tag(self):
+        result = message_tag.add_tag_to_content("empty", "#test#")
+        assert result == "#test#\nempty"
+        result = message_tag.add_tag_to_content("#tag1#\ntext", "#tag2#")
+        assert result == "#tag1#\n#tag2#\ntext"
+        result = message_tag.add_tag_to_content("#tag1#\ntext", "#tag1#")
+        assert result == "#tag1#\ntext"

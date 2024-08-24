@@ -7,6 +7,7 @@ from xutils.textutil import quote
 from . import dao as msg_dao
 from . import message_utils
 from .message_model import MessageTag
+from xutils.text_parser import TokenType
 
 """
 随手记的标签处理
@@ -95,3 +96,27 @@ def get_recent_keywords(user_name: str, tag="search", limit =20):
     for item in result:
         item.badge_info = ""
     return result
+
+def add_tag_to_content(content="", new_tag=""):
+    msg_struct = message_utils.mark_text_to_tokens(content=content)
+    result = []
+    find = False
+
+    for token in msg_struct.tokens:
+        trim_value = token.value.strip()
+        if token.is_topic() and token.value == new_tag:
+            # 已经存在标签了
+            find = True
+        elif find or token.is_topic() or trim_value == "":
+            pass
+        else:
+            find = True
+            result.append(new_tag)
+            if token.value[0] != "\n":
+                result.append("\n")
+        result.append(token.value)
+    
+    if not find:
+        result = [new_tag] + result
+    
+    return "".join(result)

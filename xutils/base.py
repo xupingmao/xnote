@@ -14,7 +14,7 @@ else:
     string_types = (str,)
 
 
-class Storage(dict):
+class MyStorage(dict):
     """
     A Storage object is like a dictionary except `obj.foo` can be used
     in addition to `obj['foo']`. (This class is modified from web.py)
@@ -64,8 +64,9 @@ class Storage(dict):
         return result
     
     def __repr__(self):     
-        return '<MyStorage ' + dict.__repr__(self) + '>'
+        return f'<{self.__class__.__name__} {dict.__repr__(self)}>'
 
+Storage = MyStorage
 
 class XnoteException(Exception):
     def __init__(self, code="500", message=""):

@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2021-01-10 14:36:09
 @LastEditors  : xupingmao
-@LastEditTime : 2024-05-03 12:48:22
+@LastEditTime : 2024-08-24 22:19:40
 @FilePath     : /xnote/xutils/text_parser.py
 @Description  : 描述
 """
@@ -20,6 +20,8 @@
 
 """
 import os
+import typing
+from xutils.base import Storage
 from urllib.parse import quote, unquote
 
 
@@ -86,7 +88,7 @@ class TextParserBase(object):
     # 调试的开关
     debug_flag = False
     # 空白字符
-    blank_chars = " \t\n\r"
+    blank_chars = set([" ", "\t", "\n", "\r"])
 
     def init(self, text):
         # type: (str)->None
@@ -95,7 +97,7 @@ class TextParserBase(object):
 
         self.text = text
         self.str_token = ""
-        self.tokens = []
+        self.tokens: typing.List[TextToken] = []
         # 当前读取的字符下标，默认初始化为第一个字符
         self.i = 0
         self.length = len(text)
@@ -157,14 +159,15 @@ class TextParserBase(object):
 
         return -1
 
-    def stash_char(self, c):
-        """暂存一个字符"""
+    def stash_str(self, c):
+        """暂存字符到str_token"""
         self.str_token += c
 
     def save_str_token(self):
         if self.str_token != "":
-            token = self.str_token
-            token = self.escape(token)
+            token_str = self.str_token
+            # token = self.escape(token)
+            token = TextToken(value=token_str)
             self.tokens.append(token)
         self.str_token = ""
 
@@ -237,19 +240,19 @@ class TextParserBase(object):
             self.i = end + len(target)
         return key
     
-    def read_till_any_target(self, target_list):
+    def read_till_any_target(self, target_list: typing.Sequence):
         """返回值包含target，索引{i}移动到target之后"""
         pos_list = []
-        target_map = {}
+        pos_target_map = {} # position -> target
         for target in target_list:
             end = self.text.find(target, self.i+1)
             if end >= 0:
                 pos_list.append(end)
-                target_map[end] = target
+                pos_target_map[end] = target
         
         if len(pos_list) > 0:
             end = min(pos_list) # type: int
-            target = target_map[end]
+            target = pos_target_map[end]
             key = self.text[self.i:end+len(target)]
             # 包含 target
             self.i = end + len(target)
@@ -272,7 +275,104 @@ class TextParserBase(object):
 
     def parse(self, text):
         raise Exception("parse() must be implemented by child class")
+    
+    def get_text_tokens(self, tokens: typing.List["TextToken"]):
+        result: typing.List[str] = []
+        for token in tokens:
+            result.append(token.get_html())
+        return result
 
+
+class TokenType:
+    text = "text"
+    link = "link"
+    topic = "topic"
+    strong = "strong"
+    phone_number = "phone_number"
+    search = "search"
+    img = "img"
+
+class TextToken(Storage):
+    def __init__(self, value=""):
+        super().__init__()
+        self.type = TokenType.text
+        self.value = value
+        self.html = ""
+
+    def get_html(self):
+        if self.html != "":
+            return self.html
+        return escape_html(self.value)
+    
+    def __eq__(self, value) -> bool:
+        return self.type == value.type and self.value == value.value
+    
+    def is_topic(self):
+        return self.type == TokenType.topic
+
+class TopicToken(TextToken):
+    def __init__(self, value=""):
+        super().__init__(value=value)
+        self.type = TokenType.topic
+        self.value = value
+
+    def get_html(self):
+        if self.html != "":
+            return self.html
+        quoted_key = quote(self.value)
+        value = escape_html(self.value)
+        return f"<a class=\"link\" href=\"/message?category=message&key={quoted_key}\">{value}</a>"
+
+class SearchToken(TopicToken):
+    def __init__(self, value=""):
+        super().__init__(value=value)
+        self.type = TokenType.search
+        self.value = value
+
+class StrongToken(TextToken):
+    def __init__(self, value=""):
+        super().__init__(value=value)
+        self.type = TokenType.strong
+        self.value = value
+        
+    def get_html(self):
+        value = self.value.strip("*")
+        value = escape_html(value)
+        return f'<span class="msg-strong">{value}</span>'
+
+class LinkToken(TextToken):
+    def __init__(self, value="", href="", name = ""):
+        super().__init__(value=value)
+        self.type = TokenType.link
+        self.value = value
+        self.href = href
+        if name == "":
+            self.name = value
+        else:
+            self.name = name
+    
+    def get_html(self):
+        return f'<a target="_blank" href="{self.href}">{self.name}</a>'
+
+class ImageToken(TextToken):
+    def __init__(self, value="", href="", has_multi=False):
+        super().__init__(value=value)
+        self.type = TokenType.img
+        self.value = value
+        self.href = href
+        self.has_multi = has_multi
+
+    def get_html(self):
+        if self.html != "":
+            return self.html
+        href = self.href
+        if self.has_multi:
+            return '<div class="msg-img-box multi"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
+        else:
+            return '<div class="msg-img-box"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
+
+    def __eq__(self, value) -> bool:
+        return self.type == value.type and self.value == value.value and self.href == value.href
 
 class TextParser(TextParserBase):
 
@@ -288,46 +388,20 @@ class TextParser(TextParserBase):
     # 话题的长度限制
     topic_len_limit = 100
 
-    # 话题转换器
-    topic_translator = None
-
-    # 搜索转换器
-    search_translator = None
-
     def init_ext(self, text):
         self.keywords = set()
-
-    def set_topic_marker(self, topic_marker):
-        self.topic_translator = topic_marker
-
-    def set_topic_translator(self, topic_translator):
-        self.topic_translator = topic_translator
-
-    def set_search_translator(self, translator):
-        self.search_translator = translator
 
     def record_keyword(self, keyword):
         self.keywords.add(keyword)
 
     def build_search_link(self, keyword):
-        if self.search_translator != None:
-            return self.search_translator(self, keyword)
-        key = quote(keyword)
-        value = escape_html(keyword)
-        return "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (key, value)
+        return SearchToken(keyword)
     
     def build_strong_tag(self, keyword):
-        value = escape_html(keyword)
-        return "<span class=\"msg-strong\">%s</span>" % value
+        return StrongToken(keyword)
 
-    def translate_topic(self, key0):
-        if self.topic_translator != None:
-            return self.topic_translator(self, key0)
-        key = key0.lstrip("#\n")
-        key = key.rstrip("#\n")
-        quoted_key = quote(key)
-        value = escape_html(key0)
-        return "<a class=\"link\" href=\"/message?category=message&key=%s\">%s</a>" % (quoted_key, value)
+    def translate_topic(self, key):
+        return TopicToken(value=key)
 
     def mark_topic(self):
         """话题转为搜索关键字的时候去掉前后的#符号"""
@@ -351,7 +425,7 @@ class TextParser(TextParserBase):
 
         if len(key0) > self.topic_len_limit:
             # 超过限制，不认为是话题
-            self.stash_char('#')
+            self.stash_str('#')
             self.i = start_index + 1
             return
         # 记录关键字
@@ -366,7 +440,7 @@ class TextParser(TextParserBase):
 
         self.save_str_token()
         link  = self.read_before_blank()
-        token = '<a target="_blank" href="%s">%s</a>' % (link, link)
+        token = LinkToken(value=link, href=link)
         self.tokens.append(token)
 
     def mark_https(self):
@@ -387,20 +461,22 @@ class TextParser(TextParserBase):
         self.record_keyword(word)
     
     def mark_strong(self, tag="**"):
-        tag_len = len(tag)
+        # tag_len = len(tag)
         self.save_str_token()
         self.i += len(tag)
         
         key = self.read_till_any_target((tag,"\n"))
         if key == "":
             # 无匹配的
-            self.tokens.append(self.escape(tag))
+            self.tokens.append(TextToken(tag))
             return
         
+        key = tag + key
         if key.endswith("\n"):
-            self.tokens.append(self.escape(tag + key))
+            # 不是完整的tag
+            self.tokens.append(TextToken(key))
         else:
-            key = key[0:len(key)-tag_len]
+            # key = key[0:len(key)-tag_len]
             token = self.build_strong_tag(key)
             self.tokens.append(token)
 
@@ -423,32 +499,30 @@ class TextParser(TextParserBase):
         
         key = self.read_till_target(end_char)
         if key == "":
-            self.tokens.append(self.text[self.i])
+            self.stash_str(self.text[self.i])
+            # self.tokens.append(self.text[self.i])
             self.i += 1
             return
 
         if exclude_tag:
             key = key[1:-1]
 
-        if build_html_tag_func == None:
-            build_html_tag_func = self.build_search_link
-
-        token = build_html_tag_func(key)
+        token = self.build_search_link(key)
         self.tokens.append(token)
 
         # 记录关键字
         if record_keyword:
             self.record_keyword(key)
     
-    def handle_img_list(self, href):
-        hrefs = []
+    def handle_img_list(self, first_img_value="", href=""):
         restore_index = self.i
+        tmp_tokens = []
+        tmp_tokens.append(ImageToken(value=first_img_value, href=href))
 
         while True:
             restore_index = self.i
-            hrefs.append(href)
 
-            while self.current() != None and self.current() in self.blank_chars:
+            while self.current() in self.blank_chars:
                 self.read_next()
 
             if self.startswith("file://"):
@@ -457,35 +531,38 @@ class TextParser(TextParserBase):
                 if not is_img_file(href):
                     self.i = restore_index
                     break
-                # else continue
+                else:
+                    # img file
+                    value = self.text[restore_index:self.i]
+                    tmp_tokens.append(ImageToken(value=value, href=href))
             else:
                 self.i = restore_index
                 break
                 
-        for href in hrefs:
-            if len(hrefs) > 1:
-                token = '<div class="msg-img-box multi"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
-            else:
-                token = '<div class="msg-img-box"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
-            self.tokens.append(token)
+        if len(tmp_tokens) > 1:
+            for token in tmp_tokens:
+                token.has_multi = True
+
+        self.tokens += tmp_tokens
 
     def mark_file(self):
         from xutils import fsutil
         self.profile("mark_file")
 
         self.save_str_token()
-        href = self.read_before_blank()
-        href = href[7:]
+        value = self.read_before_blank()
+        href = value[7:]
         if is_img_file(href):
-            self.handle_img_list(href)
+            self.handle_img_list(value, href)
         else:
             name = href[href.rfind("/")+1:]
             # 尝试urldecode名称
             name = fsutil.decode_name(name)
-            token = '<a href="%s">%s</a>' % (href, name)
+            # token = '<a href="%s">%s</a>' % (href, name)
+            token = LinkToken(value=value, href=href, name = name)
             self.tokens.append(token)
 
-    def parse(self, text):
+    def parse_to_tokens(self, text):
         self.init(text)
         self.init_ext(text)
 
@@ -510,124 +587,21 @@ class TextParser(TextParserBase):
             elif self.startswith("file://"):
                 self.mark_file()
             elif c == '\n':
-                self.stash_char(c)
+                self.stash_str(c)
                 self.save_str_token()
                 self.read_next()
             else:
                 # 未命中规则，保存并且往下读取一个字符
-                self.stash_char(c)
+                self.stash_str(c)
                 self.read_next()
 
-            # 再读取一个字符
-            # c = self.read_next()
+            # 前面都读取了一个字符，这里不需要再读取
             c = self.current()
 
         self.save_str_token()
         return self.tokens
-
-class ParseTestCase:
-
-    def print_head(self, message):
-        width  = 60
-        length = len(message)
-        left  = (width - length) // 2
-        right = width - length - left
-        print()
-        print("-" * left, message, "-" * right)
-
-    def test_topic1(self, ):
-        self.print_head("Topic Test 1")
-        text = "#Topic1# Text"
-        parser = TextParser()
-        tokens = parser.parse(text)
-        print("text=%r" % text)
-        print(tokens)
-
-    def test_topic2(self):
-        self.print_head("Topic Test 2")
-        text = "#Topic2 Bank# Text"
-        parser = TextParser()
-        tokens = parser.parse(text)
-        print("text=%r" % text)
-        print(tokens)
-
-    def test_topic3(self):
-        self.print_head("Topic Test 3")
-        text = "#NewLineTopic \nBank# Text"
-        parser = TextParser()
-        tokens = parser.parse(text)
-        print("text=%r" % text)
-        print(tokens)
-        print("keywords=%s" % parser.keywords)
-
-
-    def test_strong_normal(self):
-        self.print_head("runtest_strong_normal")
-        text = "test**mark**end"
-        parser = TextParser()
-        tokens = parser.parse(text)
-        print(tokens)
-        assert tokens[0] == "test"
-        assert tokens[1] == "<span class=\"msg-strong\">mark</span>"
-        assert tokens[2] == "end"
-
-    def test_strong_nl(self):
-        self.print_head("runtest_strong_nl")
-        text = "test**mark\n**end"
-        parser = TextParser()
-        tokens = parser.parse(text)
-        assert tokens[0] == "test"
-        assert tokens[1] == "**mark<br/>"
-        assert tokens[2] == "**"
-        assert tokens[3] == "end"
-
-    def test_strong_no_match(self):
-        self.print_head("runtest_strong_no_match")
-        text = "test***"
-        parser = TextParser()
-        tokens = parser.parse(text)
-        print(tokens)
-        assert tokens[0] == "test"
-        assert tokens[1] == "**"
-        assert tokens[2] == "*"
-
-    def test_image(self):
-        text = "图片file:///data/temp/1.png"
-        parser = TextParser()
-        tokens = parser.parse(text)
-        print(tokens)
-        assert tokens[0] == "图片"
-        assert tokens[1] == '<div class="msg-img-box"><img class="msg-img x-photo" alt="/data/temp/1.png" src="/data/temp/1.png"></div>'
     
-    def test_other(self):
-        text = """#Topic1# #Topic2 Test#
-        #中文话题#
-        This is a new line
-        图片file:///data/temp/1.png
-        文件file:///data/temp/1.zip
-        link1:http://abc.com/test?name=1
-        link2:https://abc.com/test?name=1&age=2 text after link
-        数字123456END
-        <code>test</code>
-        """
-
-        parser = TextParser()
-        tokens = parser.parse(text)
-        # print(tokens)
-        print("input: %s" % text)
-        print("output:")
-        result = "".join(tokens)
-        result = result.replace("<br/>", "\n<br/>\n")
-        print(result)
-
-def runtest():
-    testcase = ParseTestCase()
-    for attr in dir(testcase):
-        if attr.startswith("test_"):
-            testcase.print_head(attr)
-            method = getattr(testcase, attr)
-            method()
-
-if __name__ == '__main__':
-    runtest()
-
+    def parse(self, text=""):
+        # 兼容原来的 parse 方法
+        tokens = self.parse_to_tokens(text=text)
+        return self.get_text_tokens(tokens)

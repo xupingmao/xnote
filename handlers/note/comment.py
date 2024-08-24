@@ -17,8 +17,8 @@ from . import dao as note_dao
 from . import dao_comment
 from xutils import webutil
 from xnote.core.models import SearchContext
-
 from .dao_comment import search_comment
+from xutils.text_parser import TokenType
 
 NOTE_DAO = DAO("note")
 
@@ -26,7 +26,7 @@ def get_page_max(count):
     return int(math.ceil(count/xconfig.PAGE_SIZE))
 
 
-def search_translator(parser, key0):
+def translate_search(key0):
     key = key0.lstrip("")
     key = key.rstrip("")
     quoted_key = textutil.quote(key)
@@ -41,11 +41,17 @@ def mark_text(content):
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 
     parser = TextParser()
-    parser.set_topic_translator(search_translator)
-    parser.set_search_translator(search_translator)
+    tokens = parser.parse_to_tokens(content)
 
-    tokens = parser.parse(content)
-    return "".join(tokens)
+    for token in tokens:
+        if token.type in (TokenType.topic, TokenType.search):
+            token.html = translate_search(token.value)
+
+    # parser.set_topic_translator(search_translator)
+    # parser.set_search_translator(search_translator)
+
+    text_tokens = parser.get_text_tokens(tokens)
+    return "".join(text_tokens)
 
 def process_comments(comments, show_note = False):
     for comment in comments:

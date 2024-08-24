@@ -191,11 +191,16 @@ class Main(BasePlugin):
         # 插件初始化操作
         pass
 
+MAX_CLIP_SIZE = 1024*1024 # 1MB
+
 @xmanager.listen("cron.minute")
 def watch_clipboard(ctx=None):
     try:
         import pyperclip
         content = pyperclip.paste()
+        if len(content) > MAX_CLIP_SIZE:
+            logging.warn("clip content too large: %s, max_size: %s", len(content), MAX_CLIP_SIZE)
+            return
         ClipLogDao.add_log(content)
     except:
         pass

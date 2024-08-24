@@ -9,7 +9,7 @@
 @email        : 578749341@qq.com
 @Date         : 2022-05-28 20:04:59
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-13 11:37:14
+@LastEditTime : 2024-08-24 22:20:53
 @FilePath     : /xnote/handlers/message/message_utils.py
 @Description  : 随手记工具
 """
@@ -27,7 +27,13 @@ from xutils import u
 from xutils import netutil
 from xutils.functions import Counter
 from xutils.textutil import quote
+from xutils.text_parser import TokenType
+from xutils.text_parser import TextParser
 from handlers.message.message_model import MessageFolder, MessageTag, is_task_tag
+from xnote.core import xconfig
+from xutils.text_parser import TextParser
+from xutils.text_parser import set_img_file_ext
+from xutils.text_parser import TextToken
 
 from . import dao as msg_dao
 
@@ -64,18 +70,13 @@ def build_search_html(content, search_tag="log"):
                       key_text=xutils.html_escape(content))
 
 
-class TopicTranslator:
+def get_search_html(value="", tag=""):
+    key0 = value
+    key = value.strip()
+    quoted_key = textutil.quote(key)
+    value = textutil.escape_html(key0)
+    return f"<a class=\"link\" href=\"/message?tag={tag}&key={quoted_key}\">{value}</a>"
 
-    def __init__(self, tag=None):
-        self.tag = tag
-
-    def mark(self, parser, key0):
-        key = key0.lstrip("")
-        key = key.rstrip("")
-        quoted_key = textutil.quote(key)
-        value = textutil.escape_html(key0)
-        return f"<a class=\"link\" href=\"/message?tag={self.tag}&key={quoted_key}\">{value}</a>"
-    
 class TagHelper:
 
     search_tag_mapping = {
@@ -122,26 +123,37 @@ class MarkResult:
         self.keywords = keywords
         self.full_keywords = full_keywords
 
+class MarkTokenResult:
+    def __init__(self, tokens: typing.List[TextToken]):
+        self.tokens = tokens
+
 def mark_text_v2(content="", tag="log"):
-    from xnote.core import xconfig
-    from xutils.text_parser import TextParser
-    from xutils.text_parser import set_img_file_ext
     # 设置图片文集后缀
     set_img_file_ext(xconfig.FS_IMG_EXT_LIST)
 
-    marker = TopicTranslator(tag=TagHelper.get_search_tag(tag))
-
+    tag=TagHelper.get_search_tag(tag)
+    
     parser = TextParser()
-    parser.set_topic_translator(marker.mark)
-    parser.set_search_translator(marker.mark)
-
-    tokens = parser.parse(content)
+    tokens = parser.parse_to_tokens(text=content)
+    
+    for token in tokens:
+        if token.type in (TokenType.topic, TokenType.search):
+            token.html = get_search_html(value=token.value, tag=tag)
+  
+    # parser.set_topic_translator(marker.mark)
+    # parser.set_search_translator(marker.mark)
 
     keywords = parser.keywords
     if keywords == None:
         keywords = set()
 
-    return MarkResult("".join(tokens), keywords=get_standard_tag_set(keywords), full_keywords=keywords)
+    text_tokens = parser.get_text_tokens(tokens)
+    return MarkResult("".join(text_tokens), keywords=get_standard_tag_set(keywords), full_keywords=keywords)
+
+def mark_text_to_tokens(content="", tag="log"):
+    parser = TextParser()
+    tokens = parser.parse_to_tokens(text=content)
+    return MarkTokenResult(tokens=tokens)
 
 def process_message(message, search_tag="log"):
     parser = MessageListParser([])

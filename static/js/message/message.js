@@ -95,6 +95,24 @@ MessageView.setInputText = function (text) {
     }
 }
 
+MessageView.insertTagToInputBox = function (newTopic) {
+    var oldText = this.getInputText();
+    var self = this;
+    
+    if (oldText == "") {
+        self.setInputText(newTopic);
+        return;
+    }
+
+    xnote.http.post("/message/add_tag", {content:oldText, new_tag:newTopic}, function(resp) {
+        if (resp.success) {
+            self.setInputText(resp.data);
+        } else {
+            xnote.alert(resp.message);
+        }
+    });
+}
+
 // 更新输入框
 MessageView.insertBeforeInputBox = function (text) {
     var oldText = this.getInputText();
@@ -243,7 +261,7 @@ MessageView.selectTopic = function (target) {
     this.closeTopicDiloag();
 
     // 发布选择消息的事件
-    this.insertBeforeInputBox(topicText);
+    this.insertTagToInputBox(topicText);
 }
 
 // 搜索话题标签

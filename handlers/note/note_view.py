@@ -300,6 +300,7 @@ class ViewHandler:
         try:
             return self.do_get(op, id, is_public_page)
         except Exception as e:
+            xutils.print_exc()
             return xtemplate.render("error.html", error=str(e))
 
     def do_get(self, op:str, id=0, is_public_page=False):

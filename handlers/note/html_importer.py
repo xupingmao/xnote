@@ -4,12 +4,12 @@ from __future__ import print_function
 import logging
 import os
 import time
-import xtemplate
 import xutils
-import xauth
-import xmanager
-import xconfig
-import xnote_event
+from xnote.core import xtemplate
+from xnote.core import xauth
+from xnote.core import xmanager
+from xnote.core import xconfig
+from xnote.core import xnote_event
 try:
     from bs4 import BeautifulSoup
 except ImportError:
@@ -332,7 +332,7 @@ class MarkdownImageParser(TextParserBase):
                 self.append_token(name_part)
 
                 if self.current() != "(":
-                    self.stash_char(c)
+                    self.stash_str(c)
                     continue
                 else:
                     href_part = self.read_till_target(")")
@@ -343,13 +343,14 @@ class MarkdownImageParser(TextParserBase):
                 code_part = self.read_till_target("```")
                 self.append_token(code_part)
             else:
-                self.stash_char(c)
+                self.stash_str(c)
                 self.read_next()
 
             c = self.current()
 
         self.save_str_token()
-        return "".join(self.tokens)
+        tokens = self.get_text_tokens(self.tokens)
+        return "".join(tokens)
 
 
 class CacheExternalHandler:
