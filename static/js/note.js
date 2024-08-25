@@ -165,6 +165,8 @@ var NoteView = {};
 xnote.action.note = NoteView;
 xnote.note = NoteView;
 
+NoteView.wangEditor = null; // wangEditor
+
 NoteView.onTagClick = function (target) {
     $(target).toggleClass("active");
 }
@@ -517,4 +519,34 @@ NoteView.changeLevel = function (target) {
             window.location.reload();
         }
     });
+};
+
+// 初始化wangEditor
+NoteView.initWangEditor = function() {
+    var editor = new wangEditor('#toolbar', "#editor");
+    editor.customConfig.uploadImgServer = false;
+    editor.customConfig.uploadImgShowBase64 = true;   // 使用 base64 保存图片
+    editor.customConfig.linkImgCallback = function (link) {
+        // 处理图片粘贴的回调
+        // console.log(link);
+    }
+    editor.create();
+    editor.txt.html($("#data").text());
+    this.wangEditor = editor;
+}
+
+// 保存富文本文件
+NoteView.savePost = function (target) {
+    var noteId = $(target).attr("data-note-id");
+    var version = $(target).attr("data-note-version");
+    var data = this.wangEditor.txt.html();
+    xnote.http.post("/note/save?type=html", {id:noteId, version:version, data:data}, function (resp) {
+        console.log(resp);
+        if (resp.success) {
+            // window.location.reload();
+            window.location.href = "/note/" + noteId;
+        } else {
+            xnote.alert(resp.message);
+        }
+    })
 }
