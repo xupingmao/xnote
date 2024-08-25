@@ -69,8 +69,8 @@ markdown页面
 ### Docker-compose
 
 1. 创建持久化数据目录 ```mkdir data```
-2. 创建配置文件 `cp ./config/boot/boot.default.properties ./boot.properties`
-3. 根据自己的需求修改 `boot.properties`
+2. 创建配置文件 `cp ./config/boot/boot.default.properties ./boot.local.properties`
+3. 根据自己的需求修改 `boot.local.properties`
 4. 执行命令 ```docker-compose up -d```
 
 ### 在云服务平台部署
