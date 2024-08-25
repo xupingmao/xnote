@@ -67,10 +67,11 @@ markdown页面
 如果不修改端口号，启动之后在浏览器打开 http://localhost:1234/ 就可以使用了，初始化的管理员账号是admin，默认密码是 123456
 
 ### Docker-compose
+
 1. 创建持久化数据目录 ```mkdir data```
-2. 创建配置文件 `mv ./config/boot/boot.default.properties ./boot.properties`
-3. 修改boot.properties
-4. ```docker-compose up -d```
+2. 创建配置文件 `cp ./config/boot/boot.default.properties ./boot.properties`
+3. 根据自己的需求修改 `boot.properties`
+4. 执行命令 ```docker-compose up -d```
 
 ### 在云服务平台部署
 

@@ -7,7 +7,7 @@ services:
      container_name: xnote
      volumes:
        - ./data:/home/data
-       - ./boot.properties:/home/config/boot/boot.docker.properties
+       - ./boot.properties:/home/config/boot/boot.sae.properties
        - ../xnote:/home
      ports:
        - 1234:1234
