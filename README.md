@@ -41,12 +41,6 @@ markdown页面
 
 ## 安装&运行
 
-### Docker-compose
-1. 创建持久化数据目录 ```mkdir data```
-2. 创建配置文件 `mv ./config/boot/boot.default.properties ./boot.properties`
-3. 修改boot.properties
-4. ```docker-compose up -d```
-
 ### 物理机安装
 
 #### 安装依赖环境
@@ -58,7 +52,6 @@ markdown页面
     - Windows执行 `python -m pip install -r config/requirements.win.txt`
 
 #### 配置和启动
-
 
 默认的配置文件位于`config/boot/boot.default.properties`，具体的功能参考配置的注释
 
@@ -72,6 +65,12 @@ markdown页面
 ```
 
 如果不修改端口号，启动之后在浏览器打开 http://localhost:1234/ 就可以使用了，初始化的管理员账号是admin，默认密码是 123456
+
+### Docker-compose
+1. 创建持久化数据目录 ```mkdir data```
+2. 创建配置文件 `mv ./config/boot/boot.default.properties ./boot.properties`
+3. 修改boot.properties
+4. ```docker-compose up -d```
 
 ### 在云服务平台部署
 
