@@ -6,8 +6,8 @@ services:
     #image: docker.io/donjuanplatinum/xnote:latest   
      container_name: xnote
      volumes:
-       - ./data:/xnote/data
-       - ./boot.properties:/config/boot/boot.docker.properties
-       - ../xnote:/xnote
+       - ./data:/home/data
+       - ./boot.properties:/home/config/boot/boot.docker.properties
+       - ../xnote:/home
      ports:
        - 1234:1234
