@@ -99,24 +99,30 @@ def get_recent_keywords(user_name: str, tag="search", limit =20):
 
 def add_tag_to_content(content="", new_tag=""):
     msg_struct = message_utils.mark_text_to_tokens(content=content)
-    result = []
-    find = False
+
+    tags = []
+    rest_str_list = []
+    is_rest = False
 
     for token in msg_struct.tokens:
-        trim_value = token.value.strip()
-        if token.is_topic() and token.value == new_tag:
-            # 已经存在标签了
-            find = True
-        elif find or token.is_topic() or trim_value == "":
-            pass
+        if is_rest:
+            rest_str_list.append(token.value)
         else:
-            find = True
-            result.append(new_tag)
-            if token.value[0] != "\n":
-                result.append("\n")
-        result.append(token.value)
-    
-    if not find:
-        result = [new_tag] + result
-    
-    return "".join(result)
+            trim_value = token.value.strip()
+            if token.is_topic():
+                tags.append(token.value)
+                continue
+            
+            if trim_value == "":
+                continue
+
+            # 既不是标签也不是空格
+            is_rest = True
+            rest_str_list.append(token.value)
+
+    if new_tag not in tags:
+        tags.append(new_tag)
+
+    rest_text = "".join(rest_str_list).strip()
+    return " ".join(tags) + "\n" + rest_text
+

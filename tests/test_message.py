@@ -319,6 +319,6 @@ class TestMain(BaseTestCase):
         result = message_tag.add_tag_to_content("empty", "#test#")
         assert result == "#test#\nempty"
         result = message_tag.add_tag_to_content("#tag1#\ntext", "#tag2#")
-        assert result == "#tag1#\n#tag2#\ntext"
+        assert result == "#tag1# #tag2#\ntext"
         result = message_tag.add_tag_to_content("#tag1#\ntext", "#tag1#")
         assert result == "#tag1#\ntext"

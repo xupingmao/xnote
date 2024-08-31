@@ -34,8 +34,8 @@ def handle_embed(kw):
         kw.show_nav = False
 
 
-def handle_args(kw):
-    show_path = xutils.get_argument_bool("show_path")
+def handle_args(kw: Storage):
+    show_path = xutils.get_argument_bool("show_path", True)
     kw.show_path = show_path
 
 

@@ -11,7 +11,7 @@ import web.db
 import typing
 
 from xnote.core import xauth, xtables, xtemplate, xconfig
-from xutils.sqldb import TableProxy
+from xutils.sqldb import TableProxy, TempTableProxy
 
 def get_display_value(value):
     if value is None:
@@ -294,8 +294,15 @@ class SqlDBDetailHandler:
         value = dbutil.db_get(key)
         return webutil.SuccessResult(data=xutils.tojson(value, format=True))
 
-    @xauth.login_required("admin")
+    @xauth.admin_required()
     def GET(self):
+        try:
+            return self.do_get()
+        except:
+            error_stack = xutils.print_exc()
+            return xtemplate.render("error.html", error = error_stack)
+
+    def do_get(self):
         name = xutils.get_argument_str("name")
         page = xutils.get_argument_int("page", 1)
         page_size = xutils.get_argument_int("page_size", 20)
@@ -457,8 +464,12 @@ class TableData:
         self.head = head
         self.items = items # items 是 list[dict] 结构
 
-class StructHandler:
 
+class StructHelper:
+    
+    def __init__(self, table_proxy: xtables.TableProxy):
+        self.table_proxy = table_proxy
+    
     def result_set_to_table(self, result_set: web.db.BaseResultSet, table_proxy: typing.Optional[xtables.TableProxy] = None):
         result = TableData()
         comment_name = []
@@ -479,8 +490,9 @@ class StructHandler:
         result.head = result_set.names + comment_name
         result.items = items
         return result
-
-    def get_index_info(self, table_proxy: xtables.TableProxy):
+    
+    def get_index_info(self):
+        table_proxy = self.table_proxy
         table_info = table_proxy.table_info
         db_type = table_info.db_type
 
@@ -500,7 +512,8 @@ class StructHandler:
         
         return TableData()
 
-    def get_column_info(self, table_proxy: xtables.TableProxy):
+    def get_column_info(self):
+        table_proxy = self.table_proxy
         table_name = table_proxy.table_name
         table_info = table_proxy.table_info
         db_type = table_info.db_type
@@ -516,17 +529,57 @@ class StructHandler:
             return self.result_set_to_table(result_set, table_proxy)
         return TableData()
     
+    def get_create_sql(self):
+        if self.table_proxy.db_type == "sqlite":
+            vars = dict(type="table", tbl_name=self.table_proxy.table_name)
+            rows = self.table_proxy.query("select name, sql from sqlite_master where type=$type AND tbl_name=$tbl_name", vars=vars)
+            assert len(rows) > 0
+            return rows[0]["sql"]
+        return ""
 
-    @xauth.login_required("admin")
+class SqliteStructHelper(StructHelper):
+
+    def __init__(self, table_name="", dbpath=""):
+        self.db = web.db.SqliteDB(db=dbpath)
+        self.table_name = table_name
+
+    def get_index_info(self):
+        vars = dict(type="index", tbl_name=self.table_name)
+        result_set = self.db.query("select name, sql from sqlite_master where type=$type AND tbl_name=$tbl_name", vars=vars)
+        assert isinstance(result_set, web.db.BaseResultSet)
+        return self.result_set_to_table(result_set, None)
+
+    def get_column_info(self):
+        result_set = self.db.query(f"pragma table_info({self.table_name})")
+        assert isinstance(result_set, web.db.BaseResultSet)
+        return self.result_set_to_table(result_set, None)
+    
+    def get_create_sql(self):
+        vars = dict(type="table", tbl_name=self.table_name)
+        row = self.db.query("select name, sql from sqlite_master where type=$type AND tbl_name=$tbl_name", vars=vars).first()
+        assert row != None
+        return row["sql"]
+
+class StructHandler:
+
+    @xauth.admin_required()
     def GET(self):
+        dbpath = xutils.get_argument_str("dbpath")
         table_name = xutils.get_argument_str("table_name")
-        table_proxy = xtables.get_table_by_name(table_name)
+
+        if dbpath == "":
+            table_proxy = xtables.get_table_by_name(table_name)
+            helper = StructHelper(table_proxy)
+        else:
+            helper = SqliteStructHelper(table_name=table_name, dbpath=dbpath)
 
         kw = Storage()
         kw.table_name = table_name
-        kw.column_info = self.get_column_info(table_proxy)
-        kw.index_info = self.get_index_info(table_proxy)
+        kw.column_info = helper.get_column_info()
+        kw.index_info = helper.get_index_info()
+        kw.create_sql = helper.get_create_sql()
         kw.error = ""
+
         return xtemplate.render("system/page/db/db_struct.html", **kw)
 
 xurls = (

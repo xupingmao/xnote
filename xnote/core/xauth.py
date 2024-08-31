@@ -845,7 +845,7 @@ def redirect_to_login():
 
 
 def login_required(user_name=None):
-    """管理员验证装饰器"""
+    """用户登录验证装饰器"""
     def deco(func):
         def handle(*args, **kw):
             check_login(user_name)
@@ -854,6 +854,9 @@ def login_required(user_name=None):
         return handle
     return deco
 
+def admin_required():
+    """管理员登录验证装饰器"""
+    return login_required("admin")
 
 def get_user_data_dir(user_name, mkdirs=False):
     fpath = os.path.join(xconfig.DATA_DIR, "files", user_name)

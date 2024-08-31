@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:09:40
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-20 00:39:24
+@LastEditTime : 2024-08-31 20:38:37
 @FilePath     : /xnote/xutils/sqldb/table_proxy.py
 @Description  : SQL表查询代理
 """
@@ -32,8 +32,6 @@ class TableProxy(SQLDBInterface):
     def __init__(self, db: web.db.DB, tablename: str):
         # SqliteDB 内部使用了threadlocal来实现，是线程安全的，使用全局单实例即可
         assert isinstance(db, web.db.DB)
-
-        self.tablename = tablename
         self.table_name = tablename
         self.db = db
         table_info = table_manager.TableManagerFacade.get_table_info(tablename)
@@ -41,6 +39,10 @@ class TableProxy(SQLDBInterface):
         self.table_info = table_info
         self.db_type = table_info.db_type
         self.enable_binlog = TableConfig.enable_binlog and table_info.enable_binlog
+
+    @property
+    def tablename(self):
+        return self.table_name
 
     def fix_sql_keywords(self, values):
         # 兼容关键字
@@ -302,3 +304,13 @@ class TableProxy(SQLDBInterface):
         profile_log.cost_time = cost_time
         profile_log.op_type = op_type
         self.profile_logger.log(profile_log)
+
+
+class TempTableProxy(TableProxy):
+
+    def __init__(self, db: web.db.DB, tablename: str):
+        # super().__init__(db, tablename)
+        self.table_info = None
+        self.db_type = "empty"
+        self.table_name = tablename
+        self.db = db

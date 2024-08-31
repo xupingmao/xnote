@@ -61,27 +61,8 @@
         </pre>
     {% end %}
 
-    <div class="row">
-    {% if len(cols) > 0 %}
-
-        <table class="table">
-            <tr>
-                {% for key in cols %}
-                <th>{{key}}</th>
-                {% end %} <!-- for end -->
-            </tr>
-
-            {% for record in result_list %}
-                <tr>
-                {% for key in cols %}
-                    <td>{{record.get(key)}}</td>
-                {% end %}
-                </tr>
-            {% end %}
-        </table>
-
-    {% end %} <!-- if end -->
-
+    <div class="row">        
+        {% include common/table/table.html %}
     </div>
 
 </div>

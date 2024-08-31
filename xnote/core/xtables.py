@@ -41,7 +41,7 @@ class DBPool:
     # TODO 池化会导致资源无法释放
 
     sqlite_pool = {} # type: dict[str, MySqliteDB]
-    mysql_instance = None # type: web.db.MySQLDB
+    mysql_instance = None # type: web.db.MySQLDB|None
 
     @classmethod
     def get_sqlite_db(cls, dbpath=""):

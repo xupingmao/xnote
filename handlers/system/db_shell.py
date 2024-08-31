@@ -8,8 +8,9 @@ import time
 import logging
 import web.db
 
+from urllib.parse import quote
 from xnote.core import xauth, xconfig, xtemplate, xtables
-
+from xnote.plugin import DataTable
 from collections import OrderedDict
 
 config = xconfig
@@ -42,11 +43,25 @@ def db_execute(path, sql, args = None):
 
 class handler:
 
-    def get_result_by_action(self, action, path):
+    def get_result_by_action(self, action, path) -> DataTable:
         if action == "show_tables":
-            return db_execute(path, "SELECT * FROM sqlite_master;")
+            args = ("index",)
+            kv_result = db_execute(path, "SELECT type, name, tbl_name, rootpage FROM sqlite_master WHERE type != ?", args)            
+            table = DataTable()
+            table.add_head(title="type", field="type")
+            table.add_head(title="tbl_name", field="tbl_name", link_field="name_link")
+            table.add_head(title="rootpage", field="rootpage")
+            for row in kv_result:
+                name = row["tbl_name"]
+                row["name_link"] = f"{xconfig.WebConfig.server_home}/system/db/struct?table_name={name}&dbpath={quote(path)}"
+                table.add_row(row)
+            return table
+        
         if action == "count_tables":
-            result = []
+            table = DataTable()
+            table.add_head(title="name", field="name", link_field="name_link")
+            table.add_head(title="amount", field="amount")
+
             table_names = db_execute(path, "SELECT name FROM sqlite_master WHERE type = ?;", ("table",))
             for name_row in table_names:
                 name = name_row["name"]
@@ -54,10 +69,11 @@ class handler:
                 row = OrderedDict()
                 row["name"] = name
                 row["amount"] = amount
-                result.append(row)
-            return result
+                row["name_link"] = f"{xconfig.WebConfig.server_home}/system/db/struct?table_name={name}&dbpath={quote(path)}"
+                table.add_row(row)
+            return table
 
-        return []
+        return DataTable()
     
     def do_execute(self):
         path = xutils.get_argument_str("path")
@@ -68,7 +84,7 @@ class handler:
         logging.info("path:(%s), sql:(%s)", path, sql)
 
         if sql == "" and path != "":
-            result_list = self.get_result_by_action(action, path)
+            return self.get_result_by_action(action, path), ""
         
         if sql != "" and path != "":
             try:
@@ -81,17 +97,17 @@ class handler:
             keys = result_list[0].keys()
         else:
             keys = []
-        return keys, result_list, error
+        return self.result_to_table(keys, result_list), error
 
     def handle_mysql(self,sql=""):
         if sql == "":
-            return [], [], ""
+            return self.result_to_table([], []), ""
         db = xtables.get_default_db_instance()
         try:
             result = db.query(sql)
         except:
             error = xutils.print_exc()
-            return [],[],error
+            return self.result_to_table([], []),error
         
         assert isinstance(result, web.db.ResultSet)
         result_list = []
@@ -102,7 +118,7 @@ class handler:
                 break
             result_list.append(record)
 
-        return result.names, result_list, ""
+        return self.result_to_table(result.names, result_list), ""
 
 
     @xauth.login_required("admin")
@@ -115,16 +131,15 @@ class handler:
 
         t_start = time.time()
         if type == "mysql":
-            keys, result_list, error = self.handle_mysql(sql)
+            table, error = self.handle_mysql(sql)
         else:
-            keys, result_list, error = self.do_execute()
+            table, error = self.do_execute()
         t_stop = time.time()
 
 
         kw = xutils.Storage()
-        kw.cols = keys
+        kw.table = table
         kw.show_right = False
-        kw.result_list = result_list
         kw.sql = sql
         kw.error = error
         kw.cost_time = int((t_stop-t_start)*1000)
@@ -137,6 +152,14 @@ class handler:
 
     def GET(self):
         return self.POST()
+    
+    def result_to_table(self, keys: list, result_list: list) -> DataTable:
+        table = DataTable()
+        for key in keys:
+            table.add_head(title=key, field=key)
+        
+        table.set_rows(result_list)
+        return table
 
 
 xurls = (

@@ -1,9 +1,10 @@
 # encoding=utf-8
 import os
 import web
-import xtemplate
 import xutils
-import xconfig
+
+from xnote.core import xtemplate
+from xnote.core import xconfig
 
 C_TEMPLATE = """
 #include <stdio.h>
