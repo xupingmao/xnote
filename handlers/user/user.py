@@ -1,10 +1,14 @@
 # encoding=utf-8
 # @modified 2022/04/04 14:01:57
 import web
+import json
+
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xmanager
 from xnote.core.xtemplate import T
+from xnote.core import xconfig
+
 import xutils
 import math
 from xutils import textutil
@@ -12,6 +16,11 @@ from xutils import Storage
 from xutils import dbutil
 from xutils import webutil
 from . import dao
+
+from xnote.plugin.table_plugin import BaseTablePlugin
+from xnote.plugin import DataTable, TableActionType
+from xnote.plugin import DataForm
+from xnote.plugin.form import FormRowType
 
 OP_LOG_TABLE = xauth.UserOpLogDao
 
@@ -26,38 +35,77 @@ def create_op_log(user_name, op_type, detail):
     dao.UserOpLogDao.create_op_log(log)
 
 
-class ListHandler:
+class ListHandler(BaseTablePlugin):
     """用户管理"""
+    title = "用户管理"
+    option_html = """<button class="btn" onclick="xnote.table.handleEditForm(this)"
+            data-url="?action=edit" data-title="创建新用户">创建新用户</button>"""
+    NAV_HTML = ""
+    PAGE_HTML = BaseTablePlugin.TABLE_HTML
 
-    @xauth.login_required("admin")
-    def GET(self):
+    def handle_page(self):
         page = xutils.get_argument_int("page", 1)
         page_size = xutils.get_argument_int("page_size", 10)
         offset = (page-1) * page_size
         assert offset >= 0
+
+        table = DataTable()
+        table.add_head("编号", "id")
+        table.add_head("登录名", "name", link_field="edit_url")
+        table.add_head("状态", "status_text")
+        table.add_head("上次登录", "login_time")
+        # 操作按钮
+        table.add_action("编辑", link_field="edit_url", type=TableActionType.link, css_class="btn btn-default")
+        table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, 
+                         msg_field="delete_msg", css_class="btn danger")
+
+        for user_info in xauth.UserModel.list(offset = offset, limit = page_size):
+            user_info.edit_url = f"{xconfig.WebConfig.server_home}/system/user?name={user_info.name}"
+            user_info.delete_msg = f"确定删除{user_info.name}吗?"
+            user_info.delete_url = f"{xconfig.WebConfig.server_home}/system/user/remove?user_id={user_info.id}"
+            user_info.status_text = user_info.get_status_text()
+            
+            table.add_row(user_info)
 
         total = xauth.UserModel.count()
 
         kw = Storage()
         kw.user_info = None
         kw.show_aside = False
-        kw.user_list = xauth.UserModel.list(offset = offset, limit = page_size)
+        kw.table = table
         kw.page = page
         kw.page_size = page_size
         kw.page_max = math.ceil(total/page_size)//1
+        kw.page_url = "?page="
 
-        return xtemplate.render("user/page/user_list.html", **kw)
+        self.write_aside("{% include system/component/admin_nav.html %}")
 
-    @xauth.login_required("admin")
-    def POST(self):
-        name = xutils.get_argument("name")
-        password = xutils.get_argument("password")
-        error = xauth.create_user(name, password)
-        added = xauth.get_user(name)
-        # 先暴力解决
-        xmanager.reload()
-        raise web.seeother("/system/user?name=%s" % name)
+        return self.response_page(**kw)
+    
+    def handle_edit(self):
+        form = DataForm()
+        form.add_row("登录名", "name")
+        
+        kw = Storage()
+        kw.form = form
+        return self.response_form(**kw)
+    
+    def handle_save(self):
+        data_dict = self.get_data_dict()
 
+        model_id = int(data_dict.get("id", 0))
+        if model_id != 0:
+            model_info = xauth.UserDao.get_by_id(user_id=model_id)
+            assert model_info != None
+        else:
+            model_info = xauth.UserDO()
+        
+        user_name = data_dict.get("name")
+        if user_name == None:
+            return webutil.FailedResult(message="登录名不能为空")
+        
+        model_info.name = user_name
+        return xauth.create_user(user_name, textutil.random_string(6))
 
 class UserHandler:
 
@@ -104,7 +152,10 @@ class RemoveHandler:
     def POST(self):
         user_id = xutils.get_argument_int("user_id")
         xauth.UserModel.delete_by_id(user_id)
-        return dict(code="success")
+        return webutil.SuccessResult()
+    
+    def GET(self):
+        return self.POST()
 
 
 class UserInfoHandler:

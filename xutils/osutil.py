@@ -81,10 +81,12 @@ def is_command_exists(command):
     if is_windows():
         # TODO 怎么判断命令是否存在
         try:
-            result = subprocess.Popen(f"{command} --help", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return result.returncode == 0
+            result = subprocess.Popen(f"{command} --help", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            returncode = result.poll()
+            return returncode == 0
         except FileNotFoundError:
             return False
     else:
-        result = subprocess.Popen(f"which {command}", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        return result.returncode == 0
+        result = subprocess.Popen(f"which {command}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        returncode = result.poll()
+        return returncode == 0

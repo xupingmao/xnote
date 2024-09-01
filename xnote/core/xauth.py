@@ -19,6 +19,8 @@ import xutils
 import warnings
 import time
 import datetime
+import typing
+
 from xnote.core import xtables, xconfig, xmanager
 import enum
 from xutils import textutil, dbutil, fsutil, dateutil
@@ -27,6 +29,7 @@ from xutils import logutil
 from xutils import cacheutil
 from xutils import six
 from xutils.sqldb.utils import safe_str
+from xutils import webutil
 
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
@@ -107,12 +110,25 @@ class UserDO(xutils.Storage):
         result.update(dict_value)
         result.build()
         return result
+    
+    @classmethod
+    def from_dict_list(cls, dict_list) -> typing.List["UserDO"]:
+        result = []
+        for item in dict_list:
+            result.append(cls.from_dict(item))
+        return result
 
     def build(self):
         # Fix md5
         if self.password != "" and self.password_md5 == "":
             self.password_md5 = encode_password(self.password, self.salt)
 
+    def get_status_text(self):
+        if self.status == UserStatusEnum.normal.value:
+            return "正常"
+        if self.status == UserStatusEnum.deleted.value:
+            return "删除"
+        return f"未知({self.status})"
 
 class UserDao:
     @classmethod
@@ -165,7 +181,7 @@ class UserDao:
     @classmethod
     def list(cls, offset=0, limit=20):
         db = get_user_db()
-        return list(db.select(offset=offset, limit=limit))
+        return UserDO.from_dict_list(db.select(offset=offset, limit=limit))
 
     @classmethod
     def count(cls):
@@ -709,16 +725,16 @@ def create_quick_user():
 
 def create_user(name, password, fire_event=True, check_username=True):
     if name == "" or name == None:
-        return dict(code="PARAM_ERROR", message="name为空")
+        return webutil.FailedResult(code="PARAM_ERROR", message="name为空")
     if password == "" or password == None:
-        return dict(code="PARAM_ERROR", message="password为空")
+        return webutil.FailedResult(code="PARAM_ERROR", message="password为空")
     if check_username and not is_valid_username(name):
-        return dict(code="INVALID_NAME", message="非法的用户名")
+        return webutil.FailedResult(code="INVALID_NAME", message="非法的用户名")
 
     name = name.lower()
     found = find_by_name(name)
     if found is not None:
-        return dict(code="fail", message="用户已存在")
+        return webutil.FailedResult(code="fail", message="用户已存在")
     else:
         user = UserDO()
         user.name = name
@@ -730,7 +746,7 @@ def create_user(name, password, fire_event=True, check_username=True):
         user.build()
 
         UserModel.create(user, fire_event=fire_event)
-        return dict(code="success", message="create success")
+        return webutil.SuccessResult(message="create success")
 
 
 def _check_password(password):

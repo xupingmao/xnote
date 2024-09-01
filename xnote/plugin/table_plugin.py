@@ -4,12 +4,13 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-31 11:17:36
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-01 12:48:38
+@LastEditTime : 2024-09-01 20:14:26
 @FilePath     : /xnote/xnote/plugin/table_plugin.py
 @Description  : 描述
 """
 
 import xutils
+import json
 from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import webutil
@@ -78,7 +79,13 @@ class BaseTablePlugin(BasePlugin):
         kw.form = form
         return self.response_form(**kw)
     
+    def get_data_dict(self) -> dict:
+        data = xutils.get_argument_str("data")
+        data_dict = json.loads(data)
+        return data_dict
+    
     def handle_save(self):
+        # data_dict = self.get_data_dict()
         return webutil.FailedResult(code="500", message="Not Implemented")
     
     def handle_page(self):
@@ -111,4 +118,5 @@ class BaseTablePlugin(BasePlugin):
         return self.response_page(**kw)
 
     def handle_delete(self):
+        # data_id = xutils.get_argument_int("data_id")
         return webutil.FailedResult(code="500", message="Not Implemented")

@@ -30,7 +30,7 @@
                 <td>
                     {% for action in _xnote_table.actions %}
                         {% if action.type == "link" and action.get_link(row) != None %}
-                            <a href="{{action.get_link(row)}}">{{action.title}}</a>
+                            <a class="{{action.css_class}}" href="{{action.get_link(row)}}">{{action.title}}</a>
                         {% end %}
                         {% if action.type == "button" and action.get_link(row) != None %}
                             <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleAction(this)" 
