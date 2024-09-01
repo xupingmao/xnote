@@ -1,10 +1,10 @@
 # encoding=utf-8
-import xtables
 import xutils
-import xauth
 import logging
 
-from . import base
+from xnote.core import xtables
+from xnote.core import xauth
+from xnote_migrate import base
 from xutils import Storage
 from xutils import dbutil, dateutil
 from xutils.db.dbutil_helper import new_from_dict

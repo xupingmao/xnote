@@ -3,9 +3,10 @@
 # @since 2017/02/19
 # @modified 2021/05/23 19:33:48
 import web
+import xutils
+
 from xnote.core import xtemplate
 from xnote.core import xauth
-import xutils
 
 INDEX_HTML = """
 {% extends base %}

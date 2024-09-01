@@ -39,6 +39,8 @@ class TccHandler:
             
     def POST(self):
         return self.GET()
-            
-xurls = (r"/tools/tcc", TccHandler)
-         
+
+xurls = (
+    r"/tools/tcc", TccHandler,
+)
+

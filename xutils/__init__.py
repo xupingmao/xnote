@@ -1,15 +1,21 @@
 # -*- coding:utf-8 -*-
-# @author xupingmao
-# @since 2016/12/09
-# @modified 2022/04/03 22:15:46
+"""
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2016/12/09
+@LastEditors  : xupingmao
+@LastEditTime : 2024-09-01 01:48:16
+@FilePath     : /xnote/xutils/__init__.py
+@Description  : 描述
+"""
+from __future__ import print_function
+from __future__ import absolute_import
+
 
 """xnote工具类总入口
 xutils是暴露出去的统一接口，类似于windows.h一样
 建议通过xutils暴露统一接口，其他的utils由xutils导入
-
 """
-from __future__ import print_function
-from __future__ import absolute_import
 
 import shutil
 import subprocess
@@ -46,7 +52,7 @@ FS_IMG_EXT_LIST = []
 FS_TEXT_EXT_LIST = []
 FS_AUDIO_EXT_LIST = []
 FS_CODE_EXT_LIST = []
-IS_TEST = []
+IS_TEST = False
 
 #################################################################
 
@@ -160,73 +166,7 @@ def obj2dict(obj):
         return None
     return dict(**obj.__dict__)
 
-#################################################################
-##   Platform/OS Utilities, Python 2 do not have this file
-#################################################################
-
-def system(cmd, cwd = None):
-    p = subprocess.Popen(cmd, cwd=cwd, 
-                                 shell=True, 
-                                 stdout=subprocess.PIPE, 
-                                 stderr=subprocess.PIPE)
-    # out = p.stdout.read()
-    # err = p.stderr.read()
-    # if PY2:
-    #     encoding = sys.getfilesystemencoding()
-    #     os.system(cmd.encode(encoding))
-    # else:
-    #     os.system(cmd)
-
-def is_windows():
-    return os.name == "nt"
-
-def is_mac():
-    return platform.system() == "Darwin"
-
-def is_linux():
-    return os.name == "linux"
-
-def mac_say(msg):
-    def escape(str):
-        new_str_list = ['"']
-        for c in str:
-            if c != '"':
-                new_str_list.append(c)
-            else:
-                new_str_list.append('\\"')
-        new_str_list.append('"')
-        return ''.join(new_str_list)
-
-    msglist = re.split(r"[,.;?!():，。？！；：\n\"'<>《》\[\]]", msg)
-    for m in msglist:
-        m = m.strip()
-        if m == "":
-            continue
-        cmd = u("say %s") % escape(m)
-        trace("MacSay", cmd)
-        os.system(cmd.encode("utf-8"))
-
-def windows_say(msg):
-    try:
-        import comtypes.client as cc
-        # dynamic=True不生成静态的Python代码
-        voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
-        voice.Speak(msg)
-    except ImportError:
-        logging.warning("没有安装comtypes")
-    except:
-        print_exc()
-
-def say(msg):
-    if IS_TEST:
-        return
-    if is_windows():
-        windows_say(msg)
-    elif is_mac():
-        mac_say(msg)
-    else:
-        # 防止调用语音API的程序没有正确处理循环
-        time.sleep(0.5)
+from xutils.osutil import *
 
 #################################################################
 ##   规则引擎组件

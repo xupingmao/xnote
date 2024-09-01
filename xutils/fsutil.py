@@ -25,7 +25,7 @@ from xutils.imports import *
 from xutils.base import Storage
 from xutils import textutil
 from fnmatch import fnmatch
-from xutils.six.moves.configparser import ConfigParser
+from configparser import ConfigParser
 from xutils import logutil
 
 # mbcs泛指通过2字节来编码的字符编码
@@ -863,6 +863,7 @@ def get_free_space(folder):
                                                    ctypes.pointer(free_bytes))
         return free_bytes.value
     else:
+        # linux/Unix
         st = os.statvfs(folder)
         return st.f_bavail * st.f_frsize
 

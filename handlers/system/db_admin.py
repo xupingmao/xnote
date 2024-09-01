@@ -545,7 +545,7 @@ class SqliteStructHelper(StructHelper):
 
     def get_index_info(self):
         vars = dict(type="index", tbl_name=self.table_name)
-        result_set = self.db.query("select name, sql from sqlite_master where type=$type AND tbl_name=$tbl_name", vars=vars)
+        result_set = self.db.query("select name, sql from sqlite_master where type=$type AND tbl_name=$tbl_name order by name", vars=vars)
         assert isinstance(result_set, web.db.BaseResultSet)
         return self.result_set_to_table(result_set, None)
 

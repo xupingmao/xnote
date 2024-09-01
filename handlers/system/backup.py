@@ -138,6 +138,10 @@ class DBBackup:
                 backup_table = xtables.init_backup_table(table.tablename, db)
                 backup_table.writable = True
                 backup_table.log_profile = False # 备份的时候不需要profile
+
+                if backup_table.table_name == xconfig.DatabaseConfig.kv_store:
+                    logger.info("skip table (%s)", backup_table.table_name)
+                    continue
                 
                 total_count = table.count()
                 logger.info("backup table:(%s) count:(%d)", table.tablename, total_count)

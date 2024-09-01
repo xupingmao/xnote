@@ -24,7 +24,7 @@ from configparser import ConfigParser
 from handlers.plugin.dao import (
     add_visit_log, list_visit_logs, PageVisitLogDO)
 from handlers.plugin.service import CategoryService
-
+from handlers.plugin import plugin_util
 from xnote.plugin import load_plugin_file, PluginContext
 
 """xnote插件模块，由于插件的权限较大，开发权限只开放给管理员，普通用户可以使用
@@ -712,9 +712,11 @@ class LoadInnerToolHandler:
         fpath = os.path.join(xconfig.HANDLERS_DIR, "tools", fname)
         if os.path.exists(fpath):
             if user_name != None:
-                tool_name = get_inner_tool_name(url)
                 add_visit_log(user_name, url)
-            return xtemplate.render("tools/" + fname, show_aside=False)
+            kw = Storage()
+            kw.show_aside = False
+            kw.parent_link = plugin_util.get_dev_link()
+            return xtemplate.render("tools/" + fname, **kw)
         else:
             raise web.notfound()
 

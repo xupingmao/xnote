@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-06-22 19:11:13
 @LastEditors  : xupingmao
-@LastEditTime : 2024-06-25 00:33:37
+@LastEditTime : 2024-08-31 23:02:30
 @FilePath     : /xnote/xnote_migrate/upgrade_019.py
 @Description  : 描述
 """
@@ -12,7 +12,7 @@ import logging
 import xutils
 
 from xnote.core import xtables, xauth
-from . import base
+from xnote_migrate import base
 from xutils import dbutil, dateutil
 from xutils.db.dbutil_helper import new_from_dict
 from handlers.note.dao import NoteDO, create_note, NoteIndexDao

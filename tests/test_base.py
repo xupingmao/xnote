@@ -17,6 +17,7 @@ from xutils import dbutil
 from xutils import cacheutil
 from xutils import six
 from xutils.db.driver_sqlite import SqliteKV
+from xutils.config import UtilityConfig
 
 config = xconfig
 date = time.strftime("%Y/%m")
@@ -47,6 +48,8 @@ def init():
     xtables_kv.init()
 
     xutils.init(xconfig)
+    UtilityConfig.is_test = True
+    
     xauth.init()
     cacheutil.init(xconfig.STORAGE_DIR)
 
