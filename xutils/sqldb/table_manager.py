@@ -356,8 +356,10 @@ class TableManagerFacade:
         if db.dbname == "mysql":
             self.manager = MySQLTableManager(tablename, db = db, **kw)
         else:
+            dbpath = kw.get("dbpath", "")
+            assert dbpath != "", "sqlite dbpath is empty"
             self.manager = SqliteTableManager(tablename, db = db, **kw)
-            self.table_info.dbpath = db.dbpath
+            self.table_info.dbpath = dbpath
         
         self.table_info.is_deleted = kw.get("is_deleted", False)
         self.table_info.comment = kw.get("comment", "")

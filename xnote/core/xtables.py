@@ -61,6 +61,7 @@ def create_table_manager_with_dbpath(table_name="", dbpath="", **kw):
     assert dbpath != ""
     db = get_db_instance(dbpath)
     kw["db_type"] = xconfig.DatabaseConfig.db_driver_sql
+    kw["dbpath"] = dbpath
     return TableManager(table_name, db=db, mysql_database=xconfig.DatabaseConfig.mysql_database, **kw)
 
 def create_table_manager_with_db(table_name="", db=None, **kw):

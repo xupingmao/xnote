@@ -477,7 +477,7 @@ class SaveAjaxHandler:
     def do_post(self):
         content = xutils.get_argument_str("content", "")
         data = xutils.get_argument_str("data", "")
-        id = xutils.get_argument_int("id")
+        id = xutils.get_argument_str("id")
         type = xutils.get_argument_str("type")
         version = xutils.get_argument_int("version", 0)
         edit_token = xutils.get_argument_str("edit_token", "")
@@ -486,7 +486,7 @@ class SaveAjaxHandler:
             file = check_get_note(id)
             if version != file.version:
                 raise NoteException("conflict", "笔记已经被修改，请刷新后重试")
-            
+                        
             new_file = Storage(**file)
             new_file.size = len(content)
             new_file.mtime = xutils.format_datetime()
@@ -502,6 +502,11 @@ class SaveAjaxHandler:
                     new_file.content = content
                 new_file.size = len(content)
             else:
+                if file.content == content:
+                    # 内容没有变化
+                    # 清空草稿
+                    dao_draft.save_draft(file.id, "")
+                    return webutil.SuccessResult(message="content unchanged")
                 new_file.content = content
                 new_file.data = ""
                 new_file.size = len(content)

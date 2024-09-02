@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-04-28 21:04:36
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-15 21:36:55
+@LastEditTime : 2024-09-03 00:17:20
 @FilePath     : /xnote/tests/test_xutils_sqldb.py
 @Description  : 描述
 """
@@ -32,7 +32,8 @@ class TestMain(test_base.BaseTestCase):
     
     def define_db(self):
         db = self.get_db()
-        with TableManagerFacade("unit_test", db = db, check_table_define=False) as table:
+        assert isinstance(db, xtables.MySqliteDB)
+        with TableManagerFacade("unit_test", db = db, check_table_define=False, dbpath=db.dbpath) as table:
             table.add_column("name", "text", default_value="")
             table.add_column("age", "int", default_value=0)
             table.table_info.enable_binlog = True
