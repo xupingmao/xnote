@@ -350,6 +350,7 @@ class WebConfig:
     sync_interval_seconds = 3
     sync_db_from_leader = False
     sync_files_from_leader = False
+    leader_roles = ("master", "leader")
 
     # 定时任务开关
     cron_enabled = True
@@ -404,6 +405,10 @@ class WebConfig:
         nav_list.append(NavItem(text="登录", need_logout=True,
                         need_admin=False, url="/login"))
         return nav_list
+    
+    @classmethod
+    def is_leader(cls):
+        return cls.node_role in cls.leader_roles
 
 
 class TemplateConfig:

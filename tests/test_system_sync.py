@@ -29,6 +29,7 @@ from . import test_base
 from handlers.system.system_sync.node_follower import DBSyncer
 from handlers.system.system_sync.dao import ClusterConfigDao
 from handlers.system.system_sync.models import LeaderStat
+from handlers.system.system_sync import system_sync_proxy
 
 app = test_base.init()
 json_request = test_base.json_request
@@ -263,7 +264,10 @@ class TestSystemSync(BaseTestCase):
         admin_token = self.get_access_token()
         self.init_leader_config()
 
-        class MockedClient:
+        class MockedClient(system_sync_proxy.HttpClient):
+            def __init__(self, **kw):
+                pass
+            
             def list_binlog(self, last_seq):
                 return dict(code="sync_broken")
             
@@ -352,10 +356,10 @@ class TestSystemSync(BaseTestCase):
         binlog.set_max_size(1000)
         binlog.set_enabled(True)
 
-        fsutil.touch("/tmp/a.txt")
+        fsutil.touch("./tmp/a.txt")
 
         upload_event = xnote_event.FileUploadEvent()
-        upload_event.fpath = "/tmp/a.txt"
+        upload_event.fpath = "./tmp/a.txt"
         upload_event.user_id = 0
         on_fs_upload(upload_event)
 

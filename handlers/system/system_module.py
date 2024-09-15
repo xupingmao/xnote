@@ -3,10 +3,11 @@
 # @since
 # @modified 2021/11/07 22:01:00
 import xutils
-import xtemplate
 import sys
 import inspect
-import xauth
+
+from xnote.core import xtemplate
+from xnote.core import xauth
 from xutils import textutil
 from xutils import six
 
@@ -111,16 +112,18 @@ def getargspec(value):
     return argspec
 
 def do_class(functions, name, clz):
-    doc = getattr(clz, "__doc__")
+    doc = inspect.getdoc(clz)
     if doc == None:
         doc = "None"
+
     functions.append(DocInfo(name, doc, "class"))
     for attr in clz.__dict__:
         value = clz.__dict__[attr]
         if inspect.isroutine(value):
-            if attr[0] == "_" and value.__doc__ is None:
+            value_doc = inspect.getdoc(value)
+            if attr[0] == "_" and value_doc is None:
                 continue
-            functions.append(DocInfo(name+"."+attr+getargspec(value), value.__doc__, "method"))
+            functions.append(DocInfo(name+"."+attr+getargspec(value), value_doc, "method"))
 
 class ModuleDetailHandler(object):
 

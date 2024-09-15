@@ -23,13 +23,13 @@ xnote是一款面向个人的轻量级笔记系统，提供多种维度的数据
 以下是一些页面展示
 
 功能列表
-![功能列表](https://enjoy.applinzi.com/data/files/admin/upload/2024/02/xnote_v2.9.6_home.png)
+![功能列表](https://cdn.jsdelivr.net/gh/xupingmao/xnote-doc/images/v2.9.6/home.png)
 
 笔记本
-![笔记](https://enjoy.applinzi.com/data/files/admin/upload/2024/02/xnote_v2.9.6_books.png)
+![笔记](https://cdn.jsdelivr.net/gh/xupingmao/xnote-doc/images/v2.9.6/books.png)
 
 markdown页面
-![markdown](https://enjoy.applinzi.com/data/files/admin/upload/2024/02/xnote_v2.9.6_markdown.png)
+![markdown](https://cdn.jsdelivr.net/gh/xupingmao/xnote-doc/images/v2.9.6/markdown.png)
 
 -----
 ## 项目地址

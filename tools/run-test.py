@@ -15,6 +15,9 @@ def do_clean():
 	print("一些清理工作...")
 	if os.path.exists("testdata"):
 		shutil.rmtree("testdata")
+	
+	# 创建临时目录用于测试
+	fsutil.makedirs("./tmp")
 
 def update_version():
 	print("更新版本号...")
@@ -156,6 +159,7 @@ def main():
 	parser.add_argument("--mysql_user", default="test")
 	parser.add_argument("--mysql_password", default="gR4!KTO@9q")
 	parser.add_argument("--mysql_database", default="test")
+	parser.add_argument("--mysql_port", default="3306")
 	args = parser.parse_args()
 	load_config_from_test_prop_file(args)
 

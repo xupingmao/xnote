@@ -39,7 +39,7 @@ from .models import SystemSyncToken
 from handlers.system.system_sync.dao import ClusterConfigDao
 
 class SyncConfig:
-
+    
     @staticmethod
     def need_sync_db():
         return xconfig.WebConfig.sync_db_from_leader
@@ -56,9 +56,9 @@ class SyncConfig:
     def set_need_sync_files(bool_value = False):
         xconfig.WebConfig.sync_files_from_leader = bool_value
 
-    @staticmethod
-    def is_leader():
-        return xconfig.WebConfig.node_role == "leader"
+    @classmethod
+    def is_leader(cls):
+        return xconfig.WebConfig.is_leader()
 
 def get_system_role():
     return xconfig.get_global_config("system.node_role")
@@ -204,6 +204,7 @@ class SyncHandler:
             xutils.print_exc()
 
         kw.node_role = get_system_role()
+        kw.is_leader = SyncConfig.is_leader()
         kw.leader_host = ClusterConfigDao.get_leader_host()
         kw.leader_token = role_manager.get_leader_token()
         kw.leader_url = role_manager.get_leader_url()
@@ -379,8 +380,7 @@ def on_ping_leader(ctx=None):
 @xmanager.listen("sync.step")
 # @log_mem_info_deco("on_sync_files_from_leader")
 def on_sync_files_from_leader(ctx=None):
-    role = get_system_role()
-    if role == "leader":
+    if SyncConfig.is_leader():
         return None
     
     if not SyncConfig.need_sync_files():
@@ -403,8 +403,7 @@ def on_sync_files_from_leader(ctx=None):
 @xmanager.listen("sync.step")
 # @log_mem_info_deco("on_sync_db_from_leader")
 def on_sync_db_from_leader(ctx=None):
-    role = get_system_role()
-    if role == "leader":
+    if SyncConfig.is_leader():
         return None
     
     if not SyncConfig.need_sync_db():

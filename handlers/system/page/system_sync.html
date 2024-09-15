@@ -27,11 +27,11 @@
 
 <div class="card">
     <div class="list">
-        {% if node_role == "follower" %}
+        {% if not is_leader %}
             {% include system/component/system_sync_follower_view.html %}
         {% end %}
 
-        {% if node_role == "leader" %}
+        {% if is_leader %}
 
             <div class="list-item">
                 <span>授权token</span>
