@@ -90,8 +90,8 @@ class BaseTablePlugin(BasePlugin):
     
     def handle_page(self):
         table = DataTable()
-        table.add_head("类型", "type")
-        table.add_head("标题", "title", css_class_field="title_class")
+        table.add_head("类型", "type", css_class_field="type_class")
+        table.add_head("标题", "title", link_field="view_url")
         table.add_head("日期", "date")
         table.add_head("内容", "content")
 
@@ -101,9 +101,10 @@ class BaseTablePlugin(BasePlugin):
         row = {}
         row["type"] = "类型1"
         row["title"] = "测试"
-        row["title_class"] = "red"
+        row["type_class"] = "red"
         row["date"] = "2020-01-01"
         row["content"] = "测试内容"
+        row["view_url"] = "/note/index"
         row["edit_url"] = "?action=edit"
         row["delete_url"] = "?action=delete"
         row["delete_msg"] = "确认删除记录吗?"

@@ -21,7 +21,7 @@ class TabBox:
 {% end %}
 </div>
 """
-    _compiled_template = xtemplate.compile_template(TAB_HTML, "<tab-template>")
+    _compiled_template = xtemplate.compile_template(TAB_HTML, "xnote.plugin.tab")
 
     def __init__(self, css_class=""):
         self.css_class = css_class

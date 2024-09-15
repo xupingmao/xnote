@@ -9,6 +9,8 @@
 @Description  : 描述
 """
 
+from xnote.core import xtemplate
+
 class UIComponent:
     """UI组件的基类"""
     def render(self):
@@ -33,18 +35,20 @@ class Panel(UIComponent):
 class Input(UIComponent):
     """输入文本框"""
 
+    _code = """
+<div class="x-plugin-input">
+    <label class="x-plugin-input-label">{{info.label}}</label>
+    <input class="x-plugin-input-text" name="{{info.name}}" value="{{info.value}}">
+</div>
+"""
+
     def __init__(self, label, name, value):
         self.label = label
         self.name = name
         self.value = value
 
     def render(self):
-        html = '<div class="x-plugin-input">'
-        html += '<label class="x-plugin-input-label">%s</label>' % self.label
-        html += '<input class="x-plugin-input-text" name="%s" value="%s">' % (
-            self.name, self.value)
-        html += '</div>'
-        return html
+        return xtemplate.render_text(text=self._code, template_name="xnote.plugin.input", info=self)
 
 
 class Textarea:

@@ -16,12 +16,20 @@ class TableActionType:
     confirm = "confirm"
     edit_form = "edit_form"
 
+class LinkTargetType:
+    """a标签的target属性枚举"""
+    blank = "_blank"
+    self_ = "_self"
+    parent = "_parent"
+    top = "_top"
+
 class TableHead:
     """表格的标题单元"""
     def __init__(self):
         self.title = ""
         self.field = ""
         self.link_field = ""
+        self.link_target = ""
         self.type = ""
         self.width = "auto"
         self.css_class_field = ""
@@ -44,6 +52,7 @@ class TableAction:
         self.title = ""
         self.type = ""
         self.link_field = ""
+        self.link_target = ""
         self.title_field = ""
         self.css_class=""
         self.msg_field = ""
@@ -78,13 +87,14 @@ class DataTable:
         self.rows = []
         self.actions = []
     
-    def add_head(self, title="", field = "", type="", link_field="", width="auto", css_class_field=""):
+    def add_head(self, title="", field = "", type="", link_field="", width="auto", css_class_field="", link_target=""):
         head = TableHead()
         head.title = title
         head.field = field
         head.type = type
         head.width = width
         head.link_field = link_field
+        head.link_target = link_target
         head.css_class_field = css_class_field
         self.heads.append(head)
         
