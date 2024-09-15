@@ -941,6 +941,15 @@ class UserOpLog(Storage):
         self.detail = ""
         self.ip = ""
 
+    @classmethod
+    def from_dict_list(cls, dict_list: list) -> typing.List["UserOpLog"]:
+        result = []
+        for item in dict_list:
+            op_log = UserOpLog()
+            op_log.update(item)
+            result.append(op_log)
+        return result
+
 class UserOpLogDao:
 
     @classmethod
@@ -973,8 +982,9 @@ class UserOpLogDao:
         order = "ctime desc"
         if not reverse:
             order = "ctime"
-        return cls.db.select(where=dict(user_id=user_id), offset=offset, limit=limit, order=order)
-
+        result_list = cls.db.select(where=dict(user_id=user_id), offset=offset, limit=limit, order=order)
+        return UserOpLog.from_dict_list(result_list)
+    
     @classmethod
     def count(cls, user_id=0):
         return cls.db.count(where=dict(user_id=user_id))

@@ -176,10 +176,7 @@ class FileLockInterface:
         pass
 
 class RecordInterface:
-    """数据库记录的接口
-    一般情况下推荐继承 xutils.Storage
-    继承自Storage无法调用类的方法, 这种情况下可以继承当前的接口
-    """
+    """数据库记录的接口"""
 
     @classmethod
     def from_dict(cls, dict_value: dict):

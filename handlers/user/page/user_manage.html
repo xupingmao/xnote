@@ -69,24 +69,9 @@
     <div class="card-title">
         <span>用户操作日志</span>    
     </div>
-    <div class="card">
-        <table class="table op-log-table">
-            <tr>
-                <th>操作时间</th>
-                <th>操作类型</th>
-                <th>IP地址</th>
-                <th>详情</th>
-            </tr>
-
-            {% for log in log_list %}
-                <tr>
-                    <td>{{log.ctime}}</td>
-                    <td>{{log.type}}</td>
-                    <td>{{log.ip}}</td>
-                    <td>{{log.detail}}</td>
-                </tr>
-            {% end %}
-        </table>
+    {% include common/table/table.html %}
+    <div class="top-offset-1 bottom-offset-1">
+        {% include common/pagination.html %}
     </div>
 </div>
 

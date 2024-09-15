@@ -51,6 +51,10 @@
     {% end %}
 </table>
 
+{% if len(_xnote_table.rows) == 0 %}
+    {% include common/text/empty_text.html %}
+{% end %}
+
 <script>
 xnote.table.handleAction = function (target) {
     var url = $(target).attr("data-url");

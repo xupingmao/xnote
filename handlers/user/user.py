@@ -35,7 +35,7 @@ def create_op_log(user_name, op_type, detail):
     dao.UserOpLogDao.create_op_log(log)
 
 
-class ListHandler(BaseTablePlugin):
+class UserListHandler(BaseTablePlugin):
     """用户管理"""
     title = "用户管理"
     option_html = """<button class="btn" onclick="xnote.table.handleEditForm(this)"
@@ -109,6 +109,28 @@ class ListHandler(BaseTablePlugin):
 
 class UserHandler:
 
+    def handle_user_log(self, kw: Storage, user_info: xauth.UserDO):
+        assert user_info != None
+        page = xutils.get_argument_int("page", 1)
+        user_id = user_info.id
+        page_size = 20
+        offset = (page-1) * page_size
+        log_list = OP_LOG_TABLE.list_by_user(user_id=user_id, offset=offset, limit=page_size)
+
+        table = DataTable()
+        table.add_head("操作时间", "type")
+        table.add_head("操作类型", "ctime")
+        table.add_head("详情", "detail")
+
+        for item in log_list:
+            table.add_row(item)
+
+        kw.table = table
+        kw.page = page
+        kw.page_size = page_size
+        kw.page_totalsize = OP_LOG_TABLE.count(user_id=user_id)
+        kw.page_url = f"?name={user_info.name}&page="
+    
     @xauth.login_required("admin")
     def GET(self):
         name = xutils.get_argument_str("name")
@@ -116,17 +138,18 @@ class UserHandler:
         if name != "":
             user_info = xauth.get_user(name)
         
-        user_id = xauth.UserDao.get_id_by_name(name)
         kw = Storage()
         kw.name = name
         kw.user_info = user_info
-        kw.log_list = OP_LOG_TABLE.list_by_user(user_id=user_id, limit=100)
+
+        if user_info != None:
+            self.handle_user_log(kw, user_info=user_info)
 
         return xtemplate.render("user/page/user_manage.html", **kw)
 
     @xauth.login_required("admin")
     def POST(self):
-        name = xutils.get_argument("name")
+        name = xutils.get_argument_str("name")
         password = xutils.get_argument_str("password")
         user_info = xauth.get_user(name)
         if user_info is None:
@@ -233,19 +256,27 @@ class ResetPasswordHandler:
         create_op_log(user_name, dao.UserOpTypeEnum.reset_password.value, "重置密码")
         return dict(code="success", data=new_password)
 
-class UserOpLogHandler:
+class UserOpLogHandler(BaseTablePlugin):
+
+    require_admin = False
+    title = "用户日志"
+    NAV_HTML = ""
+    PAGE_HTML = BaseTablePlugin.TABLE_HTML
 
     @xauth.login_required()
-    def GET(self):
-        user_name = xauth.current_name_str()
-        user_id = xauth.UserDao.get_id_by_name(user_name)
-        log_list = OP_LOG_TABLE.list_by_user(user_id, limit=100)
-        return xtemplate.render("user/page/user_op_log.html", log_list=log_list)
+    def handle_page(self):
+        kw = Storage()
+        user_info = xauth.current_user()
+        assert user_info != None
+        UserHandler().handle_user_log(kw, user_info=user_info)
 
+        self.write_aside("""{% include settings/component/settings_sidebar.html %}""")
+
+        return self.response_page(**kw)
 
 xurls = (
     r"/user/add",  AddHandler,
-    r"/user/list",  ListHandler,
+    r"/user/list",  UserListHandler,
     r"/user/info",   UserInfoHandler,
     r"/user/info_ajax", UserInfoAjaxHandler,
     r"/user/session", SessionInfoAjaxHandler,
@@ -253,7 +284,7 @@ xurls = (
     r"/user/op_log", UserOpLogHandler,
 
     r"/system/user", UserHandler,
-    r"/system/user/list", ListHandler,
+    r"/system/user/list", UserListHandler,
     r"/system/user/remove", RemoveHandler,
     r"/system/user/reset_password", ResetPasswordHandler,
 )

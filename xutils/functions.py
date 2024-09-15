@@ -188,10 +188,6 @@ class MemTable:
     def new_value(self, name, extinfo):
         return HistoryItem(name, extinfo)
 
-    @staticmethod
-    def get_items(name):
-        return History.items.get(name, [])
-
 class History(MemTable):
 
     def __init__(self, type, maxsize):
