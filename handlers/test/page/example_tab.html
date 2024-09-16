@@ -42,6 +42,15 @@
 	<a class="x-tab" data-tab-value="tab3">TAB3</a>
 </div>""" %}
 
+{% init html5 = """
+<div class="x-tab-box border-style" 
+		data-tab-key="tab_test5" 
+		data-tab-default="tab1">
+	<a class="x-tab" data-tab-value="tab1">TAB1</a>
+	<a class="x-tab" data-tab-value="tab2">TAB2</a>
+	<a class="x-tab" data-tab-value="tab3">TAB3</a>
+</div>""" %}
+
 
 <div class="card">
 	<p>按钮tab</p>
@@ -66,6 +75,12 @@
 	<p>下划线tab</p>
 	<pre class="marked-code">{{html4}}</pre>
 	{% raw html4 %}
+</div>
+
+<div class="card">
+	<p>外边框tab</p>
+	<pre class="marked-code">{{html5}}</pre>
+	{% raw html5 %}
 </div>
 
 {% end %}

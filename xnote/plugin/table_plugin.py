@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2024-03-31 11:17:36
 @LastEditors  : xupingmao
-@LastEditTime : 2024-09-01 20:14:26
+@LastEditTime : 2024-09-16 16:08:37
 @FilePath     : /xnote/xnote/plugin/table_plugin.py
 @Description  : 描述
 """
@@ -44,6 +44,10 @@ class BaseTablePlugin(BasePlugin):
     """
 
     PAGE_HTML = NAV_HTML + TABLE_HTML
+    
+    def get_page_html(self):
+        """可以通过重写这个方法实现自定义的页面"""
+        return self.PAGE_HTML
 
     @classmethod
     def rebuild_page_html(cls):
@@ -53,7 +57,8 @@ class BaseTablePlugin(BasePlugin):
         return self.response_ajax(self.EDIT_HTML, **kw)
 
     def response_page(self, **kw):
-        self.writehtml(self.PAGE_HTML, **kw)
+        page_html = self.get_page_html()
+        self.writehtml(page_html, **kw)
 
     def handle(self, input=""):
         action = xutils.get_argument_str("action")

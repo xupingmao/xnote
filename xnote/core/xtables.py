@@ -343,9 +343,10 @@ def init_tag_bind_table():
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("tag_type", "tinyint", default_value=0, comment="一级类型")
         manager.add_column("second_type", "tinyint", default_value=0, comment="二级类型")
-        manager.add_column("tag_code",  "varchar(32)", "")
-        manager.add_column("target_id", "bigint", 0)
-        manager.add_index(["user_id", "tag_code"])
+        manager.add_column("tag_code",  "varchar(32)", default_value="")
+        manager.add_column("target_id", "bigint", default_value=0)
+        manager.add_column("sort_value", "varchar(50)", default_value="")
+        manager.add_index(["user_id", "tag_code", "sort_value"])
         manager.add_index(["user_id", "target_id"])
 
 def init_file_info():
@@ -464,7 +465,7 @@ def init_msg_index_table():
         # 短信息的类型
         manager.add_column("tag", "varchar(16)", "")
         manager.add_column("date", "date", default_value=DEFAULT_DATE)
-        manager.add_column("sort_value", "varchar(64)", default_value="", comment="排序字段")
+        manager.add_column("sort_value", "varchar(50)", default_value="", comment="排序字段")
 
         manager.add_index(["user_id", "ctime"])
         manager.add_index(["user_id", "mtime"])

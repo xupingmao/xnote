@@ -88,12 +88,31 @@
 }
 
 /** 下划线模式 **/
+.x-tab-box.underline-style>.x-tab {
+    border-left: none;
+    border-right: none;
+}
 .x-tab-box.underline-style>.x-tab.active {
+    border-bottom: 3px solid #06f;
+    text-decoration: none;
+}
+.x-tab-box.underline-style>.x-tab:hover {
+    border-bottom: 3px solid #06f;
+    text-decoration: none;
+}
+.x-tab-box.underline-style.green>.x-tab.active {
+    border-bottom: 3px solid green;
+    text-decoration: none;
+}
+.x-tab-box.underline-style.green>.x-tab:hover {
+    border-bottom: 3px solid green;
+    text-decoration: none;
+}
+.x-tab-box.underline-style.red>.x-tab.active {
     border-bottom: 3px solid red;
     text-decoration: none;
 }
-
-.x-tab-box.underline-style>.x-tab:hover {
+.x-tab-box.underline-style.red>.x-tab:hover {
     border-bottom: 3px solid red;
     text-decoration: none;
 }

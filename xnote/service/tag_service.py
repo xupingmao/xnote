@@ -4,7 +4,7 @@
 @email        : 578749341@qq.com
 @Date         : 2023-09-09 11:04:21
 @LastEditors  : xupingmao
-@LastEditTime : 2024-07-13 15:31:27
+@LastEditTime : 2024-09-16 15:55:47
 @FilePath     : /xnote/xnote/service/tag_service.py
 @Description  : 描述
 """
@@ -29,6 +29,7 @@ class TagBind(Storage):
         self.tag_code = ""
         self.target_id = 0    # target_id 对应的是 tag_type
         self.second_type = 0  # 二级类型, 这是target_id实体的一个属性
+        self.sort_value = ""  # 排序字段
 
     @classmethod
     def from_dict(cls, dict_value) -> typing.Optional["TagBind"]:
@@ -65,7 +66,7 @@ class TagBindService:
         results = self.db.select(where=where_dict)
         return TagBind.from_dict_list(results)
     
-    def list_by_tag(self, user_id=0, tag_code="", second_type=0, offset=0, limit=20, order="ctime desc"):
+    def list_by_tag(self, user_id=0, tag_code="", second_type=0, offset=0, limit=20, order="sort_value desc"):
         tag_code = tag_code.lower()
         vars = dict(tag_type=self.default_tag_type, user_id=user_id, tag_code=tag_code, second_type=second_type)
         where_sql = "user_id = $user_id AND tag_code=$tag_code AND tag_type = $tag_type"
@@ -110,7 +111,7 @@ class TagBindService:
 
         self.db.update(where=where_dict, second_type=second_type)
 
-    def bind_tags(self, user_id=0, target_id=0, tags=[], update_only_changed = False, second_type=0):
+    def bind_tags(self, user_id=0, target_id=0, tags=[], update_only_changed = False, second_type=0, sort_value=""):
         assert target_id > 0
         tags = self.normalize_tags(tags)
         tag_type = self.default_tag_type
@@ -137,4 +138,5 @@ class TagBindService:
                 new_bind.user_id = user_id
                 new_bind.target_id = target_id
                 new_bind.tag_code = tag_code
+                new_bind.sort_value = sort_value
                 self.db.insert(**new_bind)

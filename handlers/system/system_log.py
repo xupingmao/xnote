@@ -2,28 +2,28 @@
 """
 @Author       : xupingmao
 @email        : 578749341@qq.com
-@Date         : 2023-04-06 12:04:41
+@Date         : 2018/03/03 12:46:20
 @LastEditors  : xupingmao
-@LastEditTime : 2024-02-12 22:10:17
-@FilePath     : /xnote/handlers/system/system_log.py
+@LastEditTime : 2024-09-16 17:21:35
 @Description  : 描述
 """
-# -*- coding:utf-8 -*-
-# @author xupingmao <578749341@qq.com>
-# @since 2018/03/03 12:46:20
-# @modified 2022/04/20 22:50:10
+
 import os
 import time
+import xutils
+
 from collections import deque
 from xnote.core import xauth
-import xutils
 from xnote.core import xconfig
 from xnote.core import xmanager
 from xnote.core import xtables
-from xutils import logutil, dbutil, webutil, dateutil
+from xutils import logutil, dbutil, webutil, dateutil, jsonutil
 from xutils.imports import *
 from xnote.core.xtemplate import BasePlugin
 from xutils.functions import iter_exists
+from xnote.plugin.table_plugin import BaseTablePlugin
+from xnote.plugin import DataTable
+from xnote.plugin import TableActionType
 
 uv_db = dbutil.get_table("uv")
 
@@ -241,7 +241,69 @@ class LogVisitHandler:
         return self.do_get(site=site, ip=ip)
 
 
+class DatabaseLogHandler(BaseTablePlugin):
+    
+    title = "数据库日志"
+    
+    NAV_HTML = """
+    {% include system/component/system_log_tab.html %}
+    
+    <div class="card x-tab-box" data-tab-key="table_name" data-tab-default="sys_log">
+        {% for table_name in table_name_list %}
+            <a class="x-tab" data-tab-value="{{table_name}}" href="{{_server_home}}/system/log/db?log_type=db&table_name={{table_name}}">{{table_name}}</a>
+        {% end %}
+    </div>
+    """
+        
+    page_html = NAV_HTML + BaseTablePlugin.TABLE_HTML
+    
+    table_type_dict = {
+        "sys_log": "kv"
+    }
+    
+    def get_page_html(self):
+        return self.page_html
+    
+    def handle_page(self):
+        table_name_list = ["sys_log"]
+        table_name = xutils.get_argument_str("table_name", "sys_log")
+        page = xutils.get_argument_int("page", 1)
+        page_size = 20
+        
+        table_type = self.table_type_dict.get(table_name, "sql")
+        
+        table = DataTable()
+        table.add_head("时间", "ctime")
+        table.add_head("内容", "content")
+        page_total = 0
+        
+        if table_type == "kv":
+            page_total = 10000
+            db = dbutil.get_table(table_name=table_name)
+            offset = (page-1)*page_size
+            for item in db.iter(offset=offset, limit=20, reverse=True):
+                row = {}
+                content = jsonutil.tojson(item)
+                
+                max_content_size = 1024
+                if len(content) > max_content_size:
+                    content = content[:max_content_size] + "..."
+                    
+                row["ctime"] = item.get("ctime")
+                row["content"] = content
+                table.add_row(row)
+
+        kw = Storage()
+        kw.table = table
+        kw.table_name_list = table_name_list
+        kw.page = page
+        kw.page_total = page_total
+        kw.page_url = f"?log_type=db&table_name={table_name}&page="
+        
+        return self.response_page(**kw)
+
 xurls = (
     r"/system/log", LogHandler,
+    r"/system/log/db", DatabaseLogHandler,
     r"/system/log/visit", LogVisitHandler,
 )
