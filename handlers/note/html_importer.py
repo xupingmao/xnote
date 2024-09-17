@@ -24,6 +24,7 @@ from xutils.text_parser import TextParserBase
 from . import dao
 from . import dao_edit
 from .dao_api import NoteDao
+from handlers.note.models import NoteDO
 
 def get_addr(src, host):
     if src is None:
@@ -105,7 +106,7 @@ def clean_whitespace(text):
     return buf.read()
 
 
-def save_to_archive_dir(name):
+def save_to_archive_dir(name, text=""):
     dirname = os.path.join(xconfig.DATA_DIR, time.strftime("archive/%Y/%m/%d"))
     xutils.makedirs(dirname)
     path = os.path.join(dirname, "%s_%s.md" % (name, time.strftime("%H%M%S")))
@@ -185,6 +186,7 @@ class ImportNoteHandler:
             address = xutils.get_argument_str("url", "")
             name = xutils.get_argument_str("name", "")
             filename = ""
+            html = ""
 
             if hasattr(file, "filename"):
                 filename = file.filename
@@ -204,7 +206,7 @@ class ImportNoteHandler:
             result = import_from_html(html, address)
 
             if name != "" and name != None:
-                save_to_archive_dir(name)
+                save_to_archive_dir(name, html)
 
             kw = self.get_kw()
             kw.address = address
@@ -373,7 +375,7 @@ class CacheExternalHandler:
 
         return dict(code="success", message="更新成功")
 
-def has_external_image(note):
+def has_external_image(note: NoteDO):
     # type: (dict) -> bool
     """判断是否有外部图片资源"""
     if note == None:

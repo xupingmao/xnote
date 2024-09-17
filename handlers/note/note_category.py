@@ -8,18 +8,19 @@
 @FilePath     : /xnote/handlers/note/note_category.py
 @Description  : 笔记本类型
 """
-from handlers.note.dao_category import get_category_by_code, refresh_category_count, upsert_category
-import xauth
-import xtemplate
-import xutils
 
-NOTE_DAO = xutils.DAO("note")
+import xutils
+from xutils import webutil
+from handlers.note.dao_category import get_category_by_code, refresh_category_count, upsert_category
+from xnote.core import xauth
+from xnote.core import xtemplate
+from handlers.note import dao as note_dao
 
 
 class NoteCategory:
 
     def __init__(self, code, name):
-        self.name = "%s-%s" % (code, name)
+        self.name = f"{code}-{name}"
         self.url  = "/note/group?note_category=" + code
         self.icon = ""
         self.priority = 0
@@ -54,7 +55,7 @@ class CategoryHandler:
         files = get_ddc_category_list()
         cat_type = xutils.get_argument("type", "ddc")
 
-        root = NOTE_DAO.get_root()
+        root = note_dao.get_root()
         return xtemplate.render("note/page/category.html", 
             file = root, 
             title = u"杜威十进制分类法(DDC)",
@@ -72,23 +73,22 @@ class CategoryUpdateAjaxHandler:
         name = xutils.get_argument("name", "")
 
         if name == "":
-            return dict(code="400", message="name不能为空")
+            return webutil.FailedResult(code="400", message="name不能为空")
         
         user_name = xauth.current_name()
         cat_info = get_category_by_code(user_name, code)
         if cat_info == None:
-            return dict(code="400", message="无效的类目编码:%s" % code)
+            return webutil.FailedResult(code="400", message="无效的类目编码:%s" % code)
             
         cat_info.name = name
 
         upsert_category(user_name, cat_info)
         refresh_category_count(user_name, code)
 
-        return dict(code="success")
+        return webutil.SuccessResult()
 
 
 xurls = (
     r"/note/category", CategoryHandler,
-
     r"/api/note/category/update", CategoryUpdateAjaxHandler,
 )

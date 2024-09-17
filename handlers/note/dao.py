@@ -34,12 +34,12 @@ from xnote.core import xtables
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
-from .dao_api import NoteDao
-from . import dao_log
 from xutils import lists
 from web.db import SQLLiteral
-from .models import NoteIndexDO, NoteDO, NoteLevelEnum, del_dict_key, remove_virtual_fields
-from .models import NoteToken
+from handlers.note.dao_api import NoteDao
+from handlers.note import dao_log
+from handlers.note.models import NoteIndexDO, NoteDO, NoteLevelEnum, del_dict_key, remove_virtual_fields
+from handlers.note.models import NoteToken
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -48,7 +48,6 @@ _search_history_db = dbutil.get_table("search_history")
 
 _note_history_db = dbutil.get_hash_table("note_history")
 _note_history_index_db = xtables.get_table_by_name("note_history_index")
-_public_db = dbutil.get_table("note_public")
 _token_db = dbutil.get_table("token")
 
 DB_PATH = xconfig.DB_PATH
@@ -101,7 +100,9 @@ class NoteIndexDao:
             index_do[key] = note_do.get(key)
         index_do.pop("id", None)
         index_do.before_save(note_do)
-        return cls.db.insert(**index_do)
+        new_id = cls.db.insert(**index_do)
+        assert isinstance(new_id, int)
+        return new_id
     
     @classmethod
     def update(cls, note_do: NoteDO):
@@ -139,7 +140,9 @@ class NoteIndexDao:
         note_id = int(id)
         first = cls.db.select_first(where=dict(id=note_id))
         if first != None:
-            cls.compat_old(first)
+            result = NoteIndexDO.from_dict(first)
+            cls.compat_old(result)
+            return result
         return first
 
     @classmethod
@@ -378,7 +381,7 @@ class ShareInfoDao:
 
 def get_root(creator=None):
     if creator == None:
-        creator = xauth.current_name()
+        creator = xauth.current_name_str()
 
     assert creator != None
     root = NoteDO()
@@ -417,10 +420,6 @@ def get_archived_group():
     build_note_info(group)
     group.url = "/note/archived"
     return group
-
-def get_note_public_table():
-    return _public_db
-
 
 def batch_query_dict(id_list):
     result = dict()
@@ -1334,7 +1333,7 @@ def count_group_by_db(creator, status=None, query_root=False):
 
 
 @xutils.timeit(name="NoteDao.ListRootGroup:leveldb", logfile=True)
-def list_root_group(creator=None, orderby="name"):
+def list_root_group(creator: str, orderby="name"):
     creator_id = xauth.UserDao.get_id_by_name(creator)
     notes = NoteIndexDao.list(creator_id=creator_id, parent_id=0, type="group")
     sort_notes(notes, orderby)
