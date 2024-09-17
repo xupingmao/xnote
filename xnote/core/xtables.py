@@ -170,6 +170,8 @@ def init_note_index_table():
         manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         # 修改时间mtime
         manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
+        # 访问时间atime
+        manager.add_column("atime", "datetime", default_value=DEFAULT_DATETIME)
         # 删除时间
         manager.add_column("dtime", "datetime", DEFAULT_DATETIME)
         manager.add_column("is_deleted", "tinyint", 0, comment="逻辑删除标记")
@@ -186,6 +188,7 @@ def init_note_index_table():
         manager.add_index("parent_id")
         manager.add_index(["creator_id", "mtime"])
         manager.add_index(["creator_id", "ctime"])
+        manager.add_index(["creator_id", "atime"])
         manager.add_index(["creator_id", "type"])
 
 def init_note_history_index():

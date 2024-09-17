@@ -199,8 +199,8 @@ def count_visit_log(user_name):
     user_id = xauth.UserDao.get_id_by_name(user_name)
     return UserNoteLogDao.count(user_id=user_id)
 
-def add_visit_log(user_name, note):
-    return _update_log(user_name, note)
+def add_visit_log(user_name, note, user_id = 0):
+    return _update_log(user_name, note, user_id=user_id)
 
 def add_edit_log(user_name, note):
     # 目前通过mtime记录

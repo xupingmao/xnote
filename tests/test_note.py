@@ -93,6 +93,7 @@ class TestMain(BaseTestCase):
 
         user_info = xauth.current_user()
         assert user_info != None
+        user_id = user_info.id
         
         group_id = get_default_group_id()
         file = json_request("/note/add", method="POST", 
@@ -122,7 +123,7 @@ class TestMain(BaseTestCase):
         self.assertEqual("success", resp["code"])
 
         # 访问日志
-        visit_note("test", id)
+        visit_note("test", id, user_id=user_id)
         
         # 普通更新
         resp = json_request_return_dict("/note/save", method="POST",
@@ -684,9 +685,10 @@ A example image
         delete_note_for_test("visit-test")
 
         note_id = create_note_for_test("md", "visit-test")
+        user_id = xauth.current_user_id()
 
         for i in range(100):
-            visit_note(xauth.current_name(), note_id)
+            visit_note(xauth.current_name_str(), note_id, user_id=user_id)
 
         recent_notes = list_most_visited(xauth.current_name(), 0, 20)
 

@@ -10,6 +10,7 @@ from xnote.core import xauth, xconfig, xtables, xtemplate, xmanager
 from web import HTTPError
 
 from xnote.core.xconfig import Storage
+from xnote.core import xnote_event
 from xutils import fsutil
 from xutils import textutil
 from xutils import webutil
@@ -28,10 +29,10 @@ NOTE_DAO = xutils.DAO("note")
 
 
 @xmanager.listen("note.view", is_async=False)
-def visit_by_id(ctx):
+def visit_by_id(ctx: xnote_event.NoteViewEvent):
     note_id = ctx.id
     user_name = ctx.user_name
-    note_dao.visit_note(user_name, note_id)
+    note_dao.visit_note(user_name, note_id, user_id=ctx.user_id)
 
 
 def check_auth(file, user_name):
@@ -361,7 +362,7 @@ class ViewHandler:
         # 定义一些变量
         recent_created = []
 
-        event_ctx = Storage(id=file.id, user_name=user_name)
+        event_ctx = xnote_event.NoteViewEvent(id=file.id, user_name=user_name, user_id=user_id)
         xmanager.fire("note.view", event_ctx)
 
         # 通用的预处理

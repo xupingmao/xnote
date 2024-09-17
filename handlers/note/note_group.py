@@ -26,6 +26,7 @@ from . import dao
 from . import dao_book
 from . import dao_share
 from . import dao_log
+from handlers.note.models import NoteTypeInfo
 from .dao_api import NoteDao
 from handlers.note.note_service import NoteService
 import handlers.note.dao as note_dao
@@ -584,7 +585,7 @@ class BaseListHandler:
 
     note_type = "gallery"
     title = "相册"
-    orderby = "ctime desc"
+    orderby = "atime desc"
     create_type = ""
     create_text = T("创建笔记")
     date_type = "cdate"
@@ -598,31 +599,25 @@ class BaseListHandler:
 
     def map_notes(self, notes):
         for note in notes:
-            note.badge_info = dateutil.format_date(note.ctime)
+            note.badge_info = dateutil.format_date(note.atime)
 
         return notes
     
     def get_type_list(self):
-        return [
-            Storage(url="/note/all", name="全部", tag_code="all"),
-            Storage(url="/note/all?type=md", name="文档", tag_code="md"),
-            Storage(url="/note/all?type=gallery", name="相册", tag_code="gallery"),
-            Storage(url="/note/all?type=list", name="清单", tag_code="list"),
-            Storage(url="/note/all?type=table", name="表格", tag_code="table"),
-        ]
+        return NoteTypeInfo.get_type_list()
+    
+    def get_page_url(self):
+        return f"/note/all?type={self.note_type}&page="
 
     @xauth.login_required()
     def GET(self):
-        page = xutils.get_argument("page", 1, type=int)
-        user_name = xauth.current_name()
-
-        assert isinstance(page, int)
+        page = xutils.get_argument_int("page", 1)
+        user_name = xauth.current_name_str()
 
         limit = xconfig.PAGE_SIZE
         offset = (page-1)*limit
 
         self.note_type = xutils.get_argument_str("type", self.note_type)
-        assert isinstance(self.note_type, str)
 
         amount = self.count_notes(user_name)
         notes = self.list_notes(user_name, offset, limit)
@@ -633,7 +628,7 @@ class BaseListHandler:
         kw.show_pagination = True
         kw.page = page
         kw.page_max = math.ceil(amount / xconfig.PAGE_SIZE)
-        kw.page_url = "/note/%s?page=" % self.note_type
+        kw.page_url = self.get_page_url()
         kw.notes = notes
         kw.group_type = self.note_type
         kw.note_type = self.note_type
@@ -642,6 +637,7 @@ class BaseListHandler:
         kw.type_list = self.get_type_list()
         kw.show_path = False
         kw.file_type = "group"
+        kw.sticky_position = "right"
 
         # 上级菜单
         parent = PathNode(T("根目录"), "/note/group")

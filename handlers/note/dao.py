@@ -121,10 +121,14 @@ class NoteIndexDao:
         return cls.db.update(where=dict(id=note_id, user_id=user_id), visit_cnt=visit_cnt)
     
     @classmethod
-    def incr_visit_cnt(cls, note_id=0):
+    def incr_visit_cnt(cls, note_id=0, atime=None):
         if not cls.db.writable:
             return
-        return cls.db.update(where=dict(id=note_id), visit_cnt=SQLLiteral("visit_cnt+1"))
+        update_kw = {}
+        if atime != None:
+            update_kw["atime"] = atime
+        update_kw["visit_cnt"] = SQLLiteral("visit_cnt+1")
+        return cls.db.update(where=dict(id=note_id), **update_kw)
 
     @classmethod
     def update_level(cls, note_id=0, level=0):
@@ -159,7 +163,6 @@ class NoteIndexDao:
         item.badge_info = ""
         item.show_next = False
         item.archived = (item.level<0)
-        item.atime = DEFAULT_DATETIME
     
     @classmethod
     def fix_result(cls, result=[]):
@@ -532,6 +535,9 @@ def sort_by_size_desc(notes):
     for note in notes:
         note.badge_info = "%s" % note.size
 
+def empty_sort_func(notes, orderby=""):
+    pass
+
 SORT_FUNC_DICT = {
     "name": sort_by_name,
     "name_asc": sort_by_name,
@@ -549,12 +555,15 @@ SORT_FUNC_DICT = {
     "hot_desc": sort_by_hot_index,
     "size_desc": sort_by_size_desc,
     "default": sort_by_default,
+    "atime_desc": empty_sort_func,
 }
 
 
 def sort_notes(notes, orderby="name"):
     if orderby is None:
         orderby = "name"
+    else:
+        orderby = orderby.replace(" ", "_").lower()
 
     sort_func = SORT_FUNC_DICT.get(orderby, sort_by_mtime_desc)
     build_note_list_info(notes, orderby)
@@ -927,8 +936,8 @@ def add_create_log(note):
     dao_log.add_create_log(note.creator, note)
 
 
-def add_visit_log(user_name, note):
-    dao_log.add_visit_log(user_name, note)
+def add_visit_log(user_name, note, user_id=0):
+    dao_log.add_visit_log(user_name, note, user_id=user_id)
 
 
 def put_note_to_db(note_id, note):
@@ -1117,12 +1126,14 @@ def check_by_name(creator, name):
         raise Exception("笔记【%s】已存在" % name)
 
 
-def visit_note(user_name, id):
-    note = get_by_id(id)
+def visit_note(user_name: str, note_id: int, user_id = 0):
+    # print(f"visit_note: note_id={note_id}, user_id={user_id}")
+    note = get_by_id(note_id)
     if note is None:
         return
-
-    note.atime = xutils.format_datetime()
+    
+    now = xutils.format_datetime()
+    note.atime = now
     # 访问的总字数
     if note.visited_cnt is None:
         note.visited_cnt = 0
@@ -1134,11 +1145,12 @@ def visit_note(user_name, id):
         note.hot_index = 0
     note.hot_index += 1
 
-    add_visit_log(user_name, note)
+    add_visit_log(user_name, note, user_id=user_id)
 
-    # TODO 延迟更新索引
-    # update_index(note)
-    NoteIndexDao.incr_visit_cnt(note.id)
+    # 自己访问的场景更新索引
+    if user_id == note.creator_id:
+        update_atime = now
+        NoteIndexDao.incr_visit_cnt(note_id=note_id, atime=update_atime)
 
 def visit_public(note_id):
     ShareInfoDao.incr_visit_cnt(target_id=note_id)
@@ -1658,7 +1670,6 @@ def count_by_type(creator, type):
 def count_sticky(creator):
     creator_id = xauth.UserDao.get_id_by_name(creator)
     return NoteIndexDao.count(creator_id=creator_id, level=1)
-
 
 
 def list_sticky(creator, offset=0, limit=1000, orderby="ctime_desc"):

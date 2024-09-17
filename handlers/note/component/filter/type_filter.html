@@ -1,7 +1,7 @@
 <div class="card btn-line-height">
     <div class="row">
         {% for type_info in type_list %}
-            <a class="tag lightgray large meta"
+            <a class="tag lightgray large meta {{type_info.css_class}}"
                 data-tag="{{type_info.tag_code}}" 
                 href="{{type_info.url}}">{{type_info.name}}</a>
         {% end %}
