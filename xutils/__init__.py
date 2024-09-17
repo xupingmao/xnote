@@ -94,6 +94,11 @@ class SearchResult(dict):
         self.name = name
         self.url = url
         self.raw = raw
+        self.icon = ""
+        self.content = ""
+        self.show_move = False
+        self.show_more_link = False
+        self.html = ""
 
     def __getattr__(self, key): 
         try:

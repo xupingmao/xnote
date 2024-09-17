@@ -9,10 +9,11 @@ import sys
 import re
 import socket
 import six
-import xmanager
-import xconfig
 import xutils
-import xauth
+
+from xnote.core import xmanager
+from xnote.core import xconfig
+from xnote.core import xauth
 from xutils import text_contains, Storage, u
 
 SearchResult = xutils.SearchResult
@@ -42,15 +43,18 @@ def search(ctx):
             f.name = filename
             f.url = "/tools/" + filename
             f.content = filename
+            f.show_move = False
             files.append(f)
 
     if url_pattern.match(name):
         f = SearchResult()
+        f.show_move = False
         f.name = "导入笔记 - " + name
         f.url = "/note/html_importer?url=" + xutils.encode_uri_component(name)
         files.append(f)
 
         f = SearchResult()
+        f.show_move = False
         f.name = "二维码"
         f.url = "/tools/qrcode?content=" + name
         files.append(f)
@@ -88,6 +92,7 @@ def get_server_ip():
 @xmanager.searchable('addr')
 def show_addr_qrcode(ctx):
     r = SearchResult()
+    r.show_move = False
     r.icon = "icon-barcode"
     addr = "http://" + get_server_ip() + ":" + str(xconfig.PORT)
     r.url = addr

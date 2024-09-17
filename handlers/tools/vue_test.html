@@ -1,10 +1,16 @@
 {% extends base %}
 
 {% block head %}
-<script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+    {% include common/layout/wide_left.html %}
+    <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
 {% end %}
 
 {% block body %}
+
+<div class="card">
+    {% set title = "Vue Test" %}
+    {% include common/base_title.html %}
+</div>
 
 {% init bind_html = """
 <a v-bind:href="url">Baidu</a>

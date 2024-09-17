@@ -8,9 +8,10 @@ import time
 import math
 import web
 import xutils
-from xnote.core import xconfig, xauth, xmanager, xtemplate, xnote_hooks
 import handlers.note.dao as note_dao
 import handlers.dict.dict_dao as dict_dao
+
+from xnote.core import xconfig, xauth, xmanager, xtemplate, xnote_hooks
 from xutils import textutil, u
 from xutils import Storage
 from xutils import dateutil
@@ -54,6 +55,7 @@ class BaseRule:
     def __init__(self, pattern, func, scope="home"):
         self.pattern = pattern
         self.func    = func
+        self.func_str = ""
         self.scope   = scope
 
 def fill_note_info(files):
@@ -68,8 +70,9 @@ def fill_note_info(files):
         parent = note_dict.get(file.parent_id)
         if parent is not None:
             file.parent_name = parent.name
-        file.show_move = True
-        file.badge_info = "热度:%s" % file.hot_index
+        if file.category == "note":
+            file.show_move = True
+            file.badge_info = "热度:%s" % file.hot_index
 
 def log_search_history(user, key, category = "default", cost_time = 0):
     note_dao.add_search_history(user, key, category, cost_time)
@@ -132,9 +135,9 @@ def build_search_context(user_name, category, key):
 
 class SearchHandler:
 
-    def do_search(self, page_ctx, key, offset, limit):
-        category    = xutils.get_argument("category", "")
-        search_type = xutils.get_argument("search_type", "")
+    def do_search(self, page_ctx: SearchContext, key, offset, limit):
+        category    = xutils.get_argument_str("category", "")
+        search_type = xutils.get_argument_str("search_type", "")
         words      = textutil.split_words(key)
         user_name  = xauth.get_current_name()
         ctx        = build_search_context(user_name, category, key)
@@ -232,15 +235,19 @@ class SearchHandler:
         return notes[offset:offset+limit], len(notes)
 
     def do_search_task(self, ctx, key):
-        user_name = xauth.get_current_name()
+        import handlers.message.dao as MSG_DAO
+        from handlers.message.dao import MessageDO
+        from handlers.message.message_utils import process_message
+
+        user_name = xauth.current_name_str()
         offset = ctx.offset
         limit  = ctx.limit
 
         search_tags = set(["task"])
-        item_list, amount = MSG_DAO.search(user_name, key, offset, limit, search_tags = search_tags)
+        item_list, amount = MSG_DAO.search_message(user_name, key, offset, limit, search_tags = search_tags)
 
         for item in item_list:
-            MSG_DAO.process_message(item)
+            process_message(item)
             prefix = u("待办 - ")
 
             if item.tag == "done":
@@ -251,9 +258,9 @@ class SearchHandler:
             item.url  = "#"
         
         # 统计已完成待办数量
-        temp, done_count = MSG_DAO.search(user_name, key, search_tags = set(["done"]), count_only=True)
+        temp, done_count = MSG_DAO.search_message(user_name, key, search_tags = set(["done"]), count_only=True)
         if done_count > 0:
-            done_summary = Storage()
+            done_summary = MessageDO()
             done_summary.icon = "hide"
             done_summary.name = "已完成任务[%d]" % done_count
             done_summary.url =  "/message?tag=search&p=done&key=%s" % xutils.quote(key)
@@ -291,7 +298,7 @@ class SearchHandler:
         pagesize    = xconfig.SEARCH_PAGE_SIZE
         offset      = (page-1) * pagesize
         limit       = pagesize
-        ctx         = Storage()
+        ctx         = SearchContext()
         ctx.offset  = offset
         ctx.limit   = limit
 
@@ -305,16 +312,17 @@ class SearchHandler:
 
         files, count = self.do_search_with_profile(ctx, key, offset, pagesize)
 
-        return xtemplate.render("search/page/search_result.html", 
-            show_aside = False,
-            key = key,
-            html_title = "Search",
-            category = category,
-            files    = files, 
-            title    = title,
-            page_max = int(math.ceil(count/pagesize)),
-            page_url = page_url,
-            **ctx)
+        kw = Storage()
+        kw.show_aside = True
+        kw.category = category
+        kw.html_title = "Search"
+        kw.key = key
+        kw.files = files
+        kw.title = title
+        kw.page_max = int(math.ceil(count/pagesize))
+        kw.page_url = page_url
+
+        return xtemplate.render("search/page/search_result.html", **kw)
 
 
 class SearchHistoryHandler:
@@ -432,7 +440,8 @@ class RulesHandler:
         return xtemplate.render("search/search_rules.html", rules = rules, show_search = False)
 
 def list_search_rules(user_name):
-    list, count = MSG_DAO.list_by_tag(user_name, 'key', 0, 1000)
+    import handlers.message.dao as msg_dao
+    list, count = msg_dao.list_by_tag(user_name, 'key', 0, 1000)
 
     for item in list:
         item.url = "/note/timeline?type=search&key=" + xutils.encode_uri_component(item.content)
@@ -461,14 +470,14 @@ class SearchDialogAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        key = xutils.get_argument("key", "")
-        offset = xutils.get_argument("offset", 0, type = int)
-        limit = xutils.get_argument("limit", 100, type = int)
+        key = xutils.get_argument_str("key", "")
+        offset = xutils.get_argument_int("offset", 0)
+        limit = xutils.get_argument_int("limit", 100)
         xutils.get_argument("callback", "")
 
         if key != "":
             searcher = SearchHandler()
-            ctx = Storage()
+            ctx = SearchContext()
             ctx.offset = offset
             ctx.limit = limit
             result, length = searcher.do_search(ctx, key, offset, limit)

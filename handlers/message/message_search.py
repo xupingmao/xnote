@@ -10,7 +10,7 @@ from handlers.message import dao, message_utils
 
 
 @xmanager.searchable()
-def on_search_message(ctx):
+def on_search_message(ctx: SearchContext):
     if ctx.search_message is False:
         return
 
@@ -45,6 +45,7 @@ def on_search_message(ctx):
         more.url = "/message?key=" + ctx.key
         more.icon = "fa-file-text-o"
         more.show_more_link = True
+        more.show_move = False
         search_result.insert(0, more)
 
     if len(search_result) > 0:
