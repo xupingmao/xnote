@@ -737,7 +737,7 @@ class StickyListHandler(BaseListHandler):
             return 0
 
     def list_notes(self, user_name, offset, limit):
-        return note_dao.list_sticky(user_name, offset, limit)
+        return note_dao.list_sticky(user_name, offset, limit, orderby="atime desc")
 
     def get_page_url(self):
         return f"/note/sticky?type={self.note_type}&page="
