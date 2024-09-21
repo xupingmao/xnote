@@ -721,6 +721,8 @@ class RemovedListHandler(BaseListHandler):
             note.badge_info = dateutil.format_date(note.dtime)
         return notes
 
+    def get_page_url(self):
+        return f"/note/removed?type={self.note_type}&page="
 
 class StickyListHandler(BaseListHandler):
 
@@ -737,6 +739,8 @@ class StickyListHandler(BaseListHandler):
     def list_notes(self, user_name, offset, limit):
         return note_dao.list_sticky(user_name, offset, limit)
 
+    def get_page_url(self):
+        return f"/note/sticky?type={self.note_type}&page="
 
 class LogListHandler(BaseListHandler):
 
