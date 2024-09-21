@@ -137,7 +137,7 @@ class NoteTypeInfo:
     def get_type_list(cls):
         return [
             NoteTypeInfo(url="/note/all", name="全部", tag_code="all"),
-            NoteTypeInfo(url="/note/all?type=group", name="笔记本", tag_code="group"),
+            NoteTypeInfo(url="/note/group_list?type=group", name="笔记本", tag_code="group"),
             NoteTypeInfo(url="/note/all?type=md", name="文档", tag_code="md"),
             NoteTypeInfo(url="/note/all?type=gallery", name="相册", tag_code="gallery"),
             NoteTypeInfo(url="/note/all?type=list", name="清单", tag_code="list"),

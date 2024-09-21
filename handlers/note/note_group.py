@@ -334,6 +334,8 @@ class GroupListHandler:
         kw.active_count = dao.count_group(user_name, status="active", query_root=True)
         kw.smart_count = SmartGroupService.count_smart_group()
         kw.tag_meta_list = dao_tag.list_tag_meta(user_name, tag_type="group")
+        kw.type_list = NoteTypeInfo.get_type_list()
+        kw.note_type = "group"
 
         self.handle_badge_info(notes, tab=tab)
         self.sort_notes(notes, kw)
@@ -590,8 +592,17 @@ class BaseListHandler:
     create_text = T("创建笔记")
     date_type = "cdate"
     show_ext_info = True
-
+    
+    def count_all_notes(self, user_name):
+        note_stat = note_dao.get_note_stat(user_name)
+        if note_stat:
+            return note_stat.total
+        else:
+            return 0
+    
     def count_notes(self, user_name):
+        if self.note_type == "all":
+            return self.count_all_notes(user_name)
         return note_dao.count_by_type(user_name, self.note_type)
 
     def list_notes(self, user_name, offset, limit):
@@ -750,13 +761,6 @@ class AllNoteListHandler(BaseListHandler):
     note_type = "all"
     title = T("我的笔记")
     show_ext_info = False
-
-    def count_notes(self, user_name):
-        note_stat = note_dao.get_note_stat(user_name)
-        if note_stat:
-            return note_stat.total
-        else:
-            return 0
 
 
 class NotePluginHandler:
