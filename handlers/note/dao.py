@@ -193,13 +193,16 @@ class NoteIndexDao:
         return cls.fix_result(result)
     
     @classmethod
+    def to_sql_order(cls, order=""):
+        # dtime_asc -> dtime asc
+        # ctime_desc -> ctime desc
+        return order.replace("_", " ")
+
+    @classmethod
     def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, type_list=[], is_deleted=0, 
             level=None, date=None, date_start=None, date_end=None, date_end_exclusive=None, 
             name_like=None, query_root=False, order="id desc"):
-        if order=="dtime_asc":
-            order = "dtime"
-        if order=="ctime_desc":
-            order = "ctime desc"
+        order = cls.to_sql_order(order)
 
         if type == "table":
             type = None
@@ -1644,10 +1647,10 @@ def get_filter_func(type, default_filter_func):
     return default_filter_func
 
 
-def list_by_type(creator, type, offset=0, limit=20, orderby="name desc", skip_archived=False):
+def list_by_type(creator: str, type: str, offset=0, limit=20, orderby="name desc", skip_archived=False):
     """按照类型查询笔记列表
     @param {str} creator 笔记作者
-    @param {str|None} type  笔记类型
+    @param {str} type  笔记类型
     @param {int} offset 下标
     @param {int} limit 返回的最大列数
     @param {str} orderby 排序
@@ -1673,10 +1676,7 @@ def count_sticky(creator):
 
 def list_sticky(creator, offset=0, limit=1000, orderby="ctime_desc"):
     creator_id = xauth.UserDao.get_id_by_name(creator)
-    notes = NoteIndexDao.list(creator_id=creator_id, level=1, offset=offset, limit=limit)
-    sort_notes(notes, orderby=orderby)
-    return notes[offset:offset+limit]
-
+    return NoteIndexDao.list(creator_id=creator_id, level=1, offset=offset, limit=limit, order=orderby)
 
 def list_archived(creator, offset=0, limit=100):
     creator_id = xauth.UserDao.get_id_by_name(creator)

@@ -24,6 +24,7 @@ from handlers.note import dao_comment
 from handlers.note import dao_delete, dao_tag
 from handlers.note import html_importer
 from handlers.note import dao as note_dao
+from handlers.note.dao import NoteIndexDao
 
 from xutils import Storage
 from xutils import textutil
@@ -793,4 +794,13 @@ A example image
         dict = self.json_request_return_dict("/note/tag/list?tag_type=note&group_id=1&v=2")
         assert dict["success"] == True
         assert len(dict["data"]["all_list"]) > 0
+
+    def test_sticky(self):
+        for id in range(10):
+            note_id = create_note_for_test("md", f"sticky-{id}", content="")
+            NoteIndexDao.update_level(note_id=note_id, level=1)
+        
+        user_name = xauth.current_name_str()
+        result = note_dao.list_sticky(creator=user_name, offset=5, limit=5)
+        assert len(result) == 5
 
