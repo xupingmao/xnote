@@ -155,29 +155,20 @@ class NoteIndexDao:
 
     @classmethod
     def compat_old(cls, item: NoteIndexDO):
-        item.tags = item.tag_str.split()
-        item.priority = item.level
-        item.content = ""
-        item.data = ""
-        item.visited_cnt = item.visit_cnt
-        item.orderby = ""
-        item.category = ""
-        item.hot_index = item.visit_cnt
-        item.badge_info = ""
-        item.show_next = False
-        item.archived = (item.level<0)
+        item.compat_old()
     
     @classmethod
-    def fix_result(cls, result=[]):
+    def fix_result(cls, dict_list=[]):
+        result = NoteIndexDO.from_dict_list(dict_list)
         for item in result:
-            cls.compat_old(item)
             build_note_info(item)
         return result
     
     @classmethod
-    def fix_single_result(cls, result):
-        if result == None:
+    def fix_single_result(cls, dict_value):
+        if dict_value == None:
             return
+        result = NoteIndexDO.from_dict(dict_value)
         cls.compat_old(result)
         build_note_info(result)
         return result
@@ -668,8 +659,6 @@ def list_path(file, limit=5):
         if parent_id == "0":
             if file.type != "group":
                 pathlist.insert(0, get_default_group())
-            elif file.archived:
-                pathlist.insert(0, get_archived_group())
             pathlist.insert(0, convert_to_path_item(get_root(file.creator)))
             break
 
@@ -714,9 +703,7 @@ def get_by_id(id, include_full=True, creator=None):
         note.size = note_index.size
         note.tags = note_index.tags
         note.parent_id = note_index.parent_id
-        note.visited_cnt = note_index.visit_cnt
         note.visit_cnt = note_index.visit_cnt
-        note.hot_index = note_index.hot_index
         note.children_count = note_index.children_count
         note.path = note_index.path
         note.level = note_index.level
@@ -888,7 +875,7 @@ def create_note(note_dict: NoteDO, date_str=None, note_id=None, check_name=True)
     return note_id
 
 
-def create_token(type, note_id=""):
+def create_token(type, note_id=0):
     uuid = textutil.generate_uuid()
     token_info = Storage(type=type, id=note_id)
     dbutil.put("token:%s" % uuid, token_info)
@@ -1007,11 +994,10 @@ def update_note(note_id, **kw):
     is_public = kw.get("is_public")
     tags = kw.get("tags")
     orderby = kw.get("orderby")
-    archived = kw.get("archived")
     size = kw.get("size")
     token = kw.get("token")
-    visited_cnt = kw.get("visited_cnt")
     creator_id = kw.get("creator_id", 0)
+    archived = kw.get("archived")
 
     note = get_by_id(note_id)
     if note is None:
@@ -1031,6 +1017,8 @@ def update_note(note_id, **kw):
         note.name = name
     if atime:
         note.atime = atime
+    if archived != None:
+        note.set_archived(archived)
 
     # 分享相关的更新
     if is_public != None:
@@ -1044,15 +1032,10 @@ def update_note(note_id, **kw):
         note.tags = tags
     if orderby != None:
         note.orderby = orderby
-    if archived != None:
-        note.archived = archived
     if size != None:
         note.size = size
     if token != None:
         note.token = token
-    if visited_cnt != None:
-        note.visited_cnt = visited_cnt
-
     if note.version is None:
         note.version = 1
 
@@ -1075,7 +1058,7 @@ def update_note(note_id, **kw):
 
 
 def move_note(note, new_parent_id):
-    # type: (NoteDO, int) -> None
+    # type: (NoteIndexDO, int) -> None
     new_parent_id = int(new_parent_id)
 
     old_parent_id = note.parent_id
@@ -1745,6 +1728,7 @@ def expire_search_history(user_name, limit=1000):
 class NoteStatDO(Storage):
 
     def __init__(self):
+        super().__init__()
         self.total = 0
         self.group_count = 0
         self.doc_count = 0

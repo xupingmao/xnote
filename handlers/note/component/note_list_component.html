@@ -54,8 +54,13 @@
     {% end %}
 
     <a class="list-link" href="{{_server_home}}{{item.url}}">
-        {% if sticky_position == "left" and item.priority>0 %}
-            <span class="tag orange-tag">置顶</span>
+        {% if sticky_position == "left" %}
+            {% if item.level > 0 %}
+                <span class="tag orange-tag">置顶</span>
+            {% end %}
+            {% if item.archived %}
+                <span class="tag system">归档</span>
+            {% end %}
         {% end %}
 
         <!-- 图标和标题 -->
@@ -67,8 +72,13 @@
             <span class="info-tag">分享中</span>
         {% end %}
 
-        {% if sticky_position == "right" and item.priority>0 %}
-            <span class="tag orange-tag">置顶</span>
+        {% if sticky_position == "right" %}
+            {% if item.level > 0 %}
+                <span class="tag orange-tag">置顶</span>
+            {% end %}
+            {% if item.archived %}
+                <span class="tag system">归档</span>
+            {% end %}
         {% end %}
 
         {% if item.tags != None %}

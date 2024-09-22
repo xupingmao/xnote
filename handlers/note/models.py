@@ -1,5 +1,7 @@
 # encoding=utf-8
 import enum
+import typing
+
 from xutils import Storage
 from xutils import dateutil
 from xnote.core import xtables
@@ -14,6 +16,7 @@ class NoteLevelEnum(enum.Enum):
 
 class NoteIndexDO(Storage):
     def __init__(self, **kw):
+        super().__init__()
         now = dateutil.format_datetime()
         self.id = 0
         self.name = ""
@@ -39,6 +42,17 @@ class NoteIndexDO(Storage):
     def from_dict(dict_value):
         return new_from_dict(NoteIndexDO, dict_value)
     
+    @classmethod
+    def from_dict_list(cls, dict_list):
+        # type: (list[dict]) -> list[NoteIndexDO]
+        result = []
+        for item in dict_list:
+            obj = cls()
+            obj.update(item)
+            obj.compat_old()
+            result.append(obj)
+        return result
+    
     def before_save(self, index_do):
         # type: (NoteDO) -> None
         tags = index_do.tags
@@ -46,8 +60,37 @@ class NoteIndexDO(Storage):
             tags = []
         self.tag_str = " ".join(tags)
 
-class NoteDO(Storage):
+    def compat_old(self):
+        self.tags = self.tag_str.split()
+        self.priority = self.level
+        self.content = ""
+        self.data = ""
+        self.orderby = ""
+        self.category = ""
+        self.badge_info = ""
+        self.show_next = False
+
+    @property
+    def visited_cnt(self):
+        return self.visit_cnt
+    
+    @property
+    def archived(self):
+        return self.level<0
+    
+    def set_archived(self, archived):
+        if archived == True:
+            self.level = -1
+        if archived == False:
+            self.level = 0
+
+    @property
+    def hot_index(self):
+        return self.visit_cnt
+
+class NoteDO(NoteIndexDO):
     def __init__(self):
+        super(NoteDO, self).__init__()
         self.id = 0 # 笔记ID
         self.name = ""
         self.path = ""
@@ -70,10 +113,7 @@ class NoteDO(Storage):
         self.priority = 0 # (-1):归档, 0-正常, 1-置顶
         self.level = 0 # 等级 (-1):归档, 0-正常, 1-置顶
         self.visit_cnt = 0
-        self.visited_cnt = 0
         self.orderby = ""
-        # 热门指数
-        self.hot_index = 0
         # 版本
         self.version = 0
         self.tags = []
@@ -145,3 +185,17 @@ class NoteTypeInfo:
             NoteTypeInfo(url="/note/all?type=table", name="表格", tag_code="table"),
             NoteTypeInfo(url="/note/removed", name="回收站", tag_code="removed", css_class="hide"),
         ]
+    
+class NoteCategory(NoteIndexDO):
+    def __init__(self, code, name):
+        self.name = f"{code}-{name}"
+        self.url  = "/note/group?note_category=" + code
+        self.icon = ""
+        self.priority = 0
+        self.level = 0
+        self.is_deleted = 0
+        self.size = 0
+        self.show_next = True
+        self.icon = "fa-folder"
+        self.badge_info = ""
+        self.tags = None

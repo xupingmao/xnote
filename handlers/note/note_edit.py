@@ -99,7 +99,7 @@ CREATE_FUNC_DICT = {
 }
 
 def list_groups_for_create(creator):
-    notes = note_dao.list_group(creator, orderby = "name")
+    notes = note_dao.list_group_v2(creator, orderby = "name")
 
     sticky_groups   = list(filter(lambda x: x.priority != None and x.priority > 0, notes))
     archived_groups = list(filter(lambda x: x.archived == True, notes))
@@ -167,7 +167,6 @@ class CreateHandler:
         note.level = 0
 
         if note.parent_id < 0:
-            note.archived = True
             note.priority = -1
             note.level = -1
 
@@ -201,7 +200,7 @@ class CreateHandler:
             raise e1
         except Exception as e:
             xutils.print_exc()
-            error = xutils.u(e)
+            error = str(e)
             if format == 'json':
                 return dict(code = 'fail', message = error)
 

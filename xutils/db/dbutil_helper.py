@@ -6,6 +6,14 @@ def new_from_dict(class_, dict_value):
     obj.update(dict_value)
     return obj
 
+def new_from_dict_list(class_, dict_list: list):
+    result = []
+    for item in dict_list:
+        obj = class_()
+        obj.update(item)
+        result.append(obj)
+    return result
+
 class PageBuilder:
     """分页构造器"""
     def __init__(self, offset=0, limit=20):

@@ -15,21 +15,7 @@ from handlers.note.dao_category import get_category_by_code, refresh_category_co
 from xnote.core import xauth
 from xnote.core import xtemplate
 from handlers.note import dao as note_dao
-
-
-class NoteCategory:
-
-    def __init__(self, code, name):
-        self.name = f"{code}-{name}"
-        self.url  = "/note/group?note_category=" + code
-        self.icon = ""
-        self.priority = 0
-        self.is_deleted = 0
-        self.size = 0
-        self.show_next = True
-        self.icon = "fa-folder"
-        self.badge_info = ""
-        self.tags = None
+from handlers.note.models import NoteCategory
 
 def get_ddc_category_list():
     # TODO 配置化

@@ -13,6 +13,9 @@ from .dao_book import SmartGroupService
 
 import web
 import xutils
+import handlers.note.dao as note_dao
+import handlers.message.dao as msg_dao
+
 from xnote.core import xtemplate
 from xnote.core import xauth
 from xnote.core import xconfig
@@ -29,9 +32,8 @@ from . import dao_log
 from handlers.note.models import NoteTypeInfo
 from .dao_api import NoteDao
 from handlers.note.note_service import NoteService
-import handlers.note.dao as note_dao
-import handlers.message.dao as msg_dao
 from xnote.plugin import DataTable
+from handlers.note.models import NoteIndexDO
 
 VIEW_TPL = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -50,10 +52,11 @@ class PathNode(Storage):
         self.icon = type
 
 
-class GroupLink(Storage):
+class GroupLink(NoteIndexDO):
     """笔记本的类型"""
 
     def __init__(self, name, url, size=None, type="group"):
+        super().__init__()
         self.type = type
         self.priority = 0
         self.name = name
@@ -69,11 +72,12 @@ class SystemLink(GroupLink):
     """系统列表项"""
 
     def __init__(self, name, url, size=None):
-        GroupLink.__init__(self, name, url, size, "system")
+        super(SystemLink, self).__init__(name, url, size, "system")
         self.icon = "icon-folder-system"
 
 
-class NoteLink:
+class NoteLink(NoteIndexDO):
+
     def __init__(self, name, url, icon="fa-cube", size=None, roles=None, category="000", priority=0):
         self.type = "link"
         self.name = T(name)
@@ -217,24 +221,22 @@ class GroupListHandler:
         kw.category_list = list(
             filter(lambda x: x.group_count != 0, list_category(user_name)))
 
-    def load_group_list(self, user_name, status, kw):
+    def load_group_list(self, user_name: str, status: str, kw: Storage):
+        assert status in ("active", "smart")
         parent_id = xutils.get_argument_int("parent_id")
 
-        if status in ("active", "archived"):
-            query_root = (status == "active")
+        if status == "active":
+            query_root = True
             notes = dao.list_group_v2(user_name,
-                                   status=status,
                                    orderby="default",
                                    parent_id=parent_id,
                                    query_root=query_root,
                                    tags=kw.q_tags)
-        else:
-            notes = SmartGroupService.list_smart_group(user_name)
-
-        if status == "active":
             group = note_dao.get_virtual_group(user_name, "ungrouped")
             if group.size > 0:
                 notes.insert(0, group)
+        else:
+            notes = SmartGroupService.list_smart_group(user_name)
 
         return notes
 
@@ -299,7 +301,7 @@ class GroupListHandler:
         logging.debug("orderby_default:%s", orderby_default)
 
         category = xutils.get_argument("note_category", "all")
-        tab = xutils.get_argument("tab", "active")
+        tab = xutils.get_argument_str("tab", "active")
         orderby = xutils.get_argument("orderby", orderby_default)
 
         show_back = xutils.get_argument("show_back", type=bool)
