@@ -51,10 +51,9 @@
   xnote.config.serverHome = "{{_server_home}}";
 </script>
 
-<!-- 页面自定义的样式区块 -->
-{% block head %} {% end %}
 <!-- 布局脚本 -->
 {% include common/layout/base_layout.html %}
-
+<!-- 页面自定义的样式区块,放在后面可以重写基础样式 -->
+{% block head %} {% end %}
 
 </head>
