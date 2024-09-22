@@ -88,7 +88,7 @@ def run_test(args: Namespace):
 		return
 	
 	if target == "note":
-		py_exec("-m pytest tests/test_note.py --doctest-modules --cov handlers --capture no")
+		py_exec(f"-m pytest tests/test_note.py --doctest-modules --cov handlers --capture {args.capture}")
 		py_exec("-m coverage html -i")
 		return
 	
@@ -160,6 +160,7 @@ def main():
 	parser.add_argument("--mysql_password", default="gR4!KTO@9q")
 	parser.add_argument("--mysql_database", default="test")
 	parser.add_argument("--mysql_port", default="3306")
+	parser.add_argument("--capture", default="sys")
 	args = parser.parse_args()
 	load_config_from_test_prop_file(args)
 

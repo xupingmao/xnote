@@ -6,9 +6,11 @@ import math
 import web
 import os
 import xutils
+import handlers.note.dao as note_dao
+import handlers.note.dao_share as dao_share
+
 from xnote.core import xauth, xconfig, xtables, xtemplate, xmanager
 from web import HTTPError
-
 from xnote.core.xconfig import Storage
 from xnote.core import xnote_event
 from xutils import fsutil
@@ -19,10 +21,10 @@ from xnote.core.xtemplate import T
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
 from .dao_api import NoteDao
+from handlers.note.models import NotePathInfo
 from . import dao_draft
 from . import dao_log
-import handlers.note.dao as note_dao
-import handlers.note.dao_share as dao_share
+
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
@@ -174,7 +176,7 @@ def view_group_detail_func(file, kw):
 
     for child in files:
         if child.type == "group":
-            child.badge_info = child.children_count
+            child.badge_info = str(child.children_count)
 
     amount = file.size or 0
     kw.content = file.content
@@ -289,8 +291,8 @@ class ViewHandler:
 
     def handle_pathlist(self, file, is_public_page):
         if is_public_page:
-            root = Storage()
-            root.url = "/note/public"
+            root = NotePathInfo()
+            root.url = f"{xconfig.WebConfig.server_home}/note/public"
             root.name = "根目录"
             return [root, file]
         else:

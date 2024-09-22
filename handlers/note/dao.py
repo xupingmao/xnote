@@ -40,6 +40,8 @@ from handlers.note.dao_api import NoteDao
 from handlers.note import dao_log
 from handlers.note.models import NoteIndexDO, NoteDO, NoteLevelEnum, del_dict_key, remove_virtual_fields
 from handlers.note.models import NoteToken
+from handlers.note.models import NotePathInfo
+from handlers.note.models import NOTE_ICON_DICT
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -63,22 +65,6 @@ ORDER_BY_SET = set([
     "name", "name_asc", "name_desc", "name_priority", 
     "hot_index", "hot_desc",
 ])
-
-NOTE_ICON_DICT = {
-    "group": "fa-folder",
-
-    "post": "fa-file-word-o",  # 废弃
-    "html": "fa-file-word-o",  # 废弃
-    "gallery": "fa-photo",
-    "list": "fa-list",
-    "plan": "fa-calendar-check-o",
-
-    # 表格类
-    "csv": "fa-table",  # 废弃
-    "table": "fa-table",  # 废弃
-    "form": "fa-table",  # 开发中
-}
-
 
 def format_note_id(id):
     return str(id)
@@ -139,11 +125,7 @@ class NoteIndexDao:
     def get_by_id(cls, id=0):
         note_id = int(id)
         first = cls.db.select_first(where=dict(id=note_id))
-        if first != None:
-            result = NoteIndexDO.from_dict(first)
-            cls.compat_old(result)
-            return result
-        return first
+        return cls.fix_single_result(first)
 
     @classmethod
     def get_by_name(cls, creator_id=0, name=""):
@@ -166,6 +148,7 @@ class NoteIndexDao:
     
     @classmethod
     def fix_single_result(cls, dict_value):
+        # type: (dict|None) -> NoteIndexDO|None
         if dict_value == None:
             return
         result = NoteIndexDO.from_dict(dict_value)
@@ -384,7 +367,7 @@ def get_root(creator=None):
     root.type = "group"
     root.parent_id = 0
     build_note_info(root)
-    root.url = "/note/group"
+    root.url = f"{xconfig.WebConfig.server_home}/note/group"
     return root
 
 
@@ -399,8 +382,12 @@ def get_default_group():
     group.id = 0
     group.parent_id = 0
     build_note_info(group)
-    group.url = "/note/default"
+    group.url = f"{xconfig.WebConfig.server_home}/note/default"
     return group
+
+def get_default_group_path():
+    group = get_default_group()
+    return convert_to_path_item(group)
 
 
 def get_archived_group():
@@ -412,7 +399,7 @@ def get_archived_group():
     group.content = ""
     group.priority = 0
     build_note_info(group)
-    group.url = "/note/archived"
+    group.url = f"{xconfig.WebConfig.server_home}/note/archived"
     return group
 
 def batch_query_dict(id_list):
@@ -568,12 +555,11 @@ def build_note_list_info(notes, orderby=None):
         build_note_info(note, orderby)
 
 
-def build_note_info(note, orderby=None):
+def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None):
     if note is None:
         return None
 
-    # note.url = "/note/view?id={}".format(note["id"])
-    note.url = "/note/view/{}".format(note["id"])
+    note.compat_old()
 
     if note.priority is None:
         note.priority = 0
@@ -583,21 +569,13 @@ def build_note_info(note, orderby=None):
 
     if note.data is None:
         note.data = ''
-    # process icon
-    note.icon = NOTE_ICON_DICT.get(note.type, "fa-file-text-o")
     note.id = int(note.id)
 
     if note.type in ("list", "csv"):
         note.show_edit = False
 
-    if note.visited_cnt is None:
-        note.visited_cnt = 0
-
     if note.orderby is None:
         note.orderby = "ctime_desc"
-
-    if note.hot_index is None:
-        note.hot_index = 0
 
     if note.ctime != None:
         note.create_date = format_date(note.ctime)
@@ -619,7 +597,7 @@ def build_note_info(note, orderby=None):
         note.badge_info = format_date(note.ctime)
 
     if note.badge_info in (None, ""):
-        note.badge_info = note.create_date
+        note.badge_info = str(note.create_date)
 
     if note.type == "group":
         _build_book_default_info(note)
@@ -635,19 +613,18 @@ def _build_book_default_info(note):
         note.children_count = 0
 
 
-def convert_to_path_item(note):
-    return Storage(name=note.name, url=note.url, id=note.id,
+def convert_to_path_item(note: NoteIndexDO):
+    return NotePathInfo(name=note.name, url=note.url, id=note.id,
                    type=note.type, priority=note.priority, is_public=note.is_public)
 
 
 @xutils.timeit(name="NoteDao.ListPath:leveldb", logfile=True)
-def list_path(file, limit=5):
+def list_path(file: NoteIndexDO, limit=5):
     assert file != None
 
-    pathlist = []
+    pathlist: typing.List[NotePathInfo] = []
     while file is not None:
         pathlist.insert(0, convert_to_path_item(file))
-        file.url = "/note/%s" % file.id
         if len(pathlist) >= limit:
             break
         
@@ -658,7 +635,7 @@ def list_path(file, limit=5):
         # 处理根目录
         if parent_id == "0":
             if file.type != "group":
-                pathlist.insert(0, get_default_group())
+                pathlist.insert(0, get_default_group_path())
             pathlist.insert(0, convert_to_path_item(get_root(file.creator)))
             break
 
@@ -666,10 +643,12 @@ def list_path(file, limit=5):
     return pathlist
 
 
-def get_full_by_id(id):
+def get_full_by_id(id) -> typing.Optional[NoteDO]:
     if isinstance(id, int):
         id = str(id)
-    return _full_db.get_by_id(id)
+    dict_value = _full_db.get_by_id(id)
+    result = NoteDO.from_dict_or_None(dict_value)
+    return result
 
 @xutils.timeit(name="NoteDao.GetById:leveldb", logfile=True)
 def get_by_id(id, include_full=True, creator=None):
@@ -681,33 +660,25 @@ def get_by_id(id, include_full=True, creator=None):
 
     id_int = int(id)
     note_index = NoteIndexDao.get_by_id(id_int)
-    if note_index != None:
-        note_index = NoteDO.from_dict(note_index)
 
-    if not include_full and note_index != None:
-        build_note_info(note_index)
-        return note_index
+    if not include_full:
+        note_full = NoteDO.from_dict_or_None(note_index)
+        return note_full
 
     note = get_full_by_id(id)
-    if note != None:
-        note = NoteDO.from_dict(note)
-    
-    if note and not include_full:
-        del note.content
-        del note.data
 
     if note != None and note_index != None:
         note.name = note_index.name
         note.mtime = note_index.mtime
         note.atime = note_index.atime
         note.size = note_index.size
-        note.tags = note_index.tags
         note.parent_id = note_index.parent_id
         note.visit_cnt = note_index.visit_cnt
         note.children_count = note_index.children_count
-        note.path = note_index.path
         note.level = note_index.level
         note.creator_id = note_index.creator_id
+        note.tag_str = note_index.tag_str
+        note.tags = note_index.get_tags()
 
     build_note_info(note)
     return note
@@ -972,9 +943,9 @@ def convert_to_index(note):
     return note_index
 
 
-def update_index(note):
+def update_index(note: NoteDO):
     """更新索引的时候也会更新用户维度的索引(note_tiny)"""
-    id = note['id']
+    id = note.id
 
     if is_root_id(id):
         # 根目录，不需要更新
@@ -1120,15 +1091,7 @@ def visit_note(user_name: str, note_id: int, user_id = 0):
     now = xutils.format_datetime()
     note.atime = now
     # 访问的总字数
-    if note.visited_cnt is None:
-        note.visited_cnt = 0
-    note.visited_cnt += 1
-    note.visit_cnt = note.visited_cnt
-
-    # 全局访问热度
-    if note.hot_index is None:
-        note.hot_index = 0
-    note.hot_index += 1
+    note.visit_cnt += 1
 
     add_visit_log(user_name, note, user_id=user_id)
 
@@ -1842,7 +1805,7 @@ def get_virtual_group(user_name, name):
         group.url = "/note/default"
         group.size = files_count
         group.children_count = files_count
-        group.icon = "fa-folder"
+        group.type = "group"
         group.priority = 0
         return group
     else:

@@ -42,7 +42,7 @@ def on_search_message(ctx: SearchContext):
     if count > 0:
         more = SearchResult()
         more.name = "搜索到[%s]条记事" % count
-        more.url = "/message?key=" + ctx.key
+        more.url = f"{xconfig.WebConfig.server_home}/message?key=" + ctx.key
         more.icon = "fa-file-text-o"
         more.show_more_link = True
         more.show_move = False

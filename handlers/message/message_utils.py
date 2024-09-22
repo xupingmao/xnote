@@ -75,7 +75,8 @@ def get_search_html(value="", tag=""):
     key = value.strip()
     quoted_key = textutil.quote(key)
     value = textutil.escape_html(key0)
-    return f"<a class=\"link\" href=\"/message?tag={tag}&key={quoted_key}\">{value}</a>"
+    server_home = xconfig.WebConfig.server_home
+    return f"<a class=\"link\" href=\"{server_home}/message?tag={tag}&key={quoted_key}\">{value}</a>"
 
 class TagHelper:
 
@@ -577,8 +578,9 @@ def list_hot_tags(user_name:str, limit=20):
 
     msg_list, amount = msg_dao.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
     sort_message_list(msg_list, "amount_desc")
+    server_home = xconfig.WebConfig.server_home
     for msg in msg_list:
-        msg.url = f"/message?tag=log.search&key={quote(msg.content)}"
+        msg.url = f"{server_home}/message?tag=log.search&key={quote(msg.content)}"
     return msg_list[:limit]
 
 

@@ -79,7 +79,7 @@ def create_log_func(note, ctx):
     note.name = u"日志:" + date_str + dateutil.convert_date_to_wday(date_str)
     return note_dao.create_note(note, date_str)
 
-def default_create_func(note, ctx):
+def default_create_func(note: note_dao.NoteDO, ctx):
     method   = ctx.method
     date_str = ctx.date
     name     = note.name

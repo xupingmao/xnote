@@ -240,7 +240,7 @@ class TestMain(BaseTestCase):
         group_id = get_default_group_id()
         delete_note_for_test("xnote-md-test")
         
-        file = json_request("/note/add", method="POST",
+        file = json_request_return_dict("/note/add", method="POST",
             data=dict(name="xnote-md-test", type="md", content="hello markdown", parent_id = group_id))
         
         id = file["id"]
@@ -730,6 +730,11 @@ A example image
     def test_append_tag(self):
         note_id = create_note_for_test("md", "bind-tag-test")
         dao_tag.append_tag(note_id, "$todo$")
+
+        index_do = NoteIndexDao.get_by_id(note_id)
+        assert index_do != None
+        assert index_do.tag_str == "$todo$"
+
         note_info = note_dao.get_by_id(note_id)
         assert note_info != None
         assert isinstance(note_info.tags, list)

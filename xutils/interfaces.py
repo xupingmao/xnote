@@ -169,7 +169,7 @@ class FileLockInterface:
     def lock(self):
         return True
 
-    def try_lock(self):
+    def try_lock(self) -> bool:
         return True
     
     def unlock(self):

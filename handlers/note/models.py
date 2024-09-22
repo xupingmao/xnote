@@ -5,7 +5,24 @@ import typing
 from xutils import Storage
 from xutils import dateutil
 from xnote.core import xtables
+from xnote.core import xconfig
 from xutils.db.dbutil_helper import new_from_dict
+
+
+NOTE_ICON_DICT = {
+    "group": "fa-folder",
+
+    "post": "fa-file-word-o",  # 废弃
+    "html": "fa-file-word-o",  # 废弃
+    "gallery": "fa-photo",
+    "list": "fa-list",
+    "plan": "fa-calendar-check-o",
+
+    # 表格类
+    "csv": "fa-table",  # 废弃
+    "table": "fa-table",  # 废弃
+    "form": "fa-table",  # 开发中
+}
 
 
 class NoteLevelEnum(enum.Enum):
@@ -52,7 +69,7 @@ class NoteIndexDO(Storage):
             obj.compat_old()
             result.append(obj)
         return result
-    
+
     def before_save(self, index_do):
         # type: (NoteDO) -> None
         tags = index_do.tags
@@ -61,14 +78,20 @@ class NoteIndexDO(Storage):
         self.tag_str = " ".join(tags)
 
     def compat_old(self):
-        self.tags = self.tag_str.split()
+        self.tags = self.get_tags()
         self.priority = self.level
-        self.content = ""
-        self.data = ""
+        if self.__class__ != NoteDO:
+            self.content = ""
+            self.data = ""
         self.orderby = ""
         self.category = ""
         self.badge_info = ""
         self.show_next = False
+        self.url = f"{xconfig.WebConfig.server_home}/note/view/{self.id}"
+        self.icon = NOTE_ICON_DICT.get(self.type)
+
+    def get_tags(self):
+        return self.tag_str.split()
 
     @property
     def visited_cnt(self):
@@ -119,7 +142,6 @@ class NoteDO(NoteIndexDO):
         self.tags = []
 
         # 假的属性
-        self.url = ""
         self.icon = ""
         self.show_edit = True
         self.badge_info = ""
@@ -131,6 +153,12 @@ class NoteDO(NoteIndexDO):
         result = NoteDO()
         result.update(dict_value)
         return result
+    
+    @classmethod
+    def from_dict_or_None(cls, dict_value):
+        if dict_value is None:
+            return None
+        return cls.from_dict(dict_value)
     
     def before_save(self):
         remove_virtual_fields(self)
@@ -199,3 +227,15 @@ class NoteCategory(NoteIndexDO):
         self.icon = "fa-folder"
         self.badge_info = ""
         self.tags = None
+
+class NotePathInfo(Storage):
+
+    def __init__(self, **kw):
+        super().__init__()
+        self.name = ""
+        self.url = ""
+        self.id = 0
+        self.type = ""
+        self.priority = 0
+        self.is_public = 0
+        self.update(kw)

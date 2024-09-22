@@ -41,11 +41,129 @@ import atexit
 
 DEFAULT_CONFIG_FILE = xconfig.resolve_config_path("./config/boot/boot.default.properties")
 
+
 class XnoteApp:
 
     def __init__(self) -> None:
         self.web_app = web.application()
         self.handler_manager = None # type: None|xmanager.HandlerManager
+        self.file_lock = None # type: None|interfaces.FileLockInterface
+    
+    def get_file_lock(self) -> interfaces.FileLockInterface:
+        if xutils.is_windows():
+            # TODO Windows的锁还没完善
+            return DummyLock()
+        if xconfig.FileConfig.enable_boot_lock:
+            return FileLockAdapter(xconfig.FileConfig.boot_lock_file)
+        return DummyLock()
+    
+    def init_app_internal(self, boot_config_kw=None):
+        """初始化APP内部方法"""
+        print_env_info()
+
+        # 构建静态文件
+        xnote_code_builder.build()
+
+        # 初始化debug信息
+        init_debug()
+
+        # 初始化数据库
+        init_sql_db()
+        init_kv_db()
+
+        # 初始化工具箱
+        init_xutils()
+
+        # 初始化权限系统
+        xauth.init()
+
+        # 初始化应用程序
+        self.init_web_app()
+
+        # 初始化自动加载功能
+        init_autoreload()
+
+        # 初始化集群
+        init_cluster()
+
+        # 触发handler里面定义的启动函数
+        xmanager.fire("sys.init", None)
+
+        # 注册信号响应
+        # 键盘终止信号
+        atexit.register(self.handle_exit)
+
+        # 记录已经启动
+        xconfig.mark_started()
+        logging.info("app started")
+
+    @log_mem_info_deco("init_web_app")
+    def init_web_app(self):
+        # 关闭autoreload使用自己实现的版本
+        var_env = dict()
+        app = web.application(list(), var_env, autoreload=False)
+
+        # 初始化模板管理
+        xtemplate.init()
+
+        # 初始化主管理器，包括用户及权限、定时任务、各功能模块
+        xmanager.init(app, var_env)
+        self.web_app = app
+        self.handler_manager = xmanager.get_handler_manager()
+        return self
+    
+    def handle_win32_exit(self, event):
+        self.handle_exit()
+
+    def try_reg_win32_exit(self):
+        # TODO 测试没有通过
+        if xutils.is_windows():
+            import ctypes
+            from ctypes import wintypes, WINFUNCTYPE
+            kernel32 = ctypes.WinDLL('kernel32')
+            PHANDLER_ROUTINE = WINFUNCTYPE(wintypes.BOOL, wintypes.DWORD)
+            SetConsoleCtrlHandler = kernel32.SetConsoleCtrlHandler
+            SetConsoleCtrlHandler.argtypes = (PHANDLER_ROUTINE, wintypes.BOOL)
+            SetConsoleCtrlHandler.restype = wintypes.BOOL
+            SetConsoleCtrlHandler(PHANDLER_ROUTINE(self.handle_win32_exit), True)
+
+        
+    def handle_exit(self):
+        # 优雅下线
+        logging.info("准备优雅下线")
+        xmanager.fire("sys.exit")
+        if self.file_lock != None:
+            self.file_lock.unlock()
+
+    def main(self, boot_config_kw):
+        # 处理初始化参数
+        handle_args_and_init_config(boot_config_kw=boot_config_kw)
+
+        xnote_version = xconfig.SystemConfig.get_str("version")
+        logging.info("starting xnote, version: %s", xnote_version)
+
+        lock_file = xconfig.FileConfig.boot_lock_file
+        file_lock = self.get_file_lock()
+        self.file_lock = file_lock
+
+        try:
+            if file_lock.try_lock():
+                # 初始化
+                self.init_app_internal(boot_config_kw=boot_config_kw)
+                # 执行钩子函数
+                run_init_hooks(app)
+                # 监听端口
+                app.web_app.run()
+                logging.info("服务器已关闭")
+                wait_thread_exit()
+                sys.exit(xconfig.EXIT_CODE)
+            else:
+                logging.error("get lock failed")
+                logging.error("xnote进程已启动, 请不要重复启动!")
+                logging.error("如果确定是误报, 请删除lock文件: %s", lock_file)
+                sys.exit(1)
+        finally:
+            file_lock.unlock()
 
 # 配置日志模块
 logging.basicConfig(
@@ -119,12 +237,6 @@ def handle_args_and_init_config(boot_config_kw=None):
     start_time = xutils.format_datetime()
     xconfig.set_global_config("start_time", start_time)
     xconfig.set_global_config("system.start_time", start_time)
-
-
-def handle_exit():
-    # 优雅下线
-    logging.info("准备优雅下线")
-    xmanager.fire("sys.exit")
 
 
 @log_mem_info_deco("init_sql_db")
@@ -255,24 +367,6 @@ def init_cluster():
     if xconfig.get_system_config("node_role") == "follower":
         logging.info("当前系统以从节点身份运行")
 
-
-@log_mem_info_deco("init_web_app")
-def init_web_app():
-    # 关闭autoreload使用自己实现的版本
-    var_env = dict()
-    app = web.application(list(), var_env, autoreload=False)
-
-    # 初始化模板管理
-    xtemplate.init()
-
-    # 初始化主管理器，包括用户及权限、定时任务、各功能模块
-    xmanager.init(app, var_env)
-    xnote_app = XnoteApp()
-    xnote_app.web_app = app
-    xnote_app.handler_manager = xmanager.get_handler_manager()
-    return xnote_app
-
-
 def print_env_info():
     cwd = os.getcwd()
     print("当前工作目录:", os.path.abspath(cwd))
@@ -291,51 +385,11 @@ def init_xutils():
     FileUtilConfig.encode_name = xconfig.USE_URLENCODE
     FileUtilConfig.tmp_dir = xconfig.FileConfig.tmp_dir
 
-def init_app_internal(boot_config_kw=None):
-    """初始化APP内部方法"""
-    global app
-    print_env_info()
-
-    # 构建静态文件
-    xnote_code_builder.build()
-
-    # 初始化debug信息
-    init_debug()
-
-    # 初始化数据库
-    init_sql_db()
-    init_kv_db()
-
-    # 初始化工具箱
-    init_xutils()
-
-    # 初始化权限系统
-    xauth.init()
-
-    # 初始化应用程序
-    app = init_web_app()
-
-    # 初始化自动加载功能
-    init_autoreload()
-
-    # 初始化集群
-    init_cluster()
-
-    # 触发handler里面定义的启动函数
-    xmanager.fire("sys.init", None)
-
-    # 注册信号响应
-    # 键盘终止信号
-    atexit.register(handle_exit)
-
-    # 记录已经启动
-    xconfig.mark_started()
-    logging.info("app started")
-
 def init_app():
+    global app
+    app = XnoteApp()
     handle_args_and_init_config()
-    return init_app_internal()
-
+    app.init_app_internal()
 
 def count_worker_thread():
     result = []
@@ -362,39 +416,11 @@ def run_init_hooks(app):
     for func in xnote_hooks.get_init_hooks():
         func(app)
 
-def get_file_lock():
-    if xconfig.FileConfig.enable_boot_lock:
-        return FileLockAdapter(xconfig.FileConfig.boot_lock_file)
-    return DummyLock()
-
 def main(boot_config_kw=None):
     global app
 
-    # 处理初始化参数
-    handle_args_and_init_config(boot_config_kw=boot_config_kw)
-
-    xnote_version = xconfig.SystemConfig.get_str("version")
-    logging.info("starting xnote, version: %s", xnote_version)
-
-    file_lock = get_file_lock()
-
-    try:
-        if file_lock.try_lock():
-            # 初始化
-            init_app_internal(boot_config_kw=boot_config_kw)
-            # 执行钩子函数
-            run_init_hooks(app)
-            # 监听端口
-            app.web_app.run()
-            logging.info("服务器已关闭")
-            wait_thread_exit()
-            sys.exit(xconfig.EXIT_CODE)
-        else:
-            logging.error("get lock failed")
-            logging.error("xnote进程已启动，请不要重复启动!")
-            sys.exit(1)
-    finally:
-        file_lock.unlock()
+    app = XnoteApp()
+    app.main(boot_config_kw)
 
 
 if __name__ == '__main__':

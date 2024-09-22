@@ -66,7 +66,7 @@
                 page: page
             };
 
-            xnote.http.get("{{_server_home}}/note/comments", list_param, function (resp) {
+            xnote.http.get("/note/comments", list_param, function (resp) {
                 $("#comments").html(resp);
             });
         }

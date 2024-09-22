@@ -171,19 +171,29 @@ xnote.http.defaultFailHandler = function (err) {
     xnote.toast("服务器繁忙, 请稍后重试~");
 };
 
+xnote.http.resolveURL = function(url) {
+    if (url == "") {
+        // 相对路径
+        return url;
+    }
+    return xnote.config.serverHome + url;
+}
 // http-post请求
 xnote.http.post = function (url, data, callback, type) {
-    return $.post(xnote.config.serverHome + url, data, callback, type).fail(xnote.http.defaultFailHandler);
+    var newURL = xnote.http.resolveURL(url);
+    return $.post(newURL, data, callback, type).fail(xnote.http.defaultFailHandler);
 }
 
 // http-post内部请求
 xnote.http.internalPost = function(url, data, callback, type) {
-    return $.post(xnote.config.serverHome + url, data, callback, type);
+    var newURL = xnote.http.resolveURL(url);
+    return $.post(newURL, data, callback, type);
 }
 
 // http-get请求
 xnote.http.get = function (url, data, callback, type) {
-    return $.get(xnote.config.serverHome + url, data, callback, type).fail(xnote.http.defaultFailHandler);
+    var newURL = xnote.http.resolveURL(url);
+    return $.get(newURL, data, callback, type).fail(xnote.http.defaultFailHandler);
 }
 
 // http-get内部请求

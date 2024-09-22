@@ -46,63 +46,40 @@ class UnixLock(FileLockInterface):
 		return True
 
 class WinLock(FileLockInterface):
-
-	def __init__(self, fpath):
-		self.fpath = fpath
-
-	def try_lock(self):
-		return True
-
-	def unlock(self):
-		return
-
-class WinLockOld:
 	"""Windows环境的锁实现"""
 
 	def __init__(self, fpath):
 		self.fpath = fpath
 		self.got_lock = False
 
-		if not os.path.exists(self.fpath):
-			self.got_lock = True
-			self.fp = open(fpath, "w+")
-			return
-
-		self.fp = open(fpath)
-
-	def do_get_lock(self):
-		# 关闭读，重新打开为写模式
-		assert self.fp != None
-		self.fp.close()
-		self.fp = open(self.fpath, "w+")
-		self.fp.write(str(os.getpid()))
-		self.fp.flush()
-		self.got_lock = True
-
 	def try_lock(self):
-		assert self.fp != None
-		data = self.fp.read(1024)
-		if data == str(os.getpid()) or data == "":
-			self.do_get_lock()
+		if not os.path.exists(self.fpath):
+			with open(self.fpath, "w+") as fp:
+				fp.write(str(os.getpid()))
+			self.got_lock = True
 			return True
-
 		return False
-
+	
 	def unlock(self):
-		assert self.fp != None
-		if self.got_lock:
-			self.fp.write("")
-			self.got_lock = False
+		if not self.got_lock:
+			return
+		
+		if os.path.exists(self.fpath):
+			pid = ""
+			with open(self.fpath, "r") as fp:
+				pid = fp.read().strip()
 
-		if self.fp != None:
-			self.fp.close()
-			self.fp = None
+			if pid == str(os.getpid()):
+				os.remove(self.fpath)
+			else:
+				raise Exception(f"unlock failed, file pid={pid}, os pid={os.getpid()}")
 
 
 class FileLockAdapter(FileLockInterface):
 	"""文件锁，注意目前只支持posix系统"""
 
 	def __init__(self, fpath):
+		self.fpath = fpath
 		if fcntl != None:
 			self.impl = UnixLock(fpath)
 		else:

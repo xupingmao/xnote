@@ -342,7 +342,7 @@ class HandlerManager:
         for info in self.failed_mods:
             log("Failed info: %s" % info)
 
-    def resolve_module(self, module, modname):
+    def resolve_module(self, module, modname: str):
         modpath = "/".join(modname.split(".")[1:-1])
         if not modpath.startswith("/"):
             modpath = "/" + modpath
@@ -411,8 +411,8 @@ class HandlerManager:
     def get_mapping(self):
         return self.mapping
 
-    def add_mapping(self, url, handler):
-        self.mapping.append(url)
+    def add_mapping(self, url: str, handler):
+        self.mapping.append(xconfig.WebConfig.server_home + url)
         self.mapping.append(do_wrap_handler(url, handler))
         if self.report_loading:
             log("Load mapping (%s, %s)" % (url, handler))
