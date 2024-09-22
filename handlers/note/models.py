@@ -198,7 +198,7 @@ class NoteToken(Storage):
 class NoteTypeInfo:
 
     def __init__(self, url="", name="", tag_code="", css_class=""):
-        self.url = url
+        self.url = xconfig.WebConfig.server_home + url
         self.name = name
         self.tag_code = tag_code
         self.css_class = css_class

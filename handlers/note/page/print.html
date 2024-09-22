@@ -1,4 +1,4 @@
-{% extends base.html %}
+{% extends base %}
 
 {% block head %}
 <script type="text/javascript" src="{{_server_home}}/_static/lib/csv.js/csv.js"></script>
@@ -21,7 +21,23 @@
 img {
     max-width: 100%;
 }
+
+.nav-left {
+    width: 0px;
+}
+
+.main-content {
+    padding-left: 10px;
+}
+
+.content-left {
+    width: 100%;
+}
 </style>
+
+<script>
+xnote.config.isPrintMode = true;
+</script>
 
 {% end %}
 

@@ -37,7 +37,7 @@ def visit_by_id(ctx: xnote_event.NoteViewEvent):
     note_dao.visit_note(user_name, note_id, user_id=ctx.user_id)
 
 
-def check_auth(file, user_name):
+def check_auth(file: note_dao.NoteDO, user_name):
     if user_name == "admin":
         return
 
@@ -424,11 +424,18 @@ class PrintHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id")
-        file = xutils.call("note.get_by_id", id)
+        note_id = xutils.get_argument_int("id")
+        note = note_dao.get_by_id(note_id)
+        if note == None:
+            return xtemplate.render("error.html", error="笔记不存在")
         user_name = xauth.current_name()
-        check_auth(file, user_name)
-        return xtemplate.render("note/page/print.html", show_menu=False, note=file)
+        check_auth(note, user_name)
+
+        kw = Storage()
+        kw.show_menu = False
+        kw.note = note
+        kw.html_title = note.name
+        return xtemplate.render("note/page/print.html", **kw)
 
 
 def result(success=True, msg=None):

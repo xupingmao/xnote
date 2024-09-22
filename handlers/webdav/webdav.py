@@ -3,10 +3,10 @@
 # @since 2021/02/14 15:26:54
 # @modified 2022/03/04 22:23:22
 import web
-import xauth
-import xmanager
 import xutils
-import xconfig
+from xnote.core import xmanager
+from xnote.core import xconfig
+from xnote.core import xauth
 
 import logging
 from xutils import logutil
@@ -37,24 +37,57 @@ https://wsgidav.readthedocs.io/en/latest/user_guide_lib.html
     server.start()
 
 """
-_webdav_app   = None
-WEBDAV_CONFIG = None
 
+try:
+    from wsgidav.wsgidav_app import WsgiDAVApp
+except ImportError:
+    WsgiDAVApp = None
+
+class MyWebDavApp:
+    app   = None
+    config = None
+
+    @classmethod
+    def reload(cls):
+        assert WsgiDAVApp != None
+        cls.app = WsgiDAVApp(cls.config)
+
+    @classmethod
+    def init(cls, config):
+        cls.config = config
+        cls.reload()
+
+    @classmethod
+    def get_app(cls):
+        assert cls.app != None
+        return cls.app
+    
+    @classmethod
+    def add_user_mapping(cls, path, user_name, roles):
+        config = cls.config
+        assert isinstance(config, dict)
+
+        path_info = config["simple_dc"]["user_mapping"].get(path)
+        if path_info is None:
+            path_info = dict()
+
+        path_info[user_name] = dict(password = xauth.get_user_password(user_name), roles = roles)
+
+        config["simple_dc"]["user_mapping"][path] = path_info
+
+        # print(WEBDAV_CONFIG)
 
 @xutils.log_init_deco("init_webdav_config")
 def init_webdav_config():
     if not is_webdav_enabled():
         logging.info("webdav is disabled")
         return
-    from wsgidav.debug_filter import WsgiDavDebugFilter
+    # from wsgidav.debug_filter import WsgiDavDebugFilter
     from wsgidav.dir_browser import WsgiDavDirBrowser
     from wsgidav.error_printer import ErrorPrinter
     from wsgidav.http_authenticator import HTTPAuthenticator
     from wsgidav.request_resolver import RequestResolver
     from wsgidav.wsgidav_app import WsgiDAVApp
-
-    global WEBDAV_CONFIG
-    global _webdav_app
 
     WEBDAV_CONFIG = {
         "host": "0.0.0.0",
@@ -98,7 +131,8 @@ def init_webdav_config():
             # "icon": True,
         },
 
-        "lock_manager": True,
+        # "lock_manager": True,
+        "lock_storage": True,
 
         # DC指的是Domain Controller
         # 默认有三个角色：admin/editor/reader
@@ -110,39 +144,26 @@ def init_webdav_config():
         "verbose": 1,
     }
 
-    _webdav_app = WsgiDAVApp(WEBDAV_CONFIG)
+    MyWebDavApp.init(WEBDAV_CONFIG)
 
 
 def is_webdav_enabled():
     return xconfig.get_system_config("webdav") == True
 
-def add_user_mapping(path, user_name, roles):
-    global WEBDAV_CONFIG
-    path_info = WEBDAV_CONFIG["simple_dc"]["user_mapping"].get(path)
-    if path_info is None:
-        path_info = dict()
-
-    path_info[user_name] = dict(password = xauth.get_user_password(user_name), roles = roles)
-
-    WEBDAV_CONFIG["simple_dc"]["user_mapping"][path] = path_info
-
-    # print(WEBDAV_CONFIG)
-
 def init_user_mapping():
-    add_user_mapping("/webdav",      "admin", ["admin"])
-    add_user_mapping("/webdav/test", "test",  ["editor"])
+    MyWebDavApp.add_user_mapping("/webdav",      "admin", ["admin"])
+    MyWebDavApp.add_user_mapping("/webdav/test", "test",  ["editor"])
 
 @xmanager.listen("user.update", False)
 def reload_on_user_update(ctx = None):
     if not is_webdav_enabled():
         return
 
-    print("reload user_mapping")
+    logging.info("reload user_mapping")
     init_user_mapping()
 
-    global WEBDAV_CONFIG
-    global _webdav_app
-    _webdav_app = WsgiDAVApp(WEBDAV_CONFIG)
+    from wsgidav.wsgidav_app import WsgiDAVApp
+    MyWebDavApp.reload()
 
 @xmanager.listen("sys.init")
 @xutils.log_init_deco("webdav")
@@ -177,7 +198,7 @@ class WebDavHandler:
             for header in response_headers:
                 web.header(*header)
 
-        for value in _webdav_app(web.ctx.environ, start_response):
+        for value in MyWebDavApp.get_app()(web.ctx.environ, start_response):
             # print(value)
             yield value
 

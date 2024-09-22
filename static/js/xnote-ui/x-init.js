@@ -24,6 +24,7 @@ if (window.xnote === undefined) {
     // 配置信息
     xnote.config = {};
     xnote.config.serverHome = "";
+    xnote.config.isPrintMode = false;
     
     // 内部属性
     xnote._dialogIdStack = [];

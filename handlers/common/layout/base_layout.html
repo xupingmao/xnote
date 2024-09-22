@@ -67,6 +67,13 @@
   // 这里动态生成<style>不会导致闪烁
   (function () {
     function loadStyle() {
+      if (xnote.config.isPrintMode) {
+        console.log("detect print mode");
+        $(".nav-left").hide();
+        $(".main-content").css("margin-left", "0px");
+        return;
+      }
+
       var navStyle = "{{_user_config.nav_style}}";
       var contentWidth = parseInt("{{CONTENT_WIDTH}}");
       var winWidth = $(window).width(); // 窗口的宽度
@@ -87,9 +94,9 @@
 
       if (winWidth >= xnote.MOBILE_MAX_WIDTH) {
         // 桌面版
-        styleText += ".content-left { width: calc(100% - 300px); }";
-        styleText += ".content-right { width: 300px; }";
-        styleText += ".mobile-only { display: none; }";
+        styleText += ".content-left { width: calc(100% - 300px); }\n";
+        styleText += ".content-right { width: 300px; }\n";
+        styleText += ".mobile-only { display: none; }\n";
         contentLeftWidth = contentWidth - 300; // 300是右侧边栏宽度
         if (navStyle == "left") {
           paddingLeft = leftNavWidth + 10;
@@ -97,12 +104,13 @@
           paddingLeft = (winWidth - contentWidth) / 2 + 10;
           paddingRight = paddingLeft;
         }
+        styleText += ".nav-left { width: ${leftNavWidth}px }\n".replace("${leftNavWidth}", leftNavWidth);
       } else {
         // 移动版
-        styleText += ".content-left { width: 100%; }";
-        styleText += ".content-right { display: none; }";
-        styleText += ".nav {display: block;}";
-        styleText += ".desktop-only { display: none; }";
+        styleText += ".content-left { width: 100%; }\n";
+        styleText += ".content-right { display: none; }\n";
+        styleText += ".nav {display: block;}\n";
+        styleText += ".desktop-only { display: none; }\n";
         contentLeftWidth = winWidth;
         contentWidth = winWidth;
       }
@@ -115,12 +123,12 @@
         + "width:100%;"
         + "padding-left:" + paddingLeft + "px;"
         + "padding-right:" + paddingRight + "px;"
-        + "}";
+        + "}\n";
 
       styleText += ".main-content { width: 100%; padding-left:" + paddingLeft + "px; "
-        + "padding-right: " + paddingRight + "px;}";
+        + "padding-right: " + paddingRight + "px;}\n";
 
-      styleText += ".root{ min-height:" + rootMinHeight + "px;}";
+      styleText += ".root{ min-height: " + rootMinHeight + "px;}";
 
       // 设备大小信息
       xnote.device.isMobile = winWidth < xnote.MOBILE_MAX_WIDTH;

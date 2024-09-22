@@ -31,8 +31,6 @@
 <!-- 应用JS脚本,优先级更高，所以放在后面 -->
 <script type="text/javascript" src="{{_server_home}}/_static/js/app.build.js?ts={{_ts}}"></script>
 
-{% include common/layout/base_layout.html %}
-
 {% if xconfig.WebConfig.record_location %}
 <script type="text/javascript" src="{{_server_home}}/system/stats"></script>
 {% end %}
@@ -53,6 +51,7 @@
   xnote.config.serverHome = "{{_server_home}}";
 </script>
 
+<!-- 页面自定义的样式区块 -->
 {% block head %} {% end %}
 
 </head>
