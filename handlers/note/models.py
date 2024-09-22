@@ -11,7 +11,7 @@ from xutils.db.dbutil_helper import new_from_dict
 
 NOTE_ICON_DICT = {
     "group": "fa-folder",
-
+    "md": "fa-file-text-o",
     "post": "fa-file-word-o",  # 废弃
     "html": "fa-file-word-o",  # 废弃
     "gallery": "fa-photo",
@@ -23,6 +23,8 @@ NOTE_ICON_DICT = {
     "table": "fa-table",  # 废弃
     "form": "fa-table",  # 开发中
 }
+
+DEFAULT_ICON = "fa-file-text-o"
 
 
 class NoteLevelEnum(enum.Enum):
@@ -88,7 +90,7 @@ class NoteIndexDO(Storage):
         self.badge_info = ""
         self.show_next = False
         self.url = f"{xconfig.WebConfig.server_home}/note/view/{self.id}"
-        self.icon = NOTE_ICON_DICT.get(self.type)
+        self.icon = NOTE_ICON_DICT.get(self.type, DEFAULT_ICON)
 
     def get_tags(self):
         return self.tag_str.split()
