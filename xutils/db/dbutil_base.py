@@ -315,6 +315,7 @@ class TableInfo:
         self.user_attr = None
         self.is_deleted = False
         self.index_db = None # type: None|SQLDBInterface
+        self.encode_user_func = None # type: None|typing.Callable
 
     def check_and_register(self):
         if self.user_attr != None:
@@ -438,20 +439,27 @@ class IndexInfo:
     def build_prefix(table_name, index_name):
         return "%s$%s" % (table_name, index_name)
 
+def register_deleted_table(table_name, description, **kw):
+    """注册删除的表,用于兼容历史数据"""
+    kw["is_deleted"] = True
+    return register_table(table_name=table_name, description=description, **kw)
 
-def register_table(table_name, description, **kw):  # type: (...)->TableInfo
+def register_table(table_name, description, **kw):  
+    # type: (...)->TableInfo
     """注册表定义
-    :param category: 表所属的类目
-    :param check_user: 是否检查用户
-    :param user_attr: 用户的属性名
-    :param type: 表的类型 {table, index, sorted_set}
+    :param {str} table_name: 表名称
+    :param {str} category: 表所属的类目
+    :param {bool} check_user: 是否检查用户
+    :param {str} user_attr: 用户的属性名
+    :param {str} type: 表的类型 {table, index, sorted_set}
+    :param {bool} is_deleted: 是否删除
     """
     # TODO 考虑过这个方法直接返回一个 LdbTable 实例
     # LdbTable可能针对同一个`table`会有不同的实例
     if not re.match(r"^[0-9a-z_]+$", table_name):
         raise Exception("无效的表名:%r" % table_name)
 
-    return _register_table_inner(table_name, description,**kw)
+    return _register_table_inner(table_name, description, **kw)
 
 
 def _register_table_inner(table_name, description, **kw):
@@ -465,6 +473,8 @@ def _register_table_inner(table_name, description, **kw):
     info.type = kw.get("type", "table")
     info.index_db = kw.get("index_db")
     info.check_and_register()
+    info.is_deleted = kw.get("is_deleted", False)
+    info.encode_user_func = kw.get("encode_user_func", None)
 
     return info
 

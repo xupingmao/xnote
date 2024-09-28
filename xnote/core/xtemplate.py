@@ -378,7 +378,7 @@ class BasePlugin:
     # 默认需要管理员权限访问
     require_admin = True
     # 允许访问的权限列表
-    permitted_role_list = []
+    permitted_role_list = [] # type: list[str]
 
     # {分类的配置}
     # 插件分类 {note, dir, system, network}

@@ -22,6 +22,7 @@ def do_upgrade():
     handler = MigrateHandler()
     base.execute_upgrade("20240623_fix_note", handler.fix_invalid_note_id)
     base.execute_upgrade("20240623_note_history_index", handler.migrate_note_history_index)
+    base.execute_upgrade("20240928_rebuild_msg", handler.rebuild_msg)
     
 class NoteHistoryKvIndexDO(xutils.Storage):
     def __init__(self, **kw):
@@ -143,7 +144,6 @@ class MigrateHandler:
             new_note.parent_id = int(kv_item.parent_id)
             new_note.content = kv_item.content
             new_note.data = kv_item.data
-            new_note.hot_index = kv_item.hot_index
             new_note.is_public = kv_item.is_public
             new_note.tags = kv_item.tags
             new_note.visit_cnt = kv_item.visited_cnt
@@ -162,3 +162,19 @@ class MigrateHandler:
             kv_item.is_deleted = 1
             note_full_db.update(kv_item)
             logging.info("fix note_id success, old_id:%s, new_id:%s", kv_item.id, new_note_id)
+
+    def rebuild_msg(self):
+        message_db = dbutil.get_table("message")
+        new_msg_db = dbutil.get_table("msg_v2")
+                
+        for item in message_db.iter(limit=-1):
+            user_id = item.get("user_id", 0)
+            user_name = item.get("user", "")
+            if user_id == 0:
+                user_id = xauth.UserDao.get_id_by_name(user_name)
+            msg_id = item.get("_id", "")
+            if msg_id == "":
+                raise Exception("msg_id is empty")
+            item["user_id"] = user_id
+            item["id"] = new_msg_db._build_key(str(user_id), msg_id)
+            new_msg_db.put_by_id(msg_id, item)

@@ -12,9 +12,10 @@
 from xnote.core import xauth, xtables
 from xutils import dbutil, Storage
 from xutils.sqldb.utils import safe_str
-from . import base
-import logging
+from xnote_migrate import base
 from xutils import dateutil
+
+import logging
 import xutils
 
 def do_upgrade():

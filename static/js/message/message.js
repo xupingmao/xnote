@@ -390,6 +390,22 @@ MessageView.reopen = function (target) {
     this.updateMessageTag(id, "task");
 };
 
+// 删除message
+MessageView.deleteMessage = function(target) {
+    var id = $(target).attr("data-id");
+    var content = $(target).attr("data-content");
+
+    xnote.confirm("确认删除[" + content + "]吗?", function (result) {
+        xnote.http.post("/message/delete", { id: id }, function (resp) {
+            if (resp.code == "success") {
+                MessageView.refreshList();
+            } else {
+                xnote.alert(resp.message);
+            }
+        });
+    });
+};
+
 $("body").on("keyup", ".nav-search-input", function (e) {
     console.log(e);
     var inputText = $(e.target).val();

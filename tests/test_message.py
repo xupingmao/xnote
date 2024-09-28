@@ -14,6 +14,7 @@ from xutils import dbutil
 from xutils import dateutil, dbutil
 from xutils import logutil
 from handlers.message import message_tag
+from xnote.core.models import SearchContext
 
 # cannot perform relative import
 try:
@@ -32,7 +33,7 @@ BaseTestCase = test_base.BaseTestCase
 from handlers.message import dao as msg_dao
 from handlers.message import message_model
 
-MSG_DB = dbutil.get_table("message")
+MSG_DB = dbutil.get_table("msg_v2")
 
 
 def get_script_path(name):
@@ -45,7 +46,7 @@ def del_msg_by_id(id):
 
 def delete_all_messages():
     for record in MSG_DB.iter(limit=-1):
-        MSG_DB.delete_by_key(record._key)
+        MSG_DB.delete_by_key(record.get("_key"))
 
 
 class TextPage(xtemplate.BaseTextPlugin):
@@ -65,10 +66,11 @@ class TestMain(BaseTestCase):
     def test_message_create_and_update(self):
         # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
         from handlers.message.dao import MessageDao
-        response = json_request(
+        response = json_request_return_dict(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test"))
         self.assertEqual("success", response.get("code"))
         data = response.get("data")
+        assert isinstance(data, dict)
         # Py2: 判断的时候必须使用unicode
         self.assertEqual(u"Xnote-Unit-Test", data.get("content"))
         json_request("/message/touch", method="POST",
@@ -76,11 +78,11 @@ class TestMain(BaseTestCase):
 
         msg_id = data.get("id")
 
-        update_result = json_request(
+        update_result = json_request_return_dict(
             "/message/save", method="POST", data=dict(id=msg_id, content="New Content"))
         self.assertEqual("success", update_result["code"])
 
-        data = MessageDao.get_by_id(msg_id)
+        data = MessageDao.get_by_key(msg_id)
         assert data != None
         assert data.tag == "log"
         assert data.status == None
@@ -127,7 +129,9 @@ class TestMain(BaseTestCase):
         response = json_request("/message/list?tag=key")
         assert isinstance(response, dict)
         assert response.get("code") == "success"
-        return len(response.get("data"))
+        data = response.get("data")
+        assert isinstance(data, list)
+        return len(data)
 
     def test_message_key(self):
         key_result = json_request("/message/list?tag=key")
@@ -143,6 +147,7 @@ class TestMain(BaseTestCase):
 
         self.assertEqual("success", response.get("code"))
         data = response.get("data")
+        assert isinstance(data, dict)
         msg_id = data['id']
 
         assert self.count_message_key() == 1
@@ -150,7 +155,7 @@ class TestMain(BaseTestCase):
         del_msg_by_id(msg_id)
 
     def test_message_stat(self):
-        result = json_request("/message/stat")
+        result = json_request_return_dict("/message/stat")
         self.assertTrue(result.get("cron_count") != None)
 
     def test_list_by_month(self):
@@ -230,7 +235,11 @@ class TestMain(BaseTestCase):
         self.assertEqual("success", response.get("code"))
 
         from handlers.message.message_search import on_search_message, SearchHandler
-        ctx = Storage(key="xnote", user_name=user_name, messages=[])
+        ctx = SearchContext(key="xnote")
+        ctx.search_message = True
+        ctx.user_name = user_name
+        ctx.user_id = xauth.current_user_id()
+        
         on_search_message(ctx)
         # 两条记录（第一个是汇总，第二个是实际数据）
         self.assertEqual(2, len(ctx.messages))

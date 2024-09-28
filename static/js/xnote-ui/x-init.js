@@ -173,7 +173,7 @@ xnote.http.defaultFailHandler = function (err) {
 };
 
 xnote.http.resolveURL = function(url) {
-    if (url == "") {
+    if (url == "" || url[0] == "?") {
         // 相对路径
         return url;
     }

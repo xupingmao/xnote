@@ -249,6 +249,8 @@ class FileConfig:
 
     fs_max_name_length = 50
 
+    enable_boot_lock = False
+
     @classmethod
     def init(cls, data_dir):
         xnote_core_dir = os.path.dirname(__file__)

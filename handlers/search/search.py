@@ -102,6 +102,7 @@ def build_search_context(user_name, category, key):
     ctx.search_note_content = False
     ctx.search_dict         = False
     ctx.user_name           = user_name
+    ctx.user_id = xauth.UserDao.get_id_by_name(user_name)
 
     if category == "message":
         ctx.search_message = True
@@ -239,12 +240,12 @@ class SearchHandler:
         from handlers.message.dao import MessageDO
         from handlers.message.message_utils import process_message
 
-        user_name = xauth.current_name_str()
+        user_id = xauth.current_user_id()
         offset = ctx.offset
         limit  = ctx.limit
 
         search_tags = set(["task"])
-        item_list, amount = MSG_DAO.search_message(user_name, key, offset, limit, search_tags = search_tags)
+        item_list, amount = MSG_DAO.search_message(user_id, key, offset, limit, search_tags = search_tags)
 
         for item in item_list:
             process_message(item)
@@ -258,7 +259,7 @@ class SearchHandler:
             item.url  = "#"
         
         # 统计已完成待办数量
-        temp, done_count = MSG_DAO.search_message(user_name, key, search_tags = set(["done"]), count_only=True)
+        temp, done_count = MSG_DAO.search_message(user_id, key, search_tags = set(["done"]), count_only=True)
         if done_count > 0:
             done_summary = MessageDO()
             done_summary.icon = "hide"

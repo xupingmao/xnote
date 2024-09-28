@@ -13,12 +13,15 @@ from handlers.message import dao, message_utils
 def on_search_message(ctx: SearchContext):
     if ctx.search_message is False:
         return
+    
+    if ctx.user_id == 0:
+        return
 
     key = ctx.key
     message_utils.touch_key_by_content(ctx.user_name, 'key', key)
     max_len = xconfig.SEARCH_SUMMARY_LEN
 
-    messages, count = dao.search_message(ctx.user_name, key, 0, 3)
+    messages, count = dao.search_message(ctx.user_id, key, 0, 3)
     search_result = []
     for message in messages:
         item = SearchResult()
@@ -78,8 +81,9 @@ class SearchHandler:
     def get_ajax_data(self, *, user_name="", key="", offset=0,
                       limit=20, search_tags=None, no_tag=False, date=""):
         start_time = time.time()
+        user_id = xauth.UserDao.get_id_by_name(user_name)
         chatlist, amount = dao.search_message(
-            user_name, key, offset, limit,
+            user_id, key, offset, limit,
             search_tags=search_tags, no_tag=no_tag, date=date)
 
         # 搜索扩展

@@ -36,7 +36,7 @@ from . import xnote_code_builder
 from . import xnote_hooks, xnote_trace, xtables, xtables_kv, xconfig, xtemplate, xmanager, xauth
 import threading
 import xutils
-import web
+import web # type:ignore
 import atexit
 
 DEFAULT_CONFIG_FILE = xconfig.resolve_config_path("./config/boot/boot.default.properties")

@@ -22,7 +22,7 @@ from .message_model import MessageTagDO
 from .message_model import MOBILE_LENGTH
 
 
-_msg_db = dbutil.get_table("message")
+_msg_db = dbutil.get_table("msg_v2")
 _msg_stat_cache = cacheutil.PrefixedCache("msgStat:")
 _msg_history_db = dbutil.get_table_v2("msg_history")
 
@@ -145,9 +145,9 @@ def has_tag_fast(content):
 def is_user_tag(key=""):
     return key.startswith("#") and key.endswith("#") and key.count("#") == 2
 
-def search_message(user_name: str, key: str, offset=0, limit=20, *, search_tags=None, no_tag=None, count_only=False, date=""):
+def search_message(user_id: int, key: str, offset=0, limit=20, *, search_tags=None, no_tag=None, count_only=False, date=""):
     """搜索短信
-    :param {str} user_name: 用户名
+    :param {int} user_id: 用户名
     :param {str} key: 要搜索的关键字
     :param {int} offset: 下标
     :param {int} limit: 返回结果最大限制
@@ -156,7 +156,6 @@ def search_message(user_name: str, key: str, offset=0, limit=20, *, search_tags=
     :param {bool} count_only: 只统计数量
     :param {str} date: 日期过滤条件
     """
-    assert user_name != None and user_name != ""
     assert date != None
     assert key != None
 
@@ -165,7 +164,7 @@ def search_message(user_name: str, key: str, offset=0, limit=20, *, search_tags=
         if search_tags != None:
             assert len(search_tags) == 1
             second_type = MessageTagDO.get_second_type_by_code(search_tags[0])
-        return search_message_by_user_tag(user_name=user_name, key=key, offset=offset, limit=limit, second_type=second_type)
+        return search_message_by_user_tag(user_id=user_id, key=key, offset=offset, limit=limit, second_type=second_type)
     
     words = get_words_from_key(key)
 
@@ -193,23 +192,22 @@ def search_message(user_name: str, key: str, offset=0, limit=20, *, search_tags=
         chatlist = []
     else:
         chatlist = _msg_db.list(filter_func=search_func, offset=offset,
-                                limit=limit, reverse=True, user_name=user_name)
+                                limit=limit, reverse=True, user_name=str(user_id))
         # 按照创建时间倒排 (按日期补充的随手记的key不是按时间顺序的)
     
     chatlist = MessageDO.from_dict_list(chatlist)
     chatlist.sort(key = lambda x:x.sort_value, reverse=True)
-    amount = _msg_db.count(filter_func=search_func, user_name=user_name)
+    amount = _msg_db.count(filter_func=search_func, user_name=str(user_id))
     return chatlist, amount
 
 
-def search_message_by_user_tag(user_name="", key="", offset=0, limit=20, second_type=0):
-    user_id = xauth.UserDao.get_id_by_name(user_name)
+def search_message_by_user_tag(user_id=0, key="", offset=0, limit=20, second_type=0):
     bindlist = MsgTagBindDao.list_by_key(user_id=user_id, key=key, offset=offset, limit=limit, second_type=second_type)
     count = MsgTagBindDao.count_by_key(user_id=user_id, key=key, second_type=second_type)
     msg_ids = []
     for item in bindlist:
         msg_ids.append(item.target_id)
-    return MessageDao.batch_get_by_ids(user_name, msg_ids), count
+    return MessageDao.batch_get_by_ids(user_id, msg_ids), count
 
 
 def check_before_delete(id):
@@ -235,17 +233,18 @@ def delete_message_by_id(id):
 
 
 @xutils.timeit(name="Kv.Message.Count", logfile=True)
-def kv_count_message(user, status):
+def kv_count_message(user: str, status):
+    user_id = xauth.UserDao.get_id_by_name(user)
     def filter_func(k, v):
         return v.status == status
-    return _msg_db.count(filter_func=filter_func, user_name=user)
+    return _msg_db.count(filter_func=filter_func, user_name=str(user_id))
 
 
 @xutils.cache(prefix="message.count.status", expire=60)
 def count_message(user, status):
     return kv_count_message(user, status)
 
-def get_message_by_id(full_key, user_name=""):
+def get_message_by_key(full_key, user_name=""):
     if full_key == None:
         return None
     if not full_key.startswith(_msg_db.prefix):
@@ -257,6 +256,8 @@ def get_message_by_id(full_key, user_name=""):
         if user_name != "" and user_name != value.user:
             return None
     return value
+
+get_message_by_id = get_message_by_key
 
 def check_param_user(user_name):
     if user_name is None or user_name == "":
@@ -271,24 +272,26 @@ def check_param_id(id):
 
 
 @xutils.timeit(name="kv.message.list", logfile=True, logargs=True)
-def list_message_page(user, status, offset, limit):
+def list_message_page(user: str, status, offset, limit):
     def filter_func(key, value):
         if status is None:
             return value.user == user
         value.id = key
         return value.user == user and value.status == status
+    user_id = xauth.UserDao.get_id_by_name(user)
     chatlist = _msg_db.list(filter_func=filter_func, offset=offset,
-                            limit=limit, reverse=True, user_name=user)
+                            limit=limit, reverse=True, user_name=str(user_id))
 
-    amount = _msg_db.count(filter_func=filter_func, user_name=user)
+    amount = _msg_db.count(filter_func=filter_func, user_name=str(user_id))
     return chatlist, amount
 
 def query_special_page(user_name="", filter_func=None, offset=0, limit=10):
+    user_id = xauth.UserDao.get_id_by_name(user_name)
     chatlist = _msg_db.list(filter_func=filter_func, offset=offset,
-                            limit=limit, reverse=True, user_name=user_name)
+                            limit=limit, reverse=True, user_name=str(user_id))
     chatlist.sort(key = lambda x:x.ctime, reverse=True)
     # TODO 后续可以用message_stat加速
-    amount = _msg_db.count(filter_func=filter_func, user_name=user_name)
+    amount = _msg_db.count(filter_func=filter_func, user_name=str(user_id))
     return chatlist, amount
 
 def list_file_page(user, offset, limit):
@@ -409,7 +412,7 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
         user_id = xauth.UserDao.get_id_by_name(user)
         index_list = MsgIndexDao.list(user_id=user_id, tag=tag, offset=offset, limit=limit)
         
-        chatlist = MessageDao.batch_get_by_index_list(index_list, user_name=user)
+        chatlist = MessageDao.batch_get_by_index_list(index_list, user_id=user_id)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -436,7 +439,7 @@ def list_by_date(user, date, offset=0, limit=xconfig.PAGE_SIZE):
     
     user_id = xauth.UserDao.get_id_by_name(user)
     index_list = MsgIndexDao.list(user_id=user_id, date_prefix=date, offset=offset, limit=limit)
-    msg_list = MessageDao.batch_get_by_index_list(index_list, user_name=user)
+    msg_list = MessageDao.batch_get_by_index_list(index_list, user_id=user_id)
     amount = MsgIndexDao.count(user_id=user_id, date_prefix=date)
     return msg_list, amount
 
@@ -445,11 +448,11 @@ def list_by_date_range(user_id=0, tag="", date_start="", date_end="", offset=0, 
     assert user_info != None
     user_name = user_info.name
     index_list = MsgIndexDao.list(user_id=user_id, tag=tag, date_start=date_start, date_end=date_end, offset=offset, limit=limit)
-    msg_list = MessageDao.batch_get_by_index_list(index_list=index_list, user_name=user_name)
+    msg_list = MessageDao.batch_get_by_index_list(index_list=index_list, user_id=user_id)
     amount = MsgIndexDao.count(user_id=user_id, tag=tag, date_start=date_start, date_end=date_end)
     return msg_list, amount
 
-def count_by_tag(user, tag):
+def count_by_tag(user:str, tag):
     """内部方法"""
     if tag == "key":
         return MsgTagInfoDao.count(user=user)
@@ -462,7 +465,9 @@ def count_by_tag(user, tag):
         user_id = xauth.UserDao.get_id_by_name(user)
         return MsgIndexDao.count(user_id=user_id, tag=tag)
     
-    return dbutil.prefix_count("message:%s" % user, get_filter_by_tag_func(tag))
+    user_id = xauth.UserDao.get_id_by_name(user)
+    return _msg_db.count_by_func(user_name=str(user_id), filter_func=get_filter_by_tag_func(tag))
+    # return dbutil.prefix_count(f"message:{user_id}", get_filter_by_tag_func(tag))
 
 
 def get_message_stat0(user=""):
@@ -798,13 +803,17 @@ class MessageDao:
 
     @staticmethod
     def get_by_id(full_key):
-        return get_message_by_id(full_key)
+        return get_message_by_key(full_key)
     
     @staticmethod
-    def batch_get_by_ids(user_name="", ids=[]):
+    def get_by_key(full_key):
+        return get_message_by_key(full_key)
+    
+    @staticmethod
+    def batch_get_by_ids(user_id=0, ids=[]):
         key_list = []
         for item in ids:
-            key_list.append(_msg_db._build_key(user_name, str(item)))
+            key_list.append(_msg_db._build_key(str(user_id), str(item)))
         result_dict = _msg_db.batch_get_by_key(key_list=key_list)
         records = []
         for row_id in key_list:
@@ -865,12 +874,12 @@ class MessageDao:
         return get_message_tag(user, tag, priority)
     
     @classmethod
-    def batch_get_by_index_list(cls, index_list, user_name="") -> typing.List[MessageDO]:
+    def batch_get_by_index_list(cls, index_list, user_id=0) -> typing.List[MessageDO]:
         id_list = []
         for index in index_list:
             id_list.append(str(index.id))
 
-        dict_result = _msg_db.batch_get_by_id(id_list, user_name=user_name)
+        dict_result = _msg_db.batch_get_by_id(id_list, user_name=str(user_id))
         result = []
         for index in index_list:
             msg = dict_result.get(str(index.id))

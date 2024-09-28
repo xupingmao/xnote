@@ -235,8 +235,8 @@ class MySQLKV(interfaces.DBInterface):
         return rowcount
     
     def compare_and_put(self, key=b'', value=b'', old_value=None):
-        """比较之后再更新,如果old_value=None,则执行insert"""
         # type: (bytes,bytes,bytes|None) -> int
+        """比较之后再更新,如果old_value=None,则执行insert"""
         start_time = time.time()
         if len(value) > self.max_value_length:
             raise interfaces.DatabaseException(code=400, message="value too long")

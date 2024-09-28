@@ -1,11 +1,11 @@
 # encoding=utf-8
 import xutils
-from xnote.core import xtables, xauth, xconfig
 import logging
 import os
 import handlers.note.dao as note_dao
 
-from . import base
+from xnote.core import xtables, xauth, xconfig
+from xnote_migrate import base
 from xutils import Storage
 from xutils import dbutil, dateutil
 from xutils.db.dbutil_helper import new_from_dict

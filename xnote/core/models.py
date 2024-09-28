@@ -10,7 +10,8 @@ class SearchContext:
         self.category = "" # 搜索类型
         # 正则匹配的分组
         self.groups           = []
-        self.user_name        = ''
+        self.user_name        = ""
+        self.user_id = 0
         self.search_message   = False
         self.search_note      = True
         self.search_note_content = False

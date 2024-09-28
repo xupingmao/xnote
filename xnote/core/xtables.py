@@ -325,15 +325,14 @@ def init_tag_info_table():
     @since 2023/09/09
     """
     table_name = "tag_info"
-    with create_default_table_manager(table_name) as manager:
+    comment = "标签信息"
+    with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
-        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
-        manager.add_column("user_id", "bigint", 0)
-        manager.add_column("tag_type", "tinyint", 0)
-        manager.add_column("tag_code",  "varchar(32)", "")
-        manager.add_column("tag_size", "bigint", 0)
-        manager.add_index(["user_id", "tag_code"])
-
+        manager.add_column("user_id", "bigint", default_value=0)
+        manager.add_column("tag_type", "tinyint", default_value=0, comment="一级类型")
+        manager.add_column("second_type", "tinyint", default_value=0, comment="二级类型")
+        manager.add_column("tag_code",  "varchar(32)", default_value="")
+        manager.add_index("user_id")
 
 def init_tag_bind_table():
     """标签绑定关系
@@ -703,6 +702,7 @@ def init():
     
     # 标签相关
     init_note_tag_rel_table() # 已删除, 占位防止冲突
+    # init_tag_info_table()
     init_tag_bind_table()
 
     # 评论相关

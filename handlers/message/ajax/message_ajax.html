@@ -40,7 +40,7 @@
             {% end %}
 
             <a class="btn btn-default" data-id="{{item.id}}" onclick="xnote.action.message.createComment(this)">备注</a>
-            <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}">删除</a>
+            <a class="todo-delete-btn btn btn-default" data-id="{{item.id}}" data-content="{{item.content}}" onclick="xnote.action.message.deleteMessage(this)">删除</a>
         </div>
         {% if item.comments != None and len(item.comments) > 0 %}
         <div class="todo-comment">
@@ -94,21 +94,6 @@
             console.log(id, tag);
 
             updateMessageTag(id, tag);
-        });
-
-        $(".todo-delete-btn").click(function (e) {
-            var id = $(e.target).attr("data-id");
-            var content = $(e.target).attr("data-content");
-
-            xnote.confirm("确认删除[" + content + "]吗?", function (result) {
-                $.post("/message/delete", { id: id }, function (resp) {
-                    if (resp.code == "success") {
-                        xnote.action.message.refreshList();
-                    } else {
-                        xnote.alert(data.message);
-                    }
-                });
-            });
         });
 
         window.onMessageDone = function (target) {

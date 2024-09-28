@@ -20,7 +20,7 @@ from xnote.service import TagTypeEnum
 记事/日记：默认按照创建时间排序
 """
 
-VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:")
+VALID_MESSAGE_PREFIX_TUPLE = ("message:", "msg_key:", "msg_task:", "msg_v2:")
 VALID_TAG_SET = set(["task", "done", "log", "key"])
 # 带日期创建的最大重试次数
 CREATE_MAX_RETRY = 20

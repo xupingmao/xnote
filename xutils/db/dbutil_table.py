@@ -64,6 +64,7 @@ class LdbTable:
         self.table_info = table_info
         self.index_names = table_info.get_index_names()
         self._need_check_user = table_info.check_user
+        self.encode_user_func = table_info.encode_user_func
         self.user_attr = None
         self.id_gen = IdGenerator(self.table_name)
         self.fix_user_attr = True
@@ -163,6 +164,14 @@ class LdbTable:
         validate_str(index_name, "invalid index_name:%r" % index_name)
         if index_name not in self.index_names:
             raise Exception("invalid index_name:%r" % index_name)
+        
+    def _get_user_name_by_attr(self, obj):
+        user_value = obj.get(self.user_attr)
+        if user_value is None:
+            return user_value
+        if self.encode_user_func is None:
+            return user_value
+        return self.encode_user_func(user_value)
 
     def _check_user_name(self, user_name):
         user_name = self.user_name or user_name
@@ -305,7 +314,7 @@ class LdbTable:
 
         user_name = None
         if self._need_check_user:
-            user_name = obj.get(self.user_attr)
+            user_name = self._get_user_name_by_attr(obj)
 
         new_id = "1"
         with get_write_lock(self.table_name):
@@ -371,7 +380,7 @@ class LdbTable:
             id = encode_str(id)
 
         if self.user_attr != None:
-            user_name = obj.get(self.user_attr)
+            user_name = self._get_user_name_by_attr(obj)
             if user_name == None:
                 raise DBException("%s属性未设置" % self.user_attr)
 
