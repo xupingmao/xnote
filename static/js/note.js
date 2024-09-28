@@ -309,7 +309,7 @@ NoteView.addNoteToTag = function (tagCode) {
 };
 
 // 选择笔记本-平铺视图
-// 这个函数需要配合group_select_script.html使用
+// 这个函数需要配合 group_select_script.html 使用
 NoteView.selectGroupFlat = function (req) {
     var noteId = req.noteId;
     var respData;

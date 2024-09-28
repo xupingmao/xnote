@@ -16,7 +16,7 @@
             e.preventDefault();
             var formData = $(e.target).formData();
             formData.callback = "{{callback}}";
-            $.get("/search/dialog", formData, function (resp) {
+            xnote.http.get("/search/dialog", formData, function (resp) {
                 $(".searchDialog").find(".result-list").html(resp);
             });
         })

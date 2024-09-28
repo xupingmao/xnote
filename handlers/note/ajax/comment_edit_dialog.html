@@ -10,6 +10,7 @@
 
 .comment-edit-bottom {
     position: absolute;
+    left: 10px;
     bottom: 10px;
     right: 10px;
 }
@@ -25,9 +26,12 @@
 
         <div class="comment-edit-bottom">
             <input type="file" id="commentFilePicker2" class="hide" multiple />
-            <div class="float-right">
+            <div class="float-left">
                 <button class="btn btn-default attachment-btn">添加附件</button>
                 <button class="btn" id="updateCommentBtn">更新</button>
+            </div>
+            <div class="float-right">
+                <button class="large btn-default" onclick="xnote.dialog.closeLast(this)">关闭</button>
             </div>
         </div>
     </div>

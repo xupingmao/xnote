@@ -1,0 +1,29 @@
+.form-row {
+    margin-bottom: 10px;
+}
+.form-row label {
+    width: 100px;
+    display: block;
+    float: left;
+}
+.form-row textarea {
+    width: 300px;
+    height: 50px;
+}
+.form-body {
+    position: absolute;
+    padding: 10px;
+    top: 0px;
+    bottom: 50px;
+    overflow-y: auto;
+    right: 0px;
+    left: 0px;
+}
+.form-footer {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    height: 50px;
+    padding: 10px;
+}
