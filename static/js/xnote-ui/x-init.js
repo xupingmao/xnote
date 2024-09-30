@@ -35,11 +35,6 @@ if (window.xnote === undefined) {
         MOBILE_MAX_WIDTH: 100
     };
 
-    // 后端接口API模块
-    xnote.api = {};
-    // 操作动作接口
-    xnote.action = {};
-
     // 事件相关接口
     xnote.events = {};
     // resize事件回调
@@ -63,15 +58,23 @@ if (window.xnote === undefined) {
 
     // http相关操作
     xnote.http = {};
-
-    // 功能模块
-    xnote.note = {};
-
     // 字符串模块
     xnote.string = {};
-
     // 临时的空间
     xnote.tmp = {};
+
+    // 自定义模块-后端接口API模块
+    xnote.api = {};
+    // 自定义模块-操作动作接口
+    xnote.action = {};
+    // 自定义模块-笔记
+    xnote.note = {};
+    // 自定义模块-随手记
+    xnote.message = {}
+    // 自定义模块-管理后台
+    xnote.admin = {};
+    // 自定义模块-视图
+    xnote.view = {}
 }
 
 xnote.registerApiModule = function (name) {

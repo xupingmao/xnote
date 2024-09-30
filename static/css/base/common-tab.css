@@ -41,9 +41,12 @@
 .x-tab-btn, .x-tab.btn, .x-tab-box.btn-style>.x-tab {
     color: black;
     background-color: #eee;
-    border: 1px solid #ccc;
+    border: none;
     border-radius: 3px;
     margin-top: 5px;
+    color: #08c;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 /** 按钮hover **/
@@ -52,24 +55,22 @@
     /*border-color: #4f88e1;*/
     /* #05c 深蓝色 */
     /* #06f 亮蓝色 */
+    /* #08c 天蓝色 */
     background-color: #08c;
     color: #fff;
     text-decoration: none;
-    border-color: #08c;
 }
 
 /** 按钮被选中 **/
 .x-tab-btn.active, .x-tab.btn.active, .x-tab-box.btn-style>.x-tab.active {
     background-color: #08c;
     color: #fff;
-    border-color: #08c;
 }
 
 /** Dark 模式 **/
 .x-tab-box.dark>.x-tab.active,.x-tab-box.dark>.x-tab:hover {
 	background-color: gray;
 	color: #fff;
-    border: 1px solid gray;
 }
 
 .x-tab-box.dark>.x-tab {
@@ -80,12 +81,7 @@
 .x-tab-box.dark-style>.x-tab.active, .x-tab-box.dark-style>.x-tab:hover {
     background-color: gray;
     color: #fff;
-    border: 1px solid gray;
     border-radius: 2px;
-}
-
-.x-tab-box.dark-style>.x-tab {
-    border-color: #ccc;
 }
 
 /** 下划线模式 **/
