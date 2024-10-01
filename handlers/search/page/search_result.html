@@ -54,7 +54,7 @@
             {# 右侧操作选项 #}
             <div class="note-visited-cnt">
                 {# 快捷命令 #}
-                {% if file.get("command") != None %}
+                {% if file.command != None and file.command != "" %}
                     <input type="button" class="btn execute-btn float-right" value="执行" href="{{file.command}}"/>
                 {% end %}
 

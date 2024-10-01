@@ -381,9 +381,13 @@ def init_debug():
 def init_xutils():
     xutils.init(xconfig)
     from xutils.fsutil import FileUtilConfig
+    from xutils.config import UtilityConfig
+
+    UtilityConfig.is_test = xconfig.IS_TEST
     FileUtilConfig.data_dir = xconfig.FileConfig.data_dir
     FileUtilConfig.encode_name = xconfig.USE_URLENCODE
     FileUtilConfig.tmp_dir = xconfig.FileConfig.tmp_dir
+    FileUtilConfig.trash_dir = xconfig.FileConfig.trash_dir
 
 def init_app():
     global app

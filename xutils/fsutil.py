@@ -14,6 +14,7 @@ import base64
 import time
 import hashlib
 
+import logging
 # 部分系统没有ctypes（比如SAE的云引擎）
 try:
     import ctypes
@@ -47,7 +48,13 @@ class FileUtilConfig:
     encode_name = False
     data_dir = ""
     tmp_dir = "/tmp"
+    trash_dir = ""
     encode_name_ext = (".x0", ".xenc")
+
+    @classmethod
+    def get_trash_dir(cls):
+        assert cls.trash_dir != ""
+        return cls.trash_dir
 
 def get_real_path(path):
     """获取真实的path信息，如果配置了urlencode，强制进行urlencode，否则先按原路径检查，如果文件不存在，再进行urlencode
@@ -458,17 +465,18 @@ def rmdir(path, hard=False):
     @param {str} path 文件路径
     @param {bool} hard 是否是物理删除
     """
+    trash_dir = FileUtilConfig.get_trash_dir()
+
     if hard:
         shutil.rmtree(path)
         return
-    import xconfig
     path = path.rstrip("/")
     basename = os.path.basename(path)
-    target = os.path.join(xconfig.TRASH_DIR, basename)
+    target = os.path.join(trash_dir, basename)
     target = os.path.abspath(target)
     path = os.path.abspath(path)
 
-    if is_parent_dir(xconfig.TRASH_DIR, path):
+    if is_parent_dir(trash_dir, path):
         # 已经在回收站，直接删除文件夹
         shutil.rmtree(path)
         return
@@ -478,7 +486,7 @@ def rmdir(path, hard=False):
             suffix += 1
             if os.path.exists(target):
                 tmp_name = "%s@%s" % (basename, suffix)
-                target = os.path.join(xconfig.TRASH_DIR, tmp_name)
+                target = os.path.join(trash_dir, tmp_name)
             else:
                 shutil.move(path, target)
                 break
@@ -492,7 +500,8 @@ def rmfile(path, hard=False):
     @param {bool} hard=False 是否硬删除
     @return {str} path in trash.
     """
-    import xconfig
+    trash_dir = FileUtilConfig.get_trash_dir()
+
     if not os.path.exists(path):
         # 尝试转换一下path
         path = get_real_path(path)
@@ -508,8 +517,8 @@ def rmfile(path, hard=False):
             return True
         dirname = os.path.dirname(path)
         dirname = os.path.abspath(dirname)
-        dustbin = os.path.abspath(xconfig.TRASH_DIR)
-        if is_parent_dir(xconfig.TRASH_DIR, path):
+        dustbin = os.path.abspath(trash_dir)
+        if is_parent_dir(trash_dir, path):
             os.remove(path)
         else:
             fname = os.path.basename(path)
@@ -549,7 +558,7 @@ def copy(src, dest):
                 break
             destfp.write(buf)
     except Exception as e:
-        logutil.error("copy file from {} to {} failed", src, dest, e)
+        logging.error("copy file from %s to %s failed, %s", src, dest, e)
     finally:
         srcfp.close()
         destfp.close()
@@ -566,7 +575,7 @@ def try_listdir(dirname):
     try:
         return os.listdir(dirname)
     except:
-        return None
+        return []
 
 
 def fixed_dir_path(dirname):
@@ -588,6 +597,11 @@ def fixed_basename(path):
         path = path[:-1]
     return os.path.basename(path)
 
+
+class FileStatInfo(Storage):
+    def __init__(self):
+        super().__init__()
+        self.st_size = 0
 
 class FileItem(Storage):
     """文件对象"""
@@ -632,7 +646,7 @@ class FileItem(Storage):
             st = os.stat(path)
             self.cdate = xutils.format_date(st.st_ctime)
         except:
-            st = Storage()
+            st = FileStatInfo()
 
         self.name = xutils.unquote(self.name)
         self.name = decode_name(self.name)
@@ -659,21 +673,12 @@ class FileItem(Storage):
                 self.__init__(new_path, parent)
 
     # sort方法重写__lt__即可
-    def __lt__(self, other):
+    def __lt__(self, other: "FileItem"):
         if self.type == "dir" and other.type == "file":
             return True
         if self.type == "file" and other.type == "dir":
             return False
         return self.name < other.name
-
-    # 兼容Python2
-    def __cmp__(self, other):
-        if self.type == other.type:
-            return cmp(self.name, other.name)
-        if self.type == "dir":
-            return -1
-        return 1
-
 
 def touch(path):
     """类似于Linux的touch命令"""
@@ -921,6 +926,8 @@ class FileHasher:
             return hashlib.md5()
         if hash_type == "sha1":
             return hashlib.sha1()
+        if hash_type == "sha256":
+            return hashlib.sha256()
         raise Exception(f"unsupported hash_type:{hash_type}")
     
     def get_hash_hex(self):

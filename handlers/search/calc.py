@@ -2,9 +2,11 @@
 # Created by xupingmao on 2017/06/11
 # @modified 2021/07/18 17:57:33
 import re
-import xmanager
 import xutils
+from xnote.core import xmanager
 from xutils import Storage
+from xutils import SearchResult
+from xnote.core.models import SearchContext
 
 def safe_check(expression):
     p = re.compile(r"^[.0-9+\-*\/% \(\)\~]*\Z")
@@ -15,7 +17,7 @@ def safe_check(expression):
     return None
 
 @xmanager.searchable(r"(.*[0-9]+.*)")
-def do_calc(ctx):
+def do_calc(ctx: SearchContext):
     expression = ctx.key
     if expression.startswith("calc"):
         expression = expression[4:]
@@ -27,7 +29,7 @@ def do_calc(ctx):
         value = eval(exp)
         if str(value) == exp:
             return
-        f = Storage()
+        f = SearchResult()
         f.url = "#"
         f.name = "计算结果"
         f.icon = "fa-calculator"

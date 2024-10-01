@@ -278,6 +278,9 @@ class FileConfig:
         cls.tmp_dir = os.path.join(data_dir, "tmp")
         makedirs(cls.tmp_dir)
 
+        cls.trash_dir = os.path.join(data_dir, "trash")
+        makedirs(cls.trash_dir)
+
         cls.record_db_name = SystemConfig.get_str("record_db_name", "record")
         cls.record_db_file = cls.get_db_path(cls.record_db_name)
 

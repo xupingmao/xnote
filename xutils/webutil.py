@@ -10,12 +10,12 @@ import web
 import math
 from xutils.six import BytesIO
 from web import utils
+from xutils.config import UtilityConfig
 
 #################################################################
 ##   Web.py Utilities web.py工具类的封装
 #################################################################
 
-IS_TEST = False
 MOBILE_UA_NAMES = ("iphone", "android", "ipad", "webos")
 
 
@@ -129,7 +129,7 @@ def get_argument_field_storage(key=""):
 
 
 def get_client_user_agent():
-    if IS_TEST:
+    if UtilityConfig.is_test:
         return ""
     return web.ctx.env.get("HTTP_USER_AGENT")
 
@@ -241,10 +241,6 @@ class LogMiddleware:
         msg = self.format % (host, time, protocol, method, req, status,
                              int(1000 * cost_time))
         print(utils.safestr(msg), file=outfile)
-
-def init_webutil_env(is_test = False):
-    global IS_TEST
-    IS_TEST = is_test
 
 class WebResult(web.Storage):
     def __init__(self):

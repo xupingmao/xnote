@@ -49,7 +49,7 @@ from xutils import interfaces, Storage
 from xutils.db.dbutil_cache import DatabaseCache
 from xutils.base import is_str
 
-_cache_dict = dict()
+_cache_dict = dict() # type: dict[str, CacheObj]
 _cache_queue = deque()
 
 class CacheConfig:

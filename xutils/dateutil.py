@@ -56,7 +56,7 @@ WDAY_DICT = {
     "7": u"周日"
 }
 
-class DateClass:
+class DateInfo:
 
     def __init__(self):
         self.year = 0
@@ -234,7 +234,7 @@ def parse_date_to_object(date_str):
     date_str = date_str.split(" ")[0]
     parts = date_str.split("-")
     
-    date_object = DateClass()
+    date_object = DateInfo()
 
     def _parse_int(value):
         try:

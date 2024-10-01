@@ -2,7 +2,15 @@
 
 {% block head %}
     {% include common/layout/wide_left.html %}
-    <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+    {% include common/script/load_vue.html %}
+    <style>
+        .example-title {
+            width: 100%;
+            padding: 5px;
+            border-left: 5px solid #039BE5;
+            background-color: #eee;
+        }
+    </style>
 {% end %}
 
 {% block body %}
@@ -33,47 +41,71 @@
         </ul>
     </div>
     
-    <h2>声明式渲染</h3>
+    <h2>官方文档</h2>
+    <a href="https://v2.cn.vuejs.org/v2/guide/installation.html" target="_blank">vue2官方文档</a>
 
     <!-- {# `{{!` 用来转义 #} -->
 
-    <p>{{! message }}</p>
+    {% init example_list = [
+        Storage(name = "声明式渲染", type = "h2"),
+        Storage(name = "在文本中使用变量", code="""<p>{{message}}</p>"""),
+        Storage(name = "禁止渲染文本中的变量", code="""<!-- 使用v-pre指令 -->
+<p v-pre>{{message}}</p>"""),
+        Storage(name = "在属性中使用变量", code="""<div v-bind:title="bindmessage">
+    鼠标悬停几秒钟查看此处动态绑定的提示信息！
+</div>"""),
+        Storage(name = "条件与循环", type="h2"),
+        Storage(name = "v-if/v-else-if/v-else", code="""<p v-if="seen">现在你看到我了</p>
+<p v-else-if="Math.random() > 0.4"> Math.random() > 0.4 </p>
+<p v-else>看不到我</p>"""),
+        Storage(name = "v-for", code="""<!-- v-for指自身元素重复 -->
+<p>Example 1</p>
+<ul>
+    <li v-for="file in files">
+        {{ file }}
+    </li>
+</ul>
 
-    <!-- {# title中间不能有`-` #} -->
+<p>Example 2</p>
 
-    <div v-bind:title="bindmessage">
-        鼠标悬停几秒钟查看此处动态绑定的提示信息！
-    </div>
+<ul>
+    <li v-for="(file, index) in files">
+        {{ index }} - {{ file }}
+    </li>
+</ul>
 
-    <h2>条件与循环</h2>
-    <h3>v-if v-else-if v-else</h3>
-    <p v-if="seen">现在你看到我了</p>
-    <p v-else-if="Math.random() > 0.4"> Math.random() > 0.4 </p>
-    <p v-else>看不到我</p>
+<p>Example 3</p>
 
-    <h3 id="heading-v-for">v-for</h3>
-    <p>v-for指自身元素重复</p>
-    <ol>
-        <li v-for="file in files">
-            {{! file }}
-        </li>
-    </ol>
+<ul>
+    <li v-for="(value, key, index) in person">
+        {{ index }} - {{ key}} = {{ value }}
+    </li>
+</ul>
 
-    <ul>
-        <li v-for="(file, index) in files">
-            {{! index }} - {{! file }}
-        </li>
-    </ul>
+<p>Example 4</p>
 
-    <ul>
-        <li v-for="(value, key, index) in person">
-            {{! index }} - {{! key}} = {{! value }}
-        </li>
-    </ul>
+<ul>
+    <span v-for="n in 10">{{ n }} , </span>
+</ul>
+        """)
+    ] %}
 
-    <ul>
-        <span v-for="n in 10">{{! n }} , </span>
-    </ul>
+
+    {% for example in example_list %}
+        {% if example.type == "h2" %}
+            <h2>{{example.name}}</h2>
+        {% else %}
+            <h3>{{example.name}}</h3>
+            <p class="example-title">&gt;代码</p>
+            <pre class="marked-code" v-pre>
+                {{ example.code }}
+            </pre>
+            <p class="example-title">&gt;效果</p>
+            {% raw example.code %}
+        {% end %}
+    {% end %}
+
+    <!-- {# title中间不能有`-` #} -->    
 
     <h2>处理用户输入</h2>
     <h4>v-on</h4>
@@ -265,14 +297,14 @@
         var minLevel = 10;
         var elements = [];
 
-        $("h1,h2,h3,h4").each(function (idx, ele) {
+        $("h1,h2,h3:not(.card-title),h4").each(function (idx, ele) {
             $(ele).attr("id", "heading-" + idx);
             var tagName = $(ele)[0].tagName.toUpperCase();
             var level = parseInt(tagName.substring(1));
             minLevel = Math.min(minLevel, level);
         });
 
-        $("h1,h2,h3,h4").each(function (idx, ele) {
+        $("h1,h2,h3:not(.card-title),h4").each(function (idx, ele) {
             var tagName = $(ele)[0].tagName.toUpperCase();
             var level = parseInt(tagName.substring(1));
             var heading = {

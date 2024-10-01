@@ -88,32 +88,19 @@ def print_table(data, max_length=20, headings = None, ignore_attrs = None):
         row = map(lambda key:item.get(key), headings)
         print_table_row(row, max_length)
 
-class SearchResult(dict):
-
+class SearchResult(Storage):
+    """搜索结果"""
     def __init__(self, name=None, url='#', raw=None):
+        super().__init__()
         self.name = name
         self.url = url
-        self.raw = raw
+        self.raw = raw # 文本按照原始格式展示在<pre>标签里面
         self.icon = ""
         self.content = ""
         self.show_move = False
         self.show_more_link = False
         self.html = ""
-
-    def __getattr__(self, key): 
-        try:
-            return self[key]
-        except KeyError as k:
-            return None
-    
-    def __setattr__(self, key, value): 
-        self[key] = value
-
-    def __delattr__(self, key):
-        try:
-            del self[key]
-        except KeyError as k:
-            raise AttributeError(k)
+        self.command = "" # 命令类的工具
 
 def attrget(obj, attr, default_value = None):
     if hasattr(obj, attr):
@@ -180,7 +167,7 @@ from xutils.osutil import *
 class BaseRule:
     """规则引擎基类"""
 
-    def __init__(self, pattern=None):
+    def __init__(self, pattern: str):
         self.pattern = pattern
 
     def match(self, ctx, input_str = None):
@@ -238,5 +225,4 @@ def init(config, pool_size = 2000, thread_size = 5):
     FS_CODE_EXT_LIST  = config.FS_CODE_EXT_LIST
     IS_TEST           = config.IS_TEST
     
-    xutils.webutil.init_webutil_env(is_test = IS_TEST)
     logutil.init_async_pool(pool_size=pool_size, thread_size=thread_size)

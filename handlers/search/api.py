@@ -4,8 +4,9 @@
 from __future__ import print_function
 import os
 import xutils
-import xconfig
-import xauth
+from xnote.core import xconfig
+from xnote.core import xauth
+from xnote.core.models import SearchContext
 from xutils import six
 
 SearchResult = xutils.SearchResult
@@ -30,7 +31,7 @@ def init_name_dict():
 
 init_name_dict()
 
-def search(ctx, name):
+def search(ctx: SearchContext, name):
     global _api_name_dict
     if not xauth.is_admin():
         return
@@ -39,13 +40,11 @@ def search(ctx, name):
     results = []
     for task_name in _api_name_dict:
         task_command = _api_name_dict[task_name]
-        # task_name = six.u(task_name)
-        task_name = xutils.u(task_name)
         # print(name, task_name)
         if name in task_name:
             result = SearchResult()
-            result.name = xutils.u("系统接口 - ") + task_name
-            result.command = "/api/%s" % task_command
+            result.name = f"系统接口 - {name}"
+            result.command = f"/api/{task_command}"
             result.url = result.command
             results.append(result)
     return results

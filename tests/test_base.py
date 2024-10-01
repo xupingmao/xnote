@@ -4,20 +4,22 @@ import typing
 import os
 import time
 import unittest
-from xnote.core import xconfig
+import web
+import json
 import xutils
+
+from xnote.core import xconfig
 from xnote.core import xtables
 from xnote.core import xmanager
 from xnote.core import xtemplate
 from xnote.core import xtables_kv
-import web
-import json
 from xnote.core import xauth
 from xutils import dbutil
 from xutils import cacheutil
 from xutils import six
 from xutils.db.driver_sqlite import SqliteKV
 from xutils.config import UtilityConfig
+from xutils.fsutil import FileUtilConfig
 
 config = xconfig
 date = time.strftime("%Y/%m")
@@ -33,7 +35,7 @@ def init():
         return APP
     xconfig.init("./config/boot/boot.test.properties")
     xconfig.IS_TEST = True
-    
+    FileUtilConfig.trash_dir = xconfig.FileConfig.trash_dir
     xauth.TestEnv.login_admin()
     
     xconfig.port = "1234"
