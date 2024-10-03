@@ -366,6 +366,7 @@ def get_root(creator=None):
     root.name = "根目录"
     root.type = "group"
     root.parent_id = 0
+    root.level = 1
     build_note_info(root)
     root.url = f"{xconfig.WebConfig.server_home}/note/group"
     return root

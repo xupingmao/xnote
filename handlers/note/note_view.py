@@ -133,7 +133,7 @@ def view_group_timeline_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
 
 
-def view_group_detail_func(file, kw):
+def view_group_detail_func(file: note_dao.NoteDO, kw):
     orderby = kw.orderby
     user_name = kw.user_name
     page = kw.page
@@ -141,8 +141,8 @@ def view_group_detail_func(file, kw):
     pagesize = 1000
     is_public_page = kw.is_public_page
 
-    dialog = xutils.get_argument("dialog", "false")
-    q_tag = xutils.get_argument("tag", "")
+    dialog = xutils.get_argument_bool("dialog")
+    q_tag = xutils.get_argument_str("tag", "")
 
     if kw.op == "edit":
         # 编辑笔记本的简介
@@ -194,7 +194,7 @@ def view_group_detail_func(file, kw):
     kw.show_orderby = True
     kw.orderby = orderby
 
-    if dialog == "true":
+    if dialog:
         # 对话框的样式
         kw.template_name = "note/ajax/group_detail_dialog.html"
     else:

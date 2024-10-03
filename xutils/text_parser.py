@@ -134,6 +134,9 @@ class TextParserBase(object):
         if index < self.max_index:
             return self.text[index]
         return None
+    
+    def set_index(self, index):
+        self.i = index
 
     def startswith(self, target):
         """当前字符是否以{target}开头"""

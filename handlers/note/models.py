@@ -112,6 +112,9 @@ class NoteIndexDO(Storage):
     @property
     def hot_index(self):
         return self.visit_cnt
+    
+    def is_group(self):
+        return self.type == "group"
 
 class NoteDO(NoteIndexDO):
     def __init__(self):
@@ -215,7 +218,7 @@ class NoteTypeInfo:
             NoteTypeInfo(url="/note/all?type=table", name="表格", tag_code="table"),
             NoteTypeInfo(url="/note/removed", name="回收站", tag_code="removed", css_class="hide"),
         ]
-    
+
 class NoteCategory(NoteIndexDO):
     def __init__(self, code, name):
         self.name = f"{code}-{name}"

@@ -1,5 +1,5 @@
 <!-- 笔记的下拉选项 -->
-<script type="text/javascript" src="/static/lib/clipboard/clipboard-2.0.4.min.js"></script>
+<script type="text/javascript" src="{{_server_home}}/_static/lib/clipboard/clipboard-2.0.4.min.js"></script>
 
 {% if file != None and _user_name == file.creator and op == "view" %}
 
@@ -28,7 +28,7 @@ xnote.state.note = {
         <a class="dropdown-option link" data-id="{{item.id}}" data-note-type="{{item.type}}"
             onclick="xnote.note.openDialogToShare(this)">分享</a>
 
-        <a class="dropdown-option move-btn link">移动</a>
+        <a class="dropdown-option link" onclick="xnote.note.openDialogToMoveByElement(this)" data-id="{{file.id}}">移动</a>
         <a class="dropdown-option copy-btn link">复制</a>
 
         {% if file.level > 0 %}
@@ -102,7 +102,7 @@ $(function () {
         };
         var loadIndex = layer.load(2);
 
-        $.post("/note/cache_external", params, function (resp) {
+        xnote.http.post("/note/cache_external", params, function (resp) {
             layer.close(loadIndex);
             if (resp.code == "success") {
                 window.location.reload();

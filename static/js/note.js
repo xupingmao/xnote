@@ -262,7 +262,6 @@ NoteView.getSelectNoteDialogTemplate = function () {
     return text;
 };
 
-
 NoteView.renderNoteList = function (itemList) {
     var templateText = this.getSelectNoteDialogTemplate();
     var html = template.render(templateText, {
@@ -440,6 +439,10 @@ NoteView.deleteTagMeta = function (tagMetaList) {
 
 // 打开对话框移动笔记
 NoteView.openDialogToMove = function (note_id) {
+    if (note_id == undefined) {
+        xnote.alert("note_id不能为空");
+        return;
+    }
     var req = {};
     req.callback = function (parentId) {
         if (parentId === undefined || parentId == "") {
@@ -447,8 +450,12 @@ NoteView.openDialogToMove = function (note_id) {
             return;
         }
         xnote.http.post("/note/move", { id: note_id, parent_id: parentId }, function (resp) {
-            console.log(resp);
-            window.location.reload();
+            if (resp.success) {
+                console.log(resp);
+                window.location.reload();
+            } else {
+                xnote.alert(resp.message);
+            }
         });
     };
     this.selectGroupFlat(req);

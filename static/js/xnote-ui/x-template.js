@@ -29,6 +29,12 @@ xnote.renderTemplate = function(templateText, object) {
     });
 };
 
+// 使用art-template渲染
+xnote.renderArtTemplate = function(templateText, data, options) {
+    return template.render(templateText, data, options);
+};
+
+// 初始化template
 (function() {
     function jqRenderTemplate(data, options) {
         var templateText = $(this).text();

@@ -14,17 +14,19 @@ import xutils
 from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.core import xauth
+from xnote.core.models import SearchContext
 from xutils import text_contains, Storage, u
 
 SearchResult = xutils.SearchResult
 url_pattern = re.compile(r"(http|https)://[^ ]+")
 
 @xmanager.searchable(r"([^ ]+)")
-def search(ctx):
+def search(ctx: SearchContext):
     # six.print_(xconfig)
     # 查找`handlers/tools/`目录下的工具
     if not ctx.search_tool:
         return
+    server_home = xconfig.WebConfig.server_home
     name = ctx.key
     tools_path = xconfig.TOOLS_DIR
     files = []
@@ -41,7 +43,7 @@ def search(ctx):
             f = SearchResult()
             f.icon = "fa-cube"
             f.name = filename
-            f.url = "/tools/" + filename
+            f.url = f"{server_home}/tools/{filename}"
             f.content = filename
             f.show_move = False
             files.append(f)
@@ -50,13 +52,13 @@ def search(ctx):
         f = SearchResult()
         f.show_move = False
         f.name = "导入笔记 - " + name
-        f.url = "/note/html_importer?url=" + xutils.encode_uri_component(name)
+        f.url = f"{server_home}/note/html_importer?url=" + xutils.encode_uri_component(name)
         files.append(f)
 
         f = SearchResult()
         f.show_move = False
         f.name = "二维码"
-        f.url = "/tools/qrcode?content=" + name
+        f.url = f"{server_home}/tools/qrcode?content={name}"
         files.append(f)
 
     ctx.tools += files

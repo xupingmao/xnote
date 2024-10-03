@@ -17,7 +17,7 @@ class GroupApiHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument_int("id", 0)
-        list_type = xutils.get_argument("list_type", "")
+        list_type = xutils.get_argument_str("list_type", "")
         orderby = xutils.get_argument_str("orderby", "mtime_desc")
 
         user_name = xauth.current_name_str()
@@ -37,7 +37,9 @@ class GroupApiHandler:
         return dict(code="success", data=notes, parent_id=parent_id)
     
     def list_all_group(self, user_name, orderby=""):
-        return dao.list_group_v2(user_name, limit=1000, orderby=orderby)
+        result = dao.list_group_v2(user_name, limit=1000, orderby=orderby)
+        root = dao.get_root()
+        return [root] + result
 
 
 def list_recent_groups(limit=5):

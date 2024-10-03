@@ -191,19 +191,7 @@
 
         // 移动笔记
         $(".move-btn").click(function (e) {
-            var req = {};
-            req.callback = function (parentId) {
-                if (parentId === undefined || parentId == "") {
-                    xnote.alert("parentId is undefined");
-                    return;
-                }
-                var noteId = "{{file.id}}";
-                xnote.http.post("/note/move", { id: noteId, parent_id: parentId }, function (resp) {
-                    console.log(resp);
-                    window.location.reload();
-                });
-            };
-            xnote.note.selectGroupFlat(req);
+            xnote.note.openDialogToMoveByElement(e.target);
         });
     })
 </script>

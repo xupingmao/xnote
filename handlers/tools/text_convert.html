@@ -1,7 +1,6 @@
 {% extends base %}
 {% block head %}
-    <script type="text/javascript" src="/static/js/utils.js"></script>
-    <script type="text/javascript" src="/static/js/Lexer.js"></script>
+    <script type="text/javascript" src="{{_server_home}}/_static/js/Lexer.js"></script>
     <style type="text/css">
         p {
             float: left;
@@ -97,7 +96,8 @@ function select(ident) {
 }
 
 function output(str) {
-    document.getElementById("output").innerHTML = str;
+    // document.getElementById("output").innerHTML = str;
+    $("#output").val(str);
 }
 
 function Option () {
@@ -306,9 +306,12 @@ function buildEnumResult(items) {
 
 function buildResult(items) {
     var functionName = getOptionValue();
+    console.log("run", functionName, "...");
+    console.log("items", items);
     return window[functionName](items);
 }
 
+// 执行的入口
 function execute() {
     var input = getInputValue();
     try {
