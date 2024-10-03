@@ -623,10 +623,17 @@ $(function () {
 // 通过html元素来关闭对话框
 xnoteDialogModule.closeByElement = function (target) {
     var dialogId = $(target).attr("data-dialog-id");
-    var index = xnoteDialogModule.idToIndexMap[dialogId];
-    layer.close(index);
+    if (dialogId) {
+        var index = xnoteDialogModule.idToIndexMap[dialogId];
+        layer.close(index);
+    } else {
+        // layer组件的ID
+        var times = $(target).parents(".layui-layer").attr("times");
+        layer.close(times);
+    }
 }
 
+// 关闭最后的对话框
 xnoteDialogModule.closeLast = function () {
     xnoteDialogModule.closeDialog("last");
 }

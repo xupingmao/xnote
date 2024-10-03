@@ -10,6 +10,8 @@ class TableExampleHandler(BaseTablePlugin):
     title = "表格测试"
 
     NAV_HTML = """
+{% include test/component/example_nav_tab.html %}
+
 <div class="card">
     <button class="btn" onclick="xnote.table.handleEditForm(this)"
             data-url="?action=edit" data-title="新增记录">新增记录</button>

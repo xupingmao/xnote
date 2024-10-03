@@ -13,14 +13,14 @@
     </div>
 </div>
 
-<button class="btn btn-default" id="dialog1Btn">打开对话框</button>
+<button class="btn btn-default" onclick="openDialog1()">打开对话框</button>
 <script>
-    $("#dialog1Btn").click(function () {
+    function openDialog1() {
         var html = $("#dialog1").html();
         xnote.openDialog("标题", html, ["好的", "取消"], [function () {
             xnote.alert("你确认了操作");
         }]);
-    })
+    };
 </script>
 """ %}
 
@@ -42,10 +42,47 @@
 </script>
 """ %}
 
+{% init html3 = """
+<div class="x-dialog" id="dialog3">
+    <div class="dialog-body">
+        <div class="card">
+            <p>第一行</p>
+            <p>第二行</p>
+            <textarea></textarea>
+        </div>
+    </div>
+    <div class="dialog-footer">
+        <div class="float-right">
+            <button class="large" onclick="dialog3Confirm()">确定</button>
+            <button class="large btn-default" onclick="xnote.dialog.closeByElement(this)">关闭</button>
+        </div>
+    </div>
+</div>
+
+<button class="btn btn-default" onclick="openDialog3()">打开对话框</button>
+<script>
+function openDialog3 () {
+    var html = $("#dialog3").html();
+    xnote.openDialog("标题", html);
+};
+
+function dialog3Confirm() {
+    xnote.toast("点击了确认");
+    xnote.dialog.closeLast();
+}
+</script>
+""" %}
+
 <div class="card">
 	<p>对话框自定义HTML</p>
 	<pre class="marked-code">{{html1}}</pre>
 	{% raw html1 %}
+</div>
+
+<div class="card">
+	<p>对话框自定义HTML</p>
+	<pre class="marked-code">{{html3}}</pre>
+	{% raw html3 %}
 </div>
 
 <div class="card">

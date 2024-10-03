@@ -9,7 +9,6 @@
 --> #}
 
 {% include common/layout/wide_left.html %}
-
 <div class="card">
 	<div class="card-title">
 		<a href="{{_server_home}}/system/develop">开发者工具</a>
@@ -18,20 +17,4 @@
 	</div>
 </div>
 
-<div class="card">
-	<div class="float-left">
-        <a class="x-tab active" style="text-decoration: none;">案例:</a>
-    </div>
-	<div class="x-tab-box btn-style" 
-			data-tab-key="name" 
-			data-auto-href="true"
-			data-tab-default="index">
-		<a class="x-tab" data-tab-value="btn">按钮示例</a>
-		<a class="x-tab" data-tab-value="tab">Tab示例</a>
-		<a class="x-tab" data-tab-value="tag">tag示例</a>
-		<a class="x-tab" data-tab-value="dialog">Dialog示例</a>
-	    <a class="x-tab" data-tab-value="dropdown">Dropdown示例</a>
-		<a class="x-tab" data-tab-value="table" href="{{_server_home}}/test/example/table">table示例</a>
-	   	<a class="x-tab" data-tab-value="hammer">Hammer示例</a>
-	</div>
-</div>
+{% include test/component/example_nav_tab.html %}

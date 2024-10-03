@@ -15,7 +15,7 @@ $(function () {
             ajax_dialog_title = "分享笔记";
         }
 
-        $.get(ajax_dialog_url, params, function (resp) {
+        xnote.http.get(ajax_dialog_url, params, function (resp) {
             xnote.showDialog(ajax_dialog_title, resp);
         });
     }

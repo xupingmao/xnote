@@ -7,26 +7,51 @@
     }
 </style>
 
-<div class="card">
-    <p>分享给用户</p>
+{% init show_public_share = False %}
 
-    <input id="shareTo">
-    <input type="button" value="确认分享" onclick="onShareGroupClick()" />
+<div class="dialog-body">
+
+    {% if show_public_share %}
+    <div class="card">
+        <p>说明：公开分享所有人可见，链接分享仅获取链接的人可见</p>
+        {% if file.is_public %}
+            <a class="btn btn-default" onclick="javascript:visitAndRefresh(this)" 
+                data-href="{{_server_home}}/note/share/cancel?id={{file.id}}">取消公开分享</a>
+        {% else %}
+            <a class="btn btn-default" onclick="javascript:visitAndRefresh(this)" 
+                data-href="{{_server_home}}/note/share?id={{file.id}}">公开分享</a>
+        {% end %}
+        <a class="btn btn-default note-share-link-btn" href="javascript:note_share_by_link(this)" 
+            data-clipboard-text="">链接分享</a>
+    </div>
+    {% end %}
+
+    <div class="card">
+        <p>分享给用户</p>
+
+        <input id="shareTo">
+        <input type="button" value="确认分享" onclick="onShareGroupClick()" />
+    </div>
+
+    <div class="card">
+        <p>已分享用户:</p>
+    
+        {% if len(share_to_list) == 0 %}
+            <p>无</p>
+        {% end %}
+    
+        {% for share in share_to_list %}
+            <div class="user-item">
+                <span class="tag gray">{{share.to_user}}</span>
+                <a class="link" data-user="{{share.to_user}}" onclick="onCancelShare(this)">取消分享</a>
+            </div>
+        {% end %}
+    </div>
 </div>
-
-<div class="card">
-    <p>已分享用户:</p>
-
-    {% if len(share_to_list) == 0 %}
-        <p>无</p>
-    {% end %}
-
-    {% for share in share_to_list %}
-        <div class="user-item">
-            <span class="tag gray">{{share.to_user}}</span>
-            <a class="link" data-user="{{share.to_user}}" onclick="onCancelShare(this)">取消分享</a>
-        </div>
-    {% end %}
+<div class="dialog-footer">
+    <div class="float-right">
+        <button class="large btn-default" onclick="xnote.dialog.closeByElement(this)">关闭</button>
+    </div>
 </div>
 
 <script type="text/javascript">
