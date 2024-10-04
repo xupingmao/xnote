@@ -809,3 +809,6 @@ A example image
         result = note_dao.list_sticky(creator=user_name, offset=5, limit=5)
         assert len(result) == 5
 
+    def test_group_list(self):
+        self.check_OK("/note/group_list")
+        self.check_OK("/note/group_list?tab=smart")

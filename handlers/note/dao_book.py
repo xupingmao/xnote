@@ -15,13 +15,14 @@ from xnote.core import xconfig
 from xnote.core import xmanager
 from xutils import Storage
 from xutils import fsutil
+from handlers.note.models import NoteIndexDO
 from . import dao as note_dao
 from .dao import check_and_create_default_book
 
 NOTE_DAO = xutils.DAO("note")
 
-def SmartNote(name, url, icon="fa-folder", size=None, size_attr=None):
-    note = Storage(name=name, url=url)
+def SmartNote(name, url, icon="fa-folder", size=0, size_attr=None):
+    note = NoteIndexDO(name=name, url=url)
     note.priority = 0
     note.icon = icon
     note.size = size
@@ -49,11 +50,12 @@ class SmartGroupService:
         fpath = xconfig.resolve_config_path("./config/note/smart_group.ini")
         config = fsutil.load_ini_config(fpath)
         result = []
+        server_home = xconfig.WebConfig.server_home
         for key in config.sections:
             item = config.items[key]
             if item.visible == "false":
                 continue
-            note = SmartNote(item.name, item.url, size_attr=item.size_attr)
+            note = SmartNote(item.name, server_home + item.url, size_attr=item.size_attr)
             result.append(note)
         return result
 

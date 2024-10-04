@@ -55,7 +55,7 @@
 
     <a class="list-link" href="{{item.url}}">
         {% if sticky_position == "left" %}
-            {% if item.level > 0 %}
+            {% if item.is_sticky %}
                 <span class="tag orange-tag">置顶</span>
             {% end %}
             {% if item.archived %}
@@ -73,7 +73,7 @@
         {% end %}
 
         {% if sticky_position == "right" %}
-            {% if item.level > 0 %}
+            {% if item.is_sticky %}
                 <span class="tag orange-tag">置顶</span>
             {% end %}
             {% if item.archived %}

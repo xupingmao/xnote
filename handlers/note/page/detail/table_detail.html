@@ -11,10 +11,10 @@
     {% include note/component/editor/editor_default_vars.html %}
 
 
-<script src="/static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.js"></script>
+<script src="{{_server_home}}/_static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.js"></script>
 <link rel="stylesheet" href="{{_server_home}}/static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.css" type="text/css" />
 
-<script src="/static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.js"></script>
+<script src="{{_server_home}}/_static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.js"></script>
 <link rel="stylesheet" href="{{_server_home}}/static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.css" type="text/css" />
 
 {% include note/component/editor/table_lang.html %}
@@ -62,6 +62,10 @@
 
 <div class="card">
     {% include note/component/note_path.html %}
+</div>
+
+<div class="card btn-line-height">
+    {% include note/component/view_header_tag.html %}
 </div>
 
 <div class="card">

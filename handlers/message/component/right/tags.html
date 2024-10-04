@@ -1,21 +1,12 @@
 {% init side_tags = [] %}
 {% init side_tag_tab_key = "key" %}
-{% init show_side_system_tags = False %}
 {% init show_side_tags = True %}
 
 {% if show_side_tags %}
 <div class="card message-tag-card">
     <div class="card-title btn-line-height">
         <span>热门标签</span>
-        
-        <div class="float-right">
-        {% if show_side_system_tags %}
-            <a class="btn btn-default" href="{{_server_home}}/message?tag=log&p=file&displayTag=key">系统标签</a>
-        {% end %}
-        </div>
     </div>
-
-
     <div class="x-tab-box sidebar-list-style" data-tab-key="{{side_tag_tab_key}}">
         {% for temp_tag in side_tags %}
             <div class="x-tab-item">

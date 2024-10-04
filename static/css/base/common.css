@@ -165,7 +165,7 @@ h3.marked-heading {
 
 /* 高对比度link */
 .contract-link {
-    display: inline-block;
+    display: block;
     color: #08c;
     line-height: 20px;
     float: left;

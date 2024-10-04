@@ -115,7 +115,12 @@ class NoteIndexDO(Storage):
     
     def is_group(self):
         return self.type == "group"
-
+    
+    @property
+    def is_sticky(self):
+        """是否是置顶"""
+        return self.level > 0
+    
 class NoteDO(NoteIndexDO):
     def __init__(self):
         super(NoteDO, self).__init__()
