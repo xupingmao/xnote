@@ -15,8 +15,8 @@ class TableConfig:
     enable_binlog = False
     enable_auto_ddl = True # 自动DDL
     
-    _disable_profile_tables = set()
-    _disable_binlog_tables = set()
+    _disable_profile_tables = set() # type: set[str]
+    _disable_binlog_tables = set() # type: set[str]
     
     @classmethod
     def disable_profile(cls, table_name=""):

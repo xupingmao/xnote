@@ -14,10 +14,11 @@
 import os
 import warnings
 import math
-import web
+import web # type: ignore
 import xutils
 import functools
 import time
+import typing
 
 from . import xconfig, xauth, xnote_trace, xnote_hooks
 from xutils.tornado.template import Template, Loader
@@ -35,7 +36,7 @@ NAMESPACE = dict(
     quote=quote
 )
 
-_mobile_name_dict = dict()
+_mobile_name_dict = dict() # type: dict[str, str]
 LOAD_TIME = int(time.time())
 
 def T(text, lang=None):
@@ -62,8 +63,8 @@ class XnoteLoader(Loader):
     """定制Template Loader"""
 
     _instance = None # type: XnoteLoader|None
-    path_mapping = {}
-    template_mapping_list = []
+    path_mapping = {} # type: dict[str, str]
+    template_mapping_list = [] # type: list[TemplateMapping]
     memory_prefix = "memory:"
 
     def __init__(self, *args, **kw):
@@ -74,8 +75,10 @@ class XnoteLoader(Loader):
     @classmethod
     def get_instance(cls):
         # type: () -> XnoteLoader
-        assert cls._instance != None
-        return cls._instance
+        instance = cls._instance
+        if instance is None:
+            raise AssertionError("XnoteLoader instance is None")
+        return instance
     
     @classmethod
     def init_instance(cls, root_directory="", namespace={}):

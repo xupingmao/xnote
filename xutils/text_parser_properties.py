@@ -53,7 +53,7 @@ def parse_prop_text_to_pairs(text: str) -> list:
     @param {string} text 配置文本内容
     @param {string} ret_type 返回的格式，包含list, dict
     """
-    config = []
+    config = [] # type: list[dict[str,str]]
 
     if text == None or text == "":
         return config

@@ -8,8 +8,8 @@
 import os
 import threading
 import xutils
-from . import xconfig
 import web.db
+from xnote.core import xconfig
 from xutils import dbutil
 from xutils.dbutil import interfaces
 from xutils.sqldb import TableManagerFacade as TableManager
@@ -22,7 +22,7 @@ DEFAULT_DATE = "1970-01-01"
 
 class MySqliteDB(web.db.SqliteDB):
     _lock = threading.RLock()
-    _instances = set()
+    _instances = set() # type: set[MySqliteDB]
     dbpath = ""
 
     def __init__(self, **keywords):
@@ -48,7 +48,7 @@ class DBPool:
         # type: (str) -> MySqliteDB
         assert dbpath != ""
         db = cls.sqlite_pool.get(dbpath)
-        if db == None:
+        if db is None:
             db = MySqliteDB(db=dbpath)
             db.query("pragma journal_mode = %s" % xconfig.DatabaseConfig.sqlite_journal_mode)
             if xconfig.DatabaseConfig.sqlite_page_size != 0:
@@ -115,7 +115,7 @@ def get_table_by_name(table_name=""):
     # type: (str) -> TableProxy
     """通过表名获取操作代理"""
     table_info = TableManager.get_table_info(table_name)
-    if table_info == None:
+    if table_info is None:
         raise Exception("table not found: %s" % table_name)
     db = get_db_instance(dbpath=table_info.dbpath)
     return TableProxy(db, table_name)

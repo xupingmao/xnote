@@ -56,7 +56,7 @@ def mac_say(msg):
 
 def windows_say(msg):
     try:
-        import comtypes.client as cc
+        import comtypes.client as cc # type: ignore
         # dynamic=True不生成静态的Python代码
         voice = cc.CreateObject("SAPI.SpVoice", dynamic=True)
         voice.Speak(msg)

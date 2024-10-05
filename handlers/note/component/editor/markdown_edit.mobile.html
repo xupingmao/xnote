@@ -1,7 +1,7 @@
 {% extends base.html %} 
 
 {% block head %}
-<script type="text/javascript" src="/_static/lib/webuploader/webuploader.nolog.min.js"></script>
+<script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 <style>
     textarea {
@@ -26,7 +26,7 @@
 </div>
 
 <div class="card">
-    <form id="mainFrame" action="/note/update" enctype="multipart/form-data" method="POST" class="col-md-12">
+    <form id="mainFrame" action="{{_server_home}}/note/update" enctype="multipart/form-data" method="POST" class="col-md-12">
         <div class="col-md-12" id="submit-div">
             <div>
                 <span id="fileId" class="hide">{{file.id}}</span>
@@ -54,7 +54,7 @@
                 <div class="col-md-12">
                     <div id="editor" class="col-md-12" style="height: auto; ">
                         <div id="markdown-input-div" class="col-md-12">
-                            <textarea id="markdown-input" class="form-control" name="content" rows=15>{{file.content}}</textarea>
+                            <textarea id="markdown-input" class="form-control" name="content" rows="15">{{file.content}}</textarea>
                         </div>
 
                         <div id="markdown-output-div" class="col-md-6 hide"></div>
@@ -148,7 +148,7 @@ $(function () {
     });
 
     $("#actionBtn").click(function () {
-        $.get("/note/ajax/edit_symbol_dialog", function (resp) {
+        xnote.http.get("/note/ajax/edit_symbol_dialog", function (resp) {
             DIALOG_INDEX = xnote.showDialog("请选择符号", resp);
         });
     });
@@ -204,8 +204,8 @@ $(function () {
             type: "md",
             content: getContent()
         };
-        $.post("/note/save", params, function (resp) {
-            if (resp.code == "success") {
+        xnote.http.post("/note/save", params, function (resp) {
+            if (resp.success) {
                 IS_FORM_SUBMITTED = true;
                 xnote.toast("保存成功");
                 setTimeout(function () {
@@ -214,9 +214,6 @@ $(function () {
             } else {
                 xnote.alert("保存失败:" + resp.message);
             }
-        }).fail(function (error) {
-            console.log(error);
-            xnote.alert("保存失败");
         });
     });
 })

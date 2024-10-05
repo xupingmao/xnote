@@ -4,13 +4,14 @@
 # @modified 2021/11/07 19:29:43
 # @filename func_util.py
 import warnings
+import typing
 
 # 函数映射
-_FUNC_DICT = dict()
+_FUNC_DICT = dict() # type: dict[str, typing.Callable]
 # 函数注册的来源
-_FUNC_SOURCE_DICT = dict()
+_FUNC_SOURCE_DICT = dict() # type: dict[str, str]
 
-def register_func(name, func, source = None):
+def register_func(name: str, func: typing.Callable, source = None):
     """注册函数
     @param {string} name 函数名称，格式为 [protocol:] + [module] + name
     @param {func} func 函数
