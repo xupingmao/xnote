@@ -89,7 +89,7 @@ class NoteIndexDO(Storage):
         self.category = ""
         self.badge_info = ""
         self.show_next = False
-        self.url = f"{xconfig.WebConfig.server_home}/note/view/{self.id}"
+        self.url = self.get_url()
         self.icon = NOTE_ICON_DICT.get(self.type, DEFAULT_ICON)
 
     def get_tags(self):
@@ -120,6 +120,9 @@ class NoteIndexDO(Storage):
     def is_sticky(self):
         """是否是置顶"""
         return self.level > 0
+    
+    def get_url(self):
+        return f"{xconfig.WebConfig.server_home}/note/view/{self.id}"
     
 class NoteDO(NoteIndexDO):
     def __init__(self):

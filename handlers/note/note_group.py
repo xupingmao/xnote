@@ -9,7 +9,6 @@ try:
     import cProfile as profile
 except ImportError:
     import profile
-from .dao_book import SmartGroupService
 
 import web
 import xutils
@@ -23,7 +22,8 @@ from xnote.core import xmanager
 from xutils import Storage
 from xutils import dateutil, fsutil
 from xnote.core.xtemplate import T
-from .dao_category import list_category, get_category_by_code
+from handlers.note.dao_category import list_category, get_category_by_code
+from handlers.note.dao_book import SmartGroupService
 from . import dao_tag
 from . import dao
 from . import dao_book

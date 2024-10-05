@@ -10,6 +10,7 @@
 """
 import copy
 import xutils
+import typing
 
 from xnote.core import xconfig
 from xnote.core import xmanager
@@ -49,7 +50,7 @@ class SmartGroupService:
     def load_smart_groups_template():
         fpath = xconfig.resolve_config_path("./config/note/smart_group.ini")
         config = fsutil.load_ini_config(fpath)
-        result = []
+        result: typing.List[NoteIndexDO] = []
         server_home = xconfig.WebConfig.server_home
         for key in config.sections:
             item = config.items[key]

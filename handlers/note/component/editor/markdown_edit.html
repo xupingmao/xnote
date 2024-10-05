@@ -332,14 +332,15 @@
 
 
             xnote.http.post("/note/save", params, function (resp) {
-                if (resp.code == "success") {
+                console.log("save result:", resp);
+                if (resp.success) {
                     if (resp.message) {
                         xnote.toast(resp.message);
                     } else {
                         xnote.toast("保存成功");
                     }
                     window.SUBMIT_FORM = true;
-                    window.location.href = "/note/view/" + fileId;
+                    window.location.href = resp.data;
                 } else {
                     xnote.alert("保存失败:" + resp.message);
                 }

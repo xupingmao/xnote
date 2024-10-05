@@ -644,11 +644,11 @@ def list_path(file: NoteIndexDO, limit=5):
     return pathlist
 
 
-def get_full_by_id(id) -> typing.Optional[NoteDO]:
-    if isinstance(id, int):
-        id = str(id)
-    dict_value = _full_db.get_by_id(id)
+def get_full_by_id(note_id: int) -> typing.Optional[NoteDO]:
+    dict_value = _full_db.get_by_id(str(note_id))
     result = NoteDO.from_dict_or_None(dict_value)
+    if result is not None:
+        result.id = note_id
     return result
 
 @xutils.timeit(name="NoteDao.GetById:leveldb", logfile=True)
@@ -666,7 +666,7 @@ def get_by_id(id, include_full=True, creator=None):
         note_full = NoteDO.from_dict_or_None(note_index)
         return note_full
 
-    note = get_full_by_id(id)
+    note = get_full_by_id(id_int)
 
     if note != None and note_index != None:
         note.name = note_index.name

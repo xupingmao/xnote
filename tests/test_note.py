@@ -18,6 +18,7 @@ except ImportError:
     from tests.test_base import login_test_user, logout_test_user
 
 from xnote.core import xauth
+from xnote.core.xtemplate import T
 
 from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
 from handlers.note import dao_comment
@@ -130,6 +131,8 @@ class TestMain(BaseTestCase):
         resp = json_request_return_dict("/note/save", method="POST",
             data=dict(id=id, content="new-content", version=version+2, resp_type="json"))
         self.assertEqual("success", resp["code"])
+        self.assertEqual(True, resp["success"])
+        self.assertEqual(note_info.get_url(), resp["data"])
 
         note_info = NoteDao.get_by_id(id)
         assert note_info != None
@@ -143,6 +146,20 @@ class TestMain(BaseTestCase):
         assert note_info != None
         
         self.assertEqual(note_info.content, "new-content-2")
+
+        note_info = NoteDao.get_by_id(id)
+        assert note_info != None
+
+        # 更新但是内容不变化
+        resp = json_request_return_dict("/note/save", method="POST",
+            data=dict(id=id, content="new-content-2", version=note_info.version, resp_type="json"))
+        self.assertEqual("success", resp["code"])
+        self.assertEqual(True, resp["success"])
+        self.assertEqual(note_info.get_url(), resp["data"])
+        self.assertEqual(T("content_unchanged"), resp["message"])
+
+        note_info = NoteDao.get_by_id(id)
+        assert note_info != None
 
         # 复制笔记
         assert isinstance(note_info.name, str)
@@ -171,14 +188,14 @@ class TestMain(BaseTestCase):
     def test_create_name_empty(self):
         parent_id = get_default_group_id()
         result = json_request_return_dict("/note/create", method = "POST", data = dict(name = "", parent_id = parent_id))
-        self.assertEqual(xutils.u('标题为空'), result['message'])
+        self.assertEqual('标题为空', result['message'])
 
     def test_create_name_exits(self):
         delete_note_for_test("name-test")
         create_note_for_test("md", "name-test")
 
         result = json_request_return_dict("/note/create", method = "POST", data = dict(name = "name-test"))
-        self.assertEqual(xutils.u('笔记【name-test】已存在'), result['message'])
+        self.assertEqual('笔记【name-test】已存在', result['message'])
 
         delete_note_for_test("name-test")
 
@@ -187,7 +204,7 @@ class TestMain(BaseTestCase):
             method = "POST", 
             data = dict(type = "invalid", name = "invalid-test"))
         
-        self.assertEqual(xutils.u("无效的类型: invalid"), result["message"])
+        self.assertEqual("无效的类型: invalid", result["message"])
 
     def test_note_group_add_view(self):
         delete_note_for_test("xnote-unit-group")
@@ -261,12 +278,15 @@ class TestMain(BaseTestCase):
         
         self.assertTrue(id != "")
         print("id=%s" % id)
+        assert note_info != None
 
         save_data = dict(id=id, type="html", data="<p>hello</p>", version = note_info.version)
-        resp = json_request("/note/save", method="POST", data = save_data)
+        resp = json_request_return_dict("/note/save", method="POST", data = save_data)
         self.assertEqual("success", resp["code"])
 
-        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
+        file = json_request_return_dict("/note/view?id=%s&_format=json" % id).get("file")
+        assert isinstance(file, dict)
+
         self.assertEqual("html", file["type"])
         self.assertEqual("<p>hello</p>", file["data"])
 

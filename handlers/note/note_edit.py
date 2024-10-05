@@ -443,7 +443,7 @@ def check_get_note(id):
     note.creator_id = user_info.id
     return note
 
-def update_and_notify(file, update_kw):
+def update_and_notify(file: note_dao.NoteDO, update_kw):
     """更新内容并且广播消息"""
     edit_token = update_kw.get("edit_token", "")
     if edit_token != None and edit_token != "":
@@ -505,13 +505,13 @@ class SaveAjaxHandler:
                     # 内容没有变化
                     # 清空草稿
                     dao_draft.save_draft(file.id, "")
-                    return webutil.SuccessResult(message="content unchanged")
+                    return webutil.SuccessResult(message=T("content_unchanged"), data=file.get_url())
                 new_file.content = content
                 new_file.data = ""
                 new_file.size = len(content)
 
             update_and_notify(file, new_file)
-            return webutil.SuccessResult()
+            return webutil.SuccessResult(data=file.get_url())
 
 
 class UpdateHandler:
@@ -562,7 +562,7 @@ class UpdateHandler:
             if resp_type == "json":
                 return dict(code = "success")
 
-            raise web.seeother(file.url)
+            raise web.seeother(file.get_url())
 
 
 class StickHandler:
@@ -764,15 +764,15 @@ class DraftHandler:
                     return dict(code = "version_too_low", message = "当前编辑的版本过低，是否加载最新的草稿")
 
                 dao_draft.save_draft(note_id, content)
-                return dict(code = "success")
+                return webutil.SuccessResult()
         if action == "steal_lock":
             dao_draft.steal_edit_lock(note_id, token, time.time() + EDIT_LOCK_EXPIRE)
             draft_content = dao_draft.get_draft(note_id)
             if draft_content == None or draft_content == "":
                 draft_content = note.content
-            return dict(code = "success", data = draft_content)
+            return webutil.SuccessResult(data = draft_content)
 
-        return dict(code = "biz.error", message = "未知的action:%s" % action)
+        return webutil.FailedResult(code = "biz.error", message = f"未知的action:{action}")
 
 class UpdateAttrAjaxHandler:
 

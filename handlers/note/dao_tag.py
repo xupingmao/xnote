@@ -389,7 +389,7 @@ def get_user_defined_tags(tag_list):
 def get_name_by_code(code):
     return static_code_map.get(code, code)
 
-def handle_tag_for_note(note_info: note_dao.NoteDO):
+def handle_tag_for_note(note_info: note_dao.NoteIndexDO):
     note = note_info
     if note.tags == None:
         note.tags = []
