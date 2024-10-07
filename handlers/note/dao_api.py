@@ -58,9 +58,8 @@ class NoteDao:
 
     @staticmethod
     def update_content(note, new_content, clear_draft = True):
-        # type: (dict, str, bool) -> None
-        """更新笔记内容"""
-        raise NotImplementedError()
+        from handlers.note import dao_edit
+        return dao_edit.update_content(note, new_content, clear_draft)
     
     @staticmethod
     def get_root(creator=None):

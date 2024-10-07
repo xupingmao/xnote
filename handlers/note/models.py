@@ -124,6 +124,9 @@ class NoteIndexDO(Storage):
     def get_url(self):
         return f"{xconfig.WebConfig.server_home}/note/view/{self.id}"
     
+    def get_edit_url(self):
+        return f"{xconfig.WebConfig.server_home}/note/edit?id={self.id}"
+    
 class NoteDO(NoteIndexDO):
     def __init__(self):
         super(NoteDO, self).__init__()

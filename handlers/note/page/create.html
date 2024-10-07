@@ -79,7 +79,7 @@ label {
 {{!/if}}
 </script>
 
-<script type="text/javascript" src="/static/lib/layDate-v5.0.9/laydate.js"></script>
+<script type="text/javascript" src="{{_server_home}}/_static/lib/layDate-v5.0.9/laydate.js"></script>
 <script type="text/javascript">
     function getWeekDayFromLayDate(layDate) {
         var date = new Date(layDate.year, layDate.month-1, layDate.date);
@@ -123,7 +123,7 @@ label {
                 "tag_type": "note",
                 "group_id": groupId
             }
-            $.get("/note/tag/list", params, function (resp) {
+            xnote.http.get("/note/tag/list", params, function (resp) {
                 if (resp.code != "success") {
                     xnote.alert(resp.message);
                 } else {
@@ -166,11 +166,10 @@ label {
             params._format = "json";
             params.tags = getTagsText();
 
-            $.post("/note/create", params, function (resp) {
+            xnote.http.post("/note/create", params, function (resp) {
                 console.log("create resp:", resp);
-
-                if (resp.code == "success") {
-                    window.location.href = resp.url;
+                if (resp.success) {
+                    window.location.href = resp.data.url;
                 } else {
                     xnote.alert(resp.message);
                 }

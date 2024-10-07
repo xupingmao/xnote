@@ -182,19 +182,10 @@ class CreateHandler:
             inserted_id = create_func(note, ctx)
 
             new_note = note_dao.get_by_id_creator(inserted_id, creator)
-            self.after_create(new_note)
-
-            if type == "group":
-                redirect_url = "/note/view?id=%s" % inserted_id
-            else:
-                redirect_url = "/note/edit?id=%s" % inserted_id
-
-            if format == "json":
-                return dict(code="success", id = inserted_id, url = redirect_url)
-
-            if inserted_id != None:
-                raise web.seeother(redirect_url)
-
+            if method == "POST":
+                if new_note is None:
+                    return webutil.FailedResult(message="创建笔记失败")
+                return self.after_create(new_note)
         except web.HTTPError as e1:
             xutils.print_exc()
             raise e1
@@ -202,7 +193,7 @@ class CreateHandler:
             xutils.print_exc()
             error = str(e)
             if format == 'json':
-                return dict(code = 'fail', message = error)
+                return webutil.FailedResult(code = 'fail', message = error)
 
         heading  = get_heading_by_type(type)
         template = DEFAULT_CREATE_TEMPLATE
@@ -239,11 +230,22 @@ class CreateHandler:
                 message = u"请选择归属的笔记本"
                 raise Exception(message)
 
-    def after_create(self, created_note):
-        if created_note == None:
-            return
+    def after_create(self, created_note: note_dao.NoteDO):
+        note_type = created_note.type
         if created_note.type == "group":
             refresh_category_count(created_note.creator, created_note.category)
+
+        inserted_id = created_note.id
+        if note_type == "group":
+            redirect_url = created_note.get_url()
+        else:
+            redirect_url = created_note.get_edit_url()
+
+        resp = webutil.SuccessResult(data = dict(id=inserted_id, url=redirect_url))
+        # 兼容历史接口
+        resp.id = inserted_id
+        resp.url = redirect_url
+        return resp
 
 
 class RemoveAjaxHandler:

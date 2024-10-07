@@ -134,13 +134,13 @@ $("#saveToDbBtn").on("click", function () {
 
             params.parent_id = parentId;
 
-            $.post("/note/create", 
+            xnote.http.post("/note/create", 
                 params,
                 function (responseText) {
                     console.log(responseText);
                     var data = responseText;
-                    if (data.code == "success") {
-                        location.href = "/note/view?id=" + data.id;
+                    if (data.success) {
+                        location.href = data.url;
                     } else {
                         layer.alert(data.message);
                     }

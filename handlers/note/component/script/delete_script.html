@@ -3,15 +3,15 @@
 function remove(id, name, parentId) {
     var confirmed = xnote.confirm("确定删除'" + name + "'?", function (confirmed) {
         if (confirmed) {
-            $.post("/note/remove", {id:id}, function (resp) {
+            xnote.http.post("/note/remove", {id:id}, function (resp) {
                 var code = resp.code;
                 if (code != "success") {
-                    alert(resp.message);
+                    xnote.alert(resp.message);
                 } else {
                     if (parentId) {
-                        window.location.href = "/note/" + parentId;
+                        window.location.href = "{{_server_home}}/note/" + parentId;
                     } else {
-                        window.location.href = "/";
+                        window.location.href = "{{_server_home}}/";
                     }
                 }
             })
@@ -28,7 +28,7 @@ xnote.api.note.recover = function (noteId, callbackFn) {
     var params = {
         id: noteId
     };
-    $.post("/note/recover", params, function (resp) {
+    xnote.http.post("/note/recover", params, function (resp) {
         if (resp.code == "success") {
             callbackFn();
         } else {

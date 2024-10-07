@@ -64,7 +64,9 @@ def create_note_for_test(type, name, *, content = "", tags="", parent_id=0) -> i
         method = "POST",
         data = data)
     
-    note_id = note_result.get("id")
+    resp_data = note_result.get("data")
+    assert isinstance(resp_data, dict)
+    note_id = resp_data.get("id")
     print("新笔记id:", note_id)
     assert isinstance(note_id, int)
     return note_id
@@ -184,6 +186,20 @@ class TestMain(BaseTestCase):
 
     def test_create_page(self):
         self.check_OK("/note/create")
+        delete_note_for_test(name = "create-test")
+
+        create_data = {
+            "name": "create-test",
+            "content": "create-test"
+        }
+        result = json_request_return_dict("/note/create", method="POST", data = create_data)
+        assert result.get("success") == True
+        assert result.get("code") == "success"
+        
+        data = result.get("data")
+        assert isinstance(data, dict)
+        note_id = data.get("id")
+        assert data.get("url") == f"/note/edit?id={note_id}"
 
     def test_create_name_empty(self):
         parent_id = get_default_group_id()
@@ -642,6 +658,7 @@ A example image
         parser.check_only = True
         parser.parse(md_content, xauth.current_name_str())
         assert parser.has_external_image() == True
+
 
     def test_get_dialog(self):
         delete_note_for_test("xnote-dialog-group")

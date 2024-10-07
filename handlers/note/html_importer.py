@@ -20,11 +20,13 @@ from xutils import Storage
 from xutils import dbutil
 from xutils import fsutil
 from xutils import textutil
+from xutils import webutil
 from xutils.text_parser import TextParserBase
 from . import dao
 from . import dao_edit
 from .dao_api import NoteDao
 from handlers.note.models import NoteDO
+from handlers.note import dao_edit
 
 def get_addr(src, host):
     if src is None:
@@ -351,8 +353,10 @@ class MarkdownImageParser(TextParserBase):
             c = self.current()
 
         self.save_str_token()
-        tokens = self.get_text_tokens(self.tokens)
-        return "".join(tokens)
+        result = []
+        for item in self.tokens:
+            result.append(item.value)
+        return "".join(result)
 
 
 class CacheExternalHandler:
@@ -363,17 +367,17 @@ class CacheExternalHandler:
         note_id = xutils.get_argument("note_id", "")
         note = dao.get_by_id_creator(note_id, user_name)
         if note == None:
-            return dict(code="fail", message="笔记不存在")
+            return webutil.FailedResult(code="fail", message="笔记不存在")
         if note.type != "md":
-            return dict(code="fail", message="文档类型不是markdown,暂时无法处理")
+            return webutil.FailedResult(code="fail", message="文档类型不是markdown,暂时无法处理")
 
         md_content = note.content
         parser = MarkdownImageParser()
         md_content_new = parser.parse(md_content, note.creator)
 
-        NoteDao.update_content(note, md_content_new)
+        dao_edit.update_content(note, md_content_new)
 
-        return dict(code="success", message="更新成功")
+        return webutil.SuccessResult(message="更新成功")
 
 def has_external_image(note: NoteDO):
     # type: (dict) -> bool

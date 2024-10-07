@@ -4,8 +4,9 @@ from xutils import Storage
 from . import dao
 from . import dao_draft
 from .dao_api import NoteDao
+from handlers.note.models import NoteDO
 
-def update_content(note, new_content, clear_draft = True):
+def update_content(note: NoteDO, new_content: str, clear_draft = True):
     kw = Storage()
     kw.content = new_content
     kw.version = note.version + 1
@@ -23,7 +24,4 @@ def update_content(note, new_content, clear_draft = True):
 
     if clear_draft:
         dao_draft.save_draft(note.id, "")
-
-
-NoteDao.update_content = update_content
 
