@@ -61,6 +61,12 @@
     text-decoration: none;
 }
 
+/*span的样式*/
+.x-tab-box.btn-style>span.x-tab, .x-tab-box.btn-style>span.x-tab:hover {
+    color: black;
+    background-color: #fff;
+}
+
 /** 按钮被选中 **/
 .x-tab-btn.active, .x-tab.btn.active, .x-tab-box.btn-style>.x-tab.active {
     background-color: #08c;

@@ -10,6 +10,6 @@
 {% init is_vue_loaded = False %}
 
 {% if not is_vue_loaded %}
-    <script type="text/javascript" src="/static/lib/vue/vue-2.2.6.min.js"></script>
+    <script type="text/javascript" src="{{_server_home}}/_static/lib/vue/vue-2.7.9.min.js"></script>
     {% set-global is_vue_loaded = True %}
 {% end %}

@@ -2,10 +2,11 @@
 # Created by xupingmao on 2017/06/14
 # @modified 2021/04/24 21:33:47
 import os
-import xconfig
 import xutils
-import xauth
-import xmanager
+
+from xnote.core import xconfig
+from xnote.core import xauth
+from xnote.core import xmanager
 from xutils import SearchResult, textutil
 
 def search_scripts(name):
@@ -20,10 +21,10 @@ def search_scripts(name):
         if textutil.contains_all(fname, words):
             result         = xutils.SearchResult()
             result.icon    = "icon-script"
-            result.name    = xutils.u(fname)
-            result.raw     = xutils.u("搜索到可执行脚本 - ") + fname
-            result.url     = xutils.u("/code/edit?path=%s") % fpath
-            result.command = xutils.u("/system/script_admin/execute?name=%s") % fname
+            result.name    = fname
+            result.raw     = f"搜索到可执行脚本 - {fname}"
+            result.url     = f"/code/edit?path={fpath}"
+            result.command = f"/system/script_admin/execute?name={fname}"
             results.append(result)
     return results
 

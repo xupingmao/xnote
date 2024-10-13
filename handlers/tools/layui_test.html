@@ -1,0 +1,83 @@
+{% extends base %}
+
+{% block head %}
+    {% include common/layout/wide_left.html %}
+    {% include common/script/load_layui.html %}
+    <style>
+        .example-title {
+            width: 100%;
+            padding: 5px;
+            border-left: 5px solid #039BE5;
+            background-color: #eee;
+        }
+    </style>
+{% end %}
+
+{% block body %}
+
+<div class="card">
+    {% set title = "Layui Test" %}
+    {% include common/base_title.html %}
+</div>
+
+<div class="card">
+    <h2>按钮</h2>
+    <div class="layui-btn-container">
+        <button type="button" class="layui-btn">默认按钮</button>
+        <button type="button" class="layui-btn layui-bg-blue">蓝色按钮</button>
+        <button type="button" class="layui-btn layui-bg-orange">橙色按钮</button>
+        <button type="button" class="layui-btn layui-bg-red">红色按钮</button>
+        <button type="button" class="layui-btn layui-bg-purple">紫色按钮</button>
+        <button type="button" class="layui-btn layui-btn-disabled">禁用按钮</button>
+    </div>
+       
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-primary layui-border-green">主色按钮</button>
+        <button class="layui-btn layui-btn-primary layui-border-blue">蓝色按钮</button>
+        <button class="layui-btn layui-btn-primary layui-border-orange">橙色按钮</button>
+        <button class="layui-btn layui-btn-primary layui-border-red">红色按钮</button>
+        <button class="layui-btn layui-btn-primary layui-border-purple">紫色按钮</button>
+        <button class="layui-btn layui-btn-primary layui-border">普通按钮</button>
+    </div>
+
+    <div class="layui-btn-container">  
+        <button type="button" class="layui-btn layui-btn-lg">大型按钮</button>
+        <button type="button" class="layui-btn">默认按钮</button>
+        <button type="button" class="layui-btn layui-btn-sm">小型按钮</button>
+        <button type="button" class="layui-btn layui-btn-xs">迷你按钮</button>
+    </div> 
+
+    <div class="layui-btn-container">
+        <button type="button" class="layui-btn layui-btn-sm layui-btn-normal">
+            <i class="layui-icon layui-icon-left"></i>
+        </button>
+        <button type="button" class="layui-btn layui-btn-sm layui-btn-warm">
+            <i class="layui-icon layui-icon-right"></i>
+        </button>
+    </div>
+    
+    <h2>弹层</h2>
+    <div>
+        <button class="btn" onclick="openTestLayer()">打开弹层测试</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    // 在此处输入 layer 的任意代码
+
+function openTestLayer() {
+    layer.open({
+        type: 1, // page 层类型
+        area: ['500px', '300px'],
+        title: 'Hello layer',
+        shade: 0.6, // 遮罩透明度
+        shadeClose: true, // 点击遮罩区域，关闭弹层
+        maxmin: true, // 允许全屏最小化
+        anim: 0, // 0-6 的动画形式，-1 不开启
+        content: '<div style="padding: 32px;">一个普通的页面层，传入了自定义的 HTML</div>',
+        btn: ["确定", "取消"]
+    });
+}
+</script>
+
+{% end %}
