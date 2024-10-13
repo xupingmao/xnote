@@ -8,15 +8,9 @@
 
 
 {% block body_left %}
-    {% include note/component/editor/editor_default_vars.html %}
 
-
-<script src="{{_server_home}}/_static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.js"></script>
-<link rel="stylesheet" href="{{_server_home}}/static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.css" type="text/css" />
-
-<script src="{{_server_home}}/_static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.js"></script>
-<link rel="stylesheet" href="{{_server_home}}/static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.css" type="text/css" />
-
+{% include common/script/load_jexcel.html %}
+{% include note/component/editor/editor_default_vars.html %}
 {% include note/component/editor/table_lang.html %}
 {% include note/component/editor/table_myexcel.html %}
 

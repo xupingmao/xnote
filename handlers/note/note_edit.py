@@ -333,20 +333,20 @@ class RenameAjaxHandler:
         id   = xutils.get_argument("id")
         name = xutils.get_argument("name")
         if name == "" or name is None:
-            return dict(code="fail", message="名称为空")
+            return webutil.FailedResult(code="fail", message="名称为空")
         
         assert isinstance(id, str), "无效的ID"
 
         old = NoteDao.get_by_id(id)
         if old is None:
-            return dict(code="fail", message="笔记不存在")
+            return webutil.FailedResult(code="fail", message="笔记不存在")
 
         if old.creator != xauth.get_current_name():
-            return dict(code="fail", message="没有权限")
+            return webutil.FailedResult(code="fail", message="没有权限")
 
         file = note_dao.get_by_name(xauth.current_name(), name)
         if file is not None:
-            return dict(code="fail", message="%r已存在" % name)
+            return webutil.FailedResult(code="fail", message="%r已存在" % name)
 
         with dbutil.get_write_lock(id):
             new_file = Storage(**old)
@@ -356,7 +356,7 @@ class RenameAjaxHandler:
             update_and_notify(old, new_file)
 
         fire_rename_event(old)
-        return dict(code="success")
+        return webutil.SuccessResult()
 
     def GET(self):
         return self.POST()

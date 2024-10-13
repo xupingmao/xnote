@@ -122,6 +122,10 @@ noteAPI.bindTag = function (cmd) {
         throw new TypeError("无效的tagType");
     }
 
+    if (tagList === undefined) {
+        xnote.alert("tagList is undefined");
+    }
+
     // 渲染绑定标签的html
     var html = $("#bindTagTemplate").render({
         tagList: tagList,

@@ -166,41 +166,6 @@
         window.location.href = url;
     });
 
-    $(".bind-tag-btn-old").click(function (e) {
-        var selectedNameList = JSON.parse($(e.target).attr("data-tags"));
-        var html = $("#bindTagTemplate").render({
-            tagList: tagList,
-            selectedNames: selectedNameList
-        });
-
-        var group_id = $(e.target).attr("data-id");
-
-        console.log("bind-tag-dialog", html);
-
-        xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
-            var selectedNames = [];
-            $(".tag.bind.active").each(function (idx, ele) {
-                var tagName = $(ele).text().trim();
-                selectedNames.push(tagName);
-            });
-
-            var bindParams = {
-                tag_type:"group",
-                group_id:group_id,
-                tag_names: JSON.stringify(selectedNames),
-            };
-
-            xnote.http.post("/note/tag/bind", bindParams, function (resp) {
-                if (resp.code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    xnote.toast("添加标签成功");
-                }
-                location.reload();
-            });
-        });
-    });
-
     $("body").on("click", ".create-tag-btn", function (e) {
         xnote.prompt("创建新标签", "", function (text) {
             var params = {

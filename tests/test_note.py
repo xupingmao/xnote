@@ -19,6 +19,7 @@ except ImportError:
 
 from xnote.core import xauth
 from xnote.core.xtemplate import T
+from xnote.core.models import SearchContext
 
 from handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
 from handlers.note import dao_comment
@@ -505,10 +506,9 @@ class TestMain(BaseTestCase):
 
         # 搜索评论
         from handlers.note.comment import search_comment_detail, search_comment_summary
-        ctx = Storage(user_name = xauth.current_name(), 
-            key = "hello", 
-            words = ["hello"], 
-            messages = [])
+        ctx = SearchContext(key = "hell")
+        ctx.user_name = xauth.current_name_str()
+        ctx.words = ["hello"]
         summary_ctx = copy.deepcopy(ctx)
 
         search_comment_detail(ctx)
@@ -585,9 +585,11 @@ class TestMain(BaseTestCase):
         delete_note_for_test("newname-test")
 
         id = create_note_for_test("md", "rename-test")
-        json_request("/note/rename", method = "POST", data = dict(id = id, name = "newname-test"))
-
+        rename_result = json_request_return_dict("/note/rename", method = "POST", data = dict(id = id, name = "newname-test"))
+        assert rename_result["success"] == True
+        
         note_info = get_note_info(id)
+        assert note_info != None
         self.assertEqual("newname-test", note_info.name)
 
     def test_stat(self):
@@ -624,12 +626,6 @@ class TestMain(BaseTestCase):
 
     def test_workspace(self):
         self.check_OK("/note/workspace")
-
-    # def test_view_by_skey(self):
-    #     self.check_OK("/note/view?skey=skey_test")
-    #     note = get_by_user_skey(xauth.current_name(), "skey_test")
-    #     self.assertTrue(note != None)
-    #     delete_note_for_test("skey_test")
 
     def test_import_from_html(self):
         html = """<html>
@@ -834,6 +830,10 @@ A example image
         create_note_for_test("list", "tag-test", tags="tag1 tag2")
         
         dict = self.json_request_return_dict("/note/tag/list?tag_type=note&group_id=1&v=2")
+        assert dict["success"] == True
+        assert len(dict["data"]["all_list"]) > 0
+
+        dict = self.json_request_return_dict("/note/tag/list?tag_type=group&v=2")
         assert dict["success"] == True
         assert len(dict["data"]["all_list"]) > 0
 

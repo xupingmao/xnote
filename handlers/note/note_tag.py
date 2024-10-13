@@ -173,20 +173,23 @@ class TagListAjaxHandler:
     def GET(self):
         tag_type = xutils.get_argument_str("tag_type", "")
         user_name = xauth.current_name_str()
+        v = xutils.get_argument_str("v")
+
         if tag_type == "group":
+            if v == "2":
+                return self.list_tag_for_note_v2(user_name=user_name)
             data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name)
-            return dict(code="success", data = data_list)
+            return webutil.SuccessResult(data = data_list)
         
         if tag_type == "note":
-            group_id = xutils.get_argument_int("group_id")
-            v = xutils.get_argument_str("v")
+            group_id = xutils.get_argument_int("group_id")            
             if v == "2":
                 return self.list_tag_for_note_v2(user_name=user_name, group_id=group_id)
             data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name, 
                                               tag_type="note", group_id=group_id)
-            return dict(code="success", data = data_list)
+            return webutil.SuccessResult(data = data_list)
 
-        return dict(code="400", message="无效的tag_type(%s)" % tag_type)
+        return webutil.FailedResult(code="400", message="无效的tag_type(%s)" % tag_type)
 
 class BindTagAjaxHandler:
 
