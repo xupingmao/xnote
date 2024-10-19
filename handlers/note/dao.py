@@ -91,14 +91,17 @@ class NoteIndexDao:
         return new_id
     
     @classmethod
-    def update(cls, note_do: NoteDO):
+    def update(cls, note_do: NoteIndexDO):
         assert note_do.creator_id != 0
         index_do = NoteIndexDO()
         for key in index_do:
             value = note_do.get(key)
             if value != None:
                 index_do[key] = value
-        index_do.before_save(note_do)
+                
+        if isinstance(note_do, NoteDO):
+            index_do.before_save(note_do)
+        
         note_id = int(note_do.id)
         return cls.db.update(where=dict(id=note_id), **index_do)
 
@@ -157,13 +160,17 @@ class NoteIndexDao:
         return result
 
     @classmethod
-    def get_by_id_list(cls, id_list=[]):
+    def get_by_id_list(cls, id_list=[], creator_id=0):
+        # type: (list[str|int], int) -> list[NoteIndexDO]
         if len(id_list) == 0:
             return []
         int_list = []
         for id_str in id_list:
             int_list.append(int(id_str))
-        result = cls.db.select(where="id in $id_list", vars=dict(id_list=int_list))
+        where_sql = "id in $id_list"
+        if creator_id != 0:
+            where_sql += " AND creator_id = $creator_id"
+        result = cls.db.select(where=where_sql, vars=dict(id_list=int_list, creator_id=creator_id))
         return cls.fix_result(result)
     
     @classmethod
@@ -415,14 +422,8 @@ def batch_query_dict(id_list):
 
 batch_query = batch_query_dict
 
-def batch_query_list(id_list):
-    result = []
-    index_list = NoteIndexDao.get_by_id_list(id_list)
-    for note in index_list:
-        build_note_info(note)
-        result.append(note)
-    return result
-
+def batch_query_list(id_list, creator_id=0):
+    return NoteIndexDao.get_by_id_list(id_list, creator_id=creator_id)
 
 def sort_by_name(notes):
     notes.sort(key=lambda x: x.name)
@@ -441,6 +442,7 @@ def sort_by_name_priority(notes):
 
 def sort_by_mtime_desc(notes):
     notes.sort(key=lambda x: x.mtime, reverse=True)
+    sort_by_type(notes)
 
 
 def sort_by_ctime_desc(notes):
@@ -944,8 +946,8 @@ def convert_to_index(note):
     return note_index
 
 
-def update_index(note: NoteDO):
-    """更新索引的时候也会更新用户维度的索引(note_tiny)"""
+def update_index(note: NoteIndexDO):
+    """更新索引信息"""
     id = note.id
 
     if is_root_id(id):

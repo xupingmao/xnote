@@ -413,51 +413,18 @@ class GroupManageHandler:
     def handle_root(self, kw):
         page = xutils.get_argument_int("page", 1)
         orderby = xutils.get_argument_str("orderby", "default")
-        category_code = xutils.get_argument("note_category", "all")
-        q_key = xutils.get_argument("key", "")
-        q_tags_str = xutils.get_argument_str("tags", "[]")
-
-        q_tags = json.loads(q_tags_str)
+        q_key = xutils.get_argument_str("key", "")
 
         assert page > 0
         limit = 1000
         offset = (page-1) * limit
 
-        user_name = kw.user_name
         user_id = kw.get("user_id", 0)
-        parent_note = note_dao.get_root()
-
         list_group_kw = Storage()
-        list_group_kw.tags = q_tags
         list_group_kw.search_name = q_key
         list_group_kw.count_total = True
-        list_group_kw.category = category_code
-
-        notes, total = note_dao.list_group_with_count(creator_id=user_id, orderby=orderby, offset=offset,
-                                           limit=limit, **list_group_kw)
-        
-        kw.parent_note = parent_note
-        kw.notes = notes
-        kw.page_totalsize = total
-        kw.page_size = limit
-        kw.page_url = "?note_category={category}&orderby={orderby}&page=".format(
-            category=category_code, orderby=orderby)
         kw.template = "note/page/batch/group_manage.html"
-        kw.category_list = list_category(user_name)
-        kw.q_tags = q_tags
-        kw.q_key = q_key
         kw.search_type = "group_manage"
-
-        cat_info = get_category_by_code(user_name, category_code)
-        if cat_info != None:
-            kw.category_code = cat_info.code
-            kw.category_name = cat_info.name
-        else:
-            kw.category_code = "unknown"
-            kw.category_name = "未知"
-
-        kw.show_category_edit = (category_code != "all")
-        kw.note_tags = dao_tag.batch_get_tags_by_notes(kw.notes)
 
     @xauth.login_required()
     def GET(self):

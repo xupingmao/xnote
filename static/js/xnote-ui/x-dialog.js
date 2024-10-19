@@ -347,13 +347,15 @@ xnoteDialogModule.showAjaxDialog = function () {
 }
 
 // 询问函数，原生prompt的替代方案
-xnote.prompt = function(title, defaultValue, callback) {
+xnote.promptInternal = function(title, defaultValue, callback, formType) {
     if (layer && layer.prompt) {
         // 使用layer弹层
         layer.prompt({
             title: title,
             value: defaultValue,
             scrollbar: false,
+            // formType: 0-文本, 1-密码框, 2-textarea
+            formType: formType,
             area: ['400px', '300px']
         },
         function(value, index, element) {
@@ -366,6 +368,15 @@ xnote.prompt = function(title, defaultValue, callback) {
         callback(result);
     }
 };
+
+xnote.prompt = function(title, defaultValue, callback) {
+    return xnote.promptInternal(title, defaultValue, callback, 0);
+};
+
+
+xnote.promptTextarea = function (title, defaultValue, callback) {
+    return xnote.promptInternal(title, defaultValue, callback, 2);
+}
 
 // 确认函数
 xnote.confirm = function(message, callback) {

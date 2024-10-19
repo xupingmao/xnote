@@ -6,6 +6,7 @@ import xutils
 import handlers.note.dao_log as dao_log
 
 from xnote.core import xauth
+from xutils import webutil
 from handlers.note import dao
 from handlers.note.note_helper import assemble_notes_by_date
 
@@ -34,7 +35,9 @@ class GroupApiHandler:
             if parent != None:
                 parent_id = parent.parent_id
 
-        return dict(code="success", data=notes, parent_id=parent_id)
+        result = webutil.SuccessResult(data=notes)
+        result.parent_id = parent_id
+        return result
     
     def list_all_group(self, user_name, orderby=""):
         result = dao.list_group_v2(user_name, limit=1000, orderby=orderby)

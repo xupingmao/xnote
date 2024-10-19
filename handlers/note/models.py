@@ -42,11 +42,11 @@ class NoteIndexDO(Storage):
         self.creator = ""
         self.creator_id = 0
         self.type = ""
-        self.ctime = now
-        self.mtime = now
-        self.atime = now
-        self.dtime = xtables.DEFAULT_DATETIME
-        self.parent_id = 0
+        self.ctime = now # 创建时间
+        self.mtime = now # 修改时间
+        self.atime = now # 访问时间
+        self.dtime = xtables.DEFAULT_DATETIME # 删除时间
+        self.parent_id = 0 # 默认挂在根目录下
         self.size = 0
         self.children_count = 0
         self.version = 0
@@ -135,15 +135,10 @@ class NoteDO(NoteIndexDO):
         self.path = ""
         self.creator = ""
         self.creator_id = 0
-        self.ctime = dateutil.format_datetime()
-        self.mtime = dateutil.format_datetime()
-        self.atime = dateutil.format_datetime()
-        self.dtime = xtables.DEFAULT_DATETIME # 删除时间
         self.type = "md"
         self.category = "" # 废弃
         self.size = 0
         self.children_count = 0
-        self.parent_id = 0 # 默认挂在根目录下
         self.content = ""
         self.data = ""
         self.is_deleted = 0 # 0-正常， 1-删除
@@ -255,3 +250,10 @@ class NotePathInfo(Storage):
         self.priority = 0
         self.is_public = 0
         self.update(kw)
+
+class NoteGroupDO(NoteIndexDO):
+    def __init__(self):
+        self.children = []
+
+
+

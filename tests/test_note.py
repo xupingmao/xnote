@@ -572,10 +572,13 @@ class TestMain(BaseTestCase):
         delete_note_for_test("move-test")
         delete_note_for_test("move-group-test")
 
-        id = create_note_for_test("md", "move-test")
+        note_id = create_note_for_test("md", "move-test")
         parent_id = create_note_for_test("group", "move-group-test")
 
-        json_request("/note/move?id=%s&parent_id=%s" % (id, parent_id))
+        move_result = json_request_return_dict(f"/note/move?id={note_id}&parent_id={parent_id}")
+        assert move_result.get("message") == ''
+        assert move_result["success"] == True
+
         group_info = get_note_info(parent_id)
         assert group_info != None
         self.assertEqual(1, group_info.children_count)

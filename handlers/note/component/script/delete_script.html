@@ -1,42 +1,5 @@
 <script type="text/javascript">
-	
-function remove(id, name, parentId) {
-    var confirmed = xnote.confirm("确定删除'" + name + "'?", function (confirmed) {
-        if (confirmed) {
-            xnote.http.post("/note/remove", {id:id}, function (resp) {
-                var code = resp.code;
-                if (code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    if (parentId) {
-                        window.location.href = "{{_server_home}}/note/" + parentId;
-                    } else {
-                        window.location.href = "{{_server_home}}/";
-                    }
-                }
-            })
-        }
-    });
-}
 
-// 注册API模块
-xnote.registerApiModule("note")
-xnote.api.note.remove = remove;
+remove = xnote.note.remove;
 
-// 恢复笔记
-xnote.api.note.recover = function (noteId, callbackFn) {
-    var params = {
-        id: noteId
-    };
-    xnote.http.post("/note/recover", params, function (resp) {
-        if (resp.code == "success") {
-            callbackFn();
-        } else {
-            xnote.alert("恢复失败:" + resp.message);
-        }
-    }).fail(function (err) {
-        xnote.alert("网络错误，请稍后重试");
-    })
-}
-    
 </script>

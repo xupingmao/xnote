@@ -4,11 +4,13 @@
 # @modified 2022/04/04 20:47:41
 
 """笔记编辑相关处理"""
-from handlers.note.dao_category import refresh_category_count
 import web
 import time
-from xnote.core import xauth
+import typing
 import xutils
+
+from handlers.note.dao_category import refresh_category_count
+from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xmanager
 from xnote.core import xconfig
@@ -26,6 +28,7 @@ from . import dao as note_dao
 from . import dao_delete
 from . import dao_share
 
+from handlers.note.models import NoteIndexDO
 from handlers.note import dao_read
 from handlers.note import dao_draft
 
@@ -155,7 +158,6 @@ class CreateHandler:
         note.creator_id = creator_id
         note.parent_id = parent_id
         note.type      = type
-        note.type0 = type0 # 原始输入的type
         note.content   = content
         note.data      = ""
         note.size      = len(content)
@@ -217,7 +219,7 @@ class CreateHandler:
     def check_before_create(self, note):
         type = note.type
         if type not in VALID_NOTE_TYPE_SET:
-            raise Exception(u"无效的类型: %s" % note.type0)
+            raise Exception(u"无效的类型: %s" % type)
 
         name = note.name
         check_by_name = note_dao.get_by_name(note.creator, name)
@@ -642,35 +644,28 @@ class UpdateOrderByHandler:
         return webutil.SuccessResult(message = "更新排序方式成功")
 
 class MoveAjaxHandler:
-    
-    @xauth.login_required()
-    def GET(self):
-        id = xutils.get_argument_int("id")
-        parent_id = xutils.get_argument_int("parent_id")
 
-        user_name = xauth.current_name_str()
-        file = note_dao.get_by_id_creator(id, user_name)
-        target_book = note_dao.get_by_id_creator(parent_id, user_name)
-
+    def check_note_move(self, file: typing.Optional[NoteIndexDO], target_book: typing.Optional[NoteIndexDO], user_id: int):
         if file is None:
             return webutil.FailedResult(code="fail", message="笔记不存在")
         
         if target_book is None:
             return webutil.FailedResult(code="fail", message="目标笔记本不存在")
         
-        if str(id) == parent_id:
+        parent_id = target_book.id
+        if file.id == parent_id:
             return webutil.FailedResult(code="fail", message="不能移动到自身目录")
         
         if target_book.type != "group":
             return webutil.FailedResult(code="fail", message="只能移动到笔记本中")
         
         if not file.is_group() and parent_id == 0:
-            return webutil.FailedResult(code="fail", message="只能移动笔记本到根目录")
+            return webutil.FailedResult(code="fail", message="不能移动普通笔记到根目录")
 
         pathlist = note_dao.list_path(target_book)
         for item in pathlist:
             if item.id == file.id:
-                return dict(code="fail", message="不能移动笔记本到自身的子笔记本中")
+                return webutil.FailedResult(code="fail", message="不能移动笔记本到自身的子笔记本中")
         
         if file.type == "group":
             max_depth = xconfig.get_system_config("max_book_depth", 2)
@@ -681,8 +676,33 @@ class MoveAjaxHandler:
             if depth > max_depth:
                 return webutil.FailedResult(code="fail", message="笔记本的层次不能超过%d, 当前层次:%d" % (max_depth, depth))
 
+    
+    @xauth.login_required()
+    def GET(self):
+        note_id = xutils.get_argument_int("id")
+        parent_id = xutils.get_argument_int("parent_id")
+        note_ids_str = xutils.get_argument_str("note_ids")
+
+        if note_id != 0:
+            note_ids_str = str(note_id)
+        
+        note_ids = note_ids_str.split(",")
+        user_name = xauth.current_name_str()
+        target_book = note_dao.get_by_id_creator(parent_id, user_name)
+        user_id = xauth.current_user_id()
+        notes = note_dao.batch_query_list(id_list=note_ids)
+
+        for note_info in notes:
+            if note_info.creator_id != user_id:
+                return webutil.FailedResult("404", message="无操作权限")
+            
+            error_info = self.check_note_move(note_info, target_book, user_id=user_id)
+            if error_info != None:
+                return error_info
+
         with dbutil.get_write_lock(user_name):
-            note_dao.move_note(file, parent_id)
+            for note_info in notes:
+                note_dao.move_note(note_info, parent_id)
         return webutil.SuccessResult()
 
     def POST(self):

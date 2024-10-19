@@ -21,7 +21,7 @@
             <div class="float-right">
                 {% if parent_id != "0" %}
                     <button class="reverse-select-btn">反选</button>
-                    <button class="move-btn" data-url="/note/group/select?callback=batchMoveNoteCallback">移动</button>
+                    <button class="move-btn" onclick="batchMoveNotes(this)">移动</button>
                     {% include common/button/back_button.html %}
                 {% else %}
                     <!-- 根目录 -->
@@ -90,6 +90,11 @@
 </script>
 
 <script type="text/javascript">
+
+function batchMoveNotes(target) {
+    xnote.note.openDialogToBatchMove(":checked");
+}
+
 $(function () {
     $(".reverse-select-btn").click(function () {
         $("input[type=checkbox]").each(function (index, element) {
@@ -97,58 +102,6 @@ $(function () {
             $(element).prop("checked", !value);
         });
     });
-
-    // 移动笔记
-    $(".move-btn").click(function (e) {
-        var checked = $(":checked");
-        if (checked.length == 0) {
-            xnote.alert("请选择笔记");
-            return;
-        }
-
-        var req = {};
-        var idList = [];
-        req.callback = function (parentId) {
-            if (parentId === undefined || parentId == "") {
-                xnote.alert("parentId is undefined");
-                return;
-            }
-            checked.each(function (index, element) {
-                var selfId = $(element).attr("data-id");
-                idList.push(selfId);
-
-                doMoveTo(idList, selfId, parentId);
-            });
-        };
-        xnote.api["note.move.dialog"](req);
-    });
-
-    function doMoveTo(idList, selfId, parentId) {
-        $.post("/note/move", 
-          {id:selfId, parent_id: parentId}, 
-          function (resp){
-              console.log(resp);
-              // 不需要关心哪一个，只是用于计数
-              idList.pop();
-
-              if (idList.length == 0) {
-                window.location.reload();
-              }
-        });
-    }
-
-    /** 批量移动操作的回调, see /note/group/select **/
-    window.batchMoveNoteCallback = function (selectedId) {
-        var checked = $(":checked");
-        var idList = [];
-
-        checked.each(function (index, element) {
-            var selfId = $(element).attr("data-id");
-            idList.push(selfId);
-
-            doMoveTo(idList, selfId, selectedId);
-        });
-    };
 
     $(".rename-btn").click(function(event) {
         console.log("rename");

@@ -170,6 +170,7 @@ xnote.action.note = NoteView;
 xnote.note = NoteView;
 
 NoteView.wangEditor = null; // wangEditor
+NoteView.defaultParentId = 0; // 默认的父级节点
 
 NoteView.onTagClick = function (target) {
     $(target).toggleClass("active");
@@ -311,8 +312,12 @@ NoteView.addNoteToTag = function (tagCode) {
     });
 };
 
-// 选择笔记本-平铺视图
-// 这个函数需要配合 group_select_script.html 使用
+/**
+ * 选择笔记本-平铺视图
+ * 这个函数需要配合 group_select_script.html 使用
+ * @param {object} req 
+ * @param {callback} req.callback 回调函数,参数是 (selectedId: int)
+ */
 NoteView.selectGroupFlat = function (req) {
     var noteId = req.noteId;
     var respData;
@@ -442,9 +447,9 @@ NoteView.deleteTagMeta = function (tagMetaList) {
 };
 
 // 打开对话框移动笔记
-NoteView.openDialogToMove = function (note_id) {
-    if (note_id == undefined) {
-        xnote.alert("note_id不能为空");
+NoteView.openDialogToMove = function (noteIds) {
+    if (noteIds == undefined) {
+        xnote.alert("noteIds 不能为空");
         return;
     }
     var req = {};
@@ -453,7 +458,7 @@ NoteView.openDialogToMove = function (note_id) {
             xnote.alert("parentId is undefined");
             return;
         }
-        xnote.http.post("/note/move", { id: note_id, parent_id: parentId }, function (resp) {
+        xnote.http.post("/note/move", { note_ids: noteIds, parent_id: parentId }, function (resp) {
             if (resp.success) {
                 console.log(resp);
                 window.location.reload();
@@ -464,6 +469,19 @@ NoteView.openDialogToMove = function (note_id) {
     };
     this.selectGroupFlat(req);
 };
+
+NoteView.openDialogToBatchMove = function (selector) {
+    var selected = $(selector);
+    if (selected.length == 0) {
+        xnote.alert("请先选中笔记本");
+        return;
+    }
+    var noteIds = [];
+    selected.each(function(index, elem) {
+        noteIds.push($(elem).attr("data-id"));
+    })
+    xnote.note.openDialogToMove(noteIds.join(","));
+}
 
 // 打开对话框移动笔记
 NoteView.openDialogToMoveByElement = function (target) {
@@ -561,3 +579,119 @@ NoteView.savePost = function (target) {
         }
     })
 }
+
+// 删除笔记
+NoteView.remove = function(id, name, parentId, postAction) {
+    var confirmed = xnote.confirm("确定删除'" + name + "'?", function (confirmed) {
+        if (confirmed) {
+            xnote.http.post("/note/remove", {id:id}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    if (postAction == "refresh") {
+                        window.location.reload();
+                    } else if (parentId) {
+                        window.location.href = "{{_server_home}}/note/" + parentId;
+                    } else {
+                        window.location.href = "{{_server_home}}/";
+                    }
+                }
+            })
+        }
+    });
+}
+
+// 删除笔记
+NoteView.deleteByElement = function (target) {
+    var noteId = $(target).attr("data-id");
+    var name = $(target).attr("data-name");
+    var parentId = $(target).attr("data-prent-id");
+    var postAction = $(target).attr("data-post-action");
+    NoteView.remove(noteId, name, parentId, postAction);
+}
+
+// 恢复笔记
+NoteView.recover = function (noteId, callbackFn) {
+    var params = {
+        id: noteId
+    };
+    xnote.http.post("/note/recover", params, function (resp) {
+        if (resp.code == "success") {
+            callbackFn();
+        } else {
+            xnote.alert("恢复失败:" + resp.message);
+        }
+    }).fail(function (err) {
+        xnote.alert("网络错误，请稍后重试");
+    })
+}
+
+
+/** 创建分组 **/
+NoteView.createGroup = function(parentId, postAction) {
+    var opName = "新建笔记本";
+
+    if (parentId === undefined) {
+        parentId = NoteView.defaultParentId;
+    }
+
+    xnote.prompt(opName, "", function (noteTitle) {
+        var createOption = {};
+        createOption.name = noteTitle;
+        createOption.parent_id = parentId;
+        createOption.type = "group";
+        createOption._format = "json";
+        xnote.http.post("/note/create", createOption, function (resp) {
+            if (postAction == "refresh") {
+                window.location.reload();
+            } else if (resp.code == "success") {
+                window.location = resp.url;
+            } else {
+                xnote.alert(opName + "失败:" + resp.message);
+            }
+        });
+    });
+}
+
+// 别名
+NoteView.createNotebook = NoteView.createGroup;
+
+/**
+ * 重命名笔记
+ * @param {number} id 笔记ID
+ * @param {string} oldName 旧的名称
+ */
+NoteView.rename =  function(id, oldName) {
+    xnote.prompt("新名称", oldName, function (newName) {
+        console.log(newName);
+        if (newName != "" && newName != null) {
+            xnote.http.post("/note/rename", {id:id, name:newName}, function (resp) {
+                var code = resp.code;
+                if (code != "success") {
+                    xnote.alert(resp.message);
+                } else {
+                    // $("#file-"+id).text(newName);
+                    window.location.reload();
+                }
+            })
+        }
+    });
+}
+
+NoteView.renameByElement = function(target) {
+    var id = $(target).attr("data-id");
+    var oldName = $(target).attr("data-name");
+    if (id == undefined || id == "") {
+        xnote.alert("data-id为空");
+        return;
+    }
+
+    if (oldName == undefined || oldName == "") {
+        xnote.alert("data-name为空");
+        return;
+    }
+
+    NoteView.rename(id, oldName);
+}
+

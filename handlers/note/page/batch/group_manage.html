@@ -11,178 +11,182 @@
 {% init note_tags = dict() %}
 {% include note/component/script/create_script.html %}
 {% include note/component/script/tag_script.html %}
-
-<!-- 顶层控制区域的模板 -->
-<script type="text/template" id="tagTopTemplate">
-    <div class="card btn-line-height">
-        <div class="row">
-            <span>标签</span>
-            <a href="?" class="tag lightgray large {% if len(q_tags) == 0 %}active{%end%}" onclick="onClickTagFilter(this);">全部</a>
-            {{! each tagList tag }}
-                <a class="tag lightgray meta large {{!tag.active}}" onclick="onClickTagFilter(this);">{{! tag.tag_name }}</a>
-            {{!/each}}
-        </div>
-
-        <div class="row top-offset-1">
-            <button class="create-tag-btn btn-default">创建新标签</button>
-            <button class="delete-tag-btn btn danger" onclick="xnote.action.note.deleteTagMeta(xnote.note.tagList)">删除标签</button>
-        </div>
-    </div>
-</script>
-
 {% include note/component/script/note_template.html %}
+{% include note/component/script/group_select_script.html %}
+
+<style>
+    .children-box {
+        padding-left: 20px;
+        display: none;
+    }
+
+    .op-link {
+        color: blue;
+        font-size: 14px;
+    }
+    .op-link:hover {
+        color: blue;
+    }
+    .item-option.danger {
+        color: red;
+    }
+</style>
 
 <div class="card note-list">
-
     <!-- header -->
     <div class="row card-title btn-line-height">
         <span>笔记本管理</span>
         <div class="float-right">
-            <button class="btn btn-default" onclick="xnote.createNotebook()">新建笔记本</button>
             {% include common/button/back_button.html %}
         </div>
     </div>
 </div>
 
-<div class="tag-top"></div>
-
-<div class="card">
-    {% if len(notes) == 0 %}
-        {% include common/text/empty_text.html %}
-    {% end %}
-    
-    {% for item in notes %}
-        <div class="book-item">
-            <div class="row">
-                {% if item.priority>0 %}
-                    <span class="tag orange">置顶</span>
-                {% end %}
-
-                {% if item.priority==0 %}
-                    <span class="tag info">活跃</span>
-                {% end %}
-            
-                {% if item.archived %}
-                    <span class="tag system">归档</span>
-                {% end %}
-
-                <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
-                <a class="link2" href="{{_server_home}}{{item.url}}">{{item.name}}</a>
-                
-                <span class="float-right">
-                    <a class="item-option" data-id="{{item.id}}" data-name="{{item.name}}" 
-                        onclick="renameNoteByAttr(this);" href="javascript:void(0);">重命名</a>
-                    <input type="checkbox" data-id="{{item.id}}" data-name="{{item.name}}"/>
-                </span>
-            </div>
-
-            <div class="row">
-                <span>标签</span>
-                {% for tag in item.tag_info_list %}
-                    <a class="tag lightgray">{{tag.name}}</a>
-                {% end %}
-                <button class="btn btn-default bind-tag-btn"
-                    data-parent-id="{{item.parent_id}}"
-                    data-tag-type="group"
-                    data-id="{{item.id}}"
-                    data-tags="{{item.tags_json}}"
-                    onclick="xnote.action.note.editNoteTag(this);">+标签</button>
-                
-            </div>
+<script id="book_item_template" type="text/template">
+    <div class="book-item {{!if level>0}}child{{!/if}}">
+        <div class="row">
+            <i class="fa {{!item.icon}} fa-{{!item.icon}} black"></i>
+            <a class="link2" href="{{!item.url}}">{{!item.name}}</a>
+            <span class="tag lightgray">{{!item.children.length}}</span>
+            {{! if childrenBoxId > 0 }}
+                <a class="op-link toggle-op" data-id="{{!childrenBoxId}}" data-state="close" onclick="toggleChildrenBox(this)">[展开]</a>
+            {{!/if }}
+            <span class="float-right">
+                <a class="item-option" data-id="{{!item.id}}" data-name="{{!item.name}}" 
+                    onclick="xnote.note.renameByElement(this);" href="javascript:void(0);">重命名</a>
+                <a class="item-option danger" data-id="{{!item.id}}" data-name="{{!item.name}}" data-post-action="refresh"
+                    onclick="xnote.note.deleteByElement(this)">删除</a>
+                <input class="group-checkbox" type="checkbox" data-id="{{!item.id}}" data-name="{{!item.name}}"/>
+            </span>
         </div>
-    {% end %}
+    </div>
+</script>
+
+<div class="tag-top"></div>
+<div class="card btn-line-height">
+    <button class="btn btn-default" data-state="close" onclick="toggleAllChilren(this)">展开全部</button>
+    <button class="btn btn-default" onclick="batchMoveNotes(this)">批量移动</button>
+    <button class="btn btn-default" onclick="xnote.note.createNotebook(0, 'refresh')">新建笔记本</button>
+</div>
+<div class="card group-tree">
 </div>
 
 {% include note/component/script/rename_script.html %}
 
 <script type="text/javascript">
-(function() {
-    var tagList = [];
 
-    function renderTagTop(tagList) {
-        var html = $("#tagTopTemplate").render({
-            tagList: tagList,
-        });
-
-        $(".tag-top").html(html);
+function convertArrayToTree(array) {
+    var result = [];
+    var noteMap = {};
+    for (var i = 0; i < array.length; i++) {
+        var item = array[i];
+        item.children = [];
+        item.title = item.name;
+        item.spread = true; // 默认展开
+        noteMap[item.id] = item;
     }
 
-    function refreshTagTop() {
-        var filterTags = JSON.parse(xnote.getUrlParam("tags", "[]"));
-
-        xnote.http.get("/note/tag/list?tag_type=group", function (resp) {
-            console.log("resp", resp);
-            if (resp.code != "success") {
-                xnote.alert(resp.message);
-            } else {
-                // self.tagList = resp.data;
-                tagList = resp.data;
-                xnote.note.tagList = tagList;
-                for (var i=0; i < tagList.length; i++) {
-                    var item = tagList[i];
-                    if (filterTags.indexOf(item.tag_name)>=0) {
-                        item.active = "active";
-                    } else {
-                        item.active = "";
-                    }
-                }
-                renderTagTop(tagList);
-            }
-        });
-    };
-
-    refreshTagTop();
-
-    window.onClickTagFilter = function(target) {
-        var me = $(target);
-        var tagName = me.text();
-        var tagId = me.attr("data-id");
-
-        me.toggleClass("active");
-
-        if (me.hasClass("meta")) {
-            // 筛选模式
-            // 筛选模式使用单选更好
-            var filterTags = [tagName];
-            location.href = xnote.addUrlParam(location.href, "tags", JSON.stringify(filterTags));
+    for (var i = 0; i < array.length; i++) {
+        var item = array[i];
+        if (item.id == 0) {
+            // 不渲染跟节点
+            continue;
         }
+        if (item.parent_id == 0) {
+            result.push(item);
+        } else {
+            parentNote = noteMap[item.parent_id];
+            if (parentNote) {
+                parentNote.children.push(item);
+            }
+        }
+    }
 
-    };
+    return result;
+}
 
-    $(".update-category").change(function (e) {
-        var noteId = $(this).attr("data-id");
-        var newCat = $(this).val();
-        xnote.updateNoteCategory({
-            noteId: noteId,
-            value: newCat,
-            doRefresh: true,
-        });
-    });
+function buildBookItem(noteInfo, level, childrenBoxId) {
+    var html = $("#book_item_template").render({item: noteInfo, level: level, childrenBoxId: childrenBoxId});
+    return $(html);
+}
 
-    $(".switch-category").change(function(e) {
-        var selected = $(this).val();
-        var url = window.location.href;
-        url = xnote.addUrlParam(url, "category", selected);
-        window.location.href = url;
-    });
+function toggleChildrenBox(target, targetState) {
+    var state = $(target).attr("data-state");
+    var childrenBoxId = $(target).attr("data-id");
 
-    $("body").on("click", ".create-tag-btn", function (e) {
-        xnote.prompt("创建新标签", "", function (text) {
-            var params = {
-                tag_type: "group",
-                tag_name: text
-            };
-            $.post("/note/tag/create", params, function (resp) {
-                if (resp.code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    xnote.toast("创建成功");
-                }
-                refreshTagTop();
-            });
-        });
-    });
-})();
+    if (targetState === undefined) {
+        if (state == "open") {
+            targetState = "close";
+        } else {
+            targetState = "open";
+        }
+    }
+
+    if (targetState == 'close') {
+        $(target).attr("data-state", "close");
+        $(target).text("[展开]");
+        $(".box-" + childrenBoxId).hide();
+    } else {
+        $(target).attr("data-state", "open");
+        $(target).text("[收起]");
+        $(".box-" + childrenBoxId).show();
+    }
+}
+
+function toggleAllChilren(target) {
+    var state = $(target).attr("data-state");
+    if (state == "open") {
+        // 执行关闭
+        $(".toggle-op").each(function (index, element) {
+            toggleChildrenBox(element, 'close');
+        })
+        $(target).text("展开全部").attr("data-state", "close");
+    } else {
+        // 执行打开
+        $(".toggle-op").each(function (index, element) {
+            toggleChildrenBox(element, 'open');
+        })
+        $(target).text("收起全部").attr("data-state", "open");
+    }
+}
+
+function renderGroupTreeData(parent, data, level) {
+    for (var i = 0; i < data.length; i++) {
+        var noteInfo = data[i];
+        var childrenBoxId = 0;
+        if (noteInfo.children.length > 0) {
+            childrenBoxId = xnote.createNewId();
+        }
+        var child = buildBookItem(noteInfo, level, childrenBoxId);
+        parent.append(child);
+
+        if (noteInfo.children.length > 0) {
+            var children = $("<div>").addClass("children-box box-" + childrenBoxId);
+            renderGroupTreeData(children, noteInfo.children, level+1);
+            parent.append(children);
+        }
+    }
+}
+
+function renderGroupTree() {
+    xnote.http.get("/note/api/group?list_type=all", function (resp) {
+        if (resp.success) {
+            // console.log(resp);
+            var parent = $(".group-tree");
+            var noteTree = convertArrayToTree(resp.data);
+            console.log("noteTree", noteTree);
+            renderGroupTreeData(parent, noteTree, 0);
+        } else {
+            xnote.alert(resp.message);
+        }
+    })
+}
+
+function batchMoveNotes(target) {
+    xnote.note.openDialogToBatchMove(".group-checkbox:checked");
+}
+
+renderGroupTree();
 
 </script>
 

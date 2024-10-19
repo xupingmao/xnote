@@ -157,7 +157,7 @@
                 </td>
                 <td>
                     {% if item.type == "dir" %}
-                    <img src="/static/image/folder.gif" />
+                    <img src="{{_server_home}}/_static/image/folder.gif" />
                     <a href="{{item.url}}?mode=sidebar" class="fs-folder">{{item.name}}</a>
                     {% else %}
                     <a data-path="{{item.path_b64}}" class="fs-file">{{item.name}}</a>
@@ -192,7 +192,7 @@
             $(e.target).addClass("active");
             var path = $(e.target).attr("data-path");
             window.location.hash = path;
-            var previewURL = "/fs_preview?b64=1&path=" + path;
+            var previewURL = "{{_server_home}}/fs_preview?b64=1&path=" + path;
             $("#previewIframe").attr("src", previewURL);
         })
     });
