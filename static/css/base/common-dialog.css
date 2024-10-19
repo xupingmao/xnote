@@ -34,3 +34,9 @@
     height: 50px;
     padding: 10px;
 }
+
+/* 重写layer的样式 */
+textarea.layui-layer-input:focus, textarea.layui-layer-input:focus-visible {
+    border-color: #8cc;
+    outline: none;
+}

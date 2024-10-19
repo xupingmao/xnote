@@ -45,7 +45,19 @@ class FileBuilder:
     
     def append_file_to(self, fpath, target_fp):
         with open(fpath, "rb") as read_fp:
-            shutil.copyfileobj(read_fp, target_fp, BLOCKSIZE)
+            for line in read_fp.readlines():
+                line = line.strip()
+                if line == "":
+                    continue
+                if line.startswith(b"//"):
+                    # 快速判断,不准确
+                    continue
+                if line.startswith(b"/*") and line.endswith(b"*/"):
+                    continue
+
+                target_fp.write(line)
+                target_fp.write(b"\n")
+            # shutil.copyfileobj(read_fp, target_fp, BLOCKSIZE)
     
     def do_build(self):
         with open(self.target_path, "wb+") as fp:

@@ -32,7 +32,7 @@
         </tr>
 
         {% for item in column_info.items %}
-            <tr>
+            <tr class="hover-tr">
                 {% for head_ in column_info.head %}
                     <td>{{item.get(head_)}}</td>
                 {% end %}
@@ -53,7 +53,7 @@
         </tr>
 
         {% for item in index_info.items %}
-            <tr>
+            <tr class="hover-tr">
                 {% for head_ in index_info.head %}
                     <td>{{item.get(head_)}}</td>
                 {% end %}

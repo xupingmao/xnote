@@ -31,7 +31,7 @@ from xutils.db import encode
 from xutils import interfaces
 
 
-register_table("_ttl", "有效期")
+register_table("_ttl", "有效期", is_deleted = True)
 register_table("_cache", "缓存")
 
 class DatabaseCache(interfaces.CacheInterface):

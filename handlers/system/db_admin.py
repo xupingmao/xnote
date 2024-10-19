@@ -268,10 +268,17 @@ class SqlDBInfo:
 
 class SqlDBHandler:
 
+    @staticmethod
+    def sort_key(table_info: xtables.TableProxy):
+        if table_info.table_name.startswith("plugin_"):
+            return (1, table_info.table_name)
+        return (0, table_info.table_name)
+
     @xauth.login_required("admin")
     def GET(self):
         p2 = xutils.get_argument_str("p2")
         db_list = xtables.get_all_tables(is_deleted=(p2=="delete"))
+        db_list.sort(key = SqlDBHandler.sort_key)
         db_info_list = []
         for db in db_list:
             info = SqlDBInfo()
@@ -399,7 +406,7 @@ class DatabaseDriverInfoHandler:
                 value = item.get("Value")
                 self.mysql_vars[key] = value
                 
-        result = self.mysql_vars.get(var_name)
+        result = self.mysql_vars.get(var_name, "")
         if format_size:
             value_int = int(result)
             result += f" ({xutils.format_size(value_int)})"

@@ -65,7 +65,7 @@ input[type=radio] {
     height: 16px;
 }
 
-input {
+input, textarea {
     padding: 5px;
     outline: none;
 }
@@ -145,4 +145,9 @@ table td {
     border-style: solid;
     border-color: #ccc;
     background-color: #ffffff;
+}
+
+.overflow-table-container {
+    width: 100%;
+    overflow-x: auto;
 }

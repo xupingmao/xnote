@@ -15,7 +15,7 @@ from xutils.db.dbutil_base import *
 from xutils.db.dbutil_hash import LdbHashTable
 from xutils.db.encode import encode_int
 
-register_table("_rank", "排名表")
+register_table("_rank", "排名表", is_deleted = True)
 
 class RankTable:
 

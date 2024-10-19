@@ -72,7 +72,7 @@ class TestEnv:
 
 
 def get_user_db():
-    return xtables.get_user_table()
+    return UserDao._get_db()
 
 
 def get_user_config_db(name):
@@ -131,6 +131,16 @@ class UserDO(xutils.Storage):
         return f"未知({self.status})"
 
 class UserDao:
+
+    _db = None
+
+    @classmethod
+    def _get_db(cls):
+        if cls._db != None:
+            return cls._db
+        cls._db = xtables.get_user_table()
+        return cls._db
+    
     @classmethod
     def get_by_name(cls, name=""):
         # type: (str) -> UserDO | None
@@ -255,6 +265,15 @@ class UserDao:
         for item in result:
             dict_result[item.id] = item.name
         return dict_result
+    
+    @classmethod
+    def get_name_by_id(cls, user_id=0):
+        if user_id == 0:
+            return None
+        first = cls._get_db().select_first(what = "id, name", where = dict(id = user_id))
+        if first != None:
+            return first.get("name", "")
+        return None
 
 class UserModel(UserDao):
     pass

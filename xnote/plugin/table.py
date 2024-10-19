@@ -8,6 +8,7 @@
 @FilePath     : /xnote/xnote/plugin/table.py
 @Description  : 描述
 """
+import re
 
 class TableActionType:
     """表格动作的类型"""
@@ -23,7 +24,17 @@ class LinkTargetType:
     parent = "_parent"
     top = "_top"
 
+
+def _get_px_value(value: str):
+    """获取像素px的数字值,内部函数,请勿使用"""
+    if value.endswith("px"):
+        return int(value.strip("px"))
+    return 0
+
 class TableHead:
+
+    min_width_re = re.compile(r"min:([0-9]+px)")
+
     """表格的标题单元"""
     def __init__(self):
         self.title = ""
@@ -45,6 +56,25 @@ class TableHead:
             return False
         link = self.get_link(row)
         return link not in (None, "")
+    
+
+    def _get_min_width(self):
+        match = self.min_width_re.match(self.width)
+        if match:
+            return match.groups()[0]
+        return None
+    
+    def get_style(self):
+        min_width = self._get_min_width()
+        if min_width != None:
+            return f"min-width: {min_width}"
+        return f"width: {self.width}"
+    
+    def get_min_width(self):
+        min_width = self._get_min_width()
+        if min_width:
+            return _get_px_value(min_width)
+        return _get_px_value(self.width)
     
 class TableAction:
     """表格的操作单元"""
@@ -83,7 +113,7 @@ class DataTable:
     """数据表格"""
     
     def __init__(self):
-        self.heads = []
+        self.heads = [] # type:list[TableHead]
         self.rows = []
         self.actions = []
     
@@ -119,5 +149,10 @@ class DataTable:
         self.actions.append(action)
         return action
 
+    def get_min_width(self):
+        min_width = 0
+        for head in self.heads:
+            min_width += head.get_min_width()
+        return max(min_width, 300)
 
 

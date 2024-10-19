@@ -8,7 +8,7 @@
 @FilePath     : /xnote/xnote/core/xtables_kv.py
 @Description  : 数据库-KV表定义
 
-TODO 支持使用sql维护索引 index_type = sql
+** KV数据库主要用于存储非结构化的大字段 **
 """
 
 import xutils

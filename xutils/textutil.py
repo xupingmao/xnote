@@ -147,9 +147,6 @@ def isblank(text):
             return False
     return True
 
-def issubsetof(text, collection):
-    pass
-
 def is_cjk(c):
     """是否是CJK(中日韩统一表意文字)
     说明来自维基百科 https://zh.wikipedia.org/wiki/CJK
@@ -481,8 +478,14 @@ def parse_simple_command(text):
     if match: return match.group(1, 2)
     return text, ""
 
-def short_text(text, length):
-    """
+def short_text(text: str, length: int):
+    """返回短文本
+
+    Arguments:
+        - text 输入的文本字符
+        - length 全角字符长度
+
+    Simple Test
         >>> short_text('abc', 5)
         'abc'
         >>> short_text('abcdefg', 5)
@@ -531,6 +534,7 @@ def short_text(text, length):
 
 shortfor       = short_text
 get_short_text = short_text
+get_ellipsis_text = short_text
 
 def get_camel_case(name, upper = False):
     """
@@ -636,7 +640,7 @@ def mark_text(content):
     return "".join(tokens)
 
 
-def split_words(search_key):
+def split_words(search_key: str):
     """拆分字符
         >>> split_words("abc is good")
         ["abc", "is", "good"]

@@ -318,7 +318,7 @@ MessageView.createComment = function (target) {
         xnote.toast("id不能为空");
         return;
     }
-    xnote.prompt("备注", "", function (inputText) {
+    xnote.promptTextarea("备注", "", function (inputText) {
         var req = {};
         req.id = id;
         req.content = inputText;

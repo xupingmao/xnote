@@ -18,6 +18,7 @@ from xnote.core import xconfig
 from xnote.core import xmanager
 from xnote.core import xtables
 from xutils import logutil, dbutil, webutil, dateutil, jsonutil
+from xutils import textutil
 from xutils.imports import *
 from xnote.core.xtemplate import BasePlugin
 from xutils.functions import iter_exists
@@ -258,14 +259,15 @@ class DatabaseLogHandler(BaseTablePlugin):
     page_html = NAV_HTML + BaseTablePlugin.TABLE_HTML
     
     table_type_dict = {
-        "sys_log": "kv"
+        "sys_log": "kv",
+        "user_op_log": "sql",
     }
     
     def get_page_html(self):
         return self.page_html
     
     def handle_page(self):
-        table_name_list = ["sys_log"]
+        table_name_list = ["sys_log", "user_op_log"]
         table_name = xutils.get_argument_str("table_name", "sys_log")
         page = xutils.get_argument_int("page", 1)
         page_size = 20
@@ -273,8 +275,9 @@ class DatabaseLogHandler(BaseTablePlugin):
         table_type = self.table_type_dict.get(table_name, "sql")
         
         table = DataTable()
-        table.add_head("时间", "ctime")
-        table.add_head("内容", "content")
+        table.add_head("时间", "ctime", width="200px")
+        table.add_head("用户", "user_name", width="100px")
+        table.add_head("内容", "content", width = "min:200px")
         page_total = 0
         
         if table_type == "kv":
@@ -283,14 +286,22 @@ class DatabaseLogHandler(BaseTablePlugin):
             offset = (page-1)*page_size
             for item in db.iter(offset=offset, limit=20, reverse=True):
                 row = {}
-                content = jsonutil.tojson(item)
-                
-                max_content_size = 1024
-                if len(content) > max_content_size:
-                    content = content[:max_content_size] + "..."
-                    
-                row["ctime"] = item.get("ctime")
-                row["content"] = content
+                row["ctime"] = item.pop("ctime", "-")
+                row["content"] = textutil.get_short_text(jsonutil.tojson(item), 1024)
+                table.add_row(row)
+        
+        if table_type == "sql":
+            page_total = 10000
+            db = xtables.get_table_by_name(table_name=table_name)
+            offset = (page-1)*page_size
+            pk_name = db.table_info.pk_name
+            for item in db.select(offset=offset, limit=page_size, order=f"`{pk_name}` DESC"):
+                row = {}
+                user_id = item.pop("user_id", 0)
+                user_name = xauth.UserDao.get_name_by_id(user_id=user_id)
+                row["ctime"] = item.pop("ctime", "")
+                row["content"] = textutil.get_short_text(jsonutil.tojson(item), 1024)
+                row["user_name"] = user_name
                 table.add_row(row)
 
         kw = Storage()

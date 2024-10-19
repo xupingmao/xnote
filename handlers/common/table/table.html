@@ -2,11 +2,11 @@
 {% set _xnote_table = globals()[xnote_table_var] %}
 
 <script type="text/javascript" src="{{_server_home}}/_static/lib/layDate-v5.0.9/laydate.js"></script>
-
+<div class="overflow-table-container">
 <table class="table">
     <tr>
         {% for head in _xnote_table.heads %}
-            <th style="width:{{head.width}}">{{head.title}}</th>
+            <th style="{{head.get_style()}}">{{head.title}}</th>
         {% end %}
 
         {% if len(_xnote_table.actions) > 0 %}
@@ -50,12 +50,18 @@
         </tr>
     {% end %}
 </table>
+</div>
 
 {% if len(_xnote_table.rows) == 0 %}
     {% include common/text/empty_text.html %}
 {% end %}
 
-<script>
+<script type="text/javascript">
+var tableMinWidth = parseInt("{{_xnote_table.get_min_width()}}");
+if (xnote.getWindowWidth() < tableMinWidth) {
+    $(".table").width(tableMinWidth);
+}
+
 xnote.table.handleAction = function (target) {
     var url = $(target).attr("data-url");
     var title = $(target).attr("data-title");
