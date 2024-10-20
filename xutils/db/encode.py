@@ -7,6 +7,7 @@
 import json
 import xutils
 from xutils import Storage
+from xutils import jsonutil
 
 INT64_MAX = (1 << 63)-1
 INT32_MAX = (1 << 31)-1
@@ -152,7 +153,7 @@ def _encode_json(obj):
 
 def convert_object_to_json(obj):
     # ensure_ascii默认为True，会把非ascii码的字符转成\u1234的格式
-    return json.dumps(obj, ensure_ascii=False, default=_encode_json)
+    return jsonutil.tojson(obj)
 
 def convert_object_to_bytes(obj):
     return convert_object_to_json(obj).encode("utf-8")

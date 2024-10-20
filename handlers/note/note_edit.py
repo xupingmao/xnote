@@ -528,22 +528,17 @@ class UpdateHandler:
             return dict(code = "fail", message = e.message)
     
     def do_post(self):
-        is_public = xutils.get_argument("public", "")
-        id        = xutils.get_argument("id", "")
-        content   = xutils.get_argument("content", "")
-        version   = xutils.get_argument("version", 0, type=int)
-        file_type = xutils.get_argument("type")
-        name      = xutils.get_argument("name", "")
-        resp_type = xutils.get_argument("resp_type", "html")
-        edit_token = xutils.get_argument("edit_token", "")
+        id        = xutils.get_argument_int("id")
+        content   = xutils.get_argument_str("content", "")
+        version   = xutils.get_argument_int("version")
+        file_type = xutils.get_argument_str("type")
+        name      = xutils.get_argument_str("name", "")
+        resp_type = xutils.get_argument_str("resp_type", "html")
+        edit_token = xutils.get_argument_str("edit_token", "")
 
         file = None
 
-        assert isinstance(id, str)
-        assert isinstance(version, int)
-        assert isinstance(content, str)
-
-        with dbutil.get_write_lock(id):
+        with dbutil.get_write_lock(str(id)):
             file = check_get_note(id)
             if version != file.version:
                 raise NoteException("fail", "笔记已经被修改，请刷新后重试")
