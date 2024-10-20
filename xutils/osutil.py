@@ -36,18 +36,7 @@ if six.PY2:
 else:
     getstatusoutput = subprocess.getstatusoutput
 
-def system(cmd, cwd = None):
-    p = subprocess.Popen(cmd, cwd=cwd, 
-                                 shell=True, 
-                                 stdout=subprocess.PIPE, 
-                                 stderr=subprocess.PIPE)
-    # out = p.stdout.read()
-    # err = p.stderr.read()
-    # if PY2:
-    #     encoding = sys.getfilesystemencoding()
-    #     os.system(cmd.encode(encoding))
-    # else:
-    #     os.system(cmd)
+from os import system
 
 def is_windows():
     return os.name == "nt"

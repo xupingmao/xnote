@@ -56,7 +56,7 @@ def build_index_by_fpath(fpath, user_id=0, remark=""):
         file_info.ftype = "dir"
     else:
         file_info.ftype = fsutil.get_file_ext(fpath)
-        file_info.sha256 = fsutil.get_sha1_sum(fpath)
+        file_info.sha256 = fsutil.get_sha256_sum(fpath)
     FileInfoDao.upsert(file_info)
     logging.debug("更新文件索引:%s", file_info)
 

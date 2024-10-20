@@ -944,11 +944,16 @@ class FileHasher:
         return m.hexdigest()
 
 def get_md5_sum(fpath):
-    """计算文件的MD5校验码"""
+    """计算文件的MD5校验码, MD5早已经被证明不安全, 但是由于计算速度快, 一些场景还是保留用于快速校验"""
     hasher = FileHasher(fpath=fpath, hash_type="md5")
     return hasher.get_hash_hex()
 
 def get_sha1_sum(fpath: str):
-    """计算文件的SHA1校验码"""
+    """计算文件的SHA1校验码, 注意: SHA1算法已经被证明不安全"""
     hasher = FileHasher(fpath=fpath, hash_type="sha1")
+    return hasher.get_hash_hex()
+
+def get_sha256_sum(fpath: str):
+    """计算文件的SHA-256校验码"""
+    hasher = FileHasher(fpath=fpath, hash_type="sha256")
     return hasher.get_hash_hex()
