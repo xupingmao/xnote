@@ -52,11 +52,12 @@ def generate_filename(filename, prefix="", ext=None):
         filename += ext
     return prefix + filename
 
+def get_auto_filename(ext=""):
+    return xutils.create_uuid() + ext
 
 def get_display_name(fpath, parent):
     path = xutils.get_relative_path(fpath, parent)
     return xutils.unquote(path)
-
 
 def get_webpath(fpath):
     rpath = xutils.get_relative_path(fpath, xconfig.DATA_DIR)
@@ -78,9 +79,9 @@ def try_lock_file(fpath):
     return True
 
 def try_fix_orientation(fpath):
-    fix_orientation = xutils.get_argument("fix_orientation", "")
+    fix_orientation = xutils.get_argument_bool("fix_orientation", False)
     # print("fix_orientation", fix_orientation)
-    if fix_orientation != "true":
+    if not fix_orientation:
         return
 
     if Image == None:
@@ -115,6 +116,19 @@ def try_fix_orientation(fpath):
 
 def get_user_upload_dir(user):
     return os.path.join(xconfig.UPLOAD_DIR, user)
+
+def get_auto_file_path(filename: str):
+    """filename 默认是 uuid4 32位
+    先使用两层文件夹,如果文件夹里面最多256个文件,可以支持 `256*256*256 = 1677万` 个文件
+    """
+    assert len(filename) > 10
+    first_dir = filename[0:2]
+    second_dir = filename[2:4]
+    dirname = os.path.join(xconfig.FileConfig.files_dir, first_dir, second_dir)
+    fsutil.makedirs(dirname)
+    fpath = os.path.join(dirname, filename)
+    return os.path.abspath(fpath), get_webpath(fpath)
+
 
 def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=False):
     """生成上传文件名"""
@@ -194,7 +208,7 @@ class UploadHandler:
         basename, ext = os.path.splitext(filename)
         if name == "auto":
             # iOS上传文件截图文件固定是image.png
-            filename = generate_filename(None, prefix, ext)
+            filename = get_auto_filename(ext)
 
         if upload_type == "recovery":
             if not xauth.is_admin():
@@ -202,6 +216,8 @@ class UploadHandler:
             filepath, webpath = self.get_recovery_path(filename)
             dirs = os.path.dirname(filepath)
             fsutil.makedirs(dirs)
+        elif name == "auto":
+            filepath, webpath = get_auto_file_path(filename)
         else:
             filepath, webpath = get_upload_file_path(user_name, filename)
 
@@ -213,6 +229,7 @@ class UploadHandler:
         event.fpath = filepath
         event.user_name = user_info.name
         event.user_id = user_info.id
+        event.remark = file.filename
         xmanager.fire("fs.upload", event)
 
         try_fix_orientation(filepath)
@@ -220,7 +237,7 @@ class UploadHandler:
 
         result = webutil.SuccessResult()
         result.webpath = webpath
-        result.link = get_link(filename, webpath)
+        result.link = get_link(file.filename, webpath)
         return result
 
     @xauth.login_required()

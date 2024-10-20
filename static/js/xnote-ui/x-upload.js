@@ -83,6 +83,7 @@ xnote.createUploaderEx = function(req) {
     var chunked = req.chunked;
     var successFn = req.successFn;
     var fixOrientation = req.fixOrientation;
+    var fileName = req.fileName;
 
 
     if (fileSelector == undefined) {
@@ -134,6 +135,7 @@ xnote.createUploaderEx = function(req) {
     uploader.on('uploadBeforeSend', function(object, data, headers) {
         // web-uploader在上传文件的时候会自动进行旋转，但是不处理extif
         data.fix_orientation = fixOrientation;
+        data.name = fileName;
     });
 
     if (successFn) {
@@ -184,7 +186,33 @@ xnote.uploadBlob = function(blob, prefix, successFn, errorFn) {
     xhr.send(fd);
 };
 
+xnote.requestUploadAuto = function (fileSelector, chunked, successFn, errorFn) {
+    return xnote.requestUploadByOption({
+        fileSelector: fileSelector,
+        chunked: chunked,
+        successFn: successFn,
+        errorFn: errorFn,
+        fileName: "auto"
+    });
+}
+
 xnote.requestUpload = function(fileSelector, chunked, successFn, errorFn) {
+    return xnote.requestUploadByOption({
+        fileSelector: fileSelector,
+        chunked: chunked,
+        successFn: successFn,
+        errorFn: errorFn
+    });
+}
+
+// 通过对象上传文件
+xnote.requestUploadByOption = function (option) {
+    var fileSelector = option.fileSelector;
+    var chunked = option.chunked;
+    var successFn = option.successFn;
+    var errorFn = option.errorFn;
+    var fileName = option.fileName;
+
     if (fileSelector == undefined) {
         throw new Error("selector is undefined");
     }
@@ -205,6 +233,7 @@ xnote.requestUpload = function(fileSelector, chunked, successFn, errorFn) {
 
     uploader.on('uploadBeforeSend', function(object, data, headers) {
         data.dirname = "auto";
+        data.name = fileName;
     });
 
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。

@@ -364,10 +364,13 @@ def init_file_info():
         manager.add_column("ftype", "varchar(16)", "")
         manager.add_column("fsize", "bigint", 0)
         manager.add_column("user_id", "bigint", 0)
+        manager.add_column("sha256", "varchar(100)", default_value="", comment="SHA256哈希值")
+        manager.add_column("remark", "text", default_value="", comment="备注信息,比如文件名")
 
         manager.add_index("user_id")
-        manager.add_index("fpath", key_len=100)
-        manager.add_index(["ftype", "fpath"], key_len_list=[0, 100])
+        manager.add_index("fpath(100)")
+        manager.add_index(["ftype", "fpath(100)"])
+        manager.add_index("sha256(30)")
 
 
 def init_site_visit_log():
@@ -506,8 +509,8 @@ def init_kv_zset_table(db=None):
         manager.add_column("member", "varchar(512)", "")
         manager.add_column("score", "bigint", default_value=0)
         manager.add_column("version", "int", default_value=0)
-        manager.add_index(["key", "member"], is_unique=True, key_len_list=[32,100])
-        manager.add_index(["key", "score"], key_len_list=[32, 0])
+        manager.add_index(["key(32)", "member(100)"], is_unique=True)
+        manager.add_index(["key(32)", "score"])
 
 def init_comment_index_table():
     """评论索引"""

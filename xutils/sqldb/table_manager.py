@@ -9,6 +9,7 @@
 @Description  : SQL表结构管理
 """
 
+import re
 import logging
 import xutils
 import web.db
@@ -21,6 +22,60 @@ class ColumnInfo:
     def __init__(self):
         self.name = ""
         self.type = ""
+
+class TableHelper:
+
+    def __init__(self, quote="`", skip_prefix_length = False):
+        self.quote = quote
+        self.skip_prefix_length = skip_prefix_length
+
+    def quote_col(self, colname=""):
+        if self.quote in colname:
+            return colname
+    
+        if "(" in colname:
+            # like field_name(10)
+            colname = colname.replace(")", "")
+            colname = colname.replace("(", " ")
+            colname, length = colname.split()
+            if self.skip_prefix_length:
+                return f"{self.quote}{colname}{self.quote}"
+            return f"{self.quote}{colname}{self.quote}({length})"
+        
+        return f"{self.quote}{colname}{self.quote}"
+    
+    def _do_single_name(self, colname: str):
+        if "(" in colname:
+            # like field_name(10)
+            return colname.split("(")[0]
+        return colname
+
+    def to_colname_only(self, colname):
+        if isinstance(colname, list):
+            return [self._do_single_name(x) for x in colname]
+        return self._do_single_name(colname)
+
+    def build_index_name(self, colname, is_unique=False, table_name=""):
+        colname = self.to_colname_only(colname)
+        index_prefix = "idx"
+        if is_unique:
+            index_prefix = "uk"
+
+        if table_name != "":
+            index_prefix += f"_{table_name}"
+
+        if isinstance(colname, list):
+            colname_list = "_".join(colname)
+            return f"{index_prefix}_{colname_list}"
+        else:
+            return f"{index_prefix}_{colname}"
+
+    def build_colname_tuple(self, colname):
+        if isinstance(colname, list):
+            col_list = [self.quote_col(x) for x in colname]
+            return ",".join(col_list)
+        else:
+            return self.quote_col(colname)
 
 class BaseTableManager:
     """检查数据库字段，如果不存在就自动创建"""
@@ -155,43 +210,16 @@ class MySQLTableManager(BaseTableManager):
             default_value = None
         super().add_column(colname, coltype, default_value, not_null)
     
-    def add_index(self, colname, is_unique=False, key_len=0, key_len_list=[], **kw):
+    def add_index(self, colname, is_unique=False, **kw):
         """MySQL版创建索引"""
-        index_name = ""
-        colname_str = ""
-
-        index_prefix = "idx"
-        if is_unique:
-            index_prefix = "uk"
-
-        if isinstance(colname, list):
-            index_name = index_prefix
-            for name in colname:
-                index_name += "_" + name
-            temp_col_list = []
-            for index, name in enumerate(colname):
-                if index < len(key_len_list):
-                    key_len = key_len_list[index]
-                else:
-                    key_len = 0
-                if key_len > 0:
-                    tmp_col_name = self.quote_col(name) + "(%d)" % key_len
-                else:
-                    tmp_col_name = self.quote_col(name)
-                temp_col_list.append(tmp_col_name)
-            colname_str = ",".join(temp_col_list)
-        else:
-            index_name = index_prefix + "_" + colname
-            colname_str = self.quote_col(colname)
-            if key_len > 0:
-                colname_str += "(%d)" % key_len
+        helper = TableHelper()
+        index_name = helper.build_index_name(colname=colname, is_unique=is_unique)
+        colname_str = helper.build_colname_tuple(colname=colname)
 
         if is_unique:
-            sql = "ALTER TABLE `%s` ADD UNIQUE `%s` (%s)" % (
-                    self.tablename, index_name, colname_str)
+            sql = f"ALTER TABLE `{self.tablename}` ADD UNIQUE `{index_name}` ({colname_str})"
         else:
-            sql = "ALTER TABLE `%s` ADD INDEX `%s` (%s)" % (
-                    self.tablename, index_name, colname_str)
+            sql = f"ALTER TABLE `{self.tablename}` ADD INDEX `{index_name}` ({colname_str})"
 
         if self.is_index_exists(index_name):
             logging.info("index %s already exists", index_name)
@@ -282,24 +310,15 @@ class SqliteTableManager(BaseTableManager):
 
     def add_index(self, colname, is_unique=False, **kw):
         # sqlite的索引和table是一个级别的schema
-        index_prefix = "idx_"
-        if is_unique:
-            index_prefix = "uk_"
-
-        colname_str = colname
-        
-        if isinstance(colname, list):
-            idx_name = index_prefix + self.tablename + "_" + "_".join(colname)
-            colname_str = ",".join(colname)
-        else:
-            idx_name = index_prefix + self.tablename + "_" + colname
+        # sqlite不支持前缀索引
+        helper = TableHelper(skip_prefix_length=True)
+        idx_name = helper.build_index_name(colname=colname, is_unique=is_unique, table_name=self.tablename)
+        colname_str = helper.build_colname_tuple(colname=colname)
                             
         if is_unique:
-            sql = "CREATE UNIQUE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (
-                idx_name, self.tablename, colname_str)
+            sql = f"CREATE UNIQUE INDEX IF NOT EXISTS {idx_name} ON `{self.tablename}` ({colname_str})"
         else:
-            sql = "CREATE INDEX IF NOT EXISTS %s ON `%s` (%s)" % (
-                idx_name, self.tablename, colname_str)
+            sql = f"CREATE INDEX IF NOT EXISTS {idx_name} ON `{self.tablename}` ({colname_str})"
             
         self.execute(sql)
 
@@ -311,8 +330,8 @@ class TableInfo:
         self.db_type = "" # 数据库类型, 比如 mysql/sqlite
         self.comment = "" # 表的描述
         self.column_names = []
-        self.columns = []
-        self.indexes = []
+        self.columns = [] # 这个主要用于记录[args, kw]参数用于复制表结构
+        self.indexes = [] # 这个主要用于记录[args, kw]参数用于复制表结构
         self.dbpath = "" # sqlite文件路径
         self.enable_binlog = True
         self.log_profile = True
@@ -374,7 +393,7 @@ class TableManagerFacade:
         if not is_backup:
             self.table_dict[tablename] = self.table_info
     
-    def add_column(self, colname, coltype,
+    def add_column(self, colname, coltype: str,
                    default_value=None, not_null=True, comment=""):
         coltype_lower = coltype.lower()
 

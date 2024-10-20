@@ -32,6 +32,8 @@ class FileInfo(Storage):
         self.ftype = ""
         self.user_id = 0
         self.fsize = 0
+        self.remark = ""
+        self.sha256 = ""
 
 class FileInfoDao:
     

@@ -948,7 +948,7 @@ def get_md5_sum(fpath):
     hasher = FileHasher(fpath=fpath, hash_type="md5")
     return hasher.get_hash_hex()
 
-def get_sha1_sum(fpath):
+def get_sha1_sum(fpath: str):
     """计算文件的SHA1校验码"""
     hasher = FileHasher(fpath=fpath, hash_type="sha1")
     return hasher.get_hash_hex()

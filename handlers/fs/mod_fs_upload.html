@@ -1,5 +1,5 @@
-<link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/webuploader/webuploader.css">
-<script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
 
 <div id="uploadFileArea">
     <!-- 文件上传区域 -->
@@ -15,7 +15,7 @@
 
 $(function () {
     // 文件上传逻辑
-    var BASE_URL = "/static/lib/webuploader";
+    var BASE_URL = "{{_server_home}}/_static/lib/webuploader";
     $("#target-path").text(location.hash.substr(1)).attr("href", "/fs/" + location.hash.substr(1));
     var uploadFailed = false;
 
@@ -29,7 +29,7 @@ $(function () {
         swf: BASE_URL + '/Uploader.swf',
 
         // 文件接收服务端。
-        server: '/fs_upload/range',
+        server: '{{_server_home}}/fs_upload/range',
 
         // 选择文件的按钮。可选。
         // 内部根据当前运行是创建，可能是input元素，也可能是flash.

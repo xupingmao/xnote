@@ -303,7 +303,7 @@
         // 文件上传
         $("#uploadBtn").click(function () {
             console.log("准备上传文件...");
-            xnote.requestUpload("#file", false, function (resp) {
+            xnote.requestUploadAuto("#file", false, function (resp) {
                 console.log("上传文件:", resp);
                 var fileLink = resp.link;
                 codeInsert(fileLink);

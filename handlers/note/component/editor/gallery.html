@@ -46,7 +46,7 @@ xnote.execute(function () {
     xnote.events.onUploadPrepareEvent(function (event) {
         console.log("onUploadPrepareEvent", event);
         if (event.target.uploadType == "fs") {
-            $.post("/note/touch", {id: "{{file.id}}", resp_type: "json"}, function (resp) {
+            xnote.http.post("/note/touch", {id: "{{file.id}}", resp_type: "json"}, function (resp) {
                 console.log(resp);
             });
         }

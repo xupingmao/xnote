@@ -107,7 +107,7 @@ $(function () {
     var DIALOG_INDEX = 0;
 
     $("#addAttachmentBtn").click(function () {
-        xnote.requestUpload("#uploadFileInput", false, function (resp) {
+        xnote.requestUploadAuto("#uploadFileInput", false, function (resp) {
             console.log(resp);
             var fileLink = resp.link;
             var editor = getEditor();

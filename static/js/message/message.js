@@ -479,7 +479,8 @@ $(function() {
             var webpath = "file://" + resp.webpath
             xnote.action.message.updateInputBox(webpath);
         },
-        fixOrientation: true
+        fixOrientation: true,
+        fileName: "auto"
     });
 
     $("body").on("paste", ".edit-box,.input-box", function (e) {

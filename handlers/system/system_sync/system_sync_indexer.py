@@ -42,7 +42,7 @@ def convert_time_to_str(mtime):
 def is_temp_file(fname):
     return fname in TEMP_FNAME_SET
 
-def build_index_by_fpath(fpath, user_id=0):
+def build_index_by_fpath(fpath, user_id=0, remark=""):
     # TODO 如果 user_id=0 尝试根据路径推测用户
     from handlers.fs.fs_helper import FileInfo, FileInfoDao
     st = os.stat(fpath)
@@ -51,10 +51,12 @@ def build_index_by_fpath(fpath, user_id=0):
     file_info.user_id = user_id
     file_info.fsize = fsutil.get_file_size_int(fpath)
     file_info.mtime = xutils.format_datetime(st.st_mtime)
+    file_info.remark = remark
     if os.path.isdir(fpath):
         file_info.ftype = "dir"
     else:
         file_info.ftype = fsutil.get_file_ext(fpath)
+        file_info.sha256 = fsutil.get_sha1_sum(fpath)
     FileInfoDao.upsert(file_info)
     logging.debug("更新文件索引:%s", file_info)
 
@@ -184,7 +186,7 @@ def on_fs_upload(ctx: xnote_event.FileUploadEvent):
     if filepath == None:
         return
     user_id = ctx.user_id
-    build_index_by_fpath(filepath, user_id)
+    build_index_by_fpath(filepath, user_id, remark=ctx.remark)
 
     log_data = FileLog()
     log_data.fpath = filepath
