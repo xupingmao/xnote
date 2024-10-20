@@ -1,8 +1,10 @@
 # -*- coding:utf-8 -*-  
 # Created by xupingmao on 2022/09/24
 # @modified 2022/04/10 18:33:45
-from xnote.core import xauth, xtemplate
 import xutils
+import logging
+
+from xnote.core import xauth, xtemplate
 from xutils import (
     fsutil,
     dbutil,
@@ -107,12 +109,18 @@ class TextHandler:
         total_size = 0
 
         if encoding == None:
-            return dict(code="500", message="未知的文件编码")
+            return webutil.FailedResult(code="500", message="未知的文件编码")
 
         with open(fpath, encoding=encoding, errors="ignore") as fp:
             while True:
                 page_info = TxtPageInfoDO()
-                page_info.offset = fp.tell()
+                try:
+                    page_info.offset = fp.tell()
+                except OSError as tell_error:
+                    # 发生错误 can't reconstruct logical file position
+                    # 这种情况下基本上已经把文件读完了,只是最后的字符无法进行解码,导致无法计算当前的文件位置
+                    logging.error("tell failed, fpath:%s, error: %s", fpath, tell_error)
+
                 page_data = fp.read(pagesize)
                 if not page_data:
                     # None(非阻塞IO)或者长度为0的字节数组
