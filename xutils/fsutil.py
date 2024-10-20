@@ -27,7 +27,6 @@ from xutils.base import Storage
 from xutils import textutil
 from fnmatch import fnmatch
 from configparser import ConfigParser
-from xutils import logutil
 
 # mbcs泛指通过2字节来编码的字符编码
 # https://zhuanlan.zhihu.com/p/453675608
@@ -326,15 +325,7 @@ def data_path(fname):
 
 
 ### 文件操作部分
-
-
-def makedirs(dirname):
-    '''检查并创建目录(如果不存在不报错)'''
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-        return True
-    return False
-
+from xutils.base import makedirs
 
 def _try_readfile(path, mode="r", limit=-1, encoding='utf-8'):
     if PY2:

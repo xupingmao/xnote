@@ -1524,7 +1524,7 @@ def search_content(words, creator="", orderby="hot_index", limit=1000):
     assert isinstance(words, list)
     words = [word.lower() for word in words]
 
-    def is_match(value):
+    def is_match(value: NoteDO):
         if value.content is None:
             return False
         return (value.creator == creator or value.is_public) \
@@ -1537,7 +1537,7 @@ def search_content(words, creator="", orderby="hot_index", limit=1000):
         id_list = [str(x.id) for x in index_list]
         batch_result = _full_db.batch_get_by_id(id_list)
         for key in batch_result:
-            value = batch_result[key]
+            value = NoteDO.from_dict(batch_result[key])
             if is_match(value):
                 value.content = ""
                 value.data = ""

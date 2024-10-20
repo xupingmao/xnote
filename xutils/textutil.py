@@ -20,14 +20,11 @@ import json
 import inspect
 import hashlib
 import base64
-from xutils.imports import is_str, ConfigParser
+from xutils.base import is_str
+from configparser import ConfigParser
 from xutils.textutil_url import *
 from collections import OrderedDict
-
-try:
-    from urllib.parse import quote, unquote
-except ImportError:
-    from urllib import quote, unquote
+from urllib.parse import quote, unquote
 
 __doc__ = """文本处理函数库
 

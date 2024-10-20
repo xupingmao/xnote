@@ -4,7 +4,9 @@
 # @modified 2022/04/16 22:47:23
 import copy
 import sys
+import os
 import traceback
+import codecs
 
 IS_PY2 = sys.version_info[0] == 2
 
@@ -86,3 +88,24 @@ def print_stacktrace():
 
 def is_str(s):
     return isinstance(s, string_types)
+
+
+def makedirs(dirname):
+    '''检查并创建目录(如果不存在不报错)'''
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+        return True
+    return False
+
+
+def decode_bytes(bytes: bytes):
+    exc = None
+    for charset in ("utf-8", "gbk", "mbcs", "latin_1"):
+        try:
+            return codecs.decode(bytes, charset)
+        except Exception as e:
+            exc = e
+    if exc != None:
+        raise exc
+
+try_decode = decode_bytes

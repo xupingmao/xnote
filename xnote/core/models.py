@@ -29,6 +29,7 @@ class SearchContext:
         self.messages = [] # 待办/记事/通知/评论
         self.notes    = [] # 笔记
         self.files    = [] # 文件
+        self.parent_note = None # type: object # 上级笔记
 
         # 分页信息
         self.offset = 1

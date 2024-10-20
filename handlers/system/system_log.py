@@ -19,7 +19,7 @@ from xnote.core import xmanager
 from xnote.core import xtables
 from xutils import logutil, dbutil, webutil, dateutil, jsonutil
 from xutils import textutil
-from xutils.imports import *
+from xutils import Storage
 from xnote.core.xtemplate import BasePlugin
 from xutils.functions import iter_exists
 from xnote.plugin.table_plugin import BaseTablePlugin

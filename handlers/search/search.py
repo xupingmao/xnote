@@ -19,6 +19,7 @@ from xutils import mem_util
 from xutils import six
 from xnote.core.xtemplate import T
 from xnote.core.models import SearchContext
+from xutils import SearchResult
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -191,7 +192,7 @@ class SearchHandler:
         return search_result[offset:offset+limit], len(search_result)
 
     @mem_util.log_mem_info_deco("do_search_with_profile", log_args = True)
-    def do_search_with_profile(self, page_ctx, key, offset, limit):
+    def do_search_with_profile(self, page_ctx: SearchContext, key, offset, limit):
         user_name = xauth.current_name()
         category  = xutils.get_argument_str("category", "")
         search_type = xutils.get_argument_str("search_type", "")
@@ -218,14 +219,19 @@ class SearchHandler:
             note.icon = "hide"
         return notes, count
 
-    def do_search_note(self, ctx, key):
+    def do_search_note(self, ctx: SearchContext, key):
         user_name = xauth.current_name_str()
         parent_id = xutils.get_argument_int("parent_id")
         words = textutil.split_words(key)
-        notes = note_dao.search_name(words, user_name, parent_id = parent_id)
+
+        if ctx.category == "content":
+            notes = note_dao.search_content(words, user_name)
+        else:
+            notes = note_dao.search_name(words, user_name, parent_id = parent_id)
+        
         for note in notes:
             note.category = "note"
-            note.mdate = dateutil.format_date(note.mtime)
+
         fill_note_info(notes)
 
         if parent_id != "" and parent_id != None:
@@ -240,31 +246,34 @@ class SearchHandler:
         from handlers.message.dao import MessageDO
         from handlers.message.message_utils import process_message
 
+        server_home = xconfig.WebConfig.server_home
+
         user_id = xauth.current_user_id()
         offset = ctx.offset
         limit  = ctx.limit
 
         search_tags = set(["task"])
-        item_list, amount = MSG_DAO.search_message(user_id, key, offset, limit, search_tags = search_tags)
-
-        for item in item_list:
-            process_message(item)
+        msg_list, amount = MSG_DAO.search_message(user_id, key, offset, limit, search_tags = search_tags)
+        item_list = [] # type: list[SearchResult]
+        for msg_item in msg_list:
+            process_message(msg_item)
+            item = SearchResult(**msg_item)
             prefix = u("待办 - ")
 
-            if item.tag == "done":
+            if msg_item.tag == "done":
                 prefix = u("完成 - ")
 
-            item.name = prefix + item.ctime
+            item.name = prefix + msg_item.ctime
             item.icon = "hide"
             item.url  = "#"
         
         # 统计已完成待办数量
         temp, done_count = MSG_DAO.search_message(user_id, key, search_tags = set(["done"]), count_only=True)
         if done_count > 0:
-            done_summary = MessageDO()
+            done_summary = SearchResult()
             done_summary.icon = "hide"
             done_summary.name = "已完成任务[%d]" % done_count
-            done_summary.url =  "/message?tag=search&p=done&key=%s" % xutils.quote(key)
+            done_summary.url =  f"{server_home}/message?tag=done.search&key={xutils.quote(key)}"
             item_list.insert(0, done_summary)
 
         return item_list, amount
@@ -274,7 +283,7 @@ class SearchHandler:
         comment.search_comment_detail(ctx)
         return ctx.messages, len(ctx.messages)
 
-    def do_search_by_type(self, ctx, key, search_type):
+    def do_search_by_type(self, ctx: SearchContext, key, search_type):
         if search_type == "note":
             return self.do_search_note(ctx, key)
         elif search_type == "dict":
@@ -290,12 +299,12 @@ class SearchHandler:
         """search files by name and content"""
         RuleManager.load_rules()
         key         = xutils.get_argument_str("key", "")
-        title       = xutils.get_argument("title", "")
-        category    = xutils.get_argument("category", "default")
+        title       = xutils.get_argument_str("title", "")
+        category    = xutils.get_argument_str("category", "default")
         page        = xutils.get_argument_int("page", 1)
         search_type = xutils.get_argument("search_type", "")
         user_name   = xauth.get_current_name()
-        page_url    =  "/search/search?key={key}&category={category}&search_type={search_type}&page=".format(**locals())
+        page_url    =  f"/search/search?key={key}&category={category}&search_type={search_type}&page="
         pagesize    = xconfig.SEARCH_PAGE_SIZE
         offset      = (page-1) * pagesize
         limit       = pagesize

@@ -13,8 +13,8 @@ from __future__ import absolute_import
 
 
 """xnote工具类总入口
-xutils是暴露出去的统一接口，类似于windows.h一样
-建议通过xutils暴露统一接口，其他的utils由xutils导入
+xutils是暴露出去的统一接口, 类似于windows.h一样
+建议通过xutils暴露统一接口, 其他的utils由xutils导入
 """
 
 import shutil
@@ -28,10 +28,10 @@ from xutils.imports import *
 import xutils.textutil as textutil
 import xutils.ziputil as ziputil
 import xutils.fsutil as fsutil
-import xutils.logutil as logutil
 import xutils.dateutil as dateutil
 import xutils.htmlutil as htmlutil
 
+from xutils import logutil
 from xutils.ziputil import *
 from xutils.netutil import splithost, http_get, http_post
 from xutils.textutil import *
@@ -42,7 +42,7 @@ from xutils.cacheutil import cache, cache_get, cache_put, cache_del
 from xutils.functions import History, MemTable, listremove
 
 # TODO xutils是最基础的库，后续会移除对xconfig的依赖，xutils会提供配置的函数出去在上层进行配置
-from xutils.base import Storage, print_exc, print_stacktrace, XnoteException
+from xutils.base import *
 from xutils.logutil import *
 from xutils.webutil import *
 from xutils.exeutil import *
@@ -90,7 +90,7 @@ def print_table(data, max_length=20, headings = None, ignore_attrs = None):
 
 class SearchResult(Storage):
     """搜索结果"""
-    def __init__(self, name=None, url='#', raw=None):
+    def __init__(self, name="", url='#', raw=None, **kw):
         super().__init__()
         self.name = name
         self.url = url
@@ -101,12 +101,13 @@ class SearchResult(Storage):
         self.show_more_link = False
         self.html = ""
         self.command = "" # 命令类的工具
+        self.tag_name = ""
+        self.tag_class = ""
+        self.update(kw)
 
 def attrget(obj, attr, default_value = None):
-    if hasattr(obj, attr):
-        return getattr(obj, attr, default_value)
-    else:
-        return default_value
+    """不推荐使用,之前不知道getattr在有默认值的时候不报错"""
+    return getattr(obj, attr, default_value)
 
 ### DB Utilities
 
@@ -143,15 +144,6 @@ def db_execute(path, sql, args = None):
 
 def json_str(**kw):
     return json.dumps(kw)
-
-def decode_bytes(bytes):
-    for encoding in ["utf-8", "gbk", "mbcs", "latin_1"]:
-        try:
-            return bytes.decode(encoding)
-        except:
-            pass
-    return None
-
 
 def obj2dict(obj):
     if obj == None:

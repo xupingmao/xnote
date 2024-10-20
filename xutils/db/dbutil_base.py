@@ -51,7 +51,7 @@ except ImportError:
 
 # 加载第三方的库
 import xutils
-from xutils.imports import is_str
+from xutils.base import is_str
 from xutils import dateutil
 from xutils.db.encode import convert_bytes_to_object, convert_object_to_json, convert_bytes_to_object_strict
 from xutils.db.dbutil_id_gen import TimeSeqId

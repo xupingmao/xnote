@@ -17,8 +17,6 @@ from collections import deque
 
 import web
 from xutils import six, u
-from xutils.imports import PY2, getstatusoutput
-
 
 def get_current_thread():
     return threading.current_thread()
@@ -124,7 +122,7 @@ def exec_python_code(
         return ret
 
 def fix_py2_code(code):
-    if not PY2:
+    if not six.PY2:
         return code
     # remove encoding declaration, otherwise will cause
     # SyntaxError: encoding declaration in Unicode string
@@ -167,7 +165,7 @@ def exec_script(name, new_window=True, record_stdout = True, vars = None):
         # os.system(path)
         code = xutils.readfile(path)
         # TODO 防止进程阻塞
-        ret, out = getstatusoutput(code)
+        ret, out = xutils.getstatusoutput(code)
         return out
     return ret
 

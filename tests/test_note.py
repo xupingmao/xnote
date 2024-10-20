@@ -598,9 +598,21 @@ class TestMain(BaseTestCase):
     def test_stat(self):
         self.check_OK("/note/stat")
 
-    def test_note_search(self):
-        assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
+    def test_note_search_name(self):
+        delete_note_for_test("search-name-test")
+        create_note_for_test(type = "md", name = "search-name-test", content = "hello,world")
+        result = json_request_return_dict("/note/api/timeline?type=search&key=name")
+        assert result["code"] == "success"
+        assert len(result["data"]) > 0
+
         self.check_OK(u"/search?key=test中文&category=content")
+
+    def test_note_search_content(self):
+        delete_note_for_test("search-content-test")
+        create_note_for_test(type = "md", name = "search-content-test", content = "hello,world")
+        result = json_request_return_dict("/search?search_type=note&category=content&key=hello&_format=json")
+        files = result.get("files", [])
+        assert len(files) > 0
 
     def test_split_words(self):
         from xutils.textutil import split_words
@@ -619,7 +631,7 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/recent?orderby=create")
 
     def a_test_recent_files(self):
-        json_data = json_request("/note/recent_edit")
+        json_data = json_request_return_dict("/note/recent_edit")
         files = json_data["files"]
         print("files=%s" % len(files))
 

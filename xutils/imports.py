@@ -27,12 +27,13 @@ import subprocess
 import pickle
 import hashlib
 import codecs
+import web
+
 from xutils.base import Storage
 from collections import deque
 from fnmatch import fnmatch
 from xutils.tornado.escape import xhtml_escape
-
-import web
+from xutils.base import is_str, try_decode
 from web.utils import safestr, safeunicode
 
 try:
@@ -64,9 +65,6 @@ if PY2:
         names = list(os.listdir(dirname))
         encoding = sys.getfilesystemencoding()
         return [newname.decode(encoding) for newname in names]
-
-    def is_str(s):
-        return isinstance(s, (str, unicode))
 else:
     # Py3 and later
     from subprocess import getstatusoutput
@@ -74,27 +72,6 @@ else:
 
     u = str
     listdir = os.listdir
-
-    def is_str(s):
-        return isinstance(s, str)
-
-# 关于Py2的getstatusoutput，实际上是对os.popen的封装
-# 而Py3中的getstatusoutput则是对subprocess.Popen的封装
-# Py2的getstatusoutput, 注意原来的windows下不能正确运行，但是下面改进版的可以运行
-
-if PY2:
-    def getstatusoutput(cmd):
-        """Return (status, output) of executing cmd in a shell."""
-        import os
-        # old
-        # pipe = os.popen('{ ' + cmd + '; } 2>&1', 'r')
-        # 这样修改有一个缺点就是执行多个命令的时候只能获取最后一个命令的输出
-        pipe = os.popen(cmd + ' 2>&1', 'r')
-        text = pipe.read()
-        sts = pipe.close()
-        if sts is None: sts = 0
-        if text[-1:] == '\n': text = text[:-1]
-        return sts, text
 
 
 def quote_unicode(url):
@@ -127,14 +104,3 @@ def quote_unicode(url):
     #     text = matched.group()
     #     return quote(text)
     # return re.sub(r"[\u4e00-\u9fa5]+", urlencode, url)
-
-def try_decode(bytes):
-    exc = None
-    for charset in ("utf-8", "gbk", "mbcs", "latin_1"):
-        try:
-            return codecs.decode(bytes, charset)
-        except Exception as e:
-            exc = e
-    if exc != None:
-        raise exc
-
