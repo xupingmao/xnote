@@ -634,12 +634,12 @@ def get_file_info_table():
     return get_table_by_name("file_info")
 
 
-def init_backup_table(tablename, db):
+def init_backup_table(tablename, db, dbpath=""):
     table_info = TableManager.get_table_info(tablename)
     if table_info == None:
         raise Exception("table not defined: %s" % tablename)
 
-    with TableManager(tablename, db=db, is_backup=True) as manager:
+    with TableManager(tablename, db=db, is_backup=True, dbpath = dbpath) as manager:
         for args, kw in table_info.columns:
             manager.add_column(*args, **kw)
 

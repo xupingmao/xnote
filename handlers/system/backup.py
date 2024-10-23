@@ -135,7 +135,7 @@ class DBBackup:
 
         try:
             for table in xtables.get_all_tables():
-                backup_table = xtables.init_backup_table(table.tablename, db)
+                backup_table = xtables.init_backup_table(table.tablename, db, dbpath=self.db_backup_file)
                 backup_table.writable = True
                 backup_table.log_profile = False # 备份的时候不需要profile
 
@@ -329,7 +329,7 @@ class DBImporter:
                 if table.table_name == xconfig.DatabaseConfig.kv_store:
                     logger.info(f"skip kv_store table: {table.table_name}")
                     continue
-                backup_table = xtables.init_backup_table(table.tablename, backup_db)
+                backup_table = xtables.init_backup_table(table.tablename, backup_db, dbpath=db_file)
                 total_count = backup_table.count()
                 logger.info("import table:(%s) count:(%d)", table.tablename, total_count)
                 start_time = time.time()

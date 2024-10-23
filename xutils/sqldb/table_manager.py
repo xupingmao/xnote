@@ -354,20 +354,6 @@ class TableManagerFacade:
 
     table_dict = {}
 
-    @classmethod
-    def clear_table_dict(cls):
-        cls.table_dict = {}
-    
-    @classmethod
-    def get_table_info(cls, tablename=""):
-        # type: (str) -> TableInfo|None
-        return cls.table_dict.get(tablename)
-    
-    @classmethod
-    def get_table_info_dict(cls):
-        # type: () -> dict[str, TableInfo]
-        return cls.table_dict
-
     def __init__(self, tablename, db = empty_db, is_backup = False, **kw):
         self.table_info = TableInfo(tablename)
         self.table_info.pk_name = kw.get("pk_name", "id")
@@ -393,6 +379,20 @@ class TableManagerFacade:
         if not is_backup:
             self.table_dict[tablename] = self.table_info
     
+    @classmethod
+    def clear_table_dict(cls):
+        cls.table_dict = {}
+    
+    @classmethod
+    def get_table_info(cls, tablename=""):
+        # type: (str) -> TableInfo|None
+        return cls.table_dict.get(tablename)
+    
+    @classmethod
+    def get_table_info_dict(cls):
+        # type: () -> dict[str, TableInfo]
+        return cls.table_dict
+
     def add_column(self, colname, coltype: str,
                    default_value=None, not_null=True, comment=""):
         coltype_lower = coltype.lower()

@@ -46,32 +46,28 @@
  * 判断数组中是否存在以start开头的字符串
  * @param {string} start
  */
-Array.prototype.startsWith = Array.prototype.startsWith || function (start) {
-    var array = this;
-    for (var key in array) {
-        var item = array[key];
-        if (item === start) return true;
+if (!Array.prototype.startsWith) {
+    Array.prototype.startsWith = function (start) {
+        var array = this;
+        for (var key in array) {
+            var item = array[key];
+            if (item === start) return true;
+        }
+        return false;
     }
-    return false;
-}
-
-// Array.prototype.each = Array.prototype.each || function (callback) {
-//     var self = this;
-//     for (var i = 0; i < self.length; i++) {
-//         var item = self[i];
-//         callback(i, item);
-//     }
-// }
+} 
 
 /**
  * forEach遍历
  * @param {function} callback
  */
-Array.prototype.forEach = Array.prototype.forEach || function (callback) {
-    var self = this;
-    for (var i = 0; i < self.length; i++) {
-        var item = self[i];
-        callback(item, i, self);
+if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function (callback) {
+        var self = this;
+        for (var i = 0; i < self.length; i++) {
+            var item = self[i];
+            callback(item, i, self);
+        }
     }
 }
 

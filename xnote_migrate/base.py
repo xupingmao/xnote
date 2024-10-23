@@ -84,7 +84,7 @@ def migrate_sqlite_table(new_table: xtables.TableProxy, old_dbname="", check_exi
     table_name = new_table.tablename
     old_db = xtables.get_db_instance(dbpath=dbpath)
     # 初始化老的表
-    old_table = xtables.init_backup_table(table_name, old_db)
+    old_table = xtables.init_backup_table(table_name, old_db, dbpath=dbpath)
     total = old_table.count()
     count = 0
 
