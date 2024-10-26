@@ -456,14 +456,6 @@ li.menu-item:hover {
     border: 1px solid #ccc;
 }
 
-.nav-search-btn {
-    float: left;
-    height: 30px;
-    width: 30px;
-    margin-left: -30px;
-    margin-top: 0px;
-    border-radius: 0px;
-}
 
 .nav-search {
     width: 345px;

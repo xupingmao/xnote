@@ -3,7 +3,7 @@
 
 <div class="card-title btn-line-height">
     {% if parent_link != None %}
-        <a href="{{parent_link.href}}">{{parent_link.text}}</a>
+        <a class="link2" href="{{parent_link.href}}">{{parent_link.text}}</a>
         <span>/</span>
     {% end %}
     <span>{{title}}</span>
@@ -11,6 +11,6 @@
     {% if right_link is not None %}
         <a class="link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
     {% end %}
-        <button class="btn-default" onclick="javascript:history.back()">返回</button>
+        <button class="btn btn-default" onclick="javascript:history.back()">返回</button>
     </div>
 </div>

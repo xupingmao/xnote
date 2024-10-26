@@ -233,8 +233,6 @@ class ListAjaxHandler:
         if tag == "key" or tag == "log.tags":
             return LogPageHandler().do_get_tags_ajax(msg_list, page, page_max)
 
-        template_file = "message/ajax/message_ajax.html"
-
         params = dict(
             tag=tag,
             displayTag=display_tag,
@@ -259,7 +257,7 @@ class ListAjaxHandler:
             item_list=msg_list
         )
 
-        return xtemplate.render(template_file, **kw)
+        return xtemplate.render("message/ajax/message_ajax.html", **kw)
 
     def get_top_keywords(self, msg_list):
         """返回热门的标签"""

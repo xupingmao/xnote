@@ -60,7 +60,7 @@
 /** 按钮样式 **/
 
 /* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
-.btn, [type=submit], [type=button], button, .inline-btn, .x-tab-btn {
+.btn, [type=submit], [type=button], button, .inline-btn, .x-tab-btn, .btn-default, .btn-cancel {
     display: inline-block;
     -webkit-appearance: none; /* 消除IOS默认的按钮样式 */
     background-color: #337ab7;
@@ -84,7 +84,7 @@
     padding-right: 20px;
 }
 
-.btn:hover, .inline-btn:hover, button:hover, [type=submit]:hover, [type=button]:hover {
+.btn:hover, .inline-btn:hover, .btn-default:hover {
     color: #fff;
     background-color: #286090;
     border-color: #204d74;
@@ -161,7 +161,7 @@
     opacity: 1.0;
 }
 
-.btn.large {
+.btn.xlarge {
     width: 100px;
     height: 30px;
 }
