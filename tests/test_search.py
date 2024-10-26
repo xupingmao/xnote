@@ -6,6 +6,7 @@
 
 from . import test_base
 from .test_base import json_request_return_dict
+from xnote.core import xauth
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -42,3 +43,13 @@ class TestMain(BaseTestCase):
         dao.add_search_history(None, "test")
         dao.expire_search_history("user")
         dao.list_search_history("user")
+
+        user_name = xauth.current_name_str()
+        dao.add_search_history(user_name, "test")
+        from handlers.search.search import list_search_history
+
+        words = list_search_history(user_name=user_name)
+        assert "test" in words
+
+    def test_search_dialog(self):
+        self.check_OK("/search/dialog?key=test")
