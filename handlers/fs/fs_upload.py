@@ -118,12 +118,13 @@ def get_user_upload_dir(user):
     return os.path.join(xconfig.UPLOAD_DIR, user)
 
 def get_auto_file_path(filename: str):
-    """filename 默认是 uuid4 32位
+    """filename 默认是 uuid4 32位字符串
     先使用两层文件夹,如果文件夹里面最多256个文件,可以支持 `256*256*256 = 1677万` 个文件
     """
     assert len(filename) > 10
     first_dir = filename[0:2]
     second_dir = filename[2:4]
+    # TODO 虽然概率极低，最好还是check下文件名是否重复
     dirname = os.path.join(xconfig.FileConfig.files_dir, first_dir, second_dir)
     fsutil.makedirs(dirname)
     fpath = os.path.join(dirname, filename)

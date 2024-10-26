@@ -115,7 +115,7 @@ a.tag:hover {
 }
 
 .info-tag, .tag-info, .tag.info {
-    padding: 3px;
+    padding: 3px 5px;
     border-radius: 3px;
     font-size: 12px;
     background: rgb(13, 202, 240);

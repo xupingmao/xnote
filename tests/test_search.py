@@ -5,6 +5,7 @@
 # @filename test_search.py
 
 from . import test_base
+from .test_base import json_request_return_dict
 
 app          = test_base.init()
 json_request = test_base.json_request
@@ -20,7 +21,7 @@ class TestMain(BaseTestCase):
         self.check_OK("/search?category=message")
 
     def test_search_calc(self):
-        result = json_request("/search?key=1%2B2&_format=json")
+        result = json_request_return_dict("/search?key=1%2B2&_format=json")
         value = result['files'][0]['raw']
         self.assertEqual("1+2=3", value)
     

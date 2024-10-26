@@ -757,7 +757,8 @@ def prefix_iter(prefix,  # type: str
     if parse_json:
         convert_value_func = convert_bytes_to_object_strict
     else:
-        def convert_value_func(bytes_value): return bytes_value.decode("utf-8")
+        def convert_value_func(bytes_value: bytes): 
+            return bytes_value.decode("utf-8")
 
     for key_bytes, value_bytes in iterator:
         key_bytes: bytes

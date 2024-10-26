@@ -64,6 +64,9 @@ class TestMain(BaseTestCase):
         self.assertTrue(len(result1) > 0)
 
         first = db1.get_first()
+        assert isinstance(first, Storage)
+        assert isinstance(first._id, str)
+        
         self.assertEqual("key1", first.prop)
         self.assertEqual("test_user_db1:Ada:"+first._id, first._key)
 

@@ -270,12 +270,12 @@ class RemoveAjaxHandler:
 
         creator = xauth.current_name()
         if not xauth.is_admin() and file.creator != creator:
-            return dict(code="fail", message="没有删除权限")
+            return webutil.FailedResult(code="fail", message="没有删除权限")
 
         if file.type == "group":
             children_count = note_dao.count_by_parent(creator, file.id)
             if children_count > 0:
-                return dict(code="fail", message="分组不为空")
+                return webutil.FailedResult(code="fail", message="分组不为空")
 
         dao_delete.delete_note(file.id)
         

@@ -592,9 +592,9 @@ NoteView.remove = function(id, name, parentId, postAction) {
                     if (postAction == "refresh") {
                         window.location.reload();
                     } else if (parentId) {
-                        window.location.href = "{{_server_home}}/note/" + parentId;
+                        window.location.href = xnote.http.resolveURL("/note/" + parentId);
                     } else {
-                        window.location.href = "{{_server_home}}/";
+                        window.location.href = xnote.http.resolveURL("/");
                     }
                 }
             })

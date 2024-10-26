@@ -2,11 +2,9 @@
 import sys
 import time
 import unittest
-sys.path.insert(1, "lib")
-sys.path.insert(1, "core")
-import xmanager
-from xutils   import Storage
-from xmanager import CronTaskManager
+from xnote.core import xmanager
+from xnote.core.xmanager import CronTaskManager
+from xutils import Storage
 
 class TestMain(unittest.TestCase):
 

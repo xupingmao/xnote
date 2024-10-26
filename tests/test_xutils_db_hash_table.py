@@ -57,10 +57,14 @@ class TestMain(test_base.BaseTestCase):
         table.put("admin", user_info)
 
         found = table.get("admin")
+        assert isinstance(found, Storage)
+
         self.assertEqual("admin", found.name)
         self.assertEqual(20, found.age)
 
         key, first = table.first(where=dict(age=20))
+        assert isinstance(first, Storage)
+
         self.assertEqual("admin", first.name)
         self.assertEqual(20, first.age)
 
