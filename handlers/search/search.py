@@ -8,6 +8,7 @@ import time
 import math
 import web
 import xutils
+import typing
 import handlers.note.dao as note_dao
 import handlers.dict.dict_dao as dict_dao
 
@@ -20,6 +21,7 @@ from xutils import six
 from xnote.core.xtemplate import T
 from xnote.core.models import SearchContext
 from xutils import SearchResult
+from xnote.service.search_service import SearchHistoryDO
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
@@ -84,10 +86,8 @@ def list_search_history(user_name, limit = -1):
     history_list = []
 
     for item in raw_history_list:
-        if item.key is None:
-            continue
-        if item.key not in history_list:
-            history_list.append(item.key)
+        if item.search_key not in history_list:
+            history_list.append(item.search_key)
     return history_list
 
 def build_search_context(user_name, category, key):
@@ -337,22 +337,22 @@ class SearchHandler:
 
 class SearchHistoryHandler:
 
-    def fetch_recent_logs(self, raw_history_list):
+    def fetch_recent_logs(self, raw_history_list: typing.List[SearchHistoryDO]):
         history_list = []
         for item in raw_history_list:
-            if item.key is None:
+            if item.search_key is None:
                 continue
-            if item.key not in history_list:
-                history_list.append(item.key)
+            if item.search_key not in history_list:
+                history_list.append(item.search_key)
         return history_list
     
-    def fetch_hot_logs(self, raw_history_list, top_count = 10):
+    def fetch_hot_logs(self, raw_history_list: typing.List[SearchHistoryDO], top_count = 10):
         count_dict = dict()
 
         for item in raw_history_list:
-            count = count_dict.get(item.key, 0)
+            count = count_dict.get(item.search_key, 0)
             count+=1
-            count_dict[item.key] = count
+            count_dict[item.search_key] = count
         
         sorted_items = sorted(count_dict.items(), key = lambda x:x[1], reverse=True)
         return sorted_items[0:top_count]
@@ -380,7 +380,7 @@ class SearchHistoryHandler:
         p = xutils.get_argument("p", "")
         user_name = xauth.current_name()
         if p == "clear":
-            note_dao.clear_search_history(user_name)
+            note_dao.clear_search_history(user_name, search_type="default")
             return dict(code = "success")
 
         return dict(code = "500", message = "无效的操作")

@@ -31,6 +31,7 @@ from xnote.core import xmanager
 from xnote.core import xtables
 from xnote.core import xauth
 from xnote.core import xtables
+from xnote.service.search_service import SearchHistoryDO, SearchHistoryService, SearchHistoryType
 from xutils import Storage
 from xutils import dateutil, dbutil, textutil, fsutil
 from xutils import cacheutil
@@ -46,8 +47,6 @@ from handlers.note.models import NOTE_ICON_DICT
 NOTE_DAO = xutils.DAO("note")
 
 _full_db = dbutil.get_table("note_full")
-_search_history_db = dbutil.get_table("search_history")
-
 _note_history_db = dbutil.get_hash_table("note_history")
 _note_history_index_db = xtables.get_table_by_name("note_history_index")
 _token_db = dbutil.get_table("token")
@@ -1633,62 +1632,58 @@ def list_archived(creator, offset=0, limit=100):
     sort_notes(notes)
     return notes
 
-class SearchHistory(Storage):
-
-    def __init__(self) -> None:
-        self.user = ""
-        self.key = ""
-        self.category = "default"
-        self.cost_time = 0.0
-        self.ctime = dateutil.format_datetime()
-
 def add_search_history(user, search_key: str, category="default", cost_time=0.0):
     if user == None:
-        user = "public"
+        user_id = 0
+    else:
+        user_id = xauth.UserDao.get_id_by_name(user)
     
     if len(search_key) > MAX_SEARCH_KEY_LENGTH:
         return
     
     expire_search_history(user)
     
-    value = SearchHistory()
-    value.user = user
-    value.key = search_key
-    value.category = category
-    value.cost_time = cost_time
+    value = SearchHistoryDO()
+    value.user_id = user_id
+    value.search_key = search_key
+    value.search_type = category
+    value.cost_time_ms = int(cost_time)
 
-    return _search_history_db.insert(value, max_retry=100)
+    return SearchHistoryService.create(value)
 
 
-def list_search_history(user, limit=1000, orderby="time_desc"):
+def list_search_history(user, limit=1000, search_type=SearchHistoryType.default, orderby="ctime desc") -> typing.List[SearchHistoryDO]:
     if user is None or user == "":
         return []
+    
+    user_id = xauth.UserDao.get_id_by_name(user)
     result = []
-    for value in _search_history_db.list(limit = limit, reverse=True, where = dict(user=user)):
-        if value.ctime == None:
-            value.ctime = ""
+    for value in SearchHistoryService.list(user_id=user_id, search_type=search_type, limit = limit, order=orderby):
         result.append(value)
     
     result.sort(key = lambda x:x.ctime, reverse = True)
     return result
 
 
-def clear_search_history(user_name):
+def clear_search_history(user_name, search_type=""):
     assert user_name != None
     assert user_name != ""
-    db = _search_history_db
-    for item in db.list(where = dict(user=user_name), reverse=True, limit=1000):
-        db.delete(item)
+    user_id = xauth.UserDao.get_id_by_name(user_name)
 
-def expire_search_history(user_name, limit=1000):
-    db = _search_history_db
-    count = _search_history_db.count(where = dict(user = user_name))
+    ids = []
+    for item in SearchHistoryService.list(user_id=user_id, search_type=search_type, limit=1000, order="ctime asc"):
+        ids.append(item.id)
+    SearchHistoryService.delete_by_ids(ids)
+
+def expire_search_history(user_name, limit=1000, search_type=SearchHistoryType.default):
+    db = SearchHistoryService
+    user_id = xauth.UserDao.get_id_by_name(user_name)
+    count = db.count(user_id=user_id, search_type=search_type)
 
     if count > limit:
         list_limit = min(20, count - limit)
-        with dbutil.get_write_lock(user_name):
-            obj_list = db.list(where = dict(user=user_name), limit = list_limit, reverse=False)
-            db.batch_delete(obj_list)
+        obj_list = db.list(user_id=user_id, search_type=search_type, limit = list_limit, order="ctime asc")
+        db.delete_items(obj_list)
 
 
 class NoteStatDO(Storage):
@@ -1877,10 +1872,6 @@ xutils.register_func("note.find_next_note", find_next_note)
 xutils.register_func("note.add_history", add_history)
 xutils.register_func("note.list_history", list_history)
 xutils.register_func("note.get_history", get_history)
-xutils.register_func("note.add_search_history", add_search_history)
-xutils.register_func("note.list_search_history", list_search_history)
-xutils.register_func("note.clear_search_history", clear_search_history)
-xutils.register_func("note.expire_search_history", expire_search_history)
 
 # stat
 xutils.register_func("note.get_note_stat", get_note_stat)

@@ -11,6 +11,7 @@ from xnote.core import xconfig, xmanager, xtables, xauth
 from xutils import dbutil, cacheutil, textutil, Storage, functions
 from xutils import dateutil
 from xnote.core.xtemplate import T
+from xnote.service.search_service import SearchHistoryDO, SearchHistoryType, SearchHistoryService
 from xutils.db.dbutil_helper import new_from_dict
 from xnote.service import TagBindService, TagTypeEnum
 from .message_model import is_task_tag
@@ -560,20 +561,22 @@ class MsgSearchLogDao:
     max_log_size = xconfig.DatabaseConfig.user_max_log_size
     
     @classmethod
-    def get_table(cls, user_name=""):
-        return dbutil.get_hash_table("msg_search_history", user_name=user_name)
-
-    @classmethod
     def add_log(cls, user_name="", search_key="", cost_time=0):
-        user_db = cls.get_table(user_name)
-        search_log = Storage(key=search_key, cost_time=cost_time)
-        user_db.put(dbutil.timeseq(), search_log)
+        user_id = xauth.UserDao.get_id_by_name(user_name)
+        search_type = SearchHistoryType.msg
 
-        if user_db.count() > cls.max_log_size:
-            keys = []
-            for key, value in user_db.list(limit=20):
-                keys.append(key)
-            user_db.batch_delete(keys=keys)
+        search_history = SearchHistoryDO()
+        search_history.user_id = user_id
+        search_history.ctime = dateutil.format_datetime()
+        search_history.search_key = search_key
+        search_history.search_type = search_type
+        search_history.cost_time_ms = cost_time
+
+        if SearchHistoryService.count(user_id=user_id, search_type=search_type) > cls.max_log_size:
+            ids = []
+            for item in SearchHistoryService.list(user_id=user_id, search_type=search_type, limit=20, order="ctime asc"):
+                ids.append(item.id)
+            SearchHistoryService.delete_by_ids(ids)
 
 
 def add_search_history(user="", search_key="", cost_time=0):

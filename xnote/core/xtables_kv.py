@@ -132,7 +132,7 @@ def init_note_tables():
     db = dbutil.register_table("note_history_index", "笔记历史索引", category="note")
     db.delete_table()
     
-    db = dbutil.register_table("search_history", "搜索历史", user_attr="user", check_user=True)
+    db = dbutil.register_table("search_history", "搜索历史", user_attr="user", check_user=True, is_deleted=True)
     db.drop_index("user", comment = "使用二级key的表,不需要user索引")
 
     # 分享关系
@@ -174,7 +174,7 @@ def init_message_tables():
     dbutil.register_table("msg_key", "备忘关键字/标签", check_user=True, user_attr="user")
     
     dbutil.register_deleted_table("msg_backup", "随手记备份", check_user=True, user_attr="user")
-    dbutil.register_table("msg_search_history", "备忘搜索历史", check_user=True, user_attr="user")
+    dbutil.register_table("msg_search_history", "备忘搜索历史", check_user=True, user_attr="user", is_deleted=True)
     
     msg_history_index = xtables.get_table_by_name("msg_history_index")
     dbutil.register_table("msg_history", "备忘历史", index_db=msg_history_index)

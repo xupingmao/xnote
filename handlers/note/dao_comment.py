@@ -156,7 +156,8 @@ def count_comment_by_note(note_id):
         return 0
 
 def search_comment(user_name, *, keywords=[], offset=0, limit=xconfig.PAGE_SIZE, note_id=None):
-    assert user_name != None, "user_name can not be None"
+    if user_name is None:
+        return []
     user_id = xauth.UserDao.get_id_by_name(user_name)
     target_id=0
     if note_id != None:

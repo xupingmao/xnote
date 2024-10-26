@@ -581,6 +581,21 @@ def init_txt_info_index():
         manager.add_index("user_id")
         manager.table_info.enable_binlog = False
         
+
+def init_search_history_table():
+    """搜索记录
+    @since 2024/10/26
+    """
+    table_name = "search_history"
+    comment = "搜索记录"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("ctime", "datetime", default_value=DEFAULT_DATETIME, comment="创建时间")
+        manager.add_column("user_id", "bigint", default_value=0)
+        manager.add_column("cost_time_ms", "bigint", default_value=0, comment="毫秒耗时")
+        manager.add_column("search_type", "varchar(20)", default_value="")
+        manager.add_column("search_key", "varchar(100)", default_value="")
+        manager.add_index("user_id")
+
 def DBWrapper(dbpath, tablename):
     db = MySqliteDB(db=dbpath)
     return TableProxy(db, tablename)
@@ -729,3 +744,5 @@ def init():
     
     # KV表
     init_kv_store_table()
+    init_search_history_table()
+

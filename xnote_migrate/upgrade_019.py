@@ -16,6 +16,7 @@ from xnote_migrate import base
 from xutils import dbutil, dateutil
 from xutils.db.dbutil_helper import new_from_dict
 from handlers.note.dao import NoteDO, create_note, NoteIndexDao
+from xnote.service.search_service import SearchHistoryDO, SearchHistoryService, SearchHistoryType
 
 def do_upgrade():
     # since v2.9.7
@@ -23,6 +24,7 @@ def do_upgrade():
     base.execute_upgrade("20240623_fix_note", handler.fix_invalid_note_id)
     base.execute_upgrade("20240623_note_history_index", handler.migrate_note_history_index)
     base.execute_upgrade("20240928_rebuild_msg", handler.rebuild_msg)
+    base.execute_upgrade("20241026_migrate_search_history", handler.migrate_search_history)
     
 class NoteHistoryKvIndexDO(xutils.Storage):
     def __init__(self, **kw):
@@ -74,6 +76,18 @@ class KvNoteIndexDO(xutils.Storage):
     @staticmethod
     def from_dict(dict_value):
         return new_from_dict(KvNoteIndexDO, dict_value)
+
+class KvSearchHistory(xutils.Storage):
+    def __init__(self) -> None:
+        self.user = ""
+        self.key = ""
+        self.category = "default"
+        self.cost_time = 0.0
+        self.ctime = dateutil.format_datetime()
+    
+    @staticmethod
+    def from_dict(dict_value):
+        return new_from_dict(KvSearchHistory, dict_value)
 
 class MigrateHandler:
 
@@ -178,3 +192,35 @@ class MigrateHandler:
             item["user_id"] = user_id
             item["id"] = new_msg_db._build_key(str(user_id), msg_id)
             new_msg_db.put_by_id(msg_id, item)
+    
+    def upsert_search_history(self, item: KvSearchHistory, search_type: str):
+        user_id = xauth.UserDao.get_id_by_name(item.user)
+
+        new_item = SearchHistoryDO()
+        new_item.ctime = item.ctime
+        new_item.cost_time_ms = int(item.cost_time)
+        new_item.user_id = user_id
+        new_item.search_type = search_type
+        new_item.search_key = item.key
+
+        if user_id == 0:
+            logging.info("user_id=0, skip search_history")
+            return
+
+        check_old = SearchHistoryService.find_one(user_id=user_id, 
+                                                  search_type=search_type, search_key=item.key, ctime=new_item.ctime)
+        if check_old is None:
+            SearchHistoryService.create(new_item)
+
+    def migrate_search_history(self):
+        search_history_db = dbutil.get_table("search_history")
+        msg_search_history_db = dbutil.get_table("msg_search_history")
+
+        for raw_item in search_history_db.iter(limit=-1):
+            item = KvSearchHistory.from_dict(raw_item)
+            self.upsert_search_history(item, SearchHistoryType.default)
+        
+        for raw_item in msg_search_history_db.iter(limit=-1):
+            item = KvSearchHistory.from_dict(raw_item)
+            self.upsert_search_history(item, SearchHistoryType.msg)
+

@@ -50,7 +50,7 @@
 <script type="text/javascript">
     $(".clear-history-link").click(function (e) {
         xnote.confirm("确定清空历史记录吗?", function (resp) {
-            $.post("/search/history?p=clear", function(resp) {
+            xnote.http.post("/search/history?p=clear", function(resp) {
                 if (resp.code == "success") {
                     location.reload();
                 } else {
