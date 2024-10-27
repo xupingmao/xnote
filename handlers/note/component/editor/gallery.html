@@ -81,7 +81,7 @@ xnote.execute(function () {
                         {% if item.type == "dir" %}
                             <img class="fs-icon" src="/static/image/folder2.png">
                         {% elif xutils.is_img_file(item.path) %}
-                            <img class="x-photo" src="/data/files/{{quote(item.path)}}?mode=thumbnail" 
+                            <img class="x-photo" src="{{_server_home}}/data/files/{{quote(item.path)}}?mode=thumbnail" 
                                 data-src="/data/files/{{quote(item.path)}}" loading="lazy">
                         {% elif xutils.is_text_file(item.path) %}
                             <img class="fs-icon" src="/static/image/icon_txt.png">

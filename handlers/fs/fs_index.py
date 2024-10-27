@@ -128,7 +128,7 @@ class IndexHandler:
         user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/fs_index")
         path = self.get_arg_path()
-        action = xutils.get_argument("p")
+        action = xutils.get_argument_str("p")
         page_size = 20
 
         if action == "rebuild":
@@ -163,7 +163,7 @@ class IndexHandler:
         index_dirs = get_index_dirs()
         cost = 0
 
-        action = xutils.get_argument("action")
+        action = xutils.get_argument_str("action")
         path = self.get_arg_path()
         err = ""
         index_size = 0
@@ -182,8 +182,8 @@ class IndexHandler:
 
         if is_ajax:
             if err != "":
-                return dict(code="500", message=err)
-            return dict(code="success", data = index_size)
+                return webutil.FailedResult(code="500", message=err)
+            return webutil.SuccessResult(data = index_size)
         
         kw = Storage()
         kw.index_dirs = index_dirs

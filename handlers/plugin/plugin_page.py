@@ -62,12 +62,13 @@ def get_plugin_category_list():
 
 
 def get_category_url_by_code(code):
+    server_home = xconfig.WebConfig.server_home
     if code is None:
-        return "/plugin_list?category=all"
+        return f"{server_home}/plugin_list?category=all"
     for item in CategoryService.category_list:
         if item.code == code:
-            return item.url
-    return "/plugin_list?category=%s" % code
+            return f"{server_home}{item.url}"
+    return f"{server_home}/plugin_list?category=%s" % code
 
 
 def get_category_name_by_code(code: str):

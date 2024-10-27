@@ -206,7 +206,8 @@ class UploadHandler:
         fs_checker.check_file_name(file.filename)
 
         filename = get_safe_file_name(file.filename)
-        basename, ext = os.path.splitext(filename)
+        # 扩展名要从原始的文件名获取
+        _, ext = os.path.splitext(file.filename)
         if name == "auto":
             # iOS上传文件截图文件固定是image.png
             filename = get_auto_filename(ext)
