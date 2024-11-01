@@ -35,6 +35,8 @@ def encode_int(int_val):
     True
     >>> encode_int(-(1<<40)) < encode_int(-(1<<20))
     True
+    >>> encode_int(10000000000000)
+    'A000009184E72A000'
     """
     if not isinstance(int_val, int):
         raise Exception("encode_int: expect int but see: (%r)" % int_val)
@@ -66,10 +68,10 @@ def encode_int(int_val):
 
     ## int64
     if INT32_MAX < int_val <= INT64_MAX:
-        return "A%16X" % int_val
+        return "A%016X" % int_val
     
     if -INT64_MAX <= int_val < -INT32_MAX:
-        return "5%16X" % (int_val + INT64_MAX)
+        return "5%016X" % (int_val + INT64_MAX)
 
     raise Exception("encode_int: invalid value(%d)" % int_val)
     

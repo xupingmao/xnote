@@ -621,6 +621,8 @@ class FileItem(Storage):
         # 处理Windows盘符
         if path.endswith(":"):
             self.name = path
+            # 必须带`/`, 否则的话`C:`会等同于当前目录
+            self.path = path + "/"
 
         if encode_path:
             self.encoded_path = xutils.encode_uri_component(self.path)

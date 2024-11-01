@@ -28,6 +28,7 @@
 <button class="btn btn-default" id="alertBtn">alert</button>
 <button class="btn btn-default" id="toastBtn">toast</button>
 <button class="btn btn-default" id="promptBtn">prompt</button>
+<button class="btn btn-default" id="promptTextareaBtn">promptTextareaBtn</button>
 
 <script>
     $("#alertBtn").click(function () {
@@ -38,6 +39,9 @@
     });
     $("#promptBtn").click(function () {
         xnote.prompt("prompt测试");
+    });
+    $("#promptTextareaBtn").click(function () {
+        xnote.promptTextarea("prompt多行文本测试", "默认值");
     });
 </script>
 """ %}

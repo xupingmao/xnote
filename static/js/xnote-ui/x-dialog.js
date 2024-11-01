@@ -35,7 +35,6 @@ var xnoteDialogModule = {}
 xnote.dialog = xnoteDialogModule;
 
 xnoteDialogModule.idToIndexMap = {};
-xnoteDialogModule.layerIndexStack = [];
 
 xnoteDialogModule.handleOptions = function (options) {
     if (options.dialogId === undefined) {
@@ -92,24 +91,33 @@ xnoteDialogModule.showIframeDialog = function (title, url, buttons, functions) {
     });
 }
 
+xnoteDialogModule._getCloseAnim = function() {
+    if (xnote.isMobile()) {
+        return 2;
+    } else {
+        return undefined;
+    }
+}
 // 关闭对话框的入口方法
 xnoteDialogModule.closeDialog = function (flag) {
+    if (xnote.isMobile()) {
+        anim = 2; // 向下滑出
+    }
     if (flag === "last") {
-        var lastId = xnoteDialogModule.layerIndexStack.pop();
-        layer.close(lastId);
+        // 如果你想关闭最新弹出的层，直接获取layer.index即可
+        var index = layer.index;
+        layer.close(index, xnoteDialogModule._getCloseAnim());
     }
 
     if (typeof(flag) === 'number') {
-        layer.close(flag);
+        layer.close(flag, xnoteDialogModule._getCloseAnim());
         // TODO 移除_dialogIdStack中的元素
     }
 }
 
 // 打开对话框
 xnoteDialogModule.openDialogEx = function (options) {
-    var layerIndex = xnoteDialogModule.openDialogExInner(options);
-    xnoteDialogModule.layerIndexStack.push(layerIndex);
-    return layerIndex;
+    return xnoteDialogModule.openDialogExInner(options);
 }
 
 xnote.showDialogEx = function () {
@@ -196,6 +204,11 @@ xnoteDialogModule.openDialogExInner = function (options) {
         area = xnote.getDialogAreaFullScreen();
     }
 
+    if (anim === undefined && xnote.isMobile()) {
+        // 手机上默认从底部往上滑
+        anim = 2;
+    }
+
     var params = {
         type: 1,
         title: title,
@@ -233,7 +246,7 @@ xnoteDialogModule.openDialogExInner = function (options) {
     if (onOpenFn) {
         onOpenFn(index);
     }
-    return index
+    return index;
 }
 
 /**
@@ -258,7 +271,13 @@ xnoteDialogModule.showDialog = function () {
 }
 
 // 打开文本对话框
-xnoteDialogModule.openTextDialog = function(title, text, buttons, functions, features) {
+xnoteDialogModule.openTextDialogByOption = function(options) {
+    var title = options.title;
+    var text = options.text;
+    var buttons = options.buttons;
+    var functions = options.functions;
+    var features = options.features;
+
     var req = {};
     var dialogId = xnoteDialogModule.createNewId();
 
@@ -279,7 +298,10 @@ xnoteDialogModule.openTextDialog = function(title, text, buttons, functions, fea
     var textarea = $("<textarea>").addClass("dialog-textarea").text(text);
     var dialogBody = $("<div>").addClass("card dialog-body").append(textarea);
     var btnBox = $("<div>").addClass("float-right");
-    var closeBtn = $("<button>").attr("data-dialog-id", dialogId).addClass("large btn-default").attr("onclick", "xnote.dialog.closeByElement(this)").text("关闭");
+    var closeBtn = $("<button>").attr("data-dialog-id", dialogId)
+        .addClass("btn large btn-default")
+        .attr("onclick", "xnote.dialog.closeByElement(this)")
+        .text("关闭");
     var dialogFooter = $("<div>").addClass("dialog-footer").append(btnBox.append(closeBtn));
 
     if (buttons === undefined) {
@@ -296,6 +318,16 @@ xnoteDialogModule.openTextDialog = function(title, text, buttons, functions, fea
         xnote._updateDialogFeatures(req, features);
     }
     return xnote.showDialogEx(req);
+}
+
+xnoteDialogModule.openTextDialog = function(title, text, buttons, functions, features) {
+    return xnoteDialogModule.openTextDialogByOption({
+        title: title,
+        text: text,
+        buttons: buttons,
+        functions: functions,
+        features: features
+    });
 }
 
 xnote._updateDialogFeatures = function (options, features) {
@@ -375,7 +407,15 @@ xnote.prompt = function(title, defaultValue, callback) {
 
 
 xnote.promptTextarea = function (title, defaultValue, callback) {
-    return xnote.promptInternal(title, defaultValue, callback, 2);
+    var functions;
+
+    if (callback) {
+        functions = function (index, layero) {
+            var inputText = layero.find("textarea").val();
+            callback(inputText);
+        }
+    }
+    return xnote.openTextDialog(title, defaultValue, ["确定", "取消"], functions);
 }
 
 // 确认函数
@@ -636,11 +676,11 @@ xnoteDialogModule.closeByElement = function (target) {
     var dialogId = $(target).attr("data-dialog-id");
     if (dialogId) {
         var index = xnoteDialogModule.idToIndexMap[dialogId];
-        layer.close(index);
+        layer.close(index, xnoteDialogModule._getCloseAnim());
     } else {
         // layer组件的ID
         var times = $(target).parents(".layui-layer").attr("times");
-        layer.close(times);
+        layer.close(times, xnoteDialogModule._getCloseAnim());
     }
 }
 
@@ -670,3 +710,4 @@ xnote.showIframeDialog = xnoteDialogModule.showIframeDialog;
 xnote.showTextDialog = xnoteDialogModule.openTextDialog;
 xnote.openTextDialog = xnoteDialogModule.openTextDialog;
 xnote.showOptionDialog = xnoteDialogModule.showOptionDialog;
+xnote.openTextArea = xnote.promptTextarea;

@@ -80,6 +80,11 @@ class BinLog:
     @property
     def last_seq(self):
         return self.id_gen.current_id_int()
+    
+    def get_next_id(self):
+        next_id = self.id_gen.create_increment_id_int()
+        # TODO 可以按照整型数字循环写入
+        return next_id
 
     @classmethod
     def get_instance(cls):
@@ -142,7 +147,7 @@ class BinLog:
             return
 
         # 获取自增ID操作是并发安全的, 所以这里不需要加锁, 加锁过多不仅会导致性能下降, 还可能引发死锁问题
-        new_id = self.id_gen.create_increment_id_int()
+        new_id = self.get_next_id()
         binlog_id = self._pack_id(new_id)
         binlog_body = dict(optype=optype, key=key)
         if self.record_old_value and old_value != None:

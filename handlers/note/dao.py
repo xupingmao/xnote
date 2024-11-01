@@ -1530,7 +1530,7 @@ def search_content(words, creator="", orderby="hot_index", limit=1000):
             and textutil.contains_all(value.content.lower(), words)
 
     creator_id = xauth.UserDao.get_id_by_name(creator)
-    result = []
+    result = [] # type: list[NoteDO]
 
     for index_list in NoteIndexDao.iter_batch(creator_id=creator_id, batch_size=20):
         id_list = [str(x.id) for x in index_list]
@@ -1679,10 +1679,9 @@ def expire_search_history(user_name, limit=1000, search_type=SearchHistoryType.d
     db = SearchHistoryService
     user_id = xauth.UserDao.get_id_by_name(user_name)
     count = db.count(user_id=user_id, search_type=search_type)
-
-    if count > limit:
-        list_limit = min(20, count - limit)
-        obj_list = db.list(user_id=user_id, search_type=search_type, limit = list_limit, order="ctime asc")
+    delete_limit = 20
+    if count > limit + delete_limit:
+        obj_list = db.list(user_id=user_id, search_type=search_type, limit = delete_limit, order="ctime asc")
         db.delete_items(obj_list)
 
 
