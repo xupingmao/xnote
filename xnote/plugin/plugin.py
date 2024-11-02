@@ -26,6 +26,12 @@ class PluginMetaKey(enum.Enum):
     author = "author"
 
 
+def _get_absolute_url(url: str):
+    server_home = xconfig.WebConfig.server_home
+    if url.startswith(server_home):
+        return url
+    return server_home + url
+
 class PluginContext(Storage):
     """插件上下文"""
 
@@ -42,6 +48,7 @@ class PluginContext(Storage):
         
         self.url = ""  # 这个应该算是基础url，用于匹配访问日志
         self.url_query = ""  # 查询参数部分
+        self.abs_url = "" # URL的绝对路径
         self.category = None
         self.category_list = []
         
@@ -125,6 +132,8 @@ class PluginContext(Storage):
             self.icon_class = DEFAULT_PLUGIN_ICON_CLASS
         if self.url == "":
             self.url = f"/plugin/{self.plugin_name}"
+        
+        self.abs_url = _get_absolute_url(self.url)
 
 
 def is_plugin_file(fpath):
@@ -207,7 +216,7 @@ def load_plugin_by_context_and_class(context: PluginContext, main_class=None):
             main_class.category = context.category
             main_class.required_role = context.required_role
 
-        context.url = "/plugin/%s" % plugin_name
+        context.url = f"/plugin/{plugin_name}"
         context.clazz = main_class
         context.edit_link = "code/edit?path=" + fpath
 

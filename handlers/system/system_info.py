@@ -2,14 +2,15 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2020/08/22 21:54:56
 # @modified 2022/03/19 10:20:23
-import xauth
-import xtemplate
-import xutils
 import sys
 import platform
-import xconfig
+import xutils
 import os
-import xtables
+
+from xnote.core import xauth
+from xnote.core import xtemplate
+from xnote.core import xconfig
+from xnote.core import xtables
 from xutils import dateutil
 from xutils import fsutil
 from xutils import mem_util

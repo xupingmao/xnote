@@ -44,3 +44,15 @@
 .plugin-right-span {
     color: #888;
 }
+
+.plugin-item.v2 {
+    width: 33.33%;
+    border: none;
+}
+
+/* mobile */
+@media screen and (max-width: 600px) {
+    .plugin-item.v2 {
+        width: 50%;
+    }
+}

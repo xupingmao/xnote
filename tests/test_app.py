@@ -311,14 +311,14 @@ class Main:
         '''
         fpath = os.path.join(xconfig.PLUGINS_DIR, "test.py")
         xutils.savetofile(fpath, code)
-        html = request_html("/plugins/test.py")
+        html = request_html("/plugin/test.py")
         self.assertEqual(b"hello,world", html)
 
     def test_readbook(self):
         self.check_200("/api/readbook")
 
-    def test_plugins_list(self):
-        self.check_200("/plugins_list")
+    def test_plugin_list(self):
+        self.check_200("/plugin_list")
         self.check_200("/plugin_list")
 
     def test_plugin_category_list(self):
@@ -329,8 +329,8 @@ class Main:
     def test_plugin_search(self):
         self.check_200("/plugin_list?key=123")
 
-    def test_plugins_other(self):
-        self.check_OK("/plugins_list?category=other")
+    def test_plugin_other(self):
+        self.check_OK("/plugin_list?category=other")
 
     def test_plugins_new_plugin(self):
         self.check_OK("/plugins_new?input=tpl-test")

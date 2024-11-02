@@ -464,7 +464,7 @@ def reload_search(ctx = None):
 
 @xutils.log_init_deco("reload_search")
 def do_reload_search(ctx = None):
-    register_search_handler("plugin", placeholder = u"搜索插件", action = "/plugins_list")
+    register_search_handler("plugin", placeholder = u"搜索插件", action = "/plugin_list")
     register_search_handler("note.public", placeholder = u"搜索公共笔记", action = "/note/timeline", tag = "public")
     register_search_handler("dict", placeholder = u"搜索词典", action = "/search")
     register_search_handler("message", placeholder = u"搜索随手记", action = "/message")

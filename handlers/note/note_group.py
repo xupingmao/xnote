@@ -462,7 +462,7 @@ def load_note_index(user_name):
             NoteLink("日志", "/note/log", "fa-file-text",
                      size=note_stat.log_count),
             DictEntryLink(size=note_stat.dict_count),
-            NoteLink("插件", "/plugins_list", "fa-th-large",
+            NoteLink("插件", "/plugin_list", "fa-th-large",
                      size=len(xconfig.PLUGINS_DICT), roles=["admin"]),
         ]),
 

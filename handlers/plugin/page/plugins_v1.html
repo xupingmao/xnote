@@ -28,7 +28,7 @@
 
 {% block body %}
 
-{% init baseurl = "/plugins_list" %}
+{% init baseurl = "/plugin_list" %}
  
 <div class="card">
     <a class="tab tab-link x-tab x-tab-default" href="{{baseurl}}?category=all">全部</a>
@@ -95,12 +95,12 @@
     </div>
     <div class="aside-content">
         <ul>
-            <li><a href="{{_server_home}}/plugins_list" class="link">全部</a></li>
-            <li><a href="{{_server_home}}/plugins_list?category=system" class="link">系统</a></li>
-            <li><a href="{{_server_home}}/plugins_list?category=note" class="link">笔记</a></li>
-            <li><a href="{{_server_home}}/plugins_list?category=dir" class="link">文件</a></li>
-            <li><a href="{{_server_home}}/plugins_list?category=network" class="link">网络</a></li>
-            <li><a href="{{_server_home}}/plugins_list?category=None" class="link">其他</a></li>
+            <li><a href="{{_server_home}}/plugin_list" class="link">全部</a></li>
+            <li><a href="{{_server_home}}/plugin_list?category=system" class="link">系统</a></li>
+            <li><a href="{{_server_home}}/plugin_list?category=note" class="link">笔记</a></li>
+            <li><a href="{{_server_home}}/plugin_list?category=dir" class="link">文件</a></li>
+            <li><a href="{{_server_home}}/plugin_list?category=network" class="link">网络</a></li>
+            <li><a href="{{_server_home}}/plugin_list?category=None" class="link">其他</a></li>
         </ul>
     </div>
 </div>
@@ -146,7 +146,7 @@ $(function () {
 
     $("select").change(function (e) {
         var category = $(this).val();
-        window.location.href = "/plugins_list?category=" + category;
+        window.location.href = "/plugin_list?category=" + category;
     });
 
     window.onresize = function (e) {

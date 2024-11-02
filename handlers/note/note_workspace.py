@@ -80,7 +80,7 @@ def list_system_types(user_name = None):
     msg_stat  = msg_dao.get_message_stat(user_name)
 
     return [
-        NoteLink("插件", "/plugins_list", "fa-th-large", size = msg_stat.task_count),
+        NoteLink("插件", "/plugin_list", "fa-th-large", size = msg_stat.task_count),
         NoteLink("设置", "/system/settings", "fa-gear", size = ""),
     ]
 

@@ -1,12 +1,13 @@
-{% init baseurl = "/plugins_list" %}
+{% init baseurl = "/plugin_list" %}
 {% init show_category = True %}
 {% init show_back = "false" %}
 {% init title = "插件中心" %}
+{% init title_url = _server_home + "/plugin_category_list" %}
 {% init category_name = None %}
 
 <div class="card">
     <div class="card-title">
-        <span>{{ title }}</span>
+        <a class="link2" href="{{title_url}}">{{ title }}</a>
         {% if _is_mobile and category_name != None and category_name != "" %}
             <span>/</span>
             <span>{{category_name}}</span>

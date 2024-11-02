@@ -14,4 +14,5 @@ from .comment_service import *
 from .tag_service import *
 from .job_service import *
 from .lock_service import *
+from .search_service import *
 
