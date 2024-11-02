@@ -64,6 +64,7 @@ class PluginContext(Storage):
         self.author = None
         self.version = None
         self.debug = False
+        self.badge_info = "" # 角标信息
     
     @property
     def link(self):
