@@ -83,7 +83,7 @@ def run_test(args: Namespace):
 		return
 
 	if target == "app":
-		py_exec("-m pytest tests/test_app.py --doctest-modules --cov handlers --capture no")
+		py_exec(f"-m pytest tests/test_app.py --doctest-modules --cov handlers --capture {args.capture}")
 		py_exec("-m coverage html -i")
 		return
 	

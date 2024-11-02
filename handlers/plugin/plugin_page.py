@@ -467,6 +467,7 @@ class PluginCategoryListHandler:
         root.url = f"{xconfig.WebConfig.server_home}/plugin_list?category=all&show_back=true"
         root.badge_info = str(total_count)
         root.icon_class = DEFAULT_PLUGIN_ICON_CLASS
+        root.build()
         plugins.append(root)
 
         for key in category_keys:

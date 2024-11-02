@@ -14,7 +14,7 @@ import xutils
 from xnote.core import xtemplate, xconfig, xtables, xauth, xmanager
 from xutils import logutil
 from . import test_base
-from .test_base import ResponseWrapper
+from .test_base import ResponseWrapper, json_request_return_dict
 
 app = test_base.init()
 json_request = test_base.json_request
@@ -325,6 +325,15 @@ class Main:
         self.check_200("/plugin_category_list")
         from handlers.plugin.service import CategoryService
         assert len(CategoryService.category_list) > 0
+
+        resp = json_request_return_dict("/plugin_category_list?_format=json")
+        plugins = resp.get("plugins")
+        assert isinstance(plugins, list)
+        for plugin_info in plugins:
+            url = plugin_info.get("url", "")
+            abs_url = plugin_info.get("abs_url", "")
+            assert len(url) > 0
+            assert len(abs_url) > 0
 
     def test_plugin_search(self):
         self.check_200("/plugin_list?key=123")
