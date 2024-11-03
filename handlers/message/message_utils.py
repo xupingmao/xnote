@@ -25,6 +25,7 @@ from xutils import dateutil
 from xutils import Storage
 from xutils import u
 from xutils import netutil
+from xutils import webutil
 from xutils.functions import Counter
 from xutils.textutil import quote
 from xutils.text_parser import TokenType
@@ -50,11 +51,11 @@ MAX_LIST_LIMIT = 1000
 
 
 def success():
-    return dict(success=True, code="success")
+    return webutil.SuccessResult()
 
 
 def failure(message, code="fail"):
-    return dict(success=False, code=code, message=message)
+    return webutil.FailedResult(code=code, message=message)
 
 
 def build_search_url(keyword):
@@ -417,7 +418,7 @@ def get_remote_ip():
     return web.ctx.env.get("REMOTE_ADDR")
 
 
-def get_similar_key(key):
+def get_similar_key(key: str):
     assert key != None
     if key.startswith("#"):
         key = key.lstrip("#")

@@ -12,13 +12,13 @@ import logging
 import json
 import threading
 import re
-import xtemplate
-import xconfig
-import xauth
-import xtables
-import xmanager
+from xnote.core import xtemplate
+from xnote.core import xconfig
+from xnote.core import xauth
+from xnote.core import xtables
+from xnote.core import xmanager
 from xutils import sqlite3, Storage, cacheutil
-from xtemplate import T
+from xnote.core.xtemplate import T
 from xutils import logutil
 
 try:

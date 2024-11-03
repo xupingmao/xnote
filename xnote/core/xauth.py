@@ -42,7 +42,6 @@ BUILTIN_USER_DICT = None
 NAME_LENGTH_MIN = 4
 PASSWORD_LEN_MIN = 6
 INVALID_NAMES = None
-USER_CONFIG_PROP = {}  # type: dict
 SESSION_EXPIRE = 24 * 3600 * 7
 PRINT_DEBUG_LOG = False
 
@@ -75,10 +74,8 @@ def get_user_db():
     return UserDao._get_db()
 
 
-def get_user_config_db(name):
-    assert name != None
-    assert name != ""
-    return dbutil.get_hash_table("user_config", user_name=name)
+def get_user_config_db(user_name):
+    return UserConfigDao.get_db_by_name(user_name)
 
 
 class UserStatusEnum(enum.Enum):
@@ -399,7 +396,7 @@ def _get_users(force_reload=False):
 def _setcookie(key, value, expires=24*3600*30):
     assert isinstance(key, str)
     assert isinstance(value, str)
-    web.setcookie(key, value, expires)
+    web.setcookie(key, value, expires) # type: ignore
 
 
 def get_users():
@@ -503,33 +500,56 @@ def find_by_name(name):
     return UserModel.get_by_name(name)
 
 
+class UserConfigDao:
+
+    USER_CONFIG_PROP = {}  # type: dict
+
+    @classmethod
+    def init(cls):
+        user_config = xconfig.load_user_config_properties()
+        # 检查配置项的有效性
+        for key in user_config:
+            if "." in key:
+                raise Exception(f"无效的用户配置项:({key}),不能包含(.),请使用(_)")
+        cls.USER_CONFIG_PROP = user_config
+
+    @classmethod
+    def get_db_by_name(cls, user_name: str):
+        assert user_name != None
+        assert user_name != ""
+        return dbutil.get_hash_table("user_config", user_name=user_name)
+    
+    @classmethod
+    def check_config_key(cls, key: str):
+        if key not in cls.USER_CONFIG_PROP:
+            raise Exception(f"invalid user config: {key}")
+
 @cacheutil.cache_deco(prefix="user_config_dict", expire=600)
 def get_user_config_dict(name):
     if name is None or name == "":
-        return Storage(**USER_CONFIG_PROP)
+        return Storage(**UserConfigDao.USER_CONFIG_PROP)
 
     db = get_user_config_db(name)
-    config_dict = Storage(**USER_CONFIG_PROP)
+    config_dict = Storage(**UserConfigDao.USER_CONFIG_PROP)
 
     db_records = db.dict(limit=-1)
     if len(db_records) > 0:
         config_dict.update(db_records)
         return config_dict
 
-    return Storage(**USER_CONFIG_PROP)
+    return Storage(**UserConfigDao.USER_CONFIG_PROP)
 
 
 def get_user_config_valid_keys():
-    return USER_CONFIG_PROP.keys()
+    return UserConfigDao.USER_CONFIG_PROP.keys()
 
 
 def check_user_config_key(key):
-    if key not in USER_CONFIG_PROP:
-        raise Exception("invalid user config: %s" % key)
+    return UserConfigDao.check_config_key(key)
 
 
-def get_user_config(user_name, config_key):
-    default_value = USER_CONFIG_PROP.get(config_key)
+def get_user_config(user_name, config_key, default_value=None):
+    default_value = UserConfigDao.USER_CONFIG_PROP.get(config_key)
     config_dict = get_user_config_dict(user_name)
     if config_dict is None:
         return default_value
@@ -1011,22 +1031,14 @@ class UserOpLogDao:
 def init():
     global USER_TABLE
     global INVALID_NAMES
-    global USER_CONFIG_PROP
 
     INVALID_NAMES = xconfig.load_invalid_names()
-    USER_CONFIG_PROP = xconfig.load_user_config_properties()
-
+    UserConfigDao.init()
     SessionDao.init()
     UserOpLogDao.init()
 
     _create_temp_user("admin")
     _create_temp_user("test")
-
-    # 检查配置项的有效性
-    for key in USER_CONFIG_PROP:
-        if "." in key:
-            raise Exception("无效的用户配置项:(%s),不能包含(.),请使用(_)" % key)
-
 
 xutils.register_func("user.get_config_dict", get_user_config_dict, "xauth")
 xutils.register_func("user.get_config",      get_user_config,      "xauth")

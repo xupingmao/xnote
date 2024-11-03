@@ -2,7 +2,7 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2020/04/06 11:55:29
 # @modified 2021/04/11 14:08:02
-from . import xconfig, xauth
+from xnote.core import xconfig, xauth
 from xutils import Storage
 
 class UserConfigKey:
@@ -12,17 +12,13 @@ class UserConfigKey:
     LANG = "LANG"           # 语言
     nav_style = "nav_style" # 导航风格
 
-
 ###### 获取指定用户信息
 def get_user_config(user_name, config_key):
     """默认值参考DEFAULT_USER_CONFIG"""
     return xconfig.get_user_config(user_name, config_key)
 
 def get_config_dict(user_name):
-    value = xauth.get_user_config_dict(user_name)
-    if value is None:
-        return Storage()
-    return value
+    return xauth.get_user_config_dict(user_name)
 
 def get_theme(user_name):
     return get_user_config(user_name, UserConfigKey.THEME)

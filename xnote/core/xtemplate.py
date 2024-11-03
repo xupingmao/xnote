@@ -21,6 +21,7 @@ import time
 import typing
 
 from . import xconfig, xauth, xnote_trace, xnote_hooks
+from xnote.core import xnote_user_config
 from xutils.tornado.template import Template, Loader
 from xutils import dateutil, u
 from xutils import tojson
@@ -182,7 +183,7 @@ def render_before_kw(kw: dict):
     kw["_ts"] = LOAD_TIME  # 用于标识前端资源的缓存版本
 
     # 用户配置
-    kw["_user_config"] = xconfig.get_user_config_dict(user_name)
+    kw["_user_config"] = xnote_user_config.get_config_dict(user_name)
     kw["FONT_SCALE"] = xconfig.get_user_config(user_name, "FONT_SCALE")
     kw["HOME_PATH"] = xconfig.get_user_config(user_name, "HOME_PATH")
     kw["THEME"] = xconfig.get_user_config(user_name, "THEME")

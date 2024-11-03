@@ -905,37 +905,28 @@ def get_alias(name, default_value):
     """获取别名，用于扩展命令"""
     return _alias_dict.get(name, default_value)
 
-
-def get_user_config(user_name, config_key, default_value=None):
+def get_user_config(user_name: str, config_key, default_value=None):
     """默认值参考DEFAULT_USER_CONFIG"""
-    # 未启动，直接返回默认值
+    # 未启动, xauth还未准备好, 直接返回默认值
     if START_TIME is None:
         return default_value
-
+    
     from . import xauth
-    return xauth.get_user_config(user_name, config_key)
+    return xauth.get_user_config(user_name, config_key, default_value=default_value)
 
 
 def update_user_config(user_name, key, value):
     from . import xauth
     return xauth.update_user_config(user_name, key, value)
 
-
-def get_user_config_dict(user_name):
-    from . import xauth
-    value = xauth.get_user_config_dict(user_name)
-    if value is None:
-        return Storage()
-    return value
-
-
 def get_current_user_config(key, default_value=None):
+    """默认值参考DEFAULT_USER_CONFIG"""
+    # 未启动, xauth还未准备好, 直接返回默认值
     if START_TIME is None:
         return default_value
     
     from . import xauth
-    """默认值参考DEFAULT_USER_CONFIG"""
-    return get_user_config(xauth.current_name(), key, default_value)
+    return xauth.get_user_config(xauth.current_name_str(), key, default_value)
 
 
 def get_system_dir(name):
@@ -1011,9 +1002,6 @@ class SystemConfig:
         return bool(value)
 
 system_config = SystemConfig()
-
-
-
 
 class NavItem:
 
