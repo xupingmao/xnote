@@ -57,8 +57,13 @@ class XnoteApp:
             return FileLockAdapter(xconfig.FileConfig.boot_lock_file)
         return DummyLock()
     
+    def delete_reboot_file(self):
+        if os.path.exists(xconfig.FileConfig.reboot_file):
+            os.remove(xconfig.FileConfig.reboot_file)
+    
     def init_app_internal(self, boot_config_kw=None):
         """初始化APP内部方法"""
+        self.delete_reboot_file()
         print_env_info()
 
         # 构建静态文件

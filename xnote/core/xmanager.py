@@ -210,7 +210,7 @@ class HandlerManager:
     """
 
     def __init__(self, app, vars, mapping=None, last_mapping=None):
-        self.app = app  # webpy app
+        self.app = app  # type: web.application
         if mapping is None:
             self.basic_mapping = []  # webpy mapping
             self.mapping = []
@@ -897,6 +897,7 @@ def add_visit_log(user_name, url):
 
 
 def restart():
+    xutils.touch(xconfig.FileConfig.reboot_file)
     get_handler_manager().app.stop()
     xconfig.EXIT_CODE = 205
     sys.exit(205)

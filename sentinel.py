@@ -23,6 +23,9 @@ def get_current_time(format='%Y-%m-%d %H:%M:%S'):
 def print_log(*args):
 	print(get_current_time(), *args)
 
+def has_xnote_reboot_file():
+	return os.path.exists("xnote-reboot.txt")
+
 def main():
 	args = sys.argv[1:]
 	args.insert(0, sys.executable)
@@ -33,7 +36,8 @@ def main():
 		exit_code = os.system(cmd)
 		print_log("exit_code:", exit_code)
 		# Mac返回 52480
-		if exit_code in (205, 52480):
+		# 有可能是框架原因导致重启失败,所以这里再使用reboot文件来检查下
+		if exit_code in (205, 52480) or has_xnote_reboot_file():
 			print_log("restart ...")
 			print_log("-" * 50)
 			print_log("-" * 50)

@@ -253,6 +253,8 @@ class FileConfig:
 
     enable_boot_lock = False
 
+    reboot_file = "xnote-reboot.txt"
+
     @classmethod
     def init(cls, data_dir):
         xnote_core_dir = os.path.dirname(__file__)
