@@ -1,4 +1,5 @@
-{% extends base %}
+{% extends wide_base %}
+
 {% block head %}
     <script type="text/javascript" src="{{_server_home}}/_static/js/Lexer.js"></script>
     <style type="text/css">
@@ -79,7 +80,7 @@
             <label>正则表达式</label>
             <textarea id="regexp" class="regexp-textarea"></textarea>
         </p>
-        <p><button onclick="execute()">转换</button></p>
+        <p><button class="btn" onclick="execute()">转换</button></p>
     </div>
 </div>
 

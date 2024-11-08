@@ -34,6 +34,7 @@ def note_plugin(name, url, icon=None, required_role="user", url_query=""):
     context.require_admin = False
     context.required_role = required_role
     context.permitted_role_list = ["admin", "user"]
+    context.is_builtin = True
     context.build()
     return context
 

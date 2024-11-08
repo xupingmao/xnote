@@ -95,6 +95,8 @@ INIT_SCRIPT = "init.py"
 # *** 样式设置 ***
 # BASE_TEMPLATE = "common/theme/sidebar.html"
 BASE_TEMPLATE = "common/base.html"
+WIDE_BASE_TEMPLATE = "common/wide_base.html"
+
 # 主题样式
 THEME = "standard"
 # 选项风格

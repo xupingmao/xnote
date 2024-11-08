@@ -14,7 +14,7 @@
     <div class="x-tab-box" data-tab-default="all" data-tab-key="category">
         {% for category_temp in plugin_category_list %}
             {% if category_temp.is_visible() %}
-                <a class="tab tab-link x-tab" href="{{_server_home}}{{category_temp.url}}" 
+                <a class="tab tab-link x-tab {{category_temp.css_class}}" href="{{_server_home}}{{category_temp.url}}" 
                     data-tab-value="{{category_temp.code}}">{{category_temp.name}}</a>
             {% end %}
         {% end %}

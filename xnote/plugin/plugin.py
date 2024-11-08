@@ -65,6 +65,7 @@ class PluginContext(Storage):
         self.version = None
         self.debug = False
         self.badge_info = "" # 角标信息
+        self.is_external = False # 是否是外部插件
     
     @property
     def link(self):
@@ -159,6 +160,7 @@ def load_plugin_file(fpath, fname=None, raise_exception=False):
     try:
         meta = xutils.load_script_meta(fpath)
         context = PluginContext()
+        context.is_external = True
         context.icon_class = DEFAULT_PLUGIN_ICON_CLASS
         # 读取meta信息
         context.load_from_meta(meta)

@@ -123,6 +123,9 @@ class XnoteLoader(Loader):
         if name == "base":
             return os.path.join(xconfig.HANDLERS_DIR, xconfig.BASE_TEMPLATE)
         
+        if name == "wide_base":
+            return os.path.join(xconfig.HANDLERS_DIR, xconfig.WIDE_BASE_TEMPLATE)
+        
         name = self.path_mapping.get(name, name)
 
         for template_mapping in self.template_mapping_list:

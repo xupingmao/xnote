@@ -14,7 +14,8 @@ class CategoryService:
                             raise_duplication=True,
                             required_roles=None,
                             platforms=None,
-                            icon_class=None):
+                            icon_class=None,
+                            css_class=""):
         for item in cls.category_list:
             if item.code == code:
                 if raise_duplication:
@@ -28,6 +29,7 @@ class CategoryService:
                     return
         category = PluginCategory(code, name, url, required_roles)
         category.platforms = platforms
+        category.css_class = css_class
         if icon_class != None:
             category.icon_class = icon_class
         cls.category_list.append(category)
@@ -52,8 +54,12 @@ class CategoryService:
         cls.define_plugin_category("inner",    u"内置工具", platforms=[])
         cls.define_plugin_category("money",    u"理财", platforms=["desktop"])
         cls.define_plugin_category("test",     u"测试", platforms=[])
-        cls.define_plugin_category("other",    u"其他", platforms=[])
+        cls.define_plugin_category("other", u"其他", css_class="hide")
+
         cls.define_plugin_category(
-            "index",    u"全部分类", url="/plugin_category_list?category=index", icon_class="fa fa-th-large")
+            code="index",
+            name="全部分类", 
+            url="/plugin_category_list?category=index", 
+            icon_class="fa fa-th-large")
 
 CategoryService.init_category_list()

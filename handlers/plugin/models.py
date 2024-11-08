@@ -27,6 +27,7 @@ class PluginCategory:
         self.name = name
         self.required_roles = required_roles
         self.platforms = None
+        self.css_class = ""
         if url is None:
             self.url = "/plugin_list?category=%s" % self.code
         else:

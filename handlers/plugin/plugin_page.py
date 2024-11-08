@@ -515,8 +515,8 @@ class PluginV2Handler:
 
     @xauth.login_required()
     def GET(self):
-        category = xutils.get_argument("category", "")
-        key = xutils.get_argument("key", "")
+        category = xutils.get_argument_str("category", "")
+        key = xutils.get_argument_str("key", "")
         plugin_categories = []
 
         if xauth.is_admin():

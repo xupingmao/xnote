@@ -106,7 +106,7 @@ SYS_TOOLS = [
     admin_link("Menu_Modules",  "/system/modules_info"),
     admin_link("Shell",    "/tools/shell", "terminal"),
     admin_link("集群管理", "/system/sync?p=home", "server"),
-    admin_link("开发者", "/system/develop"),
+    admin_link("开发者", "/plugin_list?category=develop"),
 
     user_link("Menu_Plugin",   "/plugin_category_list?category=index&show_back=true", "cogs"),
     # 关于链接，支持外链

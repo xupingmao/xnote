@@ -19,7 +19,7 @@ html = """
 <div class="col-md-12 card">
     {% set title = "性能分析" %}
     {% from xnote.plugin import TextLink %}
-    {% set parent_link = TextLink(text="开发者工具", href=f"{_server_home}/system/develop") %}
+    {% set parent_link = TextLink(text="开发", href=f"{_server_home}/plugin_list?category=develop") %}
     {% include common/base_title.html %}
 </div>
 

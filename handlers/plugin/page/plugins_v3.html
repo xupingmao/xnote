@@ -28,6 +28,10 @@
                 <i class="{{link.icon_class}}"></i>
                 <span>{{link.title}}</span>
 
+                {% if link.is_external %}
+                    <span class="tag lightblue">外部</span>
+                {% end %}
+
                 <div class="plugin-right-box">
                     {% if link.size != None %}
                         <span class="plugin-right-span">{{link.size}}</span>
