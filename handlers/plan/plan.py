@@ -8,9 +8,10 @@
 @FilePath     : /xnote/handlers/plan/plan.py
 @Description  : 计划管理
 """
-from xnote.core import xauth, xtemplate
 import xutils
 import datetime
+
+from xnote.core import xauth, xtemplate
 from xutils import Storage
 from handlers.plan.dao import MonthPlanDao
 from handlers.note import dao as note_dao
@@ -53,8 +54,28 @@ class MonthPlanHandler:
         kw.created_notes = note_dao.NoteIndexDao.list(creator_id=user_id, 
                                                       date_start=dateutil.format_datetime(date_start), 
                                                       date_end=dateutil.format_datetime(date_end))
+        
+        kw.updated_notes = self.list_updated_notes(creator_id=user_id, year=int_year, month=int_month)
+
         return xtemplate.render("plan/page/month_plan.html", **kw)
 
+    def list_updated_notes(self, creator_id=0, year=0, month=0):
+        history_list = note_dao.NoteHistoryIndexDao.list_by_month(creator_id=creator_id, year = year, month=month)
+        result_dict = {} # type: dict[int, note_dao.NoteHistoryIndexDO]
+        for item in history_list:
+            old_item = result_dict.get(item.note_id)
+            if old_item is None:
+                result_dict[item.note_id] = item
+            elif item.mtime > old_item.mtime:
+                result_dict[item.note_id] = item
+        result = sorted(result_dict.values(), key = lambda x:x.mtime, reverse=True)
+        id_list = [x.note_id for x in history_list]
+        note_dict = note_dao.batch_query_dict(id_list=id_list)
+        for item in result:
+            note_index = note_dict.get(item.note_id)
+            if note_index != None:
+                item.icon = note_index.icon
+        return result
 
 class MonthPlanAddAjaxHandler:
     @xauth.login_required()

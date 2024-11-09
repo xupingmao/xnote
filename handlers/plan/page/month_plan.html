@@ -43,7 +43,7 @@
         <div class="card-title">
             <span>月度计划</span>
             <div class="float-right">
-                <a class="btn btn-default" href="{{_server_home}}/note/group?type=year">笔记归档</a>
+                <a class="btn btn-default" href="{{_server_home}}/note/group?type=year">笔记日历</a>
                 {% if show_back %}
                     {% include common/button/back_button.html %}
                 {% end %}
@@ -82,19 +82,16 @@
         <div class="card-title">
             <span>创建</span>
         </div>
+        {% set-global files = created_notes %}
+        {% include note/component/note_list_no_card.html %}
+    </div>
 
-        <div class="row">
-            {% for item in created_notes %}
-                <a class="list-item" href="{{_server_home}}{{item.url}}">
-                    <i class="fa {{item.icon}}"></i>
-                    <span>{{item.name}}</span>
-
-                    <div class="float-right">
-                        <span class="book-size-span">{{item.badge_info}}</span>
-                    </div>
-                </a>
-            {% end %}
+    <div class="card">
+        <div class="card-title">
+            <span>更新</span>
         </div>
+        {% set-global files = updated_notes %}
+        {% include note/component/note_list_no_card.html %}
     </div>
 
     <script type="text/javascript">

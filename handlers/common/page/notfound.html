@@ -1,6 +1,6 @@
-{% extends base.html %}
+{% extends base %}
 
-{% block body %}
+{% block body_left %}
 
 <style type="text/css">
 .center {
@@ -22,4 +22,8 @@
     <h3 class="center">Sorry, the page is not found</h3>
 </div>
 
+{% end %}
+
+{% block body_right %}
+    {% include common/sidebar/default.html %}
 {% end %}

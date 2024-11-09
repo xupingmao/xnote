@@ -5,10 +5,10 @@
 import os
 import time
 import xutils
-import xconfig
-import xauth
 import handlers.note.dao as note_dao
 import handlers.note.dao_delete as dao_delete
+from xnote.core import xconfig
+from xnote.core import xauth
 from xutils import dateutil
 from xutils.db.binlog import BinLog
 

@@ -20,8 +20,8 @@
             <span>批量操作</span>
             <div class="float-right">
                 {% if parent_id != "0" %}
-                    <button class="reverse-select-btn">反选</button>
-                    <button class="move-btn" onclick="batchMoveNotes(this)">移动</button>
+                    <button class="btn reverse-select-btn">反选</button>
+                    <button class="btn move-btn" onclick="batchMoveNotes(this)">移动</button>
                     {% include common/button/back_button.html %}
                 {% else %}
                     <!-- 根目录 -->

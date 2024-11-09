@@ -140,6 +140,8 @@ class TestMain(BaseTestCase):
         self.check_200("/system/network_profile?total_size=1024")
         self.check_200("/system/log")
         self.check_200("/system/clipboard-monitor")
+        self.check_200("/system/info?p=config_dict")
+        self.check_200("/system/info?p=sys_info_detail")
         # self.check_200("/system/pydoc")
 
     def test_system_cache_page(self):

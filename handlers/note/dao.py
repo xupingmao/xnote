@@ -25,6 +25,7 @@ import pdb
 import enum
 import xutils
 import logging
+import datetime
 
 from xnote.core import xconfig
 from xnote.core import xmanager
@@ -410,7 +411,7 @@ def get_archived_group():
     return group
 
 def batch_query_dict(id_list):
-    result = dict()
+    result = {} # type: dict[int, NoteIndexDO]
     index_list = NoteIndexDao.get_by_id_list(id_list)
 
     for note in index_list:
@@ -1450,6 +1451,31 @@ class NoteHistoryIndexDO(xutils.Storage):
         for item in dict_list:
             result.append(NoteHistoryIndexDO(**item))
         return result
+    
+    @property
+    def badge_info(self):
+        return dateutil.format_date(self.mtime)
+    
+    @property
+    def url(self):
+        return f"{xconfig.WebConfig.server_home}/note/view/{self.note_id}"
+
+
+class NoteHistoryIndexDao:
+
+    db = _note_history_index_db
+
+    @classmethod
+    def list_by_month(cls, creator_id=0, year=2024, month=1, limit=1000):
+        where_sql = "creator_id = $creator_id AND mtime >= $this_month AND mtime < $next_month"
+
+        this_month = dateutil.DateInfo(year=year, month=month).format_date()
+        next_month = dateutil.DateInfo(year=year, month=month).next_month().format_date()
+
+        vars = dict(creator_id=creator_id, this_month = this_month, next_month = next_month)
+        result = cls.db.select(where = where_sql, vars=vars, limit=limit, group="note_id")
+        return NoteHistoryIndexDO.from_list(result)
+
 
 def add_history_index(note_id, version: int, new_note):
     brief = NoteHistoryIndexDO()

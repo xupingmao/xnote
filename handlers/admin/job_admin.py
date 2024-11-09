@@ -124,7 +124,7 @@ class JobHandler(BasePlugin):
         
         table = DataTable()
         table.add_head("ID", "id", width="10%")
-        table.add_head("更新时间", "mtime", width="20%")
+        table.add_head("更新时间", "mtime", width="min:100px")
         table.add_head("任务类型", "job_type", width="20%")
         table.add_head("任务状态", "status_title", width="20%")
         

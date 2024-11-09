@@ -58,11 +58,22 @@ WDAY_DICT = {
 
 class DateInfo:
 
-    def __init__(self):
-        self.year = 0
-        self.month = 0
-        self.day = 0
+    def __init__(self, year = 1, month = 1, day = 1):
+        self.year = year
+        self.month = month
+        self.day = day
         self.wday = 0 # week day
+
+    def next_month(self):
+        if self.month == 12:
+            return DateInfo(year=self.year+1, month=1, day = 1)
+        return DateInfo(year=self.year, month=self.month+1, day=self.day)
+    
+    def format_year_month(self):
+        return f"{self.year:04}-{self.month:02}"
+    
+    def format_date(self):
+        return f"{self.year:04}-{self.month:02}-{self.day:02}"
 
     def __repr__(self):
         return "(%r,%r,%r)" % (self.year, self.month, self.day)

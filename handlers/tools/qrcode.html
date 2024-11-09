@@ -1,4 +1,4 @@
-{% extends common/wide_base.html %}
+{% extends wide_base %}
 
 {% block head %}
     <script type="text/javascript" src="{{_server_home}}/_static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
@@ -11,10 +11,11 @@
     {% set title = "二维码生成" %}
     {% include "tools/base_title.html" %}
 
-    <textarea id="qrcode_input" class="col-md-12" rows=5></textarea>
-    <button id="generate">生成</button>
+</div>
 
-    
+<div class="card">
+    <textarea id="qrcode_input" class="col-md-12" rows=5></textarea>
+    <button class="btn" id="generate">生成</button>
 </div>
    
 <div id="qrcode" class="card hide"></div>

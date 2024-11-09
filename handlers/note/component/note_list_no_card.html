@@ -1,0 +1,101 @@
+{% init show_cdate = False %}
+{% init show_mdate = False %}
+{% init show_adate = False %}
+{% init show_action_time = False %}
+{% init show_hot_index = False %}
+{% init show_next = True %}
+{% init show_size = False %}
+{% init show_orderby = False %}
+{% init orderby = "ctime_asc" %}
+
+{% init date_type = "" %}
+{% init ACTION_TEXT_MAP = {
+    "create": "创建了笔记",
+    "view": "查看了笔记",
+    "edit": "更新了笔记"
+} %}
+{% init get_date_by_type = xutils.get_func_by_name("note.get_date_by_type") %}
+{% init get_tag_name_by_code = xutils.get_func_by_name("note_tag.get_name_by_code") %}
+{% init sticky_position = "left" %} 
+
+{% if False %}
+    <a class="dialog-link" href="{{_server_home}}/note/{{file.parent_id}}">
+        <div class="book-item">
+            <i class="fa fa-mail-reply black"></i>
+            
+            <span>上级目录</span>
+            <span class="book-size">
+                <i class="fa fa-chevron-right"></i>
+            </span>
+        </div>
+    </a>
+{% end %}
+
+{% if len(files) == 0 %}
+    {% include common/text/empty_text.html %}
+{% end %}
+
+{% if False %}
+    <!-- 排序功能 -->
+    {% include note/component/sort/note_sort_tab.html %}
+{% end %}
+
+{% for item in files %}
+    <!-- 隐藏的记录 -->
+    {% if hasattr(item, "hide") and item.hide %}
+        {% continue %}
+    {% end %}
+
+    <!-- 检查角色 -->
+    {% if hasattr(item, "roles") and item.roles != None and _user_role not in item.roles %}
+        {% continue %}
+    {% end %}
+
+    <a class="list-link" href="{{item.url}}">
+        {% if sticky_position == "left" %}
+            {% if item.is_sticky %}
+                <span class="tag orange-tag">置顶</span>
+            {% end %}
+            {% if item.archived %}
+                <span class="tag system">归档</span>
+            {% end %}
+        {% end %}
+
+        <!-- 图标和标题 -->
+        <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
+
+        <span>{{item.name}}</span>
+
+        {% if hasattr(item, "is_public") and item.is_public %}
+            <span class="info-tag">分享中</span>
+        {% end %}
+
+        {% if sticky_position == "right" %}
+            {% if item.is_sticky %}
+                <span class="tag orange-tag">置顶</span>
+            {% end %}
+            {% if item.archived %}
+                <span class="tag system">归档</span>
+            {% end %}
+        {% end %}
+
+        {% if item.tags != None %}
+            {% for tag_code in item.tags %}
+                <span class="tag lightblue">{{get_tag_name_by_code(tag_code)}}</span>
+            {% end %}
+        {% end %}
+
+        <div class="float-right">
+            {% if item.is_deleted %}
+                <span class="tag gray" href="{{_server_home}}/note/removed">删除</span>
+            {% end %}
+
+            {% comment 新的角标统一使用badge_info %}
+            <span class="book-size-span">{{item.badge_info}}</span>
+
+            {% if item.show_next or show_next %}
+                <i class="fa fa-chevron-right"></i>
+            {% end %}
+        </div>
+    </a>
+{% end %}
