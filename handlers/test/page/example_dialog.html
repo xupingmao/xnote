@@ -57,8 +57,8 @@
     </div>
     <div class="dialog-footer">
         <div class="float-right">
-            <button class="large" onclick="dialog3Confirm()">确定</button>
-            <button class="large btn-default" onclick="xnote.dialog.closeByElement(this)">关闭</button>
+            <button class="btn large" onclick="dialog3Confirm(this)">确定</button>
+            <button class="btn large btn-default" onclick="xnote.dialog.closeByElement(this)">关闭</button>
         </div>
     </div>
 </div>
@@ -70,9 +70,9 @@ function openDialog3 () {
     xnote.openDialog("标题", html);
 };
 
-function dialog3Confirm() {
+function dialog3Confirm(target) {
     xnote.toast("点击了确认");
-    xnote.dialog.closeLast();
+    xnote.dialog.closeByElement(target);
 }
 </script>
 """ %}
