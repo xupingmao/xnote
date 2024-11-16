@@ -1,0 +1,72 @@
+<!-- 随手记列表 -->
+<div class="message-list">
+
+</div>
+
+<script type="text/javascript">
+(function () {
+
+    var LAST_DATE;
+
+    function getCurrentPage() {
+        var page = getUrlParam("page");
+        if (page == undefined) {
+            return 1;
+        } else {
+            return parseInt(page);
+        }
+    }
+
+    function refreshMessageList(date) {
+        LAST_DATE = date;
+        var params = {
+            date: date,
+            page: getCurrentPage()
+        };
+        params.filterKey = xnote.getUrlParam("filterKey");
+
+        xnote.http.get("/message/date", params,function (respText) {
+            $(".message-list").html(respText);
+        });
+    };
+
+    function doRefreshMessageList(params) {
+        xnote.assert(typeof(params) == "object", "expect params to be object");
+        xnote.assert(params.page, "params.page expected");
+        xnote.assert(params.tag, "params.tag expected");
+
+        params.format = "html";
+        params.displayTag = getUrlParam("displayTag", "");
+
+        xnote.http.get("/message/list", params, function (resp) {
+            // console.log(resp);
+            $(".message-list").html(resp);
+        });
+    }
+
+    function onMessageReceived(event) {
+        var data = event.data;
+        try {
+            var msg = JSON.parse(data);
+            if (msg.type == "message.updated") {
+                // 优先读取扩展函数
+                var refreshExtFunc = xnote.getExtFunc("message.refreshMessageList");
+                if (refreshExtFunc != undefined) {
+                    refreshExtFunc(LAST_DATE);
+                } else {
+                    refreshMessageList(LAST_DATE);
+                }
+
+                xnote.closeAllDialog();
+            }
+        } catch (e) {
+            console.error("parse window message failed", event, e);
+        }
+    }
+
+    // 注册到window对象上
+    window.refreshMessageList = refreshMessageList;
+    window.doRefreshMessageList = doRefreshMessageList;
+
+})();
+</script>

@@ -25,6 +25,22 @@ $(function (e) {
         }
     }
 
+    xnote.handleTabClick = function (target) {
+        console.log("handleTabClick", target);
+        var parent = $(target).parent();
+        var tabContentId = parent.attr("data-content-id");
+        var tabContent = $("#" + tabContentId);
+        console.log("tabContent", tabContent);
+
+        var contentId = $(target).attr("data-content-id");
+        var contentHtml = $("#" + contentId).html();
+        tabContent.html(contentHtml);
+
+        // 样式切换
+        parent.find(".x-tab").removeClass("active");
+        $(target).addClass("active");
+    }
+
     function initTabBox() {
         $(".x-tab-box").each(function (index, ele) {
             var key = $(ele).attr("data-tab-key");
@@ -42,16 +58,25 @@ $(function (e) {
             $(ele).find(".x-tab-btn[data-tab-value=" + qValue + "]").addClass("active");
 
             $(ele).find(".x-tab").each(function (index, child) {
+                var childQuery = $(child);
+
+                var dataContentId = childQuery.attr("data-content-id");
+                if (dataContentId) {
+                    childQuery.attr("onclick", "xnote.handleTabClick(this)");
+                    if (childQuery.attr("data-default") == "true") {
+                        childQuery.click();
+                    }
+                    return;
+                }
                 var oldHref = $(child).attr("href");
                 if ( xnote.isNotEmpty(oldHref) ) {
                     return;
                 }
                 var tabValue = $(child).attr("data-tab-value");
                 $(child).attr("href", xnote.addUrlParam(window.location.href, key, tabValue))
-            })
+            });
         });
     }
-
 
     function initTabDefault() {
         // initTabLink();

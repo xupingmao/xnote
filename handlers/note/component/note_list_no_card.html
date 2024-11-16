@@ -6,6 +6,7 @@
 {% init show_next = True %}
 {% init show_size = False %}
 {% init show_orderby = False %}
+{% init show_expand = False %}
 {% init orderby = "ctime_asc" %}
 
 {% init date_type = "" %}
@@ -17,6 +18,7 @@
 {% init get_date_by_type = xutils.get_func_by_name("note.get_date_by_type") %}
 {% init get_tag_name_by_code = xutils.get_func_by_name("note_tag.get_name_by_code") %}
 {% init sticky_position = "left" %} 
+{% set note_list_id = xutils.create_uuid() %}
 
 {% if False %}
     <a class="dialog-link" href="{{_server_home}}/note/{{file.parent_id}}">
@@ -40,6 +42,7 @@
     {% include note/component/sort/note_sort_tab.html %}
 {% end %}
 
+<div class="row note-list" id="{{note_list_id}}">
 {% for item in files %}
     <!-- 隐藏的记录 -->
     {% if hasattr(item, "hide") and item.hide %}
@@ -99,3 +102,8 @@
         </div>
     </a>
 {% end %}
+
+{% if show_expand %}
+    {% include note/component/note_list_expand.html %}
+{% end %}
+</div>

@@ -352,7 +352,7 @@
         // 保存笔记操作
         $(".save-note-btn").click(function (e) {
             e.preventDefault();
-            if (xnote.state.system.nodeRole == "follower") {
+            if (!xnote.config.isMaster) {
                 xnote.confirm("当前是从节点运行, 保存后可能被覆盖, 确认保存?", function (resp) {
                     serverSaveNote();
                 })

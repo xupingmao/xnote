@@ -79,17 +79,20 @@
     </div>
 
     <div class="card">
-        <div class="card-title">
-            <span>创建</span>
+        <div class="x-tab-box" data-content-id="tab-content">
+            <a class="x-tab" data-content-id="create-list" data-default="true">创建</a>
+            <a class="x-tab" data-content-id="update-list">更新</a>
         </div>
+    </div>
+
+    <div id="tab-content" class="card"></div>
+
+    <div id="create-list" class="hide">
         {% set-global files = created_notes %}
         {% include note/component/note_list_no_card.html %}
     </div>
 
-    <div class="card">
-        <div class="card-title">
-            <span>更新</span>
-        </div>
+    <div id="update-list" class="hide">
         {% set-global files = updated_notes %}
         {% include note/component/note_list_no_card.html %}
     </div>

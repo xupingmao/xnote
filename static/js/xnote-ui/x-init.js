@@ -25,10 +25,9 @@ if (window.xnote === undefined) {
     xnote.config = {};
     xnote.config.serverHome = "";
     xnote.config.isPrintMode = false;
+    xnote.config.nodeRole = "master";
+    xnote.config.isMaster = true;
     
-    // 内部属性
-    xnote._dialogIdStack = [];
-
     // 常量
     xnote.MOBILE_MAX_WIDTH = 1000;
     xnote.constants = {

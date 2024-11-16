@@ -25,6 +25,13 @@ my_local_var = 1
 filename = "myfile.txt" 
 ```
 
+模板中的变量命名
+
+```py
+{% set _tmp_var = 1 %}
+{% init global_var = 2 %}
+```
+
 # 2. 包命名
 
 - 小写字母+下划线，名词短语结构，示例: 
@@ -77,12 +84,12 @@ my_package # 带下划线的包名
 # 6. 模块内部的命名
 
 - `handlers/note` note模块的根目录
+- `handlers/note/*.py` 后台处理程序
 - `handlers/note/page/` 静态页面目录
 - `handlers/note/ajax/` ajax页面目录
+- `handlers/note/css` CSS组件
+- `handlers/note/script` JS脚本组件
 - `handlers/note/component/` 页面的组件
-- `handlers/note/component/css` CSS组件
-- `handlers/note/component/script` JS脚本组件
-- `handlers/note/*.py` 后台处理程序
 
 > 示例
 

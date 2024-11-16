@@ -1,0 +1,39 @@
+<div class="list-link">
+    <a class="row align-center" data-list-id="{{note_list_id}}" 
+        data-state="fold"
+        onclick="xnote.note.toggleNoteList(this)">展开</a> 
+</div>
+
+<script>
+xnote.note.expandNoteList = function (noteListId) {
+    var noteList = $("#" + noteListId);
+    noteList.find("a.list-link").show();
+}
+
+xnote.note.foldNoteList = function (noteListId) {
+    var showMax = 5;
+    var noteList = $("#" + noteListId);
+    // console.log("noteList", noteList);
+    noteList.find("a.list-link").each(function (index, elem) {
+        if (index >= showMax) {
+            $(elem).hide();
+        }
+    });
+}
+
+xnote.note.foldNoteList("{{note_list_id}}");
+
+xnote.note.toggleNoteList = function(target) {
+    var noteListId = $(target).attr("data-list-id");
+    var state = $(target).attr("data-state");
+    if (state == "fold") {
+        // 切换到展开模式
+        xnote.note.expandNoteList(noteListId);
+        $(target).attr("data-state", "expand").text("折叠");
+    } else {
+        // 切换到折叠模式
+        xnote.note.foldNoteList(noteListId);
+        $(target).attr("data-state", "fold").text("展开");
+    }
+}
+</script>

@@ -69,6 +69,9 @@ INNER_TOOLS = [
 
     # 开发工具
     dev_plugin("浏览器信息", "/tools/browser_info"),
+    dev_plugin("系统模块", "/system/module_list"),
+    dev_plugin("前端组件", "/test/example"),
+    dev_plugin("性能分析", "/system/handler_profile"),
 
     # 文本
     dev_plugin("文本对比", "/tools/text_diff"),

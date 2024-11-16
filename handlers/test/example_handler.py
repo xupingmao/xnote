@@ -1,7 +1,9 @@
 # encoding=utf-8
 # Created by xupingmao on 2024/09/15
 import xutils
+from xnote.core import xauth
 from xnote.core import xtemplate
+from xnote.core import xmanager
 from xnote.plugin.table_plugin import BaseTablePlugin
 
 
@@ -22,7 +24,10 @@ class TableExampleHandler(BaseTablePlugin):
 class ExampleHandler:
 
     def GET(self):
-        name = xutils.get_argument("name", "")
+        user_name = xauth.current_name_str()
+        xmanager.add_visit_log(user_name, "/test/example")
+        
+        name = xutils.get_argument_str("name", "")
         if name == "":
             return xtemplate.render("test/page/example_index.html")
         else:
