@@ -71,11 +71,13 @@ class MonthPlanHandler:
         result = sorted(result_dict.values(), key = lambda x:x.mtime, reverse=True)
         id_list = [x.note_id for x in history_list]
         note_dict = note_dao.batch_query_dict(id_list=id_list)
+        note_list = []
         for item in result:
             note_index = note_dict.get(item.note_id)
             if note_index != None:
-                item.icon = note_index.icon
-        return result
+                note_list.append(note_index)
+                note_index.badge_info = item.badge_info
+        return note_list
 
 class MonthPlanAddAjaxHandler:
     @xauth.login_required()
