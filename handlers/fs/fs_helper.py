@@ -26,6 +26,7 @@ from xutils import Storage
 class FileInfo(Storage):
 
     def __init__(self):
+        self.id = 0
         self.ctime = xutils.format_datetime()
         self.mtime = xutils.format_datetime()
         self.fpath = ""
@@ -34,6 +35,28 @@ class FileInfo(Storage):
         self.fsize = 0
         self.remark = ""
         self.sha256 = ""
+
+    def to_save_dict(self):
+        result = dict(**self)
+        result.pop("id")
+        if self.id != 0:
+            # 更新操作
+            result.pop("ctime", None) # 不更新创建时间
+            result.pop("user_id", None)
+        return result
+
+    @classmethod
+    def from_dict(cls, dict_value):
+        result = FileInfo()
+        result.update(dict_value)
+        return result
+
+    @classmethod
+    def from_dict_list(cls, dict_list):
+        result = [] # type: list[FileInfo]
+        for item in dict_list:
+            result.append(cls.from_dict(item))
+        return result
 
 class FileInfoDao:
     
@@ -54,7 +77,10 @@ class FileInfoDao:
     @classmethod
     def get_by_fpath(cls, fpath = ""):
         fpath = cls.get_virtual_path(fpath)
-        return cls.db.select_first(where = dict(fpath = fpath))
+        result = cls.db.select_first(where = dict(fpath = fpath))
+        if result is None:
+            return None
+        return FileInfo.from_dict(result)
     
     @classmethod
     def delete_by_fpath(cls, fpath=""):
@@ -70,12 +96,11 @@ class FileInfoDao:
         info.fpath = cls.get_virtual_path(info.fpath)
         old = cls.get_by_fpath(info.fpath)
         if old == None:
-            return cls.db.insert(**info)
+            save_dict = info.to_save_dict()
+            return cls.db.insert(**save_dict)
         else:
-            updates = dict(**info)
-            updates.pop("ctime") # 不更新创建时间
-            updates.pop("user_id")
-            cls.db.update(**updates, where = dict(id=old.id))
+            save_dict = info.to_save_dict()
+            cls.db.update(**save_dict, where = dict(id=old.id))
 
     @classmethod
     def list(cls, user_id=0, offset=0, limit=100, start_time_inclusive="", end_time_exclusive="", is_admin=False, order="ctime desc"):
@@ -96,6 +121,13 @@ class FileInfoDao:
         if fpath != "":
             fpath = cls.get_virtual_path(fpath)
         return cls.db.count(where = "fpath LIKE $fpath", vars = dict(fpath = fpath + "%"))
+    
+    @classmethod
+    def list_next_batch(cls, last_id=0, limit=20):
+        where = "id > $id"
+        vars = dict(id = last_id)
+        file_info_list = cls.db.select(where=where, vars=vars, order="id", offset=0, limit=limit)
+        return FileInfo.from_dict_list(file_info_list)
 
 
 def get_index_db(): # type: ()-> TableProxy

@@ -1,9 +1,8 @@
-{% init is_jexcel_loaded = False %}
-
-{% if not is_jexcel_loaded %}
+{% init _is_jexcel_loaded = False %}
+{% if not _is_jexcel_loaded %}
     <script src="{{_server_home}}/_static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.js"></script>
     <link rel="stylesheet" href="{{_server_home}}/static/lib/jspreadsheet-ce-4.6.0/deps/jsuites.css" type="text/css" />
     <script src="{{_server_home}}/_static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.js"></script>
     <link rel="stylesheet" href="{{_server_home}}/static/lib/jspreadsheet-ce-4.6.0/dist/jexcel.css" type="text/css" />
-    {% set-global is_jexcel_loaded = True %}
+    {% set-global _is_jexcel_loaded = True %}
 {% end %}

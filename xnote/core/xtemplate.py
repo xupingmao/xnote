@@ -20,15 +20,15 @@ import functools
 import time
 import typing
 
-from . import xconfig, xauth, xnote_trace, xnote_hooks
+from xnote.core import xconfig, xauth, xnote_trace, xnote_hooks
 from xnote.core import xnote_user_config
+from xnote.core.xconfig import TemplateConfig
 from xutils.tornado.template import Template, Loader
 from xutils import dateutil, u
 from xutils import tojson
 from xutils import Storage
 from xutils import textutil
 from urllib.parse import quote
-from .xconfig import TemplateConfig
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(

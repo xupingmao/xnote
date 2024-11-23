@@ -1,13 +1,13 @@
 # encoding=utf-8
 import time
+import xutils
 from xutils import Storage
 from xutils import dateutil
 from xnote.core import xtables
 from datetime import datetime
 
 class FileIndexInfo(Storage):
-    """文件索引信息"""
-
+    """文件索引信息 (用于数据同步) """
     def __init__(self, **kw):
         self.id = 0
         self.webpath = ""

@@ -7,9 +7,8 @@
 @FilePath     : /xnote/handlers/common/script/load_vue.html
 @Description  : 加载vue
  #} -->
-{% init is_vue_loaded = False %}
-
-{% if not is_vue_loaded %}
+{% init _is_vue_loaded = False %}
+{% if not _is_vue_loaded %}
     <script type="text/javascript" src="{{_server_home}}/_static/lib/vue/vue-2.7.9.min.js"></script>
-    {% set-global is_vue_loaded = True %}
+    {% set-global _is_vue_loaded = True %}
 {% end %}

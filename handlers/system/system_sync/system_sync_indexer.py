@@ -20,7 +20,7 @@ from xutils import dateutil
 from xutils import fsutil
 from xutils import textutil
 from xutils.db.binlog import BinLogOpType, FileLog
-from handlers.fs.fs_helper import FileInfoDao
+from handlers.fs.fs_helper import FileInfoDao, FileInfo
 from .models import FileIndexInfo
 
 _binlog = dbutil.BinLog.get_instance()
@@ -73,7 +73,7 @@ class FileSyncIndexManager:
         self.data.append(xconfig.get_system_dir("app"))
         self.data.append(xconfig.get_system_dir("archive"))
         self.data.append(xconfig.get_system_dir("scripts"))
-
+        self.data.append(xconfig.get_system_dir("backup"))
 
     def step(self):
         if len(self.data) == 0:
@@ -147,7 +147,7 @@ class FileIndexCheckManager:
     last_id = 0
     db = xtables.get_table_by_name("file_info")
 
-    def check_index(self, value):
+    def check_index(self, value: FileInfo):
         # type: (Storage) -> bool
         fpath = value.fpath
         index_id = int(value.id)
@@ -166,9 +166,7 @@ class FileIndexCheckManager:
 
 
     def run_step(self):
-        where = "id > $id"
-        vars = dict(id = self.last_id)
-        file_info_list = self.db.select(where=where, vars=vars, order="id", offset=0, limit=20)
+        file_info_list = FileInfoDao.list_next_batch(last_id=self.last_id)
         if len(file_info_list) == 0:
             logging.debug("已完成一次全量检查")
         

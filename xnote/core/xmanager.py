@@ -16,11 +16,12 @@ import time
 import copy
 import inspect
 import web
-from xnote.core import xconfig, xauth, xnote_trace, xnote_hooks, xtemplate
 import xutils
 import threading
 import logging
 import xnote_migrate
+
+from xnote.core import xconfig, xauth, xnote_trace, xnote_hooks, xtemplate
 from collections import deque
 from threading import Thread
 from xutils import Storage

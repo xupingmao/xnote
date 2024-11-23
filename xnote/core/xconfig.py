@@ -256,6 +256,12 @@ class FileConfig:
     reboot_file = "xnote-reboot.txt"
 
     @classmethod
+    def init_system_dir(cls, dirname: str):
+        result = os.path.join(cls.data_dir, dirname)
+        makedirs(result)
+        return result
+
+    @classmethod
     def init(cls, data_dir):
         xnote_core_dir = os.path.dirname(__file__)
         xnote_dir = os.path.dirname(xnote_core_dir)
@@ -265,25 +271,18 @@ class FileConfig:
         cls.data_dir = os.path.abspath(data_dir)
         makedirs(cls.data_dir)
 
-        cls.files_dir = os.path.join(data_dir, "files")
-        makedirs(cls.files_dir)
-
-        cls.db_dir = os.path.join(data_dir, "db")
-        
-        cls.sqlite_dir = os.path.join(data_dir, "db", "sqlite")
-        makedirs(cls.sqlite_dir)
-
-        cls.backup_dir = os.path.join(data_dir, "backup")
-        makedirs(cls.backup_dir)
-
-        cls.backup_db_dir = os.path.join(cls.backup_dir, "db")
-        makedirs(cls.backup_db_dir)
-
-        cls.tmp_dir = os.path.join(data_dir, "tmp")
-        makedirs(cls.tmp_dir)
-
-        cls.trash_dir = os.path.join(data_dir, "trash")
-        makedirs(cls.trash_dir)
+        cls.files_dir = cls.init_system_dir("files")
+        cls.db_dir = cls.init_system_dir("db")
+        cls.sqlite_dir = cls.init_system_dir("db/sqlite")
+        cls.backup_dir = cls.init_system_dir("backup")
+        cls.backup_db_dir = cls.init_system_dir("backup/db")
+        cls.tmp_dir = cls.init_system_dir("tmp")
+        cls.trash_dir = cls.init_system_dir("trash")
+        cls.scripts_dir = cls.init_system_dir("scripts")
+        cls.cache_dir = cls.init_system_dir("cache")
+        cls.app_dir = cls.init_system_dir("app")
+        cls.storage_dir = cls.init_system_dir("storage")
+        cls.archive_dir = cls.init_system_dir("archive")
 
         cls.record_db_name = SystemConfig.get_str("record_db_name", "record")
         cls.record_db_file = cls.get_db_path(cls.record_db_name)
@@ -935,28 +934,31 @@ def get_current_user_config(key, default_value=None):
 
 def get_system_dir(name):
     if name == "files":
-        return UPLOAD_DIR
+        return FileConfig.files_dir
 
     if name == "data":
-        return DATA_DIR
+        return FileConfig.data_dir
 
     if name == "tmp":
-        return TMP_DIR
+        return FileConfig.tmp_dir
 
     if name == "storage":
-        return STORAGE_DIR
+        return FileConfig.storage_dir
 
     if name == "scripts":
-        return SCRIPTS_DIR
+        return FileConfig.scripts_dir
 
     if name == "app":
-        return APP_DIR
+        return FileConfig.app_dir
 
     if name == "archive":
-        return os.path.join(DATA_DIR, "archive")
+        return FileConfig.archive_dir
     
     if name == "cache":
-        return os.path.join(DATA_DIR, "cache")
+        return FileConfig.cache_dir
+    
+    if name == "backup":
+        return FileConfig.backup_db_dir
 
     raise Exception("未知的系统目录:" + name)
 
