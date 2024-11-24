@@ -6,10 +6,15 @@
     display: block;
     float: left;
 }
-.form-row textarea {
+
+.form-row input, .form-row select, .form-row textarea {
     width: 300px;
+}
+
+.form-row textarea {
     height: 50px;
 }
+
 .form-body {
     position: absolute;
     padding: 10px;

@@ -27,6 +27,7 @@ from threading import Thread
 from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, u, dbutil
+from collections.abc import Callable
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -190,7 +191,7 @@ class WebModel:
         self.description = "[工具]" + self.description
 
 
-def log(msg):
+def log(msg: str):
     # six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
     xutils.info("xmanager", msg)
 
@@ -210,8 +211,8 @@ class HandlerManager:
     启动时自动加载`handlers`目录下的处理器以及定时任务
     """
 
-    def __init__(self, app, vars, mapping=None, last_mapping=None):
-        self.app = app  # type: web.application
+    def __init__(self, app: web.application, vars, mapping=None, last_mapping=None):
+        self.app = app
         if mapping is None:
             self.basic_mapping = []  # webpy mapping
             self.mapping = []
@@ -229,7 +230,7 @@ class HandlerManager:
         self.task_dict = {}
         self.model_list = []
         self.block_list = ["__pycache__"]
-        self.failed_mods = []
+        self.failed_mods = [] # type: ignore
         self.debug = True
         self.report_loading = False
         self.report_unload = True
@@ -256,7 +257,7 @@ class HandlerManager:
         """重启handlers目录下的所有的模块"""
         self.mapping = []
         self.model_list = []
-        self.failed_mods = []
+        self.failed_mods = [] # type: ignore
 
         xtemplate.reload()
         
@@ -284,7 +285,7 @@ class HandlerManager:
         load_init_script()
         fire("sys.reload")
 
-    def get_mod(self, module, name):
+    def get_mod(self, module, name: str):
         namelist = name.split(".")
         del namelist[0]
         mod = module
@@ -365,7 +366,7 @@ class HandlerManager:
         del namelist[0]
         return "/" + "/".join(namelist)
 
-    def resolve_module_old(self, module, modname):
+    def resolve_module_old(self, module, modname: str):
         name = modname
         handler = module.handler
         clz = name.replace(".", "_")
@@ -590,7 +591,7 @@ class WorkerThread(Thread):
     """执行任务队列的线程，内部有一个队列，所有线程共享"""
 
     # deque是线程安全的
-    _task_queue = deque()
+    _task_queue = deque() # type: deque[list[function|list|dict]]
 
     def __init__(self, name="WorkerThread"):
         super(WorkerThread, self).__init__()
@@ -608,7 +609,7 @@ class WorkerThread(Thread):
                     _async_logger.log("qsize:(%d), execute:(%s)",
                                       len(self._task_queue), func)
 
-                    func(*args, **kw)
+                    func(*args, **kw) # type: ignore
                 else:
                     time.sleep(0.01)
             except Exception as e:
@@ -709,7 +710,7 @@ class EventManager:
     """事件管理器，每个事件由一个执行器链组成，执行器之间有一定的依赖性
     @since 2018/01/10
     """
-    _handlers = dict()
+    _handlers = dict() # type: dict[str, list[EventHandler]]
 
     def add_handler(self, handler):
         """注册事件处理器
@@ -739,7 +740,7 @@ class EventManager:
 
 
 @xutils.log_init_deco("xmanager.init")
-def init(app, vars, last_mapping=None):
+def init(app: web.application, vars, last_mapping=None):
     global _manager
     global _event_manager
 
@@ -803,12 +804,14 @@ def put_task_async(func, *args, **kw):
 
 def get_handler_manager():
     # type: () -> HandlerManager
-    assert _manager != None
+    if  _manager is None:
+        raise Exception("_manager is None")
     return _manager
 
 def get_event_manager():
     # type: () -> EventManager
-    assert _event_manager != None
+    if _event_manager is None:
+        raise Exception("_event_manager is None")
     return _event_manager
 
 def load_tasks():

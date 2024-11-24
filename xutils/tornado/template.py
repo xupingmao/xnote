@@ -666,7 +666,7 @@ class _Init(_Node):
     def generate(self, writer):
         name, value = self.expression.split("=", 1)
         name = name.strip()
-        line = "if globals().get(%r) == None: globals()[%r] = %s" % (name, name, value)
+        line = "if %r not in globals(): globals()[%r] = %s" % (name, name, value)
         writer.write_line(line, self.line)
 
 class _SetGlobal(_Node):

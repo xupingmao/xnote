@@ -246,7 +246,7 @@ class WebResult(web.Storage):
     def __init__(self):
         self.success = True
         self.code = "success"
-        self.data = None
+        self.data = None # type: object
         self.message = ""
 
 def SuccessResult(data=None, message=""):

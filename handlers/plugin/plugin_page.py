@@ -14,6 +14,7 @@ from xnote.core import xtemplate
 from xnote.core import xauth
 from xnote.core import xmanager
 from xnote.core import xnote_hooks
+from xnote.core.models import SearchContext
 
 from xnote.core.xtemplate import T
 from xutils import Storage
@@ -285,10 +286,12 @@ def get_plugin_title_name(plugin: PluginContext):
     """返回插件的title+name"""
     if plugin.name == "":
         return plugin.title
+    if plugin.title == plugin.name:
+        return plugin.title
     return u(plugin.title + "(" + plugin.name + ")")
 
 @xmanager.searchable()
-def on_search_plugins(ctx):
+def on_search_plugins(ctx: SearchContext):
     if not xauth.is_admin():
         return
 
@@ -299,7 +302,7 @@ def on_search_plugins(ctx):
         return
 
     if PluginState.status == "loading":
-        result = Storage()
+        result = SearchResult()
         result.name = "插件加载中，暂时不可用"
         result.icon = "fa-th-large"
         result.url = "#"

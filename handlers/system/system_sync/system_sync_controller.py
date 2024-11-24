@@ -61,7 +61,7 @@ class SyncConfig:
         return xconfig.WebConfig.is_leader()
 
 def get_system_role():
-    return xconfig.get_global_config("system.node_role")
+    return xconfig.WebConfig.node_role
 
 
 def print_debug_info(*args):
@@ -172,7 +172,7 @@ class SyncHandler:
 
         if p == "build_index":
             if not xconfig.get_global_config("system.build_fs_sync_index"):
-                return dict(code="403", message="文件同步索引未开启 [build_fs_sync_index]")
+                return webutil.FailedResult(code="403", message="文件同步索引未开启 [build_fs_sync_index]")
 
             return self.do_build_index()
 
@@ -232,15 +232,17 @@ class SyncHandler:
 
     @xauth.login_required("admin")
     def get_detail(self):
-        type = xutils.get_argument("type")
-        key = xutils.get_argument("key")
+        type = xutils.get_argument_str("type")
+        key = xutils.get_argument_str("key")
 
         if type == "follower":
             role_manager = get_system_role_manager()
             info = role_manager.get_follower_info_by_url(key)
-            return dict(code="success", data=info, text=convert_dict_to_text(info))
+            result = webutil.SuccessResult(data=info)
+            result.text=convert_dict_to_text(info)
+            return result
 
-        return dict(code="500", message="未知的类型")
+        return webutil.FailedResult(code="500", message="未知的类型")
 
     def list_recent(self):
         result = Storage()
@@ -298,7 +300,7 @@ class LeaderHandler(SyncHandler):
     def list_files(self):
         """(主节点)读取文件列表"""
         last_id = xutils.get_argument_int("last_id", 0)
-        result = Storage()
+        result = webutil.SuccessResult()
         result.code = "success"
         result.req_last_id = last_id
 
@@ -308,7 +310,7 @@ class LeaderHandler(SyncHandler):
 
     def handle_leader_action(self):
         """主节点的提供的功能"""
-        p = xutils.get_argument("p", "")
+        p = xutils.get_argument_str("p", "")
         if p == "get_token":
             return self.get_token()
         
@@ -335,12 +337,12 @@ class LeaderHandler(SyncHandler):
             last_key = xutils.get_argument("last_key", "")
             limit = xutils.get_argument_int("limit", 20)
             data = LEADER.list_db(last_key, limit)
-            return dict(code="success", data=data)
+            return webutil.SuccessResult(data=data)
 
         if p == "list_recent":
             return self.list_recent()
 
-        return dict(code="error", message="未知的操作")
+        return webutil.FailedResult(code="error", message="未知的操作")
 
 
 class FollowerHandler(SyncHandler):
@@ -351,7 +353,7 @@ class FollowerHandler(SyncHandler):
         if p == "get_leader_stat":
             return FOLLOWER.get_leader_info()
         
-        return dict(code="400", message="unknown op")
+        return webutil.FailedResult(code="400", message="unknown op")
 
 @xmanager.listen("sys.init")
 def init(ctx=None):

@@ -32,26 +32,30 @@ def _get_px_value(value: str):
     return 0
 
 class TableHead:
-
-    min_width_re = re.compile(r"min:([0-9]+px)")
+    # 最小宽度
+    min_width_pattern = re.compile(r"min:([0-9]+px)")
+    # 权重
+    width_weight_pattern = re.compile(r"weight:([0-9]+)")
 
     """表格的标题单元"""
-    def __init__(self):
+    def __init__(self, table: "DataTable"):
         self.title = ""
         self.field = ""
         self.link_field = ""
         self.link_target = ""
         self.type = ""
         self.width = "auto"
+        self.width_weight = 0
         self.css_class_field = ""
+        self.table = table
     
-    def get_css_class(self, row):
+    def get_css_class(self, row: dict):
         return row.get(self.css_class_field, "")
     
-    def get_link(self, row):
+    def get_link(self, row: dict):
         return row.get(self.link_field)
     
-    def has_link(self, row):
+    def has_link(self, row: dict):
         if self.link_field == "":
             return False
         link = self.get_link(row)
@@ -59,15 +63,24 @@ class TableHead:
     
 
     def _get_min_width(self):
-        match = self.min_width_re.match(self.width)
+        match = self.min_width_pattern.match(self.width)
         if match:
             return match.groups()[0]
         return None
+    
+    def _fix_width_weight(self):
+        """如果有一个head设置了权重,没有设置的head权重默认为1"""
+        if self.width_weight == 0:
+            self.width_weight = 1
+        return self.width_weight
     
     def get_style(self):
         min_width = self._get_min_width()
         if min_width != None:
             return f"min-width: {min_width}"
+        if self.width_weight > 0:
+            percent = self.width_weight / self.table._get_width_weight_total()
+            return f"width: {percent*100:.2f}%"
         return f"width: {self.width}"
     
     def get_min_width(self):
@@ -116,13 +129,17 @@ class DataTable:
         self.heads = [] # type:list[TableHead]
         self.rows = []
         self.actions = []
+        self.action_head = TableHead(self)
     
-    def add_head(self, title="", field = "", type="", link_field="", width="auto", css_class_field="", link_target=""):
-        head = TableHead()
+    def add_head(self, title="", field = "", type="", link_field="", 
+                 width="auto", width_weight=0, 
+                 css_class_field="", link_target=""):
+        head = TableHead(self)
         head.title = title
         head.field = field
         head.type = type
         head.width = width
+        head.width_weight = width_weight
         head.link_field = link_field
         head.link_target = link_target
         head.css_class_field = css_class_field
@@ -137,6 +154,10 @@ class DataTable:
         for row in rows:
             assert isinstance(row, dict)
         self.rows = rows
+
+    def set_action_style(self, width="auto", width_weight=0):
+        self.action_head.width = width
+        self.action_head.width_weight = width_weight
     
     def add_action(self, title="", type="button", link_field="", title_field="", msg_field="", css_class=""):
         action = TableAction()
@@ -155,4 +176,10 @@ class DataTable:
             min_width += head.get_min_width()
         return max(min_width, 300)
 
+    def _get_width_weight_total(self):
+        total = 0
+        for head in self.heads:
+            total += head._fix_width_weight()
+        total += self.action_head._fix_width_weight()
+        return total
 

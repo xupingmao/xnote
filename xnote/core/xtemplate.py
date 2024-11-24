@@ -404,7 +404,7 @@ class BasePlugin:
     show_search = True
     search_type = "default"
     search_action = "/search"
-    search_placeholder = None
+    search_placeholder = "综合搜索"
 
     # {插件路径} 系统自动填充
     fpath = None
