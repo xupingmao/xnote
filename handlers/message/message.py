@@ -185,8 +185,11 @@ class ListAjaxHandler:
         if (tag in ("search", "log.search")) or (key != "" and key != None):
             # 搜索
             return self.do_search(user_name, key, offset, pagesize, search_tags=["log"])
+        
+        if tag == "log.date":
+            return MessageDateHandler().do_list_by_date(user_name=user_name, date=date, offset=offset, limit=pagesize, tag="log")
 
-        if tag in ("date", "log.date"):
+        if tag == "date":
             # 日期
             return self.do_list_by_date(user_name, date, offset, pagesize)
 
@@ -734,7 +737,7 @@ class MessagePageHandler:
         kw = Storage()
         kw.message_placeholder = "补充%s发生的事情" % date
 
-        filter_key = xutils.get_argument("filterKey", "")
+        filter_key = xutils.get_argument_str("filterKey", "")
         if filter_key != "":
             kw.show_input_box = False
         

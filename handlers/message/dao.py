@@ -434,12 +434,12 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
     return chatlist, amount
 
 
-def list_by_date(user, date, offset=0, limit=xconfig.PAGE_SIZE):
+def list_by_date(user, date, offset=0, limit=xconfig.PAGE_SIZE, tag=""):
     if date is None or date == "":
         return []
     
     user_id = xauth.UserDao.get_id_by_name(user)
-    index_list = MsgIndexDao.list(user_id=user_id, date_prefix=date, offset=offset, limit=limit)
+    index_list = MsgIndexDao.list(user_id=user_id,tag=tag, date_prefix=date, offset=offset, limit=limit)
     msg_list = MessageDao.batch_get_by_index_list(index_list, user_id=user_id)
     amount = MsgIndexDao.count(user_id=user_id, date_prefix=date)
     return msg_list, amount

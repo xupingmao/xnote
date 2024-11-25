@@ -4,6 +4,8 @@
 {% block body_left %}
 {% init show_back = True %}
 {% init created_notes = [] %}
+{% init sticky_position = "left" %} 
+{% init get_tag_name_by_code = xutils.get_func_by_name("note_tag.get_name_by_code") %}
 
     <script type="text/javascript" src="/static/js/plan/plan.js?ts={{_ts}}"></script>
 
@@ -64,10 +66,9 @@
         <div class="row">
             {% for item in record.notes %}
                 <a class="list-item" href="{{_server_home}}{{item.url}}">
-    
                     <i class="fa {{item.icon}}"></i>
                     <span>{{item.name}}</span>
-    
+                    {% include note/component/note_list_item_tags.html %}
                     <div class="float-right">
                         <button class="btn btn-default" data-id="{{item.id}}" 
                             onclick="xnote.action.plan.removeNote(this)">移除</button>
