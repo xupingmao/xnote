@@ -106,7 +106,7 @@ SYS_TOOLS = [
     admin_link("Menu_Modules",  "/system/modules_info"),
     admin_link("Shell",    "/tools/shell", "terminal"),
     admin_link("集群管理", "/system/sync?p=home", "server"),
-    admin_link("开发者", "/plugin_list?category=develop"),
+    admin_link("开发者", "/plugin_list?category=develop", icon="fa-code"),
 
     user_link("Menu_Plugin",   "/plugin_category_list?category=index&show_back=true", "cogs"),
     # 关于链接，支持外链
@@ -120,11 +120,12 @@ NOTE_TOOLS = [
     user_link("标签列表", "/note/taglist", "tags"),
 
     # 笔记
-    user_link("最近更新", "/note/recent?orderby=update", "edit"),
-    user_link("最近创建", "/note/recent?orderby=create", "plus"),
-    user_link("最近查看", "/note/recent?orderby=view", "eye"),
-    user_link("常用笔记", "/note/recent?orderby=myhot", "star-o"),
-    user_link("时光轴", "/note/timeline?type=all"),
+    user_link("我的动态", "/note/recent?orderby=update", icon="paper-plane"),
+    # user_link("最近创建", "/note/recent?orderby=create", "plus"),
+    # user_link("最近查看", "/note/recent?orderby=view", "eye"),
+    # user_link("常用笔记", "/note/recent?orderby=myhot", "star-o"),
+    user_link("时光轴", "/note/timeline?type=all", icon="hourglass-start"),
+    # 词典可以用 language 图标
     user_link("词典", "/note/dict", img_src="/static/image/icon_dict.svg"),
     user_link("搜索历史", "/search", "search"),
     user_link("上传管理", "/fs_upload", "upload"),
