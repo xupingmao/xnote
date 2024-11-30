@@ -625,7 +625,7 @@ class WorkerThread(Thread):
 class EventHandler:
     """事件处理器,执行的时候不抛出异常"""
 
-    def __init__(self, event_type, func, is_async=True, description=None):
+    def __init__(self, event_type: str, func, is_async=True, description=""):
         self.event_type = event_type
         self.key = None
         self.func = func
@@ -636,7 +636,7 @@ class EventHandler:
         func_name = get_func_abs_name(func)
 
         if self.description:
-            self.key = "%s:%s" % (func_name, self.description)
+            self.key = f"{func_name}:{self.description}"
         else:
             self.key = func_name
 
@@ -712,21 +712,23 @@ class EventManager:
     """
     _handlers = dict() # type: dict[str, list[EventHandler]]
 
-    def add_handler(self, handler):
+    def add_handler(self, handler: EventHandler):
         """注册事件处理器
         事件处理器的去重,通过判断是不是同一个函数，不通过函数名，如果修改初始化脚本需要执行【重新加载模块】功能
         """
         event_type = handler.event_type
         handlers = self._handlers.get(event_type, [])
-        if handler in handlers:
-            warn("handler %s is already registered" % handler)
-            return
+        for index, old_handler in enumerate(handlers):
+            if handler == old_handler:
+                warn(f"handler {handler} is already registered, update to new one")
+                handlers[index] = handler
+                return
         # XXX 使用str(handler)在Python2.7环境下报错
         xutils.trace("EventRegister", "%s" % handler)
         handlers.append(handler)
         self._handlers[event_type] = handlers
 
-    def fire(self, event_type, ctx=None):
+    def fire(self, event_type: str, ctx=None):
         handlers = self._handlers.get(event_type, [])
         for handler in handlers:
             handler.execute(ctx)
@@ -804,12 +806,14 @@ def put_task_async(func, *args, **kw):
 
 def get_handler_manager():
     # type: () -> HandlerManager
+    global _manager
     if  _manager is None:
         raise Exception("_manager is None")
     return _manager
 
 def get_event_manager():
     # type: () -> EventManager
+    global _event_manager
     if _event_manager is None:
         raise Exception("_event_manager is None")
     return _event_manager
@@ -823,7 +827,6 @@ def get_task_list():
 
 
 def request(*args, **kw):
-    global _manager
     # request参数如下
     # localpart='/', method='GET', data=None, host="0.0.0.0:8080", headers=None, https=False, **kw
     return get_handler_manager().app.request(*args, **kw)
@@ -847,12 +850,12 @@ def quick_sleep(seconds):
         if xconfig.EXIT_CODE == 205:
             return
 
-def fire(event_type, ctx=None):
+def fire(event_type: str, ctx=None):
     """发布一个事件"""
     get_event_manager().fire(event_type, ctx)
 
 
-def listen(event_type_list, is_async=True, description=None):
+def listen(event_type_list, is_async=True, description=""):
     """事件监听器注解"""
 
     # 同步任务使用专门的线程执行
@@ -877,7 +880,7 @@ def listen(event_type_list, is_async=True, description=None):
     return deco
 
 
-def searchable(pattern=r".*", description=None, event_type="search"):    
+def searchable(pattern=r".*", description="", event_type="search"):    
     """搜索装饰器"""
     def deco(func):
         assert _event_manager != None

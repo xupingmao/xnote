@@ -210,7 +210,7 @@ xnote.isTyping = function() {
     return now - xnote.state.system.keyupTime < typingGap;
 }
 
-window.xnote.assert = function (expression, message) {
+xnote.assert = function (expression, message) {
     if (!expression) {
         xnote.alert(message);
     }
@@ -221,7 +221,7 @@ var XUI = function(window) {
     function initSelect() {
         $("select").each(function(index, ele) {
             var self = $(ele);
-            var children = self.children();
+            var children = self.find("option");
             // 使用$.val() 会取到第一个select标签值
             var value = self.attr("value");
             for (var i = 0; i < children.length; i++) {

@@ -254,8 +254,8 @@ class TestMain(BaseTestCase):
 
     def test_search_message(self):
         self.check_200("/message?key=test&category=message")
-
-        handler = SEARCH_DAO.get_search_handler("message")
+        from handlers.search import search
+        handler = search.get_search_handler("message")
         self.assertEqual(u"搜索随手记", handler.placeholder)
 
     def test_search_mute(self):
