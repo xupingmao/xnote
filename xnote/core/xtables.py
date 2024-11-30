@@ -353,6 +353,8 @@ def init_tag_bind_table():
 
 def init_file_info():
     """文件信息
+    - 用户上传的文件都是只读的
+    - 不同的file_info对象可以指向同一个文件path
     @since 2023/05/26
     """
     table_name = "file_info"
@@ -365,7 +367,7 @@ def init_file_info():
         manager.add_column("fsize", "bigint", 0)
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("sha256", "varchar(100)", default_value="", comment="SHA256哈希值")
-        manager.add_column("remark", "text", default_value="", comment="备注信息,比如文件名")
+        manager.add_column("remark", "text", default_value="", comment="备注信息,比如上传的原始文件名")
 
         manager.add_index("user_id")
         manager.add_index("fpath(100)")

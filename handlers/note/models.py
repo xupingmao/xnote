@@ -174,7 +174,7 @@ class NoteDO(NoteIndexDO):
     def before_save(self):
         remove_virtual_fields(self)
 
-def del_dict_key(dict, key):
+def del_dict_key(dict: dict, key):
     dict.pop(key, None)
 
 def remove_virtual_fields(note):
@@ -255,5 +255,9 @@ class NoteGroupDO(NoteIndexDO):
     def __init__(self):
         self.children = []
 
-
+class NoteOptGroup(Storage):
+    def __init__(self):
+        super(NoteOptGroup, self).__init__()
+        self.label = ""
+        self.children = [] # type: list[NoteIndexDO]
 

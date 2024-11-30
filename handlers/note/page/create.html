@@ -53,8 +53,12 @@ label {
         <div class="input-group-row group-select-box">
             <label>{{T("笔记本")}}</label>
             <select name="parent_id" value="{{parent_id}}">
-                {%for item in groups %}
-                    <option value="{{item.id}}">{{item.name}}</option>
+                {%for opt_group in opt_groups %}
+                    <optgroup label="{{opt_group.label}}">
+                        {% for item in opt_group.children %}
+                            <option value="{{item.id}}">{{item.name}}</option>
+                        {% end %}
+                    </optgroup>
                 {% end %}
             </select>
         </div>

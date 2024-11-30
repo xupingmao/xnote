@@ -244,7 +244,7 @@ class UploadHandler:
 
     @xauth.login_required()
     def GET(self):
-        return self.get_upload_page_v1()
+        return self.get_upload_page_v2()
         
     def get_upload_page_v1(self):
         user_info = xauth.current_user()
@@ -256,7 +256,6 @@ class UploadHandler:
         month = xutils.get_argument_str("month", time.strftime("%m"))
         if len(month) == 1:
             month = '0' + month
-        
 
         dirname = os.path.join(xconfig.FileConfig.data_dir, "files",
                                user_name, "upload", year, month)
@@ -281,14 +280,32 @@ class UploadHandler:
         user_name = user_info.name
         xmanager.add_visit_log(user_name, "/fs_upload")
 
+        year = xutils.get_argument_int("year", dateutil.get_current_year())
+        month = xutils.get_argument_int("month", dateutil.get_current_month())
+
+        date_info = dateutil.DateInfo(year=year, month=month)
+
         user_id = user_info.id
-        files = FileInfoDao.list(user_id=user_id, limit=50)
+        start_time = date_info.format_date()
+        end_time = date_info.next_month().format_date()
+        files = FileInfoDao.list(user_id=user_id, limit=50, start_time_inclusive=start_time, end_time_exclusive=end_time)
+        pathlist = []
+        for item in files:
+            pathlist.append(item.realpath)
         
         kw = Storage()
         kw.html_title = T("文件")
         kw.files = files
-        
-        return xtemplate.render("fs/page/fs_upload_v2.html",**kw)
+        kw.pathlist = pathlist
+        kw.year = int(year)
+        kw.month = int(month)
+        kw.path = ""
+        kw.dirname = ""
+        kw.get_webpath = get_webpath
+        kw.upload_link_by_month = upload_link_by_month
+        kw.get_display_name = get_display_name
+
+        return xtemplate.render("fs/page/fs_upload.html",**kw)
     
 
 class RangeUploadHandler:

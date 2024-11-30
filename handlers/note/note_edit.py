@@ -27,14 +27,13 @@ from .dao_api import NoteDao
 from . import dao as note_dao
 from . import dao_delete
 from . import dao_share
+from . import note_helper
 
 from handlers.note.models import NoteIndexDO
 from handlers.note import dao_read
 from handlers.note import dao_draft
 
 NOTE_DAO = xutils.DAO("note")
-
-DEFAULT_CREATE_TEMPLATE = "note/page/create.html"
 
 # 编辑锁有效期
 EDIT_LOCK_EXPIRE = 600
@@ -101,27 +100,6 @@ CREATE_FUNC_DICT = {
     "log.bak": create_log_func
 }
 
-def list_groups_for_create(creator):
-    notes = note_dao.list_group_v2(creator, orderby = "name")
-
-    sticky_groups   = list(filter(lambda x: x.priority != None and x.priority > 0, notes))
-    archived_groups = list(filter(lambda x: x.archived == True, notes))
-    normal_groups   = list(filter(lambda x: x not in sticky_groups and x not in archived_groups, notes))
-
-    groups = []
-
-    for item in sticky_groups:
-        item.name = u"[置顶]" + item.name
-        groups.append(item)
-
-    for item in normal_groups:
-        groups.append(item)
-
-    for item in archived_groups:
-        item.name = u"[归档]" + item.name
-        groups.append(item)
-
-    return groups
 
 class CreateHandler:
 
@@ -132,7 +110,7 @@ class CreateHandler:
         key       = xutils.get_argument_str("key", "")
         content   = xutils.get_argument_str("content", "")
         type0     = xutils.get_argument_str("type", "md")
-        date      = xutils.get_argument("date", "")
+        date      = xutils.get_argument_str("date", "")
         format    = xutils.get_argument_str("_format", "")
         parent_id = xutils.get_argument_int("parent_id")
         deafult_name = xutils.get_argument_str("default_name")
@@ -198,9 +176,10 @@ class CreateHandler:
                 return webutil.FailedResult(code = 'fail', message = error)
 
         heading  = get_heading_by_type(type)
-        template = DEFAULT_CREATE_TEMPLATE
+        group_list = note_dao.list_group_v2(creator, orderby = "name")
+        converter = note_helper.NoteGroupConverter(group_list)
 
-        return xtemplate.render(template, 
+        return xtemplate.render("note/page/create.html", 
             show_search = False,
             heading  = heading,
             type     = type,
@@ -209,14 +188,15 @@ class CreateHandler:
             error    = error,
             message  = error,
             NOTE_TYPE_LIST = NOTE_TYPE_LIST,
-            groups   = list_groups_for_create(creator),
+            groups   = converter.get_group_list_for_create(),
+            opt_groups = converter.get_opt_groups(),
             code     = code)
 
     def GET(self):
         return self.POST('GET')
     
 
-    def check_before_create(self, note):
+    def check_before_create(self, note: note_dao.NoteDO):
         type = note.type
         if type not in VALID_NOTE_TYPE_SET:
             raise Exception(u"无效的类型: %s" % type)

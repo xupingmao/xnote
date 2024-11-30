@@ -240,6 +240,9 @@ $(function () {
   */
   window.adjustHeight = function (selector, bottom, options) {
     bottom = bottom || 0;
+    if ($(selector).length == 0) {
+      return;
+    }
     var height = getWindowHeight() - $(selector).offset().top - bottom;
     $(selector).css("height", height).css("overflow", "auto");
     

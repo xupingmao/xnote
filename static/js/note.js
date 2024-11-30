@@ -1,3 +1,15 @@
+
+var NoteView = {};
+xnote.action.note = NoteView;
+xnote.note = NoteView;
+
+NoteView.wangEditor = null; // wangEditor
+NoteView.defaultParentId = 0; // 默认的父级节点
+
+var noteAPI = {};
+xnote.api.note = noteAPI;
+
+
 /**
  * 更新笔记的类目
  * @deprecated 已废弃
@@ -64,8 +76,15 @@ xnote.updateCategoryName = function (req) {
     });
 };
 
-// 创建笔记接口
-xnote.api["note.create"] = function (req) {
+/**
+ * 创建笔记接口
+ * @param {object} req
+ * @param {string} req.name 笔记名称
+ * @param {string} req.parentId 上级目录id
+ * @param {string} req.type 笔记类型
+ * @param {callback} req.callback 回调函数
+ */
+NoteView.create = function (req) {
     xnote.validate.notUndefined(req.name, "req.name is undefined");
     xnote.validate.notUndefined(req.parentId, "req.parentId is undefined");
     xnote.validate.notUndefined(req.type, "req.type is undefined");
@@ -88,6 +107,8 @@ xnote.api["note.create"] = function (req) {
     });
 };
 
+xnote.api["note.create"] = NoteView.create;
+
 // 复制笔记接口
 xnote.api["note.copy"] = function (req) {
     xnote.validate.notUndefined(req.name, "req.name is undefined");
@@ -106,10 +127,6 @@ xnote.api["note.copy"] = function (req) {
         }
     });
 };
-
-var noteAPI = {};
-xnote.api.note = noteAPI;
-
 
 // 绑定标签
 noteAPI.bindTag = function (cmd) {
@@ -163,14 +180,6 @@ noteAPI.bindTag = function (cmd) {
         });
     });
 };
-
-
-var NoteView = {};
-xnote.action.note = NoteView;
-xnote.note = NoteView;
-
-NoteView.wangEditor = null; // wangEditor
-NoteView.defaultParentId = 0; // 默认的父级节点
 
 NoteView.onTagClick = function (target) {
     $(target).toggleClass("active");
@@ -316,6 +325,7 @@ NoteView.addNoteToTag = function (tagCode) {
  * 选择笔记本-平铺视图
  * 这个函数需要配合 group_select_script.html 使用
  * @param {object} req 
+ * @param {string} req.noteId 笔记ID
  * @param {callback} req.callback 回调函数,参数是 (selectedId: int)
  */
 NoteView.selectGroupFlat = function (req) {
@@ -628,7 +638,10 @@ NoteView.recover = function (noteId, callbackFn) {
 }
 
 
-/** 创建分组 **/
+/** 创建分组
+ * @param {string} parentId 父级笔记ID
+ * @param {string} postAction 后置的动作 {refresh}  
+ */
 NoteView.createGroup = function(parentId, postAction) {
     var opName = "新建笔记本";
 
@@ -659,7 +672,7 @@ NoteView.createNotebook = NoteView.createGroup;
 
 /**
  * 重命名笔记
- * @param {number} id 笔记ID
+ * @param {string} id 笔记ID
  * @param {string} oldName 旧的名称
  */
 NoteView.rename =  function(id, oldName) {

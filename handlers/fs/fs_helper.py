@@ -57,6 +57,10 @@ class FileInfo(Storage):
         for item in dict_list:
             result.append(cls.from_dict(item))
         return result
+    
+    @property
+    def realpath(self):
+        return self.fpath.replace(xconfig.FileReplacement.data_dir, xconfig.FileConfig.data_dir)
 
 class FileInfoDao:
     
@@ -114,7 +118,8 @@ class FileInfoDao:
             where += " AND ctime >= $start_time_inclusive"
         if end_time_exclusive != "":
             where += " AND ctime < $end_time_exclusive"
-        return cls.db.select(where=where, vars=vars, offset=offset, limit=limit, order=order)
+        result = cls.db.select(where=where, vars=vars, offset=offset, limit=limit, order=order)
+        return FileInfo.from_dict_list(result)
 
     @classmethod
     def prefix_count(cls, fpath=""):

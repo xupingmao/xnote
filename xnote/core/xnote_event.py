@@ -5,6 +5,7 @@ class FileUploadEvent(Storage):
     """文件上传事件"""
 
     def __init__(self):
+        super().__init__()
         self.user_name = ""
         self.user_id = 0
         self.fpath = ""
@@ -18,6 +19,7 @@ class FileDeleteEvent(FileUploadEvent):
 class FileRenameEvent(Storage):
     """文件重命名事件"""
     def __init__(self):
+        super().__init__()
         self.user_name = ""
         self.user_id = 0
         self.fpath = ""
