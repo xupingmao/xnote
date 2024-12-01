@@ -19,18 +19,26 @@ def on_search_message(ctx: SearchContext):
 
     key = ctx.key
     message_utils.touch_key_by_content(ctx.user_name, 'key', key)
+
+    handle_search_event(ctx, tag_name="待办", search_tag="task")
+    handle_search_event(ctx, tag_name="随手记", search_tag="log")
+    
+
+
+def handle_search_event(ctx: SearchContext, tag_name="", search_tag="log"):
+    key = ctx.key
     max_len = xconfig.SEARCH_SUMMARY_LEN
 
-    messages, count = dao.search_message(ctx.user_id, key, 0, 3)
+    messages, count = dao.search_message(ctx.user_id, key, offset=0, limit=3, search_tags=[search_tag])
     search_result = []
     for message in messages:
         item = SearchResult()
         if message.content != None and len(message.content) > max_len:
             message.content = message.content[:max_len] + "......"
         message_utils.process_message(message)
-        item.tag_name = u("记事")
+        item.tag_name = tag_name
         item.tag_class = "orange"
-        item.name = u('记事 - ') + message.ctime
+        item.name = f"{tag_name} - {message.ctime}"
         item.html = message.html
         item.icon = "hide"
         search_result.append(item)
@@ -44,8 +52,8 @@ def on_search_message(ctx: SearchContext):
 
     if count > 0:
         more = SearchResult()
-        more.name = "搜索到[%s]条记事" % count
-        more.url = f"{xconfig.WebConfig.server_home}/message?key=" + ctx.key
+        more.name = f"搜索到[{count}]条{tag_name}" 
+        more.url = f"{xconfig.WebConfig.server_home}/message?tag={search_tag}.search&key=" + ctx.key
         more.icon = "fa-file-text-o"
         more.show_more_link = True
         more.show_move = False

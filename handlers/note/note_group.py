@@ -296,16 +296,16 @@ class GroupListHandler:
     def do_get(self):
         user_name = xauth.current_name_str()
 
-        orderby_default = xconfig.get_user_config(
-            user_name, "group_list_order_by", "name_asc")
+        orderby_default = str(xconfig.get_user_config(
+            user_name, "group_list_order_by", "name_asc"))
         logging.debug("orderby_default:%s", orderby_default)
 
-        category = xutils.get_argument("note_category", "all")
+        category = xutils.get_argument_str("note_category", "all")
         tab = xutils.get_argument_str("tab", "active")
-        orderby = xutils.get_argument("orderby", orderby_default)
+        orderby = xutils.get_argument_str("orderby", orderby_default)
 
-        show_back = xutils.get_argument("show_back", type=bool)
-        q_tag_name = xutils.get_argument("tag_name", "")
+        show_back = xutils.get_argument_bool("show_back")
+        q_tag_name = xutils.get_argument_str("tag_name", "")
         q_tags = []
         if q_tag_name != "":
             q_tags = [q_tag_name]
@@ -368,8 +368,12 @@ class GroupByYearHandler:
 """    
     @xauth.login_required()
     def GET(self):
-        creator_id = xauth.current_user_id()
+        user_info = xauth.current_user()
+        assert user_info != None
+        creator_id = user_info.id
+        user_name = user_info.name
         result = NoteService.get_year_group_list(creator_id=creator_id)
+        xmanager.add_visit_log(user_name, "/note/group/year")
 
         table = DataTable()
         table.add_head("年份", "year", link_field="href", width="50%")
@@ -986,6 +990,7 @@ xurls = (
     r"/note/group", GroupListFacadeHandler,
     r"/note/group_list", GroupListFacadeHandler,
     r"/note/group/manage", GroupManageHandler,
+    r"/note/group/year", GroupByYearHandler,
     r"/note/books", GroupListFacadeHandler,
     r"/note/default", DefaultListHandler,
     r"/note/ungrouped", DefaultListHandler,

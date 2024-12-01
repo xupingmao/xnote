@@ -103,6 +103,10 @@ class SearchResult(Storage):
         self.command = "" # 命令类的工具
         self.tag_name = ""
         self.tag_class = ""
+        self.parent_id = 0
+        self.parent_name = ""
+        self.badge_info = ""
+        self.category = ""
         self.update(kw)
 
 def attrget(obj, attr, default_value = None):

@@ -219,12 +219,12 @@ class TestMain(BaseTestCase):
     def test_message_dairy(self):
         self.check_OK("/message/dairy")
 
-    def test_message_search(self):
+    def do_test_search(self, content="", tag="", tag_name=""):
         delete_all_messages()
 
         user_name = xauth.current_name_str()
 
-        create_data = dict(content="Xnote-Unit-Test")
+        create_data = dict(content=content, tag=tag)
         response = json_request(
             "/message/save", method="POST", data=create_data)
 
@@ -243,7 +243,8 @@ class TestMain(BaseTestCase):
         on_search_message(ctx)
         # 两条记录（第一个是汇总，第二个是实际数据）
         self.assertEqual(2, len(ctx.messages))
-        self.assertEqual("Xnote-Unit-Test", ctx.messages[1].html)
+        self.assertEqual(content, ctx.messages[1].html)
+        self.assertEqual(tag_name, ctx.messages[1].tag_name)
 
         search_list, amount = SearchHandler().get_ajax_data(
             user_name=user_name, key="xnote")
@@ -251,6 +252,12 @@ class TestMain(BaseTestCase):
         assert len(search_list) == 1
         assert search_list[0].id == new_msg_id
         assert search_list[0].sort_value != ""
+
+    def test_search_log(self):
+        self.do_test_search("xnote-log-test", tag="log", tag_name="随手记")
+
+    def test_search_task(self):
+        self.do_test_search("xnote-task-test", tag="task", tag_name="待办")
 
     def test_message_search_page(self):
         self.check_OK("/message?tag=search&key=123")

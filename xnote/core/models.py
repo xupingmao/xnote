@@ -1,5 +1,6 @@
 # encoding=utf-8
 
+from xutils import SearchResult
 
 class SearchContext:
     def __init__(self, key=""):
@@ -23,12 +24,12 @@ class SearchContext:
         self.stop             = False
         
         # 处理的结果集，优先级: 系统功能 > 字典 > 个人数据
-        self.commands = [] # 命令
-        self.tools    = [] # 工具
-        self.dicts    = [] # 词典 -- 公共
-        self.messages = [] # 待办/记事/通知/评论
-        self.notes    = [] # 笔记
-        self.files    = [] # 文件
+        self.commands = [] # type: list[SearchResult] # 命令
+        self.tools    = [] # type: list[SearchResult] # 工具
+        self.dicts    = [] # type: list[SearchResult] # 词典 -- 公共
+        self.messages = [] # type: list[SearchResult] # 待办/记事/通知/评论
+        self.notes    = [] # type: list[SearchResult] # 笔记
+        self.files    = [] # type: list[SearchResult] # 文件
         self.parent_note = None # type: object # 上级笔记
 
         # 分页信息

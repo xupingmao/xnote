@@ -19,8 +19,7 @@ from xutils import dateutil
 from xutils import mem_util
 from xutils import six
 from xnote.core.xtemplate import T
-from xnote.core.models import SearchContext
-from xutils import SearchResult
+from xnote.core.models import SearchContext, SearchResult
 from xnote.service.search_service import SearchHistoryDO
 
 NOTE_DAO = xutils.DAO("note")
@@ -61,7 +60,7 @@ class BaseRule:
         self.func_str = ""
         self.scope   = scope
 
-def fill_note_info(files):
+def fill_note_info(files: typing.List[SearchResult]):
     ids = []
     for file in files:
         if file.category == "note":
@@ -140,11 +139,10 @@ class SearchHandler:
     def do_search(self, page_ctx: SearchContext, key, offset, limit):
         category    = xutils.get_argument_str("category", "")
         search_type = xutils.get_argument_str("search_type", "")
-        words      = textutil.split_words(key)
         user_name  = xauth.get_current_name()
-        ctx        = build_search_context(user_name, category, key)
-
-        logger = mem_util.MemLogger("do_search")
+        ctx = build_search_context(user_name, category, key)
+        ctx.offset = offset
+        ctx.limit = limit
 
         # 优先使用 search_type
         if search_type != None and search_type != "" and search_type != "default":
@@ -152,6 +150,14 @@ class SearchHandler:
             ctx.limit  = page_ctx.limit
             return self.do_search_by_type(ctx, key, search_type)
         
+        return self.do_search_default(ctx)
+    
+    def do_search_default(self, ctx: SearchContext):
+        key = ctx.key
+        offset = ctx.offset
+        limit = ctx.limit
+
+        logger = mem_util.MemLogger("do_search")
         # 阻断性的搜索，比如特定语法的
         xmanager.fire("search.before", ctx)
         if ctx.stop:
@@ -176,19 +182,12 @@ class SearchHandler:
         # 慢搜索,如果时间过长,这个服务会被降级
         # TODO: 异步操作需要其他线程辅助执行
         xmanager.fire("search.slow", ctx)
-
         logger.info("after fire search.slow")
-
         xmanager.fire("search.after", ctx)
-
         logger.info("after fire search.after")
 
-        page_ctx.tools = []
-        
         search_result = ctx.join_as_files()
-        
         fill_note_info(search_result)
-
         return search_result[offset:offset+limit], len(search_result)
 
     @mem_util.log_mem_info_deco("do_search_with_profile", log_args = True)
@@ -229,6 +228,7 @@ class SearchHandler:
         else:
             notes = note_dao.search_name(words, user_name, parent_id = parent_id)
         
+        notes = [SearchResult(**item) for item in notes]
         for note in notes:
             note.category = "note"
 
@@ -241,7 +241,7 @@ class SearchHandler:
         limit  = ctx.limit
         return notes[offset:offset+limit], len(notes)
 
-    def do_search_task(self, ctx, key):
+    def do_search_task(self, ctx: SearchContext, key):
         import handlers.message.dao as MSG_DAO
         from handlers.message.dao import MessageDO
         from handlers.message.message_utils import process_message
@@ -254,7 +254,7 @@ class SearchHandler:
 
         search_tags = set(["task"])
         msg_list, amount = MSG_DAO.search_message(user_id, key, offset, limit, search_tags = search_tags)
-        item_list = [] # type: list[SearchResult]
+        result = [] # type: list[SearchResult]
         for msg_item in msg_list:
             process_message(msg_item)
             item = SearchResult(**msg_item)
@@ -266,6 +266,7 @@ class SearchHandler:
             item.name = prefix + msg_item.ctime
             item.icon = "hide"
             item.url  = "#"
+            result.append(item)
         
         # 统计已完成待办数量
         temp, done_count = MSG_DAO.search_message(user_id, key, search_tags = set(["done"]), count_only=True)
@@ -274,9 +275,9 @@ class SearchHandler:
             done_summary.icon = "hide"
             done_summary.name = "已完成任务[%d]" % done_count
             done_summary.url =  f"{server_home}/message?tag=done.search&key={xutils.quote(key)}"
-            item_list.insert(0, done_summary)
+            result.append(done_summary)
 
-        return item_list, amount
+        return result, amount
 
     def do_search_comment(self, ctx:SearchContext, key):
         from handlers.note import comment
@@ -303,7 +304,6 @@ class SearchHandler:
         category    = xutils.get_argument_str("category", "default")
         page        = xutils.get_argument_int("page", 1)
         search_type = xutils.get_argument("search_type", "")
-        user_name   = xauth.get_current_name()
         page_url    =  f"/search/search?key={key}&category={category}&search_type={search_type}&page="
         pagesize    = xconfig.SEARCH_PAGE_SIZE
         offset      = (page-1) * pagesize
@@ -468,7 +468,7 @@ def do_reload_search(ctx = None):
     register_search_handler("note.public", placeholder = u"搜索公共笔记", action = "/note/timeline", tag = "public")
     register_search_handler("dict", placeholder = u"搜索词典", action = "/search")
     register_search_handler("message", placeholder = u"搜索随手记", action = "/message")
-    register_search_handler("task", placeholder = u"搜索待办", action = "/message")
+    register_search_handler("task", placeholder = u"搜索待办", action = "/search")
     register_search_handler("note", placeholder = u"搜索笔记", action = "/search")
     register_search_handler("comment", placeholder = u"搜索评论")
     register_search_handler("default", placeholder = u"综合搜索", action = "/search")
