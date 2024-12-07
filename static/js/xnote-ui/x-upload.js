@@ -36,7 +36,11 @@ xnote._initUploadEvent = function(uploader, fileSelector, successFn) {
     // 文件上传成功，给item添加成功class, 用样式标记上传成功。
     uploader.on( 'uploadSuccess', function( file, resp) {
         layer.close(loadingIndex);
-        successFn(resp);
+        if (resp.success) {
+            successFn(resp);
+        } else {
+            xnote.alert(resp.message);
+        }
     });
 
     // 文件上传失败，显示上传出错。
@@ -77,7 +81,13 @@ xnote.createUploader = function(fileSelector, chunked, successFn) {
     return xnote.createUploaderEx(req);
 }
 
-/** 创建上传器 **/
+/** 创建上传器
+ * @param {string} req.selector 选择器
+ * @param {boolean} req.chunked 是否分段上传
+ * @param {callback} req.successFn 成功的回调函数
+ * @param {boolean} req.fixOrientation 是否修复方向
+ * @param {string} fileName 文件名
+ */
 xnote.createUploaderEx = function(req) {
     var fileSelector = req.fileSelector;
     var chunked = req.chunked;

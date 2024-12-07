@@ -7,10 +7,10 @@ import web
 import logging
 import time
 import math
+import xutils
 
 from xnote.core import xauth
 from xnote.core import xconfig
-import xutils
 from xnote.core import xtemplate
 from xnote.core import xmanager
 from xutils import fsutil, Storage, dateutil
@@ -186,7 +186,6 @@ class UploadHandler:
         
     def do_post(self):
         file = xutils.get_argument_field_storage("file")
-        prefix = xutils.get_argument_str("prefix")
         name = xutils.get_argument_str("name")
         note_id = xutils.get_argument_str("note_id")
         upload_type = xutils.get_argument_str("upload_type")
@@ -203,14 +202,14 @@ class UploadHandler:
         if file.filename is None:
             return webutil.FailedResult(code="400", message="file.filename is None")
         
-        fs_checker.check_file_name(file.filename)
-
         filename = get_safe_file_name(file.filename)
         # 扩展名要从原始的文件名获取
         _, ext = os.path.splitext(file.filename)
         if name == "auto":
             # iOS上传文件截图文件固定是image.png
             filename = get_auto_filename(ext)
+        else:
+            fs_checker.check_file_name(file.filename)
 
         if upload_type == "recovery":
             if not xauth.is_admin():
@@ -354,7 +353,7 @@ class RangeUploadHandler:
         part_file = True
         chunksize = 5 * 1024 * 1024
         chunk = xutils.get_argument_int("chunk")
-        chunks = xutils.get_argument("chunks", 1, type=int)
+        chunks = xutils.get_argument_int("chunks", 1)
         file = xutils.get_argument_field_storage("file")
         prefix = xutils.get_argument_str("prefix", "")
         dirname = xutils.get_argument_str("dirname", xconfig.DATA_DIR)
