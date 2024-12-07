@@ -116,11 +116,11 @@ class MessageDO(Storage):
         self.mtime = xutils.format_datetime()
         self.date = xutils.format_date()
         self.content = ""
-        self.comments = [] # 评论信息
+        self.comments = [] # type: list[MessageComment] # 评论信息
         self.version = 0
         self.visit_cnt = 0
         self.status = None # 老的结构
-        self.keywords = None
+        self.keywords = None # type: None|set[str]
         self.full_keywords = set()
         self.no_tag = True
         self.amount = 0 # keyword对象的数量
@@ -136,7 +136,7 @@ class MessageDO(Storage):
             result.comments = []
         for item in result.comments:
             comment_text = item.get("content")
-            item["content"] = sys_comment_dict.get(comment_text, comment_text)
+            item["content"] = sys_comment_dict.get(comment_text, comment_text) # type:ignore
         
         if result.sort_value == "":
             result.sort_value = xtables.DEFAULT_DATETIME

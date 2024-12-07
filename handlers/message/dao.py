@@ -412,7 +412,6 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
     else:
         user_id = xauth.UserDao.get_id_by_name(user)
         index_list = MsgIndexDao.list(user_id=user_id, tag=tag, offset=offset, limit=limit)
-        
         chatlist = MessageDao.batch_get_by_index_list(index_list, user_id=user_id)
 
     # 利用message_stat优化count查询

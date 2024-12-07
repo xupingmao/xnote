@@ -9,11 +9,11 @@ with open("README.md", "r", encoding="utf-8") as fp:
 data_ext_list =  ["*.txt", "*.json", "*.properties", "*.js", "*.html", "*.css"]
 
 setuptools.setup(
-    name = "xnote-web",
+    name = "xnote_web",
     version = "0.1.3",
     author = "mark",
     author_email = "578749341@qq.com",
-    description = "xnote-web框架",
+    description = "xnote_web框架",
     long_description = long_description,
     long_description_content_type = "text/markdown",
     # packages = ["config", "core", "docs", "handlers", "lib", "static", "tools", "xnote", "xutils"],

@@ -14,16 +14,7 @@
 # @debug  # 开启调试
 # @icon-class fa-cube
 
-import os
-import re
-import math
-import time
-import xconfig
-import xutils
-import xauth
-import xmanager
-import xtemplate
-from xtemplate import BasePlugin
+from xnote.core.xtemplate import BasePlugin
 
 BODY_HTML = """
 <!-- 插件主体 -->

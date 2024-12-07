@@ -31,6 +31,7 @@ from handlers.message.message_month_tags import MonthTagsPage
 from handlers.message.message_date import MessageDateHandler
 from handlers.message.message_date import MessageListByDayHandler
 from handlers.message.message_log import LogPageHandler
+from xnote.core import xnote_event
 
 from handlers.message.message_utils import (
     process_message,
@@ -370,7 +371,7 @@ def create_done_message(old_message):
 def update_message_tag(id, tag):
     """更新message的tag字段"""
     user_name = xauth.current_name()
-    data = MessageDao.get_by_id(id)
+    data = MessageDao.get_by_key(id)
     if data == None:
         return webutil.FailedResult(message="数据不存在")
     if data.user != user_name:
@@ -405,8 +406,8 @@ def update_message_tag(id, tag):
     if need_update:    
         MessageDao.update_tag(data, tag, sort_value=data.sort_value)
 
-    xmanager.fire("message.updated", Storage(
-        id=id, user=user_name, tag=tag, content=data.content))
+    event = xnote_event.MessageEvent(msg_key=data._key, user_id=data.user_id, tag=tag, content=data.content)
+    xmanager.fire("message.updated", event)
 
     return webutil.SuccessResult()
 
@@ -415,7 +416,7 @@ class FinishMessageAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument("id")
+        id = xutils.get_argument_str("id")
         if id == "":
             return
         return update_message_tag(id, "done")
@@ -609,7 +610,7 @@ class DateAjaxHandler:
     @xauth.login_required()
     def GET(self):
         date = xutils.get_argument_str("date", "")
-        page = xutils.get_argument("page", 1, type=int)
+        page = xutils.get_argument_int("page", 1)
         filter_key = xutils.get_argument_str("filterKey")
         user_id = xauth.current_user_id()
 

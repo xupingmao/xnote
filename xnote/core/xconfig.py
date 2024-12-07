@@ -418,7 +418,7 @@ class WebConfig:
 class TemplateConfig:
     """模板配置"""
     nav_list = []
-    lang_dict = {}
+    lang_dict = {} # type: dict[str, dict[str,str]]
 
     @classmethod
     def init(cls):
@@ -439,7 +439,7 @@ class TemplateConfig:
                 continue
             fpath = os.path.join(dirname, fname)
             content = xutils.readfile(fpath)
-            config = xutils.parse_config_text(content, ret_type='dict')
+            config = xutils.parse_config_text_to_dict(content)
             lang_dict[name] = config
         cls.lang_dict = lang_dict
 

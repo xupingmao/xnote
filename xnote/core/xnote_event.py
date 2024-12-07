@@ -34,3 +34,11 @@ class NoteViewEvent(Storage):
         self.user_id = user_id
 
 
+class MessageEvent(Storage):
+    """待办/随手记变更事件"""
+    def __init__(self, msg_key="", user_id=0, tag="", content=""):
+        super().__init__()
+        self.msg_key = msg_key
+        self.tag = tag
+        self.user_id = user_id
+        self.content = content

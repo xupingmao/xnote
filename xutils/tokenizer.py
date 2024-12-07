@@ -3,6 +3,9 @@
 # @since 2018/11/19 00:05:56
 # @modified 2018/12/09 15:40:36
 
+class TokenTypeEnum:
+    symbol = "symbol"
+
 class Token:
 
     def __init__(self,type='symbol',val=None,pos=None):

@@ -11,15 +11,12 @@
 # @permitted-role admin # 对admin用户开放
 # @debug true # 开启调试模式，开发完成后记得关闭
 
-import xconfig
 import xutils
-import xauth
-import xmanager
-import xtemplate
 from xutils import Storage
 from xutils import dbutil
 from xutils import textutil
-from xtemplate import BasePlugin
+from xnote.core import xauth
+from xnote.core.xtemplate import BasePlugin
 
 HTML = """
 <!-- 操作区域 -->
@@ -197,8 +194,8 @@ class Main(BasePlugin):
     
     def load_data_list(self):
         user_name = xauth.current_name()
-        offset = xutils.get_argument("offset", 0, type = int)
-        limit  = xutils.get_argument("limit", 20, type = int)
+        offset = xutils.get_argument_int("offset", 0)
+        limit  = xutils.get_argument_int("limit", 20)
         data_list = TABLE.list_by_user(user_name, offset, limit, reverse = True)
         data_list = convert_data_list(data_list)
         self.writehtml(HTML, data_list = data_list)

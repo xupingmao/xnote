@@ -37,6 +37,7 @@ from xutils.text_parser import set_img_file_ext
 from xutils.text_parser import TextToken
 
 from . import dao as msg_dao
+from .message_model import MessageDO
 
 MSG_DAO = xutils.DAO("message")
 TAG_TEXT_DICT = dict(
@@ -229,7 +230,7 @@ def get_tags_from_message_list(
         input_date="",
         display_tag=None,
         search_tag="all") -> typing.List[MessageTag]:
-
+    # type: (list[MessageDO], str, str, None|str, str) -> list[MessageTag]
     assert isinstance(msg_list, list)
     assert isinstance(input_tag, str)
     assert isinstance(input_date, str)

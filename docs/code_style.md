@@ -64,6 +64,14 @@ my_package # 带下划线的包名
 
 - service提供具体的服务（外部使用），manager（内部使用）是service下面一层，为service提供通用服务
 
+## 3.2 tools和util的区别
+
+- tools: 
+    - functools: function tools
+    - itertools: iter tools
+- util: 
+    - fsutil: shell utilities
+
 # 4. 函数命名
 
 - 普通函数，小写+下划线，结构为（[前缀]+动名词结构）示例: 

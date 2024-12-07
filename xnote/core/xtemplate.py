@@ -40,11 +40,11 @@ NAMESPACE = dict(
 _mobile_name_dict = dict() # type: dict[str, str]
 LOAD_TIME = int(time.time())
 
-def T(text, lang=None):
+def T(text: str, lang=None):
     if lang is None:
         lang = xconfig.get_current_user_config("LANG")
 
-    mapping = TemplateConfig.get_lang_mapping(lang)
+    mapping = TemplateConfig.get_lang_mapping(lang) # type: None | dict[str, str]
     if mapping is None:
         return text
     else:

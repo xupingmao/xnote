@@ -14,7 +14,7 @@ import os
 project_dir = os.path.dirname(__file__)
 os.chdir(project_dir)
 
-import app
-app.main(boot_config_kw = dict(db_driver = "sqlite"))
+from xnote.core import xnote_app
+xnote_app.main(boot_config_kw = dict(db_driver = "sqlite"))
 
 
