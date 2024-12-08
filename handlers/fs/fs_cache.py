@@ -11,7 +11,7 @@
 import web
 import os
 import xutils
-import xconfig
+from xnote.core import xconfig
 from urllib.parse import urlparse
 from xutils import netutil
 from xutils import dbutil

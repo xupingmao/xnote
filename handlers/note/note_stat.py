@@ -48,7 +48,7 @@ class StatHandler(BaseTablePlugin):
         search_count = SearchHistoryService.count(user_id=user_id, search_type=SearchHistoryType.default)
 
         stat_list.append(StatInfo("我的笔记本", group_count))
-        stat_list.append(StatInfo("我的笔记", note_count, f"{server_home}/note/group?type=year"))
+        stat_list.append(StatInfo("我的笔记", note_count, f"{server_home}/note/group/year"))
         stat_list.append(StatInfo("我的待办", message_stat.task_count))
         stat_list.append(StatInfo("完成待办", message_stat.done_count))
         stat_list.append(StatInfo("我的记事", message_stat.log_count))

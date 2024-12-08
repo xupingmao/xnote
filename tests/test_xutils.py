@@ -266,26 +266,30 @@ class TestMain(unittest.TestCase):
         # 足够
         v = textutil.short_text('abcd', 10)
         self.assertEqual('abcd', v)
-        v = textutil.short_text(u'中文123', 4)
+        v = textutil.short_text(u'中文123', 6)
         self.assertEqual(u'中文123', v)
 
         # 刚好
-        v = textutil.short_text('012345', 3)
+        v = textutil.short_text('012345', 6)
         self.assertEqual('012345', v)
-        v = textutil.short_text(u'中文1234', 4)
+        v = textutil.short_text(u'中文1234', 6)
         self.assertEqual(u'中文1234', v)
 
         # 不够
         v = textutil.short_text(u'中文12345678', 4)
-        self.assertEqual(u'中文12..', v)
+        self.assertEqual(u'中...', v)
         # 奇数个半角
         v = textutil.short_text(u'中文1中文中文', 4)
-        self.assertEqual(u'中文1..', v)
+        self.assertEqual(u'中...', v)
+
         v = textutil.short_text(u'BUG及问题记录', 5)
-        self.assertEqual(u'BUG及问..', v)
+        self.assertEqual(u'BU...', v)
 
         v = textutil.short_text(u'1234中国人', 4)
-        self.assertEqual(u'1234中..', v)
+        self.assertEqual(u'1...', v)
+
+        v = textutil.short_text(u'BUG及问题记录', 7)
+        self.assertEqual(u'BUG及...', v)
 
     def test_RecordList(self):
         rl = xutils.RecordList()

@@ -364,7 +364,7 @@ class CacheExternalHandler:
     @xauth.login_required("admin")
     def POST(self):
         user_name = xauth.current_name()
-        note_id = xutils.get_argument("note_id", "")
+        note_id = xutils.get_argument_int("note_id")
         note = dao.get_by_id_creator(note_id, user_name)
         if note == None:
             return webutil.FailedResult(code="fail", message="笔记不存在")

@@ -475,7 +475,7 @@ def parse_simple_command(text):
     if match: return match.group(1, 2)
     return text, ""
 
-def short_text(text: str, length: int):
+def get_short_text(text: str, length: int):
     """返回短文本
 
     Arguments:
@@ -483,55 +483,26 @@ def short_text(text: str, length: int):
         - length 全角字符长度
 
     Simple Test
-        >>> short_text('abc', 5)
+        >>> get_short_text('abc', 5)
         'abc'
-        >>> short_text('abcdefg', 5)
-        'abcdefg'
-        >>> short_text('abcd', 5)
+        >>> get_short_text('abcdefg', 5)
+        'ab...'
+        >>> get_short_text('abcd', 5)
         'abcd'
-        >>> short_text('中文12345678', 5)
-        '中文1234..'
+        >>> get_short_text('中文12345678', 5)
+        '中文...'
     """
+    if length < 3:
+        raise Exception("require length>=3")
+    
     if len(text) <= length:
         return text
-    pos = 0
-    size = 0
-    need_cut = False
-    last_size = 1
-    for c in text:
-        pos += 1
-        if ord(c) <= 127:
-            # 半角
-            size += 0.5
-            last_size = 1
-        else:
-            size += 1
-            last_size = 2
-        if size == length:
-            # 刚好
-            if pos == len(text):
-                # 最后一个字符
-                return text
-            if last_size == 2:
-                # 上一个全角
-                pos -= 1
-            if last_size == 1:
-                # 上一个半角
-                pos -= 2
-            need_cut = True
-            break
-        if size - length == 0.5:
-            # 多一个半角，上一个字符一定是全角
-            pos -= 2
-            need_cut = True
-            break
-    if not need_cut:
-        return text
-    return text[:pos] + ".."
+    
+    return text[:length-3] + "..."
 
-shortfor       = short_text
-get_short_text = short_text
-get_ellipsis_text = short_text
+short_text = get_short_text
+shortfor = get_short_text
+get_ellipsis_text = get_short_text
 
 def get_camel_case(name, upper = False):
     """

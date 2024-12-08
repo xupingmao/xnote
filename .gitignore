@@ -84,3 +84,4 @@ start-cmd.bat
 /build/
 /xnote_web.egg-info/*
 /dist/
+pypi_token.txt
