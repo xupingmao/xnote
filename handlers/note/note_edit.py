@@ -28,6 +28,7 @@ from . import dao as note_dao
 from . import dao_delete
 from . import dao_share
 from . import note_helper
+from .models import NoteLevelEnum
 
 from handlers.note.models import NoteIndexDO
 from handlers.note import dao_read
@@ -427,7 +428,7 @@ def check_get_note(id):
     note.creator_id = user_info.id
     return note
 
-def update_and_notify(file: note_dao.NoteDO, update_kw):
+def update_and_notify(file: note_dao.NoteDO, update_kw: dict):
     """更新内容并且广播消息"""
     edit_token = update_kw.get("edit_token", "")
     if edit_token != None and edit_token != "":
@@ -435,8 +436,11 @@ def update_and_notify(file: note_dao.NoteDO, update_kw):
         if not dao_draft.refresh_edit_lock(file.id, edit_token, time.time()):
             raise NoteException("conflict", "当前笔记正在被其他设备编辑")
 
+    version = update_kw.get("version")
+    assert isinstance(version, int)
+
     # 先记录变更历史
-    note_dao.add_history(file.id, update_kw.get("version"), update_kw)
+    note_dao.add_history(file.id, version, update_kw)
 
     # 执行变更
     rowcount = note_dao.update_note(file.id, **update_kw)
@@ -570,10 +574,10 @@ class ArchiveHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id")
-        note = check_get_note(id)
-        note_dao.update_note(id, archived=True, priority = -1)
-        raise web.found("/note/%s" % id)
+        note_id = xutils.get_argument_int("id")
+        note = check_get_note(note_id)
+        note_dao.NoteIndexDao.update_level(note_id=note_id, level = NoteLevelEnum.archived.value)
+        raise web.found(note.get_url())
 
 class ResetHandler:
 
@@ -588,10 +592,10 @@ class UnarchiveHandler:
 
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument("id")
-        note = check_get_note(id)
-        note_dao.update_note(id, archived=False, priority = 0)
-        raise web.found("/note/%s" % id)
+        note_id = xutils.get_argument_int("id")
+        note = check_get_note(note_id)
+        note_dao.NoteIndexDao.update_level(note_id=note_id, level = NoteLevelEnum.normal.value)
+        raise web.found(note.get_url())
 
 class UpdateStatusHandler:
 

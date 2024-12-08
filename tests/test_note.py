@@ -315,6 +315,7 @@ class TestMain(BaseTestCase):
 
     def test_note_group(self):
         self.check_200("/note/group")
+        self.check_200("/note/group/year")
         self.check_200("/note/ungrouped")
         self.check_200("/note/public")
         self.check_200("/note/removed")

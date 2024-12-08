@@ -102,12 +102,6 @@ class NoteIndexDO(Storage):
     @property
     def archived(self):
         return self.level<0
-    
-    def set_archived(self, archived):
-        if archived == True:
-            self.level = -1
-        if archived == False:
-            self.level = 0
 
     @property
     def hot_index(self):

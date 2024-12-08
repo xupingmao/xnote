@@ -563,15 +563,6 @@ def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None):
         return None
 
     note.compat_old()
-
-    if note.priority is None:
-        note.priority = 0
-
-    if note.content is None:
-        note.content = ''
-
-    if note.data is None:
-        note.data = ''
     note.id = int(note.id)
 
     if note.type in ("list", "csv"):
@@ -971,7 +962,6 @@ def update_note(note_id, **kw):
     size = kw.get("size")
     token = kw.get("token")
     creator_id = kw.get("creator_id", 0)
-    archived = kw.get("archived")
 
     note = get_by_id(note_id)
     if note is None:
@@ -991,8 +981,6 @@ def update_note(note_id, **kw):
         note.name = name
     if atime:
         note.atime = atime
-    if archived != None:
-        note.set_archived(archived)
 
     # 分享相关的更新
     if is_public != None:
