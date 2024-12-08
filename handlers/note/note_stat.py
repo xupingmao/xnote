@@ -2,6 +2,9 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2019/08/20 11:02:04
 # @modified 2022/04/20 23:03:49
+import handlers.message.dao as msg_dao
+import handlers.note.dao as note_dao
+
 from xnote.core import xauth
 from xnote.core import xmanager
 from xnote.core import xconfig
@@ -9,8 +12,6 @@ from xnote.service import SearchHistoryService, SearchHistoryType
 from xutils import dbutil, Storage
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable
-import handlers.message.dao as msg_dao
-import handlers.note.dao as note_dao
 
 
 class StatInfo(Storage):
@@ -46,6 +47,7 @@ class StatHandler(BaseTablePlugin):
         note_count = note_stat.total
         comment_count = note_stat.comment_count
         search_count = SearchHistoryService.count(user_id=user_id, search_type=SearchHistoryType.default)
+        plugin_count = len(xconfig.PLUGINS_DICT)
 
         stat_list.append(StatInfo("我的笔记本", group_count))
         stat_list.append(StatInfo("我的笔记", note_count, f"{server_home}/note/group/year"))
@@ -54,6 +56,8 @@ class StatHandler(BaseTablePlugin):
         stat_list.append(StatInfo("我的记事", message_stat.log_count))
         stat_list.append(StatInfo("搜索记录", search_count, f"{server_home}/search/history"))
         stat_list.append(StatInfo("我的评论", comment_count))
+        if xauth.is_admin():
+            stat_list.append(StatInfo("系统插件", plugin_count))
         return stat_list
 
     def handle(self, input=""):

@@ -9,9 +9,10 @@
 @Description  : 描述
 """
 
+import web.utils
+
 from . import test_base
 from xnote.core import xconfig, xmanager, xauth
-import web.utils
 from xnote.service import JobService
 
 app = test_base.init()
@@ -102,3 +103,6 @@ class TestMain(test_base.BaseTestCase):
     def test_admin_test(self):
         self.check_OK("/admin/test?type=lock")
 
+
+    def test_thread_info(self):
+        self.check_OK("/system/thread_info")

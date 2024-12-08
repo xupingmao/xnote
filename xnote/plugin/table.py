@@ -97,7 +97,7 @@ class TableAction:
         self.link_field = ""
         self.link_target = ""
         self.title_field = ""
-        self.css_class=""
+        self.css_class="" # action操作自身(比如链接/按钮之类的)的css类
         self.msg_field = ""
         self.default_msg = ""
     
@@ -134,6 +134,18 @@ class DataTable:
     def add_head(self, title="", field = "", type="", link_field="", 
                  width="auto", width_weight=0, 
                  css_class_field="", link_target=""):
+        """添加表头
+
+        Arguments:
+            - title: 标题
+            - field: 字段名
+            - type: (optional) 类型
+            - link_field: (optional) 链接的字段名
+            - width: (optional) 宽度设置
+            - width_weight: (optional) 宽度权重,如果设置会覆盖width设置
+            - css_class_field: (optional) css类的字段名
+            - link_target: 链接的target属性(css属性) @see `LinkTargetType`
+        """
         head = TableHead(self)
         head.title = title
         head.field = field
