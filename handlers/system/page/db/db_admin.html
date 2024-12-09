@@ -33,14 +33,19 @@
                 <label>关键字</label>
                 <input name="db_key" value="{{db_key}}" type="text"/>
             </div>
+
+            <div class="input-group">
+                <label>排序</label>
+                <select name="reverse" value="{{is_reverse}}">
+                    <option value="False">正序</option>
+                    <option value="True">倒序</option>
+                </select>
+            </div>
         </div>
 
         <div class="row">
-            <div class="align-center">
-                <input type=checkbox name="reverse" {% if is_reverse %}checked{%end%}><span>倒序</span>
-                <input type="button" class="btn do-search-btn" value="查询数据">
-                <a class="btn btn-default" href="?p=query&prefix={{prefix}}&reverse=true">重置查询</a>
-            </div>
+            <input type="button" class="btn do-search-btn" value="查询数据">
+            <a class="btn btn-default" href="?p=query&prefix={{prefix}}&reverse=true">重置查询</a>
         </div>
 
     </form>
@@ -130,7 +135,7 @@ $(function () {
         }
         var maxResultCount = 100;
         var prefix = $("[name=prefix]").val();
-        var reverse = $("[name=reverse]").prop("checked");
+        var reverse = $("[name=reverse]").val();
         var keyword = $("[name=db_key]").val();
         var userName = $("[name=q_user_name]").val();
         var params = {

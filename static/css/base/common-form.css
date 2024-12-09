@@ -1,3 +1,36 @@
+.input-group {
+    float:left;
+    width:170px;
+    padding-bottom:5px;
+    max-width: 700px;
+    line-height: 29px;
+}
+
+.input-group label {
+    width: 100%;
+    float: left;
+    line-height: 29px;
+    text-align: left;
+}
+
+.input-group input[type=text], .input-group input[type=password], .input-group select {
+    width: 160px;
+}
+
+.input-group button {
+    margin-top: 0px;
+}
+
+.input-group-row {
+    float: left;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.input-group-row input, .input-group-row select {
+    width: 200px;
+}
+
 .form-row {
     margin-bottom: 10px;
 }

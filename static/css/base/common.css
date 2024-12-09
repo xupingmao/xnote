@@ -651,39 +651,6 @@ li.menu-item:hover {
     border: none;
 }
 
-.input-group {
-    float:left;
-    width:300px;
-    padding-bottom:5px;
-    max-width: 700px;
-    line-height: 29px;
-}
-
-.input-group label {
-    width: 120px;
-    float: left;
-    padding-right: 10px;
-    line-height: 29px;
-    text-align: right;
-}
-
-.input-group input[type=text], .input-group input[type=password], .input-group select {
-    width: 160px;
-}
-
-.input-group button {
-    margin-top: 0px;
-}
-
-.input-group-row {
-    float: left;
-    width: 100%;
-    margin-top: 10px;
-}
-
-.input-group-row input, .input-group-row select {
-    width: 200px;
-}
 
 #searchBox {
     margin-bottom: 5px;
