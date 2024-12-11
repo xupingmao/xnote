@@ -113,7 +113,7 @@ class SearchHandler:
         pass
 
     def get_create_tag(self):
-        p = xutils.get_argument("p", "")
+        p = xutils.get_argument_str("p", "")
         if p == "task":
             return "task"
 

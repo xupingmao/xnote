@@ -273,11 +273,9 @@ class ListAjaxHandler:
 
     def do_search(self, user_name, key, offset, pagesize, search_tags=None):
         # 搜索
-        no_tag = False
-
         input_search_tags = xutils.get_argument_str("searchTags")
-        input_no_tag = xutils.get_argument("noTag", "false")
-        p = xutils.get_argument("p", "")
+        no_tag = xutils.get_argument_bool("noTag", False)
+        p = xutils.get_argument_str("p", "")
         date = xutils.get_argument_str("date")
 
         if search_tags == None:
@@ -290,18 +288,14 @@ class ListAjaxHandler:
             if p == "log":
                 search_tags = ["log"]
 
-        if input_no_tag == "true":
-            no_tag = True
-
         searcher = message_search.SearchHandler()
         return searcher.get_ajax_data(user_name=user_name, key=key, offset=offset,
                                       limit=pagesize, search_tags=search_tags,
                                       no_tag=no_tag, date=date)
 
     def do_list_task(self, user_name, offset, limit):
-        p = xutils.get_argument("p", "")
+        p = xutils.get_argument_str("p", "")
         filter_key = xutils.get_argument("filterKey", "")
-        status = xutils.get_argument("status", "")
 
         if p == "done":
             return msg_dao.list_task_done(user_name, offset, limit)

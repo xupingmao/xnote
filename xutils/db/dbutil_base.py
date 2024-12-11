@@ -842,7 +842,7 @@ def get_db_cache():
     KvDataBase.cache
 
 
-def set_db_instance(db_instance):
+def set_db_instance(db_instance: DBInterface):
     global _leveldb
     _leveldb = db_instance
 

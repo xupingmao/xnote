@@ -280,16 +280,17 @@ def list_message_page(user: str, status, offset, limit):
         value.id = key
         return value.user == user and value.status == status
     user_id = xauth.UserDao.get_id_by_name(user)
-    chatlist = _msg_db.list(filter_func=filter_func, offset=offset,
+    chatlist0 = _msg_db.list(filter_func=filter_func, offset=offset,
                             limit=limit, reverse=True, user_name=str(user_id))
-
+    chatlist = MessageDO.from_dict_list(chatlist0)
     amount = _msg_db.count(filter_func=filter_func, user_name=str(user_id))
     return chatlist, amount
 
 def query_special_page(user_name="", filter_func=None, offset=0, limit=10):
     user_id = xauth.UserDao.get_id_by_name(user_name)
-    chatlist = _msg_db.list(filter_func=filter_func, offset=offset,
+    chatlist0 = _msg_db.list(filter_func=filter_func, offset=offset,
                             limit=limit, reverse=True, user_name=str(user_id))
+    chatlist = MessageDO.from_dict_list(chatlist0)
     chatlist.sort(key = lambda x:x.ctime, reverse=True)
     # TODO 后续可以用message_stat加速
     amount = _msg_db.count(filter_func=filter_func, user_name=str(user_id))
