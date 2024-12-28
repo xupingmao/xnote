@@ -162,7 +162,7 @@ def init_note_index_table():
         manager.add_column("children_count", "bigint", 0)
         # 修改版本
         manager.add_column("version", "int", 0)
-        # 类型, markdown, post, mailist, file
+        # 类型, md, post, checklist, gallery, table
         manager.add_column("type", "varchar(32)", "")
         # 上级目录
         manager.add_column("parent_id", "bigint", 0)
@@ -178,7 +178,7 @@ def init_note_index_table():
         manager.add_column("is_public", "tinyint", 0, comment="是否是公开的笔记")
         
         # 创建者
-        manager.add_column("creator", "varchar(64)", "")
+        manager.add_column("creator", "varchar(64)", "", comment="创建者用户名快照")
         manager.add_column("creator_id", "bigint", 0)
         manager.add_column("level", "tinyint", 0)
         manager.add_column("tag_str", "varchar(255)", "")
@@ -430,7 +430,7 @@ def init_lock_table():
     @since 2024/04/03
     """
     table_name = "t_lock" # 避免和关键字冲突
-    comment = "系统任务"
+    comment = "系统锁"
     with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("ctime", "datetime", default_value=DEFAULT_DATETIME)
         manager.add_column("mtime", "datetime", default_value=DEFAULT_DATETIME)
@@ -529,7 +529,6 @@ def init_comment_index_table():
         
         manager.add_index(["user_id", "ctime"])
         manager.add_index("target_id")
-        manager.table_info.enable_binlog = True
 
 
 def init_user_note_log():
@@ -569,7 +568,7 @@ def init_month_plan_index():
         manager.add_column("user_id", "bigint", default_value=0)
         manager.add_column("month", "varchar(20)", default_value="")
         manager.add_index("user_id")
-        manager.table_info.enable_binlog = False
+    TableConfig.disable_binlog(table_name)
 
 def init_txt_info_index():
     """txt文件索引
@@ -581,8 +580,7 @@ def init_txt_info_index():
         manager.add_column("user_id", "bigint", default_value=0)
         manager.add_column("path", "varchar(255)", default_value="")
         manager.add_index("user_id")
-        manager.table_info.enable_binlog = False
-        
+    TableConfig.disable_binlog(table_name)        
 
 def init_search_history_table():
     """搜索记录

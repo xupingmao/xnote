@@ -124,26 +124,13 @@ class NoteIndexDO(Storage):
 class NoteDO(NoteIndexDO):
     def __init__(self):
         super(NoteDO, self).__init__()
-        self.id = 0 # 笔记ID
-        self.name = ""
         self.path = ""
-        self.creator = ""
-        self.creator_id = 0
-        self.type = "md"
         self.category = "" # 废弃
-        self.size = 0
-        self.children_count = 0
         self.content = ""
         self.data = ""
-        self.is_deleted = 0 # 0-正常， 1-删除
-        self.is_public = 0  # 0-不公开, 1-公开
         self.token = ""
         self.priority = 0 # (-1):归档, 0-正常, 1-置顶
-        self.level = 0 # 等级 (-1):归档, 0-正常, 1-置顶
-        self.visit_cnt = 0
         self.orderby = ""
-        # 版本
-        self.version = 0
         self.tags = []
 
         # 假的属性
