@@ -374,7 +374,7 @@ class BasePlugin:
     """插件的基类"""
 
     api_level = 0.0  # 插件的API版本 用于处理各种兼容性问题
-    show_nav = True  # 是否展示菜单
+    show_nav = True  # 是否展示菜单(顶层 or 左侧)
 
     # 插件的标题
     show_title = True
@@ -633,6 +633,8 @@ class BasePlugin:
     def POST(self):
         return self.render()
 
+    def get_aside_html(self):
+        return self.aside_html
 
 BaseTextPage = BasePlugin
 BaseTextPlugin = BasePlugin

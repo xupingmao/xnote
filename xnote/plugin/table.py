@@ -8,6 +8,7 @@
 @FilePath     : /xnote/xnote/plugin/table.py
 @Description  : 描述
 """
+import typing
 import re
 
 class TableActionType:
@@ -46,6 +47,7 @@ class TableHead:
         self.type = ""
         self.width = "auto"
         self.width_weight = 0
+        self.min_width = ""
         self.css_class_field = ""
         self.table = table
     
@@ -62,7 +64,9 @@ class TableHead:
         return link not in (None, "")
     
 
-    def _get_min_width(self):
+    def _get_min_width(self) -> typing.Optional[str]:
+        if self.min_width != "":
+            return self.min_width
         match = self.min_width_pattern.match(self.width)
         if match:
             return match.groups()[0]
@@ -132,7 +136,7 @@ class DataTable:
         self.action_head = TableHead(self)
     
     def add_head(self, title="", field = "", type="", link_field="", 
-                 width="auto", width_weight=0, 
+                 width="auto", width_weight=0, min_width="",
                  css_class_field="", link_target=""):
         """添加表头
 
@@ -143,6 +147,7 @@ class DataTable:
             - link_field: (optional) 链接的字段名
             - width: (optional) 宽度设置
             - width_weight: (optional) 宽度权重,如果设置会覆盖width设置
+            - min_width: (optional) 最小的宽度
             - css_class_field: (optional) css类的字段名
             - link_target: 链接的target属性(css属性) @see `LinkTargetType`
         """
@@ -151,6 +156,7 @@ class DataTable:
         head.field = field
         head.type = type
         head.width = width
+        head.min_width = min_width
         head.width_weight = width_weight
         head.link_field = link_field
         head.link_target = link_target

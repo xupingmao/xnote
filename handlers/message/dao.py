@@ -686,7 +686,11 @@ class MsgIndexDao:
 
     @classmethod
     def iter_batch(cls, user_id=0, batch_size=20):
-        yield from cls.db.iter_batch(batch_size=batch_size, where="user_id=$user_id", vars=dict(user_id=user_id))
+        where = ""
+        if user_id != 0:
+            where = "user_id=$user_id"
+        for batch in cls.db.iter_batch(batch_size=batch_size, where=where, vars=dict(user_id=user_id)):
+            yield MsgIndex.from_dict_list(batch)
 
     @classmethod
     def iter_all(cls):
@@ -817,6 +821,10 @@ class MessageDao:
         key_list = []
         for item in ids:
             key_list.append(_msg_db._build_key(str(user_id), str(item)))
+        return MessageDao.batch_get_by_keys(key_list)
+        
+    @staticmethod
+    def batch_get_by_keys(key_list=[]):
         result_dict = _msg_db.batch_get_by_key(key_list=key_list)
         records = []
         for row_id in key_list:
@@ -891,6 +899,15 @@ class MessageDao:
                 new_msg.sort_value = index.sort_value
                 result.append(new_msg)
         return result
+    
+    @classmethod
+    def iter_all(cls):
+        for index_batch in MsgIndexDao.iter_batch():
+            keys = []
+            for index in index_batch:
+                keys.append(_msg_db._build_key(str(index.user_id), str(index.id)))
+            
+            yield from cls.batch_get_by_keys(keys)
 
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.update", update_message)

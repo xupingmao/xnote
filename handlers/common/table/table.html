@@ -74,7 +74,8 @@ xnote.table.handleConfirmAction = function (target) {
     xnote.confirm(msg, function () {
         xnote.http.get(url, function (resp) {
             if (resp.success) {
-                xnote.toast("操作成功");
+                var msg = resp.message || "操作成功";
+                xnote.toast(msg);
                 window.location.reload();
             } else {
                 xnote.toast(resp.message);

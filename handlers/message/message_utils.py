@@ -158,9 +158,9 @@ def mark_text_to_tokens(content="", tag="log"):
     tokens = parser.parse_to_tokens(text=content)
     return MarkTokenResult(tokens=tokens)
 
-def process_message(message, search_tag="log"):
+def process_message(message: MessageDO, search_tag="log"):
     parser = MessageListParser([])
-    return parser.process_message(message, search_tag)
+    return parser.process_message(message)
 
 
 def format_count(count):
@@ -453,7 +453,7 @@ class MessageListParser(object):
         if message.tag == None:
             message.tag = self.tag
 
-    def process_message(self, message, search_tag="log") -> Storage:
+    def process_message(self, message: MessageDO) -> Storage:
         self.prehandle_message(message)
 
         message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
@@ -497,7 +497,7 @@ class MessageListParser(object):
     def do_process_message_list(self, message_list):
         keywords = {}
         for message in message_list:
-            self.process_message(message, search_tag=self.search_tag)
+            self.process_message(message)
             if message.keywords != None:
                 for keyword in message.keywords:
                     count = keywords.get(keyword, 0)

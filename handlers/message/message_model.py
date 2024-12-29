@@ -233,7 +233,10 @@ class MsgIndex(Storage):
         result.update(dict_value)
         return result
     
-
+    @classmethod
+    def from_dict_list(cls, dict_list):
+        return [cls.from_dict(item) for item in dict_list]
+    
 class MessageHistory:
     def __init__(self):
         self.msg_id = 0

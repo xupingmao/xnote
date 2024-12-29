@@ -31,7 +31,7 @@ class JobStatusEnum:
             return "执行失败"
         return str(status)
     
-class SysJob:
+class JobInfoDO:
     def __init__(self):
         self.id = 0
         self.ctime = dateutil.format_datetime()
@@ -41,11 +41,13 @@ class SysJob:
         self.job_params = ""
         self.job_result = ""
 
+SysJob = JobInfoDO
+
 class JobManager:
     """Database transaction."""
 
-    def __init__(self, job_info):
-        assert isinstance(job_info, SysJob)
+    def __init__(self, job_info: JobInfoDO):
+        assert isinstance(job_info, JobInfoDO)
         self.job_info = job_info
 
     def __enter__(self):
@@ -91,7 +93,7 @@ class JobService:
     
     @classmethod
     def dict_to_obj(cls, record):
-        job_info = SysJob()
+        job_info = JobInfoDO()
         job_info.__dict__.update(record)
         return job_info
     
@@ -108,6 +110,13 @@ class JobService:
             result.append(cls.dict_to_obj(record))
         amount = cls.db.count(where=where_sql, vars=vars)
         return result, amount
+    
+    @classmethod
+    def get_latest_job(cls, job_type="", order="ctime desc"):
+        result = cls.db.select_first(where=dict(job_type=job_type), order=order)
+        if result is None:
+            return None
+        return cls.dict_to_obj(result)
     
     @classmethod
     def update_job(cls, job_info):

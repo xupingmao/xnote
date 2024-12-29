@@ -16,6 +16,29 @@ from xutils import Storage
 from xutils import webutil
 from xnote.plugin import DataForm, FormRowType, DataTable, TableActionType
 
+
+class ParamDict:
+
+    """参数字典,在dict的基础上增加了类型方法"""
+    def __init__(self, dict_value: dict):
+        self.dict = dict_value
+
+    def get_int(self, key: str, default_value=0):
+        return int(self.dict.get(key, default_value))
+    
+    def get_float(self, key: str, default_value=0.0):
+        return float(self.dict.get(key, default_value))
+    
+    def get_str(self, key: str, default_value="", strip = True):
+        result = str(self.dict.get(key, default_value))
+        if strip:
+            return result.strip()
+        return result
+
+    def get(self, key: str):
+        return self.dict.get(key)
+    
+
 class BaseTablePlugin(BasePlugin):
     rows = 0
     show_edit = False
@@ -84,10 +107,10 @@ class BaseTablePlugin(BasePlugin):
         kw.form = form
         return self.response_form(**kw)
     
-    def get_data_dict(self) -> dict:
+    def get_data_dict(self) -> ParamDict:
         data = xutils.get_argument_str("data")
         data_dict = json.loads(data)
-        return data_dict
+        return ParamDict(data_dict)
     
     def handle_save(self):
         # data_dict = self.get_data_dict()

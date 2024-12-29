@@ -106,3 +106,7 @@ class TestMain(test_base.BaseTestCase):
 
     def test_thread_info(self):
         self.check_OK("/system/thread_info")
+
+    def test_admin_repair(self):
+        self.check_OK("/admin/repair")
+        self.check_OK("/admin/repair?action=repair&code=fix_msg_tag")

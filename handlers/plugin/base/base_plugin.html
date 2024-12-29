@@ -51,7 +51,7 @@
 
 {% block body_right %}
     {% if model.show_aside %}
-        {% raw model.aside_html %}
+        {% raw model.get_aside_html() %}
     {% end %}
 {% end %}
 
