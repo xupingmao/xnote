@@ -75,7 +75,7 @@ class JobService:
         record = job_info.__dict__
         record.pop("id", None)
         
-        db_id = cls.db.insert(record)
+        db_id = cls.db.insert(**record)
         assert isinstance(db_id, int)
         job_info.id = db_id
         return db_id
@@ -126,7 +126,7 @@ class JobService:
         return cls.db.update(where=dict(id=job_info.id), **updates)
     
     @classmethod
-    def run_with_job(cls, job_info):
-        assert isinstance(job_info, SysJob)
+    def run_with_job(cls, job_info: JobInfoDO):
+        assert isinstance(job_info, JobInfoDO)
         return JobManager(job_info=job_info)
         

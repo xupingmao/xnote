@@ -1,12 +1,14 @@
 # encoding=utf-8
 
+import typing
 import xutils
 from xnote.core import xauth, xtemplate, xconfig
 from xutils import Storage, webutil, dateutil
 from xutils.textutil import quote
+from xutils.db.dbutil_helper import new_from_dict
 from . import dao as msg_dao
 from . import message_utils
-from .message_model import MessageTag
+from .message_model import MsgTagInfo
 from xutils.text_parser import TokenType
 
 """
@@ -67,17 +69,16 @@ def get_log_tags_page():
     return xtemplate.render("message/page/message_list_view.html", **kw)
 
 
-def filter_standard_msg_list(msg_list):
-    result = []
+def filter_standard_msg_list(msg_list: typing.List[MsgTagInfo]):
+    result = [] # type: list[MsgTagInfo]
     for item in msg_list:
         if message_utils.is_standard_tag(item.content):
             result.append(item)
     return result
 
 def list_message_tags(user_name, offset, limit, *, orderby = "amount_desc", only_standard=False):
-    msg_list, amount = msg_dao.list_by_tag(
-        user_name, "key", 0, MAX_LIST_LIMIT)
-    
+    msg_list = msg_dao.MsgTagInfoDao.list(user=user_name, offset=0, limit=MAX_LIST_LIMIT)
+
     if only_standard:
         msg_list = filter_standard_msg_list(msg_list)
 

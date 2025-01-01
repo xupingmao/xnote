@@ -110,7 +110,7 @@ class BaseTableManager:
     def execute(self, sql):
         pass
 
-    def escape(self, strval):
+    def escape(self, strval: str):
         strval = strval.replace("'", "''")
         return "'%s'" % strval
     
@@ -144,11 +144,7 @@ class BaseTableManager:
         raise Exception("not implemented")
 
     def drop_index(self, col_name, is_unique=False):
-        sql = "DROP INDEX idx_%s_%s" % (self.tablename, col_name)
-        try:
-            self.execute(sql)
-        except Exception:
-            xutils.print_exc()
+        raise Exception("not implemented")
 
     def drop_column(self, colname):
         sql = "ALTER TABLE `%s` DROP COLUMN `%s`" % (self.tablename, colname)
@@ -229,7 +225,14 @@ class MySQLTableManager(BaseTableManager):
         if not TableConfig.enable_auto_ddl:
             raise Exception("db_auto_ddl is disabled")
         self.execute(sql)
-        
+
+    def drop_index(self, col_name, is_unique=False):
+        # return super().drop_index(col_name, is_unique)
+        helper = TableHelper()
+        index_name = helper.build_index_name(colname=col_name, is_unique=is_unique)
+        if self.is_index_exists(index_name):
+            sql = f"ALTER TABLE `{self.tablename}` DROP INDEX {index_name}"
+            self.execute(sql)
     
     def is_index_exists(self, index_name=""):
         assert len(self.mysql_database) > 0
@@ -322,6 +325,12 @@ class SqliteTableManager(BaseTableManager):
             
         self.execute(sql)
 
+    def drop_index(self, col_name, is_unique=False):
+        helper = TableHelper()
+        index_name = helper.build_index_name(colname=col_name, is_unique=is_unique, table_name=self.tablename)
+        sql = f"DROP INDEX IF EXISTS {index_name}"
+        self.execute(sql)
+
 class TableInfo:
 
     def __init__(self, tablename = ""):
@@ -412,6 +421,9 @@ class TableManagerFacade:
     def add_index(self, colname, is_unique=False, **kw):
         self.table_info.add_index(colname, is_unique)
         self.manager.add_index(colname, is_unique, **kw)
+
+    def drop_index(self, colname, is_unique=False, **kw):
+        self.manager.drop_index(colname, is_unique, **kw)
 
     def __enter__(self):
         return self

@@ -71,6 +71,7 @@ class TableProxy(SQLDBInterface):
             raise Exception("当前状态不能写入")
 
     def insert(self, seqname=None, _test=False, **values):
+        assert len(values) > 0
         self.check_write_state()
         values = self.fix_sql_keywords(values)
         start_time = time.time()
@@ -87,6 +88,10 @@ class TableProxy(SQLDBInterface):
         
     def select(self, vars=None, what='*', where=None, order=None, group=None,
                limit=None, offset=None, _test=False):
+        if limit != None:
+            assert limit > 0
+        if offset != None:
+            assert offset >= 0
         where = self.fix_sql_keywords(where)
         result_set = self.db.select(self.tablename, vars=vars, what=what, where=where, order=order, group=group,
                               limit=limit, offset=offset, _test=_test)
@@ -114,6 +119,7 @@ class TableProxy(SQLDBInterface):
         return self.db.query(sql, vars=vars).first().amount
 
     def update(self, where, vars=None, _test=False, _skip_binlog=False, _skip_profile=False, **values):
+        assert len(values) > 0
         self.check_write_state()
         where = self.fix_sql_keywords(where)
         values = self.fix_sql_keywords(values)
@@ -179,16 +185,17 @@ class TableProxy(SQLDBInterface):
     def iter_batch(self, batch_size=20, where="", vars=None):
         assert isinstance(where, str)
         
+        pk_name = self.table_info.pk_name
         last_id = 0
         while True:
             this_vars = dict(last_id = last_id)
             if vars != None:
                 this_vars.update(vars)
-            records = self.select(where = "id > $last_id " + where, vars = this_vars, limit = batch_size, order="id")
+            records = self.select(where = f"{pk_name} > $last_id " + where, vars = this_vars, limit = batch_size, order=pk_name)
             if len(records) == 0:
                 break
             yield records
-            last_id = records[-1].id
+            last_id = records[-1].get(pk_name)
     
     def get_table_info(self) -> table_manager.TableInfo:
         return self.table_info

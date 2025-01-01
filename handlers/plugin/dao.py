@@ -53,7 +53,7 @@ class PageVisitDao:
     def delete_by_id(cls, log_id):
         return cls.db.delete(where=dict(id=log_id))
     
-def list_visit_logs(user_name, offset = 0, limit = -1):
+def list_visit_logs(user_name, offset = 0, limit = 1000):
     user_id = xauth.UserDao.get_id_by_name(user_name)
     return PageVisitDao.list_logs(user_id=user_id, offset=offset, limit=limit, order="visit_time desc")
 

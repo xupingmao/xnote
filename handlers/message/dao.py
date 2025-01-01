@@ -21,6 +21,7 @@ from .message_model import VALID_MESSAGE_PREFIX_TUPLE
 from .message_model import MessageHistory
 from .message_model import MessageTagDO
 from .message_model import MOBILE_LENGTH
+from .message_model import MsgTagInfo
 
 
 _msg_db = dbutil.get_table("msg_v2")
@@ -66,7 +67,7 @@ def _create_message_with_date(kw):
     msg_index.ctime_sys = xutils.format_datetime()
     msg_index.ctime = ctime
     msg_index.date = date
-    msg_index.sort_value = ctime
+    msg_index.change_time = ctime
     msg_id = MsgIndexDao.insert(msg_index)
     _msg_db.update_by_id(str(msg_id), kw)
     kw.id = kw._key
@@ -86,7 +87,7 @@ def _create_message_without_date(kw):
     index.date = kw.date
     index.user_name = kw.user
     index.user_id = xauth.UserDao.get_id_by_name(kw.user)
-    index.sort_value = ctime
+    index.change_time = ctime
 
     msg_id = MsgIndexDao.insert(index)
     _msg_db.update_by_id(str(msg_id), kw)
@@ -197,7 +198,7 @@ def search_message(user_id: int, key: str, offset=0, limit=20, *, search_tags=No
         # 按照创建时间倒排 (按日期补充的随手记的key不是按时间顺序的)
     
     chatlist = MessageDO.from_dict_list(chatlist)
-    chatlist.sort(key = lambda x:x.sort_value, reverse=True)
+    chatlist.sort(key = lambda x:x.change_time, reverse=True)
     amount = _msg_db.count(filter_func=search_func, user_name=str(user_id))
     return chatlist, amount
 
@@ -607,6 +608,9 @@ class MsgIndexDao:
         assert msg_index.user_id != 0
         assert msg_index.user_name != ""
 
+        if msg_index.change_time == xtables.DEFAULT_DATETIME:
+            msg_index.change_time = msg_index.ctime
+
         msg_index.mtime = dateutil.format_datetime()
         return cls.db.insert(**msg_index)
     
@@ -630,7 +634,7 @@ class MsgIndexDao:
         return cls.db.count(where=where, vars=vars)
     
     @classmethod
-    def list(cls, user_id=0, tag="", date_prefix="", date_start="", date_end="", offset=0, limit=10, order="sort_value desc"):
+    def list(cls, user_id=0, tag="", date_prefix="", date_start="", date_end="", offset=0, limit=10, order="change_time desc"):
         where = "1=1"
         if user_id != 0:
             where += " AND user_id=$user_id"
@@ -660,13 +664,11 @@ class MsgIndexDao:
         return MsgIndex(**result)
     
     @classmethod
-    def update_tag(cls, id=0, tag="", sort_value=""):
-        now = xutils.format_datetime()
+    def update_tag(cls, id=0, tag="", update_time=xtables.DEFAULT_DATETIME):
         updates = dict()
         updates["tag"] = tag
-        updates["mtime"] = now
-        if sort_value != "":
-            updates["sort_value"] = sort_value
+        updates["mtime"] = update_time
+        updates["change_time"] = update_time
         return cls.db.update(where=dict(id=id), **updates)
     
     @classmethod
@@ -696,37 +698,6 @@ class MsgIndexDao:
     def iter_all(cls):
         for item in cls.db.iter():
             yield MsgIndex.from_dict(item)
-
-class MsgTagInfo(Storage):
-    def __init__(self):
-        self._key = "" # kv的真实key
-        self.id = ""
-        self.ctime = xutils.format_datetime()
-        self.mtime = xutils.format_datetime()
-        self.user = ""
-        self.content=""
-        self.amount=0
-        self.is_marked=False
-        self.visit_cnt=0
-    
-    @staticmethod
-    def from_dict(dict_value):
-        result = new_from_dict(MsgTagInfo, dict_value)
-        result.id = result._key
-        return result
-    
-    @classmethod
-    def from_dict_or_None(cls, dict_value):
-        if dict_value == None:
-            return None
-        return cls.from_dict(dict_value)
-    
-    @classmethod
-    def from_dict_list(cls, dict_list) -> typing.List["MsgTagInfo"]:
-        result = []
-        for item in dict_list:
-            result.append(cls.from_dict(item))
-        return result
 
 class MsgTagInfoDao:
     """随手记标签元信息表,使用KV存储"""
@@ -792,8 +763,8 @@ class MsgTagBindDao:
         cls.tag_bind_service.bind_tags(user_id=user_id, target_id=msg_id, tags=tags, update_only_changed=True, second_type=second_type, sort_value=sort_value)
 
     @classmethod
-    def update_second_type(cls, user_id=0, msg_id=0, second_type=0):
-        cls.tag_bind_service.update_second_type(user_id=user_id, target_id=msg_id, second_type=second_type)
+    def update_second_type(cls, user_id=0, msg_id=0, second_type=0, sort_value=""):
+        cls.tag_bind_service.update_second_type(user_id=user_id, target_id=msg_id, second_type=second_type, sort_value=sort_value)
         
     @classmethod
     def count_by_key(cls, user_id=0, key="", second_type=0):
@@ -844,15 +815,18 @@ class MessageDao:
     @staticmethod
     def update_user_tags(message:MessageDO):
         msg_id = message.get_int_id()
-        sort_value = str(message.ctime)
+        sort_value = str(message.change_time)
         MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.full_keywords, second_type=message.get_second_type(), sort_value=sort_value)
     
     @classmethod
-    def update_tag(cls, message:MessageDO, tag="", sort_value=""):
+    def update_tag(cls, message:MessageDO, tag=""):
+        now = dateutil.format_datetime()
         message.tag = tag
-        MsgIndexDao.update_tag(id=int(message._id), tag=tag, sort_value=sort_value)
+        message.change_time = now
+        MsgIndexDao.update_tag(id=int(message._id), tag=tag, update_time=now)
         second_type = message.get_second_type()
-        MsgTagBindDao.update_second_type(user_id=message.user_id, msg_id=message.get_int_id(), second_type=second_type)
+        MsgTagBindDao.update_second_type(user_id=message.user_id, msg_id=message.get_int_id(), 
+                                         second_type=second_type, sort_value=now)
         cls.update(message)
         cls.refresh_message_stat(message.user)
 
@@ -885,7 +859,7 @@ class MessageDao:
         return get_message_tag(user, tag, priority)
     
     @classmethod
-    def batch_get_by_index_list(cls, index_list, user_id=0) -> typing.List[MessageDO]:
+    def batch_get_by_index_list(cls, index_list: typing.List[MsgIndex], user_id=0) -> typing.List[MessageDO]:
         id_list = []
         for index in index_list:
             id_list.append(str(index.id))
@@ -896,7 +870,7 @@ class MessageDao:
             msg = dict_result.get(str(index.id))
             if msg != None:
                 new_msg = MessageDO.from_dict(msg)
-                new_msg.sort_value = index.sort_value
+                new_msg.change_time = index.change_time
                 result.append(new_msg)
         return result
     

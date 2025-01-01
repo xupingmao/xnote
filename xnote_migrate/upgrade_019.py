@@ -25,6 +25,7 @@ def do_upgrade():
     base.execute_upgrade("20240623_note_history_index", handler.migrate_note_history_index)
     base.execute_upgrade("20240928_rebuild_msg", handler.rebuild_msg)
     base.execute_upgrade("20241026_migrate_search_history", handler.migrate_search_history)
+    base.execute_upgrade("20241229_msg_idx_change_time", handler.rebuild_msg_idx_change_time)
     
 class NoteHistoryKvIndexDO(xutils.Storage):
     def __init__(self, **kw):
@@ -88,6 +89,39 @@ class KvSearchHistory(xutils.Storage):
     @staticmethod
     def from_dict(dict_value):
         return new_from_dict(KvSearchHistory, dict_value)
+
+class MsgIndex(xutils.Storage):
+    def __init__(self, **kw):
+        self.id = 0
+        self.tag = ""
+        self.user_id = 0
+        self.user_name = ""
+        self.ctime_sys = dateutil.format_datetime() # 实际创建时间
+        self.ctime = dateutil.format_datetime() # 展示创建时间
+        self.mtime = dateutil.format_datetime() # 修改时间
+        self.date = xtables.DEFAULT_DATE
+        self.sort_value = "" # 排序字段, 对于log/task,存储创建时间,对于done,存储完成时间
+        self.change_time = xtables.DEFAULT_DATETIME
+        self.update(kw)
+
+    @classmethod
+    def from_dict(cls, dict_value):
+        result = MsgIndex()
+        result.update(dict_value)
+        return result
+    
+    def get_change_time(self):
+        if not dateutil.is_empty_datetime(self.change_time):
+            return self.change_time
+        if self.sort_value == "":
+            return self.mtime
+        try:
+            return str(dateutil.to_py_datetime(self.sort_value))
+        except:
+            return self.mtime
+        
+    def get_full_key(self):
+        return f"msg_v2:{self.user_id}:{self.id}"
 
 class MigrateHandler:
 
@@ -224,3 +258,21 @@ class MigrateHandler:
             item = KvSearchHistory.from_dict(raw_item)
             self.upsert_search_history(item, SearchHistoryType.msg)
 
+
+    def rebuild_msg_idx_change_time(self):
+        msg_index_db = xtables.get_table_by_name("msg_index")
+        msg_full_db = dbutil.get_table("msg_v2")
+        for batch in msg_index_db.iter_batch():
+            for row in batch:
+                msg_index = MsgIndex.from_dict(row)
+                new_change_time = msg_index.get_change_time()
+                if new_change_time != msg_index.change_time:
+                    full_key = msg_index.get_full_key()
+                    full_info = msg_full_db.get_by_key(full_key)
+                    if full_info != None:
+                        full_info.pop("sort_value", None)
+                        full_info["change_time"] = new_change_time
+                        msg_full_db.update(full_info)
+                    msg_index_db.update(where=dict(id=msg_index.id), change_time = new_change_time)
+
+                        

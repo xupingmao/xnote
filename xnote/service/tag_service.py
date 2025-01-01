@@ -103,13 +103,13 @@ class TagBindService:
             return self.default_tag_type
         return tag_type
     
-    def update_second_type(self, user_id=0, target_id=0, second_type=0):
+    def update_second_type(self, user_id=0, target_id=0, second_type=0, sort_value=""):
         where_dict = {}
         where_dict["tag_type"] = self.default_tag_type
         where_dict["user_id"] = user_id
         where_dict["target_id"] = target_id
 
-        self.db.update(where=where_dict, second_type=second_type)
+        self.db.update(where=where_dict, second_type=second_type, sort_value=sort_value)
 
     def bind_tags(self, user_id=0, target_id=0, tags=[], update_only_changed = False, second_type=0, sort_value=""):
         assert target_id > 0

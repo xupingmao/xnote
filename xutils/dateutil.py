@@ -44,6 +44,9 @@ SECONDS_PER_DAY = 3600 * 24
 DEFAULT_FORMAT = '%Y-%m-%d %H:%M:%S'
 FORMAT = DEFAULT_FORMAT
 DATE_FORMAT = "%Y-%m-%d"
+DEFAULT_DATETIME = "1970-01-01 00:00:00"
+DEFAULT_DATE = "1970-01-01"
+DEFAULT_DATETIME_OBJ = datetime.datetime(1970, 1, 1)
 
 WDAY_DICT = {
     "*": u"每天",
@@ -394,3 +397,10 @@ def match_time(year = None, month = None, day = None, wday = None, tm = None):
 def get_today():
     return format_date()
 
+def is_empty_datetime(value):
+    if value == DEFAULT_DATETIME or value == "":
+        return True
+    if isinstance(value, datetime.datetime):
+        return value == DEFAULT_DATETIME_OBJ
+    return False
+    

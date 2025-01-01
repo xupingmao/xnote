@@ -9,7 +9,6 @@ from . import base
 from xutils import Storage
 from xutils import dbutil
 from xutils.db.dbutil_helper import new_from_dict
-from handlers.message.dao import MsgIndex
 
 def do_upgrade():
     # since 2.9.5
@@ -27,6 +26,24 @@ class MsgInfoV1(Storage):
     @staticmethod
     def from_dict(dict_value):
         return new_from_dict(MsgInfoV1, dict_value)
+
+class MsgIndex(xutils.Storage):
+    def __init__(self, **kw):
+        self.id = 0
+        self.tag = ""
+        self.user_id = 0
+        self.user_name = ""
+        self.ctime_sys = xtables.DEFAULT_DATETIME # 实际创建时间
+        self.ctime = xtables.DEFAULT_DATETIME # 展示创建时间
+        self.mtime = xtables.DEFAULT_DATETIME # 修改时间
+        self.date = xtables.DEFAULT_DATE
+        self.update(kw)
+
+    @classmethod
+    def from_dict(cls, dict_value):
+        result = MsgIndex()
+        result.update(dict_value)
+        return result
 
 def fix_datetime(datetime_str=""):
     if datetime_str == "":

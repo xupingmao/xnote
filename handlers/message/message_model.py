@@ -14,6 +14,7 @@ from xutils.functions import del_dict_key
 from xnote.core.xtemplate import T
 from xnote.core import xtables
 from xnote.service import TagTypeEnum
+from xutils.db.dbutil_helper import new_from_dict
 
 """消息模型相关的内容
 任务：默认按照修改时间排序
@@ -37,6 +38,10 @@ second_type_dict = {
     "done": 3,
 }
 
+class BaseMsgDO(Storage):
+    def get_time_info(self):
+        return ""
+
 class MessageSystemTag:
     """系统标签"""
     task = "task"
@@ -53,7 +58,6 @@ class MessageFolder(Storage):
         self.item_list = []
 
 class MessageTag(Storage):
-
     def __init__(self, **kw):
         self.name = ""
         self.content = kw.get("name", "")
@@ -65,8 +69,39 @@ class MessageTag(Storage):
         self.update(kw)
 
 
-class MessageTagDO(Storage):
+class MsgTagInfo(BaseMsgDO):
+    def __init__(self):
+        self._key = "" # kv的真实key
+        self.id = ""
+        self.ctime = xutils.format_datetime()
+        self.mtime = xutils.format_datetime()
+        self.user = ""
+        self.content=""
+        self.amount=0
+        self.is_marked=False
+        self.visit_cnt=0
+    
+    @staticmethod
+    def from_dict(dict_value):
+        result = new_from_dict(MsgTagInfo, dict_value)
+        result.id = result._key
+        return result
+    
+    @classmethod
+    def from_dict_or_None(cls, dict_value):
+        if dict_value == None:
+            return None
+        return cls.from_dict(dict_value)
+    
+    @classmethod
+    def from_dict_list(cls, dict_list) -> typing.List["MsgTagInfo"]:
+        result = []
+        for item in dict_list:
+            result.append(cls.from_dict(item))
+        return result
 
+class MessageTagDO(BaseMsgDO):
+    """这个是对外展示的菜单信息"""
     def __init__(self, tag, size, priority=0):
         self.type = type
         self.size = size
@@ -91,7 +126,7 @@ class MessageTagDO(Storage):
     def get_second_type_by_code(cls, code=""):
         return second_type_dict.get(code, 0)
 
-def is_task_tag(tag):
+def is_task_tag(tag: str):
     return tag in ("task", "done", "task.search", "done.search")
 
 
@@ -100,7 +135,31 @@ class MessageComment(Storage):
         self.time = dateutil.format_datetime()
         self.content = ""
 
-class MessageDO(Storage):
+class MsgIndex(Storage):
+    def __init__(self, **kw):
+        self.id = 0
+        self.tag = ""
+        self.user_id = 0
+        self.user_name = ""
+        self.ctime_sys = dateutil.format_datetime() # 实际创建时间
+        self.ctime = dateutil.format_datetime() # 展示创建时间
+        self.mtime = dateutil.format_datetime() # 修改时间
+        self.date = xtables.DEFAULT_DATE
+        self.change_time = xtables.DEFAULT_DATETIME # 状态变更的时间，比如创建时间/完成时间/重新打开的时间
+        self.update(kw)
+
+    @classmethod
+    def from_dict(cls, dict_value):
+        result = MsgIndex()
+        result.update(dict_value)
+        return result
+    
+    @classmethod
+    def from_dict_list(cls, dict_list):
+        return [cls.from_dict(item) for item in dict_list]
+
+
+class MessageDO(BaseMsgDO):
     def __init__(self):
         self._key = "" # kv的主键
         self._id = "" # kv的ID
@@ -125,7 +184,7 @@ class MessageDO(Storage):
         self.no_tag = True
         self.amount = 0 # keyword对象的数量
         self.done_time = None # type: str|None
-        self.sort_value = ""
+        self.change_time = xtables.DEFAULT_DATETIME
 
     @classmethod
     def from_dict(cls, dict_value: dict):
@@ -137,22 +196,11 @@ class MessageDO(Storage):
         for item in result.comments:
             comment_text = item.get("content")
             item["content"] = sys_comment_dict.get(comment_text, comment_text) # type:ignore
-        
-        if result.sort_value == "":
-            result.sort_value = xtables.DEFAULT_DATETIME
-            # index = MsgIndexDao.get_by_id(numutil.parse_int(result._id))
-            # if index != None:
-            #     result.sort_value = index.sort_value
-            #     MessageDao.update(result)
-            
         return result
     
     @classmethod
-    def from_dict_list(cls, dict_list) -> typing.List["MessageDO"]:
-        result = []
-        for item in dict_list:
-            result.append(cls.from_dict(item))
-        return result
+    def from_dict_list(cls, dict_list):
+        return [cls.from_dict(item) for item in dict_list]
     
     @classmethod
     def from_dict_or_None(cls, dict_value):
@@ -212,30 +260,12 @@ class MessageDO(Storage):
     
     def get_second_type(self):
         return second_type_dict.get(self.tag, 0)
-
-
-class MsgIndex(Storage):
-    def __init__(self, **kw):
-        self.id = 0
-        self.tag = ""
-        self.user_id = 0
-        self.user_name = ""
-        self.ctime_sys = dateutil.format_datetime() # 实际创建时间
-        self.ctime = dateutil.format_datetime() # 展示创建时间
-        self.mtime = dateutil.format_datetime() # 修改时间
-        self.date = xtables.DEFAULT_DATE
-        self.sort_value = "" # 排序字段, 对于log/task,存储创建时间,对于done,存储完成时间
-        self.update(kw)
-
-    @classmethod
-    def from_dict(cls, dict_value):
-        result = MsgIndex()
-        result.update(dict_value)
-        return result
     
-    @classmethod
-    def from_dict_list(cls, dict_list):
-        return [cls.from_dict(item) for item in dict_list]
+    def get_time_info(self):
+        if is_task_tag(self.tag):
+            return self.change_time
+        else:
+            return self.ctime
     
 class MessageHistory:
     def __init__(self):

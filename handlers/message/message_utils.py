@@ -494,7 +494,7 @@ class MessageListParser(object):
         if len(message.keywords) == 0:
             message.html = build_search_html(message.content)
 
-    def do_process_message_list(self, message_list):
+    def do_process_message_list(self, message_list: typing.List[MessageDO]):
         keywords = {}
         for message in message_list:
             self.process_message(message)
@@ -502,10 +502,7 @@ class MessageListParser(object):
                 for keyword in message.keywords:
                     count = keywords.get(keyword, 0)
                     keywords[keyword] = count + 1
-            if is_task_tag(message.tag):
-                message.time_info = message.sort_value
-            else:
-                message.time_info = message.ctime
+            message.time_info = message.get_time_info()
             message.weekday = dateutil.datetime_to_weekday(message.time_info)
 
         self.keywords = []

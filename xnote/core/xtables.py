@@ -462,22 +462,27 @@ def init_msg_index_table():
     comment = "随手记索引"
     with create_default_table_manager(table_name, comment=comment) as manager:
         # 展示创建时间
-        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("ctime", "datetime", DEFAULT_DATETIME, comment="创建时间")
         # 实际创建时间
-        manager.add_column("ctime_sys", "datetime", DEFAULT_DATETIME)
+        manager.add_column("ctime_sys", "datetime", DEFAULT_DATETIME, comment="系统创建时间")
         # 修改时间
-        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", DEFAULT_DATETIME, comment="修改时间")
         manager.add_column("user_id", "bigint", 0)
         manager.add_column("user_name", "varchar(64)", "")
         # 短信息的类型
         manager.add_column("tag", "varchar(16)", "")
         manager.add_column("date", "date", default_value=DEFAULT_DATE)
-        manager.add_column("sort_value", "varchar(50)", default_value="", comment="排序字段")
+        # 状态变更的时间,比如task的完成时间
+        manager.add_column("change_time", "datetime", DEFAULT_DATETIME, comment="状态变更时间")
+        manager.add_column("sort_value", "varchar(50)", default_value="", comment="【废弃】排序字段")
 
         manager.add_index(["user_id", "ctime"])
         manager.add_index(["user_id", "mtime"])
-        manager.add_index(["user_id", "sort_value"])
-        manager.add_index(["user_id", "tag", "sort_value"])
+        manager.add_index(["user_id", "tag", "change_time"])
+
+        # 删除的索引
+        manager.drop_index(["user_id", "sort_value"])
+        manager.drop_index(["user_id", "tag", "sort_value"])
 
 def init_msg_history_index():
     """随手记历史索引"""
