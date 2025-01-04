@@ -1,0 +1,16 @@
+{% init _is_select2_loaded = False %}
+
+{% if not _is_select2_loaded %} 
+    {% set-global _is_select2_loaded = True %}
+    <link rel="stylesheet" href="{{_server_home}}/_static/lib/select2/4.0.13/select2.min.css" type="text/css" />
+    <script type="text/javascript" src="{{_server_home}}/_static/lib/select2/4.0.13/select2.min.js"></script>
+
+<script>
+    $(function() {
+        // 只有大于等于10个选项时展示搜索
+        $("select").select2({
+            minimumResultsForSearch: 10
+        });
+    });
+</script>
+{% end %}

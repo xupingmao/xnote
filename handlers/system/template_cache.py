@@ -1,7 +1,8 @@
 import web
 import xutils
-import xtemplate
-import xauth
+from xutils import Storage
+from xnote.core import xtemplate
+from xnote.core import xauth
 
 class handler:
 
@@ -18,5 +19,10 @@ class handler:
                 code = xtemplate.get_code(name)
             except:
                 code = ""
-            return xtemplate.render("system/page/template_cache.html", code=code, name=name, templates=templates)
+            lines = code.split("\n")
+            kw = Storage()
+            kw.code = code
+            kw.lines = lines
+            kw.templates = templates
+            return xtemplate.render("system/page/template_cache.html", **kw)
 

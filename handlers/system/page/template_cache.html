@@ -1,27 +1,39 @@
-{% extends base.html %}
+{% extends wide_base %}
 
 {% block body %}
 
+{% include common/script/load_select2.html %}
+{% include common/script/load_codemirror.html %}
+
 {% init code = "" %}
 {% init name = "" %}
+{% init lines = [] %}
+{% init title = "Template Cache" %}
 
-<h3>Template Cache</h3>
-<form method="get">
+<div class="card">
+    {% include common/base_title.html %}
+</div>
+
+<div class="card">
     <div>
-        <label>Name</label>
-        <input type="text" name="name" value="{{name}}"/>
-        <button>查询</button>
+        <label>请选择模板</label>
+        <select id="nameSelect" value = "{{name}}" class="row">
+            {% for tname in templates %}
+                <option>{{tname}}</option>
+            {% end %}
+        </select>
     </div>
-</form>
+    <div class="top-offset-1 border">
+        <textarea id="code" class="row code">{{code}}</textarea>
+    </div>
+</div>
 
-<ul>
-{% for tname in templates %}
-    <li><a href="{{_server_home}}/system/template_cache?name={{tname}}">{{tname}}</a></li>
-{% end %}
-</ul>
-
-{% set lines = code.count("\n") %}
-<pre class="col-md-1" >{% for l in range(1, lines+1) %}{{"%04d\n" % l}}{% end %}</pre>
-<pre class="col-md-11">{{code}}</pre>
+<script>
+    initCodeMirror("#code", {});
+    $("#nameSelect").change(function() {
+        var name = $(this).val();
+        window.location.href = "?name=" + name;
+    })
+</script>
 
 {% end %}
