@@ -72,10 +72,10 @@ class MySQLKV(interfaces.DBInterface):
         # 一个CHAR占用3个字节，索引最多用1000个字节
         
         self.db.query("""CREATE TABLE IF NOT EXISTS `kv_store` (
-            `key` blob not null comment '键值对key', 
+            `key` varbinary(100) not null comment '键值对key', 
             value longblob comment '键值对value',
             version int not null default 0 comment '版本',
-            PRIMARY KEY (`key`(200))
+            PRIMARY KEY (`key`)
         ) COMMENT '键值对存储';
         """)
 

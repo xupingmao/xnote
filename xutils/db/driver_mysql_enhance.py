@@ -18,7 +18,7 @@ class EnhancedMySQLKV(MySQLKV):
     def init(self):
         warnings.warn("EnhancedMySQLKV is deprecated")
         super().init()
-        self.max_key_len = 200
+        self.max_key_len = 100
 
     def doPutRaw(self, key, value, cursor=None):
         assert len(key) <= self.max_key_len

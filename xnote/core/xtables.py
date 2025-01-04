@@ -15,10 +15,7 @@ from xutils.dbutil import interfaces
 from xutils.sqldb import TableManagerFacade as TableManager
 from xutils.sqldb import TableProxy, TableConfig
 from xutils import fsutil
-
-
-DEFAULT_DATETIME = "1970-01-01 00:00:00"
-DEFAULT_DATE = "1970-01-01"
+from xutils.dateutil import DEFAULT_DATE, DEFAULT_DATETIME
 
 class MySqliteDB(web.db.SqliteDB):
     _lock = threading.RLock()
@@ -237,11 +234,12 @@ def init_user_table():
         manager.add_column("token", "varchar(32)", "")
         manager.add_column("login_time", "datetime", DEFAULT_DATETIME)
         manager.add_column("status", "tinyint", 0)
+        
+        # 索引
         manager.add_index("name", is_unique=True)
         manager.add_index("token")
         # 删除的字段
         manager.drop_column("privileges", "text", "")
-        manager.table_info.enable_binlog = True
 
 
 def init_user_op_log_table():
@@ -499,8 +497,7 @@ def init_msg_history_index():
 def init_kv_store_table():
     kw = dict()
     kw["pk_name"] = "key"
-    kw["pk_len"] = 100
-    kw["pk_type"] = "blob"
+    kw["pk_type"] = "varbinary(100)"
     kw["debug"] = xconfig.DatabaseConfig.db_debug
     kw["comment"] = "kv存储"
     dbpath = xconfig.FileConfig.kv_db_file

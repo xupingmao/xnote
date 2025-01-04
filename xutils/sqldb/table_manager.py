@@ -44,7 +44,8 @@ class TableHelper:
         
         return f"{self.quote}{colname}{self.quote}"
     
-    def _do_single_name(self, colname: str):
+    @classmethod
+    def _do_single_name(cls, colname: str):
         if "(" in colname:
             # like field_name(10)
             return colname.split("(")[0]
@@ -76,6 +77,11 @@ class TableHelper:
             return ",".join(col_list)
         else:
             return self.quote_col(colname)
+        
+    @classmethod
+    def get_type_name(cls, type_name: str):
+        """获取字段的类型名称,不包含长度"""
+        return cls._do_single_name(type_name)
 
 class BaseTableManager:
     """检查数据库字段，如果不存在就自动创建"""
@@ -91,8 +97,9 @@ class BaseTableManager:
         self.pk_type = kw.get("pk_type", "int")
         self.pk_len = kw.get("pk_len", 0)
         self.pk_comment = kw.get("pk_comment", "主键")
+        pk_type = TableHelper.get_type_name(self.pk_type)
         # 目前只支持这两种主键
-        assert self.pk_type in ("int", "blob")
+        assert pk_type in ("int", "varbinary")
 
     def __enter__(self):
         return self
@@ -416,7 +423,8 @@ class TableManagerFacade:
     
     def drop_column(self, colname, coltype,
                    default_value=None, not_null=True):
-        pass
+        """只会打一个告警日志,不会实际删除"""
+        logging.warning(f"drop column {colname}")
 
     def add_index(self, colname, is_unique=False, **kw):
         self.table_info.add_index(colname, is_unique)
