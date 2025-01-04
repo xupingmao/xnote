@@ -12,6 +12,7 @@ except ImportError:
 
 import web
 import xutils
+import typing
 import handlers.note.dao as note_dao
 import handlers.message.dao as msg_dao
 
@@ -19,6 +20,7 @@ from xnote.core import xtemplate
 from xnote.core import xauth
 from xnote.core import xconfig
 from xnote.core import xmanager
+from xnote.core.xnote_user_config import UserConfig
 from xutils import Storage
 from xutils import dateutil, fsutil
 from xnote.core.xtemplate import T
@@ -33,7 +35,7 @@ from handlers.note.models import NoteTypeInfo
 from .dao_api import NoteDao
 from handlers.note.note_service import NoteService
 from xnote.plugin import DataTable
-from handlers.note.models import NoteIndexDO
+from handlers.note.models import NoteIndexDO, OrderTypeEnum
 
 VIEW_TPL = "note/page/view.html"
 TYPES_NAME = "笔记索引"
@@ -217,10 +219,6 @@ class MyShareListHandler(ShareListHandler):
 
 class GroupListHandler:
 
-    def load_category(self, kw, user_name):
-        kw.category_list = list(
-            filter(lambda x: x.group_count != 0, list_category(user_name)))
-
     def load_group_list(self, user_name: str, status: str, kw: Storage):
         assert status in ("active", "smart")
         parent_id = xutils.get_argument_int("parent_id")
@@ -245,40 +243,21 @@ class GroupListHandler:
             for note in notes:
                 note.badge_info = note.children_count
 
-    def sort_notes(self, notes, kw):
+    def sort_notes(self, notes: typing.List[NoteIndexDO], kw):
         tab = kw.tab
-        orderby = kw.orderby
+        order_type = kw.order_type
+        kw.show_orderby = True
 
         if tab == "smart":
             return
 
-        kw.show_orderby = True
-
-        if orderby == "name_desc":
-            notes.sort(key=lambda x: x.name, reverse=True)
-
-        if orderby == "name_asc":
-            notes.sort(key=lambda x: x.name)
-
-        if orderby == "hot_desc":
+        if order_type == OrderTypeEnum.size.int_value:
             for note in notes:
-                note.hot_index = note.hot_index or 0
-                note.badge_info = "热度(%s)" % note.hot_index
-            notes.sort(key=lambda x: x.hot_index, reverse=True)
-
-        if orderby == "size_desc":
-            for note in notes:
-                note.badge_info = note.children_count
-
+                note.badge_info = str(note.children_count)
             notes.sort(key=lambda x: x.children_count or 0, reverse=True)
+            return
 
-        if orderby == "ctime_desc":
-            for note in notes:
-                note.ctime = note.ctime or ""
-                note.badge_info = note.create_date
-            notes.sort(key=lambda x: x.ctime, reverse=True)
-
-        notes.sort(key=lambda x: x.priority, reverse=True)
+        note_dao.sort_notes(notes, order_type=kw.order_type)
 
     def GET(self):
         flag = xutils.get_argument_bool("profile")
@@ -296,14 +275,11 @@ class GroupListHandler:
     def do_get(self):
         user_name = xauth.current_name_str()
 
-        orderby_default = str(xconfig.get_user_config(
-            user_name, "group_list_order_by", "name_asc"))
-        logging.debug("orderby_default:%s", orderby_default)
+        order_type = UserConfig.group_list_order_type.get(user_name=user_name)
+        logging.debug("group_list_order_type:%s", order_type)
 
         category = xutils.get_argument_str("note_category", "all")
         tab = xutils.get_argument_str("tab", "active")
-        orderby = xutils.get_argument_str("orderby", orderby_default)
-
         show_back = xutils.get_argument_bool("show_back")
         q_tag_name = xutils.get_argument_str("tag_name", "")
         q_tags = []
@@ -312,14 +288,11 @@ class GroupListHandler:
 
         xmanager.add_visit_log(user_name, "/note/group")
 
-        if orderby != orderby_default:
-            xconfig.update_user_config(
-                user_name, "group_list_order_by", orderby)
-
         root = note_dao.get_root()
         kw = Storage()
         kw.tab = tab
-        kw.orderby = orderby
+        kw.orderby = order_type
+        kw.order_type = order_type
         kw.title = T("我的笔记本")
         kw.note_category = category
         kw.category_info = get_category_by_code(user_name, category)
@@ -850,7 +823,7 @@ class ManagementHandler:
 
         notes = note_dao.list_by_parent(user_name, parent_id,
                                         offset=0, limit=200, 
-                                        orderby=parent_note.orderby, tags=q_tags)
+                                        order_type=parent_note.order_type, tags=q_tags)
 
         parent = Storage(url="/note/%s" % parent_id,
                          name=parent_note.name)

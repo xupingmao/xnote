@@ -18,12 +18,14 @@ from xutils import textutil
 from xutils import webutil
 from xutils import dbutil, dateutil
 from xnote.core.xtemplate import T
+from xnote.core.xnote_user_config import UserConfig
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
 from .dao_api import NoteDao
 from handlers.note.models import NotePathInfo
 from . import dao_draft
 from . import dao_log
+from .models import OrderTypeEnum
 
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -134,7 +136,6 @@ def view_group_timeline_func(note, kw):
 
 
 def view_group_detail_func(file: note_dao.NoteDO, kw):
-    orderby = kw.orderby
     user_name = kw.user_name
     page = kw.page
     # pagesize  = kw.pagesize
@@ -149,27 +150,19 @@ def view_group_detail_func(file: note_dao.NoteDO, kw):
         kw.show_recommend = False
         kw.template_name = "note/component/editor/markdown_edit.html"
         return
-
-    if orderby != "" and orderby != file.orderby and user_name == file.creator:
-        note_dao.update_note(file.id, orderby=orderby, creator_id=file.creator_id)
-
-    if orderby == None or orderby == "":
-        orderby = file.orderby
-
-    if orderby == None or orderby == "":
-        orderby = "ctime_desc"
-
+    
     q_tags = None
     if q_tag != "":
         q_tags = [q_tag]
 
-    if orderby == "ctime_desc":
+    if file.order_type == int(OrderTypeEnum.ctime_desc.value):
         files = []
+        kw.show_timeline_body = True
     else:
         offset = max(page-1, 0) * pagesize
         files = note_dao.list_by_parent(file.creator, parent_id=file.id,
                                         offset=offset, limit=pagesize,
-                                        orderby=orderby, tags=q_tags)
+                                        order_type=file.order_type, tags=q_tags)
 
     if is_public_page:
         files = list(filter(lambda x: x.is_public, files))
@@ -192,7 +185,7 @@ def view_group_detail_func(file: note_dao.NoteDO, kw):
     kw.tag_meta_list = dao_tag.list_tag_meta(
         user_name=user_name, group_id=file.id, tag_type="note")
     kw.show_orderby = True
-    kw.orderby = orderby
+    kw.order_type = file.order_type
 
     if dialog:
         # 对话框的样式
@@ -239,8 +232,7 @@ VIEW_FUNC_DICT = {
 
 
 def view_func_before(note, kw):
-    kw.show_comment_edit = (xconfig.get_user_config(
-        note.creator, "show_comment_edit") == "true")
+    kw.show_comment_edit = UserConfig.show_comment_edit.get_bool()
     dao_tag.handle_tag_for_note(note)
 
 
@@ -334,10 +326,10 @@ class ViewHandler:
         kw.op = op
         kw.user_name = user_name
         kw.page = page
-        kw.orderby = orderby
         kw.pagesize = pagesize
-        kw.page_url = "/note/view?id=%s&orderby=%s&page=" % (id, orderby)
+        kw.page_url = f"/note/view?id={id}&page="
         kw.is_public_page = is_public_page
+        kw.OrderTypeEnum = OrderTypeEnum
 
         if id == 0 or id == "0":
             raise web.found("/")

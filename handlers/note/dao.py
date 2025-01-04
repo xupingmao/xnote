@@ -44,6 +44,7 @@ from handlers.note.models import NoteIndexDO, NoteDO, NoteLevelEnum, del_dict_ke
 from handlers.note.models import NoteToken
 from handlers.note.models import NotePathInfo
 from handlers.note.models import NOTE_ICON_DICT
+from handlers.note.models import OrderTypeEnum
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -541,8 +542,16 @@ SORT_FUNC_DICT = {
     "atime_desc": empty_sort_func,
 }
 
+SORT_TYPE_FUNC_DICT = {
+    OrderTypeEnum.name.int_value: sort_by_name,
+    OrderTypeEnum.hot.int_value: sort_by_hot_index,
+    OrderTypeEnum.size.int_value: sort_by_size_desc,
+    OrderTypeEnum.ctime_desc.int_value: sort_by_ctime_desc,
+}
 
-def sort_notes(notes, orderby="name"):
+def sort_notes(notes, orderby="name", order_type=0):
+    if order_type != 0:
+        return sort_notes_by_order_type(notes, order_type)
     if orderby is None:
         orderby = "name"
     else:
@@ -553,12 +562,17 @@ def sort_notes(notes, orderby="name"):
     sort_func(notes)
 
 
+def sort_notes_by_order_type(notes, order_type=0):
+    sort_func = SORT_TYPE_FUNC_DICT.get(order_type, sort_by_mtime_desc)
+    build_note_list_info(notes, order_type)
+    sort_func(notes)
+
 def build_note_list_info(notes, orderby=None):
     for note in notes:
         build_note_info(note, orderby)
 
 
-def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None):
+def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None, order_type=0):
     if note is None:
         return None
 
@@ -568,8 +582,8 @@ def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None):
     if note.type in ("list", "csv"):
         note.show_edit = False
 
-    if note.orderby is None:
-        note.orderby = "ctime_desc"
+    if note.order_type == 0:
+        note.order_type = OrderTypeEnum.ctime_desc.int_value
 
     if note.ctime != None:
         note.create_date = format_date(note.ctime)
@@ -581,13 +595,13 @@ def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None):
     if note.is_deleted == 1 and note.dtime == None:
         note.dtime = note.mtime
 
-    if orderby == "hot_index":
+    if orderby == "hot_index" or order_type == OrderTypeEnum.hot.int_value:
         note.badge_info = "热度: %s" % note.hot_index
     
     if orderby == "mtime_desc":
         note.badge_info = format_date(note.mtime)
 
-    if orderby == "ctime_desc":
+    if orderby == "ctime_desc" or order_type == OrderTypeEnum.ctime_desc.int_value:
         note.badge_info = format_date(note.ctime)
 
     if note.badge_info in (None, ""):
@@ -673,6 +687,7 @@ def get_by_id(id, include_full=True, creator=None):
         note.creator_id = note_index.creator_id
         note.tag_str = note_index.tag_str
         note.tags = note_index.get_tags()
+        note.order_type = note_index.order_type
 
     build_note_info(note)
     return note
@@ -958,7 +973,7 @@ def update_note(note_id, **kw):
     atime = kw.get("atime")
     is_public = kw.get("is_public")
     tags = kw.get("tags")
-    orderby = kw.get("orderby")
+    order_type = kw.get("order_type", 0)
     size = kw.get("size")
     token = kw.get("token")
     creator_id = kw.get("creator_id", 0)
@@ -992,8 +1007,8 @@ def update_note(note_id, **kw):
 
     if tags != None:
         note.tags = tags
-    if orderby != None:
-        note.orderby = orderby
+    if order_type != 0:
+        note.order_type = order_type
     if size != None:
         note.size = size
     if token != None:
@@ -1325,6 +1340,7 @@ def count_public():
 @xutils.timeit_deco(name="NoteDao.ListNote:leveldb", logfile=True, logargs=True)
 def list_by_parent(creator="", parent_id=None, offset=0, limit=1000,
                    orderby="name",
+                   order_type=0,
                    skip_group=False,
                    include_public=True,
                    *,
@@ -1360,13 +1376,7 @@ def list_by_parent(creator="", parent_id=None, offset=0, limit=1000,
     notes = NoteIndexDao.list(parent_id=parent_id_int, offset=offset, limit=1000, creator_id=creator_id)
     build_note_list_info(notes, orderby=orderby)
     notes = list(filter(filter_note_func, notes))
-    if orderby == "db":
-        note = get_by_id_creator(parent_id, creator)
-        if note == None:
-            raise Exception("笔记不存在:%s" % parent_id)
-        orderby = note.orderby
-
-    sort_notes(notes, orderby)
+    sort_notes(notes, orderby, order_type=order_type)
     return notes[offset:offset+limit]
 
 

@@ -1,13 +1,14 @@
 # encoding=utf-8
 import enum
 import typing
+import xutils
 
-from xutils import Storage
+from xutils import Storage, EnumItem
 from xutils import dateutil
 from xnote.core import xtables
 from xnote.core import xconfig
 from xutils.db.dbutil_helper import new_from_dict
-
+from xutils.base import EnumItem
 
 NOTE_ICON_DICT = {
     "group": "fa-folder",
@@ -33,6 +34,13 @@ class NoteLevelEnum(enum.Enum):
     normal = 0 # 普通
     sticky = 1 # 置顶
 
+class OrderTypeEnum(xutils.BaseEnum):
+    name = EnumItem("名称", "1")
+    hot = EnumItem("热门", "2")
+    size = EnumItem("大小", "3")
+    ctime_desc = EnumItem("最新", "4")
+
+
 class NoteIndexDO(Storage):
     def __init__(self, **kw):
         super().__init__()
@@ -55,6 +63,7 @@ class NoteIndexDO(Storage):
         self.level = 0 # 等级 (-1)-归档 0-正常, 1-置顶
         self.tag_str = ""
         self.visit_cnt = 0
+        self.order_type = 0 # 排序方式
         self.update(kw)
 
     @staticmethod
@@ -85,7 +94,6 @@ class NoteIndexDO(Storage):
         if self.__class__ != NoteDO:
             self.content = ""
             self.data = ""
-        self.orderby = ""
         self.category = ""
         self.badge_info = ""
         self.show_next = False
@@ -130,8 +138,8 @@ class NoteDO(NoteIndexDO):
         self.data = ""
         self.token = ""
         self.priority = 0 # (-1):归档, 0-正常, 1-置顶
-        self.orderby = ""
         self.tags = []
+        self.orderby = "" # 废弃字段
 
         # 假的属性
         self.icon = ""

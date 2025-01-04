@@ -14,6 +14,7 @@ from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xmanager
 from xnote.core import xconfig
+from xnote.core.xnote_user_config import UserConfig
 from xutils import Storage
 from xutils import dateutil
 from xutils import cacheutil
@@ -28,7 +29,7 @@ from . import dao as note_dao
 from . import dao_delete
 from . import dao_share
 from . import note_helper
-from .models import NoteLevelEnum
+from .models import NoteLevelEnum, OrderTypeEnum
 
 from handlers.note.models import NoteIndexDO
 from handlers.note import dao_read
@@ -609,17 +610,24 @@ class UpdateStatusHandler:
         note_dao.NoteIndexDao.update_level(id, level = status)
         return webutil.SuccessResult(message = "更新状态成功")
 
-class UpdateOrderByHandler:
+class UpdateOrderTypeHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument("id")
-        orderby = xutils.get_argument("orderby")
-        if orderby not in note_dao.ORDER_BY_SET:
-            return webutil.FailedResult(code = "fail", message = "无效的排序方式: %s" % orderby)
-        note = check_get_note(id)
+        note_id = xutils.get_argument_int("note_id")
+        order_type = xutils.get_argument_int("order_type")
+        enum_item = OrderTypeEnum.get_by_value(str(order_type))
+        if enum_item == None:
+            return webutil.FailedResult(code = "fail", message = f"无效的排序方式: {order_type}")
+
+        if note_id == 0:
+            user_name = xauth.current_name_str()
+            # 更新根目录的排序
+            UserConfig.group_list_order_type.set(user_name, order_type)
+            return webutil.SuccessResult()
         
-        note_dao.update_note(id, orderby = orderby, creator_id = note.creator_id)
+        note = check_get_note(note_id)
+        note_dao.update_note(note_id, order_type = order_type, creator_id = note.creator_id)
         return webutil.SuccessResult(message = "更新排序方式成功")
 
 class MoveAjaxHandler:
@@ -864,7 +872,7 @@ xurls = (
     r"/note/unarchive"   , UnarchiveHandler,
     r"/note/touch"       , TouchHandler,
     r"/note/status"      , UpdateStatusHandler,
-    r"/note/orderby"     , UpdateOrderByHandler,
+    r"/note/order_type", UpdateOrderTypeHandler,
     
     # 分享
     r"/note/share",        NoteShareHandler,

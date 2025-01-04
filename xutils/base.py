@@ -109,3 +109,37 @@ def decode_bytes(bytes: bytes):
         raise exc
 
 try_decode = decode_bytes
+
+
+class EnumItem:
+    def __init__(self, name="", value=""):
+        self.name = name
+        self.value = value
+        self._int_cache = None
+    
+    @property
+    def int_value(self):
+        if self._int_cache is not None:
+            return self._int_cache
+        
+        self._int_cache = int(self.value)
+        return self._int_cache
+
+
+class BaseEnum:
+    """枚举的基类,和python自带的不同,允许动态新增枚举值"""
+    @classmethod
+    def enums(cls):
+        result = [] # type: list[EnumItem]
+        for key in cls.__dict__:
+            item = getattr(cls, key, None)
+            if isinstance(item, EnumItem):
+                result.append(item)
+        return result
+    
+    @classmethod
+    def get_by_value(cls, value=""):
+        for item in cls.enums():
+            if item.value == value:
+                return item
+        return None

@@ -180,6 +180,7 @@ def init_note_index_table():
         manager.add_column("level", "tinyint", 0)
         manager.add_column("tag_str", "varchar(255)", "")
         manager.add_column("visit_cnt", "bigint", 0, comment="访问次数")
+        manager.add_column("order_type", "tinyint", 0, comment="排序方式")
 
         # 各种索引
         manager.add_index("parent_id")

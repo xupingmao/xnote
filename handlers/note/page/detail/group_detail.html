@@ -13,6 +13,8 @@
 {% block body_left %}
     {% init url_type = "default" %}
     {% init parent_id = note.id %}
+    {% init show_timeline_body = False %}
+    
     {% include note/component/editor/editor_default_vars.html %}
 
     <div class="card">
@@ -23,7 +25,7 @@
         {% include note/component/note_path.html %}
     </div>
 
-    {% if orderby == "ctime_desc" %}
+    {% if show_timeline_body %}
         {% include note/component/timeline/timeline_body.html %}
     {% else %}
         {% include note/page/detail/group_detail_body.html %}

@@ -136,13 +136,13 @@ class TestXauth(BaseTestCase):
         assert xauth.has_login_by_sid(user_name, session_info.sid)
 
     def test_user_config_2(self):
-        from xnote.core.xnote_user_config import UserConfigKey
+        from xnote.core.xnote_user_config import UserConfig
         user_name = xauth.current_name_str()
         config_dict = xnote_user_config.get_config_dict(user_name)
         
-        assert config_dict[UserConfigKey.THEME] == "default"
-        assert config_dict[UserConfigKey.HOME_PATH] == "/note/group"
-        assert config_dict[UserConfigKey.nav_style] == "left"
+        assert config_dict[UserConfig.THEME.key] == "default"
+        assert config_dict[UserConfig.HOME_PATH.key] == "/note/group"
+        assert config_dict[UserConfig.nav_style.key] == "left"
 
         
     def test_user_oplog_clean(self):

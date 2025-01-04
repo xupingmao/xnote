@@ -708,3 +708,19 @@ NoteView.renameByElement = function(target) {
     NoteView.rename(id, oldName);
 }
 
+NoteView.updateOrderType = function(target) {
+    var noteId = $(target).attr("data-id");
+    var orderType = $(target).attr("data-value");
+    var params = {
+        note_id: noteId,
+        order_type: orderType
+    }
+    xnote.http.post("/note/order_type", params, function (resp) {
+        if (resp.success) {
+            window.location.reload();
+        } else {
+            xnote.alert(resp.message);
+        }
+    });
+}
+
