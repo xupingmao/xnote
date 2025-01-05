@@ -1,0 +1,46 @@
+{% init name = "" %}
+{% init value = "" %}
+{% init can_edit = False %}
+{% init show_delete = False %}
+{% init dict_title = "新增" %}
+
+<div class="card">
+    <h3 class="card-title">
+        <a class="path-link" href="{{_server_home}}/note/dict">词典</a>&nbsp;/&nbsp;{{dict_title}}
+        <div class="float-right">
+            {% include common/button/back_button.html %}
+        </div>
+    </h3>
+</div>
+
+<div class="card">
+    <div style="max-width: 600px">
+        <table class="table no-border-table">
+            <tr>
+                <td>类型</td>
+                <td>{{dict_type_str}}</td>
+            </tr>
+            <tr>
+                <td>名称</td>
+                <td><input type="text" class="mid-text col-md-12" name="name" value="{{name}}"/></td>
+            </tr>
+            <tr>
+                <td>解释</td>
+                <td><textarea name="value" rows=5 class="row">{{value}}</textarea></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    {% if can_edit %}
+                        <button class="btn save-btn">保存</button>
+                        {% if show_delete %}
+                        <button class="delete-btn btn danger">删除</button>
+                        {% end %}
+                    {% else %}
+                        <span>无编辑权限</span>
+                    {% end %}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

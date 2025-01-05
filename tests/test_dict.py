@@ -17,7 +17,14 @@ app = init_app()
 class TestMain(BaseTestCase):
 
     def test_dict(self):
-        json_request("/dict/edit/name", method = "POST", data = dict(name = "name", value = u"姓名".encode("utf-8")))
+        params = dict(
+            key="name",
+            value="姓名",
+            dict_type=dict_dao.DictTypeEnum.public.int_value,
+        )        
+        resp = json_request_return_dict("/api/dict/create", method = "POST", data = params)
+        assert resp["success"] == True
+        
         self.check_OK("/note/dict")
         self.check_OK("/dict/search?key=name")
     

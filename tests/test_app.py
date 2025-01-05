@@ -83,9 +83,6 @@ class TestMain(BaseTestCase):
     def test_dict(self):
         self.check_200("/note/dict")
 
-    def test_dict_edit(self):
-        self.check_200("/dict/edit/test")
-
     def test_fs(self):
         self.check_200("/fs/~/")
         self.check_200("/fs/~/?_format=json")

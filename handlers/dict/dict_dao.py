@@ -65,11 +65,11 @@ class DictDaoClass:
             save_dict.pop("user_id", None)
         else:
             assert save_dict["user_id"] > 0
-        dict_id = int(self.db.insert(**save_dict))
+        dict_id = int(self.db.insert(**save_dict)) # type:ignore
         dict_item.dict_id = dict_id
         return dict_id
     
-    def update(self, dict_id=0, user_id=0, value=""):
+    def update(self, dict_id=0, user_id=0, value="", key=""):
         now = dateutil.format_datetime()
         where_dict = {
             self.db.table_info.pk_name: dict_id,
@@ -77,8 +77,15 @@ class DictDaoClass:
         }
         if self.dict_type.has_user_id:
             where_dict["user_id"] = user_id
-            
-        return self.db.update(where=where_dict, value=value, mtime=now)
+
+        values = {
+            "value": value,
+            "mtime": now,
+        }
+        if key != "":
+            values["key"] = key
+
+        return self.db.update(where=where_dict, **values) # type:ignore
 
     def get_by_id(self, dict_id=0, user_id=0):
         assert dict_id > 0

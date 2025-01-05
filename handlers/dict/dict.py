@@ -25,17 +25,20 @@ from xnote.plugin.table_plugin import BaseTablePlugin, TableActionType, FormRowT
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
+def check_edit_auth(dict_type=0):
+    if dict_type == 0:
+        dict_type = xutils.get_argument_int("dict_type")
+    enum_item = DictTypeEnum.get_by_int_value(dict_type)
+    assert enum_item != None
+    if enum_item.has_user_id:
+        xauth.check_login()
+    else:
+        xauth.check_login("admin")
+        
 class BaseDictHandler:
 
     def get_dict_type(self):
         return xutils.get_argument_int("dict_type", DictTypeEnum.get_default().int_value)
-    
-    def check_edit_auth(self):
-        dict_type = self.get_dict_type()
-        if dict_type == DictTypeEnum.public.value:
-            xauth.check_login("admin")
-        else:
-            xauth.check_login()
     
     def get_dict_dao(self):
         dict_type = self.get_dict_type()
@@ -52,40 +55,6 @@ class BaseDictHandler:
         kw.dict_type_str = DictTypeEnum.get_name_by_value(str(dict_type))
         kw.can_edit = can_edit
         return kw
-
-class DictEditHandler:
-
-    def GET(self, name=""):
-        if name is None:
-            name = ""
-        name  = xutils.unquote(name)
-        table = xtables.get_dict_table()
-        item  = table.select_first(where=dict(key=name))
-        value = ""
-        if item != None:
-            value = item.value
-        kw = Storage()
-        kw.name = name
-        kw.value = value
-        kw.search_type = "dict"
-        kw.dict_type = DictTypeEnum.public.value
-
-        return xtemplate.render("dict/page/dict_edit.html", **kw)
-
-    @xauth.login_required("admin")
-    def POST(self, name=""):
-        key   = xutils.get_argument_str("name", "")
-        value = xutils.get_argument_str("value", "")
-        if key != "" and value != "":
-            key   = xutils.unquote(key)
-            table = xtables.get_dict_table()
-            item  = table.select_first(where=dict(key=key))
-            if item != None:
-                table.update(value = value, where = dict(key = key))
-            else:
-                table.insert(key = key, value = value)
-        return self.GET(name)
-
 
 class DictHandler(BaseTablePlugin):
 
@@ -125,17 +94,10 @@ class DictHandler(BaseTablePlugin):
         if dict_type == 0:
             dict_type = self.get_dict_type()
         return dict_dao.get_dao_by_type(dict_type)
-    
-    def check_edit_auth(self):
-        dict_type = self.get_dict_type()
-        if dict_type == DictTypeEnum.public.value:
-            xauth.check_login("admin")
-        else:
-            xauth.check_login()
 
     def show_edit_action(self):
         dict_type = self.get_dict_type()
-        dict_type_info = DictTypeEnum.get_by_value(str(dict_type)) # type: DictTypeItem|None
+        dict_type_info = DictTypeEnum.get_by_int_value(dict_type)
         if dict_type_info == None:
             return False
         if dict_type_info.has_user_id:
@@ -187,7 +149,7 @@ class DictHandler(BaseTablePlugin):
         return self.response_page(**kw)
     
     def handle_edit(self):
-        self.check_edit_auth()
+        check_edit_auth()
         dict_id = xutils.get_argument_int("dict_id")
         dict_type = self.get_dict_type()
         user_id = xauth.current_user_id()
@@ -217,7 +179,7 @@ class DictHandler(BaseTablePlugin):
         return self.response_form(**kw)
     
     def handle_save(self):
-        self.check_edit_auth()
+        check_edit_auth()
         data_dict = self.get_data_dict()
         dict_id = data_dict.get_int("dict_id")
         key = data_dict.get_str("key")
@@ -267,7 +229,7 @@ class DictUpdateHandler(BaseDictHandler):
 
 class CreateAjaxHandler(BaseDictHandler):
     def POST(self):
-        self.check_edit_auth()
+        check_edit_auth()
         key = xutils.get_argument_str("key", "")
         value = xutils.get_argument_str("value", "")
         if key == "":
@@ -298,21 +260,29 @@ class CreateAjaxHandler(BaseDictHandler):
 class UpdateAjaxHandler(BaseDictHandler):
 
     def POST(self):
-        self.check_edit_auth()
+        check_edit_auth()
         dict_id = xutils.get_argument_int("dict_id")
+        key = xutils.get_argument_str("key")
         value = xutils.get_argument_str("value")
         if dict_id <= 0:
             return webutil.FailedResult(code="400", message="无效的dict_id")
         dao = self.get_dict_dao()
         user_id = xauth.current_user_id()
-        dao.update(dict_id=dict_id, user_id=user_id, value=value)
+        find_by_key = dao.find_one(user_id=user_id, key=key)
+        if find_by_key is None:
+            dao.update(dict_id=dict_id, user_id=user_id, key=key, value=value)
+        elif find_by_key.dict_id == dict_id:
+            dao.update(dict_id=dict_id, user_id=user_id, value=value)
+        else:
+            return webutil.FailedResult(code="500", message="关键字冲突")
+        
         return webutil.SuccessResult()
 
 
 class DeleteAjaxHandler(BaseDictHandler):
 
     def POST(self):
-        self.check_edit_auth()
+        check_edit_auth()
         dict_id = xutils.get_argument_int("dict_id")
         dao = self.get_dict_dao()
         dao.delete_by_id(dict_id)
@@ -322,7 +292,6 @@ xutils.register_func("dict.search", search_dict)
 
 xurls = (
     r"/dict/add", DictAddHandler,
-    r"/dict/edit/(.+)", DictEditHandler,
     r"/dict/update",    DictUpdateHandler,
     r"/dict/search",    DictHandler,
     r"/dict/list",      DictHandler,

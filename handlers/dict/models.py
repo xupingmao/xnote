@@ -3,7 +3,9 @@ from xutils import dateutil
 from xutils import EnumItem, BaseEnum
 from xnote.core.models import SearchResult
 from xnote.core.xtemplate import T
+from xnote.core import xconfig
 
+server_home = xconfig.WebConfig.server_home
 
 class DictTypeItem(EnumItem):
     def __init__(self, name="", value="", table_name="", has_user_id=True):
@@ -17,9 +19,18 @@ class DictTypeEnum(BaseEnum):
     public = DictTypeItem("公共词典", "1", table_name = "dictionary", has_user_id=False)
     relevant = DictTypeItem("关联词典", "3", table_name = "dictionary", has_user_id=False)
 
+    _all = [personal, public, relevant]
+
     @classmethod
     def get_default(cls):
         return cls.personal
+    
+    @classmethod
+    def get_by_int_value(cls, dict_type=0):
+        for item in cls._all:
+            if item.int_value == dict_type:
+                return item
+        return None
 
 
 class DictDO(Storage):
@@ -57,7 +68,7 @@ class DictDO(Storage):
     
     @property
     def url(self):
-        return f"/dict/update?dict_type={self.dict_type}&dict_id={self.dict_id}"
+        return f"{server_home}/dict/update?dict_type={self.dict_type}&dict_id={self.dict_id}"
 
     def to_search_result(self):
         result = SearchResult()
