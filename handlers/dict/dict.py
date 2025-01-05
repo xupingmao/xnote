@@ -18,7 +18,7 @@ from xutils import textutil
 from . import dict_dao
 from handlers.dict.dict_dao import search_dict, convert_dict_func
 from handlers.note.models import NoteTypeInfo
-from .models import DictTypeEnum
+from .models import DictTypeEnum, DictTypeItem
 from xnote.plugin.table import DataTable
 from xnote.plugin.table_plugin import BaseTablePlugin, TableActionType, FormRowType
 
@@ -28,7 +28,7 @@ PAGE_SIZE = xconfig.PAGE_SIZE
 class BaseDictHandler:
 
     def get_dict_type(self):
-        return xutils.get_argument_str("dict_type", DictTypeEnum.public.value)
+        return xutils.get_argument_int("dict_type", DictTypeEnum.get_default().int_value)
     
     def check_edit_auth(self):
         dict_type = self.get_dict_type()
@@ -44,11 +44,12 @@ class BaseDictHandler:
     def create_kw(self):
         can_edit = xauth.is_admin()
         dict_type = self.get_dict_type()
-        if dict_type == DictTypeEnum.personal.value:
+        if dict_type == DictTypeEnum.personal.int_value:
             can_edit = True
 
         kw = Storage()
         kw.dict_type = self.get_dict_type()
+        kw.dict_type_str = DictTypeEnum.get_name_by_value(str(dict_type))
         kw.can_edit = can_edit
         return kw
 
@@ -95,6 +96,7 @@ class DictHandler(BaseTablePlugin):
     search_type = "dict"
     search_placeholder = "搜索词典"
     search_action = "/note/dict"
+    permitted_role_list = ["user", "admin"]
 
     PAGE_HTML = """
 {% include note/component/filter/type_filter.html %}
@@ -117,10 +119,10 @@ class DictHandler(BaseTablePlugin):
 """
     
     def get_dict_type(self):
-        return xutils.get_argument_str("dict_type")
+        return xutils.get_argument_int("dict_type")
 
-    def get_dict_dao(self, dict_type=""):
-        if dict_type == "":
+    def get_dict_dao(self, dict_type=0):
+        if dict_type == 0:
             dict_type = self.get_dict_type()
         return dict_dao.get_dao_by_type(dict_type)
     
@@ -131,8 +133,17 @@ class DictHandler(BaseTablePlugin):
         else:
             xauth.check_login()
 
+    def show_edit_action(self):
+        dict_type = self.get_dict_type()
+        dict_type_info = DictTypeEnum.get_by_value(str(dict_type)) # type: DictTypeItem|None
+        if dict_type_info == None:
+            return False
+        if dict_type_info.has_user_id:
+            return True
+        return xauth.is_admin()
+
     def handle_page(self):
-        dict_type = xutils.get_argument_str("dict_type", DictTypeEnum.public.value)
+        dict_type = xutils.get_argument_int("dict_type", DictTypeEnum.get_default().int_value)
         fuzzy_key = xutils.get_argument_str("key")
         page = xutils.get_argument_int("page", 1)
         self.dict_type = dict_type
@@ -142,13 +153,7 @@ class DictHandler(BaseTablePlugin):
         offset=(page-1)*PAGE_SIZE
 
         dao = dict_dao.get_dao_by_type(dict_type)
-        if dao != None:
-            items, amount = dao.find_page(user_id=user_id, fuzzy_key=fuzzy_key, offset=offset, limit=limit)
-        else:
-            db = xtables.get_dict_table()
-            items = db.select(order="id",)
-            items = map(convert_dict_func, items)
-            amount = db.count()
+        items, amount = dao.find_page(user_id=user_id, fuzzy_key=fuzzy_key, offset=offset, limit=limit)
 
         page_max = math.ceil(amount / PAGE_SIZE)
         user_name = xauth.current_name_str()
@@ -157,7 +162,9 @@ class DictHandler(BaseTablePlugin):
         table = DataTable()
         table.add_head("关键字", field="key", width="20%", link_field="view_url")
         table.add_head("解释", field="value", width="60%")
-        table.add_action(title="编辑", type=TableActionType.edit_form, link_field="edit_url", css_class="btn btn-default")
+
+        if self.show_edit_action():
+            table.add_action(title="编辑", type=TableActionType.edit_form, link_field="edit_url", css_class="btn btn-default")
 
         for item in items:
             item.view_url = item.url
@@ -183,10 +190,11 @@ class DictHandler(BaseTablePlugin):
         self.check_edit_auth()
         dict_id = xutils.get_argument_int("dict_id")
         dict_type = self.get_dict_type()
+        user_id = xauth.current_user_id()
 
         dao = self.get_dict_dao()
         if dict_id > 0:
-            dict_item = dao.get_by_id(dict_id)
+            dict_item = dao.get_by_id(dict_id, user_id=user_id)
         else:
             dict_item = dict_dao.DictDO()
 
@@ -196,12 +204,12 @@ class DictHandler(BaseTablePlugin):
         form = self.create_form()
         form.add_row("dict_id", "dict_id", value=str(dict_item.dict_id), css_class="hide")
 
-        row = form.add_row("词典类型", "dict_type", type=FormRowType.select, value=dict_type, readonly=True)
+        row = form.add_row("词典类型", "dict_type", type=FormRowType.select, value=str(dict_type), readonly=True)
 
         for item in DictTypeEnum.enums():
             row.add_option(item.name, item.value)
         
-        form.add_row("关键字", "key", value=dict_item.value)
+        form.add_row("关键字", "key", value=dict_item.key, readonly=True)
         form.add_row("解释", "value", type=FormRowType.textarea, value=dict_item.value)
         
         kw = Storage()
@@ -214,7 +222,7 @@ class DictHandler(BaseTablePlugin):
         dict_id = data_dict.get_int("dict_id")
         key = data_dict.get_str("key")
         value = data_dict.get_str("value")
-        dict_type = data_dict.get_str("dict_type")
+        dict_type = data_dict.get_int("dict_type")
         dao = self.get_dict_dao(dict_type)
 
         user_id = xauth.current_user_id()

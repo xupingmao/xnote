@@ -50,7 +50,8 @@ def init():
 
 def init_system_table():
     dbutil.register_table("sys_log", "系统日志")
-    dbutil.register_table("dict", "词典")
+    dbutil.register_table("dict", "词典", is_deleted = True)
+    dbutil.register_table("dict_relevant", "相关词词库", type="hash", is_deleted=True)
     dbutil.register_table("migrate_failed", "迁移失败记录")
     dbutil.register_table("z", "老版本的zset实现", is_deleted = True)
 

@@ -24,7 +24,6 @@ from xnote.service.search_service import SearchHistoryDO
 
 NOTE_DAO = xutils.DAO("note")
 MSG_DAO  = xutils.DAO("message")
-DICT_DAO = xutils.DAO("dict")
 
 config = xconfig
 SEARCH_TYPE_DICT = dict() # type: dict[str, Storage]
@@ -328,6 +327,7 @@ class SearchHandler:
         kw.title = title
         kw.page_max = int(math.ceil(count/pagesize))
         kw.page_url = page_url
+        kw.relevant_words = dict_dao.get_relevant_words(key)
 
         return xtemplate.render("search/page/search_result.html", **kw)
 

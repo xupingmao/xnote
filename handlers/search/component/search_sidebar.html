@@ -8,7 +8,7 @@
 --> #}
 
 {% init key = "" %}
-{% set-global relevant_words = xutils.call("dict_relevant.get_relevant_words", key) %}
+{% init relevant_words = [] %}
 
 {% include common/sidebar/app_index.html %}
 
@@ -17,7 +17,7 @@
     <div class="card-title">
         <span>相关搜索</span>
         <div class="float-right">
-            <a class="btn btn-default" href="{{_server_home}}/dict/relevant/list">编辑词库</a>
+            <a class="btn btn-default" href="{{_server_home}}/dict/list?dict_type=3">编辑词库</a>
         </div>
     </div>
 

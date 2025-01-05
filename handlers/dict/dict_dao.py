@@ -14,94 +14,31 @@ from xutils import Storage
 from xutils import dateutil, is_str
 from xnote.core.models import SearchResult
 from .models import DictDO, DictTypeEnum, DictTypeItem
+from xutils import textutil
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
-
-class DictItem(Storage):
-
-    def __init__(self):
-        self.key = ""
-        self.value = ""
-        self.ctime = ""
-        self.mtime = ""
-
-def dict_to_obj(item):
-    if item == None:
-        return None
-    result = DictItem()
-    result.update(item)
-    return result
-
-def get_by_key(key):
-    table = xtables.get_dict_table()
-    item = table.select_first(where=dict(key=key))
-    return dict_to_obj(item)
-
-def get_by_id(id):
-    table = xtables.get_dict_table()
-    item = table.select_first(where=dict(id=id))
-    return dict_to_obj(item)
-
-def create(dict_item):
-    table = xtables.get_dict_table()
-    return table.insert(**dict_item)
-
-def update(id, value):
-    assert isinstance(id, int), "id必须为数字"
-    table = xtables.get_dict_table()
-    now = dateutil.format_datetime()
-    return table.update(value = value, mtime = now, where = dict(id = id))
-
-def delete(id):
-    table = xtables.get_dict_table()
-    return table.delete(where = dict(id = id))
-
-
-def convert_dict_func(item):
-    v = SearchResult()
-    v.name = f"定义: {item.key}"
-    v.value = item.value
-    v.summary = item.value
-    v.mtime = item.mtime
-    v.ctime = item.ctime
-    v.url = f"/dict/update?dict_id={item.id}"
-    v.raw = item.value
-    v.icon = "icon-dict"
-    v.priority = 0
-    v.show_next = True
+def convert_dict_func(item: DictDO):
+    v = item.to_search_result()
+    v.name = f"公共词典: {item.key}"
     return v
-
-
-def escape_sqlite_text(text):
-    text = text.replace('/', '//')
-    text = text.replace("'", '\'\'')
-    text = text.replace('[', '/[')
-    text = text.replace(']', '/]')
-    text = text.replace('(', '/(')
-    text = text.replace(')', '/)')
-    return text
-
-def search_escape(text):
-    if not is_str(text):
-        return text
-    text = escape_sqlite_text(text)
-    return "'%" + text + "%'"
-
-
-def left_match_escape(text):
-    return "'%s%%'" % escape_sqlite_text(text)
 
 
 def search_dict(key, offset = 0, limit = None):
     if limit is None:
         limit = PAGE_SIZE
-    db = xtables.get_dict_table()
-    where_sql = "`key` LIKE %s" % left_match_escape(key)
-    items = db.select(order="key", where = where_sql, limit=limit, offset=offset)
+    items, count = DictPublicDao.find_page(key=key, offset=offset, limit=limit)
     items = list(map(convert_dict_func, items))
-    count = db.count(where = where_sql)
     return items, count
+
+def get_relevant_words(word: str):
+    result = DictRelevantDao.find_one(key = word)
+    if result != None:
+        if "," in result.value:
+            return result.value.split(",")
+        return result.value.split()
+    return []
+
 
 class DictDaoClass:
 
@@ -120,6 +57,8 @@ class DictDaoClass:
         now = dateutil.format_datetime()
         dict_item.ctime = now
         dict_item.mtime = now
+        dict_item.dict_type = self.dict_type.int_value
+        dict_item.key = dict_item.key.lower()
 
         save_dict = dict_item.get_save_dict()
         if not self.dict_type.has_user_id:
@@ -134,6 +73,7 @@ class DictDaoClass:
         now = dateutil.format_datetime()
         where_dict = {
             self.db.table_info.pk_name: dict_id,
+            "dict_type": self.dict_type.int_value,
         }
         if self.dict_type.has_user_id:
             where_dict["user_id"] = user_id
@@ -144,11 +84,15 @@ class DictDaoClass:
         assert dict_id > 0
         where_dict = {
             self.db.table_info.pk_name: dict_id,
+            "dict_type": self.dict_type.int_value,
         }
+        if self.dict_type.has_user_id:
+            where_dict["user_id"] = user_id
+        
         result = self.db.select_first(where=where_dict)
         if result is None:
             return None
-        return DictDO.from_dict(result, dict_type=self.dict_type.value)
+        return DictDO.from_dict(result)
     
     def delete_by_id(self, dict_id=0):
         assert dict_id > 0
@@ -164,8 +108,13 @@ class DictDaoClass:
         return None
     
     def find_page(self, user_id=0, key="", fuzzy_key="", offset=0, limit=20, skip_count=False):
-        assert user_id > 0
-        where = "1=1"
+        if self.dict_type.has_user_id:
+            assert user_id > 0
+
+        key = key.lower()
+        fuzzy_key = fuzzy_key.lower()
+
+        where = "dict_type=$dict_type"
         if self.dict_type.has_user_id:
             where += " AND user_id=$user_id"
         if key != "":
@@ -174,22 +123,22 @@ class DictDaoClass:
             where += " AND `key` LIKE $fuzzy_key"
             fuzzy_key = self.to_fuzzy(fuzzy_key)
         
-        vars = dict(user_id=user_id, key=key, fuzzy_key=fuzzy_key)
+        vars = dict(user_id=user_id, key=key, fuzzy_key=fuzzy_key, dict_type=self.dict_type.int_value)
         db_result = self.db.select(where=where, vars=vars, offset=offset, limit=limit)
         if skip_count:
             amount = 0
         else:
             amount = self.db.count(where=where, vars=vars)
-        return DictDO.from_dict_list(db_result, dict_type=self.dict_type.value), amount
+        return DictDO.from_dict_list(db_result), amount
 
 DictPublicDao = DictDaoClass(DictTypeEnum.public)
 DictPersonalDao = DictDaoClass(DictTypeEnum.personal)
 DictRelevantDao = DictDaoClass(DictTypeEnum.relevant)
 
-def get_dao_by_type(dict_type=""):
-    if dict_type == DictTypeEnum.personal.value:
+def get_dao_by_type(dict_type=0):
+    if dict_type == DictTypeEnum.personal.int_value:
         return DictPersonalDao
-    if dict_type == DictTypeEnum.relevant.value:
+    if dict_type == DictTypeEnum.relevant.int_value:
         return DictRelevantDao
     
     return DictPublicDao

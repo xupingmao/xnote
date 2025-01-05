@@ -8,8 +8,9 @@
 @FilePath     : /xnote/tests/test_dict.py
 """
 
-from .test_base import json_request, BaseTestCase
+from .test_base import json_request, json_request_return_dict, BaseTestCase
 from .test_base import init as init_app
+from handlers.dict import dict_dao
 
 app = init_app()
 
@@ -21,18 +22,13 @@ class TestMain(BaseTestCase):
         self.check_OK("/dict/search?key=name")
     
     def test_dict_relevant(self):
-        self.check_OK("/dict/relevant/list")
-        resp1 = json_request("/dict/relevant/add_words", method = "POST", data = dict(words = "test1 test2"))
+        params = dict(
+            key="test",
+            value="test1 test2",
+            dict_type=dict_dao.DictTypeEnum.relevant.int_value,
+        )
+        resp1 = json_request_return_dict("/api/dict/create", method = "POST", data = params)
         self.assertEqual("success", resp1["code"])
 
-        resp2 = json_request("/dict/relevant/list?_format=json", method = "GET")
-        self.assertEqual(2, len(resp2["words"]))
-
-        resp2b = json_request("/dict/relevant/list?_format=json&key=test1")
-        self.assertEqual(1, len(resp2b["words"]))
-
-        resp3 = json_request("/dict/relevant/delete", method = "POST", data = dict(word = "test1"))
-        self.assertEqual("success", resp3["code"])
-
-        resp4 = json_request("/dict/relevant/list?_format=json", method = "GET")
-        self.assertEqual(0, len(resp4["words"]))
+        words = dict_dao.get_relevant_words("test")
+        assert words == ["test1", "test2"]

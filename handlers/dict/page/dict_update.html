@@ -14,7 +14,7 @@
     <h3 class="card-title">
         <a class="path-link" href="{{_server_home}}/note/dict?dict_type={{dict_type}}">词典</a>&nbsp;/&nbsp;编辑
         <div class="float-right">
-            <a class="btn btn-default" href="{{_server_home}}/dict/add">新增</a>
+            <a class="btn btn-default" href="{{_server_home}}/dict/add?dict_type={{dict_type}}">新增</a>
             {% include common/button/back_button.html %}
         </div>
     </h3>
@@ -23,6 +23,10 @@
 <div class="card">
     <div style="max-width: 600px">
         <table class="table no-border-table">
+            <tr>
+                <td>类型</td>
+                <td>{{dict_type_str}}</td>
+            </tr>
             <tr>
                 <td>名称</td>
                 <td><input type="text" class="mid-text col-md-12 dict-key" name="name" value="{{name}}" disabled /></td>
@@ -35,7 +39,7 @@
                 <tr>
                     <td></td>
                     <td>
-                        <button class="save-btn">保存</button>
+                        <button class="btn save-btn">保存</button>
                         <button class="delete-btn btn danger">删除</button>
                     </td>
                 </tr>

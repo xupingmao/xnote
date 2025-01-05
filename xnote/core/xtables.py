@@ -301,36 +301,11 @@ def init_dict_table():
     with create_default_table_manager("dictionary", comment=comment) as manager:
         manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
         manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
-        manager.add_column("key", "varchar(100)", "")
-        manager.add_column("value", "text", "")
-        manager.add_index("key")
-
-def init_dict_personal_table():
-    """个人词典
-    """
-    comment = "个人词典"
-    table_name = "dict_personal"
-    pk_name = "dict_id"
-    with create_default_table_manager(table_name, comment=comment, pk_name=pk_name) as manager:
-        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
-        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
+        manager.add_column("dict_type", "tinyint", default_value=1, comment="词典类型")
         manager.add_column("user_id", "bigint", 0, comment="用户ID")
         manager.add_column("key", "varchar(100)", "")
         manager.add_column("value", "text", "")
-        manager.add_index(["user_id", "key"], is_unique=True)
-
-def init_dict_relevant_table():
-    """关联词词典
-    """
-    comment = "关联词词典"
-    table_name = "dict_relevant"
-    pk_name = "dict_id"
-    with create_default_table_manager(table_name, comment=comment, pk_name=pk_name) as manager:
-        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
-        manager.add_column("mtime", "datetime", DEFAULT_DATETIME)
-        manager.add_column("key", "varchar(100)", "")
-        manager.add_column("value", "text", "")
-        manager.add_index("key", is_unique=True)
+        manager.add_index(["dict_type", "user_id", "key"])
 
 def init_note_tag_rel_table():
     """笔记标签绑定关系
@@ -731,10 +706,7 @@ def init():
         TableProxy.profile_logger = DBProfileLogger()
         TableProxy.log_profile = True
     
-    init_dict_table()
-    init_dict_personal_table()
-    init_dict_relevant_table()
-    
+    init_dict_table()    
     init_record_table()
     init_user_table()
     init_file_info()

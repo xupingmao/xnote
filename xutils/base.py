@@ -143,3 +143,10 @@ class BaseEnum:
             if item.value == value:
                 return item
         return None
+    
+    @classmethod
+    def get_name_by_value(cls, value=""):
+        for item in cls.enums():
+            if item.value == value:
+                return item.name
+        return ""
