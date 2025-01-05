@@ -2,40 +2,24 @@
 
 {% block body_left %}
 
+{% init dict_type = "" %}
 
 <div class="card">
     <div class="card-title">
         <a class="path-link" href="{{_server_home}}/note/dict">词典</a>
 
         <div class="float-right">
-            <a class="btn btn-default" href="{{_server_home}}/dict/add">新增</a>
+            <a class="btn btn-default" href="{{_server_home}}/dict/add?dict_type={{dict_type}}">新增</a>
             {% include common/button/back_button.html %}
         </div>
     </div>
 </div>
 
+{% include note/component/filter/type_filter.html %}
+{% include dict/page/dict_type_tab.html %}
 <div class="card">
-
-    <div class="grid-row note-list">
-        {% if len(files) == 0 %}
-            {% include common/text/empty_text.html %}
-        {% end %}
-
-        {% for item in files %}
-            <a class="dialog-link" href="{{_server_home}}{{item.url}}">
-                <div class="book-item">
-                    <span>{{item.name}}</span>
-                    <span class="dict-list-value">{{item.value}}</span>
-                    <span class="book-size">
-                        <i class="fa fa-chevron-right"></i>
-                    </span>
-                </div>
-            </a>
-        {% end %}
-    </div>
-
+    {% include common/table/table.html %}
 </div>
-
 
 <!-- 分页 -->
 {% if show_pagination and "page" in globals() %}
@@ -48,6 +32,6 @@
 
 {% block body_right %}
     <div class="desktop-only">
-        {% include dict/component/dict_sidebar.html %}
+        {% include dict/page/dict_sidebar.html %}
     </div>
 {% end %}

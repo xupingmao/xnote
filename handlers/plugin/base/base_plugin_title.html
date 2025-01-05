@@ -14,7 +14,7 @@
             {% end %}
             <span>{{title}}</span>
             <span class="float-right">
-                {% raw model.option_html %}
+                {% raw model.get_option_html() %}
 
                 {% if _is_admin and model.show_edit and model.editable %}
                     <a class="btn" href="{{_server_home}}/code/edit?path={{fpath}}">编辑</a>

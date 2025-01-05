@@ -91,7 +91,7 @@ class BaseTablePlugin(BasePlugin):
         return self.handle_page()
 
     def handle_edit(self):
-        form = DataForm()
+        form = self.create_form()
         form.add_row("id", "id", css_class="hide")
         form.add_row("只读属性", "readonly_attr", value="test", readonly=True)
 
@@ -117,7 +117,7 @@ class BaseTablePlugin(BasePlugin):
         return webutil.FailedResult(code="500", message="Not Implemented")
     
     def handle_page(self):
-        table = DataTable()
+        table = self.create_table()
         table.add_head("类型", "type", css_class_field="type_class")
         table.add_head("标题", "title", link_field="view_url")
         table.add_head("日期", "date")
@@ -149,3 +149,10 @@ class BaseTablePlugin(BasePlugin):
     def handle_delete(self):
         # data_id = xutils.get_argument_int("data_id")
         return webutil.FailedResult(code="500", message="Not Implemented")
+    
+    def create_table(self):
+        return DataTable()
+
+    def create_form(self):
+        return DataForm()
+

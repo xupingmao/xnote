@@ -213,9 +213,6 @@ class SearchHandler:
         offset = ctx.offset
         limit  = ctx.limit
         notes, count = dict_dao.search_dict(key, offset, limit)
-        for note in notes:
-            note.raw = note.value
-            note.icon = "hide"
         return notes, count
 
     def do_search_note(self, ctx: SearchContext, key):

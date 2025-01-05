@@ -28,13 +28,14 @@ NOTE_ICON_DICT = {
 DEFAULT_ICON = "fa-file-text-o"
 
 
-class NoteLevelEnum(enum.Enum):
+class NoteLevelEnum(xutils.BaseEnum):
     """笔记等级"""
-    archived = -1 # 归档
-    normal = 0 # 普通
-    sticky = 1 # 置顶
+    archived = EnumItem("归档", "-1")
+    normal = EnumItem("普通", "0")
+    sticky = EnumItem("置顶", "1")
 
 class OrderTypeEnum(xutils.BaseEnum):
+    """排序方式"""
     name = EnumItem("名称", "1")
     hot = EnumItem("热门", "2")
     size = EnumItem("大小", "3")
@@ -211,6 +212,7 @@ class NoteTypeInfo:
             NoteTypeInfo(url="/note/all?type=gallery", name="相册", tag_code="gallery"),
             NoteTypeInfo(url="/note/all?type=list", name="清单", tag_code="list"),
             NoteTypeInfo(url="/note/all?type=table", name="表格", tag_code="table"),
+            NoteTypeInfo(url="/note/dict", name="词典",  tag_code="dict"),
             NoteTypeInfo(url="/note/removed", name="回收站", tag_code="removed", css_class="hide"),
         ]
 

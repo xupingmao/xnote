@@ -16,8 +16,10 @@ import xutils
 from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.core import xtables
-from xutils import u, Storage, SearchResult, textutil
+from xutils import u, Storage, textutil
 from xnote.core.xtemplate import T
+from xnote.core.models import SearchResult, SearchContext
+from .dict_dao import DictPublicDao
 
 def wrap_results(dicts, origin_key):
     files = []
@@ -55,8 +57,7 @@ def do_translate(ctx):
     path = os.path.join(xconfig.DATA_PATH, "dictionary.db")
     if not os.path.exists(path):
         return
-    user_name = ctx.user_name
-    table     = xtables.get_dict_table()
+    table = xtables.get_dict_table()
     if textutil.isalpha(word):
         dicts = table.select(where="`key` LIKE $key",
             vars = dict(key = word + '%'))
@@ -66,29 +67,27 @@ def do_translate(ctx):
     ctx.dicts += wrap_results(dicts, "key")
 
 @xmanager.searchable(r".+")
-def do_translate_strict(ctx):
+def do_translate_strict(ctx: SearchContext):
     if not ctx.search_dict_strict:
         return
 
-    user_name = ctx.user_name
-    db = xtables.get_dict_table()
-    results = db.select(where="`key` = $key", vars=dict(key=ctx.input_text))
+    user_id = ctx.user_id
+    results, _ = DictPublicDao.find_page(user_id=user_id, key=ctx.input_text, skip_count=True)
     for item in results:
         value = item.value.replace("\\n", "\n")
 
-        result = Storage()
+        result = SearchResult()
         result.name = T("search_definition") % item.key
-        result.key = item.key
         result.raw = value
-        result.url = "#"
+        result.url = item.url
         result.icon = "icon-dict"
         result.category = "dict"
-        result.id = item.id
+        result.id = item.dict_id
 
         ctx.dicts.append(result)
 
 @xmanager.searchable(r"[a-zA-Z\-]+")
-def translate_english(ctx):
+def translate_english(ctx: SearchContext):
     """使用词库进行部分模糊匹配"""
     if not ctx.search_dict:
         return
@@ -99,7 +98,7 @@ def translate_english(ctx):
     for item in results:
         value = item.value.replace("\\n", "\n")
 
-        result = Storage()
+        result = SearchResult()
         result.name = u("翻译 - %s") % item.key
         result.key = item.key
         result.raw = value

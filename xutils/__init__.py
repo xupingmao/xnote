@@ -93,7 +93,8 @@ class SearchResult(Storage):
     def __init__(self, name="", url='#', raw=None, **kw):
         super().__init__()
         self.name = name
-        self.url = url
+        self.url = url # 查看的URL
+        self.edit_url = "" # 编辑的URL
         self.raw = raw # 文本按照原始格式展示在<pre>标签里面
         self.icon = ""
         self.content = ""
@@ -108,6 +109,14 @@ class SearchResult(Storage):
         self.badge_info = ""
         self.category = ""
         self.update(kw)
+
+    @property
+    def edit_link(self):
+        return self.edit_url
+    
+    @edit_link.setter
+    def set_edit_link(self, value):
+        self.edit_url = value
 
 def attrget(obj, attr, default_value = None):
     """不推荐使用,之前不知道getattr在有默认值的时候不报错"""

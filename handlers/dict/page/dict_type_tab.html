@@ -1,0 +1,10 @@
+{% from handlers.dict.models import DictTypeEnum %}
+{% init dict_type = "" %}
+
+<div class="card btn-line-height">
+    <div class="x-tab-box btn-style float-left" data-tab-default="{{dict_type}}" data-tab-key="dict_type">
+        {% for item in DictTypeEnum.enums() %}
+            <a class="x-tab" data-tab-value="{{item.value}}">{{item.name}}</a>
+        {% end %}
+    </div>
+</div>

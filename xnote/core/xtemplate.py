@@ -596,6 +596,7 @@ class BasePlugin:
         kw.show_search = self.show_search
         kw.search_action = self.search_action
         kw.search_placeholder = self.search_placeholder
+        kw.search_type = self.search_type
         kw.CONTENT_WIDTH = self.CONTENT_WIDTH
         return kw
 
@@ -635,6 +636,9 @@ class BasePlugin:
 
     def get_aside_html(self):
         return self.aside_html
+    
+    def get_option_html(self):
+        return self.option_html
 
 BaseTextPage = BasePlugin
 BaseTextPlugin = BasePlugin

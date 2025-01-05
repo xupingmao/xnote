@@ -577,7 +577,7 @@ class ArchiveHandler:
     def GET(self):
         note_id = xutils.get_argument_int("id")
         note = check_get_note(note_id)
-        note_dao.NoteIndexDao.update_level(note_id=note_id, level = NoteLevelEnum.archived.value)
+        note_dao.NoteIndexDao.update_level(note_id=note_id, level = NoteLevelEnum.archived.int_value)
         raise web.found(note.get_url())
 
 class ResetHandler:
@@ -595,7 +595,7 @@ class UnarchiveHandler:
     def GET(self):
         note_id = xutils.get_argument_int("id")
         note = check_get_note(note_id)
-        note_dao.NoteIndexDao.update_level(note_id=note_id, level = NoteLevelEnum.normal.value)
+        note_dao.NoteIndexDao.update_level(note_id=note_id, level = NoteLevelEnum.normal.int_value)
         raise web.found(note.get_url())
 
 class UpdateStatusHandler:

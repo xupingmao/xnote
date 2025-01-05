@@ -1,0 +1,19 @@
+{# <!--
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2022-05-07 22:04:04
+@LastEditors  : xupingmao
+@LastEditTime : 2022-05-07 22:05:33
+@FilePath     : /xnote/handlers/dict/page/dict_sidebar.html
+@Description  : 描述
+--> #}
+
+{% set-global show_app_index_icon = False %}
+{% include common/sidebar/app_index.html %}
+{% from handlers.dict.models import DictTypeEnum %}
+
+<div class="list card">
+    {% for type_item in DictTypeEnum.enums() %}
+        <a class="list-item" href="{{_server_home}}/dict/list?dict_type={{type_item.value}}">{{type_item.name}}</a>
+    {% end %}
+</div>

@@ -29,12 +29,10 @@
                 <td>解释</td>
                 <td><textarea name="value" rows=5 class="row">{{value}}</textarea></td>
             </tr>
-            {% if _is_admin %}
-                <tr>
-                    <td></td>
-                    <td><button class="save-btn">保存</button></td>
-                </tr>
-            {% end %}
+            <tr>
+                <td></td>
+                <td><button class="save-btn">保存</button></td>
+            </tr>
         </table>
     </div>
 </div>
@@ -44,13 +42,17 @@
         var params = {};
         params.key = $("[name=name]").val();
         params.value = $("[name=value]").val();
-        $.post("/api/dict/create", params, function (resp) {
-            if (resp.code == "success") {
+        params.dict_type = "{{dict_type}}";
+
+        xnote.http.post("/api/dict/create", params, function (resp) {
+            if (resp.success) {
                 xnote.toast("添加成功");
                 window.location.href = resp.data.url;
             } else if (resp.code == "302") {
                 xnote.toast("添加失败:" + resp.message);
-                window.location.href = resp.data.url;
+                setTimeout(function() {
+                    window.location.href = resp.data.url;
+                }, 1000);
             } else {
                 xnote.toast("添加失败:" + resp.message);
             }
@@ -64,5 +66,5 @@
 
 
 {% block body_right %}
-    {% include dict/component/dict_sidebar.html %}
+    {% include dict/page/dict_sidebar.html %}
 {% end %}

@@ -28,25 +28,7 @@ def search(ctx: SearchContext):
         return
     server_home = xconfig.WebConfig.server_home
     name = ctx.key
-    tools_path = xconfig.TOOLS_DIR
     files = []
-    basename_set = set()
-    for filename in os.listdir(tools_path):
-        if filename[0] == '_':
-            continue
-        _filename, ext = os.path.splitext(filename)
-        if ext in (".html", ".py"):
-            basename_set.add(_filename)
-
-    for filename in basename_set:
-        if name in filename:
-            f = SearchResult()
-            f.icon = "fa-cube"
-            f.name = filename
-            f.url = f"{server_home}/tools/{filename}"
-            f.content = filename
-            f.show_move = False
-            files.append(f)
 
     if url_pattern.match(name):
         f = SearchResult()

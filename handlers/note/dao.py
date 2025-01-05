@@ -40,7 +40,7 @@ from xutils import lists
 from web.db import SQLLiteral
 from handlers.note.dao_api import NoteDao
 from handlers.note import dao_log
-from handlers.note.models import NoteIndexDO, NoteDO, NoteLevelEnum, del_dict_key, remove_virtual_fields
+from handlers.note.models import NoteIndexDO, NoteDO, del_dict_key, remove_virtual_fields
 from handlers.note.models import NoteToken
 from handlers.note.models import NotePathInfo
 from handlers.note.models import NOTE_ICON_DICT

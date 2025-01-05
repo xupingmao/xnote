@@ -64,14 +64,9 @@
 
                 {# 插件 #}
                 {% if file.category == "plugin" %}
-                    <a class="item-option" href="{{file.edit_link}}">编辑</a>
+                    <a class="item-option" href="{{file.edit_url}}">编辑</a>
                 {% end %}
-
-                {# 词典 #}
-                {% if _is_admin and file.category == "dict" %}
-                    <a class="item-option" href="{{_server_home}}/dict/update?id={{file.id}}">编辑</a>
-                {% end %}
-
+                
                 {% if file.get("show_more_link") %}
                     <!-- 分类导航 -->
                     <a href="{{file.url}}">查看全部</a>
