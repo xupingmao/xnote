@@ -11,6 +11,8 @@
     </div>
 </div>
 
+{% include settings/page/settings_tab.html %}
+
 <div class="card list">
 
     <div class="list-item">
@@ -57,5 +59,5 @@ $(function () {
 {% end %}
 
 {% block body_right %}
-    {% include settings/component/settings_sidebar.html %}
+    {% include settings/page/settings_sidebar.html %}
 {% end %}

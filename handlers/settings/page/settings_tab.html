@@ -1,0 +1,11 @@
+{% from handlers.settings.model import SettingTabEnum %}
+{% init tab_list = SettingTabEnum.enums() %}
+<div class="card">
+    <div class="x-tab-box btn-style float-left" data-tab-default="base" data-tab-key="category">
+        {% for item in tab_list %}
+            {% if item.is_visible() %}
+                <a class="x-tab" href="{{item.url}}" data-tab-value="{{item.category}}">{{item.name}}</a>
+            {% end %}
+        {% end %}
+    </div>
+</div>

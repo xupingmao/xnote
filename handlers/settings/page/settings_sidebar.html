@@ -1,0 +1,19 @@
+{% init show_app_index_icon = False %}
+{% include common/sidebar/app_index.html %}
+{% from handlers.settings.model import SettingTabEnum %}
+
+{% init data_list = SettingTabEnum.enums() %}
+<div class="card list">
+
+    {% for item in data_list %}
+        {% if item.is_visible() %}
+        <a class="list-link" href="{{item.url}}">
+            <span>{{item.name}}</span>
+            <div class="float-right">
+                <i class="fa fa-chevron-right"></i>
+            </div>
+        </a>
+        {% end %}
+    {% end %}
+
+</div>

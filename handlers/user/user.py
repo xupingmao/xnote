@@ -270,7 +270,7 @@ class UserOpLogHandler(BaseTablePlugin):
         assert user_info != None
         UserHandler().handle_user_log(kw, user_info=user_info)
 
-        self.write_aside("""{% include settings/component/settings_sidebar.html %}""")
+        self.write_aside("""{% include settings/page/settings_sidebar.html %}""")
 
         return self.response_page(**kw)
 

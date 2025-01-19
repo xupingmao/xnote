@@ -23,19 +23,21 @@
     </div>
 </div>
 
+{% include settings/page/settings_tab.html %}
+
 <div class="col-md-12 card">
 
     {% if category == "search" %}
 
-        {% include settings/component/search_settings.html %}
+        {% include settings/page/settings_search.html %}
 
     {% elif category == "admin" %}
 
-        {% include settings/component/admin_settings.html %}
+        {% include settings/page/settings_admin.html %}
 
     {% else %}
 
-        {% include settings/component/note_settings.html %}
+        {% include settings/page/settings_note.html %}
 
     {% end %}
 </div>
@@ -77,5 +79,5 @@
 {% end %}
 
 {% block body_right %}
-    {% include settings/component/settings_sidebar.html %}
+    {% include settings/page/settings_sidebar.html %}
 {% end %}

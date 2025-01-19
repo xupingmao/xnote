@@ -169,23 +169,27 @@ def update_sys_config(key, value):
     setattr(xconfig, key, value)
 
 class ConfigHandler:
+
+    def parse_value(self, type: str, value: str):
+        if type == "int":
+            return int(value)
+
+        if type == "bool":
+            return value.lower() in ("true", "yes", "on")
+        
+        return value
     
     @xauth.login_required("admin")
     def POST(self):
         key   = xutils.get_argument("key")
         value = xutils.get_argument_str("value", "")
-        type  = xutils.get_argument("type")
+        type  = xutils.get_argument_str("type")
         p     = xutils.get_argument("p")
 
         update_msg = "%s,%s,%s" % (type, key, value)
         logging.info(update_msg)
         xutils.info("UpdateConfig", update_msg)
-
-        if type == "int":
-            value = int(value)
-
-        if type == "bool":
-            value = value.lower() in ("true", "yes", "on")
+        value = self.parse_value(type, value)
 
         if key == "BASE_TEMPLATE":
             xmanager.reload()
