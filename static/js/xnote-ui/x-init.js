@@ -59,6 +59,8 @@ if (window.xnote === undefined) {
     xnote.http = {};
     // 字符串模块
     xnote.string = {};
+    // 数组模块
+    xnote.array = {};
     // 临时的空间
     xnote.tmp = {};
 
@@ -118,7 +120,7 @@ xnote.getOrDefault = function (value, defaultValue) {
 };
 
 xnote.execute = function (fn) {
-    fn();
+    return fn();
 };
 
 
@@ -352,3 +354,53 @@ xnote.string.replaceByIndex = function (text, target, replacement, index) {
     return result.join("");
 };
 
+/**
+ * 判断 srcArray 是否包含target
+ * @param {array} srcArray 
+ * @param {object} target 
+ * @param {function|undefined} equalsFunction 
+ * @returns 
+ */
+xnote.array.contains = function(srcArray, target, equalsFunction) {
+    if (equalsFunction === undefined) {
+        return srcArray.indexOf(target)>=0;
+    }
+    for (var i = 0; i < srcArray.length; i++) {
+        var srcItem = srcArray[i];
+        if (equalsFunction(srcItem, target)) {
+            return true;
+        }
+    }
+    return false;
+}
+/**
+ * 从srcArray中移除target元素,返回一个新的array
+ * @param {array} srcArray 
+ * @param {array|object} target 
+ * @param {function|undefined} equalsFunction 比较函数
+ * @returns 
+ */
+xnote.array.remove = function(srcArray, target, equalsFunction) {
+    var result = [];
+    if (equalsFunction === undefined) {
+        equalsFunction = function (a,b) {
+            return a === b;
+        }
+    }
+
+    if (Array.isArray(target)) {
+        var contains = xnote.array.contains;
+        srcArray.forEach(function (item) {
+            if (!contains(target, item, equalsFunction)) {
+                result.push(item);
+            }
+        })
+    } else {
+        srcArray.forEach(function (item) {
+            if (!equalsFunction(item, target)) {
+                result.push(item);
+            }
+        })
+    }
+    return result;
+};

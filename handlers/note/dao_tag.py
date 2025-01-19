@@ -55,6 +55,16 @@ class TagMeta(Storage):
         self.group_id: typing.Optional[str] = ""
         self.update(kw)
 
+    @classmethod
+    def from_dict(cls, dict_item):
+        result = TagMeta()
+        result.update(dict_item)
+        return result
+
+    @classmethod
+    def from_dict_list(cls, dict_list):
+        return [cls.from_dict(item) for item in dict_list]
+
 class NoteTagRelation(Storage):
     """笔记和标签的关系表"""
     def __init__(self):
@@ -248,9 +258,10 @@ class TagMetaDao:
         if group_id != None:
             where["group_id"] = str(group_id)
         
-        result = tag_meta_db.list(
+        dict_list = tag_meta_db.list(
             limit=limit, where = where, user_name=user_name)
-        
+        result = TagMeta.from_dict_list(dict_list)
+
         if not include_sys_tag:
             result = list(filter(cls.is_not_sys_tag, result))
 
@@ -263,7 +274,7 @@ class TagMetaDao:
 
 
 def get_tag_meta_by_name(user_name, tag_name, tag_type="group", group_id=None):
-    result = list_tag_meta(
+    result = TagMetaDao.list_meta(
         user_name, limit=1, tag_type=tag_type, group_id=group_id, tag_name=tag_name)
     if len(result) > 0:
         return TagMeta(**result[0])

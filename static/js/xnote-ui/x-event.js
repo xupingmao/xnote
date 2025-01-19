@@ -6,7 +6,7 @@
  * @filename x-event.js
  */
 
-(function(){
+xnote.execute(function(){
 
     /**
      * 代码来自 quarkjs
@@ -136,4 +136,4 @@
         return xnote._eventDispatcher.dispatchEvent(event);
     };
     
-})();
+});

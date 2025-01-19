@@ -143,6 +143,10 @@ noteAPI.bindTag = function (cmd) {
         xnote.alert("tagList is undefined");
     }
 
+    allTagList = xnote.array.remove(allTagList, tagList, function (a, b) {
+        return a.tag_name === b.tag_name;
+    })
+
     // 渲染绑定标签的html
     var html = $("#bindTagTemplate").render({
         tagList: tagList,
