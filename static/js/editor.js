@@ -126,6 +126,11 @@ function initCodeMirror(selector, options) {
                 });
         })
     }
+
+    // 刷新编辑器
+    setTimeout(function(){
+        editor.refresh();
+    }, 500);
     return editor;
 }
 
