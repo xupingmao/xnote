@@ -60,7 +60,7 @@ class DictDaoClass:
         dict_item.dict_type = self.dict_type.int_value
         dict_item.key = dict_item.key.lower()
 
-        save_dict = dict_item.get_save_dict()
+        save_dict = dict_item.to_save_dict()
         if not self.dict_type.has_user_id:
             save_dict.pop("user_id", None)
         else:

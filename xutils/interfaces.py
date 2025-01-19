@@ -176,7 +176,9 @@ class FileLockInterface:
         pass
 
 class RecordInterface:
-    """数据库记录的接口"""
+    """废弃,使用 xutils.base.BaseDataRecord
+    数据库记录的接口
+    """
 
     @classmethod
     def from_dict(cls, dict_value: dict):
@@ -185,7 +187,7 @@ class RecordInterface:
         result.__dict__.update(dict_value)
         return result
 
-    def to_dict(self):
+    def to_save_dict(self):
         """从领域模型转为数据库记录"""
         return dict(**self.__dict__)
 

@@ -150,3 +150,30 @@ class BaseEnum:
             if item.value == value:
                 return item.name
         return ""
+    
+
+class BaseDataRecord(Storage):
+
+    def handle_from_dict(self):
+        pass
+    
+    @classmethod
+    def from_dict(cls, dict_value):
+        result = cls()
+        result.update(dict_value)
+        result.handle_from_dict()
+        return result
+    
+    @classmethod
+    def from_dict_or_None(cls, dict_value):
+        if dict_value is None:
+            return None
+        return cls.from_dict(dict_value)
+
+    @classmethod    
+    def from_dict_list(cls, dict_list):
+        return [cls.from_dict(item) for item in dict_list]
+
+    def to_save_dict(self):
+        return dict(**self)
+

@@ -8,7 +8,7 @@ from xutils import dateutil
 from xnote.core import xtables
 from xnote.core import xconfig
 from xutils.db.dbutil_helper import new_from_dict
-from xutils.base import EnumItem
+from xutils.base import EnumItem, BaseDataRecord
 
 NOTE_ICON_DICT = {
     "group": "fa-folder",
@@ -42,7 +42,7 @@ class OrderTypeEnum(xutils.BaseEnum):
     ctime_desc = EnumItem("最新", "4")
 
 
-class NoteIndexDO(Storage):
+class NoteIndexDO(BaseDataRecord):
     def __init__(self, **kw):
         super().__init__()
         now = dateutil.format_datetime()
@@ -67,20 +67,8 @@ class NoteIndexDO(Storage):
         self.order_type = 0 # 排序方式
         self.update(kw)
 
-    @staticmethod
-    def from_dict(dict_value):
-        return new_from_dict(NoteIndexDO, dict_value)
-    
-    @classmethod
-    def from_dict_list(cls, dict_list):
-        # type: (list[dict]) -> list[NoteIndexDO]
-        result = []
-        for item in dict_list:
-            obj = cls()
-            obj.update(item)
-            obj.compat_old()
-            result.append(obj)
-        return result
+    def handle_from_dict(self):
+        self.compat_old()
 
     def before_save(self, index_do):
         # type: (NoteDO) -> None

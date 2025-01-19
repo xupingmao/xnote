@@ -21,9 +21,9 @@ from xutils import fsutil, six
 from xutils.dbutil import LdbTable
 from xutils.fsutil import FileItem
 from xutils.sqldb import TableProxy
-from xutils import Storage
+from xutils import Storage, BaseDataRecord
 
-class FileInfo(Storage):
+class FileInfo(BaseDataRecord):
 
     def __init__(self):
         self.id = 0
@@ -45,19 +45,6 @@ class FileInfo(Storage):
             result.pop("user_id", None)
         return result
 
-    @classmethod
-    def from_dict(cls, dict_value):
-        result = FileInfo()
-        result.update(dict_value)
-        return result
-
-    @classmethod
-    def from_dict_list(cls, dict_list):
-        result = [] # type: list[FileInfo]
-        for item in dict_list:
-            result.append(cls.from_dict(item))
-        return result
-    
     @property
     def realpath(self):
         return self.fpath.replace(xconfig.FileReplacement.data_dir, xconfig.FileConfig.data_dir)
