@@ -61,7 +61,7 @@ class ViewSourceHandler:
 
     @xauth.login_required("admin")
     def GET(self, path=""):
-        template_name = "code/code_edit.html"
+        template_name = "code/page/code_edit.html"
         path = xutils.get_argument("path", "")
         key = xutils.get_argument("key", "")
         type = xutils.get_argument_str("type", "")

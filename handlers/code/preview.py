@@ -98,7 +98,7 @@ class PreviewHandler:
             type = "file"
 
         handle_layout(kw)
-        return render("code/preview.html",
+        return render("code/page/preview.html",
                       html_title=basename,
                       os=os,
                       path=path,
@@ -164,7 +164,7 @@ class PreviewHandler:
         if parentname == "":
             parentname = "/"
 
-        return render("code/wiki_edit.html",
+        return render("code/page/wiki_edit.html",
                       show_aside=False,
                       os=os,
                       parent=parent,
@@ -179,10 +179,10 @@ class PreviewHandler:
 
 class ReadOnlyHandler:
 
-    def GET(self, path=None):
+    def GET(self, path=""):
         realpath = os.path.join(xconfig.TMP_DIR, path)
         content = xutils.readfile(realpath)
-        return xtemplate.render("code/preview.html",
+        return xtemplate.render("code/page/preview.html",
                                 os=os, content=content, type="file")
 
 

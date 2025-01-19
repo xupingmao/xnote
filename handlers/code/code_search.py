@@ -11,9 +11,9 @@
 """
 import re
 import os
-import xtemplate
 import xutils
-import xconfig
+from xnote.core import xtemplate
+from xnote.core import xconfig
 from xutils import textutil
 from xutils import xhtml_escape, Storage
 
@@ -262,7 +262,7 @@ class handler:
                 files, total_lines = searcher.search_files(path, key, blacklist, filename);
         except Exception as e:
             error = e
-        return xtemplate.render("code/code_search.html", 
+        return xtemplate.render("code/page/code_search.html", 
             show_aside = False,
             files = files,
             total_lines = total_lines,

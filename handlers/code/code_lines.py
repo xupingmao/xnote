@@ -5,10 +5,10 @@
 import os
 import web
 import re
-import xconfig
-import xauth
-import xtemplate
 import xutils
+from xnote.core import xauth
+from xnote.core import xtemplate
+from xnote.core import xconfig
 from collections import OrderedDict
 
 CODE_EXT_LIST = xconfig.FS_TEXT_EXT_LIST
@@ -127,7 +127,7 @@ class CodeLinesHandler:
         count = args.count
         typedict = CODE_EXT_DICT
         blackliststr = args.blacklist
-        filter_text = xutils.get_argument("filter_text", "")
+        filter_text = xutils.get_argument_str("filter_text", "")
         blacklist = re.split(r"[,\n]", blackliststr)
         lines_sort = xutils.get_argument("lines_sort", "")
 
@@ -152,7 +152,7 @@ class CodeLinesHandler:
         else:
             line_infos = []
 
-        return xtemplate.render("code/code_lines.html",
+        return xtemplate.render("code/page/code_lines.html",
                                 show_aside=False,
                                 typedict=typedict,
                                 line_infos=line_infos,
@@ -161,7 +161,7 @@ class CodeLinesHandler:
     @xauth.login_required("admin")
     def POST(self):
         path = xutils.get_argument("path", "")
-        recursive = xutils.get_argument("recursive", True, type=bool)
+        recursive = xutils.get_argument_bool("recursive", True)
         type = xutils.get_argument("type", "")
         args = dict(path=path, recursive=recursive, type=type)
 
@@ -174,7 +174,7 @@ class CodeLinesHandler:
 
         typedict = CODE_EXT_DICT
         # return xtemplate.render("code/lines.html", **locals())
-        return xtemplate.render("code/code_lines.html",
+        return xtemplate.render("code/page/code_lines.html",
                                 show_aside=False,
                                 typedict=typedict,
                                 line_infos=line_infos,
