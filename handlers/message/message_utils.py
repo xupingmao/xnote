@@ -463,6 +463,10 @@ class MessageListParser(object):
         if message.content is None:
             message.content = ""
             return message
+        
+        if isinstance(message, MessageTag):
+            message.html = build_search_html(message.content)
+            return message
 
         result = mark_text_v2(message.content, message.tag)
         message.html = result.result_text
@@ -539,7 +543,7 @@ class MessageKeyWordProcessor:
                 item.badge_info = "访问次数(%s)" % item.visit_cnt
 
         if orderby == "amount_desc":
-            def amount_key_func(item):
+            def amount_key_func(item: MessageTag):
                 if isinstance(item.amount, str):
                     return 0
                 if item.amount == None:
@@ -566,7 +570,7 @@ def sort_message_list(msg_list, orderby=""):
 
 
 def sort_keywords_by_marked(msg_list: typing.List[MessageTag]):
-    msg_list.sort(key=lambda x:x.score)
+    msg_list.sort(key=lambda x:x.score, reverse=True)
 
 
 def list_hot_tags(user_name:str, limit=20):
