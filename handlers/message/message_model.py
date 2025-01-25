@@ -59,6 +59,10 @@ class MessageFolder(Storage):
 
 class MsgTagInfo(TagInfoDO):
 
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.html = ""
+
     @property
     def content(self):
         return self.tag_code
@@ -80,6 +84,7 @@ class MsgTagInfo(TagInfoDO):
     def to_save_dict(self):
         result = dict(**self)
         result.pop("tag_id", None)
+        result.pop("html", None)
         return result
     
     def get_time_info(self):
@@ -172,6 +177,7 @@ class MessageDO(BaseMsgDO):
         self.amount = 0 # keyword对象的数量
         self.done_time = None # type: str|None
         self.change_time = xtables.DEFAULT_DATETIME
+        self.html = ""
 
     @classmethod
     def from_dict(cls, dict_value: dict):

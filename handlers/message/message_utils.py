@@ -484,8 +484,6 @@ class MessageListParser(object):
     def build_done_html(self, message: typing.Union[MessageDO, MessageTag]):
         task = None
         done_time = message.done_time
-        message.html = ""
-
         if message.ref != None:
             task = msg_dao.get_message_by_id(message.ref)
 
