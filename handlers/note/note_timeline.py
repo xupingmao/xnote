@@ -669,8 +669,8 @@ class DateHandler:
 
         notes = []
         # 待办任务
-        notes.append(MessageDao.get_message_tag(user_name, "task", priority=2))
-        notes.append(MessageDao.get_message_tag(user_name, "log",  priority=2))
+        notes.append(MessageDao.get_message_stat_item(user_name, "task", priority=2))
+        notes.append(MessageDao.get_message_stat_item(user_name, "log",  priority=2))
         notes.append(SystemGroup(
             "我的人生", "/note/view?skey=my_life", priority=2))
         notes.append(SystemGroup("我的年报:%s" % year, "/note/view?skey=year_%s" % year,

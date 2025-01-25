@@ -13,12 +13,33 @@ import typing
 
 from xnote.core import xtables
 from xutils import Storage, dateutil
+from xutils.base import BaseDataRecord
 
 class TagTypeEnum:
     """枚举无法扩展,所以这里不用,从外部添加枚举值可以直接设置新的属性"""
     empty = 0
     note_tag = 1 # 笔记标签
     msg_tag = 2  # 随手记标签
+
+
+class TagInfoDO(BaseDataRecord):
+    def __init__(self, **kw):
+        self.tag_id = 0
+        self.ctime = xtables.DEFAULT_DATETIME
+        self.mtime = xtables.DEFAULT_DATETIME
+        self.user_id = 0
+        self.tag_type = 0
+        self.second_type = 0
+        self.tag_code = ""
+        self.score = 0.0
+        self.amount = 0
+        self.visit_cnt = 0
+        self.update(kw)
+
+    def to_save_dict(self):
+        result = dict(**self)
+        result.pop("tag_id", None)
+        return result
 
 class TagBind(Storage):
     """标签绑定信息, 业务唯一键=tag_type+tag_code+target_id"""

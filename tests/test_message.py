@@ -13,7 +13,6 @@ from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil, dbutil
 from xutils import logutil
-from handlers.message import message_tag
 from xnote.core.models import SearchContext
 
 # cannot perform relative import
@@ -32,6 +31,7 @@ BaseTestCase = test_base.BaseTestCase
 
 from handlers.message import dao as msg_dao
 from handlers.message import message_model
+from handlers.message import message_tag
 
 MSG_DB = dbutil.get_table("msg_v2")
 
@@ -208,7 +208,7 @@ class TestMain(BaseTestCase):
         logutil.wait_task_done()
 
         # 重新把任务开启
-        open_result = json_request_return_dict("/message/tag", method="POST",
+        open_result = json_request_return_dict("/message/update_first_tag", method="POST",
                                                data=dict(id=task_id, tag="task"))
         assert open_result["success"] == True
 
@@ -285,8 +285,8 @@ class TestMain(BaseTestCase):
 
         from handlers.message.message import get_or_create_keyword
 
-        user_name = xauth.current_name()
-        keyword = get_or_create_keyword(user_name, "#test#", "127.0.0.1")
+        user_id = xauth.current_user_id()
+        keyword = get_or_create_keyword(user_id, "#test#", "127.0.0.1")
         print(keyword)
 
         assert keyword != None
@@ -297,15 +297,16 @@ class TestMain(BaseTestCase):
     def test_message_keyword_delete(self):
         from handlers.message.dao import MessageDO
         user_name = xauth.current_name_str()
+        user_id = xauth.current_user_id()
         tagname = "#delete-test#"
 
-        tagInfo = msg_dao.MsgTagInfoDao.get_or_create(user_name, tagname)
+        tagInfo = msg_dao.MsgTagInfoDao.get_or_create(user_id, tagname)
         keyword = msg_dao.get_by_content(user_name, "key", tagname)
         assert keyword != None
         assert keyword.content == tagname
 
         resp = json_request_return_dict(
-            "/message/delete", method="POST", data=dict(id=tagInfo.id))
+            "/message/tag/delete", method="POST", data=dict(tag_id=tagInfo.tag_id))
         print("resp=", resp)
 
         self.assertEqual("success", resp["code"])

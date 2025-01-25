@@ -26,7 +26,7 @@
     </div>
 </script>
 
-<script type="text/template" id="msg-tag-list-tpl">
+<script type="text/template" id="msgTagListTpl">
     <div class="main-content-bg row">
         <div class="row">
             <input type="text" class="nav-search-input" placeholder="搜索标签" onchange="onSearchInputChange(this)"/>
@@ -41,7 +41,7 @@
                 <a onclick="xnote.action.message.selectTopic(this);" class="list-item topic-item">请输入标签</a>
             {{!/if}}
             {{!each itemList msg}}
-                <a onclick="xnote.action.message.selectTopic(this);" class="list-item topic-item">{{!msg.content}}</a>
+                <a onclick="xnote.action.message.selectTopic(this);" class="list-item topic-item">{{!msg.tag_code}}</a>
             {{!/each}}
         </div>
 

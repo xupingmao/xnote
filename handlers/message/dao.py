@@ -19,9 +19,10 @@ from .message_model import MessageDO
 from .message_model import MsgIndex
 from .message_model import VALID_MESSAGE_PREFIX_TUPLE
 from .message_model import MessageHistory
-from .message_model import MessageTagDO
+from .message_model import MessageStatItem
 from .message_model import MOBILE_LENGTH
 from .message_model import MsgTagInfo
+from xnote.service import TagInfoDO
 
 
 _msg_db = dbutil.get_table("msg_v2")
@@ -165,7 +166,7 @@ def search_message(user_id: int, key: str, offset=0, limit=20, *, search_tags=No
         second_type = 0
         if search_tags != None:
             assert len(search_tags) == 1
-            second_type = MessageTagDO.get_second_type_by_code(search_tags[0])
+            second_type = MessageStatItem.get_second_type_by_code(search_tags[0])
         return search_message_by_user_tag(user_id=user_id, key=key, offset=offset, limit=limit, second_type=second_type)
     
     words = get_words_from_key(key)
@@ -385,18 +386,15 @@ def get_content_filter_func(tag, content):
     return filter_func
 
 
-def get_by_content(user, tag, content):
+def get_by_content(user, tag, content, user_id=0):
     if tag == "key":
+        if user_id == 0:
+            user_id = xauth.UserDao.get_id_by_name(user)
         # tag是独立的表，不需要比较tag
-        value = MsgTagInfoDao.get_first(user=user, content=content)
+        value = MsgTagInfoDao.get_first(user_id=user_id, content=content)
         return MsgTagInfo.from_dict_or_None(value)
     else:
         return None
-
-def delete_keyword(user, content):
-    first = MsgTagInfoDao.get_first(user=user, content=content)
-    if first != None:
-        MsgTagInfoDao.delete(first)
 
 def list_task(user, offset=0, limit=xconfig.PAGE_SIZE):
     return list_by_tag(user, "task", offset, limit)
@@ -410,7 +408,7 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
     check_param_user(user)
 
     if tag == "key":
-        chatlist = MsgTagInfoDao.list(user=user, offset=offset, limit=limit)
+        raise Exception("tag=key not supported")
     else:
         user_id = xauth.UserDao.get_id_by_name(user)
         index_list = MsgIndexDao.list(user_id=user_id, tag=tag, offset=offset, limit=limit)
@@ -425,8 +423,6 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
         amount = get_message_stat(user).cron_count
     elif tag == "log":
         amount = get_message_stat(user).log_count
-    elif tag == "key":
-        amount = get_message_stat(user).key_count
     else:
         amount = count_by_tag(user, tag)
 
@@ -584,13 +580,13 @@ def add_search_history(user="", search_key="", cost_time=0):
     MsgSearchLogDao.add_log(user_name=user, search_key=search_key, cost_time=cost_time)
 
 
-def get_message_tag(user, tag, priority=0):
+def get_message_stat_item(user, tag, priority=0):
     msg_stat = get_message_stat(user)
 
     if tag == "log":
-        return MessageTagDO(tag, msg_stat.log_count, priority=priority)
+        return MessageStatItem(tag, msg_stat.log_count, priority=priority)
     if tag == "task":
-        return MessageTagDO(tag, msg_stat.task_count, priority=priority)
+        return MessageStatItem(tag, msg_stat.task_count, priority=priority)
 
     raise Exception("unknown tag:%s" % tag)
 
@@ -648,7 +644,8 @@ class MsgIndexDao:
             where += " AND date < $date_end"
 
         vars = dict(user_id=user_id, tag=tag, date_prefix=date_prefix+"%", date_start=date_start, date_end=date_end)
-        return cls.db.select(where=where, vars=vars,offset=offset,limit=limit,order=order)
+        result = cls.db.select(where=where, vars=vars,offset=offset,limit=limit,order=order)
+        return MsgIndex.from_dict_list(result)
     
     @classmethod
     def delete_by_id(cls, id=0):
@@ -701,55 +698,71 @@ class MsgIndexDao:
 
 class MsgTagInfoDao:
     """随手记标签元信息表,使用KV存储"""
-    db = dbutil.get_table("msg_key")
+    db = xtables.get_table_by_name("tag_info")
+    tag_type = TagTypeEnum.msg_tag
 
     @classmethod
-    def get_first(cls, user="", content=""):
-        where = dict(user=user, content=content)
-        return cls.db.get_first(where=where)
-    
-    @classmethod
-    def get_by_key(cls, key=""):
-        result = cls.db.get_by_key(key)
+    def get_first(cls, user_id=0, content="", user_name=""):
+        if user_id == 0:
+            user_id = xauth.UserDao.get_id_by_name(user_name)
+        where_dict = dict(user_id=user_id, tag_code=content, tag_type=cls.tag_type)
+        result = cls.db.select_first(where=where_dict)
         return MsgTagInfo.from_dict_or_None(result)
     
     @classmethod
-    def list(cls, user="", offset=0, limit=20, content=None):
-        where = {}
+    def get_by_id(cls, user_id=0, tag_id=0):
+        where_dict = dict(user_id=user_id, tag_id=tag_id)
+        result = cls.db.select_first(where=where_dict)
+        return MsgTagInfo.from_dict_or_None(result)
+    
+    @classmethod
+    def list(cls, user="", user_id=0, offset=0, limit=20, content=None):
+        if user_id == 0:
+            user_id = xauth.UserDao.get_id_by_name(user)
+        where_dict = {}
+        where_dict["user_id"] = user_id
+        where_dict["tag_type"] = cls.tag_type
         if content != None:
-            where["content"] = content
-        records = cls.db.list(where=where, user_name=user,offset=offset,limit=limit,reverse=True)
+            where_dict["tag_code"] = content
+        records = cls.db.select(where=where_dict, offset=offset,limit=limit,order="ctime desc")
         return MsgTagInfo.from_dict_list(records)
     
     @classmethod
     def update(cls, tag_info: MsgTagInfo):
         tag_info.mtime = xutils.format_datetime()
-        return cls.db.update(tag_info)
+        tag_id = tag_info.tag_id
+        update_dict = tag_info.to_save_dict()
+        return cls.db.update(where=dict(tag_id=tag_id), **update_dict)
 
     @classmethod
-    def delete_by_id(cls, id=""):
-        return cls.db.delete_by_id(id=id)
+    def delete_by_id(cls, tag_id=0):
+        return cls.db.delete(where=dict(tag_id=tag_id))
     
     @classmethod
-    def delete(cls, obj):
-        return cls.db.delete(obj)
+    def delete(cls, obj: TagInfoDO):
+        return cls.delete_by_id(obj.tag_id)
 
     @classmethod
-    def get_or_create(cls, user="", content=""):
-        item = cls.get_first(user=user, content=content)
+    def get_or_create(cls, user_id=0, content=""):
+        item = cls.get_first(user_id=user_id, content=content)
         if item != None:
             return MsgTagInfo.from_dict(item)
         else:
+            now = dateutil.format_datetime()
             record = MsgTagInfo()
-            record.user = user
-            record.content = content
-            cls.db.insert(record)
-            record.id = record._key
+            record.tag_type = TagTypeEnum.msg_tag
+            record.ctime = now
+            record.mtime = now
+            record.user_id = user_id
+            record.tag_code = content
+            new_id = cls.db.insert(**record.to_save_dict())
+            record.tag_id = int(new_id)
             return record
 
     @classmethod
     def count(cls, user=""):
-        return cls.db.count(user_name=user)
+        user_id = xauth.UserDao.get_id_by_name(user)
+        return cls.db.count(where=dict(user_id=user_id))
 
 class MsgTagBindDao:
 
@@ -855,8 +868,8 @@ class MessageDao:
         return get_message_stat(user)
     
     @staticmethod
-    def get_message_tag(user, tag, priority=0):
-        return get_message_tag(user, tag, priority)
+    def get_message_stat_item(user, tag, priority=0):
+        return get_message_stat_item(user, tag, priority)
     
     @classmethod
     def batch_get_by_index_list(cls, index_list: typing.List[MsgIndex], user_id=0) -> typing.List[MessageDO]:
@@ -892,7 +905,7 @@ xutils.register_func("message.count", count_message)
 xutils.register_func("message.find_by_id", get_message_by_id)
 xutils.register_func("message.get_by_id",  get_message_by_id)
 xutils.register_func("message.get_by_content", get_by_content)
-xutils.register_func("message.get_message_tag", get_message_tag)
+xutils.register_func("message.get_message_tag", get_message_stat_item)
 
 xutils.register_func("message.list", list_message_page)
 xutils.register_func("message.list_file", list_file_page)

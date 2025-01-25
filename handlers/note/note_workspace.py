@@ -90,8 +90,8 @@ def list_special_groups(user_name = None):
 
     # 短消息：任务、通知和备忘
     fixed_books = []
-    fixed_books.append(msg_dao.get_message_tag(user_name, "task"))
-    fixed_books.append(msg_dao.get_message_tag(user_name, "log"))
+    fixed_books.append(msg_dao.get_message_stat_item(user_name, "task"))
+    fixed_books.append(msg_dao.get_message_stat_item(user_name, "log"))
     fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart&show_back=true", 
         size = book_dao.SmartGroupService.count_smart_group(), 
         icon = "fa-folder"))
@@ -107,7 +107,7 @@ class NoteWorkspaceHandler:
             recent_update_limit = 10
 
         creator = xauth.current_name()
-        memos = [msg_dao.get_message_tag(creator, "task"), msg_dao.get_message_tag(creator, "log")]
+        memos = [msg_dao.get_message_stat_item(creator, "task"), msg_dao.get_message_stat_item(creator, "log")]
         sticky_notes = note_dao.list_sticky(creator, limit = 5, orderby = "mtime_desc")
         hot_notes    = log_dao.list_hot(creator, limit = 5)
         note_groups  = note_dao.list_group(creator, orderby = "mtime_desc", limit = 5)

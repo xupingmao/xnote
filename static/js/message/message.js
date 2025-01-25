@@ -157,12 +157,12 @@ MessageView.edit = function (target) {
 
 // 展示选择标签对话框
 MessageView.showTopicDialog = function (target) {
-    xnote.http.get("/message/list?pagesize=100&page=1&key=&tag=key", function (resp) {
-        if (resp.code != "success") {
+    xnote.http.get("/api/message/tag/list?pagesize=100&page=1&key=&tag=key", function (resp) {
+        if (!resp.success) {
             xnote.alert(resp.message);
         } else {
             // 选择标签
-            var html = $("#msg-tag-list-tpl").render({
+            var html = $("#msgTagListTpl").render({
                 itemList: resp.data
             });
             var dialogId = xnote.openDialog("选择标签", html);
@@ -373,12 +373,12 @@ MessageView.showAllComments = function(target, selector) {
 }
 
 MessageView.updateMessageTag = function(id, tag) {
-    xnote.http.post("/message/tag", { id: id, tag: tag }, function (resp) {
-        if (resp.code == "success") {
+    xnote.http.post("/message/update_first_tag", { id: id, tag: tag }, function (resp) {
+        if (resp.success) {
             xnote.toast("更新状态成功");
             xnote.fire("message.updated");
         } else {
-            alert(resp.message);
+            xnote.alert(resp.message);
         }
     });
 }

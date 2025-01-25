@@ -127,3 +127,51 @@ def add_tag_to_content(content="", new_tag=""):
     rest_text = "".join(rest_str_list).strip()
     return " ".join(tags) + "\n" + rest_text
 
+class DeleteTagAjaxHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        tag_id = xutils.get_argument_int("tag_id")
+        if tag_id == 0:
+            return webutil.FailedResult("invalid tag_id")
+        user_id = xauth.current_user_id()
+        tag_info = msg_dao.MsgTagInfoDao.get_by_id(user_id=user_id, tag_id=tag_id)
+        if tag_info is None:
+            return webutil.FailedResult("标签不存在")
+        msg_dao.MsgTagInfoDao.delete_by_id(tag_id=tag_id)
+        return webutil.SuccessResult()
+
+
+class AddTagHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        content = xutils.get_argument_str("content")
+        new_tag = xutils.get_argument_str("new_tag")
+        result = add_tag_to_content(content=content, new_tag=new_tag)
+        return webutil.SuccessResult(result)
+
+    def GET(self):
+        return self.POST()
+
+class ListTagAjaxHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        user_id = xauth.current_user_id()
+        limit = xutils.get_argument_int("pagesize", 1000)
+        tag_info_list = msg_dao.MsgTagInfoDao.list(user_id=user_id, offset=0, limit=limit)
+        return webutil.SuccessResult(tag_info_list)
+
+class ListTagPage:
+    
+    @xauth.login_required()
+    def GET(self):
+        pass
+
+xurls = (
+    r"/message/add_tag", AddTagHandler,
+    r"/message/tag/delete", DeleteTagAjaxHandler,
+    r"/message/tag/list", ListTagPage,
+    r"/api/message/tag/list", ListTagAjaxHandler,
+)

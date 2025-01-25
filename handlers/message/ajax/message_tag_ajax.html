@@ -59,7 +59,7 @@ $(function () {
         var tag = $(e.target).attr("data-tag");
         console.log(id, tag);
 
-        xnote.http.post("/message/tag", {id: id, tag: tag}, function (resp) {
+        xnote.http.post("/message/update_first_tag", {id: id, tag: tag}, function (resp) {
             if (resp.code == "success") {
                 xnote.fire("message.refresh");
             } else {

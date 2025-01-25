@@ -121,7 +121,7 @@ def after_message_delete(msg_item):
     process_message(msg_item)
     after_upsert(msg_item)
 
-def after_upsert(msg_item):
+def after_upsert(msg_item: msg_dao.MessageDO):
     """插入或者更新异步处理"""
     user_name = msg_item.user
 
@@ -129,7 +129,7 @@ def after_upsert(msg_item):
         # 只自动创建标准的tag
         if not message_utils.is_standard_tag(keyword):
             continue
-        message = get_or_create_keyword(user_name, keyword, msg_item.ip)
+        message = get_or_create_keyword(msg_item.user_id, keyword, msg_item.ip)
         update_keyword_amount(message, user_name, keyword)
 
 class ListAjaxHandler:
@@ -151,7 +151,6 @@ class ListAjaxHandler:
         assert isinstance(tag, str)
 
         user_name = xauth.get_current_name()
-
         chatlist, amount = self.do_list_message(
             user_name, tag, offset, pagesize)
 
@@ -426,19 +425,6 @@ class OpenMessageAjaxHandler:
         return update_message_tag(id, "task")
 
 
-class UpdateTagAjaxHandler:
-
-    @xauth.login_required()
-    def POST(self):
-        id = xutils.get_argument_str("id")
-        tag = xutils.get_argument_str("tag")
-        if id == "":
-            return webutil.FailedResult(code="404", message="id为空")
-
-        if tag in ("task", "cron", "log", "key", "done"):
-            return update_message_tag(id, tag)
-        else:
-            return webutil.FailedResult(message="无效的标签: %s" % tag)
 
 class TouchAjaxHandler:
 
@@ -506,9 +492,6 @@ class DeleteAjaxHandler:
             msg = MessageDao.get_by_id(id)
             if msg != None:
                 return self.delete_msg(msg)
-            tag_info = msg_dao.MsgTagInfoDao.get_by_key(id)
-            if tag_info != None:
-                return self.delete_tag(tag_info)
             return webutil.FailedResult(message="数据不存在")
         except:
             xutils.print_exc()
@@ -556,8 +539,8 @@ def create_message(user_name, tag, content, ip):
 
     return message
 
-def get_or_create_keyword(user_name, content="", ip=""):
-    return msg_dao.MsgTagInfoDao.get_or_create(user_name, content)
+def get_or_create_keyword(user_id=0, content="", ip=""):
+    return msg_dao.MsgTagInfoDao.get_or_create(user_id, content)
 
 class SaveAjaxHandler:
 
@@ -836,14 +819,14 @@ class MessageKeywordAjaxHandler:
         return dict(code="404", message="指定动作不存在")
 
     def do_mark_or_unmark(self, keyword, action):
-        user_name = xauth.current_name_str()
-        tag_info = msg_dao.MsgTagInfoDao.get_or_create(user=user_name, content=keyword)
+        user_id = xauth.current_user_id()
+        tag_info = msg_dao.MsgTagInfoDao.get_or_create(user_id=user_id, content=keyword)
         assert tag_info != None
 
         if action == "unmark":
-            tag_info.is_marked = False
+            tag_info.set_is_marked(False)
         else:
-            tag_info.is_marked = True
+            tag_info.set_is_marked(True)
 
         msg_dao.MsgTagInfoDao.update(tag_info)
         
@@ -928,17 +911,20 @@ class ParseMessageHandler:
     def GET(self):
         return self.POST()
 
-class AddTagHandler:
+
+class UpdateTagAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        content = xutils.get_argument_str("content")
-        new_tag = xutils.get_argument_str("new_tag")
-        result = message_tag.add_tag_to_content(content=content, new_tag=new_tag)
-        return webutil.SuccessResult(result)
+        id = xutils.get_argument_str("id")
+        tag = xutils.get_argument_str("tag")
+        if id == "":
+            return webutil.FailedResult(code="404", message="id为空")
 
-    def GET(self):
-        return self.POST()
+        if tag in ("task", "cron", "log", "key", "done"):
+            return update_message_tag(id, tag)
+        else:
+            return webutil.FailedResult(message="无效的标签: %s" % tag)
 
 xurls = (
     r"/message", MessagePageHandler,
@@ -953,6 +939,7 @@ xurls = (
     r"/message/refresh", MessageRefreshHandler,
     
     # Ajax处理
+    r"/message/update_first_tag", UpdateTagAjaxHandler,
     r"/message/list", ListAjaxHandler,
     r"/message/date", DateAjaxHandler,
     r"/message/stat", StatAjaxHandler,
@@ -962,11 +949,9 @@ xurls = (
     r"/message/open", OpenMessageAjaxHandler,
     r"/message/finish", FinishMessageAjaxHandler,
     r"/message/touch", TouchAjaxHandler,
-    r"/message/tag", UpdateTagAjaxHandler,
     r"/message/keyword", MessageKeywordAjaxHandler,
     r"/message/comment/create", CreateCommentHandler,
     r"/message/comment/delete", DeleteCommentHandler,
     r"/message/comment/list", ListCommentHandler,
     r"/message/parse", ParseMessageHandler,
-    r"/message/add_tag", AddTagHandler,
 )

@@ -21,7 +21,6 @@ class TaskListHandler:
         kw.message_left_class = "hide"
         kw.message_right_class = "row"
     
-    
     @staticmethod
     def get_task_kw():
         kw = Storage()
@@ -75,11 +74,13 @@ class TaskListHandler:
             msg_list, "task", display_tag="taglist", search_tag="task")
 
         for tag in tag_list:
-            tag.is_marked = is_marked_keyword(user_name, tag.name)
+            is_marked = is_marked_keyword(user_name, tag.tag_code)
+            tag.set_is_marked(is_marked)
 
         sort_keywords_by_marked(tag_list)
 
         kw = cls.get_task_kw()
+        kw.date = ""
         kw.tag_list = tag_list
         kw.html_title = T("待办任务")
         kw.message_placeholder = T("添加待办任务")
@@ -99,3 +100,14 @@ class TaskListHandler:
         kw.show_input_box = False
         cls.hide_side_tags(kw)
         return xtemplate.render("message/page/task_done_index.html", **kw)
+
+
+class TaskTagListPage:
+
+    @xauth.login_required()
+    def GET(self):
+        return TaskListHandler.get_task_taglist_page()
+
+xurls = (
+    r"/message/task/tag_list", TaskTagListPage,
+)

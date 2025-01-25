@@ -933,8 +933,8 @@ class DateListHandler:
 
         notes = []
         # 待办任务
-        notes.append(msg_dao.get_message_tag(user_name, "task", priority=2))
-        notes.append(msg_dao.get_message_tag(user_name, "log",  priority=2))
+        notes.append(msg_dao.get_message_stat_item(user_name, "task", priority=2))
+        notes.append(msg_dao.get_message_stat_item(user_name, "log",  priority=2))
         notes_new = note_dao.list_by_date(
             "ctime", user_name, date, orderby="ctime desc")
         for note in notes_new:

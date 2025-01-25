@@ -13,7 +13,7 @@ from xutils import numutil
 from xutils.functions import del_dict_key
 from xnote.core.xtemplate import T
 from xnote.core import xtables
-from xnote.service import TagTypeEnum
+from xnote.service import TagTypeEnum, TagInfoDO
 from xutils.db.dbutil_helper import new_from_dict
 
 """消息模型相关的内容
@@ -57,50 +57,37 @@ class MessageFolder(Storage):
         self.wday = ""
         self.item_list = []
 
-class MessageTag(Storage):
-    def __init__(self, **kw):
-        self.name = ""
-        self.content = kw.get("name", "")
-        self.amount = 0
-        self.url = ""
-        self.mtime = xtables.DEFAULT_DATETIME
-        self.badge_info = ""
-        self.is_no_tag = False
-        self.update(kw)
+class MsgTagInfo(TagInfoDO):
 
-
-class MsgTagInfo(BaseMsgDO):
-    def __init__(self):
-        self._key = "" # kv的真实key
-        self.id = ""
-        self.ctime = xutils.format_datetime()
-        self.mtime = xutils.format_datetime()
-        self.user = ""
-        self.content=""
-        self.amount=0
-        self.is_marked=False
-        self.visit_cnt=0
+    @property
+    def content(self):
+        return self.tag_code
     
-    @staticmethod
-    def from_dict(dict_value):
-        result = new_from_dict(MsgTagInfo, dict_value)
-        result.id = result._key
+    @property
+    def is_marked(self):
+        return self.score == 1.0
+    
+    @property
+    def tag(self):
+        return "key"
+    
+    def set_is_marked(self, value=False):
+        if value:
+            self.score = 1.0
+        else:
+            self.score = 0.0
+
+    def to_save_dict(self):
+        result = dict(**self)
+        result.pop("tag_id", None)
         return result
     
-    @classmethod
-    def from_dict_or_None(cls, dict_value):
-        if dict_value == None:
-            return None
-        return cls.from_dict(dict_value)
-    
-    @classmethod
-    def from_dict_list(cls, dict_list) -> typing.List["MsgTagInfo"]:
-        result = []
-        for item in dict_list:
-            result.append(cls.from_dict(item))
-        return result
+    def get_time_info(self):
+        return self.ctime
 
-class MessageTagDO(BaseMsgDO):
+MessageTag = MsgTagInfo
+
+class MessageStatItem(BaseMsgDO):
     """这个是对外展示的菜单信息"""
     def __init__(self, tag, size, priority=0):
         self.type = type

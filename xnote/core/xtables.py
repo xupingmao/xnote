@@ -326,12 +326,17 @@ def init_tag_info_table():
     """
     table_name = "tag_info"
     comment = "标签信息"
-    with create_default_table_manager(table_name, comment=comment) as manager:
-        manager.add_column("ctime", "datetime", DEFAULT_DATETIME)
+    pk_name = "tag_id"
+    with create_default_table_manager(table_name, comment=comment, pk_name=pk_name) as manager:
+        manager.add_column("ctime", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", default_value=DEFAULT_DATETIME)
         manager.add_column("user_id", "bigint", default_value=0)
         manager.add_column("tag_type", "tinyint", default_value=0, comment="一级类型")
         manager.add_column("second_type", "tinyint", default_value=0, comment="二级类型")
         manager.add_column("tag_code",  "varchar(32)", default_value="")
+        manager.add_column("score", "double", default_value=0.0)
+        manager.add_column("amount", "bigint", default_value=0, comment="标签关联的对象数量")
+        manager.add_column("visit_cnt", "bigint", default_value=0, comment="访问次数")
         manager.add_index("user_id")
 
 def init_tag_bind_table():
@@ -724,7 +729,7 @@ def init():
     
     # 标签相关
     init_note_tag_rel_table() # 已删除, 占位防止冲突
-    # init_tag_info_table()
+    init_tag_info_table()
     init_tag_bind_table()
 
     # 评论相关

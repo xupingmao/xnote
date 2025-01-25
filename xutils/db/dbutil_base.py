@@ -386,6 +386,7 @@ class TableInfo:
     
     def delete_table(self):
         self.is_deleted = True
+        return self
 
     @classmethod
     def get_kv_table_by_index(cls, index_name=""):

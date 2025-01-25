@@ -238,6 +238,8 @@ def get_tags_from_message_list(
     tag_counter = Counter()
     tag_sorter = TagSorter()
 
+    server_home = xconfig.WebConfig.server_home
+
     for msg_item in msg_list:
         process_message(msg_item)
 
@@ -273,8 +275,8 @@ def get_tags_from_message_list(
             p=search_tag,
         )
 
-        url = "/message?" + \
-            netutil.build_query_string(params, skip_empty_value=True)
+        query_string = netutil.build_query_string(params, skip_empty_value=True)
+        url = f"{server_home}/message?{query_string}"            
 
         mtime = tag_sorter.get_mtime(tag_name)
 
@@ -453,7 +455,7 @@ class MessageListParser(object):
         if message.tag == None:
             message.tag = self.tag
 
-    def process_message(self, message: MessageDO) -> Storage:
+    def process_message(self, message: typing.Union[MessageDO, MessageTag]) -> Storage:
         self.prehandle_message(message)
 
         message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
@@ -475,9 +477,10 @@ class MessageListParser(object):
 
         return message
 
-    def build_done_html(self, message):
+    def build_done_html(self, message: typing.Union[MessageDO, MessageTag]):
         task = None
         done_time = message.done_time
+        message.html = ""
 
         if message.ref != None:
             task = msg_dao.get_message_by_id(message.ref)
@@ -488,7 +491,7 @@ class MessageListParser(object):
             message.keywords = keywords
         elif done_time is None:
             done_time = message.mtime
-            message.html += u("<br>------<br>完成于 %s") % done_time
+            message.html += f"<br>------<br>完成于 {done_time}"
 
     def _build_keyword_html(self, message):
         if len(message.keywords) == 0:
@@ -522,7 +525,7 @@ class MessageListParser(object):
 class MessageKeyWordProcessor:
     def __init__(self, msg_list):
         assert isinstance(msg_list, list)
-        self.msg_list = msg_list
+        self.msg_list = msg_list # type: list[MessageTag]
 
     def sort(self, orderby=""):
         msg_list = self.msg_list
@@ -562,20 +565,14 @@ def sort_message_list(msg_list, orderby=""):
     p.sort(orderby)
 
 
-def sort_keywords_by_marked(msg_list):
-    def key_func(item):
-        if item.is_marked:
-            return 0
-        else:
-            return 1
-
-    msg_list.sort(key=key_func)
+def sort_keywords_by_marked(msg_list: typing.List[MessageTag]):
+    msg_list.sort(key=lambda x:x.score)
 
 
 def list_hot_tags(user_name:str, limit=20):
     assert isinstance(user_name, str)
 
-    msg_list, amount = msg_dao.list_by_tag(user_name, "key", 0, MAX_LIST_LIMIT)
+    msg_list = msg_dao.MsgTagInfoDao.list(user=user_name, offset=0, limit=MAX_LIST_LIMIT)
     sort_message_list(msg_list, "amount_desc")
     server_home = xconfig.WebConfig.server_home
     for msg in msg_list:
@@ -601,7 +598,7 @@ def check_content_for_update(user_name, tag, content):
 
 
 def touch_key_by_content(user_name, tag, content):
-    item = check_content_for_update(user_name, tag, content)
+    item = msg_dao.MsgTagInfoDao.get_first(user_name=user_name, content=content)
     if item != None:
         item.mtime = xutils.format_datetime()
         if item.visit_cnt is None:
