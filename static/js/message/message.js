@@ -14,10 +14,12 @@ if (xnote.state.message === undefined) {
 var MessageView = {};
 MessageView.state = {};
 MessageView.state.isEditDialog = false;
+MessageView.listAjaxUrl = "/message/list";
 xnote.action.message = MessageView;
 
 
 MessageView.refreshList = function() {
+    var self = this;
     function doRefreshMessageList(params) {
         console.log("doRefreshMessageList:", params);
         xnote.assert(typeof(params) == "object", "expect params to be object");
@@ -29,7 +31,7 @@ MessageView.refreshList = function() {
 
         console.log("[message] refresh messageList");
         
-        xnote.http.get("/message/list", params, function (resp) {
+        xnote.http.get(MessageView.listAjaxUrl, params, function (resp) {
             // console.log(resp);
             $(".message-list").html(resp);
         });

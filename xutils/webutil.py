@@ -275,6 +275,15 @@ class WebPageInfo:
         if self.page_max == 0:
             self.page_max = 1
 
+def get_offset_by_page(page=1, page_size=20):
+    if page < 1:
+        return 0
+    return (page-1) * page_size
+
+def get_page_max_by_total(total=0, page_size=20):
+    if page_size <= 0:
+        return 1
+    return int(math.ceil(total/page_size))
 
 Pagination = WebPageInfo
         

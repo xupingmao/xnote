@@ -1,0 +1,15 @@
+<!-- {#
+@Author       : xupingmao
+@email        : 578749341@qq.com
+@Date         : 2023-06-30 20:24:59
+@LastEditors  : xupingmao
+@LastEditTime : 2023-11-26 11:29:04
+@FilePath     : /xnote/handlers/message/card/message_system_tag.html
+@Description  : 描述
+ #} -->
+{% from handlers.message.message_model import MessageTagEnum %}
+<div class="card x-tab-box btn-style dark" data-tab-key="sys_tag">
+    {% for sys_tag_info in MessageTagEnum.system_tag_list %}
+    <a class="x-tab" href="{{sys_tag_info.url}}" data-tab-value="{{sys_tag_info.value}}">{{sys_tag_info.name}}</a>
+    {% end %}
+</div>

@@ -58,9 +58,6 @@ MSG_RULES = []
 # 默认的标签
 DEFAULT_TAG = "log"
 MAX_LIST_LIMIT = 1000
-# 系统标签
-SYSTEM_TAG_TUPLE = ("book", "people", "file", "phone", "link")
-
 LIST_VIEW_TPL = "message/page/message_list_view.html"
 
 def get_current_message_stat():
@@ -150,6 +147,9 @@ class ListAjaxHandler:
 
         assert isinstance(tag, str)
 
+        if tag == "key" or tag == "log.tags":
+            return webutil.FailedResult(message="功能已迁移")
+
         user_name = xauth.get_current_name()
         chatlist, amount = self.do_list_message(
             user_name, tag, offset, pagesize)
@@ -199,10 +199,6 @@ class ListAjaxHandler:
         if tag == "task":
             return self.do_list_task(user_name, offset, pagesize)
 
-        if tag == "key" or tag == "log.tags":
-            orderby = xutils.get_argument_str("orderby", "amount_desc")
-            return message_tag.list_message_tags(user_name, offset, pagesize, orderby = orderby, only_standard=True)
-
         list_func = xutils.lookup_func("message.list_%s" % tag)
         if list_func != None:
             return list_func(user_name, offset, pagesize)
@@ -232,9 +228,6 @@ class ListAjaxHandler:
 
         if tag == "key":
             show_edit_btn = False
-        
-        if tag == "key" or tag == "log.tags":
-            return LogPageHandler().do_get_tags_ajax(msg_list, page, page_max)
 
         params = dict(
             tag=tag,
@@ -650,6 +643,9 @@ class MessagePageHandler:
             return message_search.SearchHandler().get_page()
 
         if tag == "key" or tag == "log.tags":
+            return webutil.FailedResult(message="功能已迁移")
+        
+        if tag == "key" or tag == "log.tags":
             return self.get_log_tags_page()
         
         return LogPageHandler().do_get()
@@ -666,25 +662,6 @@ class MessagePageHandler:
     
     def get_tag_list(self):
         return message_tag.get_tag_list()
-
-    def get_log_tags_page(self):
-        sys_tag = xutils.get_argument_str("sys_tag")
-        if sys_tag in SYSTEM_TAG_TUPLE:
-            return self.get_system_tag_page(sys_tag)
-
-        return message_tag.get_log_tags_page()
-
-    def get_system_tag_page(self, tag):
-        kw = Storage()
-        
-        kw.message_tag=tag
-        kw.search_type="message"
-        kw.show_input_box=False
-        kw.show_side_tags=False
-        kw.message_left_class = "hide"
-        kw.message_right_class = "row"
-
-        return xtemplate.render("message/page/message_list_view.html", **kw)
 
     def get_task_kw(self):
         return TaskListHandler.get_task_kw()

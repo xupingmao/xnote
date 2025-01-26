@@ -24,6 +24,7 @@
     {% init show_keyword_info = False %}
     {% init message_left_class = "message-left" %}
     {% init message_right_class = "message-right" %}
+    {% init list_ajax_url = "/message/list" %}
 
     <!-- 事件转换 -->
     {% include message/component/message_event.html %}
@@ -50,7 +51,7 @@
     
         <!-- 系统标签 -->
         {% if show_system_tag %}
-            {% include message/card/message_system_tag.html %}
+            {% include message/page/message_tag_system.html %}
         {% end %}
     
         <!-- 二级目录 -->
@@ -68,6 +69,7 @@
     <script type="text/javascript">
         xnote.state.message.messageTag = "{{message_tag}}";
         xnote.state.message.tag = "{{tag}}";
+        MessageView.listAjaxUrl = "{{list_ajax_url}}";
         MessageView.refreshList();
     </script>
 

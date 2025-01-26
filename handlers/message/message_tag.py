@@ -8,8 +8,10 @@ from xutils.textutil import quote
 from xutils.db.dbutil_helper import new_from_dict
 from . import dao as msg_dao
 from . import message_utils
-from .message_model import MsgTagInfo
+from .message_model import MsgTagInfo, MessageTagEnum
 from xutils.text_parser import TokenType
+from xutils import netutil
+
 
 """
 随手记的标签处理
@@ -43,30 +45,6 @@ def get_tag_list_by_month(user_id=0, month="2000-01"):
     msg_list, amount = msg_dao.list_by_date_range(user_id=user_id, date_start=date_start, date_end=date_end)
     result = get_tag_list_by_msg_list(msg_list, date=month)
     return result
-
-def get_log_tags_page():
-    """随手记的话题标签页面"""
-    orderby = xutils.get_argument_str("orderby", "")
-
-    kw = Storage(
-        tag="key",
-        search_type="message",
-        show_tag_btn=False,
-        show_attachment_btn=False,
-        show_system_tag=True,
-        message_placeholder="添加标签/关键字/话题",
-        show_side_tags=False,
-    )
-
-    kw.show_input_box = False
-    kw.show_sub_link = False
-    kw.orderby = orderby
-    kw.search_ext_dict = dict(tag="search")
-    kw.show_left_tags = False
-    kw.message_left_class = "hide"
-    kw.message_right_class = "row"
-
-    return xtemplate.render("message/page/message_list_view.html", **kw)
 
 
 def filter_standard_msg_list(msg_list: typing.List[MsgTagInfo]):
@@ -167,11 +145,107 @@ class ListTagPage:
     
     @xauth.login_required()
     def GET(self):
-        pass
+        sys_tag = xutils.get_argument_str("sys_tag")
+        if MessageTagEnum.is_system_tag_code(sys_tag):
+            return self.get_system_tag_page(sys_tag)
+        return self.get_log_tags_page()
+    
+    def create_kw(self):
+        kw = Storage()
+        return kw
+
+    def get_system_tag_page(self, tag):
+        kw = self.create_kw()
+        kw.message_tag=tag
+        kw.search_type="message"
+        kw.show_input_box=False
+        kw.show_side_tags=False
+        kw.message_left_class = "hide"
+        kw.message_right_class = "row"
+
+        return xtemplate.render("message/page/message_list_view.html", **kw)
+    
+    def get_log_tags_page(self):
+        """随手记的话题标签页面"""
+        orderby = xutils.get_argument_str("orderby", "")
+        kw = self.create_kw()
+        kw.list_ajax_url = "/message/tag/list_ajax"
+        kw.tag="key"
+        kw.search_type="message",
+        kw.show_tag_btn=False
+        kw.show_attachment_btn=False
+        kw.show_system_tag=True
+        kw.message_placeholder="添加标签/关键字/话题"
+        kw.show_side_tags=False
+        kw.show_input_box = False
+        kw.show_sub_link = False
+        kw.orderby = orderby
+        kw.search_ext_dict = dict(tag="search")
+        kw.show_left_tags = False
+        kw.message_left_class = "hide"
+        kw.message_right_class = "row"
+
+        return xtemplate.render("message/page/message_list_view.html", **kw)
+
+
+class ListAjaxHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        page = xutils.get_argument_int("page", 1)
+        tag = xutils.get_argument_str("tag")
+        display_tag = xutils.get_argument_str("displayTag")
+        date = xutils.get_argument_str("date")
+        key = xutils.get_argument_str("key")
+        orderby = xutils.get_argument_str("orderby", "amount_desc")
+        filter_key = xutils.get_argument_str("filter_key")
+        template_file = "message/page/message_tag_ajax.html"
+        page_size = 20
+        user_id = xauth.current_user_id()
+        offset = webutil.get_offset_by_page(page, page_size)
+        tag_list, total = msg_dao.MsgTagInfoDao.get_page(user_id=user_id, offset=offset, limit=page_size)
+        message_utils.format_tag_list(tag_list)
+        message_utils.sort_tag_list(tag_list, orderby=orderby)
+
+        params = dict(
+            tag=tag,
+            displayTag=display_tag,
+            key=key,
+            date=date,
+            filterKey=filter_key,
+            orderby=orderby,
+        )
+
+        query_string = netutil.build_query_string(params=params, skip_empty_value=True)
+        page_url = f"?{query_string}&page="
+
+        kw = Storage(
+            page=page,
+            page_url=page_url,
+            page_max=webutil.get_page_max_by_total(total, page_size),
+            item_list=tag_list
+        )
+
+        kw.page = page
+
+        user_name = xauth.current_name_str()
+
+        kw.top_keywords = []
+        if orderby == "amount_desc" and page == 1:
+            limit = self.get_recent_limit()
+            kw.recent_keywords = get_recent_keywords(user_name, tag = "search", limit=limit)
+            
+        return xtemplate.render(template_file, **kw)
+    
+    def get_recent_limit(self):
+        if webutil.is_mobile_client():
+            return 5
+        return 20
 
 xurls = (
     r"/message/add_tag", AddTagHandler,
     r"/message/tag/delete", DeleteTagAjaxHandler,
     r"/message/tag/list", ListTagPage,
+    r"/message/tag/list_ajax", ListAjaxHandler,
     r"/api/message/tag/list", ListTagAjaxHandler,
 )

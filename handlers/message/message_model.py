@@ -12,9 +12,10 @@ from xutils import dateutil
 from xutils import numutil
 from xutils.functions import del_dict_key
 from xnote.core.xtemplate import T
-from xnote.core import xtables
+from xnote.core import xtables, xconfig
 from xnote.service import TagTypeEnum, TagInfoDO
 from xutils.db.dbutil_helper import new_from_dict
+from xutils.base import BaseEnum, EnumItem
 
 """消息模型相关的内容
 任务：默认按照修改时间排序
@@ -49,6 +50,34 @@ class MessageSystemTag:
     log = "log"
     key = "key"
 
+server_home = xconfig.WebConfig.server_home
+
+class MessageTagItem(EnumItem):
+
+    def __init__(self, name="", value=""):
+        super().__init__(name, value)
+
+    @property
+    def url(self):
+        return f"{server_home}/message/tag/list?tag=log.tags&sys_tag={self.value}"
+
+
+class MessageTagEnum(BaseEnum):
+
+    book = MessageTagItem("书籍", "book")
+    people = MessageTagItem("人物", "people")
+    file = MessageTagItem("文件", "file")
+    phone = MessageTagItem("电话", "phone")
+    link = MessageTagItem("链接", "link")
+
+    system_tag_list = [file, link, book, people, phone]
+
+    @classmethod
+    def is_system_tag_code(cls, tag_code=""):
+        for item in cls.system_tag_list:
+            if tag_code == item.value:
+                return True
+        return False
 
 class MessageFolder(Storage):
 
@@ -58,6 +87,7 @@ class MessageFolder(Storage):
         self.item_list = []
 
 class MsgTagInfo(TagInfoDO):
+    """用户标签"""
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -267,3 +297,4 @@ class MessageHistory:
         self.user_id = 0
         self.content = ""
         self.ctime = dateutil.format_datetime()
+

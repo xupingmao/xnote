@@ -562,7 +562,7 @@ class MessageKeyWordProcessor:
         pass
 
 
-def sort_message_list(msg_list, orderby=""):
+def sort_tag_list(msg_list, orderby=""):
     p = MessageKeyWordProcessor(msg_list)
     p.sort(orderby)
 
@@ -575,7 +575,7 @@ def list_hot_tags(user_name:str, limit=20):
     assert isinstance(user_name, str)
 
     msg_list = msg_dao.MsgTagInfoDao.list(user=user_name, offset=0, limit=MAX_LIST_LIMIT)
-    sort_message_list(msg_list, "amount_desc")
+    sort_tag_list(msg_list, "amount_desc")
     server_home = xconfig.WebConfig.server_home
     for msg in msg_list:
         msg.url = f"{server_home}/message?tag=log.search&key={quote(msg.content)}"
@@ -609,6 +609,10 @@ def touch_key_by_content(user_name, tag, content):
         msg_dao.MsgTagInfoDao.update(item)
     return item
 
+def format_tag_list(tag_list: typing.List[MessageTag], search_tag="log"):
+    for item in tag_list:
+        item.html = build_search_html(item.tag_code, search_tag=search_tag)
+    return tag_list
 
 xutils.register_func("message.list_hot_tags", list_hot_tags)
 xutils.register_func("message.filter_default_content", filter_default_content)

@@ -43,6 +43,8 @@ def get_script_path(name):
 def del_msg_by_id(id):
     json_request("/message/delete", method="POST", data=dict(id=id))
 
+def del_msg_tag(tag_id=0):
+    json_request("/message/tag/delete", method="POST", data=dict(tag_id=tag_id))
 
 def delete_all_messages():
     for record in MSG_DB.iter(limit=-1):
@@ -126,7 +128,7 @@ class TestMain(BaseTestCase):
             del_msg_by_id(msg['id'])
 
     def count_message_key(self):
-        response = json_request("/message/list?tag=key")
+        response = json_request("/api/message/tag/list")
         assert isinstance(response, dict)
         assert response.get("code") == "success"
         data = response.get("data")
@@ -134,11 +136,11 @@ class TestMain(BaseTestCase):
         return len(data)
 
     def test_message_key(self):
-        key_result = json_request("/message/list?tag=key")
+        key_result = json_request("/api/message/tag/list")
         assert isinstance(key_result, dict)
 
         for item in key_result["data"]:
-            del_msg_by_id(item["id"])
+            del_msg_tag(item["tag_id"])
 
         assert self.count_message_key() == 0
 

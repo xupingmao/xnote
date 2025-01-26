@@ -1,12 +1,13 @@
 <!-- 随手记列表 -->
+{% init list_ajax_url = "/message/list" %}
 <div class="message-list">
 
 </div>
 
 <script type="text/javascript">
-(function () {
-
+xnote.execute(function () {
     var LAST_DATE;
+    var listAjaxUrl = "{{list_ajax_url}}";
 
     function getCurrentPage() {
         var page = getUrlParam("page");
@@ -38,7 +39,7 @@
         params.format = "html";
         params.displayTag = getUrlParam("displayTag", "");
 
-        xnote.http.get("/message/list", params, function (resp) {
+        xnote.http.get(listAjaxUrl, params, function (resp) {
             // console.log(resp);
             $(".message-list").html(resp);
         });
@@ -68,5 +69,5 @@
     window.refreshMessageList = refreshMessageList;
     window.doRefreshMessageList = doRefreshMessageList;
 
-})();
+});
 </script>
