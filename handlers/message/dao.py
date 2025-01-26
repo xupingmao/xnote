@@ -717,20 +717,20 @@ class MsgTagInfoDao:
         return MsgTagInfo.from_dict_or_None(result)
     
     @classmethod
-    def list(cls, user="", user_id=0, offset=0, limit=20, content=""):
+    def list(cls, user="", user_id=0, offset=0, limit=20, tag_code=""):
         if user_id == 0:
             user_id = xauth.UserDao.get_id_by_name(user)
-        records, _ = cls.get_page(user_id=user_id, offset=offset, limit=limit, content=content, skip_count=True)
+        records, _ = cls.get_page(user_id=user_id, offset=offset, limit=limit, tag_code=tag_code, skip_count=True)
         return records
     
     @classmethod
-    def get_page(cls, user_id=0, offset=0, limit=20, content="", skip_count=False):
+    def get_page(cls, user_id=0, offset=0, limit=20, tag_code="", order="ctime desc", skip_count=False):
         where_dict = {}
         where_dict["user_id"] = user_id
         where_dict["tag_type"] = cls.tag_type
-        if content != "" and content != None:
-            where_dict["tag_code"] = content
-        records = cls.db.select(where=where_dict, offset=offset,limit=limit,order="ctime desc")
+        if tag_code != "" and tag_code != None:
+            where_dict["tag_code"] = tag_code
+        records = cls.db.select(where=where_dict, offset=offset,limit=limit,order=order)
         
         if skip_count:
             amount = 0

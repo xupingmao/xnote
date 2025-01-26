@@ -9,6 +9,7 @@ from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable, FormRowType, TableActionType
 from handlers.message.dao import MessageDao
 from handlers.message.message_utils import process_message
+from handlers.message import message_tag
 
 class RepairInfo(Storage):
     def __init__(self, code="", name="", content=""):
@@ -45,7 +46,9 @@ class RepairMsgTag(RepairInfo):
                 for msg in MessageDao.iter_all():
                     process_message(msg)
                     MessageDao.update_user_tags(msg)
+                    message_tag.update_tag_amount_by_msg(msg)
                     count += 1
+
                 job_info.job_result = f"修复{count}条记录"
 
         return webutil.SuccessResult(message="修复成功")

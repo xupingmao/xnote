@@ -24,7 +24,6 @@ from xnote.core import xauth, xconfig, xmanager, xtemplate
 from xutils import BaseRule, Storage
 from xnote.core.xtemplate import T
 from xutils import netutil, webutil
-from xutils.functions import safe_list
 from xutils.textutil import quote
 from handlers.message.message_task import TaskListHandler
 from handlers.message.message_month_tags import MonthTagsPage
@@ -64,17 +63,6 @@ def get_current_message_stat():
     user_name = xauth.current_name()
     message_stat = MessageDao.get_message_stat(user_name)
     return format_message_stat(message_stat)
-
-
-def update_keyword_amount(tag_info: msg_dao.MsgTagInfo, user_name="", key=""):
-    user_id = xauth.UserDao.get_id_by_name(user_name)
-    amount = dao.MsgTagBindDao.count_by_key(user_id=user_id, key=key)
-    tag_info.amount = amount
-    if amount == 0:
-        msg_dao.MsgTagInfoDao.delete(tag_info)
-    else:
-        msg_dao.MsgTagInfoDao.update(tag_info)
-    logging.info("user:%s,key:%s,amount:%s", user_name, key, amount)
 
 
 @xutils.timeit(name="message.refresh", logfile=True)
@@ -120,14 +108,7 @@ def after_message_delete(msg_item):
 
 def after_upsert(msg_item: msg_dao.MessageDO):
     """插入或者更新异步处理"""
-    user_name = msg_item.user
-
-    for keyword in safe_list(msg_item.keywords):
-        # 只自动创建标准的tag
-        if not message_utils.is_standard_tag(keyword):
-            continue
-        message = get_or_create_keyword(msg_item.user_id, keyword, msg_item.ip)
-        update_keyword_amount(message, user_name, keyword)
+    message_tag.update_tag_amount_by_msg(msg_item)
 
 class ListAjaxHandler:
 

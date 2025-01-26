@@ -2,6 +2,8 @@
 
 import typing
 import xutils
+import logging
+
 from xnote.core import xauth, xtemplate, xconfig
 from xutils import Storage, webutil, dateutil
 from xutils.textutil import quote
@@ -11,6 +13,7 @@ from . import message_utils
 from .message_model import MsgTagInfo, MessageTagEnum
 from xutils.text_parser import TokenType
 from xutils import netutil
+from xutils.functions import safe_list
 
 
 """
@@ -105,6 +108,27 @@ def add_tag_to_content(content="", new_tag=""):
     rest_text = "".join(rest_str_list).strip()
     return " ".join(tags) + "\n" + rest_text
 
+def update_tag_amount(tag_info: msg_dao.MsgTagInfo, user_id=0, key=""):
+    amount = msg_dao.MsgTagBindDao.count_by_key(user_id=user_id, key=key)
+    tag_info.amount = amount
+    if amount == 0:
+        msg_dao.MsgTagInfoDao.delete(tag_info)
+    else:
+        msg_dao.MsgTagInfoDao.update(tag_info)
+    logging.info(f"user:{user_id},key:{key},amount:{amount}")
+
+
+def update_tag_amount_by_msg(msg_item: msg_dao.MessageDO):
+    """插入或者更新异步处理"""
+    user_id = msg_item.user_id
+
+    for keyword in safe_list(msg_item.keywords):
+        # 只自动创建标准的tag
+        if not message_utils.is_standard_tag(keyword):
+            continue
+        message = msg_dao.MsgTagInfoDao.get_or_create(msg_item.user_id, keyword)
+        update_tag_amount(message, user_id, keyword)
+
 class DeleteTagAjaxHandler:
 
     @xauth.login_required()
@@ -190,6 +214,13 @@ class ListTagPage:
 
 class ListAjaxHandler:
 
+    def get_order(self, orderby=""):
+        if orderby == "amount_desc":
+            return "amount desc"
+        if orderby == "visit":
+            return "visit_cnt desc"
+        return "ctime desc"
+
     @xauth.login_required()
     def GET(self):
         page = xutils.get_argument_int("page", 1)
@@ -203,7 +234,9 @@ class ListAjaxHandler:
         page_size = 20
         user_id = xauth.current_user_id()
         offset = webutil.get_offset_by_page(page, page_size)
-        tag_list, total = msg_dao.MsgTagInfoDao.get_page(user_id=user_id, offset=offset, limit=page_size)
+        order = self.get_order(orderby)
+        tag_list, total = msg_dao.MsgTagInfoDao.get_page(user_id=user_id, offset=offset, 
+                                                         limit=page_size, order=order)
         message_utils.format_tag_list(tag_list)
         message_utils.sort_tag_list(tag_list, orderby=orderby)
 

@@ -267,7 +267,7 @@ class TestMain(BaseTestCase):
     def test_message_keyword_mark(self):
         user_name = xauth.current_name_str()
         from handlers.message.dao import MsgTagInfoDao
-        tags = MsgTagInfoDao.list(user=user_name, content="#test#")
+        tags = MsgTagInfoDao.list(user=user_name, tag_code="#test#")
         for tag in tags:
             print("删除tag:", tag)
             MsgTagInfoDao.delete(tag)
