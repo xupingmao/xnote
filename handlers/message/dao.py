@@ -717,19 +717,20 @@ class MsgTagInfoDao:
         return MsgTagInfo.from_dict_or_None(result)
     
     @classmethod
-    def list(cls, user="", user_id=0, offset=0, limit=20, tag_code=""):
+    def list(cls, user="", user_id=0, offset=0, limit=20, tag_code="", order=""):
         if user_id == 0:
             user_id = xauth.UserDao.get_id_by_name(user)
-        records, _ = cls.get_page(user_id=user_id, offset=offset, limit=limit, tag_code=tag_code, skip_count=True)
+        records, _ = cls.get_page(user_id=user_id, offset=offset, limit=limit, tag_code=tag_code, order=order, skip_count=True)
         return records
     
     @classmethod
-    def get_page(cls, user_id=0, offset=0, limit=20, tag_code="", order="ctime desc", skip_count=False):
+    def get_page(cls, user_id=0, offset=0, limit=20, tag_code="", order="", skip_count=False):
         where_dict = {}
         where_dict["user_id"] = user_id
         where_dict["tag_type"] = cls.tag_type
         if tag_code != "" and tag_code != None:
             where_dict["tag_code"] = tag_code
+        order = cls.format_order(order)
         records = cls.db.select(where=where_dict, offset=offset,limit=limit,order=order)
         
         if skip_count:
@@ -738,7 +739,19 @@ class MsgTagInfoDao:
             amount = cls.db.count(where=where_dict)
         
         return MsgTagInfo.from_dict_list(records), amount
-    
+
+    @classmethod
+    def format_order(cls, orderby=""):
+        if orderby == "amount_desc":
+            return "amount desc"
+        if orderby == "visit":
+            return "visit_cnt desc"
+        if orderby == "recent":
+            return "ctime desc"
+        if orderby == "":
+            return "ctime desc"
+        return orderby
+
     @classmethod
     def update(cls, tag_info: MsgTagInfo):
         tag_info.mtime = xutils.format_datetime()

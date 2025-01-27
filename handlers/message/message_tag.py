@@ -49,7 +49,6 @@ def get_tag_list_by_month(user_id=0, month="2000-01"):
     result = get_tag_list_by_msg_list(msg_list, date=month)
     return result
 
-
 def filter_standard_msg_list(msg_list: typing.List[MsgTagInfo]):
     result = [] # type: list[MsgTagInfo]
     for item in msg_list:
@@ -57,8 +56,8 @@ def filter_standard_msg_list(msg_list: typing.List[MsgTagInfo]):
             result.append(item)
     return result
 
-def list_message_tags(user_name, offset, limit, *, orderby = "amount_desc", only_standard=False):
-    msg_list = msg_dao.MsgTagInfoDao.list(user=user_name, offset=0, limit=MAX_LIST_LIMIT)
+def list_message_tags(user_name, offset=0, limit=20, *, orderby = "amount_desc", only_standard=False):
+    msg_list = msg_dao.MsgTagInfoDao.list(user=user_name, offset=offset, limit=limit, order=orderby)
 
     if only_standard:
         msg_list = filter_standard_msg_list(msg_list)
@@ -214,13 +213,6 @@ class ListTagPage:
 
 class ListAjaxHandler:
 
-    def get_order(self, orderby=""):
-        if orderby == "amount_desc":
-            return "amount desc"
-        if orderby == "visit":
-            return "visit_cnt desc"
-        return "ctime desc"
-
     @xauth.login_required()
     def GET(self):
         page = xutils.get_argument_int("page", 1)
@@ -234,9 +226,8 @@ class ListAjaxHandler:
         page_size = 20
         user_id = xauth.current_user_id()
         offset = webutil.get_offset_by_page(page, page_size)
-        order = self.get_order(orderby)
         tag_list, total = msg_dao.MsgTagInfoDao.get_page(user_id=user_id, offset=offset, 
-                                                         limit=page_size, order=order)
+                                                         limit=page_size, order=orderby)
         message_utils.format_tag_list(tag_list)
         message_utils.sort_tag_list(tag_list, orderby=orderby)
 

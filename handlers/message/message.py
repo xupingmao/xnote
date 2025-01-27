@@ -626,9 +626,6 @@ class MessagePageHandler:
         if tag == "key" or tag == "log.tags":
             return webutil.FailedResult(message="功能已迁移")
         
-        if tag == "key" or tag == "log.tags":
-            return self.get_log_tags_page()
-        
         return LogPageHandler().do_get()
 
     def do_select_key(self):
