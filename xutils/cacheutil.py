@@ -44,6 +44,7 @@ import traceback
 import base64
 
 from xutils import dateutil
+from xutils import textutil
 from collections import OrderedDict, deque
 from xutils import interfaces, Storage
 from xutils.db.dbutil_cache import DatabaseCache
@@ -120,7 +121,7 @@ class JsonSerializer:
             return value
         else:
             formatted_value = self.format_value(value)
-            return json.dumps(formatted_value) # 转成json，要保证能够序列化
+            return textutil.tojson(formatted_value) # 转成json，要保证能够序列化
 
     def decode(self, value):
         if isinstance(value, bytes):
