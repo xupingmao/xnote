@@ -1,33 +1,41 @@
-{% extends base %}
+{% extends wide_base %}
 
 {% block head %}
 
-<link rel="stylesheet" href="{{_server_home}}/static/lib/codemirror/codemirror.min.css">
-<link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/codemirror/theme/monokai.min.css">
-<script type="text/javascript" src="/static/lib/codemirror/codemirror.min.js"></script>
+{% include common/script/load_codemirror.html %}
 <script type="text/javascript" src="/static/lib/codemirror/mode/clike/clike.js"></script>
 
 {% end %}
 
 {% block body %}
 
-<form method="POST">
-<div class="col-md-12">
-    <textarea id="editor" class="col-md-12" rows="20" name="code">{{code}}</textarea>
-    <button id="run">Run</button>
-    <textarea id="output" class="col-md-12" rows="5">{{output}}</textarea>
+{% init code = "" %}
+{% init output = "" %}
+{% init title = "TCC" %}
+
+<div class="card">
+  {% include common/title/base_title.html %}
 </div>
-</form>
+
+<div class="card">
+  <form method="POST">
+    <div class="col-md-12">
+      <textarea id="editor" class="col-md-12" rows="20" name="code">{{code}}</textarea>
+      <button id="run" class="btn">Run</button>
+      <textarea id="output" class="col-md-12" rows="5">{{output}}</textarea>
+    </div>
+  </form>
+</div>
 
 <script>
-$(function () {
-  var editor = CodeMirror.fromTextArea($("#editor")[0], {
-    lineNumbers: true,
-    mode: "text/x-c",
-    theme:"monokai",
-    indentUnit:4,
+  $(function () {
+    var editor = CodeMirror.fromTextArea($("#editor")[0], {
+      lineNumbers: true,
+      mode: "text/x-c",
+      theme: "monokai",
+      indentUnit: 4,
+    });
   });
-});
 </script>
 
 {% end %}
