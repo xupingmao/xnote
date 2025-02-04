@@ -57,10 +57,12 @@ def _create_message_with_date(kw):
     timestamp = dateutil.parse_date_to_timestamp(date)
     timestamp += 60 * 60 * 23 + 60 * 59 # 追加日志的开始时间默认为23点59
     ctime = dateutil.format_datetime(timestamp)
+    change_time = ctime
 
     kw.ctime0 = xutils.format_datetime()
     kw.ctime = ctime
     kw.date = date
+    kw.change_time = change_time
 
     msg_index = MsgIndex()
     msg_index.tag = kw.tag
@@ -69,7 +71,7 @@ def _create_message_with_date(kw):
     msg_index.ctime_sys = xutils.format_datetime()
     msg_index.ctime = ctime
     msg_index.date = date
-    msg_index.change_time = ctime
+    msg_index.change_time = change_time
     msg_id = MsgIndexDao.insert(msg_index)
     _msg_db.update_by_id(str(msg_id), kw)
     kw.id = kw._key
@@ -854,7 +856,8 @@ class MessageDao:
     def update_user_tags(message:MessageDO):
         msg_id = message.get_int_id()
         sort_value = str(message.change_time)
-        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.full_keywords, second_type=message.get_second_type(), sort_value=sort_value)
+        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.full_keywords, 
+                                second_type=message.get_second_type(), sort_value=sort_value)
     
     @classmethod
     def update_tag(cls, message:MessageDO, tag=""):

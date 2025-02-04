@@ -9,6 +9,7 @@ from xnote.core import xtemplate
 from xnote.core import xconfig
 from xnote.core import xauth
 
+from xutils.functions import TypeDict
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil, dbutil
@@ -93,6 +94,15 @@ class TestMain(BaseTestCase):
 
         json_request("/message/delete", method="POST",
                      data=dict(id=data.id))
+        
+    def test_create_with_date(self):
+        data = dict(content="Xnote-Date-Test", date="2020-01-01")
+        result = json_request_return_dict("/message/save", method="POST", data=data)
+        assert result["success"] == True
+        msg_id = TypeDict(result).get_dict("data").get_int("id")
+        data = msg_dao.MessageDao.get_by_key(msg_id)
+        assert data != None
+        assert data.change_time == "2020-01-01 23:59:00"
 
     def test_message_list(self):
         json_request("/message/list")

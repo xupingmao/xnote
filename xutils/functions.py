@@ -291,6 +291,26 @@ def del_dict_key(dict_obj, key):
     assert isinstance(dict_obj, dict)
     dict_obj.pop(key, None)
 
+class TypeDict:
+    """带类型的dict"""
+    def __init__(self, dict_: dict) -> None:
+        self.dict_ = dict_
+
+    def get_dict(self, key: str):
+        value = self.dict_.get(key)
+        if value is None:
+            return TypeDict({})
+        return TypeDict(value)
+    
+    def get_int(self, key: str) -> int:
+        return self.dict_.get(key, 0)
+
+def dict_get_dict(dict_:dict, key:str) -> dict:
+    value = dict_.get(key)
+    if value is None:
+        return {}
+    return value
+
 def safe_list(item):
     if isinstance(item, list):
         return item
