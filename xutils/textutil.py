@@ -711,6 +711,8 @@ def decode_base64(text: str):
     """URL安全的base64解码，注意Python自带的方法没有处理填充字符=
     @param {str} text 编码后的字符
     """
+    if text == "":
+        return ""
     padding = 4- len(text) % 4
     text = text + '=' * padding
     return base64.urlsafe_b64decode(text).decode("utf-8")

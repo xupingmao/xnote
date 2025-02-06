@@ -22,8 +22,8 @@ class MySqliteDB(web.db.SqliteDB):
     _instances = set() # type: set[MySqliteDB]
     dbpath = ""
 
-    def __init__(self, **keywords):
-        super().__init__(**keywords)
+    def __init__(self, db=""):
+        super().__init__(db=db)
         with self._lock:
             MySqliteDB._instances.add(self)
 
@@ -116,7 +116,6 @@ def get_table_by_name(table_name=""):
         raise Exception("table not found: %s" % table_name)
     db = get_db_instance(dbpath=table_info.dbpath)
     return TableProxy(db, table_name)
-
 
 def get_all_tables(is_deleted=False):
     # type: (bool) -> list[TableProxy]

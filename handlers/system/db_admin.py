@@ -290,6 +290,12 @@ class SqlDBHandler:
         kw.db_info_list = db_info_list
         return xtemplate.render("system/page/db/sqldb_list.html", **kw)
 
+class SqlResult:
+    def __init__(self, rows=[], count=0) -> None:
+        self.rows = rows
+        self.count = count
+        self.pk_name = "id"
+
 class SqlDBDetailHandler:
 
     def get_table_by_name(self, name):
@@ -300,6 +306,34 @@ class SqlDBDetailHandler:
         key = xutils.get_argument_str("key")
         value = dbutil.db_get(key)
         return webutil.SuccessResult(data=xutils.tojson(value, format=True))
+    
+    def get_ext_db_rows(self, name="", page=1, page_size=20, dbpath=""):
+        assert page_size <= 100
+        result = SqlResult()
+        db = xtables.MySqliteDB(db=dbpath)
+
+        offset = webutil.get_offset_by_page(page=page, page_size=page_size)
+        result.rows = list(db.select(name, offset=offset, limit=page_size))
+        result.count = db.select(name, what="count(1) AS amount").first().amount
+        return result
+    
+    def get_db_rows(self, name="", page=1, page_size=20, dbpath=""):
+        if dbpath != "":
+            return self.get_ext_db_rows(name, page, page_size, dbpath)
+        
+        assert page_size <= 100
+        db = self.get_table_by_name(name)
+        table_info = db.table_info
+        db_rows = []
+        
+        if db != None and table_info != None:
+            pk_name = table_info.pk_name
+            offset = (page-1) * page_size
+            db_rows = db.select(offset = offset, limit = page_size, order = f"`{pk_name}` desc")
+        
+        result = SqlResult(rows = db_rows, count = db.count())
+        result.pk_name = table_info.pk_name
+        return result
 
     @xauth.admin_required()
     def GET(self):
@@ -314,29 +348,21 @@ class SqlDBDetailHandler:
         page = xutils.get_argument_int("page", 1)
         page_size = xutils.get_argument_int("page_size", 20)
         method = xutils.get_argument_str("method")
+        dbpath = xutils.get_argument_str("dbpath")
         if method == "get_kv_detail":
             return self.get_kv_detail()
         
-        assert page_size <= 100
-        db = self.get_table_by_name(name)
-        table_info = xtables.TableManager.get_table_info(name)
-        db_rows = []
-        page_max = 0
-        pk_name = "id"
-        
-        if db != None and table_info != None:
-            pk_name = table_info.pk_name
-            offset = (page-1) * page_size
-            db_rows = db.select(offset = offset, limit = page_size, order = f"`{pk_name}` desc")
-            page_max = math.ceil(db.count() / page_size) // 1
+        result = self.get_db_rows(name=name, page=page, page_size=page_size, dbpath=dbpath)
+        page_max = math.ceil(result.count / page_size) // 1
+    
 
         kw = Storage()
-        kw.db_rows = db_rows
-        kw.pk_name = pk_name
+        kw.db_rows = result.rows
+        kw.pk_name = result.pk_name
         kw.page = page
         kw.page_size = page_size
         kw.page_max = page_max
-        kw.page_url = "?name={name}&page_size={page_size}&page=".format(name = name, page_size=page_size)
+        kw.page_url = f"?name={name}&dbpath={xutils.quote(dbpath)}&page_size={page_size}&page="
         kw.table_name = name
         kv_table_info = dbutil.TableInfo.get_kv_table_by_index(name)
         if kv_table_info != None:
@@ -350,6 +376,11 @@ class SqlDBOperateHandler:
     @xauth.login_required("admin")
     def GET(self):
         table_name = xutils.get_argument_str("table_name")
+        dbpath = xutils.get_argument_str("dbpath")
+        if dbpath != "":
+            dbpath = xutils.quote(dbpath)
+            raise web.found(f"/system/sqlite?table_name={table_name}&path={dbpath}")
+        
         db = xtables.get_table_by_name(table_name)
         if isinstance(db.db, xtables.MySqliteDB):
             dbpath = xutils.quote(db.db.dbpath)

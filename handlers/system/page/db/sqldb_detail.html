@@ -7,12 +7,13 @@
 
 {% init table_name = "" %}
 {% init kv_table_name = None %}
+{% init dbpath = "" %}
 
 <div class="card">
     <div class="row bottom-offset-1">
         <span>表名称: {{table_name}}</span>
-        <a href="{{_server_home}}/system/db/struct?table_name={{table_name}}">查看表结构</a>
-        <a href="{{_server_home}}/system/sqldb_operate?table_name={{table_name}}">通过SQL查询</a>
+        <a href="{{_server_home}}/system/db/struct?table_name={{table_name}}&dbpath={{quote(dbpath)}}">查看表结构</a>
+        <a href="{{_server_home}}/system/sqldb_operate?table_name={{table_name}}&dbpath={{quote(dbpath)}}">通过SQL查询</a>
     </div>
 
     <table class="table">

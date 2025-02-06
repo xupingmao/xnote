@@ -2,6 +2,7 @@
 
 {% block body %}
 
+{% from xutils import encode_base64 %}
 {% init table_name = "" %}
 {% init error     = "" %}
 {% init cost_time = None %}
@@ -22,7 +23,7 @@
 <div class="card">
     <div class="card-title">
         <span>字段</span>
-        <a href="{{_server_home}}/system/sqldb_detail?name={{table_name}}">查询数据</a>
+        <a href="{{_server_home}}/system/sqldb_detail?name={{table_name}}&dbpath={{quote(dbpath)}}">查询数据</a>
     </div>
     <table class="table">
         <tr>
