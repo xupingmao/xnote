@@ -17,11 +17,36 @@ from xutils import Storage
 from xutils import cacheutil
 from xutils import dateutil
 from xutils import dbutil
+from xutils import webutil
+from xutils import textutil
 
-class CacheHandler:
+from xnote.plugin.table_plugin import BaseTablePlugin
 
-    @xauth.login_required("admin")
-    def GET(self):
+class CacheHandler(BaseTablePlugin):
+    title = "缓存信息"
+    require_admin = True
+    show_aside = True
+    show_right = True
+
+    NAV_HTML = """
+<div class="card">
+    <div class="x-tab-box" data-tab-key="type" data-tab-default="local">
+        <a class="x-tab" href="{{_server_home}}/system/cache?type=local" data-tab-value="local">单机缓存</a>
+        <a class="x-tab" href="{{_server_home}}/system/cache?type=db" data-tab-value="db">数据库缓存</a>
+    </div>
+</div>
+
+<div class="card btn-line-height">
+    <span>缓存总数: {{cache_count}}</span>
+    <span>缓存大小: {{cache_size}}</span>
+</div>
+"""
+    PAGE_HTML = NAV_HTML + BaseTablePlugin.TABLE_HTML
+
+    def get_aside_html(self):
+        return xtemplate.render_text("{% include system/component/admin_nav.html %}")
+
+    def handle_page(self):
         page = xutils.get_argument_int("page", 1)
         limit = xutils.get_argument_int("page_size", 20)
         type = xutils.get_argument_str("type")
@@ -48,18 +73,19 @@ class CacheHandler:
             key_page = keys[offset:offset+limit]
             total = len(keys)
 
+        table = self.create_table()
+        table.default_head_style.width = "33.3%"
+        table.add_head("Key", field="key")
+        table.add_head("Value", field="value_short", detail_field="value")
+        table.add_head("Expire", field="expire")
+
         for key in key_page:
             expire_time = cache.get_expire(key)
             expire_text = dateutil.format_time(expire_time)
-            value = cache.get(key)
-            if isinstance(value, bytes):
-                value = str(value)
-            value_short = value
-            if isinstance(value, str) and len(value) > 50:
-                value_short = value[:50] + "..."
-
-            item = Storage(key=key, value=value, value_short=value_short, expire=expire_text)
-            cache_list.append(item)
+            value = textutil.tojson(cache.get(key), format=True)
+            value_short = textutil.get_short_text(value, 100)
+            row = Storage(key=key, value=value, value_short=value_short, expire=expire_text)
+            table.add_row(row)
 
         kw.cache_list = cache_list
         kw.cache_count = total
@@ -67,8 +93,9 @@ class CacheHandler:
         kw.page_totalsize = total
         kw.page_size = limit
         kw.page_url = "?type=%s&page=" % type
+        kw.table = table
 
-        return xtemplate.render("system/page/cache_admin.html", **kw)
+        return self.response_page(**kw)
 
     @xauth.login_required("admin")
     def POST(self):
@@ -79,15 +106,15 @@ class CacheAjaxHandler:
 
     @xauth.login_required("admin")
     def POST(self):
-        key = xutils.get_argument("key", "")
-        value = xutils.get_argument("value", "")
+        key = xutils.get_argument_str("key", "")
+        value = xutils.get_argument_str("value", "")
         cacheutil.put(key, value)
-        return dict(code = "success")
+        return webutil.SuccessResult()
 
     @xauth.login_required("admin")
     def GET(self):
-        key = xutils.get_argument("key", "")
-        return dict(code = "success", data = cacheutil.get(key))
+        key = xutils.get_argument_str("key", "")
+        return webutil.SuccessResult(data = cacheutil.get(key))
 
 
 xurls = (

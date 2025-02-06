@@ -6,7 +6,10 @@ import threading
 import xutils
 
 from xnote.core import xauth, xtemplate, xmanager
+from xutils import Storage
 from xutils import MyStdout
+from xutils import textutil
+from xnote.plugin.table_plugin import BaseTablePlugin
 
 def get_thread_log(thread):
     records = MyStdout.get_records(thread)
@@ -20,14 +23,42 @@ def get_handler_name(thread):
         return handler_class
     return None
 
-class ThreadInfoHandler:
+class ThreadInfoHandler(BaseTablePlugin):
 
-    @xauth.login_required("admin")
-    def GET(self):
-        kw = xutils.Storage()
-        kw.thread_list = threading.enumerate()
-        kw.get_handler_name = get_handler_name
-        return xtemplate.render("system/page/thread_info.html", **kw)
+    require_admin = True
+    title = "线程列表"
+    PAGE_HTML = BaseTablePlugin.TABLE_HTML
+    show_aside = True
+    show_right = True
+
+    def get_aside_html(self):
+        return xtemplate.render_text("{% include system/component/admin_nav.html %}")
+
+    def handle_page(self):
+        table = self.create_table()
+        table.default_head_style.width = "25%"
+        table.add_head("编号", "no")
+        table.add_head("Name", "name")
+        table.add_head("处理器", "handler")
+        table.add_head("详情", "detail_short", detail_field="detail")
+        
+        for idx, info in enumerate(threading.enumerate()):
+            row = {}
+            row["no"] = idx + 1
+            row["name"] = info.name
+            row["handler"] = get_handler_name(thread=info)
+            detail = textutil.tojson(info.__dict__, format=True)
+            row["detail"] = detail
+            row["detail_short"] = textutil.get_short_text(detail, 100)
+            table.add_row(row)
+
+        kw = Storage()
+        kw.table = table
+        kw.page = 1
+        kw.page_max = 1
+        kw.page_url = "?page="
+
+        return self.response_page(**kw)
 
 xurls = (
     r"/system/thread_info", ThreadInfoHandler,

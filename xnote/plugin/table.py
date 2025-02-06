@@ -11,6 +11,8 @@
 import typing
 import re
 
+DEFAULT_WIDTH = "auto"
+
 class TableActionType:
     """表格动作的类型"""
     link = "link"
@@ -50,6 +52,7 @@ class TableHead:
         self.max_width = ""
         self.min_width = ""
         self.css_class_field = ""
+        self.detail_field = ""
         self.table = table
     
     def get_css_class(self, row: dict):
@@ -64,6 +67,17 @@ class TableHead:
         link = self.get_link(row)
         return link not in (None, "")
     
+    def has_detail(self, row: dict):
+        if self.detail_field == "":
+            return False
+        detail = self.get_detail(row)
+        value = row.get(self.field)
+        if detail == value:
+            return False
+        return detail not in (None, "")
+    
+    def get_detail(self, row: dict):
+        return row.get(self.detail_field)
 
     def _get_min_width(self) -> typing.Optional[str]:
         if self.min_width != "":
@@ -109,7 +123,7 @@ class TableAction:
         self.link_field = ""
         self.link_target = ""
         self.title_field = ""
-        self.css_class="" # action操作自身(比如链接/按钮之类的)的css类
+        self.css_class = "" # action操作自身(比如链接/按钮之类的)的css类
         self.msg_field = ""
         self.default_msg = ""
     
@@ -137,8 +151,14 @@ class TableAction:
 class DefaultHeadStyle:
 
     def __init__(self):
+        self.width = DEFAULT_WIDTH
         self.min_width = ""
         self.max_width = ""
+
+    def get_width(self, width=""):
+        if width == DEFAULT_WIDTH or width == "":
+            return self.width
+        return width
 
 class DataTable:
     """数据表格"""
@@ -156,8 +176,8 @@ class DataTable:
         return default_value
     
     def add_head(self, title="", field = "", type="", link_field="", 
-                 width="auto", width_weight=0, min_width="", max_width="",
-                 css_class_field="", link_target=""):
+                 width=DEFAULT_WIDTH, width_weight=0, min_width="", max_width="",
+                 css_class_field="", link_target="", detail_field=""):
         """添加表头
 
         Arguments:
@@ -178,13 +198,14 @@ class DataTable:
         head.title = title
         head.field = field
         head.type = type
-        head.width = width
+        head.width = default_style.get_width(width)
         head.min_width = self._get_str_or_default(min_width, default_style.min_width)
         head.max_width = self._get_str_or_default(max_width, default_style.max_width)
         head.width_weight = width_weight
         head.link_field = link_field
         head.link_target = link_target
         head.css_class_field = css_class_field
+        head.detail_field = detail_field
         self.heads.append(head)
         
     def add_row(self, obj):

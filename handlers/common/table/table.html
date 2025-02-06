@@ -23,6 +23,9 @@
                 {% else %}
                     {{row.get(head.field)}}
                 {% end %}
+                {% if head.has_detail(row) %}
+                    <a data-detail="{{head.get_detail(row)}}" href="#" onclick="xnote.table.handleViewDetail(this);">查看详情</a>
+                {% end %}
                 </td>
             {% end %} 
 
@@ -94,6 +97,12 @@ xnote.table.handleEditForm = function (target) {
         options.html = respHtml;
         xnote.showDialogEx(options);
     });
+}
+
+xnote.table.handleViewDetail = function (target) {
+    // console.log("handleViewDetail", target);
+    var detail = $(target).attr("data-detail");
+    xnote.showTextDialog("查看详情", detail);
 }
 
 </script>
