@@ -25,42 +25,16 @@
         <span>字段</span>
         <a href="{{_server_home}}/system/sqldb_detail?name={{table_name}}&dbpath={{quote(dbpath)}}">查询数据</a>
     </div>
-    <table class="table">
-        <tr>
-            {% for head_ in column_info.head %}
-                <th>{{head_}}</th>
-            {% end %} <!-- for end -->
-        </tr>
-
-        {% for item in column_info.items %}
-            <tr class="hover-tr">
-                {% for head_ in column_info.head %}
-                    <td>{{item.get(head_)}}</td>
-                {% end %}
-            </tr>
-        {% end %}
-    </table>
+    {% set xnote_table_var = "column_table" %}
+    {% include common/table/table.html %}
 </div>
 
 <div class="card">
     <div class="card-title">
         <span>索引</span>
     </div>
-    <table class="table">
-        <tr>
-            {% for head_ in index_info.head %}
-                <th>{{head_}}</th>
-            {% end %} <!-- for end -->
-        </tr>
-
-        {% for item in index_info.items %}
-            <tr class="hover-tr">
-                {% for head_ in index_info.head %}
-                    <td>{{item.get(head_)}}</td>
-                {% end %}
-            </tr>
-        {% end %}
-    </table>
+    {% set xnote_table_var = "index_table" %}
+    {% include common/table/table.html %}
 </div>
 
 <div class="card">

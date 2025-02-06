@@ -49,15 +49,18 @@ class UserListHandler(BaseTablePlugin):
         offset = (page-1) * page_size
         assert offset >= 0
 
-        table = DataTable()
+        table = self.create_table()
+        table.default_head_style.min_width = "100px"
+
         table.add_head("编号", "id")
         table.add_head("登录名", "name", link_field="edit_url")
         table.add_head("状态", "status_text")
-        table.add_head("上次登录", "login_time")
+        table.add_head("上次登录", "login_time", min_width="200px")
         # 操作按钮
         table.add_action("编辑", link_field="edit_url", type=TableActionType.link, css_class="btn btn-default")
         table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, 
                          msg_field="delete_msg", css_class="btn danger")
+        table.set_action_style(min_width="120px")
 
         for user_info in xauth.UserModel.list(offset = offset, limit = page_size):
             user_info.edit_url = f"{xconfig.WebConfig.server_home}/system/user?name={user_info.name}"

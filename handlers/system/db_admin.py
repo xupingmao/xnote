@@ -12,6 +12,7 @@ import typing
 
 from xnote.core import xauth, xtables, xtemplate, xconfig
 from xutils.sqldb import TableProxy, TempTableProxy
+from xnote.plugin import DataTable
 
 def get_display_value(value):
     if value is None:
@@ -502,6 +503,14 @@ class TableData:
         self.head = head
         self.items = items # items 是 list[dict] 结构
 
+    def to_data_table(self):
+        result = DataTable()
+
+        for head in self.head:
+            result.add_head(title=head, field=head, min_width="100px")
+        result.set_rows(self.items)
+        return result
+
 
 class StructHelper:
     
@@ -611,12 +620,15 @@ class StructHandler:
         else:
             helper = SqliteStructHelper(table_name=table_name, dbpath=dbpath)
 
+        column_info = helper.get_column_info()
+        index_info = helper.get_index_info()
+
         kw = Storage()
         kw.table_name = table_name
-        kw.column_info = helper.get_column_info()
-        kw.index_info = helper.get_index_info()
         kw.create_sql = helper.get_create_sql()
         kw.error = ""
+        kw.column_table = column_info.to_data_table()
+        kw.index_table = index_info.to_data_table()
 
         return xtemplate.render("system/page/db/db_struct.html", **kw)
 

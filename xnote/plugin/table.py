@@ -47,6 +47,7 @@ class TableHead:
         self.type = ""
         self.width = "auto"
         self.width_weight = 0
+        self.max_width = ""
         self.min_width = ""
         self.css_class_field = ""
         self.table = table
@@ -79,13 +80,20 @@ class TableHead:
         return self.width_weight
     
     def get_style(self):
+        result = []
         min_width = self._get_min_width()
         if min_width != None:
-            return f"min-width: {min_width}"
+            result.append(f"min-width: {min_width}")
         if self.width_weight > 0:
             percent = self.width_weight / self.table._get_width_weight_total()
-            return f"width: {percent*100:.2f}%"
-        return f"width: {self.width}"
+            result.append(f"width: {percent*100:.2f}%")
+        else:
+            result.append(f"width: {self.width}")
+
+        if self.max_width != "":
+            result.append(f"max-width: {self.max_width}")
+        
+        return ";".join(result)
     
     def get_min_width(self):
         min_width = self._get_min_width()
@@ -126,6 +134,12 @@ class TableAction:
         link = self.get_link(row)
         return link not in (None, "")
 
+class DefaultHeadStyle:
+
+    def __init__(self):
+        self.min_width = ""
+        self.max_width = ""
+
 class DataTable:
     """数据表格"""
     
@@ -134,9 +148,15 @@ class DataTable:
         self.rows = []
         self.actions = []
         self.action_head = TableHead(self)
+        self.default_head_style = DefaultHeadStyle()
+
+    def _get_str_or_default(self, value="", default_value=""):
+        if value != "":
+            return value
+        return default_value
     
     def add_head(self, title="", field = "", type="", link_field="", 
-                 width="auto", width_weight=0, min_width="",
+                 width="auto", width_weight=0, min_width="", max_width="",
                  css_class_field="", link_target=""):
         """添加表头
 
@@ -148,15 +168,19 @@ class DataTable:
             - width: (optional) 宽度设置
             - width_weight: (optional) 宽度权重,如果设置会覆盖width设置
             - min_width: (optional) 最小的宽度
+            - max_width: (optional) 最大的宽度
             - css_class_field: (optional) css类的字段名
             - link_target: 链接的target属性(css属性) @see `LinkTargetType`
         """
+        default_style = self.default_head_style
+
         head = TableHead(self)
         head.title = title
         head.field = field
         head.type = type
         head.width = width
-        head.min_width = min_width
+        head.min_width = self._get_str_or_default(min_width, default_style.min_width)
+        head.max_width = self._get_str_or_default(max_width, default_style.max_width)
         head.width_weight = width_weight
         head.link_field = link_field
         head.link_target = link_target
@@ -173,9 +197,12 @@ class DataTable:
             assert isinstance(row, dict)
         self.rows = rows
 
-    def set_action_style(self, width="auto", width_weight=0):
-        self.action_head.width = width
-        self.action_head.width_weight = width_weight
+    def set_action_style(self, width="auto", width_weight=0, min_width="", max_width=""):
+        action_head = self.action_head
+        action_head.width = width
+        action_head.width_weight = width_weight
+        action_head.min_width = min_width
+        action_head.max_width = max_width
     
     def add_action(self, title="", type="button", link_field="", title_field="", msg_field="", css_class=""):
         action = TableAction()

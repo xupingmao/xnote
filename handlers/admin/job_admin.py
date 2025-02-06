@@ -123,15 +123,17 @@ class JobHandler(BasePlugin):
         assert page >= 1
         
         table = DataTable()
+        table.default_head_style.min_width="100px"
         table.add_head("ID", "id", width="10%")
-        table.add_head("更新时间", "mtime", width="min:100px")
+        table.add_head("更新时间", "mtime", min_width="120px")
         table.add_head("任务类型", "job_type", width="20%")
         table.add_head("任务状态", "status_title", width="20%")
         
         table.add_action("查看详情", link_field="view_url")
         table.add_action("编辑", link_field="edit_url", type="edit_form")
         table.add_action("删除", type="confirm", link_field="delete_url", msg_field="delete_msg", css_class="btn danger")
-        
+        table.set_action_style(min_width="100px")
+
         job_list, total = JobService.list_job_page(offset=(page-1)*page_size, limit=page_size)
         
         for job_info in job_list:
