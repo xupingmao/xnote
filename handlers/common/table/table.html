@@ -1,6 +1,7 @@
 {% init xnote_table_var = "table" %}
 {% set _xnote_table = globals()[xnote_table_var] %}
 
+{% include common/script/load_select2.html %}
 <script type="text/javascript" src="{{_server_home}}/_static/lib/layDate-v5.0.9/laydate.js"></script>
 <div class="overflow-table-container">
 <table class="table">
@@ -96,6 +97,7 @@ xnote.table.handleEditForm = function (target) {
         options.title = title;
         options.html = respHtml;
         xnote.showDialogEx(options);
+        xnote.initSelect2();
     });
 }
 
