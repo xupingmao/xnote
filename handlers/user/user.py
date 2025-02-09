@@ -96,14 +96,14 @@ class UserListHandler(BaseTablePlugin):
     def handle_save(self):
         data_dict = self.get_data_dict()
 
-        model_id = int(data_dict.get("id", 0))
+        model_id = data_dict.get_int("id")
         if model_id != 0:
             model_info = xauth.UserDao.get_by_id(user_id=model_id)
             assert model_info != None
         else:
             model_info = xauth.UserDO()
         
-        user_name = data_dict.get("name")
+        user_name = data_dict.get_str("name")
         if user_name == None:
             return webutil.FailedResult(message="登录名不能为空")
         
