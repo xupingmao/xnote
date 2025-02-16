@@ -2,6 +2,10 @@
 
 from xutils import SearchResult
 
+class SearchOption:
+    def __init__(self) -> None:
+        self.show_message_detail = False
+
 class SearchContext:
     def __init__(self, key=""):
         # 输入的文本
@@ -9,6 +13,10 @@ class SearchContext:
         self.input_text = key
         self.words = [] # 根据key分割的token
         self.category = "" # 搜索类型
+
+        # 搜索选项
+        self.option = SearchOption()
+
         # 正则匹配的分组
         self.groups           = []
         self.user_name        = ""

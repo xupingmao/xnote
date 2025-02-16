@@ -73,7 +73,6 @@ def fill_note_info(files: typing.List[SearchResult]):
             file.parent_name = parent.name
         if file.category == "note":
             file.show_move = True
-            file.badge_info = "热度:%s" % file.hot_index
 
 def log_search_history(user, key, category = "default", cost_time = 0):
     note_dao.add_search_history(user, key, category, cost_time)
@@ -231,11 +230,19 @@ class SearchHandler:
         fill_note_info(notes)
 
         if parent_id != "" and parent_id != None:
-            ctx.parent_note = note_dao.get_by_id(parent_id)
+            ctx.parent_note = note_dao.get_by_id(parent_id, include_full=False)
 
         offset = ctx.offset
         limit  = ctx.limit
         return notes[offset:offset+limit], len(notes)
+    
+    def do_search_message(self, ctx: SearchContext, key: str):
+        from handlers.message.message_search import handle_search_event
+        ctx.option.show_message_detail = True
+        handle_search_event(ctx=ctx, tag_name="随手记")
+        offset = ctx.offset
+        limit = ctx.limit
+        return ctx.messages[offset:offset+limit], len(ctx.messages)
 
     def do_search_task(self, ctx: SearchContext, key):
         import handlers.message.dao as MSG_DAO
@@ -251,13 +258,19 @@ class SearchHandler:
         search_tags = set(["task"])
         msg_list, amount = MSG_DAO.search_message(user_id, key, offset, limit, search_tags = search_tags)
         result = [] # type: list[SearchResult]
+        search_task_link = SearchResult()
+        search_task_link.icon = "hide"
+        search_task_link.name = f"搜索到[{amount}]个待办"
+        search_task_link.url = f"{server_home}/message?tag=task.search&key={xutils.quote(key)}"
+        result.append(search_task_link)
+
         for msg_item in msg_list:
             process_message(msg_item)
             item = SearchResult(**msg_item)
-            prefix = u("待办 - ")
+            prefix = u("【待办】")
 
             if msg_item.tag == "done":
-                prefix = u("完成 - ")
+                prefix = u("【完成】")
 
             item.name = prefix + msg_item.ctime
             item.icon = "hide"
@@ -269,7 +282,7 @@ class SearchHandler:
         if done_count > 0:
             done_summary = SearchResult()
             done_summary.icon = "hide"
-            done_summary.name = "已完成任务[%d]" % done_count
+            done_summary.name = "搜索到[%d]个已完成任务" % done_count
             done_summary.url =  f"{server_home}/message?tag=done.search&key={xutils.quote(key)}"
             result.append(done_summary)
 
@@ -287,6 +300,8 @@ class SearchHandler:
             return self.do_search_dict(ctx, key)
         elif search_type == "task":
             return self.do_search_task(ctx, key)
+        elif search_type == "message":
+            return self.do_search_message(ctx, key)
         elif search_type == "comment":
             return self.do_search_comment(ctx, key)
         else:

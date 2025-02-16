@@ -29,7 +29,13 @@ def handle_search_event(ctx: SearchContext, tag_name="", search_tag="log"):
     key = ctx.key
     max_len = xconfig.SEARCH_SUMMARY_LEN
 
-    messages, count = dao.search_message(ctx.user_id, key, offset=0, limit=3, search_tags=[search_tag])
+    if ctx.option.show_message_detail:
+        # 搜索详情
+        limit = 1000
+    else:
+        limit = 3
+
+    messages, count = dao.search_message(ctx.user_id, key, offset=0, limit=limit, search_tags=[search_tag])
     search_result = []
     for message in messages:
         item = SearchResult()
@@ -38,17 +44,18 @@ def handle_search_event(ctx: SearchContext, tag_name="", search_tag="log"):
         message_utils.process_message(message)
         item.tag_name = tag_name
         item.tag_class = "orange"
-        item.name = f"{tag_name} - {message.ctime}"
+        item.name = f"【{tag_name}】{message.ctime}"
         item.html = message.html
         item.icon = "hide"
         search_result.append(item)
         # print(message)
+        
+    if not ctx.option.show_message_detail:
+        show_message_detail = xconfig.get_user_config(
+            ctx.user_name, "search_message_detail_show")
 
-    show_message_detail = xconfig.get_user_config(
-        ctx.user_name, "search_message_detail_show")
-
-    if show_message_detail == "false":
-        search_result = []
+        if show_message_detail == "false":
+            search_result = []
 
     if count > 0:
         more = SearchResult()

@@ -567,9 +567,9 @@ def sort_notes_by_order_type(notes, order_type=0):
     build_note_list_info(notes, order_type)
     sort_func(notes)
 
-def build_note_list_info(notes, orderby=None):
+def build_note_list_info(notes, orderby=None, order_type=0):
     for note in notes:
-        build_note_info(note, orderby)
+        build_note_info(note, orderby=orderby, order_type=order_type)
 
 
 def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None, order_type=0):
@@ -596,7 +596,7 @@ def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None, order_type
         note.dtime = note.mtime
 
     if orderby == "hot_index" or order_type == OrderTypeEnum.hot.int_value:
-        note.badge_info = "热度: %s" % note.hot_index
+        note.badge_info = f"热度: {note.visit_cnt}"
     
     if orderby == "mtime_desc":
         note.badge_info = format_date(note.mtime)
@@ -605,7 +605,7 @@ def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None, order_type
         note.badge_info = format_date(note.ctime)
 
     if note.badge_info in (None, ""):
-        note.badge_info = str(note.create_date)
+        note.badge_info = format_date(note.ctime)
 
     if note.type == "group":
         _build_book_default_info(note)
@@ -1519,7 +1519,7 @@ def get_history(note_id, version):
     return _note_history_db.with_user(note_id).get(version_str)
 
 
-def search_name(words, creator="", parent_id=0, orderby="hot_index", limit=1000):
+def search_name(words: typing.List[str], creator="", parent_id=0, orderby="hot_index", limit=1000):
     # TODO 搜索排序使用索引
     assert isinstance(words, list)
 
@@ -1534,7 +1534,7 @@ def search_name(words, creator="", parent_id=0, orderby="hot_index", limit=1000)
                                name_like=name_like)
 
     # 补全信息
-    build_note_list_info(result)
+    build_note_list_info(result, order_type=OrderTypeEnum.hot.int_value)
 
     # 对笔记进行排序
     sort_notes(result, orderby)
