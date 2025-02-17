@@ -34,6 +34,20 @@ def _get_px_value(value: str):
         return int(value.strip("px"))
     return 0
 
+
+class DefaultHeadStyle:
+    def __init__(self):
+        self.width = DEFAULT_WIDTH
+        self.min_width = ""
+        self.max_width = ""
+
+    def get_width(self, width=""):
+        if width == DEFAULT_WIDTH or width == "":
+            return self.width
+        return width
+
+DEFAULT_HEAD_STYLE = DefaultHeadStyle()
+
 class TableHead:
     # 最小宽度
     min_width_pattern = re.compile(r"min:([0-9]+px)")
@@ -54,6 +68,7 @@ class TableHead:
         self.css_class_field = ""
         self.detail_field = ""
         self.table = table
+        self.default_style = DEFAULT_HEAD_STYLE
     
     def get_css_class(self, row: dict):
         return row.get(self.css_class_field, "")
@@ -82,10 +97,20 @@ class TableHead:
     def _get_min_width(self) -> typing.Optional[str]:
         if self.min_width != "":
             return self.min_width
+        
+        default_style = self.default_style
+        if default_style.min_width != "":
+            return default_style.min_width
+        
         match = self.min_width_pattern.match(self.width)
         if match:
             return match.groups()[0]
         return None
+    
+    def _get_max_width(self):
+        if self.max_width != "":
+            return self.max_width
+        return self.default_style.max_width
     
     def _fix_width_weight(self):
         """如果有一个head设置了权重,没有设置的head权重默认为1"""
@@ -98,18 +123,20 @@ class TableHead:
         min_width = self._get_min_width()
         if min_width != None:
             result.append(f"min-width: {min_width}")
+        
         if self.width_weight > 0:
             percent = self.width_weight / self.table._get_width_weight_total()
             result.append(f"width: {percent*100:.2f}%")
         else:
             result.append(f"width: {self.width}")
 
-        if self.max_width != "":
-            result.append(f"max-width: {self.max_width}")
+        max_width = self._get_max_width()
+        if max_width != "":
+            result.append(f"max-width: {max_width}")
         
         return ";".join(result)
     
-    def get_min_width(self):
+    def get_min_width_int(self):
         min_width = self._get_min_width()
         if min_width:
             return _get_px_value(min_width)
@@ -148,18 +175,6 @@ class TableAction:
         link = self.get_link(row)
         return link not in (None, "")
 
-class DefaultHeadStyle:
-
-    def __init__(self):
-        self.width = DEFAULT_WIDTH
-        self.min_width = ""
-        self.max_width = ""
-
-    def get_width(self, width=""):
-        if width == DEFAULT_WIDTH or width == "":
-            return self.width
-        return width
-
 class DataTable:
     """数据表格"""
     
@@ -169,11 +184,7 @@ class DataTable:
         self.actions = []
         self.action_head = TableHead(self)
         self.default_head_style = DefaultHeadStyle()
-
-    def _get_str_or_default(self, value="", default_value=""):
-        if value != "":
-            return value
-        return default_value
+        self.action_head.default_style = self.default_head_style
     
     def add_head(self, title="", field = "", type="", link_field="", 
                  width=DEFAULT_WIDTH, width_weight=0, min_width="", max_width="",
@@ -199,13 +210,14 @@ class DataTable:
         head.field = field
         head.type = type
         head.width = default_style.get_width(width)
-        head.min_width = self._get_str_or_default(min_width, default_style.min_width)
-        head.max_width = self._get_str_or_default(max_width, default_style.max_width)
+        head.min_width = min_width
+        head.max_width = max_width
         head.width_weight = width_weight
         head.link_field = link_field
         head.link_target = link_target
         head.css_class_field = css_class_field
         head.detail_field = detail_field
+        head.default_style = self.default_head_style
         self.heads.append(head)
         
     def add_row(self, obj):
@@ -239,7 +251,7 @@ class DataTable:
     def get_min_width(self):
         min_width = 0
         for head in self.heads:
-            min_width += head.get_min_width()
+            min_width += head.get_min_width_int()
         return max(min_width, 300)
 
     def _get_width_weight_total(self):
