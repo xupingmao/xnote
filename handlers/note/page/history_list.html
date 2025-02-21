@@ -13,7 +13,7 @@
 </style>
 
 <div class="card">
-    <h3 class="card-title btn-line-height">
+    <h3 class="card-title">
         <a href="{{current_note.url}}" class="link2">{{current_note.name}}</a>
         <span>/</span>
         <span>{{T("History")}}</span>
@@ -39,7 +39,7 @@
             <td>{{note.name}}</td>
             <td>{{note.mtime}}</td>
             <td>{{note.version}}</td>
-            <td><button class="view-btn" data-version="{{note.version}}">查看</button></td>
+            <td><button class="btn btn-default view-btn" data-version="{{note.version}}">查看</button></td>
         </tr>
         {% end %}
     </table>

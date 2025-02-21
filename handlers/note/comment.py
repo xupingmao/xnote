@@ -3,8 +3,9 @@
 # @since 2019/08/10 23:44:48
 # @modified 2022/04/16 22:36:45
 import math
-from xnote.core import xconfig
 import xutils
+
+from xnote.core import xconfig
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xmanager
@@ -16,7 +17,7 @@ from xnote.core.xtemplate import T
 from . import dao as note_dao
 from . import dao_comment
 from xutils import webutil
-from xnote.core.models import SearchContext
+from xnote.core.models import SearchContext, SearchResult
 from .dao_comment import search_comment
 from xutils.text_parser import TokenType
 
@@ -68,7 +69,7 @@ def process_comments(comments, show_note = False):
 def search_comment_summary(ctx: SearchContext):
     comments = dao_comment.search_comment(user_name = ctx.user_name, keywords = ctx.words)
     if len(comments) > 0:
-        result = Storage()
+        result = SearchResult()
         result.name = "搜索到[%s]条评论" % len(comments)
         result.url  = "/search?key=%s&search_type=comment" % quote(ctx.key)
         result.icon = "fa-comments-o"
@@ -103,7 +104,7 @@ def on_search_comments(ctx: SearchContext):
         search_comment_detail(ctx)
 
 def convert_to_html(comments, show_note = False, page = 1, page_max = 1, show_edit = False):
-    return xtemplate.render("note/ajax/comment_list.html", 
+    return xtemplate.render("note/page/comment/comment_list_ajax.html", 
         show_comment_edit = show_edit,
         page = page,
         page_max = page_max,
@@ -150,7 +151,7 @@ class CommentListAjaxHandler:
             return comments
     
     def search_comments(self, user_name):
-        key = xutils.get_argument("key", "")
+        key = xutils.get_argument_str("key", "")
         note_id = xutils.get_argument("note_id", "")
         keywords = textutil.split_words(key)
         return search_comment(user_name = user_name, keywords = keywords, limit=1000, note_id = note_id)
@@ -211,7 +212,7 @@ class MyCommentsHandler:
         xmanager.add_visit_log(user_name, "/note/comment/mine")
         date = xutils.get_argument("date", "")
 
-        return xtemplate.render("note/page/comment_user_page.html", 
+        return xtemplate.render("note/page/comment/comment_user_page.html", 
             show_comment_title = False,
             show_comment_create = False,
             show_comment_note = True,
@@ -222,7 +223,7 @@ class CommentAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        p = xutils.get_argument("p")
+        p = xutils.get_argument_str("p")
         user_name = xauth.current_name()
         comment_id = xutils.get_argument_str("comment_id", "")
 
@@ -232,7 +233,7 @@ class CommentAjaxHandler:
                 return "评论不存在"
             if comment.user != user_name:
                 return "无操作权限"
-            return xtemplate.render("note/ajax/comment_edit_dialog.html", comment = comment)
+            return xtemplate.render("note/page/comment/comment_edit_dialog.html", comment = comment)
         
         if p == "update":
             comment = dao_comment.get_comment(comment_id)
@@ -243,7 +244,7 @@ class CommentAjaxHandler:
             content = xutils.get_argument_str("content", "")
             comment.content = content
             dao_comment.update_comment(comment)
-            return dict(code = "success")
+            return webutil.SuccessResult()
         return "未知的操作"
 
     def POST(self):

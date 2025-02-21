@@ -15,20 +15,58 @@ class TableExampleHandler(BaseTablePlugin):
     PAGE_HTML = """
 {% include test/component/example_nav_tab.html %}
 
+<style>
+    .table-edit-row {
+        padding-bottom:5px;
+        width:100%;
+        float:left;
+    }
+    .btn.green-bg {
+        background-color:green;
+    }
+</style>
+
 <div class="card">
-    <button class="btn" onclick="xnote.table.handleEditForm(this)"
-            data-url="?action=edit" data-title="新增记录">新增记录</button>
+    <form>
+        <div class="row">
+            <div class="input-group">
+                <label>类型</label>
+                <select name="prefix" value="">
+                    <option value="">全部</option>
+                    <option value="">类型-1</option>
+                    <option value="">类型-2</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>关键字</label>
+                <input type="text"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <input type="button" class="btn do-search-btn" value="查询数据">
+            <a class="btn btn-default" href="">重置查询</a>
+        </div>
+
+    </form>
 </div>
 
 <div class="card">
-    <div class="card-title">
+    <div class="table-edit-row">
+        <button class="btn" onclick="xnote.table.handleEditForm(this)"
+            data-url="?action=edit" data-title="新增记录">新增记录</button>
+
         <span>表格1-自动宽度</span>
     </div>
+
     {% include common/table/table.html %}
 </div>
 
 <div class="card">
-    <div class="card-title">
+    <div class="table-edit-row">
+        <button class="btn" onclick="xnote.table.handleEditForm(this)"
+            data-url="?action=edit" data-title="新增记录">新增记录</button>
         <span>表格2-权重宽度</span>
     </div>
     {% set-global xnote_table_var = "weight_table" %}

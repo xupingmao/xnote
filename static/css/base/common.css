@@ -725,7 +725,7 @@ li.menu-item:hover {
     float: left;
     border-left: 5px solid #039BE5;
     margin-top: 0px;
-    margin-bottom: 5px;
+    margin-bottom: 0px;
     font-family: arial,"Sim Sun";
     font-size: 14px;
     font-weight: normal;
