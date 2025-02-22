@@ -179,6 +179,8 @@ class DataTable:
     """数据表格"""
     
     def __init__(self):
+        self.title = "表格明细"
+        self.create_btn_text = "新增记录"
         self.heads = [] # type:list[TableHead]
         self.rows = []
         self.actions = []

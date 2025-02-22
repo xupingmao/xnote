@@ -1,0 +1,49 @@
+
+/** 表格 **/
+.no-border-table td {
+    border: none;
+}
+
+.table {
+    width: 100%;
+}
+
+.table th{
+    border-color: #ccc;
+    text-align: left;
+}
+
+.table td {
+    border-color: #ccc;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+/* 
+这种方式走不通,需要声明hover-tr
+.table tr:hover td{
+    background-color: none;
+}
+
+.table tr:hover{
+    background-color: #eee;
+}
+ */
+
+.row-no, .index-td {
+    width: 50px;
+}
+
+.hover-tr:hover td {
+    background: none;
+}
+
+.hover-tr:hover {
+    background-color: #eee;
+}
+
+.table-action-row {
+    padding-bottom: 5px;
+    width: 100%;
+    float: left;
+}

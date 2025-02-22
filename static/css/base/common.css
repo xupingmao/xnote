@@ -192,48 +192,6 @@ h3.marked-heading {
     text-decoration: underline;
 }
 
-/** 表格 **/
-.no-border-table td {
-    border: none;
-}
-
-.table {
-    width: 100%;
-}
-
-.table th{
-    border-color: #ccc;
-    text-align: left;
-}
-
-.table td {
-    border-color: #ccc;
-    word-wrap: break-word;
-    word-break: break-all;
-}
-
-/* 
-这种方式走不通,需要声明hover-tr
-.table tr:hover td{
-    background-color: none;
-}
-
-.table tr:hover{
-    background-color: #eee;
-}
- */
-
-.row-no, .index-td {
-    width: 50px;
-}
-
-.hover-tr:hover td {
-    background: none;
-}
-
-.hover-tr:hover {
-    background-color: #eee;
-}
 
 .line-td {
     border-top: none;
@@ -1061,7 +1019,10 @@ select.no-border {
 .row{float: left;width: 100%;overflow: auto;}
 .pad5 {padding: 5px;}
 .pad10 {padding: 10px;}
+.pad-top-5 {padding-top: 5px;}
+.pad-top-10 {padding-top: 10px;}
 .pad-left-5 {padding-left: 5px;}
+.pad-bottom-5 {padding-bottom: 5px;}
 .pad-bottom-10 {padding-bottom: 10px}
 
 

@@ -102,7 +102,7 @@
             <textarea name="content" id="editor">{{content}}</textarea>
         </div>
 
-        <div class="col-md-12 bottom-offset-1">
+        <div class="row top-offset-1">
             {% if not readonly %}
                 <input type="button" value="保存" class="btn save-btn">
                 <input type="button" id="rename" class="btn rename-btn" value="重命名"/>
@@ -112,7 +112,7 @@
                 <a class="btn" href="{{_server_home}}/code/wiki/{{path}}?embed={{embed}}">{{T("Preview")}}</a>
             {% end %}
             {% if path.find("/plugins/") >= 0 or path.find("\\plugins\\") >= 0 %}
-                <input type="button" class="link-btn" href="{{_server_home}}/plugins/{{plugin_name}}?embed={{embed}}&_reload=true" value="预览"/>
+                <input type="button" class="btn link-btn" href="{{_server_home}}/plugins/{{plugin_name}}?embed={{embed}}&_reload=true" value="预览"/>
             {% end %}
             <span>注意不会自动保存</span>
         </div>

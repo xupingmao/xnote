@@ -43,14 +43,13 @@ class BaseTablePlugin(BasePlugin):
     rows = 0
     show_edit = False
 
-    NAV_HTML = r"""
+    NAV_HTML = """
 <div class="card">
     <button class="btn" onclick="xnote.table.handleEditForm(this)"
-            data-url="?action=edit" data-title="新增记录">新增记录</button>
+        data-url="?action=edit" data-title="新增记录">新增记录</button>
 </div>
 """
-
-    TABLE_HTML = r"""
+    TABLE_HTML = """
 <div class="card">
     {% include common/table/table.html %}
 </div>
@@ -61,10 +60,10 @@ class BaseTablePlugin(BasePlugin):
 """
 
     EDIT_HTML = """
-    <div class="card">
-        {% include common/form/form.html %}
-    </div>
-    """
+<div class="card">
+    {% include common/form/form.html %}
+</div>
+"""
 
     PAGE_HTML = NAV_HTML + TABLE_HTML
     

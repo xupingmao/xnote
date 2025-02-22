@@ -20,6 +20,7 @@ from xutils import Storage
 from xutils.sqldb import TableProxy
 from xutils import fsutil, webutil
 from .fs_helper import get_index_dirs, get_index_db, FileInfoDao, FileInfo
+from xnote.plugin.table_plugin import BaseTablePlugin
 
 class IndexBuilder:
 
@@ -119,24 +120,51 @@ def update_file_index():
     for dirname in get_index_dirs():
         build_fs_index(dirname)
 
-class IndexHandler:
+class IndexHandler(BaseTablePlugin):
     """文件索引管理"""
 
-    @xauth.login_required("admin")
-    def GET(self):
+    title = "索引管理"
+    require_admin = True
+    show_aside = True
+    show_right = True
+
+    PAGE_HTML = """
+{% init index_size = 0 %}
+<div class="card">
+    <div class="table-action-row">
+        <button class="btn" onclick="xnote.table.handleConfirmAction(this)"
+            data-url="?action=rebuild" data-msg="确定要重建索引吗?">重建索引</button>
+        <span>索引数量: {{index_size}}</span>
+    </div>
+    {% include common/table/table.html %}
+</div>
+
+<div class="card">
+    {% include common/pagination.html %}
+</div>
+"""
+
+    def get_aside_html(self):
+        return xtemplate.render_text("{% include fs/component/fs_sidebar.html %}")
+    
+    def get_page_html(self):
+        return self.PAGE_HTML
+
+    def handle_page(self):
+        table = self.create_table()
+        table.default_head_style.min_width = "100px"
+        table.add_head("文件编号", "id")
+        table.add_head("文件路径", "fpath")
+        table.add_head("用户ID", "user_id")
+        table.add_head("上传时间", "ctime", min_width="200px")
+        table.add_head("文件大小", "fsize_str")
+
         page = xutils.get_argument_int("page",1)
         user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/fs_index")
         path = self.get_arg_path()
-        action = xutils.get_argument_str("p")
         page_size = 20
-
-        if action == "rebuild":
-            return self.get_rebuild_page()
-
-        tpl = "fs/page/fs_index.html"
         index_size = FileInfoDao.prefix_count(path)
-        
         page_info = webutil.Pagination(page=page, total=index_size, page_size=page_size)
         offset = (page-1) * page_size
         
@@ -145,19 +173,24 @@ class IndexHandler:
             file_info.fsize_str = "-"
             if isinstance(file_info.fsize, int):
                 file_info.fsize_str = fsutil.format_size(file_info.fsize)
+
+            table.add_row(file_info)
                 
         kw = Storage()
+        kw.table = table
         kw.index_size = index_size
         kw.files = files
         kw.index_dirs = get_index_dirs()
         kw.page = page
         kw.page_max = page_info.page_max
         kw.page_url = f"?page="
-        
-        return xtemplate.render(tpl, **kw)
+        return self.response_page(**kw)
+    
+    def handle_rebuild(self):
+        self.do_rebuild_index()
+        return webutil.SuccessResult()
 
-    @xauth.login_required("admin")
-    def POST(self):
+    def do_post(self):
         is_ajax = xutils.get_argument_bool("is_ajax", False)
         tpl = "fs/page/fs_index.html"
         index_dirs = get_index_dirs()
@@ -210,7 +243,7 @@ class IndexHandler:
     def do_config(self):
         index_config = xutils.get_argument("index_config")
         xauth.update_user_config(xauth.current_name(), "fs_index_dirs", index_config)
-        return dict(code = "success")
+        return webutil.SuccessResult()
 
     def do_rebuild_index(self):
         path = self.get_arg_path()
@@ -224,15 +257,7 @@ class IndexHandler:
             update_file_index()
         t2 = time.time()
         return (t2-t1)*1000
-    
-    def get_rebuild_page(self):
-        path = self.get_arg_path()
-        kw = self.create_kw()
-        kw.path = path
-        kw.show_index_dirs = False
-        kw.index_size = FileInfoDao.prefix_count(path)
 
-        return xtemplate.render("fs/page/fs_index.html", **kw)
 
 xurls = (
     r"/fs_index", IndexHandler,

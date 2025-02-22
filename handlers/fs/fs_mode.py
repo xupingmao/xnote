@@ -4,9 +4,8 @@
 # @modified 2022/04/10 23:59:24
 # @filename fs_mode.py
 
-import xtemplate
-
-from xtemplate import T
+from xnote.core import xtemplate
+from xnote.core.xtemplate import T
 from xutils import dbutil
 from .fs_helper import sort_files_by_size
 

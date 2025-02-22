@@ -15,17 +15,6 @@ class TableExampleHandler(BaseTablePlugin):
     PAGE_HTML = """
 {% include test/component/example_nav_tab.html %}
 
-<style>
-    .table-edit-row {
-        padding-bottom:5px;
-        width:100%;
-        float:left;
-    }
-    .btn.green-bg {
-        background-color:green;
-    }
-</style>
-
 <div class="card">
     <form>
         <div class="row">
@@ -52,30 +41,18 @@ class TableExampleHandler(BaseTablePlugin):
     </form>
 </div>
 
-<div class="card">
-    <div class="table-edit-row">
-        <button class="btn" onclick="xnote.table.handleEditForm(this)"
-            data-url="?action=edit" data-title="新增记录">新增记录</button>
+{% include common/table/table_v2.html %}
 
-        <span>表格1-自动宽度</span>
-    </div>
+{% set-global xnote_table_var = "weight_table" %}
+{% include common/table/table_v2.html %}
 
-    {% include common/table/table.html %}
-</div>
-
-<div class="card">
-    <div class="table-edit-row">
-        <button class="btn" onclick="xnote.table.handleEditForm(this)"
-            data-url="?action=edit" data-title="新增记录">新增记录</button>
-        <span>表格2-权重宽度</span>
-    </div>
-    {% set-global xnote_table_var = "weight_table" %}
-    {% include common/table/table.html %}
-</div>
+{% set-global xnote_table_var = "empty_table" %}
+{% include common/table/table_v2.html %}
 """
 
     def handle_page(self):
         table = DataTable()
+        table.title = "表格1-自动宽度"
         table.add_head("类型", "type", css_class_field="type_class")
         table.add_head("标题", "title", link_field="view_url")
         table.add_head("日期", "date")
@@ -104,11 +81,13 @@ class TableExampleHandler(BaseTablePlugin):
         kw.page_url = "?page="
 
         kw.weight_table = self.get_weight_table()
+        kw.empty_table = self.get_empty_table()
 
         return self.response_page(**kw)
     
     def get_weight_table(self):
         table = DataTable()
+        table.title = "表格2-权重宽度"
         table.add_head("权重1", field="value1", width_weight=1)
         table.add_head("权重1", field="value2", width_weight=1)
         table.add_head("权重2", field="value3", width_weight=2)
@@ -129,7 +108,19 @@ class TableExampleHandler(BaseTablePlugin):
 
         table.add_row(row)
         return table
-
+    
+    def get_empty_table(self):
+        table = DataTable()
+        table.title = "表格3-空表格"
+        table.create_btn_text = "新建"
+        table.add_head("权重1", field="value1", width_weight=1)
+        table.add_head("权重1", field="value2", width_weight=1)
+        table.add_head("权重2", field="value3", width_weight=2)
+        table.add_head("权重1", field="value4", width_weight=1)
+        table.add_action("编辑", link_field="edit_url", type=TableActionType.edit_form)
+        table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, 
+                         msg_field="delete_msg", css_class="btn danger")
+        return table
 
 class ExampleHandler:
 
