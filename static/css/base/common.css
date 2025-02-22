@@ -1024,5 +1024,7 @@ select.no-border {
 .pad-left-5 {padding-left: 5px;}
 .pad-bottom-5 {padding-bottom: 5px;}
 .pad-bottom-10 {padding-bottom: 10px}
-
-
+.margin-top-5 {margin-top: 5px;}
+.margin-top-10 {margin-top: 10px;}
+.margin-bottom-5 {margin-bottom: 5px;}
+.margin-bottom-10 {margin-bottom: 10px;}

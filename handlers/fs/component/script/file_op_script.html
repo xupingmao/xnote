@@ -4,33 +4,42 @@
 {% set-global file_op_script_loaded = True %}
 {% include fs/component/move_file_dialog.html %}
 
+<style>
+    .fs-wide-btn {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        width: 100%;
+        height: 30px;
+    }
+</style>
+
 <input type="hidden" id="currentPath" value="{{path}}">
 
 <script type="text/template" id="fileItemOptionDialog">
     <div class="card dialog-body">
         <div class="align-center">
-            <button class="btn btn-default huge" 
+            <button class="btn btn-default huge fs-wide-btn" 
                 data-path="{{!filePath}}" 
                 data-path-b64="{{!filePathB64}}"
                 onclick="xnote.action.fs.download(this);">下载</button>
-            <button class="btn btn-default huge" 
+            <button class="btn btn-default huge fs-wide-btn" 
                 data-path="{{!filePath}}" 
                 data-name="{{!fileName}}"
                 data-realname="{{!fileRealName}}"
                 onclick="xnote.action.fs.rename(this);">重命名</button>
-            <button class="btn btn-default huge"
+            <button class="btn btn-default huge fs-wide-btn"
                 data-path="{{!filePath}}"
                 onclick="xnote.action.fs.move(this);">移动</button>
-            <button class="btn btn-default huge"
+            <button class="btn btn-default huge fs-wide-btn"
                 onclick="xnote.action.fs.copy(this);">复制</button>
-            <button class="btn btn-default huge"
+            <button class="btn btn-default huge fs-wide-btn"
                 data-path="{{!filePath}}"
                 onclick="xnote.action.fs.showDetail(this);">详细信息</button>
-            <button class="btn btn-default huge"
+            <button class="btn btn-default huge fs-wide-btn"
                 data-path="{{!filePath}}"
                 data-path-b64="{{!filePathB64}}"
                 onclick="xnote.action.fs.viewHex(this);">查看二进制</button>
-            <button class="btn danger huge" 
+            <button class="btn danger fs-wide-btn" 
                 data-path="{{!filePath}}"
                 data-name="{{!fileName}}"
                 data-realname="{{!fileRealName}}"

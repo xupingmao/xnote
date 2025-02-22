@@ -749,9 +749,9 @@ class MsgTagInfoDao:
         if orderby == "visit":
             return "visit_cnt desc"
         if orderby == "recent":
-            return "ctime desc"
+            return "mtime desc"
         if orderby == "":
-            return "ctime desc"
+            return "mtime desc"
         return orderby
 
     @classmethod

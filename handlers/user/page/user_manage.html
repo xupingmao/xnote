@@ -53,15 +53,17 @@
     </table>
 
     {% if user_info.name != "admin" %}
-        <input class="btn danger" type="button" 
-            data-name="{{user_info.name}}" data-id="{{user_info.id}}"
-            onclick="xnoteDeleteUser(this)"
-            value="删除用户">
-        
-        <input class="btn danger" type="button" 
-            data-name="{{user_info.name}}" data-id="{{user_info.id}}"
-            onclick="xnoteResetUserPassword(this)"
-            value="重置用户密码">
+        <div class="row pad-top-5">
+            <input class="btn danger" type="button" 
+                data-name="{{user_info.name}}" data-id="{{user_info.id}}"
+                onclick="xnoteDeleteUser(this)"
+                value="删除用户">
+            
+            <input class="btn danger" type="button" 
+                data-name="{{user_info.name}}" data-id="{{user_info.id}}"
+                onclick="xnoteResetUserPassword(this)"
+                value="重置用户密码">
+        </div>
     {% end %}
 </div>
 
