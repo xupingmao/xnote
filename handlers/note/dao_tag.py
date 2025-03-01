@@ -20,6 +20,7 @@ from xnote.core import xauth
 from xutils import functions, lists
 from xutils import dbutil
 from xutils import attrget, Storage
+from xutils.base import BaseDataRecord
 from handlers.note.dao_api import NoteDao
 from xnote.service import TagBindService, TagTypeEnum
 
@@ -43,7 +44,7 @@ class TagBind(Storage):
         bind.update(dict_value)
         return bind
 
-class TagMeta(Storage):
+class TagMeta(BaseDataRecord):
     """标签元信息"""
     def __init__(self, **kw):
         self.user = ""
@@ -54,16 +55,6 @@ class TagMeta(Storage):
         self.book_id: typing.Optional[str] = ""
         self.group_id: typing.Optional[str] = ""
         self.update(kw)
-
-    @classmethod
-    def from_dict(cls, dict_item):
-        result = TagMeta()
-        result.update(dict_item)
-        return result
-
-    @classmethod
-    def from_dict_list(cls, dict_list):
-        return [cls.from_dict(item) for item in dict_list]
 
 class NoteTagRelation(Storage):
     """笔记和标签的关系表"""
@@ -382,7 +373,7 @@ def get_system_tag_list(tag_list=None):
 
 
 def get_system_tag_code_map():
-    result = {}
+    result = {} # type: dict[str,str]
     for item in get_system_tag_list():
         result[item.code] = item.name
     return result
@@ -397,7 +388,7 @@ def get_user_defined_tags(tag_list):
             result.append(item)
     return result
 
-def get_name_by_code(code):
+def get_name_by_code(code: str):
     return static_code_map.get(code, code)
 
 def handle_tag_for_note(note_info: note_dao.NoteIndexDO):

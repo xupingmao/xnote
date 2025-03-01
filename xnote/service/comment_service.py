@@ -4,6 +4,7 @@
 import xutils
 from xnote.core import xtables
 from xutils import dateutil
+from xutils.base import BaseDataRecord
 
 class CommentTypeEnum:
     """枚举无法扩展,所以这里不用,从外部添加枚举值可以直接设置新的属性"""
@@ -11,8 +12,9 @@ class CommentTypeEnum:
     note = "note"
     list_item = "list_item"
 
-class Comment(xutils.Storage):
+class Comment(BaseDataRecord):
     def __init__(self):
+        self.id = 0
         self.ctime = dateutil.format_datetime()
         self.mtime = dateutil.format_datetime()
         self.type = ""
@@ -53,7 +55,8 @@ class CommentService:
             raise Exception("user_id,target_id不能同时为0")
         
         where, vars = self.build_where(user_id=user_id, target_id=target_id,date=date,type=type)
-        return self.db.select(where=where, vars=vars, offset=offset,limit=limit,order=order)
+        result = self.db.select(where=where, vars=vars, offset=offset,limit=limit,order=order)
+        return Comment.from_dict_list(result)
 
     def count(self, user_id=0, target_id=0, date=None,type=""):
         where, vars = self.build_where(user_id=user_id, target_id=target_id,date=date,type=type)

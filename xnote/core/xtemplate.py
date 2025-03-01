@@ -164,7 +164,13 @@ def get_user_agent():
 
 def render_before_kw(kw: dict):
     """模板引擎预处理过程"""
-    user_name = xauth.current_name() or ""
+    user_info = xauth.current_user()
+    user_name = ""
+    user_id = 0
+    if user_info != None:
+        user_id = user_info.user_id
+        user_name = user_info.name
+    
     user_role = xauth.current_role() or ""
 
     kw["math"] = math
@@ -172,6 +178,7 @@ def render_before_kw(kw: dict):
     kw["_is_admin"] = xauth.is_admin()
     kw["_has_login"] = xauth.has_login()
     kw["_user_name"] = user_name
+    kw["_user_id"] = user_id
     kw["_user_role"] = user_role
     kw["_user_agent"] = get_user_agent()
     # 用于渲染其他组件

@@ -35,7 +35,7 @@ class MyStorage(dict):
     def __init__(self, **kw):
         # default_value会导致items等函数出问题
         # self.default_value = default_value
-        super(Storage, self).__init__(**kw)
+        super(MyStorage, self).__init__(**kw)
 
     def __getattr__(self, key):
         try:

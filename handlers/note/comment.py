@@ -20,6 +20,7 @@ from xutils import webutil
 from xnote.core.models import SearchContext, SearchResult
 from .dao_comment import search_comment
 from xutils.text_parser import TokenType
+from .models import NoteTypeInfo
 
 NOTE_DAO = DAO("note")
 
@@ -210,14 +211,18 @@ class MyCommentsHandler:
     def GET(self):
         user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/note/comment/mine")
-        date = xutils.get_argument("date", "")
+        date = xutils.get_argument_str("date", "")
 
-        return xtemplate.render("note/page/comment/comment_user_page.html", 
-            show_comment_title = False,
-            show_comment_create = False,
-            show_comment_note = True,
-            comment_list_date = date,
-            comment_list_type = "user")
+        kw = Storage()
+        kw.show_comment_title = False
+        kw.show_comment_create = False
+        kw.show_comment_note = True
+        kw.comment_list_date = date
+        kw.comment_list_type = "user"
+        kw.note_type = "comment"
+        kw.type_list = NoteTypeInfo.get_type_list()
+
+        return xtemplate.render("note/page/comment/comment_user_page.html", **kw)
 
 class CommentAjaxHandler:
 

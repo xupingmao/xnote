@@ -9,6 +9,7 @@
 
 {% for comment in comments %}
     <div class="comment-row">
+        <span class="hide">{{comment.user_id}}</span>
         <div class="comment-user">{{comment.user}}</div>
         <div class="comment-time">{{comment.ctime}}</div>
         <div class="comment-content">{% raw comment.html %}</div>
@@ -18,7 +19,7 @@
                     <span>[来源]</span>
                     <a class="comment-foot-link" href="{{comment.note_url}}">{{comment.note_name}}</a>
                 </div>
-            {% elif show_comment_edit %}
+            {% elif show_comment_edit and _user_id == comment.user_id %}
                 <a class="btn btn-default edit-comment-btn" data-id="{{comment.id}}">编辑</a>
             {% end %}
 

@@ -3,9 +3,9 @@
 # @since 2021/12/04 22:07:44
 # @modified 2022/04/16 21:57:34
 # @filename dao_comment.py
-
-
 import xutils
+import typing
+
 from xnote.core import xconfig
 from xnote.core import xmanager
 from xnote.core import xauth
@@ -13,7 +13,8 @@ from xutils import dbutil
 from xutils import textutil
 from xutils import dateutil
 from xutils.db.dbutil_helper import PageBuilder, batch_iter
-from xnote.service import CommentService
+from xnote.service import CommentService, Comment
+from xutils.base import BaseDataRecord
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -21,8 +22,9 @@ _comment_db = dbutil.get_table("comment")
 
 comment_service = CommentService()
 
-class CommentDO(xutils.Storage):
+class CommentDO(BaseDataRecord):
     def __init__(self, **kw):
+        self.id = 0
         self.user = ""
         self.user_id = 0
         self.note_id = 0
@@ -76,23 +78,26 @@ class CommentDao:
 
 
 
-def list_comments_by_idx_list(idx_list, user_name=""):
+def list_comments_by_idx_list(idx_list: typing.List[Comment], user_name=""):
     """通过索引查询评论
     :param {list} idx_list: 索引对象列表
     :param {str} user_name: 用于处理删除数据的user_name, 可以不传
     """
     id_list = [str(item.id) for item in idx_list]
     comment_dict = _comment_db.batch_get_by_id(id_list)
-    result = []
-    for id in id_list:
-        item = comment_dict.get(id)
+    result = [] # type: list[CommentDO]
+    for index in idx_list:
+        id_str = str(index.id)
+        item = comment_dict.get(id_str)
         if item != None:
-            item.id = id
-            result.append(item)
+            item_do = CommentDO.from_dict(item)
+            item_do.id = id_str
+            result.append(item_do)
         else:
             item = CommentDO()
-            item.id = id
+            item.id = id_str
             item.user = user_name
+            item.user_id = index.user_id
             item.content = "[数据被删除]"
             result.append(item)
     return result

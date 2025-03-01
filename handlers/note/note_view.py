@@ -25,11 +25,43 @@ from .dao_api import NoteDao
 from handlers.note.models import NotePathInfo
 from . import dao_draft
 from . import dao_log
-from .models import OrderTypeEnum
+from .models import OrderTypeEnum, NoteIndexDO
 
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
+
+class NoteViewContext(Storage):
+
+    def __init__(self, **kw):
+        self.user_name = ""
+        self.recommended_notes = [] # type: list|object
+        self.next_note = None # type: NoteIndexDO|None
+        self.prev_note = None # type: NoteIndexDO|None
+        
+        self.show_left = False
+        self.show_groups = False
+        self.show_aside = True
+        self.show_contents_btn = False
+        self.show_comment_edit = False
+        self.can_edit = False
+
+        self.page = 1
+        self.pagesize = 20
+        self.page_url = ""
+
+        self.groups = []
+        self.files = []
+        self.show_mdate = False
+        self.show_add_file = False
+        self.template_name = "note/page/detail/note_detail.html"
+        self.search_type = "note"
+        self.comment_source_class = "hide"
+        self.op = ""
+        self.is_public_page = False
+        self.OrderTypeEnum = OrderTypeEnum
+        self.file = None # type: NoteIndexDO|None
+        self.update(kw)
 
 
 @xmanager.listen("note.view", is_async=False)
@@ -63,7 +95,7 @@ def check_auth(file: note_dao.NoteDO, user_name):
     raise web.seeother("/unauthorized")
 
 
-def handle_note_recommend(kw, file, user_name):
+def handle_note_recommend(kw: NoteViewContext, file, user_name):
     ctx = Storage(id=file.id, name=file.name, creator=file.creator,
                   content=file.content,
                   parent_id=file.parent_id,
@@ -103,8 +135,8 @@ def view_html_func(file, kw):
     kw.show_pagination = False
 
 
-def view_or_edit_md_func(file, kw):
-    device = xutils.get_argument("device", "desktop")
+def view_or_edit_md_func(file, kw: NoteViewContext):
+    device = xutils.get_argument_str("device", "desktop")
     load_draft = xutils.get_argument_bool("load_draft")
     kw.content = file.content
     kw.show_recommend = True
@@ -231,8 +263,13 @@ VIEW_FUNC_DICT = {
 }
 
 
-def view_func_before(note, kw):
-    kw.show_comment_edit = UserConfig.show_comment_edit.get_bool()
+def view_func_before(kw: NoteViewContext):
+    if kw.file is None:
+        return
+    note = kw.file
+    file = kw.file
+    # 是否允许评论跟着笔记走
+    kw.show_comment_edit = UserConfig.show_comment_edit.get_bool(user_name=file.creator)
     dao_tag.handle_tag_for_note(note)
 
 
@@ -255,28 +292,12 @@ def find_note_for_view(token, id, name):
         note.adate = dateutil.format_date(note.atime)
     return note
 
-
-def create_view_kw():
-    kw = Storage()
-    kw.show_left = False
-    kw.show_groups = False
-    kw.show_aside = True
-    kw.groups = []
-    kw.files = []
-    kw.show_mdate = False
-    kw.recommended_notes = []
-    kw.show_add_file = False
-    kw.template_name = "note/page/detail/note_detail.html"
-    kw.search_type = "note"
-    kw.comment_source_class = "hide"
-
-    return kw
-
-
 class ViewHandler:
 
-    def handle_contents_btn(self, kw):
+    def handle_contents_btn(self, kw:NoteViewContext):
         file = kw.file
+        if file is None:
+            raise Exception("file is None")
         can_edit = kw.can_edit
         is_valid_type = (file.type != "group") and (file.parent_id != "0")
         kw.show_contents_btn = is_valid_type and can_edit
@@ -321,15 +342,13 @@ class ViewHandler:
 
         skey = xutils.get_argument_str("skey")
 
-        kw = create_view_kw()
-
+        kw = NoteViewContext()
         kw.op = op
         kw.user_name = user_name
         kw.page = page
         kw.pagesize = pagesize
         kw.page_url = f"/note/view?id={id}&page="
         kw.is_public_page = is_public_page
-        kw.OrderTypeEnum = OrderTypeEnum
 
         if id == 0 or id == "0":
             raise web.found("/")
@@ -339,7 +358,8 @@ class ViewHandler:
         else:
             # 回收站的笔记也能看到
             file = find_note_for_view(token, id, name)
-
+        
+        kw.file = file
         if file is None:
             if id != "":
                 event = Storage(id=id, user_name=user_name)
@@ -360,7 +380,7 @@ class ViewHandler:
         xmanager.fire("note.view", event_ctx)
 
         # 通用的预处理
-        view_func_before(file, kw)
+        view_func_before(kw)
 
         view_func = VIEW_FUNC_DICT.get(file.type, view_or_edit_md_func)
         view_func(file, kw)

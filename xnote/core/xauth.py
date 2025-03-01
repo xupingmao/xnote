@@ -98,6 +98,10 @@ class UserDO(xutils.Storage):
         self.status = 0
         self.update(kw)
 
+    @property
+    def user_id(self):
+        return self.id
+
     @classmethod
     def from_dict(cls, dict_value):
         if dict_value == None:
