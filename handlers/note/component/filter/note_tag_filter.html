@@ -9,14 +9,18 @@
  #} -->
 
 {% if len(tag_meta_list) > 0 %}
-<div class="card btn-line-height">
-    <div class="row">
-        <span>标签</span>
-        <a class="tag lightgray large {%if q_tag=='' %}active{%end%}" href="?">全部</a>
+
+<div class="card">
+    <div class="float-left">
+        <a class="x-tab title">标签</a>
+    </div>
+    <div class="x-tab-box btn-style" data-tab-default="" data-tab-key="tag">
+        <a class="x-tab" data-tab-value="">全部</a>
         {% for tag in tag_meta_list %}
-            <a class="tag lightgray large meta {% if tag.tag_name == q_tag %}active{%end%}" 
-                href="{{_server_home}}/note/{{note_id}}?tag={{quote(tag.tag_name)}}">{{tag.tag_name}}</a>
+            <a class="x-tab" data-tab-value="{{tag.tag_code}}" 
+                href="{{_server_home}}/note/{{note_id}}?tag={{quote(tag.tag_code)}}">{{tag.tag_name}}</a>
         {% end %}
     </div>
 </div>
+
 {% end %}

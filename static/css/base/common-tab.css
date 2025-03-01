@@ -37,6 +37,12 @@
     color: #000;
 }
 
+.x-tab.title {
+    color: #000;
+    cursor: default;
+    text-decoration: none;
+}
+
 /** 按钮模式 **/
 .x-tab-btn, .x-tab.btn, .x-tab-box.btn-style>.x-tab {
     color: black;

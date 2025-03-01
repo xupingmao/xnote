@@ -91,31 +91,29 @@ my_package # 带下划线的包名
 
 # 6. 模块内部的命名
 
+- `handlers/common/` 通用组件
 - `handlers/note` note模块的根目录
 - `handlers/note/*.py` 后台处理程序
-- `handlers/note/page/` 静态页面目录
-- `handlers/note/ajax/` ajax页面目录
-- `handlers/note/css` CSS组件
-- `handlers/note/script` JS脚本组件
-- `handlers/note/component/` 页面的组件
+- `handlers/note/page/` 模板页面目录
+- `handlers/note/page/xxx_ajax` ajax页面目录
+- `handlers/note/page/xxx_css` CSS组件
+- `handlers/note/page/xxx_script` JS脚本组件
 
 > 示例
 
 ```text
 handlers/note/
 |-- page
-|   |-- note_index.html
-|   `-- note_create.html
-|-- ajax
-|   |-- note_option_dialog.html
-|   `-- note_select_dialog.html
-|-- component
 |   |-- css
 |   |   |-- layout_css.html
 |   |   `-- header_css.html
 |   |-- script
 |   |   |-- option_script.html
 |   |   `-- search_script.html
+|   |-- note_index.html
+|   |-- note_create.html
+|   |-- note_option_dialog.html
+|   `-- note_select_dialog.html
 |   `-- header.html
 |-- note_dao.py   # 数据访问对象
 |-- note_page.py  # 页面的controller
