@@ -475,7 +475,6 @@ class TestMain(BaseTestCase):
         # clean up
         json_request("/note/remove?id=" + str(id))
 
-
     def test_note_comment(self):
         # clean comments
         data = json_request("/note/comments?note_id=123")
@@ -531,6 +530,14 @@ class TestMain(BaseTestCase):
 
         data = json_request("/note/comment/list?list_type=user")
         self.assertEqual(0, len(data))
+
+
+    def test_note_comment_not_login(self):
+        try:
+            logout_test_user()
+            self.check_OK("/note/comments?note_id=123")
+        finally:
+            login_test_user()
 
 
     def test_note_management(self):

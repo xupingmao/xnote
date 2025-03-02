@@ -125,14 +125,19 @@ class CommentListAjaxHandler:
         page_max  = 1
         page_size = xconfig.PAGE_SIZE
         user_info = xauth.current_user()
-        if user_info is None:
-            raise Exception("user_info is None")
+        user_name = ""
+        user_id = 0
         
-        user_name = user_info.name
-        user_id = user_info.user_id
+        # can visit comment without login
+        if user_info != None:
+            user_name = user_info.name
+            user_id = user_info.user_id
+
         offset = max(0, page-1) * xconfig.PAGE_SIZE
 
         if list_type == "user":
+            if user_id == 0:
+                raise Exception("user not login")
             count  = dao_comment.count_comments_by_user(user_id, list_date)
             comments = dao_comment.list_comments_by_user(user_id=user_id, 
                 date = list_date, offset = offset, 
