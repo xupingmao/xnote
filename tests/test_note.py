@@ -423,6 +423,8 @@ class TestMain(BaseTestCase):
         note_id = create_note_for_test(name = "xnote-link-share-test", type = "md")
         resp = json_request_return_dict("/note/link_share", method = "POST", data = dict(id = note_id))
         self.assertEqual("success", resp["code"])
+        self.assertTrue(resp["success"])
+        self.check_OK(resp["data"])
 
     def test_note_tag(self):
         delete_note_for_test("xnote-tag-test")

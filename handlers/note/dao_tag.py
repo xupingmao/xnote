@@ -20,12 +20,15 @@ from xnote.core import xauth
 from xutils import functions, lists
 from xutils import dbutil
 from xutils import attrget, Storage
-from xutils.base import BaseDataRecord
+from xutils.base import BaseDataRecord, BaseEnum, EnumItem
 from handlers.note.dao_api import NoteDao
 from xnote.service import TagBindService, TagTypeEnum, TagInfoDO
 
 tag_bind_db = dbutil.get_table("note_tags")
 tag_meta_db = dbutil.get_table("note_tag_meta")
+
+class SystemTagEnum(BaseEnum):
+    todo = EnumItem("待办", "$todo$")
 
 class TagBind(BaseDataRecord):
     """标签绑定信息"""
@@ -48,12 +51,18 @@ class TagMeta(BaseDataRecord):
         self.group_id: typing.Optional[str] = ""
         self.update(kw)
 
+    def is_system_tag(self):
+        return SystemTagEnum.get_by_value(self.tag_code) != None
+    
 class TagInfo(Storage):
     def __init__(self, name = "", code = "", amount = 0) -> None:
-        self.name = name
+        self.name = get_name_by_code(code)
         self.code = code
         self.amount = amount
         self.url = ""
+
+    def is_system_tag(self):
+        return SystemTagEnum.get_by_value(self.code) != None
 
 def get_tags(creator, note_id):
     note_tags = tag_bind_db.get_by_id(note_id, user_name=creator)
@@ -110,7 +119,7 @@ class TagBindDao:
 
     @classmethod
     def is_not_sys_tag(cls, tag_info: TagInfo):
-        return tag_info.code not in static_code_map
+        return not tag_info.is_system_tag()
 
     @classmethod
     def list_tag(cls, user, exclude_sys_tag=False):
@@ -129,7 +138,7 @@ class TagBindDao:
 
         tag_bind_db.count(filter_func=list_func, user_name=user)
 
-        tag_list = [TagInfo(name=k, amount=tags[k]) for k in tags]
+        tag_list = [TagInfo(code=k, amount=tags[k]) for k in tags]
         
         if exclude_sys_tag:
             tag_list = list(filter(cls.is_not_sys_tag, tag_list))
@@ -215,7 +224,7 @@ class TagMetaDao:
     
     @classmethod
     def is_not_sys_tag(cls, tag_info: TagMeta):
-        return tag_info.tag_code not in static_code_map
+        return not tag_info.is_system_tag()
 
     @classmethod
     def list_meta(cls, user_name, *, limit=1000, tag_type="group", 
@@ -342,38 +351,32 @@ def batch_get_tags_by_notes(notes):
         note.tags_json = json.dumps(tags)
     return result
 
-def get_system_tag_list(tag_list=None):
+def get_system_tag_list(tag_list: typing.List[TagInfo]):
     result = [
         TagInfo(code="$todo$", name="待办", amount=0),
     ]
-    if tag_list != None:
+
+    if len(tag_list) > 0:
         tag_count_map = dict()
         for item in tag_list:
             tag_count_map[item.name] = item.amount
         for item in result:
             item.amount = tag_count_map.get(item.code, 0)
-
     return result
 
 
-def get_system_tag_code_map():
-    result = {} # type: dict[str,str]
-    for item in get_system_tag_list():
-        result[item.code] = item.name
-    return result
-
-
-static_code_map = get_system_tag_code_map()
-
-def get_user_defined_tags(tag_list):
+def get_user_defined_tags(tag_list: typing.List[TagInfo]):
     result = []
     for item in tag_list:
-        if item.name not in static_code_map:
+        if not item.is_system_tag():
             result.append(item)
     return result
 
 def get_name_by_code(code: str):
-    return static_code_map.get(code, code)
+    name = SystemTagEnum.get_name_by_value(code)
+    if name == "":
+        return code
+    return name
 
 def handle_tag_for_note(note_info: note_dao.NoteIndexDO):
     note = note_info

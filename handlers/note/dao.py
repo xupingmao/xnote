@@ -51,7 +51,6 @@ NOTE_DAO = xutils.DAO("note")
 _full_db = dbutil.get_table("note_full")
 _note_history_db = dbutil.get_hash_table("note_history")
 _note_history_index_db = xtables.get_table_by_name("note_history_index")
-_token_db = dbutil.get_table("token")
 
 DB_PATH = xconfig.DB_PATH
 MAX_STICKY_SIZE = 1000
@@ -698,15 +697,6 @@ def get_by_id_creator(id, creator, db=None):
         return note
     return None
 
-
-def get_by_token(token):
-    token_dict = _token_db.get_by_id(token)
-    token_info = NoteToken.from_dict(token_dict)
-    if token_info != None and token_info.type == "note":
-        return get_by_id(token_info.id)
-    return None
-
-
 def get_by_user_skey(user_name, skey):
     return None
 
@@ -854,12 +844,34 @@ def create_note(note_dict: NoteDO, date_str=None, note_id=None, check_name=True)
 
     return note_id
 
+class NoteTokenDaoImpl:
+    db = dbutil.get_table("token")
+    token_type = "note"
 
-def create_token(type, note_id=0):
-    uuid = textutil.generate_uuid()
-    token_info = Storage(type=type, id=note_id)
-    dbutil.put("token:%s" % uuid, token_info)
-    return uuid
+    def create_token(self, note_id=0):
+        uuid = textutil.generate_uuid()
+        token_info = NoteToken(type=self.token_type, id=note_id)
+        self.db.put_by_id(uuid, token_info)
+        return uuid
+
+    def update_token(self, note: NoteDO):
+        if note.token == "" or note.token is None:
+            return
+        
+        result = self.db.get_by_id(note.token)
+        if result is None:
+            self.db.put_by_id(note.token, NoteToken(type=self.token_type, id=note.id))
+  
+    def get_by_token(self, token):
+        token_dict = self.db.get_by_id(token)
+        if token_dict is None:
+            return None
+        token_info = NoteToken.from_dict(token_dict)
+        if token_info.type == self.token_type:
+            return get_by_id(token_info.id)
+        return None
+
+
 
 def check_and_create_default_book(user_name="", default_book_name="默认笔记本"):
     """检查并且创建默认笔记本"""
@@ -1845,7 +1857,6 @@ xutils.register_func("note.update0", update0)
 xutils.register_func("note.move", move_note)
 xutils.register_func("note.visit",  visit_note)
 xutils.register_func("note.touch",  touch_note)
-xutils.register_func("note.create_token", create_token)
 
 # 内部更新索引的接口，外部不要使用
 xutils.register_func("note.update_index", update_index)
@@ -1854,7 +1865,6 @@ xutils.register_func("note.update_index", update_index)
 xutils.register_func("note.get_root", get_root)
 xutils.register_func("note.get_default_group", get_default_group)
 xutils.register_func("note.get_by_id", get_by_id)
-xutils.register_func("note.get_by_token", get_by_token)
 xutils.register_func("note.get_by_id_creator", get_by_id_creator)
 xutils.register_func("note.get_by_name", get_by_name)
 xutils.register_func("note.get_or_create", get_or_create_note)
@@ -1905,3 +1915,6 @@ NoteDao.get_by_id_creator = get_by_id_creator
 NoteDao.get_root = get_root
 NoteDao.batch_query_list = batch_query_list
 NoteDao.get_note_stat = get_note_stat
+
+
+NoteTokenDao = NoteTokenDaoImpl()

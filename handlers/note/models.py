@@ -169,18 +169,10 @@ def remove_virtual_fields(note):
 class NoteTokenType:
     note = "note"
 
-class NoteToken(Storage):
-    def __init__(self):
-        self.type = ""
-        self.id = 0
-    
-    @classmethod
-    def from_dict(cls, dict_value):
-        if dict_value == None:
-            return None
-        result = NoteToken()
-        result.update(dict_value)
-        return result
+class NoteToken(BaseDataRecord):
+    def __init__(self, type="", id=0):
+        self.type = type
+        self.id = id
     
 class NoteTypeInfo:
 

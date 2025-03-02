@@ -64,7 +64,7 @@ xnote.state.note = {
 $(function () {
     $(".link-share-option").click(function(event) {
         /* Act on the event */
-        $.post("/note/link_share", {id: "{{file.id}}"}, function (resp) {
+        xnote.http.post("/note/link_share", {id: "{{file.id}}"}, function (resp) {
             if (resp.code == "success") {
                 var link = window.location.protocol + "//" + window.location.host + resp.data;
                 $(".share-link-text").text(link);

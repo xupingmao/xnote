@@ -31,6 +31,9 @@ from .models import OrderTypeEnum, NoteIndexDO
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
 
+def is_empty_id(note_id):
+    return note_id == 0 or note_id == ""
+
 class NoteViewContext(Storage):
 
     def __init__(self, **kw):
@@ -273,19 +276,19 @@ def view_func_before(kw: NoteViewContext):
     dao_tag.handle_tag_for_note(note)
 
 
-def find_note_for_view0(token, id, name):
+def find_note_for_view0(token, note_id=0, name=""):
     if token != "":
-        return note_dao.get_by_token(token)
-    if id != "":
-        return note_dao.get_by_id(id)
+        return note_dao.NoteTokenDao.get_by_token(token)
+    if note_id != 0:
+        return note_dao.get_by_id(note_id)
     if name != "":
         return note_dao.get_by_name(xauth.current_name(), name)
 
     raise HTTPError(504)
 
 
-def find_note_for_view(token, id, name):
-    note = find_note_for_view0(token, id, name)
+def find_note_for_view(token, note_id, name):
+    note = find_note_for_view0(token, note_id, name)
     if note != None:
         note.mdate = dateutil.format_date(note.mtime)
         note.cdate = dateutil.format_date(note.ctime)
@@ -328,9 +331,8 @@ class ViewHandler:
         name = xutils.get_argument("name", "")
         page = xutils.get_argument_int("page", 1)
         pagesize = xutils.get_argument_int("pagesize", xconfig.PAGE_SIZE)
-        orderby = xutils.get_argument_str("orderby", "")
-        is_iframe = xutils.get_argument("is_iframe", "false")
-        token = xutils.get_argument_str("token", "")
+        is_iframe = xutils.get_argument_str("is_iframe", "false")
+        token = xutils.get_argument_str("token")
         
         user_info = xauth.current_user()
         if user_info != None:
@@ -350,7 +352,7 @@ class ViewHandler:
         kw.page_url = f"/note/view?id={id}&page="
         kw.is_public_page = is_public_page
 
-        if id == 0 or id == "0":
+        if token == "" and is_empty_id(id):
             raise web.found("/")
 
         if skey != None and skey != "":
@@ -361,7 +363,7 @@ class ViewHandler:
         
         kw.file = file
         if file is None:
-            if id != "":
+            if id != 0:
                 event = Storage(id=id, user_name=user_name)
                 xmanager.fire("note.notfound", event)
             raise web.notfound()

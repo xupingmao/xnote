@@ -382,14 +382,17 @@ class LinkShareHandler:
 
     @xauth.login_required()
     def POST(self):
-        id   = xutils.get_argument("id")
-        note = check_get_note(id)
+        note_id = xutils.get_argument_int("id")
+        note = check_get_note(note_id)
+        NoteTokenDao = note_dao.NoteTokenDao
+
         if note.token != None and note.token != "":
-            return webutil.SuccessResult(data = "/note/view?token=%s" % note.token)
+            NoteTokenDao.update_token(note)
+            return webutil.SuccessResult(data = f"/note/view?token={note.token}")
         else:
-            token = note_dao.create_token("note", note.id)
+            token = NoteTokenDao.create_token(note.id)
             note_dao.update_note(note.id, token = token)
-        return webutil.SuccessResult(data = "/note/view?token=%s" % token)
+        return webutil.SuccessResult(data = f"/note/view?token={token}")
 
 class UnshareHandler:
 
