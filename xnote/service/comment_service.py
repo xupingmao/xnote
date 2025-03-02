@@ -12,7 +12,7 @@ class CommentTypeEnum:
     note = "note"
     list_item = "list_item"
 
-class Comment(BaseDataRecord):
+class CommentIndexDO(BaseDataRecord):
     def __init__(self):
         self.id = 0
         self.ctime = dateutil.format_datetime()
@@ -20,6 +20,8 @@ class Comment(BaseDataRecord):
         self.type = ""
         self.user_id = 0
         self.target_id = 0
+
+Comment = CommentIndexDO
 
 class CommentService:
 
@@ -56,7 +58,7 @@ class CommentService:
         
         where, vars = self.build_where(user_id=user_id, target_id=target_id,date=date,type=type)
         result = self.db.select(where=where, vars=vars, offset=offset,limit=limit,order=order)
-        return Comment.from_dict_list(result)
+        return CommentIndexDO.from_dict_list(result)
 
     def count(self, user_id=0, target_id=0, date=None,type=""):
         where, vars = self.build_where(user_id=user_id, target_id=target_id,date=date,type=type)

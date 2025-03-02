@@ -21,12 +21,19 @@ class UserConfigItem:
             return value.lower() == "true"
         return bool(value)
     
+    def get_str(self, user_name=""):
+        value = self.get(user_name)
+        if value is None:
+            return ""
+        return str(value)
+    
     def set(self, user_name="", value=None):
         xauth.update_user_config(user_name=user_name, key=self.key, value=value)
 
 class UserConfig:
     THEME = UserConfigItem("THEME", "主题") 
-    HOME_PATH = UserConfigItem("HOME_PATH", "家目录") 
+    HOME_PATH = UserConfigItem("HOME_PATH", "家目录")
+    HOME_PATH_MOBILE = UserConfigItem("HOME_PATH_MOBILE", "移动端家目录")
     LANG = UserConfigItem("LANG", "语言")
     nav_style = UserConfigItem("nav_style", "导航风格")
     group_list_order_type = UserConfigItem("group_list_order_type", "笔记本排序方式")

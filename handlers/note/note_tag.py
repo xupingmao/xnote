@@ -41,7 +41,7 @@ class TagUpdateAjaxHandler:
 
 class TagNameHandler:
 
-    def GET(self, tagname):
+    def GET(self, tagname=""):
         tagname = xutils.unquote(tagname)
         page = xutils.get_argument_int("page", 1)
         limit = xutils.get_argument_int("limit", xconfig.PAGE_SIZE)

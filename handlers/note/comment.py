@@ -124,12 +124,17 @@ class CommentListAjaxHandler:
         page = xutils.get_argument_int("page", 1)
         page_max  = 1
         page_size = xconfig.PAGE_SIZE
-        user_name = xauth.current_name_str()
+        user_info = xauth.current_user()
+        if user_info is None:
+            raise Exception("user_info is None")
+        
+        user_name = user_info.name
+        user_id = user_info.user_id
         offset = max(0, page-1) * xconfig.PAGE_SIZE
 
         if list_type == "user":
-            count  = dao_comment.count_comments_by_user(user_name, list_date)
-            comments = dao_comment.list_comments_by_user(user_name, 
+            count  = dao_comment.count_comments_by_user(user_id, list_date)
+            comments = dao_comment.list_comments_by_user(user_id=user_id, 
                 date = list_date, offset = offset, 
                 limit = page_size)
         elif list_type == "search":
@@ -194,16 +199,16 @@ class DeleteCommentAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        comment_id = xutils.get_argument_str("comment_id")
+        comment_id = xutils.get_argument_int("comment_id")
         user       = xauth.current_name()
         comment    = dao_comment.get_comment(comment_id)
         if comment is None:
             dao_comment.delete_index(comment_id)
             return webutil.SuccessResult()
         if user != comment.user:
-            return dict(success = False, message = "unauthorized")
+            return webutil.FailedResult(message = "unauthorized")
         dao_comment.delete_comment(comment_id)
-        return dict(success = True, code = "success")
+        return webutil.SuccessResult()
 
 class MyCommentsHandler:
 
@@ -230,7 +235,7 @@ class CommentAjaxHandler:
     def GET(self):
         p = xutils.get_argument_str("p")
         user_name = xauth.current_name()
-        comment_id = xutils.get_argument_str("comment_id", "")
+        comment_id = xutils.get_argument_int("comment_id")
 
         if p == "edit":
             comment = dao_comment.get_comment(comment_id)

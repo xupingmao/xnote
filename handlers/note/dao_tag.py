@@ -22,12 +22,12 @@ from xutils import dbutil
 from xutils import attrget, Storage
 from xutils.base import BaseDataRecord
 from handlers.note.dao_api import NoteDao
-from xnote.service import TagBindService, TagTypeEnum
+from xnote.service import TagBindService, TagTypeEnum, TagInfoDO
 
 tag_bind_db = dbutil.get_table("note_tags")
 tag_meta_db = dbutil.get_table("note_tag_meta")
 
-class TagBind(Storage):
+class TagBind(BaseDataRecord):
     """标签绑定信息"""
     def __init__(self, **kw):
         self.note_id = ""
@@ -35,14 +35,6 @@ class TagBind(Storage):
         self.tags = []
         self.parent_id = ""
         self.update(kw)
-
-    @classmethod
-    def from_dict(cls, dict_value):
-        if dict_value == None:
-            return None
-        bind = TagBind()
-        bind.update(dict_value)
-        return bind
 
 class TagMeta(BaseDataRecord):
     """标签元信息"""
@@ -55,14 +47,6 @@ class TagMeta(BaseDataRecord):
         self.book_id: typing.Optional[str] = ""
         self.group_id: typing.Optional[str] = ""
         self.update(kw)
-
-class NoteTagRelation(Storage):
-    """笔记和标签的关系表"""
-    def __init__(self):
-        self.ctime = xutils.format_datetime()
-        self.user_id = 0
-        self.note_id = ""
-        self.tag_code = ""
 
 class TagInfo(Storage):
     def __init__(self, name = "", code = "", amount = 0) -> None:
@@ -94,7 +78,7 @@ class TagBindDao:
     @staticmethod
     def get_by_note_id(user_name, note_id):
         record = tag_bind_db.get_by_id(note_id, user_name=user_name)
-        return TagBind.from_dict(record)
+        return TagBind.from_dict_or_None(record)
 
     @staticmethod
     def count_user_tag(user_name = "", tag_name = "", parent_id=None):
@@ -126,7 +110,7 @@ class TagBindDao:
 
     @classmethod
     def is_not_sys_tag(cls, tag_info: TagInfo):
-        return tag_info.name not in static_code_map
+        return tag_info.code not in static_code_map
 
     @classmethod
     def list_tag(cls, user, exclude_sys_tag=False):
