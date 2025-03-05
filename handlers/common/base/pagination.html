@@ -7,7 +7,11 @@
 {% end %}
 
 {% if "page_total" in globals() %}
-    {% set-global page_max = int(math.ceil(page_total/page_size)) %}
+    {% if page_total == 0 %}
+        {% set-global page_max = 1 %}
+    {% else %}
+        {% set-global page_max = int(math.ceil(page_total/page_size)) %}
+    {% end %}
 {% end %}
 
 {% if page_max >= 0 %}

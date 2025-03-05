@@ -25,6 +25,7 @@ from __future__ import absolute_import, division, print_function, with_statement
 
 import re
 import sys
+import typing
 
 from .util import unicode_type, basestring_type, u
 
@@ -209,7 +210,7 @@ def utf8(value):
 _TO_UNICODE_TYPES = (unicode_type, type(None))
 
 
-def to_unicode(value):
+def to_unicode(value) -> typing.Optional[str]:
     """Converts a string argument to a unicode string.
 
     If the argument is already a unicode string or None, it is returned

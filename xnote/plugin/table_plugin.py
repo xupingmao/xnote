@@ -106,10 +106,12 @@ class BaseTablePlugin(BasePlugin):
         kw.form = form
         return self.response_form(**kw)
     
-    def get_data_dict(self) -> ParamDict:
+    def get_param_dict(self) -> ParamDict:
         data = xutils.get_argument_str("data")
         data_dict = json.loads(data)
         return ParamDict(data_dict)
+    
+    get_data_dict = get_param_dict
     
     def handle_save(self):
         # data_dict = self.get_data_dict()

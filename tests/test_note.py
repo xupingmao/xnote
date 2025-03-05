@@ -439,7 +439,7 @@ class TestMain(BaseTestCase):
         user_info = xauth.current_user()
         assert user_info != None
 
-        service = TagBindService(TagTypeEnum.note_tag)
+        service = TagBindService(TagTypeEnum.note_tag.int_value)
         binds = service.list_by_target_id(user_id=user_info.id, target_id=int(note_info.id))
         tags = [x.tag_code for x in binds]
         assert len(binds) == 2

@@ -98,7 +98,7 @@ class XnoteLoader(Loader):
             TemplateMapping("$plugin/", xconfig.FileConfig.plugins_dir),
         ]
 
-    def resolve_path_old(self, name, parent_path=None):
+    def resolve_path_old(self, name: str, parent_path: typing.Optional[str] = None):
         """这是默认的按照相对路径处理模板路径"""
         if parent_path and not parent_path.startswith("<") and \
             not parent_path.startswith("/") and \
@@ -110,7 +110,7 @@ class XnoteLoader(Loader):
                 name = relative_path[len(self.root) + 1:]
         return name
 
-    def resolve_path(self, name, parent_path=None):
+    def resolve_path(self, name: str, parent_path=None):
         """tornado中的Template._get_ancestors方法会把template的路径作为parent_path参数,
         但是Loader默认的方法处理绝对路径时，不处理相对路径,参考resolve_path_old
         由于判断绝对路径是通过`/`开头，这样造成windows系统和posix系统的处理结果不一致
@@ -381,7 +381,7 @@ class BasePlugin:
     """插件的基类"""
 
     api_level = 0.0  # 插件的API版本 用于处理各种兼容性问题
-    show_nav = True  # 是否展示菜单(顶层 or 左侧)
+    show_nav = True  # 是否展示导航 (顶层 or 左侧)
 
     # 插件的标题
     show_title = True
@@ -391,17 +391,18 @@ class BasePlugin:
     # {权限配置}
     # 默认需要管理员权限访问
     require_admin = True
+    # 是否需要登录,默认需要
+    require_login = True
     # 允许访问的权限列表
     permitted_role_list = [] # type: list[str]
 
     # {分类的配置}
     # 插件分类 {note, dir, system, network}
     show_category = True
-    category = None
+    category = ""
 
     # {侧边栏自定义HTML}
     show_aside = False
-    show_right = False
     aside_html = ""
     header_html = ""
     footer_html = ""
@@ -531,6 +532,8 @@ class BasePlugin:
 
         if self.require_admin:
             xauth.check_login("admin")
+        elif self.require_login:
+            xauth.check_login()
             
     def iter_output(self, output):
         yield from output
@@ -599,7 +602,6 @@ class BasePlugin:
         kw.css_style = self.css_style
         kw.show_nav = self.show_nav
         kw.show_aside = self.show_aside
-        kw.show_right = self.show_right
         kw.show_search = self.show_search
         kw.search_action = self.search_action
         kw.search_placeholder = self.search_placeholder
@@ -646,6 +648,14 @@ class BasePlugin:
     
     def get_option_html(self):
         return self.option_html
+    
+    @property
+    def show_right(self):
+        return self.show_aside
+    
+    @show_right.setter
+    def show_right(self, show_aside = False):
+        self.show_aside = show_aside
 
 BaseTextPage = BasePlugin
 BaseTextPlugin = BasePlugin

@@ -875,7 +875,7 @@ def has_login(name=None):
     if user != None:
         if name is None:
             return True
-        return user.get("name") == name
+        return user.name == name
 
     return has_login_by_cookie(name)
 

@@ -1,14 +1,12 @@
 {% init xnote_table_var = "table" %}
 {% set _xnote_table = globals()[xnote_table_var] %}
 
-<div class="card">
-    <div class="table-action-row">
-        <span>{{_xnote_table.title}}</span>
-        <div class="float-right">
-            {% set _create_text = _xnote_table.create_btn_text %}
-            <button class="btn" onclick="xnote.table.handleEditForm(this)"
-                data-url="?action=edit" data-title="{{_create_text}}">{{_create_text}}</button>
-        </div>
+<div class="table-action-row">
+    <span>{{_xnote_table.title}}</span>
+    <div class="float-right">
+        {% set _create_text = _xnote_table.create_btn_text %}
+        <button class="btn" onclick="xnote.table.handleEditForm(this)"
+            data-url="?action=edit" data-title="{{_create_text}}">{{_create_text}}</button>
     </div>
-    {% include common/table/table.html %}
 </div>
+{% include common/table/table.html %}

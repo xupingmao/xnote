@@ -702,7 +702,7 @@ class MsgIndexDao:
 class MsgTagInfoDao:
     """随手记标签元信息表,使用KV存储"""
     db = xtables.get_table_by_name("tag_info")
-    tag_type = TagTypeEnum.msg_tag
+    tag_type = TagTypeEnum.msg_tag.int_value
 
     @classmethod
     def get_first(cls, user_id=0, content="", user_name=""):
@@ -777,7 +777,7 @@ class MsgTagInfoDao:
         else:
             now = dateutil.format_datetime()
             record = MsgTagInfo()
-            record.tag_type = TagTypeEnum.msg_tag
+            record.tag_type = TagTypeEnum.msg_tag.int_value
             record.ctime = now
             record.mtime = now
             record.user_id = user_id
@@ -793,7 +793,7 @@ class MsgTagInfoDao:
 
 class MsgTagBindDao:
 
-    tag_bind_service = TagBindService(TagTypeEnum.msg_tag)
+    tag_bind_service = TagBindService(TagTypeEnum.msg_tag.int_value)
 
     @classmethod
     def bind_tags(cls, user_id=0, msg_id=0, tags=[], second_type=0, sort_value=""):

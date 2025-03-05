@@ -13,13 +13,12 @@ import typing
 
 from xnote.core import xtables
 from xutils import Storage, dateutil
-from xutils.base import BaseDataRecord
+from xutils.base import BaseDataRecord, BaseEnum, EnumItem
 
-class TagTypeEnum:
+class TagTypeEnum(BaseEnum):
     """枚举无法扩展,所以这里不用,从外部添加枚举值可以直接设置新的属性"""
-    empty = 0
-    note_tag = 1 # 笔记标签
-    msg_tag = 2  # 随手记标签
+    note_tag = EnumItem("笔记标签", "1")
+    msg_tag = EnumItem("随手记标签", "2")
 
 
 class TagInfoDO(BaseDataRecord):
@@ -34,6 +33,7 @@ class TagInfoDO(BaseDataRecord):
         self.score = 0.0
         self.amount = 0
         self.visit_cnt = 0
+        self.category_id = 0
         self.update(kw)
 
     def to_save_dict(self):
@@ -73,7 +73,7 @@ class TagBindService:
     db = xtables.get_table_by_name("tag_bind")
     max_tag_length = 30
 
-    def __init__(self, tag_type = TagTypeEnum.empty):
+    def __init__(self, tag_type = TagTypeEnum.note_tag.int_value):
         assert isinstance(tag_type, int)
         self.default_tag_type = tag_type
     
@@ -161,3 +161,36 @@ class TagBindService:
                 new_bind.tag_code = tag_code
                 new_bind.sort_value = sort_value
                 self.db.insert(**new_bind)
+
+
+class TagInfoServiceImpl:
+
+    db = xtables.get_table_by_name("tag_info")
+
+    def list(self, user_id=0, offset=0, limit=20):
+        result, _ = self.get_page(user_id=user_id, offset=offset, limit=limit, skip_count=True)
+        return result
+    
+    def get_page(self, user_id=0, tag_type=0, offset=0, limit=20, skip_count=False):
+        where_dict = dict(user_id=user_id)
+        if tag_type > 0:
+            where_dict["tag_type"] = tag_type
+        result = self.db.select(where=where_dict, offset=offset, limit=limit)
+        if skip_count:
+            count = 0
+        else:
+            count = self.db.count(where=where_dict)
+        return TagInfoDO.from_dict_list(result), count
+    
+    def get_by_id(self, tag_id=0, user_id=0):
+        where_dict = dict(tag_id=tag_id)
+        if user_id > 0:
+            where_dict["user_id"] = user_id
+        result = self.db.select_first(where=where_dict)
+        return TagInfoDO.from_dict_or_None(result)
+    
+    def update(self, tag_info: TagInfoDO):
+        data = tag_info.to_save_dict()
+        return self.db.update(where=dict(tag_id=tag_info.tag_id), **data)
+
+TagInfoService = TagInfoServiceImpl()

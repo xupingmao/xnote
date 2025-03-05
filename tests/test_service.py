@@ -65,7 +65,7 @@ class TestMain(test_base.BaseTestCase):
 
 
     def test_tag_service(self):
-        service = TagBindService(tag_type=TagTypeEnum.msg_tag)
+        service = TagBindService(tag_type=TagTypeEnum.msg_tag.int_value)
         user_id = 1
         target_id = 1234
         # delete all tag binds
@@ -83,7 +83,7 @@ class TestMain(test_base.BaseTestCase):
         assert bindlist[1].tag_code == "tag2"
 
     def test_tag_service_with_second_type(self):
-        service = TagBindService(tag_type=TagTypeEnum.msg_tag)
+        service = TagBindService(tag_type=TagTypeEnum.msg_tag.int_value)
         user_id = 1
         target_id = 1234
         type1 = 1

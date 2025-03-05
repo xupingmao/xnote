@@ -1149,7 +1149,7 @@ def update_children_count(parent_id, db=None, parent_note=None):
     update_index(parent_note)
 
 
-def fill_parent_name(files):
+def fill_parent_name(files: typing.List[NoteIndexDO]):
     id_list = []
     for item in files:
         build_note_info(item)

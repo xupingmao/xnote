@@ -118,7 +118,7 @@ class CreateTagAjaxHandler:
             return dict(code="500", message="标签已经存在,请重新输入")
 
         dao_tag.TagMetaDao.create(obj)
-        return dict(code="success")
+        return webutil.SuccessResult()
 
     @xauth.login_required()
     def POST(self):
@@ -258,5 +258,5 @@ xurls = (
 
     # 页面
     r"/note/tagname/(.*)", TagNameHandler,
-    r"/note/taglist", TagListHandler
+    r"/note/taglist", TagListHandler,
 )

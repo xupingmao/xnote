@@ -41,13 +41,19 @@ class TableExampleHandler(BaseTablePlugin):
     </form>
 </div>
 
-{% include common/table/table_v2.html %}
+<div class="card">
+    {% include common/table/table_v2.html %}
+</div>
 
-{% set-global xnote_table_var = "weight_table" %}
-{% include common/table/table_v2.html %}
+<div class="card">
+    {% set-global xnote_table_var = "weight_table" %}
+    {% include common/table/table_v2.html %}
+</div>
 
-{% set-global xnote_table_var = "empty_table" %}
-{% include common/table/table_v2.html %}
+<div class="card">
+    {% set-global xnote_table_var = "empty_table" %}
+    {% include common/table/table_v2.html %}
+</div>
 """
 
     def handle_page(self):

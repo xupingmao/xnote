@@ -70,7 +70,8 @@ def create_record_table_manager(table_name=""):
     """默认使用 record.db 文件"""
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file)
 
-def create_default_table_manager(table_name="", **kw):
+def create_default_table_manager(table_name="", pk_name="id", **kw):
+    kw["pk_name"] = pk_name
     return create_table_manager_with_dbpath(table_name, xconfig.FileConfig.record_db_file, **kw)
 
 def get_default_db_instance():
@@ -336,7 +337,9 @@ def init_tag_info_table():
         manager.add_column("score", "double", default_value=0.0)
         manager.add_column("amount", "bigint", default_value=0, comment="标签关联的对象数量")
         manager.add_column("visit_cnt", "bigint", default_value=0, comment="访问次数")
+        manager.add_column("category_id", "bigint", default_value=0, comment="标签类别")
         manager.add_index("user_id")
+
 
 def init_tag_bind_table():
     """标签绑定关系
@@ -354,6 +357,24 @@ def init_tag_bind_table():
         manager.add_column("sort_value", "varchar(50)", default_value="")
         manager.add_index(["user_id", "tag_code", "sort_value"])
         manager.add_index(["user_id", "target_id"])
+
+
+def init_tag_category_table():
+    """标签类别
+    @since 2025/03/02
+    """
+    table_name = "tag_category"
+    pk_name = "category_id"
+    comment = "标签类别"
+    with create_default_table_manager(table_name, comment=comment, pk_name=pk_name) as manager:
+        manager.add_column("ctime", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("mtime", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("user_id", "bigint", default_value=0)
+        manager.add_column("name", "varchar(100)", default_value="")
+        manager.add_column("description", "text", default_value="")
+        manager.add_column("sort_order", "int", default_value=0)
+        manager.add_column("tag_amount", "int", default_value=0)
+
 
 def init_file_info():
     """文件信息
@@ -730,6 +751,7 @@ def init():
     init_note_tag_rel_table() # 已删除, 占位防止冲突
     init_tag_info_table()
     init_tag_bind_table()
+    init_tag_category_table()
 
     # 评论相关
     init_comment_index_table()

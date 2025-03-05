@@ -359,7 +359,7 @@ class Template(object):
         linecache.clearcache()
         return execute()
 
-    def _generate_python(self, loader):
+    def _generate_python(self, loader) -> str:
         buffer = StringIO()
         try:
             # named_blocks maps from names to _NamedBlock objects
@@ -431,7 +431,7 @@ class BaseLoader(object):
         """Converts a possibly-relative path to absolute (used internally)."""
         raise NotImplementedError()
 
-    def load(self, name, parent_path=None):
+    def load(self, name, parent_path=None) -> Template:
         """Loads a template."""
         name = self.resolve_path(name, parent_path=parent_path)
         with self.lock:

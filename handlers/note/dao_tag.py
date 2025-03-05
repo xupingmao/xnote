@@ -73,7 +73,7 @@ def get_tags(creator, note_id):
 
 class TagBindDao:
     """标签绑定信息"""
-    tag_bind_service = TagBindService(TagTypeEnum.note_tag)
+    tag_bind_service = TagBindService(TagTypeEnum.note_tag.int_value)
 
     @classmethod
     def bind_tag(cls, user_name="", note_id=0, tags=[], parent_id=None):
