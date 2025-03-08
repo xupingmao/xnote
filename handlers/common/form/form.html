@@ -77,7 +77,7 @@
         request.data = JSON.stringify(data);
         console.log("request:", request);
     
-        xnote.http.post("?model={{_xnote_form.model_name}}&action={{_xnote_form.save_action}}", request, function (resp) {
+        xnote.http.post("{{_xnote_form.path}}?model={{_xnote_form.model_name}}&action={{_xnote_form.save_action}}", request, function (resp) {
             if (resp.success) {
                 xnote.toast("保存成功");
                 window.parent.location.reload();

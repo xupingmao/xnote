@@ -67,6 +67,7 @@ class DataForm:
         self.rows = []
         self.save_action = "save"
         self.model_name = "default"
+        self.path = ""
     
     def add_row(self, title="", field="", placeholder="", value="", type="input", css_class="", readonly=False):
         self.row_id += 1

@@ -1,8 +1,6 @@
 {% init xnote_table_var = "table" %}
 {% set _xnote_table = globals()[xnote_table_var] %}
 
-{% include common/script/load_select2.html %}
-<script type="text/javascript" src="{{_server_home}}/_static/lib/layDate-v5.0.9/laydate.js"></script>
 <div class="overflow-table-container">
 <table class="table">
     <tr>
@@ -61,50 +59,9 @@
 {% end %}
 
 <script type="text/javascript">
-var tableMinWidth = parseInt("{{_xnote_table.get_min_width()}}");
-if (xnote.getWindowWidth() < tableMinWidth) {
-    $(".table").width(tableMinWidth);
-}
-
-xnote.table.handleAction = function (target) {
-    var url = $(target).attr("data-url");
-    var title = $(target).attr("data-title");
-    var xnoteDialogId = xnote.showIframeDialog(title, url, ["确认", "取消"]);
-}
-
-xnote.table.handleConfirmAction = function (target) {
-    var url = $(target).attr("data-url");
-    var msg = $(target).attr("data-msg");
-    xnote.confirm(msg, function () {
-        xnote.http.get(url, function (resp) {
-            if (resp.success) {
-                var msg = resp.message || "操作成功";
-                xnote.toast(msg);
-                window.location.reload();
-            } else {
-                xnote.toast(resp.message);
-            }
-        }); 
-    });
-}
-
-xnote.table.handleEditForm = function (target) {
-    var url = $(target).attr("data-url");
-    var title = $(target).attr("data-title");
-
-    xnote.http.get(url, function (respHtml) {
-        var options = {};
-        options.title = title;
-        options.html = respHtml;
-        xnote.showDialogEx(options);
-        xnote.initSelect2();
-    });
-}
-
-xnote.table.handleViewDetail = function (target) {
-    // console.log("handleViewDetail", target);
-    var detail = $(target).attr("data-detail");
-    xnote.showTextDialog("查看详情", detail);
-}
-
+    var tableMinWidth = parseInt("{{_xnote_table.get_min_width()}}");
+    if (xnote.getWindowWidth() < tableMinWidth) {
+        $(".table").width(tableMinWidth);
+    }
 </script>
+{% include common/table/table_script.html %}

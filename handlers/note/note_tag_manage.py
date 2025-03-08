@@ -167,6 +167,7 @@ class TagManageHandler(BaseTagManageHandler):
 
         
         form = self.create_form()
+        form.path = "/note/tag_manage"
         form.add_row(title="标签ID", field="tag_id", value=str(tag_id), readonly=True)
         form.add_row(title="名称", field="name", value=tag_info.tag_code, readonly=True)
         row = form.add_row(title="标签类别", field="category_id", value=str(tag_info.category_id), type=FormRowType.select)

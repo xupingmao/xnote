@@ -52,6 +52,8 @@ class TagInfoHandler:
         user_id = xauth.current_user_id()
         files, count = NoteTagBindDao.get_note_page_by_tag(user_id=user_id, tag_code=tag_code, offset=offset, limit=limit)
 
+        tag_info = NoteTagInfoDao.get_by_code(user_id=user_id, tag_code=tag_code)
+
         kw = Storage()
         kw.tagname = dao_tag.get_name_by_code(tag_code)
         kw.tagcode = tag_code
@@ -61,6 +63,7 @@ class TagInfoHandler:
         kw.page_size = limit
         kw.page_total = count
         kw.page_url = f"?tag_code={tag_code}&page="
+        kw.tag_info = tag_info
 
         return xtemplate.render("note/page/taginfo.html", **kw)
 

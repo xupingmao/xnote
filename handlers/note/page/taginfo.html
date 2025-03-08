@@ -9,12 +9,19 @@
         <span>{{tagname}}</span>
 
         <div class="float-right">
-            <button class="btn btn-default" data-code="{{tagcode}}" onclick="xnote.action.note.openDialogToAddNote(event)">添加笔记</button>
+            {% if tag_info != None %}
+            <button class="btn btn-default" data-title="编辑标签"
+                data-url="{{_server_home}}/note/tag_manage?action=edit&tag_id={{tag_info.tag_id}}"
+                onclick="xnote.table.handleEditForm(this)">编辑标签</button>
+            {% end %}
+            <button class="btn btn-default" data-code="{{tagcode}}" 
+                onclick="xnote.action.note.openDialogToAddNote(event)">添加笔记</button>
             {% include common/button/back_button.html %}
         </div>
     </div>
 </div>
 
+{% include common/table/table_script.html %}
 {% include note/component/note_list_component.html %}
 
 <div class="card">

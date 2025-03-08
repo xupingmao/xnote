@@ -1,0 +1,45 @@
+{% include common/script/load_select2.html %}
+{% include common/script/load_laydate.html %}
+<script type="text/javascript">
+    xnote.table.handleAction = function (target) {
+        var url = $(target).attr("data-url");
+        var title = $(target).attr("data-title");
+        var xnoteDialogId = xnote.showIframeDialog(title, url, ["确认", "取消"]);
+    }
+    
+    xnote.table.handleConfirmAction = function (target) {
+        var url = $(target).attr("data-url");
+        var msg = $(target).attr("data-msg");
+        xnote.confirm(msg, function () {
+            xnote.http.get(url, function (resp) {
+                if (resp.success) {
+                    var msg = resp.message || "操作成功";
+                    xnote.toast(msg);
+                    window.location.reload();
+                } else {
+                    xnote.toast(resp.message);
+                }
+            }); 
+        });
+    }
+    
+    xnote.table.handleEditForm = function (target) {
+        var url = $(target).attr("data-url");
+        var title = $(target).attr("data-title");
+    
+        xnote.http.get(url, function (respHtml) {
+            var options = {};
+            options.title = title;
+            options.html = respHtml;
+            xnote.showDialogEx(options);
+            xnote.initSelect2();
+        });
+    }
+    
+    xnote.table.handleViewDetail = function (target) {
+        // console.log("handleViewDetail", target);
+        var detail = $(target).attr("data-detail");
+        xnote.showTextDialog("查看详情", detail);
+    }
+    
+</script>
