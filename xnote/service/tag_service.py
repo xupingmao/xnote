@@ -164,6 +164,11 @@ class TagBindServiceImpl:
                 new_bind.tag_code = tag_code
                 new_bind.sort_value = sort_value
                 self.db.insert(**new_bind)
+    
+    def delete_tags(self, user_id=0, target_id=0):
+        where_sql = "user_id=$user_id AND target_id=$target_id"
+        vars = dict(user_id=user_id, target_id=target_id)
+        return self.db.delete(where=where_sql, vars=vars)
 
 class TagInfoServiceImpl:
 
@@ -227,9 +232,14 @@ class TagInfoServiceImpl:
         return self.db.update(where=dict(tag_id=tag_info.tag_id), **data)
     
     def create(self, tag_info: TagInfoDO):
+        tag_type = self.handle_tag_type(tag_info.tag_type)
         assert tag_info.user_id > 0
-        assert tag_info.tag_type > 0
-    
+        assert tag_type > 0
+
+        now = dateutil.format_datetime()
+        tag_info.tag_type = tag_type
+        tag_info.ctime = now
+        tag_info.mtime = now
         data = tag_info.to_save_dict()
         return self.db.insert(**data)
     

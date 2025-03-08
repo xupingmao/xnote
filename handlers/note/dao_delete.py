@@ -23,7 +23,7 @@ from .dao import (
     NoteIndexDao
 )
 
-from .dao_tag import delete_tags
+from .dao_tag import NoteTagBindDao
 
 def delete_note_physically(creator: str, note_id: int):
     assert creator != None, "creator can not be null"
@@ -57,7 +57,7 @@ def delete_note(id):
 
     # 更新数量
     update_children_count(note.parent_id)
-    delete_tags(note.creator, id)
+    NoteTagBindDao.delete_by_note_id(note.creator_id, id)
 
     # 删除skey索引
     delete_note_skey(note)

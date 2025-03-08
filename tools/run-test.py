@@ -117,6 +117,11 @@ def run_test(args: Namespace):
 		py_exec("-m coverage html -i")
 		return
 
+	if target == "migrate":
+		py_exec("-m pytest tests/test_migrate.py --doctest-modules --cov xnote_migrate --capture no")
+		py_exec("-m coverage html -i")
+		return
+
 	if target != "all":
 		print("未知的操作:", target)
 		sys.exit(1)

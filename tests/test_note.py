@@ -49,7 +49,7 @@ def get_default_group_id():
         return note.id
     return create_note_for_test("group", name)
 
-def create_note_for_test(type, name, *, content = "", tags="", parent_id=0) -> int:
+def create_note_for_test(type="", name="", *, content = "", tags="", parent_id=0) -> int:
     assert type != None, "type cannot be None"
     assert name != None, "name cannot be None"
     assert isinstance(tags, str), "tags must be str"
@@ -73,7 +73,7 @@ def create_note_for_test(type, name, *, content = "", tags="", parent_id=0) -> i
     assert isinstance(note_id, int)
     return note_id
 
-def delete_note_for_test(name):
+def delete_note_for_test(name=""):
     # 调用2次彻底删除
     user_id = xauth.current_user_id()
     note_index = note_dao.NoteIndexDao.get_by_name(creator_id=user_id, name=name)
@@ -455,20 +455,25 @@ class TestMain(BaseTestCase):
         json_request("/note/remove?id=%s" % id)
     
     def test_note_tag_info_create(self):
-        from handlers.note.dao_tag import NoteTagInfoDao
+        from handlers.note.dao_tag import NoteTagInfoDao, NoteTagBindDao
         from xnote.service.tag_service import TagTypeEnum
+        delete_note_for_test("group-test")
+        group_id = create_note_for_test("group", "group-test")
+
         create_params = dict(
             tag_type = "group",
-            tag_name = "测试"
+            tag_name = "测试",
+            group_id = group_id,
         )
         result = json_request_return_dict("/note/tag/create", method="POST", data = create_params)
         self.assertEqual("success", result["code"])
         user_id = xauth.current_user_id()
-        meta_info = NoteTagInfoDao.get_by_code(user_id=user_id, tag_code="测试")
-        assert meta_info != None
+        bind_list = NoteTagBindDao.list_by_tag(user_id=user_id, tag_code="测试")
+        assert len(bind_list) > 0
 
-        self.assertEqual("测试", meta_info.tag_name)
-        self.assertEqual(TagTypeEnum.note_tag.int_value, meta_info.tag_type)
+        bind_info = bind_list[0]
+        self.assertEqual("测试", bind_info.tag_code)
+        self.assertEqual(TagTypeEnum.note_tag.int_value, bind_info.tag_type)
 
     def test_note_stick(self):
         delete_note_for_test("xnote-share-test")
@@ -857,10 +862,17 @@ A example image
         CommentDao.delete_by_id(comment_id)
         
     def test_note_tag_v2(self):
+        from handlers.note.dao_tag import NoteTagInfoDao, NoteTagBindDao
+        delete_note_for_test("group-test")
+        group_id = create_note_for_test(type="group", name="group-test")
         delete_note_for_test("tag-test")
         create_note_for_test("list", "tag-test", tags="tag1 tag2")
+
+        user_id = xauth.current_user_id()
+        NoteTagInfoDao.create(user_id=user_id, tag_code="tag1")
+        NoteTagBindDao.append_tag(note_id=group_id,tag_code="tag1")
         
-        dict = self.json_request_return_dict("/note/tag/list?tag_type=note&group_id=1&v=2")
+        dict = self.json_request_return_dict(f"/note/tag/list?tag_type=note&group_id={group_id}")
         assert dict["success"] == True
         assert len(dict["data"]["all_list"]) > 0
 

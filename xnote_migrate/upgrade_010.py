@@ -29,7 +29,7 @@ class TagBind(BaseDataRecord):
     """标签绑定信息"""
     def __init__(self, **kw):
         self.note_id = ""
-        self.user_name = ""
+        self.user = ""
         self.tags = []
         self.parent_id = ""
         self.update(kw)

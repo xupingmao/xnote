@@ -34,28 +34,21 @@ class SystemTagEnum(BaseEnum):
     def is_sys_tag(tag_code=""):
         return SystemTagEnum.get_by_value(tag_code) != None
 
-class TagSuggestInfo(BaseDataRecord):
-    """标签绑定信息"""
-    def __init__(self, **kw):
-        self.note_id = ""
-        self.user_name = ""
-        self.tags = []
-        self.parent_id = ""
-        self.update(kw)
-
-
 class TagCategoryDetail(TagCategoryDO):
     def __init__(self, **kw):
         self.tag_list = []
         self.update(kw)
 
-class TagBindDaoImpl:
+class _TagBindDaoImpl:
     """标签绑定信息"""
     tag_bind_service = NoteTagBindService
 
     def get_by_note_id(self, user_id=0, note_id=0):
         return self.tag_bind_service.list_by_target_id(user_id=user_id, target_id=note_id)
-
+    
+    def list_by_tag(self, user_id=0, tag_code=""):
+        return self.tag_bind_service.list_by_tag(user_id=user_id, tag_code=tag_code)
+    
     @classmethod    
     def get_uniq_tags(cls, new_tags=[]):
         return lists.get_uniq_list(new_tags)
@@ -73,7 +66,7 @@ class TagBindDaoImpl:
         note_dao.update_index(note_index)
 
     def list_tag(self, user_id=0):
-        tag_list, count = NoteTagInfoService.get_page(user_id=user_id, limit=1000)
+        tag_list, count = NoteTagInfoService.get_page(user_id=user_id, limit=1000, skip_count=True)
         return tag_list
     
     def get_note_page_by_tag(self, user_id=0, tag_code="", offset=0, limit=20):
@@ -106,9 +99,23 @@ class TagBindDaoImpl:
         tags.remove(tag_code)
         NoteTagBindDao.update_tag_and_note(note_info.creator_id, note_id, tags)
 
+    def delete_by_note_id(self, user_id=0, note_id=0):
+        self.tag_bind_service.delete_tags(user_id=user_id, target_id=note_id)
 
-class NoteTagInfoDaoImpl:
+
+class _NoteTagInfoDaoImpl:
     tag_info_service = NoteTagInfoService
+
+    def create(self, user_id=0, tag_code=""):
+        old = self.get_by_code(user_id=user_id, tag_code=tag_code)
+        if old is not None:
+            return
+        
+        tag_info = TagInfoDO()
+        tag_info.tag_code = tag_code
+        tag_info.user_id = user_id
+        return self.tag_info_service.create(tag_info)
+
 
     def count(self, user_id=0):
         return self.tag_info_service.count(user_id=user_id)
@@ -141,29 +148,6 @@ class NoteTagInfoDaoImpl:
 
 def bind_tags(user_id=0, note_id=0, tags=[], tag_type="group"):
     NoteTagBindDao.update_tag_and_note(user_id=user_id, note_id=note_id, tags=tags)
-
-
-def delete_tags(creator, note_id):
-    tag_bind_db.delete_by_id(note_id, user_name=creator)
-
-def list_by_tag(user="", tagname = "", limit = 1000):
-    # TODO 优化查询性能
-    if user == "":
-        user = "public"
-        
-    def list_func(key, value):
-        if value.tags is None:
-            return False
-        return tagname in value.tags
-
-    tags = tag_bind_db.list(filter_func=list_func, user_name=user, limit = limit)
-    note_ids = []
-    for tag in tags:
-        note_ids.append(tag.note_id)
-    notes = note_dao.batch_query_list(note_ids)
-    note_dao.sort_notes(notes, orderby="mtime_desc")
-    note_dao.sort_by_ctime_priority(notes)
-    return notes
 
 
 def batch_get_tags_by_notes(notes: typing.List[NoteIndexDO]):
@@ -249,7 +233,7 @@ def list_tag_category_detail(user_id=0):
 
     return result
 
-NoteTagInfoDao = NoteTagInfoDaoImpl()
-NoteTagBindDao = TagBindDaoImpl()
+NoteTagInfoDao = _NoteTagInfoDaoImpl()
+NoteTagBindDao = _TagBindDaoImpl()
 get_name_by_code = get_tag_name_by_code
 
