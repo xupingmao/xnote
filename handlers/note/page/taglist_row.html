@@ -1,0 +1,12 @@
+<div class="row">
+    {% if len(tag_info_list) == 0 %}
+        {% include common/text/empty_text.html %}
+    {% end %}
+
+    {% for tag_info in tag_info_list %}
+        <span class="tag-span">
+            <a class="tag-link" href="{{_server_home}}/note/taginfo?tag_code={{quote(tag_info.tag_code)}}">{{tag_info.tag_name}}</a>
+            {{tag_info.amount}}
+        </span>
+    {% end %}
+</div>

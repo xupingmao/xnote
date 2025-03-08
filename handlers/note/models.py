@@ -91,6 +91,10 @@ class NoteIndexDO(BaseDataRecord):
 
     def get_tags(self):
         return self.tag_str.split()
+    
+    def set_tags(self, tags=[]):
+        self.tags = tags
+        self.tag_str = " ".join(tags)
 
     @property
     def visited_cnt(self):

@@ -40,10 +40,12 @@
         <input type="hidden" name="type" value="{{type}}">
         <input type="hidden" name="embed" value="{{embed}}">
         <textarea id="editor" name="sql" style="width:100%;">{{sql}}</textarea>
-        <button class="btn">运行</button>
-        <a class="btn btn-default" href="?path={{path}}&action=show_tables&embed={{embed}}">展示表</a>
-        <a class="btn btn-default" href="?path={{path}}&action=count_tables&embed={{embed}}">记录数统计</a>
-        <a class="btn btn-default" onclick="xnoteImportBackup()">导入备份</a>
+        <div class="margin-top-5">
+            <button class="btn">运行</button>
+            <a class="btn btn-default" href="?path={{path}}&action=show_tables&embed={{embed}}">展示表</a>
+            <a class="btn btn-default" href="?path={{path}}&action=count_tables&embed={{embed}}">记录数统计</a>
+            <a class="btn btn-default" onclick="xnoteImportBackup()">导入备份</a>
+        </div>
     </form>
 </div>
 
@@ -81,7 +83,7 @@ $(function () {
 
 window.xnoteImportBackup = function () {
     xnote.confirm("导入数据会覆盖现有数据，确认执行?", function (resp) {
-        $.get("{{_server_home}}/system/backup?p=import_db&path={{quote(path)}}")
+        xnote.http.get("/system/backup?p=import_db&path={{quote(path)}}")
         xnote.alert("执行中... <a target=\"_blank\" href=\"{{_server_home}}/system/log?log_type=mem&log_name=import_db\">查看执行日志</a>")
     });
 };

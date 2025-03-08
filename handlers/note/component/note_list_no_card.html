@@ -16,7 +16,7 @@
     "edit": "更新了笔记"
 } %}
 {% init get_date_by_type = xutils.get_func_by_name("note.get_date_by_type") %}
-{% init get_tag_name_by_code = xutils.get_func_by_name("note_tag.get_name_by_code") %}
+{% from handlers.note.dao_tag import get_tag_name_by_code %}
 {% init sticky_position = "left" %} 
 {% set note_list_id = xutils.create_uuid() %}
 

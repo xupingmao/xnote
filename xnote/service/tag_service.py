@@ -11,9 +11,10 @@
 # encoding=utf-8
 import typing
 
-from xnote.core import xtables
 from xutils import Storage, dateutil
+from xnote.core import xtables
 from xutils.base import BaseDataRecord, BaseEnum, EnumItem
+from xutils import dateutil
 
 class TagTypeEnum(BaseEnum):
     """枚举无法扩展,所以这里不用,从外部添加枚举值可以直接设置新的属性"""
@@ -30,6 +31,7 @@ class TagInfoDO(BaseDataRecord):
         self.tag_type = 0
         self.second_type = 0
         self.tag_code = ""
+        self.tag_name = ""
         self.score = 0.0
         self.amount = 0
         self.visit_cnt = 0
@@ -39,9 +41,10 @@ class TagInfoDO(BaseDataRecord):
     def to_save_dict(self):
         result = dict(**self)
         result.pop("tag_id", None)
+        result.pop("tag_name", None)
         return result
 
-class TagBind(Storage):
+class TagBindDO(BaseDataRecord):
     """标签绑定信息, 业务唯一键=tag_type+tag_code+target_id"""
     def __init__(self):
         self.ctime = dateutil.format_datetime()
@@ -52,23 +55,9 @@ class TagBind(Storage):
         self.second_type = 0  # 二级类型, 这是target_id实体的一个属性
         self.sort_value = ""  # 排序字段
 
-    @classmethod
-    def from_dict(cls, dict_value) -> typing.Optional["TagBind"]:
-        if dict_value == None:
-            return None
-        bind = TagBind()
-        bind.update(dict_value)
-        return bind
+TagBind = TagBindDO
 
-    @classmethod
-    def from_dict_list(cls, dict_list) -> typing.List["TagBind"]:
-        result = []
-        for item in dict_list:
-            result.append(cls.from_dict(item))
-        return result
-
-
-class TagBindService:
+class TagBindServiceImpl:
     """标签绑定服务"""
     db = xtables.get_table_by_name("tag_bind")
     max_tag_length = 30
@@ -86,6 +75,20 @@ class TagBindService:
             where_dict["second_type"] = second_type
         results = self.db.select(where=where_dict)
         return TagBind.from_dict_list(results)
+    
+    def get_page(self, user_id=0, target_id_list=[], tag_code="", offset=0, limit=20, skip_count=False):
+        where_sql = "user_id=$user_id"
+        if len(target_id_list) > 0:
+            where_sql += " AND target_id in $target_id_list"
+        if tag_code != "":
+            where_sql += " AND tag_code=$tag_code"
+        vars = dict(user_id=user_id, target_id_list=target_id_list, tag_code=tag_code)
+        result = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit)
+        count = 0
+        if not skip_count:
+            count = self.db.count(where=where_sql, vars=vars)
+        
+        return TagBind.from_dict_list(result), count
     
     def list_by_tag(self, user_id=0, tag_code="", second_type=0, offset=0, limit=20, order="sort_value desc"):
         tag_code = tag_code.lower()
@@ -162,24 +165,32 @@ class TagBindService:
                 new_bind.sort_value = sort_value
                 self.db.insert(**new_bind)
 
-
 class TagInfoServiceImpl:
 
     db = xtables.get_table_by_name("tag_info")
 
-    def list(self, user_id=0, offset=0, limit=20):
-        result, _ = self.get_page(user_id=user_id, offset=offset, limit=limit, skip_count=True)
-        return result
-    
-    def get_page(self, user_id=0, tag_type=0, offset=0, limit=20, skip_count=False):
-        where_dict = dict(user_id=user_id)
+    def __init__(self, tag_type=TagTypeEnum.note_tag.int_value) -> None:
+        self.tag_type = tag_type
+
+    def handle_tag_type(self, tag_type=0):
         if tag_type > 0:
-            where_dict["tag_type"] = tag_type
-        result = self.db.select(where=where_dict, offset=offset, limit=limit)
+            return tag_type
+        return self.tag_type
+    
+    def get_page(self, user_id=0, tag_type=0, target_id_list=[], offset=0, limit=20, skip_count=False):
+        where_sql = "user_id=$user_id"
+        tag_type = self.handle_tag_type(tag_type)
+
+        if tag_type > 0:
+            where_sql += " AND tag_type=$tag_type"
+        if len(target_id_list) > 0:
+            where_sql += " AND target_id IN $target_id_list"
+        vars = dict(user_id=user_id, tag_type=tag_type, target_id_list=target_id_list)
+        result = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit)
         if skip_count:
             count = 0
         else:
-            count = self.db.count(where=where_dict)
+            count = self.db.count(where=where_sql, vars=vars)
         return TagInfoDO.from_dict_list(result), count
     
     def get_by_id(self, tag_id=0, user_id=0):
@@ -189,8 +200,117 @@ class TagInfoServiceImpl:
         result = self.db.select_first(where=where_dict)
         return TagInfoDO.from_dict_or_None(result)
     
+    def get_by_code_list(self, user_id=0, tag_code_list=[], limit=1000) -> typing.List[TagInfoDO]:
+        if len(tag_code_list) == 0:
+            return []
+        where_sql = "user_id=$user_id AND tag_code in $tag_code_list"
+        vars = dict(user_id=user_id, tag_code_list=tag_code_list)
+        result = self.db.select(where=where_sql, vars=vars, limit=limit)
+        return TagInfoDO.from_dict_list(result)
+    
+    def get_first(self, tag_id=0, tag_code="", user_id=0):
+        where_sql = "user_id=$user_id"
+        if tag_id > 0:
+            where_sql += " AND tag_id=$tag_id"
+        if tag_code != "":
+            where_sql += " AND tag_code=$tag_code"
+        vars = dict(tag_id=tag_id, user_id=user_id, tag_code=tag_code)
+        result = self.db.select_first(where=where_sql, vars=vars)
+        return TagInfoDO.from_dict_or_None(result)
+        
     def update(self, tag_info: TagInfoDO):
+        assert tag_info.user_id > 0
+        assert tag_info.tag_type > 0
+        
         data = tag_info.to_save_dict()
+        data.pop("ctime", None)
         return self.db.update(where=dict(tag_id=tag_info.tag_id), **data)
+    
+    def create(self, tag_info: TagInfoDO):
+        assert tag_info.user_id > 0
+        assert tag_info.tag_type > 0
+    
+        data = tag_info.to_save_dict()
+        return self.db.insert(**data)
+    
+    def save(self, tag_info: TagInfoDO):
+        if tag_info.tag_id != 0:
+            return self.update(tag_info)
+        
+        tag_code = tag_info.tag_code
+        user_id = tag_info.user_id
+        old = self.get_first(tag_code=tag_code, user_id=user_id)
+        if old != None:
+            tag_info.tag_id = old.tag_id
+            return self.update(tag_info)
+        return self.create(tag_info)
+    
+    def count(self, user_id=0):
+        where_sql = "user_id=$user_id AND tag_type=$tag_type"
+        vars = dict(tag_type=self.tag_type, user_id=user_id)
+        return self.db.count(where=where_sql, vars=vars)
 
-TagInfoService = TagInfoServiceImpl()
+class TagCategoryDO(BaseDataRecord):
+
+    def __init__(self, **kw):
+        self.category_id = 0
+        self.user_id = 0
+        self.name = ""
+        self.description = ""
+        self.ctime = xtables.DEFAULT_DATETIME
+        self.mtime = xtables.DEFAULT_DATETIME
+        self.sort_order = 0
+        self.tag_amount = 0
+        self.update(kw)
+
+    def to_save_dict(self):
+        result = dict(**self)
+        result.pop("category_id")
+        return result
+
+class TagCategoryServiceImpl:
+
+    db = xtables.get_table_by_name("tag_category")
+
+    def create(self, tag_category:TagCategoryDO):
+        now = dateutil.format_datetime()
+        tag_category.ctime = now
+        tag_category.mtime = now
+        save_dict = tag_category.to_save_dict()
+        return self.db.insert(**save_dict)
+    
+    def save(self, category_info: TagCategoryDO):
+        if category_info.category_id > 0:
+            category_info.mtime = dateutil.format_datetime()
+            save_dict = category_info.to_save_dict()
+            return self.db.update(where=dict(category_id=category_info.category_id), **save_dict)
+        else:
+            return self.create(category_info)
+    
+    def list(self, user_id=0, limit=100):
+        assert user_id > 0
+        result_list = self.db.select(where=dict(user_id=user_id), limit=limit, order="sort_order")
+        return TagCategoryDO.from_dict_list(result_list)
+    
+    def get_by_id(self, category_id=0):
+        if category_id == 0:
+            return None
+        result = self.db.select_first(where=dict(category_id=category_id))
+        return TagCategoryDO.from_dict_or_None(result)
+    
+    def get_name_dict(self, user_id=0, limit=100):
+        assert user_id > 0
+        result_list = self.db.select(what="category_id,name", where=dict(user_id=user_id), limit=limit)
+        result = {} # type: dict[int, str]
+        for item in TagCategoryDO.from_dict_list(result_list):
+            result[item.category_id] = item.name
+        return result
+
+
+TagCategoryService = TagCategoryServiceImpl()
+NoteTagInfoService = TagInfoServiceImpl(tag_type=TagTypeEnum.note_tag.int_value)
+MsgTagInfoService = TagInfoServiceImpl(tag_type=TagTypeEnum.msg_tag.int_value)
+TagInfoService = TagInfoServiceImpl(tag_type=0)
+
+NoteTagBindService = TagBindServiceImpl(tag_type=TagTypeEnum.note_tag.int_value)
+MsgTagBindService = TagBindServiceImpl(tag_type=TagTypeEnum.msg_tag.int_value)

@@ -4,6 +4,7 @@ import xutils
 from xutils import webutil
 from xutils import Storage
 from xnote.core import xtemplate
+from xnote.core import xauth
 from xnote.service import DatabaseLockService, JobService, JobInfoDO, JobStatusEnum
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable, FormRowType, TableActionType
@@ -53,12 +54,11 @@ class RepairMsgTag(RepairInfo):
 
         return webutil.SuccessResult(message="修复成功")
 
-
 class RepairHandler(BaseTablePlugin):
 
     title = "数据修复"
     show_aside = True
-    show_right = True
+    require_admin = True
 
     repair_rows = [
         RepairMsgTag(code="fix_msg_tag", name="待办/随手记索引"),

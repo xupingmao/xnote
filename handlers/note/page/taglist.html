@@ -1,6 +1,7 @@
 {% extends base %}
 
 {% block body_left %}
+
 <div class="card">
     <div class="card-title btn-line-height">
         {{T("Tag List")}}
@@ -11,38 +12,16 @@
 
 {% include note/page/taglist_tab.html %}
 
-{% init system_tag_list = [] %}
-
 <div class="card">
-    <div class="split-title">
-        系统标签
-    </div>
-
-    <div class="row">
-        {% for tag_info in system_tag_list %}
-            <span class="tag-span">
-                <a class="tag-link" href="{{_server_home}}/note/tagname/{{tag_info.code}}">{{tag_info.name}}</a>
-                {{tag_info.amount}}
-            </span>
-        {% end %}
-    </div>
-
-    <div class="split-title top-offset-1">
-        自定义标签
-    </div>
-    <div class="row">
-        {% if len(tag_list) == 0 %}
-            {% include common/text/empty_text.html %}
-        {% end %}
-
-        {% for tag_info in tag_list %}
-            <span class="tag-span">
-                <a class="tag-link" href="{{_server_home}}/note/tagname/{{tag_info.name}}">{{tag_info.name}}</a>
-                {{tag_info.amount}}
-            </span>
-        {% end %}
-    </div>
+    {% for tag_category in tag_category_list %}
+        <div class="split-title">
+            {{tag_category.name}}
+        </div>
+        {% set tag_info_list = tag_category.tag_list %}
+        {% include note/page/taglist_row.html %}
+    {% end %}
 </div>
+
 {% end %}
 
 {% block aside %}

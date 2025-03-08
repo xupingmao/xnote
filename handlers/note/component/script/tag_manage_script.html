@@ -52,9 +52,9 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
             "tag_type": cmd.tagType
         };
 
-        xnote.http.get("/note/tag/list", params, function (resp) {
+        xnote.http.get("/note/tag/suggest", params, function (resp) {
             console.log("resp", resp);
-            if (resp.code != "success") {
+            if (!resp.success) {
                 xnote.alert(resp.message);
             } else {
                 tagList = resp.data;
@@ -97,7 +97,7 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
                 tag_name: text,
                 group_id: cmd.groupId
             };
-            $.post("/note/tag/create", params, function (resp) {
+            xnote.http.post("/note/tag/create", params, function (resp) {
                 if (resp.code != "success") {
                     xnote.alert(resp.message);
                 } else {

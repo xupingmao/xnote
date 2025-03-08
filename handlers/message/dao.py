@@ -13,7 +13,7 @@ from xutils import dateutil
 from xnote.core.xtemplate import T
 from xnote.service.search_service import SearchHistoryDO, SearchHistoryType, SearchHistoryService
 from xutils.db.dbutil_helper import new_from_dict
-from xnote.service import TagBindService, TagTypeEnum
+from xnote.service import MsgTagBindService, TagTypeEnum
 from .message_model import is_task_tag
 from .message_model import MessageDO
 from .message_model import MsgIndex
@@ -793,7 +793,7 @@ class MsgTagInfoDao:
 
 class MsgTagBindDao:
 
-    tag_bind_service = TagBindService(TagTypeEnum.msg_tag.int_value)
+    tag_bind_service = MsgTagBindService
 
     @classmethod
     def bind_tags(cls, user_id=0, msg_id=0, tags=[], second_type=0, sort_value=""):

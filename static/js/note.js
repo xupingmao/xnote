@@ -5,6 +5,7 @@ xnote.note = NoteView;
 
 NoteView.wangEditor = null; // wangEditor
 NoteView.defaultParentId = 0; // 默认的父级节点
+NoteView.groupId = 0; // 当前笔记本
 
 var noteAPI = {};
 xnote.api.note = noteAPI;
@@ -226,79 +227,21 @@ NoteView.searchNote = function () {
     var searchText = $("#note-search-text").val();
     var api = "";
     if (searchText == "") {
-        api = "/note/api/timeline?type=all&limit=100";
+        api = "/note/timeline/search_dialog?action=item_list&limit=100";
     } else {
-        api = "/note/api/timeline?type=search&key=" + searchText;
+        api = "/note/timeline/search_dialog?action=item_list&limit=100&key=" + searchText;
     }
-    xnote.http.get(api, function (resp) {
-        if (resp.code != "success") {
-            xnote.toast(resp.message);
-        } else {
-            var templateText = self.getSelectNoteItemListTemplate();
-            var html = template.render(templateText, {
-                itemList: resp.data
-            });
-            $(".note-search-dialog-body").html(html);
-        }
+    xnote.http.get(api, function (html) {
+        $(".note-search-dialog-body").html(html);
     });
-};
-
-NoteView.getSelectNoteItemListTemplate = function () {
-    var text = "";
-    text += "{{if itemList.length == 0 }}";
-    text += "    <p class=\"align-center\">空空如也~</p>";
-    text += "{{/if}}";
-    text += "{{each itemList item}}";
-    text += "<h3 class=\"card-title-2\">{{item.title}}</h3>";
-    text += "    {{each item.children subItem }}";
-    text += "    <p class=\"card-row share-dialog-row\">";
-    text += "        <i class=\"fa {{subItem.icon}}\"></i>";
-    text += "        <a href=\"{{subItem.url}}\">{{subItem.name}}</a>";
-    text += "        <input type=\"checkbox\"";
-    text += "            class=\"select-note-checkbox float-right\" ";
-    text += "            data-id=\"{{subItem.id}}\">";
-    text += "    <p>";
-    text += "    {{/each}}";
-    text += "{{/each}}";
-    return text;
-}
-
-NoteView.getSelectNoteDialogTemplate = function () {
-    var text = "";
-    text += "<div class=\"card\">";
-    text += "<div class=\"row\">";
-    text += "    <input type=\"text\" class=\"nav-search-input\" id=\"note-search-text\" placeholder=\"搜索笔记\" ";
-    text += "        value=\"{{searchText}}\" onkeyup=\"xnote.action.note.searchNote(this);\">";
-    text += "    <button class=\"nav-search-btn btn-default\" onclick=\"xnote.action.note.searchNote(this)\">";
-    text += "        <i class=\"fa fa-search\"></i>";
-    text += "    </button>";
-    text += "</div>";
-    text += "<div class=\"row note-search-dialog-body\" style=\"padding-top: 10px;\">";
-    text += this.getSelectNoteItemListTemplate();
-    text += "</div>";
-    text += "</div>";
-    return text;
-};
-
-NoteView.renderNoteList = function (itemList) {
-    var templateText = this.getSelectNoteDialogTemplate();
-    var html = template.render(templateText, {
-        itemList: itemList
-    });
-    return html;
 };
 
 NoteView.openDialogToAddNote = function (event) {
     var tagCode = $(event.target).attr("data-code");
-    xnote.http.get("/note/api/timeline?type=all&limit=100", function (resp) {
-        if (resp.code != "success") {
-            xnote.alert(resp.message);
-        } else {
-            var html = NoteView.renderNoteList(resp.data);
-            xnote.openDialog("选择笔记", html, ["确定", "取消"], function () {
-                NoteView.addNoteToTag(tagCode);
-            });
-        }
+    xnote.http.get("/note/timeline/search_dialog?limit=100", function (html) {
+        xnote.openDialog("选择笔记", html, ["确定", "取消"], function () {
+            NoteView.addNoteToTag(tagCode);
+        });
     });
 };
 
@@ -436,18 +379,19 @@ NoteView.deleteTagMeta = function (tagMetaList) {
     });
 
     xnote.openDialog("删除标签", html, ["确定删除", "取消"], function () {
-        var tagIds = [];
+        var tagCodeList = [];
         $(".tag.delete.active").each(function (idx, ele) {
-            var tagId = $(ele).attr("data-id");
-            tagIds.push(tagId);
+            var tagCode = $(ele).attr("data-tag-code");
+            tagCodeList.push(tagCode);
         });
 
         var deleteParams = {
             tag_type: "group",
-            tag_ids: JSON.stringify(tagIds),
+            group_id: NoteView.groupId,
+            tag_code_list: JSON.stringify(tagCodeList),
         };
         xnote.http.post("/note/tag/delete", deleteParams, function (resp) {
-            if (resp.code != "success") {
+            if (!resp.code) {
                 xnote.alert(resp.message);
             } else {
                 xnote.toast("删除成功,准备刷新...");

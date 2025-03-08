@@ -12,7 +12,7 @@ import time
 from . import test_base
 from xnote.core import xtables
 from xnote.service import DatabaseLockService
-from xnote.service import TagBindService
+from xnote.service import TagBindServiceImpl
 from xnote.service import TagTypeEnum
 
 app = test_base.init()
@@ -65,7 +65,7 @@ class TestMain(test_base.BaseTestCase):
 
 
     def test_tag_service(self):
-        service = TagBindService(tag_type=TagTypeEnum.msg_tag.int_value)
+        service = TagBindServiceImpl(tag_type=TagTypeEnum.msg_tag.int_value)
         user_id = 1
         target_id = 1234
         # delete all tag binds
@@ -83,7 +83,7 @@ class TestMain(test_base.BaseTestCase):
         assert bindlist[1].tag_code == "tag2"
 
     def test_tag_service_with_second_type(self):
-        service = TagBindService(tag_type=TagTypeEnum.msg_tag.int_value)
+        service = TagBindServiceImpl(tag_type=TagTypeEnum.msg_tag.int_value)
         user_id = 1
         target_id = 1234
         type1 = 1

@@ -27,6 +27,7 @@ from handlers.note import dao_delete, dao_tag
 from handlers.note import html_importer
 from handlers.note import dao as note_dao
 from handlers.note.dao import NoteIndexDao
+from handlers.note.models import NoteIndexDO
 
 from xutils import Storage
 from xutils import textutil
@@ -259,16 +260,20 @@ class TestMain(BaseTestCase):
         assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
 
     def test_timeline_sort_func(self):
-        build_date_result = xutils.Module("note").build_date_result
-        note1 = Storage(name = "note1", ctime = "2015-01-01 00:00:00")
-        note2 = Storage(name = "note2", ctime = "2015-06-01 00:00:00")
-        note3 = Storage(name = "note3", ctime = "2014-01-01 00:00:00")
+        from handlers.note.note_timeline import build_date_result
+        note1 = NoteIndexDO(name = "note1", ctime = "2015-01-01 00:00:00")
+        note2 = NoteIndexDO(name = "note2", ctime = "2015-06-01 00:00:00")
+        note3 = NoteIndexDO(name = "note3", ctime = "2014-01-01 00:00:00")
         result = build_date_result([note1, note2, note3])
 
         self.assertEqual("success", result['code'])
         self.assertEqual("2015-06-01", result['data'][0]['title'])
         self.assertEqual("2015-01-01", result['data'][1]['title'])
         self.assertEqual("2014-01-01", result['data'][2]['title'])
+
+    def test_timeline_search_dialog(self):
+        self.check_OK("/note/timeline/search_dialog")
+        self.check_OK("/note/timeline/search_dialog?action=list_item&key=123")
 
     def test_note_editor_md(self):
         group_id = get_default_group_id()
@@ -435,11 +440,11 @@ class TestMain(BaseTestCase):
 
         self.assertEqual(note_info.tags, ["ABC", "DEF"])
 
-        from xnote.service import TagBindService, TagTypeEnum
+        from xnote.service import TagBindServiceImpl, TagTypeEnum
         user_info = xauth.current_user()
         assert user_info != None
 
-        service = TagBindService(TagTypeEnum.note_tag.int_value)
+        service = TagBindServiceImpl(TagTypeEnum.note_tag.int_value)
         binds = service.list_by_target_id(user_id=user_info.id, target_id=int(note_info.id))
         tags = [x.tag_code for x in binds]
         assert len(binds) == 2
@@ -449,20 +454,21 @@ class TestMain(BaseTestCase):
         # clean up
         json_request("/note/remove?id=%s" % id)
     
-    def test_note_tag_meta_create(self):
-        from handlers.note.dao_tag import TagMetaDao
+    def test_note_tag_info_create(self):
+        from handlers.note.dao_tag import NoteTagInfoDao
+        from xnote.service.tag_service import TagTypeEnum
         create_params = dict(
             tag_type = "group",
             tag_name = "测试"
         )
         result = json_request_return_dict("/note/tag/create", method="POST", data = create_params)
         self.assertEqual("success", result["code"])
-
-        meta_info = TagMetaDao.get_by_name(xauth.current_name(), "测试", tag_type="group")
+        user_id = xauth.current_user_id()
+        meta_info = NoteTagInfoDao.get_by_code(user_id=user_id, tag_code="测试")
         assert meta_info != None
 
         self.assertEqual("测试", meta_info.tag_name)
-        self.assertEqual("group", meta_info.tag_type)
+        self.assertEqual(TagTypeEnum.note_tag.int_value, meta_info.tag_type)
 
     def test_note_stick(self):
         delete_note_for_test("xnote-share-test")

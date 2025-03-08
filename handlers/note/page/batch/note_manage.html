@@ -64,7 +64,7 @@
                 <div class="row">
                     <span>标签</span>
                     {% for tag in item.tag_info_list %}
-                        <a class="tag lightgray">{{tag.name}}</a>
+                        <a class="tag lightgray">{{tag.tag_name}}</a>
                     {% end %}
                     <button class="btn-default bind-tag-btn" 
                         data-parent-id="{{item.parent_id}}"
@@ -87,6 +87,7 @@
         selectedTags: JSON.parse(xnote.getUrlParam("tags", "[]")),
         linkOfTagAll: "/note/manage?parent_id=" + xnote.getUrlParam("parent_id")
     });
+    xnote.note.groupId = xnote.getUrlParam("parent_id");
 </script>
 
 <script type="text/javascript">

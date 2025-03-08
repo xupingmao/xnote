@@ -26,6 +26,7 @@ from handlers.note.models import NotePathInfo
 from . import dao_draft
 from . import dao_log
 from .models import OrderTypeEnum, NoteIndexDO
+from .dao_tag import NoteTagInfoDao
 
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -176,6 +177,7 @@ def view_group_detail_func(file: note_dao.NoteDO, kw):
     # pagesize  = kw.pagesize
     pagesize = 1000
     is_public_page = kw.is_public_page
+    user_id = file.creator_id
 
     dialog = xutils.get_argument_bool("dialog")
     q_tag = xutils.get_argument_str("tag", "")
@@ -217,8 +219,7 @@ def view_group_detail_func(file: note_dao.NoteDO, kw):
     kw.page_max = math.ceil(amount/pagesize)
     kw.parent_id = file.id
     kw.q_tag = q_tag
-    kw.tag_meta_list = dao_tag.list_tag_meta(
-        user_name=user_name, group_id=file.id, tag_type="note")
+    kw.tag_meta_list = NoteTagInfoDao.list(user_id=user_id, group_id=file.id)
     kw.show_orderby = True
     kw.order_type = file.order_type
 

@@ -9,6 +9,8 @@
 @Description  : DAO接口定义
 """
 
+from xnote.core import xauth
+
 class NoteDao:
 
     """笔记的DAO接口"""
@@ -37,11 +39,13 @@ class NoteDao:
         raise NotImplementedError()
 
     @staticmethod
-    def count_tag(user_name):
-        # type: (str)->int
+    def count_tag(user_name="", user_id=0):
         """统计标签数量"""
+        if user_id == 0:
+            user_id = xauth.UserDao.get_id_by_name(user_name)
+
         from . import dao_tag
-        return dao_tag.count_tag(user_name)
+        return dao_tag.NoteTagInfoDao.count(user_id=user_id)
     
     @staticmethod
     def count_comment(user_name):

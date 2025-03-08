@@ -265,6 +265,13 @@ def FailedResult(code="500", message=""):
     result.message = message
     return result
 
+class WebException(Exception):
+    def __init__(self, code="500", message=""):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
 
 class WebPageInfo:
     

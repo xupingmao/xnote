@@ -9,12 +9,12 @@
 @Description  : 描述
 """
 
+import os
 from xutils import dbutil, Storage
 from . import base
 from xnote.core import xauth
 from xnote.core import xtables
 from xnote.core import xconfig
-import os
 from xutils import sqldb
 
 def do_upgrade():

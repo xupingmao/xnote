@@ -5,10 +5,14 @@
 """时光轴视图"""
 import re
 import xutils
-from xnote.core import xauth
-from xnote.core import xtemplate
+import typing
 import time
 import web
+import handlers.note.dao as note_dao
+import handlers.note.dao_log as dao_log
+
+from xnote.core import xauth
+from xnote.core import xtemplate
 from xutils import Storage, dateutil, textutil
 from xutils import webutil
 from xutils.textutil import split_words
@@ -18,8 +22,7 @@ from handlers.message.dao import MessageDao
 from handlers.note.dao_api import NoteDao
 from handlers.note.dao import NoteIndexDao
 from handlers.note import note_helper, dao_share
-import handlers.note.dao as note_dao
-import handlers.note.dao_log as dao_log
+from handlers.note import dao_tag
 from xnote.core import xmanager
 from datetime import datetime
 
@@ -44,6 +47,11 @@ class ListContext(Storage):
         self.url_type = ""
         self.year = 0
         self.update(kw)
+
+class TimelineRow(Storage):
+    def __init__(self, title="", children=[]) -> None:
+        self.title = title
+        self.children = children
 
 def get_parent_link(user_name, type, priority=0):
     if priority < 0:
@@ -131,17 +139,14 @@ def build_note_info_for_timeline(note, url_type=""):
         note.url = "/note/timeline?type=default&parent_id=%s" % note.id
 
 
-def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=False, archived_title=False, url_type="timeline"):
+def build_date_result(rows: typing.List[note_dao.NoteIndexDO], orderby='ctime', sticky_title=False, 
+                      group_title=False, archived_title=False, url_type="timeline"):
     tmp_result = dict()
     sticky_notes = []
     archived_notes = []
     group_notes = []
 
     for row in rows:
-        if row.level == None:
-            # 可能是虚拟的对象
-            row.level = 0
-
         build_note_info_for_timeline(row, url_type)
         if sticky_title and row.level > 0:
             sticky_notes.append(row)
@@ -173,28 +178,28 @@ def build_date_result(rows, orderby='ctime', sticky_title=False, group_title=Fal
     for key in tmp_result:
         items = tmp_result[key]
         items.sort(key=lambda x: x[orderby], reverse=True)
-        tmp_sorted_result.append(dict(title=key, children=items))
+        tmp_sorted_result.append(TimelineRow(title=key, children=items))
     tmp_sorted_result.sort(key=lambda x: x['title'], reverse=True)
 
-    result = []
+    result = [] # type: list[TimelineRow]
 
     if len(sticky_notes) > 0:
         # sticky_notes.sort(key = lambda x:x[orderby])
         sticky_notes.sort(key = lambda x: x.name)
-        result.append(dict(title=u'置顶', children=sticky_notes))
+        result.append(TimelineRow(title=u'置顶', children=sticky_notes))
 
     if len(group_notes) > 0:
         # group_notes.sort(key = lambda x:x[orderby])
         group_notes.sort(key = lambda x: x.name)
-        result.append(dict(title=u'笔记本', children=group_notes))
+        result.append(TimelineRow(title=u'笔记本', children=group_notes))
 
     result += tmp_sorted_result
 
     if len(archived_notes) > 0:
         archived_notes.sort(key = lambda x:x[orderby])
-        result.append(dict(title=u'归档', children=archived_notes))
+        result.append(TimelineRow(title=u'归档', children=archived_notes))
 
-    return dict(code='success', data=result)
+    return webutil.SuccessResult(data=result)
 
 
 def list_search_func(context: ListContext):
@@ -332,10 +337,10 @@ def list_plan_func(context):
     return build_date_result(rows, 'ctime')
 
 
-def list_all_func(context):
-    offset = context['offset']
-    limit = context['limit']
-    user_name = context['user_name']
+def list_all_func(context: ListContext):
+    offset = context.offset
+    limit = context.limit
+    user_name = context.user_name
     rows = dao_log.list_recent_created(user_name, offset, limit)
     return build_date_result(rows, 'ctime')
 
@@ -351,7 +356,7 @@ def list_recent_edit_func(context):
 def default_list_func(context: ListContext):
     offset = context.offset
     limit = context.limit
-    user_name = context['user_name']
+    user_name = context.user_name
     parent_id = context.parent_id
     tags = None
     
@@ -360,13 +365,13 @@ def default_list_func(context: ListContext):
     
     note_info = note_dao.get_by_id(parent_id)
     if note_info == None:
-        return webutil.FailedResult(code="404", message="笔记不存在")
+        raise webutil.WebException(code="404", message="笔记不存在")
     
     if note_info.creator != user_name:
         # 分享模式
         share_info = dao_share.get_share_by_note_and_to_user(parent_id, user_name)
         if share_info == None:
-            return webutil.FailedResult(code="403", message="无查看权限")
+            raise webutil.WebException(code="403", message="无查看权限")
     
     rows = note_dao.list_by_parent(creator_id=note_info.creator_id, parent_id=parent_id, offset=offset, limit=limit, orderby = 'ctime_desc', tags=tags)
     
@@ -443,7 +448,10 @@ class TimelineAjaxHandler:
         kw.year = xutils.get_argument_int("year")
 
         list_func = LIST_FUNC_DICT.get(type, default_list_func)
-        return list_func(kw)
+        try:
+            return list_func(kw)
+        except webutil.WebException as e:
+            return webutil.FailedResult(e.code, e.message)
 
 
 class DateTimelineAjaxHandler:
@@ -694,6 +702,69 @@ class DateHandler:
         return xtemplate.render("note/page/list_by_date.html", **kw)
 
 
+class TimelineSearchDialogHandler:
+
+    item_list_html = """
+{% if len(item_list) == 0 %}
+    <p class="align-center">空空如也~</p>
+{% end %}
+{% for group in item_list %}
+    <h3 class="card-title-2">{{group.title}}</h3>
+    {% for item in group.children %}
+        <p class="card-row share-dialog-row"> <i class="fa {{item.icon}}"></i> <a
+            href="{{item.url}}">{{item.name}}</a>
+            {% include note/component/note_list_item_tags.html %}
+            <input type="checkbox" class="select-note-checkbox float-right" data-id="{{item.id}}">
+        </p>
+    {% end %}
+{% end %}
+"""
+
+    html = """
+<div class="card">
+    <div class="row"> <input type="text" class="nav-search-input" id="note-search-text" 
+        placeholder="搜索笔记" value="{{searchText}}" onkeyup="xnote.action.note.searchNote(this);">
+        <button class="nav-search-btn btn-default" onclick="xnote.action.note.searchNote(this)">
+        <i class="fa fa-search"></i></button>
+    </div>
+    <div class="row note-search-dialog-body" style="padding-top: 10px;">
+        {% raw item_list_html %}
+    </div>
+</div>
+"""
+
+    def get_item_list_html(self):
+        search_key = xutils.get_argument_str("key")
+        limit = xutils.get_argument_int("limit", 100)
+        if limit > 1000:
+            return "分页不能超过1000"
+        
+        ctx = ListContext()
+        ctx.limit = limit
+        ctx.user_name = xauth.current_name_str()
+        ctx.search_key = search_key
+
+        if search_key != "":
+            result = list_search_func(ctx)
+        else:
+            result = list_all_func(ctx)
+        item_list = result.data
+        return xtemplate.render_text(self.item_list_html, item_list = item_list, 
+                                     get_tag_name_by_code=dao_tag.get_tag_name_by_code)
+
+    @xauth.login_required()
+    def GET(self):
+        action = xutils.get_argument_str("action")
+
+        if action == "item_list":
+            return self.get_item_list_html()
+        
+        try:
+            item_list_html = self.get_item_list_html()
+            return xtemplate.render_text(self.html, item_list_html = item_list_html, searchText="")
+        except webutil.WebException as e:
+            return e.message
+
 xutils.register_func("note.build_date_result", build_date_result)
 
 xurls = (
@@ -702,6 +773,7 @@ xurls = (
     # 时光轴视图
     r"/note/timeline", TimelineHandler,
     r"/note/timeline/month", DateTimelineAjaxHandler,
+    r"/note/timeline/search_dialog", TimelineSearchDialogHandler,
     
     r"/note/plan", PlanListHandler,
     r"/project/default", DefaultProjectHandler,

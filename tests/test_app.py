@@ -266,8 +266,8 @@ class TestMain(BaseTestCase):
         data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
         self.assertEqual(True, b"HTTP_X_TEST" in data)
 
-    def test_tagname(self):
-        self.check_OK("/note/tagname/test")
+    def test_taginfo(self):
+        self.check_OK("/note/taginfo?tag_code=test")
 
     def test_taglist(self):
         self.check_OK("/note/taglist")

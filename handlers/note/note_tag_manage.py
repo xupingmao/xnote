@@ -8,8 +8,7 @@ from xnote.plugin import FormRowType, TableActionType
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.service import TagInfoService, TagTypeEnum
-
-from .dao_tag_category import TagCategoryDao, TagCategoryDO
+from xnote.service import TagCategoryService, TagCategoryDO
 
 class BaseTagManageHandler(BaseTablePlugin):
     require_admin = False
@@ -50,7 +49,7 @@ class TagCategoryManageHandler(BaseTagManageHandler):
         table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, msg_field="delete_msg", css_class="btn danger")
 
         user_id = xauth.current_user_id()
-        category_list = TagCategoryDao.list(user_id=user_id)
+        category_list = TagCategoryService.list(user_id=user_id)
         for row in category_list:
             row["edit_url"] = f"?action=edit&category_id={row.category_id}"
             row["delete_url"] = f"?action=delete&category_id={row.category_id}"
@@ -67,7 +66,7 @@ class TagCategoryManageHandler(BaseTagManageHandler):
     
     def handle_edit(self):
         category_id = xutils.get_argument_int("category_id")
-        category_info = TagCategoryDao.get_by_id(category_id)
+        category_info = TagCategoryService.get_by_id(category_id)
         if category_info is None:
             category_info = TagCategoryDO()
 
@@ -92,7 +91,7 @@ class TagCategoryManageHandler(BaseTagManageHandler):
         user_id = xauth.current_user_id()
 
         if category_id > 0:
-            category_info = TagCategoryDao.get_by_id(category_id)
+            category_info = TagCategoryService.get_by_id(category_id)
             if category_info is None:
                 return webutil.FailedResult(code="404", message="记录不存在")
         else:
@@ -102,7 +101,7 @@ class TagCategoryManageHandler(BaseTagManageHandler):
         category_info.name = name
         category_info.description = description
         category_info.sort_order = sort_order
-        TagCategoryDao.save(category_info)
+        TagCategoryService.save(category_info)
         return webutil.SuccessResult()
 
 
@@ -140,11 +139,7 @@ class TagManageHandler(BaseTagManageHandler):
         page_size = 20
         offset = (page-1) * page_size
 
-        category_dict = {}
-        category_list = TagCategoryDao.list(user_id=user_id)
-        for category in category_list:
-            category_dict[category.category_id] = category.name
-
+        category_dict = TagCategoryService.get_name_dict(user_id=user_id)
         rows, count = TagInfoService.get_page(user_id=user_id, offset=offset, tag_type=tag_type, limit=page_size)
         for row in rows:
             row["edit_url"] = f"?action=edit&tag_id={row.tag_id}"
@@ -176,7 +171,7 @@ class TagManageHandler(BaseTagManageHandler):
         form.add_row(title="名称", field="name", value=tag_info.tag_code, readonly=True)
         row = form.add_row(title="标签类别", field="category_id", value=str(tag_info.category_id), type=FormRowType.select)
         row.add_option(title="[未设置]", value="0")
-        for category in TagCategoryDao.list(user_id=user_id):
+        for category in TagCategoryService.list(user_id=user_id):
             row.add_option(title=category.name, value=str(category.category_id))
 
         kw = Storage()
@@ -197,6 +192,6 @@ class TagManageHandler(BaseTagManageHandler):
         return webutil.SuccessResult()
 
 xurls = (
-    r"/note/taglist/manage", TagManageHandler,
-    r"/note/tagcategory/manage", TagCategoryManageHandler,
+    r"/note/tag_manage", TagManageHandler,
+    r"/note/tag_category_manage", TagCategoryManageHandler,
 )

@@ -308,7 +308,6 @@ class GroupListHandler:
         kw.archived_count = dao.count_group(user_name, status="archived")
         kw.active_count = dao.count_group(user_name, status="active", query_root=True)
         kw.smart_count = SmartGroupService.count_smart_group()
-        kw.tag_meta_list = dao_tag.list_tag_meta(user_name, tag_type="group")
         kw.type_list = NoteTypeInfo.get_type_list()
         kw.note_type = "group"
 

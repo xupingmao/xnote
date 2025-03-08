@@ -114,6 +114,7 @@ class MsgTagInfo(TagInfoDO):
     def to_save_dict(self):
         result = dict(**self)
         result.pop("tag_id", None)
+        result.pop("tag_name", None)
         result.pop("html", None)
         return result
     

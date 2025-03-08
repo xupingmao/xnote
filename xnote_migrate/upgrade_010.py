@@ -8,12 +8,16 @@
 @FilePath     : /xnote/core/xnote_migrate/upgrade_010.py
 @Description  : 描述
 """
+
 from xnote.core import xauth
 from . import base
 from handlers.note.dao import get_by_id
-from handlers.note.dao_tag import TagBindDao, TagMetaDao
+from xutils import dbutil
+from xutils import BaseDataRecord
+from xutils.numutil import parse_int
+from xnote.service.tag_service import NoteTagBindService
 
-
+# TODO 创建测试用例覆盖
 def do_upgrade():
     """修复笔记历史的索引"""
     new_key = "20230205_note_tag"
@@ -21,20 +25,23 @@ def do_upgrade():
     base.move_upgrade_key(old_key=old_key, new_key=new_key)
     base.execute_upgrade(new_key, fix_user_tag)
 
+class TagBind(BaseDataRecord):
+    """标签绑定信息"""
+    def __init__(self, **kw):
+        self.note_id = ""
+        self.user_name = ""
+        self.tags = []
+        self.parent_id = ""
+        self.update(kw)
+
 
 def fix_user_tag():
-    for user in xauth.iter_user(limit=-1):
-        user_name = user.name
-        for tag_info in TagBindDao.iter_user_tag(user_name=user_name):
-            note_id = tag_info.note_id
-            tags = tag_info.tags
-            note_info = get_by_id(note_id)
-            tag_type = "note"
-
-            if note_info != None:
-                TagBindDao.bind_tag(user_name, note_id, tags,
-                                    parent_id=note_info.parent_id)
-                if note_info.type == "group":
-                    tag_type = "group"
-                TagMetaDao.update_amount_async(
-                    user_name, tags, tag_type=tag_type, parent_id=note_info.parent_id)
+    tag_bind_kv = dbutil.get_table("note_tags")
+    for item in tag_bind_kv.iter(limit=-1):
+        tag_info = TagBind(**item)
+        note_id = parse_int(tag_info.note_id)
+        tags = tag_info.tags
+        note_info = get_by_id(note_id)
+        if note_info != None and note_id > 0:
+            user_id = note_info.creator_id
+            NoteTagBindService.bind_tags(user_id=user_id, target_id=note_id, tags=tags)

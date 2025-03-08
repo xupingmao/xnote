@@ -14,79 +14,74 @@ from xutils import Storage
 from xutils import dbutil, webutil
 from xnote.core.xtemplate import T
 from . import dao_tag
+from .dao_tag import NoteTagInfoDao, NoteTagBindDao
 from . import dao as note_dao
-
-tag_db = dbutil.get_table("note_tag_meta")
 
 class TagUpdateAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument("file_id")
+        note_id = xutils.get_argument_int("file_id")
         tags_str = xutils.get_argument("tags")
         user_name = xauth.get_current_name()
+        user_id = xauth.current_user_id()
 
         if tags_str is None or tags_str == "":
-            dao_tag.bind_tags(note_id=id, creator=user_name, tags=[])
-            return dict(code="success")
+            dao_tag.bind_tags(note_id=note_id, user_id=user_id, tags=[])
+            return webutil.SuccessResult()
 
         assert isinstance(tags_str, str)
         new_tags = tags_str.split()
-        dao_tag.bind_tags(note_id=id, creator=user_name, tags=new_tags)
-        return dict(code="success", message="", data="OK")
+        dao_tag.bind_tags(note_id=note_id, user_id=user_id, tags=new_tags)
+        return webutil.SuccessResult(message="", data="OK")
 
     def GET(self):
         return self.POST()
 
 
-class TagNameHandler:
+class TagInfoHandler:
 
-    def GET(self, tagname=""):
-        tagname = xutils.unquote(tagname)
+    @xauth.login_required()
+    def GET(self):
+        tag_code = xutils.get_argument_str("tag_code")
         page = xutils.get_argument_int("page", 1)
         limit = xutils.get_argument_int("limit", xconfig.PAGE_SIZE)
 
         offset = (page-1) * limit
         assert offset >= 0
-
-        if xauth.has_login():
-            user_name = xauth.current_name_str()
-        else:
-            user_name = ""
-
-        files = dao_tag.list_by_tag(user_name, tagname)
-        count = len(files)
-
-        files = files[offset: offset+limit]
+        user_id = xauth.current_user_id()
+        files, count = NoteTagBindDao.get_note_page_by_tag(user_id=user_id, tag_code=tag_code, offset=offset, limit=limit)
 
         kw = Storage()
-        kw.tagname = dao_tag.get_name_by_code(tagname)
-        kw.tagcode = tagname
-        kw.tags = tagname
+        kw.tagname = dao_tag.get_name_by_code(tag_code)
+        kw.tagcode = tag_code
+        kw.tags = tag_code
         kw.files = files
         kw.page = page
         kw.page_size = limit
         kw.page_total = count
+        kw.page_url = f"?tag_code={tag_code}&page="
 
-        return xtemplate.render("note/page/tagname.html", **kw)
+        return xtemplate.render("note/page/taginfo.html", **kw)
 
 
 class TagListHandler:
 
     def GET(self):
         if xauth.has_login():
-            user_name = xauth.get_current_name()
-            assert isinstance(user_name, str)
-
-            tag_list = dao_tag.list_tag(user_name)
+            user_info = xauth.current_user()
+            assert user_info != None
+            user_name = user_info.name
+            user_id = user_info.user_id
             xmanager.add_visit_log(user_name, "/note/taglist")
+            tag_category_list = dao_tag.list_tag_category_detail(user_id=user_id)
         else:
-            tag_list = dao_tag.list_tag("")
+            # TODO 公共标签
+            tag_category_list = []
         
         kw = Storage()
         kw.html_title = T("标签列表")
-        kw.system_tag_list = dao_tag.get_system_tag_list(tag_list)
-        kw.tag_list = dao_tag.get_user_defined_tags(tag_list)
+        kw.tag_category_list = tag_category_list
 
         return xtemplate.render("note/page/taglist.html", **kw)
 
@@ -95,29 +90,22 @@ class CreateTagAjaxHandler:
 
     def create_group_tag(self, user_name, tag_type):
         tag_name = xutils.get_argument_str("tag_name", "")
-        group_id = xutils.get_argument_str("group_id", "")
-
-        if group_id == "":
-            group_id = None
+        group_id = xutils.get_argument_int("group_id")
 
         if tag_name == "":
-            return dict(code="400", message="tag_name不能为空,请重新输入")
+            return webutil.FailedResult(code="400", message="tag_name不能为空,请重新输入")
         
         if tag_type == "note" and group_id == None:
-            return dict(code="400", message="group_id不能为空, 请重新输入")
+            return webutil.FailedResult(code="400", message="group_id不能为空, 请重新输入")
 
-        obj = dao_tag.TagMeta()
-        obj.tag_type = tag_type
-        obj.tag_name = tag_name
-        obj.user = user_name
-        obj.group_id = group_id
-        obj.book_id = group_id
+        user_id = xauth.current_user_id()
+        tag_bind_list = NoteTagBindDao.get_by_note_id(user_id=user_id, note_id=group_id)
 
-        tag_meta = dao_tag.get_tag_meta_by_name(user_name, tag_name, tag_type=tag_type, group_id=group_id)
-        if tag_meta != None:
-            return dict(code="500", message="标签已经存在,请重新输入")
+        for tag_bind in tag_bind_list:
+            if tag_bind.tag_code == tag_name:
+                return webutil.FailedResult(code="500", message="标签已经存在,请重新输入")
 
-        dao_tag.TagMetaDao.create(obj)
+        dao_tag.append_tag(note_id=group_id, tag_code=tag_name)
         return webutil.SuccessResult()
 
     @xauth.login_required()
@@ -127,69 +115,62 @@ class CreateTagAjaxHandler:
         if tag_type in ("group", "note"):
             return self.create_group_tag(user_name, tag_type)
 
-        return dict(code="fail", message="无效的标签类型")
+        return webutil.FailedResult(code="fail", message="无效的标签类型")
 
 
 class DeleteTagAjaxHandler:
 
-    def delete_group_tag(self, user_name):
-        tag_ids_str = xutils.get_argument("tag_ids", "[]")
-        assert isinstance(tag_ids_str, str)
-        tag_ids = json.loads(tag_ids_str)
-        if len(tag_ids) == 0:
-            return dict(code="400", message="请选择要删除的标签")
+    def delete_group_tag(self):
+        group_id = xutils.get_argument_int("group_id")
+        tag_code_list_str = xutils.get_argument_str("tag_code_list", "[]")
+        tag_code_list = json.loads(tag_code_list_str)
+        if len(tag_code_list) == 0:
+            return webutil.FailedResult(code="400", message="请选择要删除的标签")
         
-        user_name = xauth.current_name()
-        for id in tag_ids:
-            tag_db.delete_by_id(id, user_name=user_name)
+        user_id = xauth.current_user_id()
+        tag_bind_list = NoteTagBindDao.get_by_note_id(user_id=user_id, note_id=group_id)
+        new_tags = []
+        for bind in tag_bind_list:
+            if bind.tag_code not in tag_code_list:
+                new_tags.append(bind.tag_code)
+        
+        NoteTagBindDao.update_tag_and_note(user_id=user_id, note_id=group_id, tags=new_tags)
 
-        return dict(code="success")
+        return webutil.SuccessResult()
 
     @xauth.login_required()
     def POST(self):
         tag_type = xutils.get_argument("tag_type")
-        user_name = xauth.current_name()
         if tag_type == "group":
-            return self.delete_group_tag(user_name)
+            return self.delete_group_tag()
 
-        return dict(code="fail", message="无效的标签类型")
+        return webutil.FailedResult(code="fail", message="无效的标签类型")
 
 
 class TagListAjaxHandler:
 
-    def list_tag_for_note_v2(self, user_name="", group_id=0):
-        suggest_list = dao_tag.list_tag_meta(limit=1000, 
-                                             user_name=user_name, tag_type="note", 
-                                             group_id=group_id)
-        all_list = dao_tag.list_tag(user_name, exclude_sys_tag=True)
-        for tag_info in all_list:
-            tag_info.tag_name = tag_info.name
-            tag_info.tag_code = tag_info.code
-
+    def list_tag_for_note_v2(self, user_id=0, group_id=0):
+        suggest_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id)
+        all_list = NoteTagInfoDao.list(user_id=user_id)
         data = Storage(suggest_list=suggest_list, all_list=all_list)
         return webutil.SuccessResult(data=data)
 
     @xauth.login_required()
     def GET(self):
         tag_type = xutils.get_argument_str("tag_type", "")
-        user_name = xauth.current_name_str()
-        v = xutils.get_argument_str("v")
+        user_info = xauth.current_user()
+        assert user_info != None
+
+        user_id = user_info.user_id
 
         if tag_type == "group":
-            if v == "2":
-                return self.list_tag_for_note_v2(user_name=user_name)
-            data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name)
-            return webutil.SuccessResult(data = data_list)
+            return self.list_tag_for_note_v2(user_id=user_id)
         
         if tag_type == "note":
             group_id = xutils.get_argument_int("group_id")            
-            if v == "2":
-                return self.list_tag_for_note_v2(user_name=user_name, group_id=group_id)
-            data_list = dao_tag.list_tag_meta(limit=1000, user_name=user_name, 
-                                              tag_type="note", group_id=group_id)
-            return webutil.SuccessResult(data = data_list)
+            return self.list_tag_for_note_v2(user_id=user_id, group_id=group_id)
 
-        return webutil.FailedResult(code="400", message="无效的tag_type(%s)" % tag_type)
+        return webutil.FailedResult(code="400", message=f"无效的tag_type({tag_type})")
 
 class BindTagAjaxHandler:
 
@@ -202,11 +183,12 @@ class BindTagAjaxHandler:
         user_name = xauth.current_name()
         book_info = get_by_id_creator(group_id, user_name)
         if book_info == None:
-            return dict(code="500", message="笔记不存在或者无权限")
+            return webutil.FailedResult(code="500", message="笔记不存在或者无权限")
 
+        user_id = book_info.creator_id
         tag_names = json.loads(tag_names_str)
-        dao_tag.bind_tags(user_name, group_id, tag_names, tag_type="group")
-        return dict(code="success")
+        NoteTagBindDao.update_tag_and_note(user_id=user_id, note_id=group_id, tags=tag_names)
+        return webutil.SuccessResult()
     
     def bind_note_tag(self):
         note_id = xutils.get_argument_int("note_id")
@@ -215,38 +197,54 @@ class BindTagAjaxHandler:
         assert note_id != 0
         assert isinstance(tag_names_str, str)
         
-        user_name = xauth.current_name()
+        user_info = xauth.current_user()
+        if user_info is None:
+            return webutil.FailedResult(code="403", message="用户未登录")
+        
+        user_name = user_info.name
         book_info = get_by_id_creator(note_id, user_name)
         if book_info == None:
-            return dict(code="500", message="笔记不存在或者无权限")
+            return webutil.FailedResult(code="500", message="笔记不存在或者无权限")
 
+        user_id = user_info.user_id
         tag_names = json.loads(tag_names_str)
-        dao_tag.bind_tags(user_name, note_id, tag_names, tag_type="note")
-        return dict(code="success")
+        NoteTagBindDao.update_tag_and_note(user_id=user_id, note_id=note_id, tags=tag_names)
+        return webutil.SuccessResult()
 
     @xauth.login_required()
     def POST(self):
         action = xutils.get_argument_str("action", "")
-        tag_type = xutils.get_argument("tag_type", "")
+        tag_type = xutils.get_argument_str("tag_type", "")
         if action == "add_note_to_tag":
             return self.add_note_to_tag()
         if tag_type == "group":
             return self.bind_group_tag()
         if tag_type == "note":
             return self.bind_note_tag()
-        return dict(code="400", message="无效的tag_type")
+        return webutil.FailedResult(code="400", message="无效的tag_type")
 
     def add_note_to_tag(self):
         tag_code = xutils.get_argument_str("tag_code")
         if tag_code == "":
-            return dict(code="400", message="tag_code不存在")
+            return webutil.FailedResult(code="400", message="tag_code不存在")
         note_ids_str = xutils.get_argument_str("note_ids")
         note_ids = note_ids_str.split(",")
         if len(note_ids) == 0:
-            return dict(code="400", message="note_ids参数无效")
+            return webutil.FailedResult(code="400", message="note_ids参数无效")
         for note_id in note_ids:
             dao_tag.append_tag(int(note_id), tag_code)
-        return dict(code="success")
+        return webutil.SuccessResult()
+
+
+class SuggestTagHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        group_id = xutils.get_argument_int("group_id")
+        user_id = xauth.current_user_id()
+
+        suggest_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id)
+        return webutil.SuccessResult(data=suggest_list)
 
 xurls = (
     # ajax
@@ -255,8 +253,9 @@ xurls = (
     r"/note/tag/delete", DeleteTagAjaxHandler,
     r"/note/tag/list", TagListAjaxHandler,
     r"/note/tag/bind", BindTagAjaxHandler,
+    r"/note/tag/suggest", SuggestTagHandler,
 
     # 页面
-    r"/note/tagname/(.*)", TagNameHandler,
+    r"/note/taginfo", TagInfoHandler,
     r"/note/taglist", TagListHandler,
 )
