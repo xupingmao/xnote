@@ -11,12 +11,15 @@
 import logging
 import xutils
 
+from xutils import numutil
 from xnote.core import xtables, xauth
 from xnote_migrate import base
 from xutils import dbutil, dateutil
 from xutils.db.dbutil_helper import new_from_dict
 from handlers.note.dao import NoteDO, create_note, NoteIndexDao
 from xnote.service.search_service import SearchHistoryDO, SearchHistoryService, SearchHistoryType
+from xutils.base import BaseDataRecord
+from handlers.note.dao_tag import NoteTagBindDao, NoteTagInfoDao
 
 def do_upgrade():
     # since v2.9.7
@@ -26,6 +29,7 @@ def do_upgrade():
     base.execute_upgrade("20240928_rebuild_msg", handler.rebuild_msg)
     base.execute_upgrade("20241026_migrate_search_history", handler.migrate_search_history)
     base.execute_upgrade("20241229_msg_idx_change_time", handler.rebuild_msg_idx_change_time)
+    base.execute_upgrade("20250308_note_tag", handler.migrate_note_tag)
     
 class NoteHistoryKvIndexDO(xutils.Storage):
     def __init__(self, **kw):
@@ -122,6 +126,15 @@ class MsgIndex(xutils.Storage):
         
     def get_full_key(self):
         return f"msg_v2:{self.user_id}:{self.id}"
+
+class TagBind(BaseDataRecord):
+    """标签绑定信息"""
+    def __init__(self, **kw):
+        self.note_id = ""
+        self.user = ""
+        self.tags = []
+        self.parent_id = ""
+        self.update(kw)
 
 class MigrateHandler:
 
@@ -275,4 +288,17 @@ class MigrateHandler:
                         msg_full_db.update(full_info)
                     msg_index_db.update(where=dict(id=msg_index.id), change_time = new_change_time)
 
-                        
+    
+    def migrate_note_tag(self):
+        db = dbutil.get_table("note_tags")
+        for item in db.iter(limit=-1):
+            tag_bind = TagBind(**item)
+            note_id = numutil.parse_int(tag_bind.note_id)
+            tags = tag_bind.tags
+            user_id = xauth.UserDao.get_id_by_name(tag_bind.user)
+            if user_id > 0 and note_id > 0 and isinstance(tags, list):
+                NoteTagBindDao.update_tag(user_id=user_id, note_id=note_id, tags=tags)
+                for tag_code in tags:
+                    NoteTagInfoDao.create(user_id=user_id, tag_code=tag_code)
+            else:
+                logging.error("invalid tag_bind %s", tag_bind)

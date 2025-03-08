@@ -53,8 +53,8 @@ class _TagBindDaoImpl:
     def get_uniq_tags(cls, new_tags=[]):
         return lists.get_uniq_list(new_tags)
     
-    def update_tag(self, user_id=0, note_id=0, new_tags=[]):
-        self.tag_bind_service.bind_tags(user_id=user_id, target_id=note_id, tags=new_tags)
+    def update_tag(self, user_id=0, note_id=0, tags=[]):
+        self.tag_bind_service.bind_tags(user_id=user_id, target_id=note_id, tags=tags)
     
     def update_tag_and_note(self, user_id=0, note_id=0, tags=[]):
         tags = self.get_uniq_tags(tags)

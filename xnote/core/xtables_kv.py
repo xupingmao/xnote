@@ -99,9 +99,9 @@ def init_deleted_table():
 def init_note_tables():
     # 笔记信息
     dbutil.register_table("note_tags", "笔记标签绑定",
-                          category="note", user_attr="user")
+                          category="note", user_attr="user").delete_table()
     dbutil.register_table("note_tag_meta", "笔记标签",
-                          category="note", user_attr="user")
+                          category="note", user_attr="user").delete_table()
     dbutil.register_table("note_draft", "笔记草稿", category="note", type="hash")
     dbutil.register_table("note_lock", "笔记编辑锁", category="note")
     dbutil.register_table("note_full", "笔记的完整信息", category="note")

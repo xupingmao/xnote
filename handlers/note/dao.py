@@ -835,7 +835,7 @@ def create_note(note_dict: NoteDO, date_str=None, note_id=None, check_name=True)
     # 处理标签
     if tags != None and len(tags) > 0:
         from . import dao_tag
-        dao_tag.NoteTagBindDao.update_tag(user_id= note_dict.creator_id, note_id = note_id, new_tags=tags)
+        dao_tag.NoteTagBindDao.update_tag(user_id= note_dict.creator_id, note_id = note_id, tags=tags)
 
     # 最后发送创建笔记成功的消息
     create_msg = dict(name=name, type=type, id=note_id)
