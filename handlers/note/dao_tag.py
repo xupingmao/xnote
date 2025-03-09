@@ -25,14 +25,8 @@ from handlers.note.dao_api import NoteDao
 from xnote.service import NoteTagBindService, TagTypeEnum, TagBindDO
 from xnote.service import NoteTagInfoService, TagInfoDO
 from xnote.service import TagCategoryService, TagCategoryDO
+from xnote.service import SystemTagEnum
 from .models import NoteIndexDO
-
-class SystemTagEnum(BaseEnum):
-    todo = EnumItem("待办", "$todo$")
-
-    @staticmethod
-    def is_sys_tag(tag_code=""):
-        return SystemTagEnum.get_by_value(tag_code) != None
 
 class TagCategoryDetail(TagCategoryDO):
     def __init__(self, **kw):
@@ -44,6 +38,9 @@ class _TagBindDaoImpl:
     tag_bind_service = NoteTagBindService
 
     def get_by_note_id(self, user_id=0, note_id=0):
+        return self.tag_bind_service.list_by_target_id(user_id=user_id, target_id=note_id)
+    
+    def list_by_note_id(self, user_id=0, note_id=0):
         return self.tag_bind_service.list_by_target_id(user_id=user_id, target_id=note_id)
     
     def list_by_tag(self, user_id=0, tag_code=""):
@@ -172,11 +169,8 @@ def batch_get_tags_by_notes(notes: typing.List[NoteIndexDO]):
         note.tags_json = json.dumps(tags)
 
 
-def get_tag_name_by_code(code: str):
-    name = SystemTagEnum.get_name_by_value(code)
-    if name == "":
-        return code
-    return name
+def get_tag_name_by_code(tag_code: str):
+    return SystemTagEnum.get_name_by_code(tag_code)
 
 def handle_tag_for_note(note_info: note_dao.NoteIndexDO):
     note = note_info
@@ -187,8 +181,6 @@ def handle_tag_for_note(note_info: note_dao.NoteIndexDO):
     for tag_code in note.tags:
         tag_name = get_name_by_code(tag_code)
         tag_info = TagInfoDO(tag_code = tag_code, tag_name = tag_name)
-        tag_info.url = f"/note/taginfo?tag_code={xutils.quote(tag_code)}"
-
         tag_info_list.append(tag_info)
     note.tag_info_list = tag_info_list
 
@@ -196,9 +188,15 @@ def handle_tag_for_note(note_info: note_dao.NoteIndexDO):
 def append_tag(note_id=0, tag_code=""):
     NoteTagBindDao.append_tag(note_id, tag_code)
 
+def get_skip_tag_type(tag_type=0):
+    if tag_type == 0:
+        return True
+    return False
 
-def list_tag_category_detail(user_id=0):
-    all_tags, _ = NoteTagInfoService.get_page(user_id=user_id, limit=1000, skip_count=True)
+def list_tag_category_detail(user_id=0, tag_type=0):
+    skip_tag_type = get_skip_tag_type(tag_type)
+    all_tags, _ = NoteTagInfoService.get_page(user_id=user_id, tag_type=tag_type, limit=1000, 
+                                              skip_count=True, skip_tag_type=skip_tag_type)
     cate_list = TagCategoryService.list(user_id=user_id)
     cate_dict = {} # type: dict[int, TagCategoryDetail]
     cate_detail_list = [] # type: list[TagCategoryDetail]

@@ -15,6 +15,22 @@ from xutils import Storage, dateutil
 from xnote.core import xtables
 from xutils.base import BaseDataRecord, BaseEnum, EnumItem
 from xutils import dateutil
+from xutils import quote
+
+class SystemTagEnum(BaseEnum):
+    todo = EnumItem("待办", "$todo$")
+
+    tag_name_dict = {
+        "$todo$": "待办",
+    }
+
+    @staticmethod
+    def is_sys_tag(tag_code=""):
+        return SystemTagEnum.get_by_value(tag_code) != None
+    
+    @classmethod
+    def get_name_by_code(cls, tag_code=""):
+        return cls.tag_name_dict.get(tag_code, tag_code)
 
 class TagTypeEnum(BaseEnum):
     """枚举无法扩展,所以这里不用,从外部添加枚举值可以直接设置新的属性"""
@@ -43,6 +59,13 @@ class TagInfoDO(BaseDataRecord):
         result.pop("tag_id", None)
         result.pop("tag_name", None)
         return result
+    
+    @property
+    def url(self):
+        if self.tag_type == TagTypeEnum.msg_tag.int_value:
+            return f"/message?tag=search&key={quote(self.tag_code)}"
+        return f"/note/taginfo?tag_code={quote(self.tag_code)}"
+        
 
 class TagBindDO(BaseDataRecord):
     """标签绑定信息, 业务唯一键=tag_type+tag_code+target_id"""
@@ -54,6 +77,10 @@ class TagBindDO(BaseDataRecord):
         self.target_id = 0    # target_id 对应的是 tag_type
         self.second_type = 0  # 二级类型, 这是target_id实体的一个属性
         self.sort_value = ""  # 排序字段
+
+    @property
+    def tag_name(self):
+        return SystemTagEnum.get_name_by_code(self.tag_code)
 
 TagBind = TagBindDO
 
@@ -182,11 +209,11 @@ class TagInfoServiceImpl:
             return tag_type
         return self.tag_type
     
-    def get_page(self, user_id=0, tag_type=0, target_id_list=[], offset=0, limit=20, skip_count=False):
+    def get_page(self, user_id=0, tag_type=0, target_id_list=[], offset=0, limit=20, skip_count=False, skip_tag_type=False):
         where_sql = "user_id=$user_id"
         tag_type = self.handle_tag_type(tag_type)
 
-        if tag_type > 0:
+        if not skip_tag_type and tag_type > 0:
             where_sql += " AND tag_type=$tag_type"
         if len(target_id_list) > 0:
             where_sql += " AND target_id IN $target_id_list"

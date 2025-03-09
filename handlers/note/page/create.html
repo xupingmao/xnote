@@ -73,17 +73,6 @@ label {
     </form>
 </div>
 
-<script type="text/template" id="tag-template">
-{{! if tagList.length > 0 }}
-    <div class="input-group-row">
-        <label>标签</label>
-        {{! each tagList tag }}
-            <a class="tag lightgray large create-tag">{{! tag.tag_name }}</a>
-        {{!/each}}
-    </div>
-{{!/if}}
-</script>
-
 <script type="text/javascript" src="{{_server_home}}/_static/lib/layDate-v5.0.9/laydate.js"></script>
 <script type="text/javascript">
     function getWeekDayFromLayDate(layDate) {
@@ -128,15 +117,8 @@ label {
                 "tag_type": "note",
                 "group_id": groupId
             }
-            xnote.http.get("/note/tag/list", params, function (resp) {
-                if (resp.code != "success") {
-                    xnote.alert(resp.message);
-                } else {
-                    var html = $("#tag-template").render({
-                        tagList: resp.data
-                    });
-                    $(".tag-box").html(html);
-                }
+            xnote.http.get("/note/tag/list_html", params, function (html) {
+                $(".tag-box").html(html);
             })
         }
 

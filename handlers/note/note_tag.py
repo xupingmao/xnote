@@ -14,7 +14,7 @@ from xutils import Storage
 from xutils import dbutil, webutil
 from xnote.core.xtemplate import T
 from . import dao_tag
-from .dao_tag import NoteTagInfoDao, NoteTagBindDao
+from .dao_tag import NoteTagInfoDao, NoteTagBindDao, TagTypeEnum
 from . import dao as note_dao
 
 class TagUpdateAjaxHandler:
@@ -71,13 +71,14 @@ class TagInfoHandler:
 class TagListHandler:
 
     def GET(self):
+        tag_type = xutils.get_argument_int("tag_type", 1)
         if xauth.has_login():
             user_info = xauth.current_user()
             assert user_info != None
             user_name = user_info.name
             user_id = user_info.user_id
             xmanager.add_visit_log(user_name, "/note/taglist")
-            tag_category_list = dao_tag.list_tag_category_detail(user_id=user_id)
+            tag_category_list = dao_tag.list_tag_category_detail(user_id=user_id, tag_type=tag_type)
         else:
             # TODO 公共标签
             tag_category_list = []
@@ -85,6 +86,7 @@ class TagListHandler:
         kw = Storage()
         kw.html_title = T("标签列表")
         kw.tag_category_list = tag_category_list
+        kw.tag_type_list = TagTypeEnum.enums()
 
         return xtemplate.render("note/page/taglist.html", **kw)
 
@@ -249,6 +251,27 @@ class SuggestTagHandler:
         suggest_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id)
         return webutil.SuccessResult(data=suggest_list)
 
+
+class TagListHtmlHandler:
+
+    html = """
+{% if len(tag_list) > 0 %}
+    <div class="input-group-row">
+        <label>标签</label>
+        {% for tag in tag_list %}
+            <a class="tag lightgray large create-tag">{{ tag.tag_name }}</a>
+        {% end %}
+    </div>
+{% end %}
+"""
+
+    @xauth.login_required()
+    def GET(self):
+        group_id = xutils.get_argument_int("group_id")
+        user_id = xauth.current_user_id()
+        tag_list = NoteTagBindDao.list_by_note_id(user_id=user_id, note_id=group_id)
+        return xtemplate.render_text(self.html, tag_list=tag_list)
+
 xurls = (
     # ajax
     r"/note/tag/update", TagUpdateAjaxHandler,
@@ -261,4 +284,5 @@ xurls = (
     # 页面
     r"/note/taginfo", TagInfoHandler,
     r"/note/taglist", TagListHandler,
+    r"/note/tag/list_html", TagListHtmlHandler,
 )
