@@ -714,7 +714,8 @@ class TimelineSearchDialogHandler:
         <p class="card-row share-dialog-row"> <i class="fa {{item.icon}}"></i> <a
             href="{{item.url}}">{{item.name}}</a>
             {% include note/component/note_list_item_tags.html %}
-            <input type="checkbox" class="select-note-checkbox float-right" data-id="{{item.id}}">
+            <input type="checkbox" class="select-note-checkbox float-right" data-id="{{item.id}}" 
+                data-name="{{item.name}}" data-url="{{item.url}}">
         </p>
     {% end %}
 {% end %}

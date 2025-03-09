@@ -245,6 +245,49 @@ NoteView.openDialogToAddNote = function (event) {
     });
 };
 
+
+/**
+ * @param {options.callback} 回调函数 
+ */
+NoteView.openSearchNoteDialog = function (options) {
+    var callback = options.callback;
+
+    xnote.http.get("/note/timeline/search_dialog?limit=100", function (html) {
+        var dialogOptions = {};
+        dialogOptions.title = "选择笔记";
+        dialogOptions.buttons = ["确认", "取消"];
+        dialogOptions.closeForYes = false;
+        dialogOptions.html = html;
+
+        var yesFunction = function () {
+            var noteList = [];
+            $(".select-note-checkbox:checked").each(function (idx, ele) {
+                var noteId = $(ele).attr("data-id");
+                var noteName = $(ele).attr("data-name");
+                var url = $(ele).attr("data-url");
+                var noteInfo = {
+                    "note_id": noteId,
+                    "name": noteName,
+                    "url": url
+                }
+                noteList.push(noteInfo);
+            });
+            console.log(noteList);
+            // result: {close:bool}
+            var result = callback(noteList);
+            console.info("callback result:", result, dialogOptions.layerIndex);
+            if (result) {
+                if (result.close) {
+                    layer.close(dialogOptions.layerIndex);
+                }
+            }
+        }
+
+        dialogOptions.functions = [yesFunction];
+        xnote.openDialogEx(dialogOptions);
+    });
+}
+
 NoteView.addNoteToTag = function (tagCode) {
     var selectedIds = [];
     $(".select-note-checkbox:checked").each(function (idx, ele) {

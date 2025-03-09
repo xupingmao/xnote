@@ -238,6 +238,7 @@ xnoteDialogModule.openDialogExInner = function (options) {
     }
 
     var index = layer.open(params);
+    options.layerIndex = index;
 
     // id映射
     xnoteDialogModule.idToIndexMap[dialogId] = index;
@@ -246,6 +247,7 @@ xnoteDialogModule.openDialogExInner = function (options) {
     if (onOpenFn) {
         onOpenFn(index);
     }
+
     return index;
 }
 

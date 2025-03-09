@@ -475,6 +475,12 @@ class TestMain(BaseTestCase):
         self.assertEqual("测试", bind_info.tag_code)
         self.assertEqual(TagTypeEnum.note_tag.int_value, bind_info.tag_type)
 
+        self.check_OK(f"/note/tag/list_html?group_id={group_id}")
+
+    def test_note_tag_manage(self):
+        self.check_OK(f"/note/tag_manage")
+        self.check_OK(f"/note/tag_category_manage")
+
     def test_note_stick(self):
         delete_note_for_test("xnote-share-test")
 

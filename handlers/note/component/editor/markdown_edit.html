@@ -52,7 +52,7 @@
                 <input type="button" id="insertDel" class="toolbox-btn" value="删除线" />
                 <input type="file" id="file" name="file" class="hidden-file" />
                 <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
-                <input type="button" id="insertNoteLink" class="toolbox-btn" value="笔记链接" />
+                <input type="button" class="toolbox-btn" value="笔记链接" onclick="xnote.note.openDialogToAddLink()"/>
                 <input type="button" class="toolbox-btn" value="格式化" onclick="xnote.editor.formatMarkdownTable()" />
                 <div class="float-right">
                     <div class="float-left">
@@ -276,16 +276,26 @@
             toggleSurround("~~");
         });
 
-        $("#insertNoteLink").click(function () {
-            // showAjaxDialog是异步的，没有返回值
-            xnote.showAjaxDialog("选择笔记", "/search/dialog?search_type=note&callback=insertNoteLinkCallback");
+        xnote.note.openDialogToAddLink = function() {
+            var result = {};
+            result.close = true;
+            var options = {};
+            options.callback = function (noteList) {
+                if (noteList.length > 1) {
+                    xnote.toast("只能选择一个笔记");
+                    result.close = false;
+                    return result;
+                }
+                for (var i = 0; i < noteList.length; i++) {
+                    var noteInfo = noteList[i];
+                    var link = "[" + noteInfo.name + "](" + noteInfo.url + ")";
+                    codeInsert(link);
+                }
+                return result;
+            }
 
-            window.insertNoteLinkCallback = function (param) {
-                var link = "[" + param.name + "](" + param.url + ")";
-                codeInsert(link);
-                xnote.closeDialog("last");
-            };
-        });
+            xnote.note.openSearchNoteDialog(options);
+        };
 
         // 格式化表格
         xnote.editor.formatMarkdownTable = function () {
