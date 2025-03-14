@@ -29,11 +29,12 @@ from . import dao as note_dao
 from . import dao_delete
 from . import dao_share
 from . import note_helper
-from .models import NoteLevelEnum, OrderTypeEnum
+from .models import NoteLevelEnum, OrderTypeEnum, NoteDO, NoteIndexDO
 
 from handlers.note.models import NoteIndexDO
 from handlers.note import dao_read
 from handlers.note import dao_draft
+from xutils.base import BaseDataRecord
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -46,6 +47,15 @@ class NoteException(Exception):
         super(NoteException, self).__init__(message)
         self.code = code
         self.message = message
+
+
+class CreateNoteContext(BaseDataRecord):
+    def __init__(self, **kw):
+        self.method = ""
+        self.date = ""
+        self.creator_id = 0
+        self.update(kw)
+
 
 def get_heading_by_type(type):
     title = u"创建" + NOTE_TYPE_DICT.get(type, u"笔记")
@@ -66,11 +76,11 @@ def fire_update_event(note_old):
     xmanager.fire("note.updated", event_body)
     xmanager.fire("note.update", event_body)
 
-def fire_rename_event(note):
+def fire_rename_event(note: NoteDO):
     event_body = dict(action = "rename", id = note.id, name = note.name, type = note.type)
     xmanager.fire("note.rename", event_body)
 
-def create_log_func(note, ctx):
+def create_log_func(note: note_dao.NoteDO, ctx: CreateNoteContext):
     method   = ctx.method
     date_str: str = ctx.date
 
@@ -83,7 +93,7 @@ def create_log_func(note, ctx):
     note.name = u"日志:" + date_str + dateutil.convert_date_to_wday(date_str)
     return note_dao.create_note(note, date_str)
 
-def default_create_func(note: note_dao.NoteDO, ctx):
+def default_create_func(note: note_dao.NoteDO, ctx: CreateNoteContext):
     method   = ctx.method
     date_str = ctx.date
     name     = note.name
@@ -155,10 +165,10 @@ class CreateHandler:
         heading = T("创建笔记")
         code = "fail"
         error = ""
-        ctx = Storage(method = method, date = date, creator_id=creator_id)
+        ctx = CreateNoteContext(method = method, date = date, creator_id=creator_id)
         
         try:
-            self.check_before_create(note)
+            self.check_before_create(ctx, note)
 
             create_func = CREATE_FUNC_DICT.get(type, default_create_func)
             inserted_id = create_func(note, ctx)
@@ -198,7 +208,10 @@ class CreateHandler:
         return self.POST('GET')
     
 
-    def check_before_create(self, note: note_dao.NoteDO):
+    def check_before_create(self, ctx: CreateNoteContext, note: note_dao.NoteDO):
+        if ctx.method == "GET":
+            return
+        
         type = note.type
         if type not in VALID_NOTE_TYPE_SET:
             raise Exception(f"无效的类型: {type}")
@@ -246,7 +259,7 @@ class RemoveAjaxHandler:
         if id != "" and id != None:
             file = note_dao.get_by_id(id)
         elif name != "":
-            file = note_dao.get_by_name(xauth.current_name(), name)
+            file = note_dao.get_by_name(xauth.current_name_str(), name)
         else:
             return webutil.FailedResult(code="fail", message="id,name至少一个不为空")
 
@@ -281,13 +294,13 @@ class RecoverAjaxHandler:
     @xauth.login_required()
     def GET(self):
         id = xutils.get_argument("id", "")
-        name = xutils.get_argument("name", "")
+        name = xutils.get_argument_str("name", "")
         file = None
 
         if id != "" and id != None:
             file = note_dao.get_by_id(id)
         elif name != "":
-            file = note_dao.get_by_name(xauth.current_name(), name)
+            file = note_dao.get_by_name(xauth.current_name_str(), name)
         else:
             return dict(code="fail", message="id,name至少一个不为空")
 
@@ -317,29 +330,27 @@ class RenameAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        id   = xutils.get_argument("id")
-        name = xutils.get_argument("name")
-        if name == "" or name is None:
+        note_id   = xutils.get_argument_int("id")
+        name = xutils.get_argument_str("name")
+        if name == "":
             return webutil.FailedResult(code="fail", message="名称为空")
         
-        assert isinstance(id, str), "无效的ID"
-
-        old = NoteDao.get_by_id(id)
+        old = NoteDao.get_by_id(note_id)
         if old is None:
             return webutil.FailedResult(code="fail", message="笔记不存在")
 
         if old.creator != xauth.get_current_name():
             return webutil.FailedResult(code="fail", message="没有权限")
 
-        file = note_dao.get_by_name(xauth.current_name(), name)
+        user_id = xauth.current_user_id()
+        file = note_dao.get_by_name(name=name, creator_id=user_id)
         if file is not None:
             return webutil.FailedResult(code="fail", message="%r已存在" % name)
 
-        with dbutil.get_write_lock(id):
-            new_file = Storage(**old)
+        with dbutil.get_write_lock(str(note_id)):
+            new_file = NoteDO(**old)
             new_file.name = name
             new_file.mtime = dateutil.format_datetime()
-
             update_and_notify(old, new_file)
 
         fire_rename_event(old)

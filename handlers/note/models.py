@@ -126,7 +126,7 @@ class NoteIndexDO(BaseDataRecord):
         return f"{xconfig.WebConfig.server_home}/note/edit?id={self.id}"
     
 class NoteDO(NoteIndexDO):
-    def __init__(self):
+    def __init__(self, **kw):
         super(NoteDO, self).__init__()
         self.path = ""
         self.category = "" # 废弃
@@ -143,6 +143,7 @@ class NoteDO(NoteIndexDO):
         self.badge_info = ""
         self.create_date = ""
         self.update_date = ""
+        self.update(kw)
 
     @classmethod
     def from_dict(cls, dict_value):
