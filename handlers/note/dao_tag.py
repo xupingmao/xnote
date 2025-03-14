@@ -61,13 +61,17 @@ class _TagBindDaoImpl:
         self.tag_bind_service.bind_tags(user_id=user_id, target_id=int(note_id), tags=tags)
         note_index.set_tags(tags)
         note_dao.update_index(note_index)
+        for tag_code in tags:
+            count = self.tag_bind_service.count_user_tag(user_id=user_id, tag_code=tag_code)
+            NoteTagInfoDao.update_tag_amount(user_id=user_id, tag_code=tag_code, amount=count)
 
     def list_tag(self, user_id=0):
         tag_list, count = NoteTagInfoService.get_page(user_id=user_id, limit=1000, skip_count=True)
         return tag_list
     
-    def get_note_page_by_tag(self, user_id=0, tag_code="", offset=0, limit=20):
-        tag_bind_list, amount = self.tag_bind_service.get_page(user_id=user_id, tag_code=tag_code, offset=offset, limit=limit)
+    def get_note_page_by_tag(self, user_id=0, tag_code="", offset=0, limit=20, order=None):
+        tag_bind_list, amount = self.tag_bind_service.get_page(user_id=user_id, tag_code=tag_code, 
+                                                               offset=offset, limit=limit, order=order)
         note_id_list = [x.target_id for x in tag_bind_list]
         return note_dao.batch_query_list(id_list=note_id_list, creator_id=user_id), amount
     
@@ -113,7 +117,6 @@ class _NoteTagInfoDaoImpl:
         tag_info.user_id = user_id
         return self.tag_info_service.create(tag_info)
 
-
     def count(self, user_id=0):
         return self.tag_info_service.count(user_id=user_id)
     
@@ -142,6 +145,19 @@ class _NoteTagInfoDaoImpl:
         for item in result:
             item.tag_name = get_name_by_code(item.tag_code)
         return result
+    
+    def update_tag_amount(self, user_id=0, tag_code="", amount=0):
+        self.fix_dup_tag(user_id=user_id, tag_code=tag_code)
+        self.tag_info_service.update_amount(user_id=user_id, tag_code=tag_code, amount=amount)
+
+    def fix_dup_tag(self, user_id=0, tag_code=""):
+        tag_list = self.tag_info_service.get_by_code_list(user_id=user_id, tag_code_list=[tag_code], order="tag_id")
+        if len(tag_list) == 0:
+            return
+        if len(tag_list) > 1:
+            for tag in tag_list[1:]:
+                self.tag_info_service.delete(tag)
+        
 
 def bind_tags(user_id=0, note_id=0, tags=[], tag_type="group"):
     NoteTagBindDao.update_tag_and_note(user_id=user_id, note_id=note_id, tags=tags)

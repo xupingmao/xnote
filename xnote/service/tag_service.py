@@ -103,14 +103,14 @@ class TagBindServiceImpl:
         results = self.db.select(where=where_dict)
         return TagBind.from_dict_list(results)
     
-    def get_page(self, user_id=0, target_id_list=[], tag_code="", offset=0, limit=20, skip_count=False):
+    def get_page(self, user_id=0, target_id_list=[], tag_code="", offset=0, limit=20, skip_count=False, order=None):
         where_sql = "user_id=$user_id"
         if len(target_id_list) > 0:
             where_sql += " AND target_id in $target_id_list"
         if tag_code != "":
             where_sql += " AND tag_code=$tag_code"
         vars = dict(user_id=user_id, target_id_list=target_id_list, tag_code=tag_code)
-        result = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit)
+        result = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit, order=order)
         count = 0
         if not skip_count:
             count = self.db.count(where=where_sql, vars=vars)
@@ -232,12 +232,13 @@ class TagInfoServiceImpl:
         result = self.db.select_first(where=where_dict)
         return TagInfoDO.from_dict_or_None(result)
     
-    def get_by_code_list(self, user_id=0, tag_code_list=[], limit=1000) -> typing.List[TagInfoDO]:
+    def get_by_code_list(self, user_id=0, tag_code_list=[], limit=1000, order=None) -> typing.List[TagInfoDO]:
         if len(tag_code_list) == 0:
             return []
-        where_sql = "user_id=$user_id AND tag_code in $tag_code_list"
-        vars = dict(user_id=user_id, tag_code_list=tag_code_list)
-        result = self.db.select(where=where_sql, vars=vars, limit=limit)
+        tag_type = self.handle_tag_type()
+        where_sql = "user_id=$user_id AND tag_code in $tag_code_list AND tag_type = $tag_type"
+        vars = dict(user_id=user_id, tag_code_list=tag_code_list, tag_type = tag_type)
+        result = self.db.select(where=where_sql, vars=vars, limit=limit, order=order)
         return TagInfoDO.from_dict_list(result)
     
     def get_first(self, tag_id=0, tag_code="", user_id=0):
@@ -257,6 +258,10 @@ class TagInfoServiceImpl:
         data = tag_info.to_save_dict()
         data.pop("ctime", None)
         return self.db.update(where=dict(tag_id=tag_info.tag_id), **data)
+    
+    def update_amount(self, user_id=0,  tag_code="", amount=0):
+        tag_type = self.handle_tag_type()
+        self.db.update(where=dict(user_id=user_id, tag_code=tag_code, tag_type=tag_type), amount=amount)
     
     def create(self, tag_info: TagInfoDO):
         tag_type = self.handle_tag_type(tag_info.tag_type)
@@ -282,6 +287,9 @@ class TagInfoServiceImpl:
             return self.update(tag_info)
         return self.create(tag_info)
     
+    def delete(self, tag_info: TagInfoDO):
+        self.db.delete(where=dict(tag_id=tag_info.tag_id))
+
     def count(self, user_id=0):
         where_sql = "user_id=$user_id AND tag_type=$tag_type"
         vars = dict(tag_type=self.tag_type, user_id=user_id)

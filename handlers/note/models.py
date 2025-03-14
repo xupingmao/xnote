@@ -108,6 +108,10 @@ class NoteIndexDO(BaseDataRecord):
     def hot_index(self):
         return self.visit_cnt
     
+    @property
+    def note_id(self):
+        return self.id
+    
     def is_group(self):
         return self.type == "group"
     

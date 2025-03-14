@@ -132,35 +132,14 @@ xnote.api["note.copy"] = function (req) {
 // 绑定标签
 noteAPI.bindTag = function (cmd) {
     var currentTags = cmd.currentTags;
-    var tagList = cmd.tagList;
-    var allTagList = cmd.allTagList; // 全部的标签
     var targetId = cmd.targetId;
 
     if (cmd.tagType != "group" && cmd.tagType != "note") {
         throw new TypeError("无效的tagType");
     }
 
-    if (tagList === undefined) {
-        xnote.alert("tagList is undefined");
-    }
-
-    allTagList = xnote.array.remove(allTagList, tagList, function (a, b) {
-        return a.tag_name === b.tag_name;
-    })
-
     // 渲染绑定标签的html
-    var html = $("#bindTagTemplate").render({
-        tagList: tagList,
-        allTagList: allTagList,
-        selectedNames: currentTags,
-        manageLink: cmd.manageLink,
-        globalTagList: [
-            { tag_name: "待办", tag_code: "$todo$" }
-        ],
-    });
-
-    console.log("bind-tag-dialog", html);
-
+    var html = cmd.html;
     xnote.openDialog("添加标签", html, ["确定", "取消"], function () {
         var selectedNames = [];
         $(".tag.bind.active").each(function (idx, ele) {
@@ -204,19 +183,17 @@ NoteView.editNoteTag = function (target) {
         tag_type: tagType,
         group_id: parentId,
         v: 2,
+        tags_json: tagsJson
     };
 
-    xnote.http.get("/note/tag/list", listParams, function (resp) {
+    xnote.http.get("/note/tag/bind_dialog", listParams, function (html) {
         var cmd = {
             tagType: "note", // 绑定类型始终是note
             currentTags: JSON.parse(tagsJson),
             noteId: noteId,
             manageLink: "/note/manage?parent_id=" + parentId,
         };
-        // 推荐的标签
-        cmd.tagList = resp.data.suggest_list;
-        // 全部的标签
-        cmd.allTagList = resp.data.all_list;
+        cmd.html = html;
         // 调用绑定标签组件
         noteAPI.bindTag(cmd);
     })

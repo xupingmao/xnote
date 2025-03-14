@@ -164,14 +164,21 @@ class NoteIndexDao:
         # type: (list[str|int], int) -> list[NoteIndexDO]
         if len(id_list) == 0:
             return []
-        int_list = []
-        for id_str in id_list:
-            int_list.append(int(id_str))
+        int_list = [int(id_str) for id_str in id_list]
         where_sql = "id in $id_list"
         if creator_id != 0:
             where_sql += " AND creator_id = $creator_id"
-        result = cls.db.select(where=where_sql, vars=dict(id_list=int_list, creator_id=creator_id))
-        return cls.fix_result(result)
+        db_result = cls.db.select(where=where_sql, vars=dict(id_list=int_list, creator_id=creator_id))
+        result_list = cls.fix_result(db_result)
+        result_dict = {} # type: dict[int, NoteIndexDO|None]
+        for item in result_list:
+            result_dict[item.note_id] = item
+        result = [] # type: list[NoteIndexDO]
+        for note_id in int_list:
+            note_info = result_dict.get(note_id)
+            if note_info != None:
+                result.append(note_info)
+        return result
     
     @classmethod
     def to_sql_order(cls, order=""):
