@@ -111,6 +111,9 @@ class NoteIndexDO(BaseDataRecord):
     def is_group(self):
         return self.type == "group"
     
+    def is_markdown(self):
+        return self.type == "md"
+    
     @property
     def is_sticky(self):
         """是否是置顶"""

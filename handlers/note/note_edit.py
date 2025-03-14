@@ -92,8 +92,8 @@ def default_create_func(note: note_dao.NoteDO, ctx):
         # GET请求直接返回
         return
 
-    if name == '':
-        message = u'标题为空'
+    if name == "":
+        message = '标题为空'
         raise Exception(message)
 
     return note_dao.create_note(note, date_str)
@@ -201,7 +201,10 @@ class CreateHandler:
     def check_before_create(self, note: note_dao.NoteDO):
         type = note.type
         if type not in VALID_NOTE_TYPE_SET:
-            raise Exception(u"无效的类型: %s" % type)
+            raise Exception(f"无效的类型: {type}")
+        
+        if note.name == "":
+            raise Exception("标题为空")
 
         name = note.name
         check_by_name = note_dao.get_by_name(note.creator, name)

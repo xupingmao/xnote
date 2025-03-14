@@ -2,6 +2,20 @@
 {% init edit_token = "" %}
 {% init show_draft_edit = False %}
 
+<style>
+/* 预览浮窗样式 */
+.preview-popup {
+    position: absolute;
+    display: none;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 300px;
+    z-index: 100;
+}
+</style>
+
 <!-- 解析CSV依赖 -->
 <script type="text/javascript" src="{{_server_home}}/_static/lib/csv.js/csv.js"></script>
 <!-- 代码高亮highlight依赖 -->
@@ -45,6 +59,8 @@
         </div>
     </div>
 </div>
+
+<div id="preview_popup_window" class="preview-popup"></div>
 
 <script type="text/javascript">
     $(function () {
@@ -168,5 +184,24 @@
         options.onCheckboxClicked = onCheckboxClicked;
         options.csvEditFunc = "xnote.note.openEditCsvDialog";
         marked.parseAndRender(input, "#markdown-output-div", options);
+
+        $("body").on("mouseover", ".marked-strong", function (e) {
+            e.preventDefault();
+            var offset = $(e.target).offset();
+            var name = $(e.target).text();
+            console.log("name", name);
+            xnote.http.get("/note/preview_popup?name="+encodeURI(name), function (html) {
+                if (html != "") {
+                    offset.top += 20;
+                    offset.left += 10;
+                    console.log("offset", offset);
+                    $("#preview_popup_window").html(html).css(offset).show();
+                }
+            });
+        });
+
+        $("body").click(function(event) {
+            $("#preview_popup_window").html("").hide();
+        })
     });
 </script>

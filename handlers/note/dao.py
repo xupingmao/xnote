@@ -1084,10 +1084,12 @@ def update0(note):
     put_note_to_db(note.id, note)
 
 
-def get_by_name(creator, name):
-    assert creator != None, "get_by_name:creator is None"
-    assert name != None, "get_by_name: name is None"
-    creator_id = xauth.UserDao.get_id_by_name(creator)
+def get_by_name(creator="", name="", creator_id=0):
+    if creator_id == 0:
+        assert creator != "", "get_by_name:creator is empty"
+    assert name != "", "get_by_name: name is empty"
+    if creator_id == 0:
+        creator_id = xauth.UserDao.get_id_by_name(creator)
     note = NoteIndexDao.get_by_name(creator_id=creator_id, name=name)
     if note != None:
         return get_by_id(note.id)

@@ -571,6 +571,22 @@ class ViewPublicHandler:
         id = xutils.get_argument_int("id")
         return ViewHandler().GET("view", id, is_public_page=True)
 
+class PreviewPopupHandler:
+    @xauth.login_required()
+    def GET(self):
+        name = xutils.get_argument_str("name")
+        user_id = xauth.current_user_id()
+        note_info = note_dao.get_by_name(name = name, creator_id = user_id)
+        if note_info is None:
+            return ""
+        if not note_info.is_markdown():
+            return ""
+        content = note_info.content
+        try:
+            import markdown
+            return markdown.markdown(content[:200])
+        except:
+            return ""
 
 xurls = (
     r"/note/(edit|view)", ViewHandler,
@@ -584,5 +600,6 @@ xurls = (
     r"/note/ajax/(.+)", GetDialogHandler,
     r"/file/mark", MarkHandler,
     r"/file/unmark", UnmarkHandler,
-    r"/file/markdown", ViewHandler
+    r"/file/markdown", ViewHandler,
+    r"/note/preview_popup", PreviewPopupHandler,
 )
