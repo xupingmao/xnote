@@ -27,10 +27,13 @@ from xnote.service import NoteTagInfoService, TagInfoDO
 from xnote.service import TagCategoryService, TagCategoryDO
 from xnote.service import SystemTagEnum
 from .models import NoteIndexDO
+from xnote.plugin import TextLink
 
 class TagCategoryDetail(TagCategoryDO):
     def __init__(self, **kw):
+        self.title = ""
         self.tag_list = []
+        self.link = TextLink()
         self.update(kw)
 
 class _TagBindDaoImpl:
@@ -123,11 +126,11 @@ class _NoteTagInfoDaoImpl:
     def get_by_code(self, user_id=0, tag_code=""):
         return self.tag_info_service.get_first(user_id=user_id, tag_code=tag_code)
     
-    def list(self, user_id=0, group_id=0) -> typing.List[TagInfoDO]:
+    def list(self, user_id=0, group_id=0, order=None) -> typing.List[TagInfoDO]:
         if group_id > 0:
             tags = NoteTagBindDao.get_by_note_id(user_id=user_id, note_id=group_id)
             tag_code_list = [x.tag_code for x in tags]
-            tag_info_list = NoteTagInfoService.get_by_code_list(user_id=user_id, tag_code_list=tag_code_list)
+            tag_info_list = NoteTagInfoService.get_by_code_list(user_id=user_id, tag_code_list=tag_code_list, order=order)
             tag_info_dict = {} # type: dict[str, TagInfoDO]
             for tag_info in tag_info_list:
                 tag_info_dict[tag_info.tag_code] = tag_info
@@ -141,7 +144,7 @@ class _NoteTagInfoDaoImpl:
                     tag_info.tag_name = get_name_by_code(tag_info.tag_code)
                 result.append(tag_info)
             return result
-        result, _ = NoteTagInfoService.get_page(user_id=user_id, limit=1000, skip_count=True)
+        result, _ = NoteTagInfoService.get_page(user_id=user_id, limit=1000, skip_count=True, order=order)
         for item in result:
             item.tag_name = get_name_by_code(item.tag_code)
         return result
@@ -212,7 +215,7 @@ def get_skip_tag_type(tag_type=0):
 def list_tag_category_detail(user_id=0, tag_type=0):
     skip_tag_type = get_skip_tag_type(tag_type)
     all_tags, _ = NoteTagInfoService.get_page(user_id=user_id, tag_type=tag_type, limit=1000, 
-                                              skip_count=True, skip_tag_type=skip_tag_type)
+                                              skip_count=True, skip_tag_type=skip_tag_type, order="amount desc")
     cate_list = TagCategoryService.list(user_id=user_id)
     cate_dict = {} # type: dict[int, TagCategoryDetail]
     cate_detail_list = [] # type: list[TagCategoryDetail]

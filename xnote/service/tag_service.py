@@ -209,7 +209,8 @@ class TagInfoServiceImpl:
             return tag_type
         return self.tag_type
     
-    def get_page(self, user_id=0, tag_type=0, target_id_list=[], offset=0, limit=20, skip_count=False, skip_tag_type=False):
+    def get_page(self, user_id=0, tag_type=0, target_id_list=[], offset=0, limit=20, 
+                 skip_count=False, skip_tag_type=False, order=None):
         where_sql = "user_id=$user_id"
         tag_type = self.handle_tag_type(tag_type)
 
@@ -218,7 +219,7 @@ class TagInfoServiceImpl:
         if len(target_id_list) > 0:
             where_sql += " AND target_id IN $target_id_list"
         vars = dict(user_id=user_id, tag_type=tag_type, target_id_list=target_id_list)
-        result = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit)
+        result = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit, order=order)
         if skip_count:
             count = 0
         else:

@@ -584,7 +584,8 @@ class PreviewPopupHandler:
         content = note_info.content
         try:
             import markdown
-            return markdown.markdown(content[:200])
+            content = textutil.get_short_text(content, 200)
+            return markdown.markdown(content)
         except:
             return ""
 

@@ -15,8 +15,9 @@ from xutils import Storage
 from xutils import dbutil, webutil
 from xnote.core.xtemplate import T
 from . import dao_tag
-from .dao_tag import NoteTagInfoDao, NoteTagBindDao, TagTypeEnum, TagInfoDO
+from .dao_tag import NoteTagInfoDao, NoteTagBindDao, TagTypeEnum, TagInfoDO, TagCategoryDetail
 from . import dao as note_dao
+from xnote.plugin import TextLink
 
 class TagUpdateAjaxHandler:
 
@@ -279,62 +280,28 @@ class TagBindDialogHandler:
 
     html = """
 <div class="card btn-line-height">
+{% for tag_group in tag_group_list %}
     <div class="split-title top-offset-1">
-        <span>系统标签</span>
+        <span>{{tag_group.title}}</span>
         <div class="float-right">
-            <a href="{{_server_home}}/note/taglist">查看</a>
+            <a href="{{ tag_group.link.href }}">{{tag_group.link.text}}</a>
         </div>
     </div>
 
     <div class="row">
-        {% for tag in global_tag_list %}
-        <a class="tag lightgray for-dialog large bind {{get_active_class(tag)}}" 
-            data-code="{{tag.tag_code}}" onclick="xnote.action.note.onTagClick(this);">
-            {{ tag.tag_name }}
-        </a>
-        {% end %}
-    </div>
-    
-    <div class="split-title top-offset-1">
-        <span>推荐标签</span>
-        <div class="float-right">
-            <a href="{{ manage_link }}">管理</a>
-        </div>
-    </div>
-
-    <div class="row">
-        {% for tag in suggest_tag_list %}
+        {% for tag in tag_group.tag_list %}
         <a class="tag lightgray for-dialog large bind {{get_active_class(tag)}}" 
             data-id="{{tag.tag_id}}" data-code="{{tag.tag_code}}" onclick="xnote.action.note.onTagClick(this);">
-            {{ tag.tag_name }}
+            {{ tag.tag_name }}({{tag.amount}})
         </a>
         {% end %}
 
-        {% if len(suggest_tag_list) == 0 %}
-            <span>暂无标签</span>
-        {% end %}
-
-    </div>
-
-    <div class="split-title top-offset-1">
-        <span>全部标签</span>
-        <div class="float-right">
-            <a href="{{_server_home}}/note/taglist">查看</a>
-        </div>
-    </div>
-
-    <div class="row">
-        {% for tag in other_tag_list %}
-        <a class="tag lightgray for-dialog large bind {{get_active_class(tag)}}" 
-            data-id="{{tag.tag_id}}" data-code="{{tag.tag_code}}" onclick="xnote.action.note.onTagClick(this);">
-            {{ tag.tag_name }}
-        </a>
-        {% end %}
-
-        {% if len(other_tag_list) == 0 %}
+        {% if len(tag_group.tag_list) == 0 %}
             <span>暂无标签</span>
         {% end %}
     </div>
+
+{% end %}
 </div>
 """
 
@@ -347,9 +314,9 @@ class TagBindDialogHandler:
             return "无效的类型"
         
         user_id = xauth.current_user_id()
-        suggest_tag_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id)
+        suggest_tag_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id, order="amount desc")
         global_tag_list = [TagInfoDO(tag_name="待办", tag_code="$todo$")]
-        all_tag_list = NoteTagInfoDao.list(user_id=user_id)
+        all_tag_list = NoteTagInfoDao.list(user_id=user_id, order="amount desc")
         dup_codes = set([tag.tag_code for tag in suggest_tag_list + global_tag_list])
         other_tag_list = [tag for tag in all_tag_list if tag.tag_code not in dup_codes]
 
@@ -357,13 +324,22 @@ class TagBindDialogHandler:
             if tag.tag_code in tags:
                 return "active"
             return ""
-    
+        
+        server_home = xconfig.WebConfig.server_home
+        view_url = f"{server_home}/note/taglist"
+        manage_url = f"{server_home}/note/manage?parent_id={group_id}"
+
+        view_link = TextLink(text="查看", href=view_url)
+        manage_link = TextLink(text="管理", href=manage_url)
+
+        tag_group_list = [
+            TagCategoryDetail(title = "系统标签", tag_list = global_tag_list, link = view_link),
+            TagCategoryDetail(title = "推荐标签", tag_list = suggest_tag_list, link = manage_link),
+            TagCategoryDetail(title = "其他标签", tag_list = other_tag_list, link = view_link),
+        ] 
         kw = Storage()
         kw.get_active_class = get_active_class
-        kw.global_tag_list = global_tag_list
-        kw.suggest_tag_list = suggest_tag_list
-        kw.other_tag_list = other_tag_list
-        kw.manage_link = f"/note/manage?parent_id={group_id}"
+        kw.tag_group_list = tag_group_list
         web.header("Content-Type", 'text/html; charset=utf-8')
         return xtemplate.render_text(self.html, **kw)
 
