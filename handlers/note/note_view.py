@@ -583,7 +583,7 @@ class PreviewPopupHandler:
     def GET(self):
         name = xutils.get_argument_str("name")
         user_id = xauth.current_user_id()
-        note_info = note_dao.get_by_name(name = name, creator_id = user_id)
+        note_info = note_dao.get_by_name_or_alias(name = name, creator_id = user_id)
         if note_info is None:
             return ""
         if not note_info.is_markdown():

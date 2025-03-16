@@ -44,7 +44,7 @@ from handlers.note.dao_api import NoteDao
 
 def get_default_group_id():
     name = "default_group_id"
-    note = get_by_name(xauth.current_name(), name)
+    note = get_by_name(xauth.current_name_str(), name)
     if note != None:
         return note.id
     return create_note_for_test("group", name)
@@ -115,6 +115,7 @@ class TestMain(BaseTestCase):
 
         self.check_OK("/note/view?id=" + str(id))
         self.check_OK("/note/print?id=" + str(id))
+        self.check_OK("/note/preview_popup?name=xnote-unit-test")
 
         # 乐观锁更新
         resp = json_request_return_dict("/note/update", method="POST", 
@@ -898,3 +899,43 @@ A example image
     def test_group_list(self):
         self.check_OK("/note/group_list")
         self.check_OK("/note/group_list?tab=smart")
+
+    def test_note_alias(self):
+        user_id = xauth.current_user_id()
+        origin_name = "origin-name"
+        alias_name = "alias-name"
+
+        delete_note_for_test(origin_name)
+        parent_id = create_note_for_test(type="md", name=origin_name)
+        self.check_OK(f"/note/alias/edit?action=page&parent_id={parent_id}")
+        self.check_OK(f"/note/alias/edit?action=edit&parent_id={parent_id}")
+
+        param_dict = dict(note_id=0, parent_id=parent_id, name=alias_name)
+        data_dict = dict(data = textutil.tojson(param_dict))
+        result = json_request_return_dict("/note/alias/edit?action=save", method="POST", data=data_dict)
+        assert result.get("success")
+
+        # 创建之后再查一下
+        self.check_OK(f"/note/alias/edit?action=page&parent_id={parent_id}")
+
+        alias_info = note_dao.get_by_name(name=alias_name, creator_id=user_id)
+        assert alias_info != None
+
+        # 再更新一下名字
+        param_dict = dict(note_id=alias_info.note_id, parent_id=parent_id, name=alias_name + "-update")
+        data_dict = dict(data = textutil.tojson(param_dict))
+        result = json_request_return_dict("/note/alias/edit?action=save", method="POST", data=data_dict)
+        assert result.get("success")
+
+        # 再更新回去
+        param_dict = dict(note_id=alias_info.note_id, parent_id=parent_id, name=alias_name)
+        data_dict = dict(data = textutil.tojson(param_dict))
+        result = json_request_return_dict("/note/alias/edit?action=save", method="POST", data=data_dict)
+        assert result.get("success")
+
+        result = json_request_return_dict(f"/note/alias/edit?action=delete&note_id={alias_info.note_id}")
+        assert result.get("success")
+
+        alias_info = note_dao.get_by_name(name=alias_name, creator_id=user_id)
+        assert alias_info == None
+

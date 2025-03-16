@@ -1113,6 +1113,14 @@ def get_by_name(creator="", name="", creator_id=0):
         return get_by_id(note.id)
     return None
 
+def get_by_name_or_alias(name="", creator_id=0):
+    note_info = get_by_name(name=name, creator_id=creator_id)
+    if note_info is None:
+        return None
+    if note_info.is_alias:
+        return get_by_id_creator(id=note_info.parent_id, creator=note_info.creator)
+    return note_info
+
 
 def check_by_name(creator, name):
     note_by_name = get_by_name(creator, name)
