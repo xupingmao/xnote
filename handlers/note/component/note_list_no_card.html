@@ -20,26 +20,8 @@
 {% init sticky_position = "left" %} 
 {% set note_list_id = xutils.create_uuid() %}
 
-{% if False %}
-    <a class="dialog-link" href="{{_server_home}}/note/{{file.parent_id}}">
-        <div class="book-item">
-            <i class="fa fa-mail-reply black"></i>
-            
-            <span>上级目录</span>
-            <span class="book-size">
-                <i class="fa fa-chevron-right"></i>
-            </span>
-        </div>
-    </a>
-{% end %}
-
 {% if len(files) == 0 %}
     {% include common/text/empty_text.html %}
-{% end %}
-
-{% if False %}
-    <!-- 排序功能 -->
-    {% include note/component/sort/note_sort_tab.html %}
 {% end %}
 
 <div class="row note-list" id="{{note_list_id}}">
@@ -62,11 +44,13 @@
             {% if item.archived %}
                 <span class="tag system">归档</span>
             {% end %}
+            {% if item.type == "alias" %}
+                <span class="tag system">别名</span>
+            {% end %}
         {% end %}
 
         <!-- 图标和标题 -->
         <i class="fa {{item.icon}} fa-{{item.icon}} black"></i>
-
         <span>{{item.name}}</span>
         {% include note/component/note_list_item_tags.html %}
 

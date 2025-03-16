@@ -125,9 +125,16 @@ class NoteIndexDao:
         return cls.db.update(where=dict(id=note_id), level=level, mtime=xutils.format_datetime())
 
     @classmethod
-    def get_by_id(cls, id=0):
-        note_id = int(id)
-        first = cls.db.select_first(where=dict(id=note_id))
+    def get_by_id(cls, note_id=0, creator_id=0, check_user=False):
+        if check_user:
+            assert creator_id > 0
+        
+        note_id = int(note_id)
+        where_sql = "id=$note_id"
+        if creator_id > 0:
+            where_sql += " AND creator_id=$creator_id"
+        vars = dict(note_id=note_id, creator_id=creator_id)
+        first = cls.db.select_first(where=where_sql, vars=vars)
         return cls.fix_single_result(first)
 
     @classmethod
@@ -316,6 +323,10 @@ class NoteIndexDao:
             date_obj = dateutil.parse_date_to_object(min_record.ctime)
             return date_obj.year
         return -1
+    
+    @classmethod
+    def delete(cls, note_index:NoteIndexDO):
+        return cls.db.delete(where=dict(id=note_index.note_id))
 
 class ShareTypeEnum(enum.Enum):
     note_public = "note_public"
@@ -1107,6 +1118,18 @@ def check_by_name(creator, name):
     note_by_name = get_by_name(creator, name)
     if note_by_name != None:
         raise Exception("笔记【%s】已存在" % name)
+
+def rename_note(note_info: NoteIndexDO, new_name=""):
+    check_name = get_by_name(name=new_name, creator_id=note_info.creator_id)
+    if check_name is not None:
+        raise Exception(f"笔记{new_name}已存在")
+    
+    note_id = note_info.note_id
+    with dbutil.get_write_lock(str(note_id)):
+        new_file = NoteDO(**note_info)
+        new_file.name = new_name
+        new_file.mtime = dateutil.format_datetime()
+        update_note(note_info.note_id, **new_file)
 
 
 def visit_note(user_name: str, note_id: int, user_id = 0):

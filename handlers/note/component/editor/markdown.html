@@ -37,6 +37,12 @@
     {% include note/component/note_path.html %}
 </div>
 
+{% if len(note_alias_list) > 0 %}
+<div class="card">
+    {% include note/component/view_header_alias.html %}
+</div>
+{% end %}
+
 <div class="card btn-line-height">
     {% include note/component/view_header_tag.html %}
 </div>

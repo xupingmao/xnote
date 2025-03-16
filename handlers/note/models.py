@@ -9,6 +9,7 @@ from xnote.core import xtables
 from xnote.core import xconfig
 from xutils.db.dbutil_helper import new_from_dict
 from xutils.base import EnumItem, BaseDataRecord
+from handlers.note.constant import NoteType
 
 NOTE_ICON_DICT = {
     "group": "fa-folder",
@@ -26,6 +27,10 @@ NOTE_ICON_DICT = {
 }
 
 DEFAULT_ICON = "fa-file-text-o"
+
+class NoteTypeEnum(xutils.BaseEnum):
+    """笔记类型枚举"""
+    alias = NoteType(name="别名", type="alias")
 
 
 class NoteLevelEnum(xutils.BaseEnum):
@@ -117,6 +122,10 @@ class NoteIndexDO(BaseDataRecord):
     
     def is_markdown(self):
         return self.type == "md"
+    
+    @property
+    def is_alias(self):
+        return self.type == NoteTypeEnum.alias.value
     
     @property
     def is_sticky(self):

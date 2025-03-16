@@ -25,8 +25,9 @@ from .dao_api import NoteDao
 from handlers.note.models import NotePathInfo
 from . import dao_draft
 from . import dao_log
-from .models import OrderTypeEnum, NoteIndexDO
+from .models import OrderTypeEnum, NoteIndexDO, NoteTypeEnum
 from .dao_tag import NoteTagInfoDao
+from .dao import NoteIndexDao, NoteDO
 
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -139,13 +140,16 @@ def view_html_func(file, kw):
     kw.show_pagination = False
 
 
-def view_or_edit_md_func(file, kw: NoteViewContext):
+def view_or_edit_md_func(file: NoteDO, kw: NoteViewContext):
     device = xutils.get_argument_str("device", "desktop")
     load_draft = xutils.get_argument_bool("load_draft")
+    creator_id = file.creator_id
+    note_id = file.note_id
     kw.content = file.content
     kw.show_recommend = True
     kw.show_pagination = False
     kw.edit_token = textutil.create_uuid()
+    kw.note_alias_list = NoteIndexDao.list(creator_id=creator_id, parent_id=note_id)
 
     if kw.op == "edit":
         if load_draft:
@@ -283,7 +287,7 @@ def find_note_for_view0(token, note_id=0, name=""):
     if note_id != 0:
         return note_dao.get_by_id(note_id)
     if name != "":
-        return note_dao.get_by_name(xauth.current_name(), name)
+        return note_dao.get_by_name(xauth.current_name_str(), name)
 
     raise HTTPError(504)
 
@@ -371,6 +375,9 @@ class ViewHandler:
 
         if token == "":
             check_auth(file, user_name)
+
+        if file.is_alias:
+            raise web.seeother(f"/note/view/{file.parent_id}")
 
         pathlist = self.handle_pathlist(file, is_public_page)
 
@@ -525,8 +532,8 @@ class QueryHandler:
             id = xutils.get_argument("id")
             return dict(code="success", data=note_dao.get_by_id(id))
         if action == "get_by_name":
-            name = xutils.get_argument("name")
-            return dict(code="success", data=note_dao.get_by_name(xauth.current_name(), name))
+            name = xutils.get_argument_str("name")
+            return dict(code="success", data=note_dao.get_by_name(xauth.current_name_str(), name))
         return dict(code="fail", message="unknown action")
 
 

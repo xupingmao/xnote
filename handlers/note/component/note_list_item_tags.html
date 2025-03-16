@@ -10,6 +10,9 @@
     {% if item.archived %}
         <span class="tag system">归档</span>
     {% end %}
+    {% if item.is_alias %}
+        <span class="tag lightblue">别名</span>
+    {% end %}
 {% end %}
 
 {% if item.tags != None %}

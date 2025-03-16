@@ -31,10 +31,13 @@ from . import dao_share
 from . import note_helper
 from .models import NoteLevelEnum, OrderTypeEnum, NoteDO, NoteIndexDO
 
-from handlers.note.models import NoteIndexDO
+from handlers.note.models import NoteIndexDO, NoteTypeEnum
 from handlers.note import dao_read
 from handlers.note import dao_draft
 from xutils.base import BaseDataRecord
+from .dao import NoteIndexDao
+from xnote.plugin.table_plugin import BaseTablePlugin, TableActionType
+from xnote.plugin import AsideTemplate
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -866,6 +869,123 @@ class CopyHandler:
             return webutil.FailedResult(code="500", message = str(e))
 
 
+class NoteAliasEditHandler(BaseTablePlugin):
+    title = "编辑别名"
+    require_admin = False
+    require_login = True
+    show_aside = True
+
+    PAGE_HTML = """
+<div class="card">
+    {% include note/component/note_path.html %}
+</div>
+
+<div class="card">
+    <div class="table-action-row">
+        <button class="btn" onclick="xnote.table.handleEditForm(this)"
+            data-url="?action=edit&parent_id={{parent_id}}" data-title="{{create_btn_text}}">{{create_btn_text}}</button>
+    </div>
+    {% include common/table/table.html %}
+</div>
+"""
+
+    def get_page_html(self):
+        return self.PAGE_HTML
+    
+    def get_aside_html(self):
+        return AsideTemplate.get_default_aside_html()
+
+    def handle_page(self):
+        parent_id = xutils.get_argument_int("parent_id")
+        user_id = xauth.current_user_id()
+        notes = NoteIndexDao.list(creator_id=user_id, parent_id=parent_id, type=NoteTypeEnum.alias.value)
+
+        table = self.create_table()
+        table.default_head_style.min_width = "100px"
+        table.add_head(title="笔记ID", field="id")
+        table.add_head(title="别名", field="name")
+        table.add_action(title="编辑", type=TableActionType.edit_form, link_field="edit_url")
+        table.add_action(title="删除", type=TableActionType.confirm, link_field="delete_url", 
+                         msg_field="delete_msg", css_class="btn danger")
+
+        for note in notes:
+            note["edit_url"] = f"?action=edit&parent_id={note.parent_id}&note_id={note.note_id}"
+            note["delete_url"] = f"?action=delete&note_id={note.note_id}"
+            note["delete_msg"] = f"确认删除【{note.name}】吗?"
+            table.add_row(note)
+
+        parent_note = note_dao.get_by_id(parent_id)
+        if parent_note is None:
+            return f"parent_note为空, parent_id={parent_id}"
+        
+        kw = Storage()
+        kw.table = table
+        kw.page = 1
+        kw.page_max = 1
+        kw.page_url = "?page="
+        kw.parent_id = parent_id
+        kw.create_btn_text = "创建别名"
+        kw.pathlist = note_dao.list_path(parent_note)
+        return self.response_page(**kw)
+    
+    def handle_edit(self):
+        parent_id = xutils.get_argument_int("parent_id")
+        note_id = xutils.get_argument_int("note_id")
+        note_info = NoteIndexDao.get_by_id(note_id)
+        if note_info is None:
+            note_info = NoteIndexDO()
+            note_info.parent_id = parent_id
+        form = self.create_form()
+        form.add_row(title="笔记ID", field="note_id", readonly=True, value=str(note_info.note_id))
+        form.add_row(title="原始笔记ID", field="parent_id", readonly=True, value=str(note_info.parent_id))
+        form.add_row(title="别名", field="name", value=note_info.name)
+
+        kw = Storage()
+        kw.form = form
+        return self.response_form(**kw)
+    
+    def handle_delete(self):
+        note_id = xutils.get_argument_int("note_id")
+        user_id = xauth.current_user_id()
+        note_info = NoteIndexDao.get_by_id(note_id=note_id, creator_id=user_id, check_user=True)
+        if note_info is None:
+            return webutil.FailedResult(code="404", message="笔记不存在")
+        if note_info.type != NoteTypeEnum.alias.value:
+            return webutil.FailedResult(code="500", message="不是别名类型")
+        dao_delete.delete_note_physically(creator=note_info.creator, note_id=note_info.note_id)
+        return webutil.SuccessResult()
+
+    def handle_save(self):
+        param = self.get_param_dict()
+        note_id = param.get_int("note_id")
+        parent_id = param.get_int("parent_id")
+        name = param.get_str("name")
+
+        user_id = xauth.current_user_id()
+        user_name = xauth.current_name_str()
+
+        try:
+            if note_id == 0:
+                note = note_dao.NoteDO()
+                note.name = name
+                note.creator = user_name
+                note.creator_id = user_id
+                note.parent_id = parent_id
+                note.type = NoteTypeEnum.alias.value
+
+                note_dao.create_note(note, check_name=True)
+                return webutil.SuccessResult()
+            else:
+                note_info = NoteIndexDao.get_by_id(note_id=note_id, creator_id=user_id, check_user=True)
+                if note_info is None:
+                    return webutil.FailedResult(code="404", message="笔记不存在")
+                if not note_info.is_alias:
+                    return webutil.FailedResult(code="400", message="不是别名类型")
+                note_dao.rename_note(note_info, new_name=name)
+                return webutil.SuccessResult()
+        except Exception as e:
+            return webutil.FailedResult(code="500", message=str(e))
+
 xurls = (
     r"/note/add"         , CreateHandler,
     r"/note/create"      , CreateHandler,
@@ -890,6 +1010,7 @@ xurls = (
     r"/note/touch"       , TouchHandler,
     r"/note/status"      , UpdateStatusHandler,
     r"/note/order_type", UpdateOrderTypeHandler,
+    r"/note/alias/edit", NoteAliasEditHandler,
     
     # 分享
     r"/note/share",        NoteShareHandler,

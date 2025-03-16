@@ -2,12 +2,13 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2020/02/16 12:49:30
 # @modified 2022/03/12 09:39:04
+from xutils.base import EnumItem
 
-class NoteType:
-
-    def __init__(self, type, name, visible = True):
+class NoteType(EnumItem):
+    def __init__(self, type="", name="", visible = True):
         self.type = type
         self.name = name
+        self.value = type
         self.visible = visible
 
 NOTE_TYPE_MAPPING = {
