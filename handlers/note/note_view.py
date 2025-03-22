@@ -592,7 +592,8 @@ class PreviewPopupHandler:
         try:
             import markdown
             content = textutil.get_short_text(content, 200)
-            return markdown.markdown(content)
+            footer = f"""<div class="row"><a href="{note_info.url}">查看全文</a></div>"""
+            return markdown.markdown(content) + footer
         except:
             return ""
 
