@@ -104,15 +104,12 @@ SYS_TOOLS = [
 
 NOTE_TOOLS = [
     user_link("笔记本", "/note/group", "book"),
-    user_link("待办",  "/message?tag=task", "calendar-check-o"),
+    user_link("待办",  "/message/task", "calendar-check-o"),
     user_link("随手记",  "/message?tag=log", "pencil"),
     user_link("标签列表", "/note/taglist", "tags"),
 
     # 笔记
     user_link("我的动态", "/note/recent?orderby=update", icon="paper-plane"),
-    # user_link("最近创建", "/note/recent?orderby=create", "plus"),
-    # user_link("最近查看", "/note/recent?orderby=view", "eye"),
-    # user_link("常用笔记", "/note/recent?orderby=myhot", "star-o"),
     user_link("时光轴", "/note/timeline?type=all", icon="hourglass-start"),
     # 词典可以用 language 图标
     user_link("词典", "/note/dict", img_src="/static/image/icon_dict.svg"),

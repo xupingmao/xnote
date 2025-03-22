@@ -53,7 +53,7 @@ class TagCategoryManageHandler(BaseTagManageHandler):
         for row in category_list:
             row["edit_url"] = f"?action=edit&category_id={row.category_id}"
             row["delete_url"] = f"?action=delete&category_id={row.category_id}"
-            row["delete_msg"] = "确认删除记录吗?"
+            row["delete_msg"] = f"确认删除记录【{row.name}】吗?"
             table.add_row(row)
 
         kw = Storage()
@@ -65,12 +65,12 @@ class TagCategoryManageHandler(BaseTagManageHandler):
         return self.response_page(**kw)
     
     def handle_edit(self):
+        user_id = xauth.current_user_id()
         category_id = xutils.get_argument_int("category_id")
-        category_info = TagCategoryService.get_by_id(category_id)
+        category_info = TagCategoryService.get_by_id(category_id, user_id=user_id)
         if category_info is None:
             category_info = TagCategoryDO()
 
-        user_id = xauth.current_user_id()
         form = self.create_form()
         form.add_row(field="category_id", value=str(category_id), css_class="hide")
         form.add_row(field="user_id", value=str(user_id), css_class="hide")
@@ -85,23 +85,37 @@ class TagCategoryManageHandler(BaseTagManageHandler):
     def handle_save(self):
         param = self.get_data_dict()
         category_id = param.get_int("category_id")
-        name = param.get_str("name")
+        name = param.get_str("name").strip()
         description = param.get_str("description")
         sort_order = param.get_int("sort_order")
         user_id = xauth.current_user_id()
 
         if category_id > 0:
-            category_info = TagCategoryService.get_by_id(category_id)
+            category_info = TagCategoryService.get_by_id(category_id, user_id=user_id)
             if category_info is None:
                 return webutil.FailedResult(code="404", message="记录不存在")
         else:
+            # 创建
             category_info = TagCategoryDO()
             category_info.user_id = user_id
+            old = TagCategoryService.get_by_name(name, user_id=user_id)
+            if old is not None:
+                return webutil.FailedResult(code="404", message=f"标签分类【{name}】已存在")
         
         category_info.name = name
         category_info.description = description
         category_info.sort_order = sort_order
         TagCategoryService.save(category_info)
+        return webutil.SuccessResult()
+    
+    def handle_delete(self):
+        category_id = xutils.get_argument_int("category_id")
+        user_id = xauth.current_user_id()
+        old = TagCategoryService.get_by_id(category_id, user_id=user_id)
+        if old:
+            TagCategoryService.delete(old)
+        else:
+            return webutil.FailedResult(code="404", message=f"数据不存在,category_id={category_id}")
         return webutil.SuccessResult()
 
 
@@ -128,7 +142,7 @@ class TagManageHandler(BaseTagManageHandler):
         table.default_head_style.min_width = "100px"
         table.add_head("ID", "tag_id")
         table.add_head("标签类别", "category_name")
-        table.add_head("对象类型", "tag_type")
+        table.add_head("对象类型", "tag_type_str")
         table.add_head("名称", "tag_code", css_class_field="type_class")
         table.add_head("标签数量", "amount")
         table.add_head("修改时间", "mtime")
@@ -144,6 +158,7 @@ class TagManageHandler(BaseTagManageHandler):
         for row in rows:
             row["edit_url"] = f"?action=edit&tag_id={row.tag_id}"
             row["category_name"] = category_dict.get(row.category_id, "")
+            row["tag_type_str"] = row.tag_type_name
             table.add_row(row)
 
         kw = Storage()

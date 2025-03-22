@@ -65,6 +65,10 @@ class TagInfoDO(BaseDataRecord):
         if self.tag_type == TagTypeEnum.msg_tag.int_value:
             return f"/message?tag=search&key={quote(self.tag_code)}"
         return f"/note/taginfo?tag_code={quote(self.tag_code)}"
+    
+    @property
+    def tag_type_name(self):
+        return TagTypeEnum.get_name_by_value(str(self.tag_type))
         
 
 class TagBindDO(BaseDataRecord):
@@ -338,10 +342,14 @@ class TagCategoryServiceImpl:
         result_list = self.db.select(where=dict(user_id=user_id), limit=limit, order="sort_order")
         return TagCategoryDO.from_dict_list(result_list)
     
-    def get_by_id(self, category_id=0):
+    def get_by_id(self, category_id=0, user_id=0):
         if category_id == 0:
             return None
-        result = self.db.select_first(where=dict(category_id=category_id))
+        result = self.db.select_first(where=dict(category_id=category_id, user_id=user_id))
+        return TagCategoryDO.from_dict_or_None(result)
+    
+    def get_by_name(self, name="", user_id=0):
+        result = self.db.select_first(where=dict(name=name, user_id=user_id))
         return TagCategoryDO.from_dict_or_None(result)
     
     def get_name_dict(self, user_id=0, limit=100):
@@ -352,6 +360,8 @@ class TagCategoryServiceImpl:
             result[item.category_id] = item.name
         return result
 
+    def delete(self, category_info: TagCategoryDO):
+        return self.db.delete(where=dict(category_id = category_info.category_id))
 
 TagCategoryService = TagCategoryServiceImpl()
 NoteTagInfoService = TagInfoServiceImpl(tag_type=TagTypeEnum.note_tag.int_value)

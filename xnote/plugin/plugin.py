@@ -66,14 +66,19 @@ class PluginContext(Storage):
         self.debug = False
         self.badge_info = "" # 角标信息
         self.is_external = False # 是否是外部插件
+        self.visible_in_list = True # 是否在列表中展示
     
     @property
     def link(self):
         return self.url
     
     @link.setter
-    def set_link(self, link=""):
+    def link(self, link=""):
         self.url = link
+
+    @property
+    def is_builtin(self):
+        return not self.is_external
 
     # sort方法重写__lt__即可
     def __lt__(self, other):

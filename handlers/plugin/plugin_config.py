@@ -21,7 +21,7 @@ def inner_plugin(name, url, category="inner", url_query="", icon= "fa fa-cube"):
     return context
 
 
-def note_plugin(name, url, icon=None, required_role="user", url_query=""):
+def note_plugin(name, url, icon=None, required_role="user", url_query="", visible_in_list=True):
     context = PluginContext()
     context.name = name
     context.title = name
@@ -34,7 +34,8 @@ def note_plugin(name, url, icon=None, required_role="user", url_query=""):
     context.require_admin = False
     context.required_role = required_role
     context.permitted_role_list = ["admin", "user"]
-    context.is_builtin = True
+    context.is_external = False
+    context.visible_in_list = visible_in_list
     context.build()
     return context
 
@@ -99,8 +100,8 @@ INNER_TOOLS = [
     inner_plugin("摄像头", "/tools/camera"),
 
     # 笔记工具
-    note_plugin("新建笔记", "/note/create", "fa-plus-square"),
-    note_plugin("我的置顶", "/note/sticky", "fa-thumb-tack"),
+    note_plugin("新建笔记", "/note/create", "fa-plus-square", visible_in_list=False),
+    note_plugin("我的置顶", "/note/sticky", "fa-thumb-tack", visible_in_list=False),
     note_plugin("搜索历史", "/search/history", "fa-search"),
     note_plugin("导入笔记", "/note/html_importer",
                 "fa-internet-explorer", required_role="admin"),
@@ -111,14 +112,13 @@ INNER_TOOLS = [
     note_plugin("笔记批量管理", "/note/management", "fa-gear"),
     note_plugin("回收站", "/note/removed", "fa-trash"),
     note_plugin("笔记本", "/note/group", "fa-th-large"),
-    note_plugin("待办任务", "/message?tag=task", "fa-calendar-check-o"),
+    note_plugin("待办任务", "/message/task", "fa-calendar-check-o"),
     note_plugin("随手记", "/message?tag=log", "fa-file-text-o"),
-    note_plugin("我的相册", "/note/gallery", "fa-photo"),
-    note_plugin("我的清单", "/note/list", "fa-list"),
-    note_plugin("我的日志", "/note/log", "fa-file-text-o"),
+    note_plugin("我的相册", "/note/gallery", "fa-photo", visible_in_list=False),
+    note_plugin("我的清单", "/note/list", "fa-list", visible_in_list=False),
     note_plugin("我的评论", "/note/comment/mine", "fa-comments"),
     note_plugin("标签列表", "/note/taglist", "fa-tags"),
-    note_plugin("常用笔记", "/note/recent?orderby=hot", "fa-file-text-o"),
+    note_plugin("常用笔记", "/note/recent?orderby=hot", "fa-file-text-o", visible_in_list=False),
     note_plugin("词典", "/note/dict", "icon-dict"),
     note_plugin("时光轴", "/note/timeline", "fa-clock-o"),
     note_plugin("笔记日历", "/note/group/year", "fa-file-text-o"),

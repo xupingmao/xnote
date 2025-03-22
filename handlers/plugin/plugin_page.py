@@ -320,7 +320,7 @@ def on_search_plugins(ctx: SearchContext):
         result.icon = "fa-cube"
         result.name = get_plugin_title_name(plugin)
         result.url = u(plugin.url)
-        result.edit_link = plugin.edit_link
+        result.edit_url = plugin.edit_link
         temp_result.append(result)
 
     result_count = len(temp_result)
@@ -428,7 +428,7 @@ class PluginListHandler:
 
         fill_plugins_badge_info(plugins, orderby)
 
-        context.plugins = plugins
+        context.plugins = self.filter_plugins(plugins)
         context.plugins_status = PluginState.status
 
         if category == "":
@@ -436,6 +436,9 @@ class PluginListHandler:
 
         template_file = get_template_by_version(version)
         return xtemplate.render(template_file, **context)
+    
+    def filter_plugins(self, plugins: typing.List[PluginContext]):
+        return [p for p in plugins if p.visible_in_list]
 
 
 class PluginCategoryListHandler:
