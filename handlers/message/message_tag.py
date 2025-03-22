@@ -37,7 +37,7 @@ def get_tag_list_by_msg_list(msg_list, date=""):
     server_home = xconfig.WebConfig.server_home
     for tag_info in result:
         tag_name = tag_info.name
-        tag_info.url = f"{server_home}/message/calendar?tag=log.date&date={date}&filterKey={quote(tag_name)}"
+        tag_info.customized_url = f"{server_home}/message/calendar?tag=log.date&date={date}&filterKey={quote(tag_name)}"
         tag_info.badge_info = f"{tag_info.amount}"
     result.sort(key = lambda x:x.amount, reverse=True)
     return result

@@ -9,7 +9,7 @@ from xnote.core import xtemplate
 from xnote.core import xconfig
 from xnote.core import xauth
 
-from xutils.functions import TypeDict
+from xutils.functions import TypedDict
 from xutils import Storage
 from xutils import dbutil
 from xutils import dateutil, dbutil
@@ -98,8 +98,8 @@ class TestMain(BaseTestCase):
     def test_create_with_date(self):
         data = dict(content="Xnote-Date-Test", date="2020-01-01")
         result = json_request_return_dict("/message/save", method="POST", data=data)
-        assert result["success"] == True
-        msg_id = TypeDict(result).get_dict("data").get_int("id")
+        assert result.get_bool("success") == True
+        msg_id = result.get_dict("data").get_int("id")
         data = msg_dao.MessageDao.get_by_key(msg_id)
         assert data != None
         assert data.change_time == "2020-01-01 23:59:00"
@@ -197,6 +197,11 @@ class TestMain(BaseTestCase):
         self.check_OK("/message?tag=task")
         self.check_OK("/message?tag=task&action=create")
         self.check_OK("/message?tag=task&filterKey=test")
+        self.check_OK("/message/task")
+        self.check_OK("/message/task?p=done")
+        self.check_OK("/message/task/list_ajax")
+        self.check_OK("/message/task/list_ajax?p=done")
+        self.check_OK("/message/task/tag_list")
 
     def test_task_create_and_done(self):
         # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
@@ -351,3 +356,10 @@ class TestMain(BaseTestCase):
         assert result == "#tag1# #tag2#\ntext"
         result = message_tag.add_tag_to_content("#tag1#\ntext", "#tag1#")
         assert result == "#tag1#\ntext"
+
+    def test_parse_message(self):
+        content = "#tag# test"
+        data = dict(content=content)
+        result = json_request_return_dict("/message/parse", method="POST", data=data)
+        assert result.get("success")
+        tokens = result.get

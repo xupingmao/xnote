@@ -266,8 +266,11 @@ def get_tags_from_message_list(
             no_tag = "true"
             is_no_tag = True
 
+
+        search_tag = TagHelper.get_search_tag(input_tag)
+
         params = dict(
-            tag=TagHelper.get_search_tag(input_tag),
+            tag=search_tag,
             date=input_date,
             key=search_key,
             displayTag=display_tag,
@@ -280,8 +283,10 @@ def get_tags_from_message_list(
 
         mtime = tag_sorter.get_mtime(tag_name)
 
-        tag_item = MessageTag(name=tag_name,
+        tag_item = MessageTag(tag_name=tag_name,
+                              tag_code=tag_name,
                               tag=input_tag,
+                              search_tag = search_tag,
                               amount=amount,
                               url=url,
                               mtime=mtime)
@@ -513,7 +518,7 @@ class MessageListParser(object):
         self.keywords = []
         for word in keywords:
             amount = keywords[word]
-            keyword_info = MessageTag(name=word, url=build_search_url(word), amount=amount)
+            keyword_info = MessageTag(tag_name=word, tag_code=word, customized_url=build_search_url(word), amount=amount)
             self.keywords.append(keyword_info)
 
     def get_message_list(self):
@@ -578,11 +583,11 @@ def list_hot_tags(user_name:str, limit=20):
     sort_tag_list(msg_list, "amount_desc")
     server_home = xconfig.WebConfig.server_home
     for msg in msg_list:
-        msg.url = f"{server_home}/message?tag=log.search&key={quote(msg.content)}"
+        msg.customized_url = f"{server_home}/message?tag=log.search&key={quote(msg.content)}"
     return msg_list[:limit]
 
 
-def list_task_tags(user_name, limit=20, offset=0, tag="task"):
+def list_task_tags(user_name="", limit=20, offset=0, tag="task"):
     assert isinstance(user_name, str)
 
     msg_list, amount = msg_dao.list_task(

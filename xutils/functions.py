@@ -291,7 +291,7 @@ def del_dict_key(dict_obj, key):
     assert isinstance(dict_obj, dict)
     dict_obj.pop(key, None)
 
-class TypeDict:
+class TypedDict:
     """带类型的dict"""
     def __init__(self, dict_: dict) -> None:
         self.dict_ = dict_
@@ -299,11 +299,20 @@ class TypeDict:
     def get_dict(self, key: str):
         value = self.dict_.get(key)
         if value is None:
-            return TypeDict({})
-        return TypeDict(value)
+            return TypedDict({})
+        return TypedDict(value)
     
     def get_int(self, key: str) -> int:
         return self.dict_.get(key, 0)
+    
+    def get_bool(self, key: str) -> bool:
+        return self.dict_.get(key, False)
+    
+    def get(self, key, default_value=None):
+        return self.dict_.get(key, default_value)
+    
+    def __getitem__(self, key):
+        return self.dict_[key]
 
 def dict_get_dict(dict_:dict, key:str) -> dict:
     value = dict_.get(key)

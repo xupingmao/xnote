@@ -30,6 +30,7 @@ from handlers.message.message_month_tags import MonthTagsPage
 from handlers.message.message_date import MessageDateHandler
 from handlers.message.message_date import MessageListByDayHandler
 from handlers.message.message_log import LogPageHandler
+from handlers.message.message_model import MessageTagEnum
 from xnote.core import xnote_event
 
 from handlers.message.message_utils import (
@@ -176,10 +177,7 @@ class ListAjaxHandler:
 
         if filter_date != "":
             return self.do_list_by_date(user_name, filter_date, offset, pagesize)
-
-        if tag == "task":
-            return self.do_list_task(user_name, offset, pagesize)
-
+        
         list_func = xutils.lookup_func("message.list_%s" % tag)
         if list_func != None:
             return list_func(user_name, offset, pagesize)
@@ -265,21 +263,6 @@ class ListAjaxHandler:
         return searcher.get_ajax_data(user_name=user_name, key=key, offset=offset,
                                       limit=pagesize, search_tags=search_tags,
                                       no_tag=no_tag, date=date)
-
-    def do_list_task(self, user_name, offset, limit):
-        p = xutils.get_argument_str("p", "")
-        filter_key = xutils.get_argument("filterKey", "")
-
-        if p == "done":
-            return msg_dao.list_task_done(user_name, offset, limit)
-
-        if filter_key != "":
-            msg_list, amount = msg_dao.list_task(
-                user_name, offset=0, limit=MAX_LIST_LIMIT)
-            msg_list = filter_msg_list_by_key(msg_list, filter_key)
-            return msg_list[offset:offset+limit], len(msg_list)
-        else:
-            return msg_dao.list_task(user_name, offset, limit)
 
     def do_list_by_date(self, user_name, date, offset, pagesize):
         return MessageDateHandler().do_list_by_date(user_name=user_name, date=date, offset=offset, limit=pagesize)
@@ -434,7 +417,7 @@ class DeleteAjaxHandler:
 
     def delete_msg(self, msg: msg_dao.MessageDO):
         if msg.user != xauth.current_name():
-            return dict(code="fail", message="no permission")
+            return webutil.FailedResult(code="fail", message="no permission")
 
         # 先保存历史
         MessageDao.add_history(msg)
@@ -450,7 +433,7 @@ class DeleteAjaxHandler:
         return webutil.SuccessResult()
     
     def delete_tag(self, tag_info: msg_dao.MsgTagInfo):
-        if tag_info.user != xauth.current_name_str():
+        if tag_info.user_id != xauth.current_user_id():
             return webutil.FailedResult(message="no permission")
         
         msg_dao.MsgTagInfoDao.delete(tag_info)
@@ -614,9 +597,6 @@ class MessagePageHandler:
         if tag == "api.tag_list":
             return self.get_tag_list()
 
-        if tag == "task":
-            return self.get_task_page()
-
         if tag == "task.tags":
             return TaskListHandler.get_task_taglist_page()
 
@@ -643,25 +623,6 @@ class MessagePageHandler:
 
     def get_task_kw(self):
         return TaskListHandler.get_task_kw()
-
-    def get_task_page(self):
-        filter_key = xutils.get_argument_str("filterKey", "")
-        page_name = xutils.get_argument_str("p", "")
-
-        if page_name == "create":
-            return TaskListHandler.get_task_create_page()
-
-        if page_name == "done":
-            return TaskListHandler.get_task_done_page()
-
-        if page_name == "taglist":
-            return TaskListHandler.get_task_taglist_page()
-
-        if filter_key != "":
-            return TaskListHandler.get_task_by_keyword_page(filter_key)
-        else:
-            # 任务的首页
-            return TaskListHandler.get_task_create_page()
 
     def get_task_home_page(self):
         return TaskListHandler.get_task_create_page()
@@ -771,7 +732,7 @@ class MessageKeywordAjaxHandler:
         if action in ("mark", "unmark"):
             return self.do_mark_or_unmark(keyword, action)
 
-        return dict(code="404", message="指定动作不存在")
+        return webutil.FailedResult(code="404", message="指定动作不存在")
 
     def do_mark_or_unmark(self, keyword, action):
         user_id = xauth.current_user_id()
@@ -785,7 +746,7 @@ class MessageKeywordAjaxHandler:
 
         msg_dao.MsgTagInfoDao.update(tag_info)
         
-        return dict(code="success")
+        return webutil.SuccessResult()
 
 xutils.register_func("message.process_message", process_message)
 xutils.register_func("message.get_current_message_stat",
@@ -876,7 +837,7 @@ class UpdateTagAjaxHandler:
         if id == "":
             return webutil.FailedResult(code="404", message="id为空")
 
-        if tag in ("task", "cron", "log", "key", "done"):
+        if MessageTagEnum.is_first_tag_code(tag):
             return update_message_tag(id, tag)
         else:
             return webutil.FailedResult(message="无效的标签: %s" % tag)

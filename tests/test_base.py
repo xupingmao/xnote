@@ -20,6 +20,7 @@ from xutils import six
 from xutils.db.driver_sqlite import SqliteKV
 from xutils.config import UtilityConfig
 from xutils.fsutil import FileUtilConfig
+from xutils.functions import TypedDict
 
 config = xconfig
 date = time.strftime("%Y/%m")
@@ -115,6 +116,11 @@ def json_request_return_dict(*args, **kw):
     """
     ret = json_request(*args, **kw)
     assert isinstance(ret, dict)
+    return TypedDict(ret)
+
+def json_request_return_list(*args, **kw):
+    ret = json_request(*args, **kw)
+    assert isinstance(ret, list)
     return ret
 
 def request_html(*args, **kw) -> bytes:

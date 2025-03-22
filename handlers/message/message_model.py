@@ -16,6 +16,7 @@ from xnote.core import xtables, xconfig
 from xnote.service import TagTypeEnum, TagInfoDO
 from xutils.db.dbutil_helper import new_from_dict
 from xutils.base import BaseEnum, EnumItem
+from xutils import quote
 
 """消息模型相关的内容
 任务：默认按照修改时间排序
@@ -43,13 +44,6 @@ class BaseMsgDO(Storage):
     def get_time_info(self):
         return ""
 
-class MessageSystemTag:
-    """系统标签"""
-    task = "task"
-    done = "done"
-    log = "log"
-    key = "key"
-
 server_home = xconfig.WebConfig.server_home
 
 class MessageTagItem(EnumItem):
@@ -61,8 +55,10 @@ class MessageTagItem(EnumItem):
     def url(self):
         return f"{server_home}/message/tag/list?tag=log.tags&sys_tag={self.value}"
 
-
 class MessageTagEnum(BaseEnum):
+    task = MessageTagItem(name="任务", value="task")
+    done = MessageTagItem(name="完成", value="done")
+    log = MessageTagItem(name="随手记", value="log")
 
     book = MessageTagItem("书籍", "book")
     people = MessageTagItem("人物", "people")
@@ -71,6 +67,14 @@ class MessageTagEnum(BaseEnum):
     link = MessageTagItem("链接", "link")
 
     system_tag_list = [file, link, book, people, phone]
+    first_tag_list = [task, done, log]
+
+    @classmethod
+    def is_first_tag_code(cls, tag_code=""):
+        for item in cls.first_tag_list:
+            if tag_code == item.value:
+                return True
+        return False
 
     @classmethod
     def is_system_tag_code(cls, tag_code=""):
@@ -84,6 +88,8 @@ class MessageFolder(Storage):
     def __init__(self):
         self.date = ""
         self.wday = ""
+        self.title = ""
+        self.css_class = ""
         self.item_list = []
 
 class MsgTagInfo(TagInfoDO):
@@ -91,7 +97,11 @@ class MsgTagInfo(TagInfoDO):
 
     def __init__(self, **kw):
         super().__init__(**kw)
+        self.search_tag = ""
         self.html = ""
+        self.customized_url = kw.get("url", "")
+        self.badge_info = ""
+        self.update(kw)
 
     @property
     def content(self):
@@ -116,10 +126,25 @@ class MsgTagInfo(TagInfoDO):
         result.pop("tag_id", None)
         result.pop("tag_name", None)
         result.pop("html", None)
+        result.pop("search_tag", None)
+        result.pop("customized_url", None)
+        result.pop("badge_info", None)
         return result
     
     def get_time_info(self):
         return self.ctime
+    
+    @property
+    def name(self):
+        return self.tag_name
+    
+    @property
+    def url(self):
+        if self.customized_url != "":
+            return self.customized_url
+        if self.search_tag != "":
+            return f"/message?tag={self.search_tag}&key={quote(self.tag_code)}"
+        return f"/message?tag=search&key={quote(self.tag_code)}"
 
 MessageTag = MsgTagInfo
 

@@ -35,6 +35,7 @@ from xutils import textutil
 app          = test_base.init()
 json_request = test_base.json_request
 json_request_return_dict = test_base.json_request_return_dict
+json_request_return_list = test_base.json_request_return_list
 request_html = test_base.request_html
 BaseTestCase = test_base.BaseTestCase
 
@@ -121,13 +122,10 @@ class TestMain(BaseTestCase):
         # 乐观锁更新
         resp = json_request_return_dict("/note/update", method="POST", 
             data=dict(id=id, content="new-content2", type="md", version=version, resp_type="json"))
-        assert isinstance(resp, dict)
-
         self.assertEqual("success", resp["code"])
-
+        
         resp = json_request_return_dict("/note/update", method="POST", 
             data=dict(id=id, content="new-content3", type="md", version=version+1, resp_type="json"))
-        
         self.assertEqual("success", resp["code"])
 
         # 访问日志
@@ -285,7 +283,7 @@ class TestMain(BaseTestCase):
             data=dict(name="xnote-md-test", type="md", content="hello markdown", parent_id = group_id))
         
         id = file["id"]
-        file = json_request("/note/view?id=%s&_format=json" % id).get("file")
+        file = json_request_return_dict("/note/view?id=%s&_format=json" % id).get_dict("file")
         self.assertEqual("md", file["type"])
         self.assertEqual("hello markdown", file["content"])
         self.check_200("/note/edit?id=%s" % id)
@@ -496,7 +494,7 @@ class TestMain(BaseTestCase):
 
     def test_note_comment(self):
         # clean comments
-        data = json_request("/note/comments?note_id=123")
+        data = json_request_return_list("/note/comments?note_id=123")
         for comment in data:
             delete_comment_for_test(comment['id'])
 
@@ -505,7 +503,7 @@ class TestMain(BaseTestCase):
         json_request("/note/comment/save", method="POST", data = request)
 
         # 查询评论
-        data = json_request("/note/comments?note_id=123")
+        data = json_request_return_list("/note/comments?note_id=123")
         self.assertEqual(1, len(data))
         self.assertEqual("hello", data[0]['content'])
 
@@ -515,11 +513,11 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/comment?comment_id=%s&p=edit" % comment_id)
 
         # 更新评论
-        data = json_request("/note/comment?comment_id=%s&p=update&content=%s" % (comment_id, "#TOPIC# hello"))
+        data = json_request_return_dict("/note/comment?comment_id=%s&p=update&content=%s" % (comment_id, "#TOPIC# hello"))
         self.assertEqual("success", data["code"])
 
         # 查询用户维度评论列表
-        data = json_request("/note/comment/list?list_type=user")
+        data = json_request_return_list("/note/comment/list?list_type=user")
         self.assertEqual(1, len(data))
 
         # 我的所有评论
@@ -547,7 +545,7 @@ class TestMain(BaseTestCase):
             data = dict(comment_id = comment_id))
         self.assertEqual("success", result["code"])
 
-        data = json_request("/note/comment/list?list_type=user")
+        data = json_request_return_list("/note/comment/list?list_type=user")
         self.assertEqual(0, len(data))
 
 
