@@ -702,6 +702,9 @@ NoteView.openPreviewPopup = function (e, targetSelector) {
     var offset = $(e.target).offset();
     var name = $(e.target).text();
     console.log("name", name);
+    if (xnote.isMobile()) {
+        offset.left = 0;
+    }
     xnote.http.get("/note/preview_popup?name="+encodeURI(name), function (html) {
         if (html != "") {
             offset.top += 20;
