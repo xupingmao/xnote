@@ -138,21 +138,12 @@
 
 
 .msg-img-box {
-    width: 200px;
-    background: #eee;
+    height: 120px;
     overflow: hidden;
-    /* 水平居中 */
-    text-align: center;
-    /* 垂直居中 需要配合子容器的vertical-align:middle; */
-    /*height: 200px;*/
-    /*line-height: 200px;*/
 }
 
 .msg-img-box.multi {
     float: left;
-    background: none;
-    width: unset;
-    height: 200px;
     padding-right: 10px;
     padding-top: 10px;
 }
