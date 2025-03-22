@@ -17,6 +17,7 @@ from xutils import fsutil
 from xutils import textutil
 from xutils import webutil
 from xutils import dbutil, dateutil
+from xutils import encode_uri_component
 from xnote.core.xtemplate import T
 from xnote.core.xnote_user_config import UserConfig
 from .constant import CREATE_BTN_TEXT_DICT
@@ -66,6 +67,11 @@ class NoteViewContext(Storage):
         self.is_public_page = False
         self.OrderTypeEnum = OrderTypeEnum
         self.file = None # type: NoteIndexDO|None
+        self.content = ""
+        self.note_alias_list = [] # type: list[NoteIndexDO]
+        self.show_recommend = False
+        self.show_pagination = False
+        self.edit_token = ""
         self.update(kw)
 
 
@@ -111,7 +117,7 @@ def handle_note_recommend(kw: NoteViewContext, file, user_name):
     kw.prev_note = note_dao.find_prev_note(file, user_name)
 
 
-def view_gallery_func(file, kw):
+def view_gallery_func(file: NoteDO, kw: NoteViewContext):
     fpath = os.path.join(xconfig.UPLOAD_DIR, file.creator,
                          str(file.parent_id), str(file.id))
     filelist = []
@@ -127,7 +133,7 @@ def view_gallery_func(file, kw):
     kw.filelist = filelist
 
 
-def view_html_func(file, kw):
+def view_html_func(file: NoteDO, kw: NoteViewContext):
     """处理html/post等类型的文档"""
     content = file.content
     content = content.replace(u'\xad', '\n')
@@ -585,17 +591,29 @@ class PreviewPopupHandler:
         user_id = xauth.current_user_id()
         note_info = note_dao.get_by_name_or_alias(name = name, creator_id = user_id)
         if note_info is None:
-            return ""
+            return self.render_search(name)
         if not note_info.is_markdown():
-            return ""
+            return self.render_search(name)
         content = note_info.content
         try:
             import markdown
             content = textutil.get_short_text(content, 200)
-            footer = f"""<div class="row"><a href="{note_info.url}">查看全文</a></div>"""
+            search_url = self.get_search_url(name)
+            footer = f"""<div class="row">
+                <a href="{note_info.url}">查看全文</a>
+                <span>|</span>
+                <a href="{search_url}">搜索【{name}】</a>
+            </div>"""
             return markdown.markdown(content) + footer
         except:
-            return ""
+            return self.render_search(name)
+        
+    def get_search_url(self,name=""):
+        return f"/s/{encode_uri_component(name)}"
+        
+    def render_search(self, name=""):
+        search_url = self.get_search_url(name)
+        return f"""<div class="row"><a href="{search_url}">搜索【{name}】</a></div>"""
 
 xurls = (
     r"/note/(edit|view)", ViewHandler,

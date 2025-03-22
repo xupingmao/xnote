@@ -196,19 +196,13 @@
         marked.parseAndRender(input, "#markdown-output-div", options);
 
         $("body").on("mouseover", ".marked-strong", function (e) {
-            e.preventDefault();
-            var offset = $(e.target).offset();
-            var name = $(e.target).text();
-            console.log("name", name);
-            xnote.http.get("/note/preview_popup?name="+encodeURI(name), function (html) {
-                if (html != "") {
-                    offset.top += 20;
-                    offset.left += 10;
-                    console.log("offset", offset);
-                    $("#preview_popup_window").html(html).css(offset).show();
-                }
-            });
+            xnote.note.openPreviewPopup(e, "#preview_popup_window");
         });
+
+        $("body").on("click", ".marked-strong", function (e) {
+            // 移动端点击触发
+            xnote.note.openPreviewPopup(e, "#preview_popup_window");
+        })
 
         $("body").click(function(event) {
             $("#preview_popup_window").html("").hide();

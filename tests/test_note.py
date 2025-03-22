@@ -116,6 +116,7 @@ class TestMain(BaseTestCase):
         self.check_OK("/note/view?id=" + str(id))
         self.check_OK("/note/print?id=" + str(id))
         self.check_OK("/note/preview_popup?name=xnote-unit-test")
+        self.check_OK("/note/preview_popup?name=no-such-note")
 
         # 乐观锁更新
         resp = json_request_return_dict("/note/update", method="POST", 

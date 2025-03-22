@@ -455,7 +455,7 @@ NoteView.openDialogToBatchMove = function (selector) {
         return;
     }
     var noteIds = [];
-    selected.each(function(index, elem) {
+    selected.each(function (index, elem) {
         noteIds.push($(elem).attr("data-id"));
     })
     xnote.note.openDialogToMove(noteIds.join(","));
@@ -476,8 +476,8 @@ NoteView.onTagClick = function (target) {
 NoteView.openDialogToShare = function (target) {
     var id = $(target).attr("data-id");
     var type = $(target).attr("data-note-type");
-    var params = {note_id: id};
-    var ajax_dialog_url   = "/note/ajax/share_group_dialog";
+    var params = { note_id: id };
+    var ajax_dialog_url = "/note/ajax/share_group_dialog";
     var ajax_dialog_title = "分享笔记本";
 
     if (type != "group") {
@@ -498,7 +498,7 @@ NoteView.changeOrderBy = function (target) {
     checkNotEmpty(id, "data-id为空");
     checkNotEmpty(orderby, "data-orderby为空");
 
-    xnote.http.post("/note/orderby", {id: id, orderby: orderby}, function (resp) {
+    xnote.http.post("/note/orderby", { id: id, orderby: orderby }, function (resp) {
         var code = resp.code;
         if (code != "success") {
             xnote.alert(resp.message);
@@ -517,7 +517,7 @@ NoteView.changeLevel = function (target) {
     checkNotEmpty(id, "data-id为空");
     checkNotEmpty(status, "data-status为空");
 
-    xnote.http.post("/note/status", {id: id, status: status}, function (resp) {
+    xnote.http.post("/note/status", { id: id, status: status }, function (resp) {
         var code = resp.code;
         if (code != "success") {
             xnote.alert(resp.message);
@@ -529,7 +529,7 @@ NoteView.changeLevel = function (target) {
 };
 
 // 初始化wangEditor
-NoteView.initWangEditor = function() {
+NoteView.initWangEditor = function () {
     var editor = new wangEditor('#toolbar', "#editor");
     editor.customConfig.uploadImgServer = false;
     editor.customConfig.uploadImgShowBase64 = true;   // 使用 base64 保存图片
@@ -547,7 +547,7 @@ NoteView.savePost = function (target) {
     var noteId = $(target).attr("data-note-id");
     var version = $(target).attr("data-note-version");
     var data = this.wangEditor.txt.html();
-    xnote.http.post("/note/save?type=html", {id:noteId, version:version, data:data}, function (resp) {
+    xnote.http.post("/note/save?type=html", { id: noteId, version: version, data: data }, function (resp) {
         console.log(resp);
         if (resp.success) {
             // window.location.reload();
@@ -559,10 +559,10 @@ NoteView.savePost = function (target) {
 }
 
 // 删除笔记
-NoteView.remove = function(id, name, parentId, postAction) {
+NoteView.remove = function (id, name, parentId, postAction) {
     var confirmed = xnote.confirm("确定删除'" + name + "'?", function (confirmed) {
         if (confirmed) {
-            xnote.http.post("/note/remove", {id:id}, function (resp) {
+            xnote.http.post("/note/remove", { id: id }, function (resp) {
                 var code = resp.code;
                 if (code != "success") {
                     xnote.alert(resp.message);
@@ -610,7 +610,7 @@ NoteView.recover = function (noteId, callbackFn) {
  * @param {string} parentId 父级笔记ID
  * @param {string} postAction 后置的动作 {refresh}  
  */
-NoteView.createGroup = function(parentId, postAction) {
+NoteView.createGroup = function (parentId, postAction) {
     var opName = "新建笔记本";
 
     if (parentId === undefined) {
@@ -643,11 +643,11 @@ NoteView.createNotebook = NoteView.createGroup;
  * @param {string} id 笔记ID
  * @param {string} oldName 旧的名称
  */
-NoteView.rename =  function(id, oldName) {
+NoteView.rename = function (id, oldName) {
     xnote.prompt("新名称", oldName, function (newName) {
         console.log(newName);
         if (newName != "" && newName != null) {
-            xnote.http.post("/note/rename", {id:id, name:newName}, function (resp) {
+            xnote.http.post("/note/rename", { id: id, name: newName }, function (resp) {
                 var code = resp.code;
                 if (code != "success") {
                     xnote.alert(resp.message);
@@ -660,7 +660,7 @@ NoteView.rename =  function(id, oldName) {
     });
 }
 
-NoteView.renameByElement = function(target) {
+NoteView.renameByElement = function (target) {
     var id = $(target).attr("data-id");
     var oldName = $(target).attr("data-name");
     if (id == undefined || id == "") {
@@ -676,7 +676,7 @@ NoteView.renameByElement = function(target) {
     NoteView.rename(id, oldName);
 }
 
-NoteView.updateOrderType = function(target) {
+NoteView.updateOrderType = function (target) {
     var noteId = $(target).attr("data-id");
     var orderType = $(target).attr("data-value");
     var params = {
@@ -692,3 +692,22 @@ NoteView.updateOrderType = function(target) {
     });
 }
 
+/**
+ * 打开笔记预览
+ * @param {Event} e 
+ * @param {string} targetSelector 
+ */
+NoteView.openPreviewPopup = function (e, targetSelector) {
+    e.preventDefault();
+    var offset = $(e.target).offset();
+    var name = $(e.target).text();
+    console.log("name", name);
+    xnote.http.get("/note/preview_popup?name="+encodeURI(name), function (html) {
+        if (html != "") {
+            offset.top += 20;
+            offset.left += 10;
+            console.log("offset", offset);
+            $(targetSelector).html(html).css(offset).show();
+        }
+    });
+}

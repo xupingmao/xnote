@@ -116,7 +116,10 @@ def get_draft(note_id):
     note_id = str(note_id)
 
     db = get_note_draft_db()
-    return db.get(note_id)
+    result = db.get(note_id)
+    if result is None:
+        return ""
+    return str(result)
 
 def steal_edit_lock(note_id, token, expire_time):
     return NoteLockDao.steal_edit_lock(note_id, token, expire_time)
