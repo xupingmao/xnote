@@ -1,5 +1,6 @@
+{% from handlers.note.models import NoteDO %}
 {% init comment_class = "" %}
-{% init file = Storage() %}
+{% init file = NoteDO() %}
 {% init show_comment_title = True %}
 {% init show_comment_create = True %}
 {% init show_comment_note = False %}

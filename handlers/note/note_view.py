@@ -29,6 +29,7 @@ from . import dao_log
 from .models import OrderTypeEnum, NoteIndexDO, NoteTypeEnum
 from .dao_tag import NoteTagInfoDao
 from .dao import NoteIndexDao, NoteDO
+from handlers.note.note_service import NoteService
 
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -50,6 +51,8 @@ class NoteViewContext(Storage):
         self.show_aside = True
         self.show_contents_btn = False
         self.show_comment_edit = False
+        self.show_content = True
+        self.show_ext_info = True
         self.can_edit = False
 
         self.page = 1
@@ -72,6 +75,7 @@ class NoteViewContext(Storage):
         self.show_recommend = False
         self.show_pagination = False
         self.edit_token = ""
+        self.tab = ""
         self.update(kw)
 
 
@@ -80,30 +84,6 @@ def visit_by_id(ctx: xnote_event.NoteViewEvent):
     note_id = ctx.id
     user_name = ctx.user_name
     note_dao.visit_note(user_name, note_id, user_id=ctx.user_id)
-
-
-def check_auth(file: note_dao.NoteDO, user_name):
-    if user_name == "admin":
-        return
-
-    if user_name == file.creator:
-        return
-
-    if file.is_public == 1:
-        return
-
-    if user_name is None:
-        xauth.redirect_to_login()
-
-    # 笔记的分享
-    if dao_share.get_share_to(user_name, file.id) != None:
-        return
-
-    # 笔记本的分享
-    if dao_share.get_share_to(user_name, file.parent_id) != None:
-        return
-
-    raise web.seeother("/unauthorized")
 
 
 def handle_note_recommend(kw: NoteViewContext, file, user_name):
@@ -175,6 +155,10 @@ def view_or_edit_md_func(file: NoteDO, kw: NoteViewContext):
 
     if kw.op == "edit" and webutil.is_mobile_client():
         kw.show_nav = False
+
+    if kw.tab == "comment":
+        kw.show_content = False
+        kw.show_ext_info = False
 
 
 def view_group_timeline_func(note, kw):
@@ -362,6 +346,7 @@ class ViewHandler:
         kw.pagesize = pagesize
         kw.page_url = f"/note/view?id={id}&page="
         kw.is_public_page = is_public_page
+        kw.tab = xutils.get_argument_str("tab")
 
         if token == "" and is_empty_id(id):
             raise web.found("/")
@@ -380,7 +365,7 @@ class ViewHandler:
             raise web.notfound()
 
         if token == "":
-            check_auth(file, user_name)
+            NoteService.check_auth(file, user_id)
 
         if file.is_alias:
             raise web.seeother(f"/note/view/{file.parent_id}")
@@ -456,8 +441,8 @@ class PrintHandler:
         note = note_dao.get_by_id(note_id)
         if note == None:
             return xtemplate.render("error.html", error="笔记不存在")
-        user_name = xauth.current_name()
-        check_auth(note, user_name)
+        user_id = xauth.current_user_id()
+        NoteService.check_auth(note, user_id)
 
         kw = Storage()
         kw.show_menu = False

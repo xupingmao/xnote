@@ -357,6 +357,7 @@ def default_list_func(context: ListContext):
     offset = context.offset
     limit = context.limit
     user_name = context.user_name
+    user_id = context.user_id
     parent_id = context.parent_id
     tags = None
     
@@ -367,9 +368,9 @@ def default_list_func(context: ListContext):
     if note_info == None:
         raise webutil.WebException(code="404", message="笔记不存在")
     
-    if note_info.creator != user_name:
+    if note_info.creator_id != user_id:
         # 分享模式
-        share_info = dao_share.get_share_by_note_and_to_user(parent_id, user_name)
+        share_info = dao_share.get_share_by_note_and_to_user(parent_id, user_id)
         if share_info == None:
             raise webutil.WebException(code="403", message="无查看权限")
     

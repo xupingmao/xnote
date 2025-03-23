@@ -420,7 +420,8 @@ class UnshareHandler:
         try:
             note = check_get_note(id)
             if to_user != "":
-                dao_share.delete_share(id, to_user = to_user)
+                to_user_id = xauth.UserDao.get_id_by_name(to_user)
+                dao_share.delete_share(id, to_user_id = to_user_id)
             else:
                 note_dao.update_note(id, is_public = 0)
                 note_dao.ShareInfoDao.delete_by_target(share_type="note_public", target_id=id)

@@ -102,8 +102,8 @@ def list_comments_by_idx_list(idx_list: typing.List[CommentIndexDO], user_name="
             result.append(item)
     return result
 
-def list_comments(note_id, offset=0, limit=100, user_name=""):
-    index_list = comment_service.list(target_id=int(note_id), offset=offset,limit=limit)
+def list_comments(note_id=0, offset=0, limit=100, user_name=""):
+    index_list = comment_service.list(target_id=note_id, offset=offset,limit=limit)
     return list_comments_by_idx_list(index_list, user_name=user_name)
 
 def list_comments_by_user(user_id=0, date="", offset=0, limit=0):

@@ -1,6 +1,7 @@
 {% init can_edit = False %}
 {% init edit_token = "" %}
 {% init show_draft_edit = False %}
+{% init show_content = True %}
 
 <style>
 /* 预览浮窗样式 */
@@ -54,6 +55,12 @@
 </div>
 {% end %}
 
+<div class="card x-tab-box btn-style" data-tab-key="tab" data-tab-default="all">
+    <a class="x-tab" data-tab-value="all">全部</a>
+    <a class="x-tab" data-tab-value="comment">评论</a>
+</div>
+
+{% if show_content %}
 <div class="card col-md-12">
     {% if file.content == "" %}
         {% include common/text/empty_text.html %}
@@ -209,3 +216,5 @@
         })
     });
 </script>
+
+{% end %}

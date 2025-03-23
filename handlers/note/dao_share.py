@@ -27,7 +27,7 @@ class NoteShareDao:
     share_type = ShareTypeEnum.note_to_user.value
 
     @classmethod
-    def get_by_note_and_to_user(cls, note_id, to_id):
+    def get_by_note_and_to_user(cls, note_id=0, to_id=0):
         where = dict(share_type="note_to_user", target_id = int(note_id), to_id = to_id)
         return cls.db.select_first(where=where)
     
@@ -74,11 +74,12 @@ class NoteShareDao:
             where["target_id"] = target_id
         if from_id != 0:
             where["from_id"] = from_id
-        return cls.db.select(where=where, offset=offset, limit=limit, order=order)
+        result = cls.db.select(where=where, offset=offset, limit=limit, order=order)
+        return ShareInfoDO.from_dict_list(result)
 
-def get_share_by_note_and_to_user(note_id=0, to_user=""):
-    to_id = xauth.UserDao.get_id_by_name(to_user)
-    return NoteShareDao.get_by_note_and_to_user(note_id, to_id=to_id)
+def get_share_by_note_and_to_user(note_id=0, to_user_id=0):
+    assert to_user_id > 0
+    return NoteShareDao.get_by_note_and_to_user(note_id, to_id=to_user_id)
 
 
 @logutil.log_deco("share_note_to", log_args = True, args_convert_func = args_convert_func)
@@ -88,8 +89,8 @@ def share_note_to(note_id, from_user, to_user):
     return NoteShareDao.share_note_to(target_id=note_id, from_id=from_id, to_id=to_id)
 
 @logutil.log_deco("delete_share", log_args = True)
-def delete_share(note_id, to_user=""):
-    record = get_share_by_note_and_to_user(note_id, to_user)
+def delete_share(note_id, to_user_id=0):
+    record = get_share_by_note_and_to_user(note_id, to_user_id)
     if record != None:
         NoteShareDao.delete_by_id(record.id)
 
@@ -125,8 +126,8 @@ def count_share_to(to_user):
     return NoteShareDao.count(to_id=to_id)
 
 
-def get_share_to(to_user, note_id):
-    return get_share_by_note_and_to_user(note_id, to_user)
+def get_share_to(to_user_id=0, note_id=0):
+    return get_share_by_note_and_to_user(note_id, to_user_id)
 
 xutils.register_func("note.share_to", share_note_to)
 xutils.register_func("note.delete_share", delete_share)

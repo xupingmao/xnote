@@ -222,7 +222,6 @@ class ListAjaxHandler:
         key = xutils.get_argument_str("key")
         orderby = xutils.get_argument_str("orderby", "amount_desc")
         filter_key = xutils.get_argument_str("filter_key")
-        template_file = "message/page/message_tag_ajax.html"
         page_size = 20
         user_id = xauth.current_user_id()
         offset = webutil.get_offset_by_page(page, page_size)
@@ -259,7 +258,7 @@ class ListAjaxHandler:
             limit = self.get_recent_limit()
             kw.recent_keywords = get_recent_keywords(user_name, tag = "search", limit=limit)
             
-        return xtemplate.render(template_file, **kw)
+        return xtemplate.render("message/page/message_tag_ajax.html", **kw)
     
     def get_recent_limit(self):
         if webutil.is_mobile_client():

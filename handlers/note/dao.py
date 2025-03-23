@@ -45,6 +45,7 @@ from handlers.note.models import NoteToken
 from handlers.note.models import NotePathInfo
 from handlers.note.models import NOTE_ICON_DICT
 from handlers.note.models import OrderTypeEnum
+from xutils.base import BaseDataRecord
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -332,7 +333,7 @@ class ShareTypeEnum(enum.Enum):
     note_public = "note_public"
     note_to_user = "note_to_user"
 
-class ShareInfoDO(Storage):
+class ShareInfoDO(BaseDataRecord):
     def __init__(self):
         self.ctime = dateutil.format_datetime()
         # 分享类型 {note_public, note_to_user}

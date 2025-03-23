@@ -53,7 +53,7 @@
             params.p = "update";
             params.comment_id = "{{comment.id}}";
             params.content = $("#commentUpdateContent").val();
-            $.post("/note/comment", params, function (resp) {
+            xnote.http.post("/note/comment", params, function (resp) {
                 if (resp.code == "success") {
                     xnote.toast("更新成功");
                     xnote.fire("comment.refresh");

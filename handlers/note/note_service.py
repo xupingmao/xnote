@@ -1,8 +1,12 @@
 # encoding=utf-8
+import web
 from datetime import datetime
 from xutils import dateutil
 from handlers.note.dao import NoteIndexDao
+from handlers.note.models import NoteDO
 from xnote.core import xconfig
+from xnote.core import xauth
+from handlers.note import dao_share
 import typing
 
 class YearGroup:
@@ -35,3 +39,24 @@ class NoteService:
             result.append(item)
             year-=1
         return result
+        
+    @classmethod
+    def check_auth(cls, file: NoteDO, user_id=0):
+        if user_id == file.creator_id:
+            return
+
+        if file.is_public == 1:
+            return
+
+        if user_id == 0:
+            xauth.redirect_to_login()
+
+        # 笔记的分享
+        if dao_share.get_share_to(user_id, file.id) != None:
+            return
+
+        # 笔记本的分享
+        if dao_share.get_share_to(user_id, file.parent_id) != None:
+            return
+
+        raise web.seeother("/unauthorized")
