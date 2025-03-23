@@ -493,17 +493,19 @@ class TestMain(BaseTestCase):
         json_request("/note/remove?id=" + str(id))
 
     def test_note_comment(self):
+        delete_note_for_test(name="comment-test")
+        note_id = create_note_for_test(type="md", name="comment-test")
         # clean comments
-        data = json_request_return_list("/note/comments?note_id=123")
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
         for comment in data:
             delete_comment_for_test(comment['id'])
 
         # 创建一个评论
-        request = dict(note_id = "123", content = "hello")
+        request = dict(note_id = str(note_id), content = "hello")
         json_request("/note/comment/save", method="POST", data = request)
 
         # 查询评论
-        data = json_request_return_list("/note/comments?note_id=123")
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
         self.assertEqual(1, len(data))
         self.assertEqual("hello", data[0]['content'])
 
@@ -550,9 +552,18 @@ class TestMain(BaseTestCase):
 
 
     def test_note_comment_not_login(self):
+        delete_note_for_test(name="comment-test")
+        note_id = create_note_for_test(type="md", name="comment-test")
+        note_index = NoteIndexDao.get_by_id(note_id)
+        assert note_index != None
+
         try:
             logout_test_user()
-            self.check_OK("/note/comments?note_id=123")
+            self.check_303(f"/note/comments?note_id={note_id}")
+            # 改成public
+            note_index.is_public = True
+            NoteIndexDO.update(note_index)
+            self.check_OK(f"/note/comments?note_id={note_id}")
         finally:
             login_test_user()
 

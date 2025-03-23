@@ -21,6 +21,8 @@ from xnote.core.models import SearchContext, SearchResult
 from .dao_comment import search_comment
 from xutils.text_parser import TokenType
 from .models import NoteTypeInfo
+from handlers.note.note_service import NoteService
+from handlers.note.dao import NoteIndexDao
 
 NOTE_DAO = DAO("note")
 
@@ -147,6 +149,10 @@ class CommentListAjaxHandler:
             count = len(comments)
         else:
             assert note_id > 0
+            note_index = NoteIndexDao.get_by_id(note_id)
+            if note_index is None:
+                raise Exception("笔记不存在")
+            NoteService.check_auth(note_index, user_id=user_id)
             comments  = dao_comment.list_comments(note_id, offset = offset, limit = page_size, user_name=user_name)
             count = dao_comment.count_comment_by_note(note_id)
         

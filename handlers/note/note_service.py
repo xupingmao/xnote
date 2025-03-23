@@ -3,7 +3,7 @@ import web
 from datetime import datetime
 from xutils import dateutil
 from handlers.note.dao import NoteIndexDao
-from handlers.note.models import NoteDO
+from handlers.note.models import NoteDO, NoteIndexDO
 from xnote.core import xconfig
 from xnote.core import xauth
 from handlers.note import dao_share
@@ -41,7 +41,7 @@ class NoteService:
         return result
         
     @classmethod
-    def check_auth(cls, file: NoteDO, user_id=0):
+    def check_auth(cls, file: NoteIndexDO, user_id=0):
         if user_id == file.creator_id:
             return
 

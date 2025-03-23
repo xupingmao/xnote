@@ -21,6 +21,8 @@ from xnote.core.xnote_event import FileUploadEvent
 from .fs_helper import FileInfoDao
 from handlers.fs import fs_checker
 from xutils.fsutil import get_safe_file_name
+from handlers.note.models import NoteTypeInfo
+
 try:
     from PIL import Image
 except ImportError:
@@ -244,33 +246,6 @@ class UploadHandler:
     @xauth.login_required()
     def GET(self):
         return self.get_upload_page_v2()
-        
-    def get_upload_page_v1(self):
-        user_info = xauth.current_user()
-        assert user_info != None
-        user_name = user_info.name
-        xmanager.add_visit_log(user_name, "/fs_upload")
-
-        year = xutils.get_argument_str("year", time.strftime("%Y"))
-        month = xutils.get_argument_str("month", time.strftime("%m"))
-        if len(month) == 1:
-            month = '0' + month
-
-        dirname = os.path.join(xconfig.FileConfig.data_dir, "files",
-                               user_name, "upload", year, month)
-        pathlist = fsutil.listdir_abs(dirname)
-        
-        return xtemplate.render("fs/page/fs_upload.html",
-                                show_aside=False,
-                                html_title=T("文件"),
-                                pathlist=pathlist,
-                                year=int(year),
-                                month=int(month),
-                                path=dirname,
-                                dirname=dirname,
-                                get_webpath=get_webpath,
-                                upload_link_by_month=upload_link_by_month,
-                                get_display_name=get_display_name)
 
     def get_upload_page_v2(self):
         # TODO 基于数据库数据的上传页面
@@ -303,6 +278,8 @@ class UploadHandler:
         kw.get_webpath = get_webpath
         kw.upload_link_by_month = upload_link_by_month
         kw.get_display_name = get_display_name
+        kw.type_list = NoteTypeInfo.get_type_list()
+        kw.note_type = "file"
 
         return xtemplate.render("fs/page/fs_upload.html",**kw)
     
