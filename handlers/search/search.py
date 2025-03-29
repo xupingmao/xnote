@@ -22,12 +22,14 @@ from xnote.core.xtemplate import T
 from xnote.core.models import SearchContext, SearchResult
 from xnote.service.search_service import SearchHistoryDO
 
-NOTE_DAO = xutils.DAO("note")
-MSG_DAO  = xutils.DAO("message")
-
-config = xconfig
 SEARCH_TYPE_DICT = dict() # type: dict[str, Storage]
 
+class SearchHandlerConfig:
+    def __init__(self):
+        self.search_type = ""
+        self.placeholder = ""
+        self.action = ""
+        self.tag = ""
 
 def register_search_handler(search_type, placeholder = None, action = None, tag = None):
     global SEARCH_TYPE_DICT
@@ -495,7 +497,7 @@ class SearchDialogAjaxHandler:
         key = xutils.get_argument_str("key", "")
         offset = xutils.get_argument_int("offset", 0)
         limit = xutils.get_argument_int("limit", 100)
-        xutils.get_argument("callback", "")
+        xutils.get_argument_str("callback", "")
 
         if key != "":
             searcher = SearchHandler()

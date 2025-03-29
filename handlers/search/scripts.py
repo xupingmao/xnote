@@ -7,7 +7,8 @@ import xutils
 from xnote.core import xconfig
 from xnote.core import xauth
 from xnote.core import xmanager
-from xutils import SearchResult, textutil
+from xutils import textutil
+from xnote.core.models import SearchContext, SearchResult
 
 def search_scripts(name):
     words   = textutil.split_words(name)
@@ -30,19 +31,19 @@ def search_scripts(name):
 
 # 脚本工具比较危险，不允许执行了
 # @xmanager.searchable()
-def on_search_scripts(ctx):
+def on_search_scripts(ctx:SearchContext):
     if not xauth.is_admin():
         return None
     if not ctx.search_tool:
         return
     if ctx.search_dict:
         return
-    name    = ctx.key
+    name = ctx.key
     ctx.commands += search_scripts(name)
 
 
 @xmanager.searchable()
-def on_search_books(ctx):
+def on_search_books(ctx: SearchContext):
     if not xauth.is_admin():
         return
     if not ctx.category == "book":

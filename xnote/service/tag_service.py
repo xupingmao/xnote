@@ -54,6 +54,10 @@ class TagInfoDO(BaseDataRecord):
         self.category_id = 0
         self.update(kw)
 
+    def handle_from_dict(self):
+        if self.tag_name == "":
+            self.tag_name = SystemTagEnum.get_name_by_code(self.tag_code)
+
     def to_save_dict(self):
         result = dict(**self)
         result.pop("tag_id", None)

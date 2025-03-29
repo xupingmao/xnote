@@ -4,15 +4,15 @@
 
 """Description here"""
 import sys
-import xmanager
 import xutils
-import xauth
-from xtemplate import T
 
-SearchResult = xutils.SearchResult
+from xnote.core import xmanager
+from xnote.core import xauth
+from xnote.core.xtemplate import T
+from xnote.core.models import SearchResult, SearchContext
 
 @xmanager.searchable(r"([a-zA-Z0-9\.]+)")
-def search(ctx):
+def search(ctx: SearchContext):
     """搜索Python文档"""
     if not xauth.is_admin():
         return

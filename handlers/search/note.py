@@ -4,27 +4,17 @@
 """搜索知识库文件"""
 import re
 import sys
-import six
 import logging
 
 import xutils
-import xauth
-import xmanager
-import xconfig
-import xtables
+from xnote.core import xauth
+from xnote.core import xmanager
+from xnote.core import xconfig
+from xnote.core import xtables
+from xnote.core.models import SearchContext
 from xutils import textutil
 from xutils import SearchResult, text_contains
 
-NOTE_DAO = xutils.DAO("note")
-
-def to_sqlite_obj(text):
-    if text is None:
-        return "NULL"
-    if not isinstance(text, six.string_types):
-        return repr(text)
-    text = text.replace("'", "''")
-    return "'" + text + "'"
-    
 def filter_symbols(words):
     new_words = []
     for word in words:
@@ -34,9 +24,31 @@ def filter_symbols(words):
         new_words.append(word)
     return new_words
 
-def search(ctx, expression=None):
+
+def search_tag(ctx: SearchContext):
+    from handlers.note.dao_tag import NoteTagInfoDao
+    key = ctx.key
+    result = [] # type: list[SearchResult]
+    if key == "":
+        return result
+    
+    tag_info = NoteTagInfoDao.get_by_code(user_id=ctx.user_id, tag_code=key)
+    if tag_info != None:
+        tag_result = SearchResult()
+        tag_result.name = f"【标签】{tag_info.tag_name}"
+        tag_result.url = tag_info.url
+        tag_result.icon = "fa fa-file-text-o"
+        tag_result.show_move = False
+        result.append(tag_result)
+        return result
+    return result
+
+
+def search(ctx: SearchContext, expression=None):
+    from handlers.note import dao as note_dao
     words = ctx.words
     files = []
+    tags = search_tag(ctx)
 
     words = filter_symbols(words)
 
@@ -44,19 +56,19 @@ def search(ctx, expression=None):
         return files
 
     if ctx.search_note_content:
-        files += NOTE_DAO.search_content(words, xauth.current_name())
+        files += note_dao.search_content(words, xauth.current_name_str())
     
     if ctx.search_note:
-        files += NOTE_DAO.search_name(words, xauth.current_name())
+        files += note_dao.search_name(words, xauth.current_name_str())
 
     for item in files:
         item.category = 'note'
 
     # group 放前面
-    groups     = list(filter(lambda x: x.type == "group", files))
+    groups = list(filter(lambda x: x.type == "group", files))
     text_files = list(filter(lambda x: x.type != "group", files))
-    files      = groups + text_files
+    files = groups + text_files
 
     logging.debug("len(files)=%s", len(files))
-    return files
+    return tags + files
 

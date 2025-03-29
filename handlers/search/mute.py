@@ -5,9 +5,9 @@
 """Description here"""
 import re
 import time
-import xconfig
 import xutils
-import xauth
+from xnote.core import xconfig
+from xnote.core import xauth
 
 def search(ctx, mute_last):
     if not xauth.is_admin():
