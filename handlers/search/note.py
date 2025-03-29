@@ -25,22 +25,31 @@ def filter_symbols(words):
     return new_words
 
 
-def search_tag(ctx: SearchContext):
+def search_tag(ctx: SearchContext, max_result=5):
     from handlers.note.dao_tag import NoteTagInfoDao
     key = ctx.key
     result = [] # type: list[SearchResult]
     if key == "":
         return result
     
-    tag_info = NoteTagInfoDao.get_by_code(user_id=ctx.user_id, tag_code=key)
-    if tag_info != None:
-        tag_result = SearchResult()
-        tag_result.name = f"【标签】{tag_info.tag_name}"
-        tag_result.url = tag_info.url
-        tag_result.icon = "fa fa-file-text-o"
-        tag_result.show_move = False
+    tag_info_list = NoteTagInfoDao.search(user_id=ctx.user_id, tag_code_like=key, order="amount desc")
+
+    tag_result = SearchResult()
+    tag_result.name = f"搜索到{len(tag_info_list)}个标签"
+    tag_result.url = "#"
+    tag_result.icon = "fa fa-tags"
+    tag_result.show_move = False
+    
+    if len(tag_info_list) > 0:
+        html = ""
+        server_home = xconfig.WebConfig.server_home
+        for tag_info in tag_info_list[:max_result]:
+            html += f"""<span class="tag-span">
+            <a class="tag-link" href="{server_home}{tag_info.url}">{tag_info.tag_name}</a>
+            {tag_info.amount}
+            </span>"""
+        tag_result.html = html
         result.append(tag_result)
-        return result
     return result
 
 

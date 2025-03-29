@@ -18,9 +18,11 @@ def search(ctx: SearchContext):
         return
     name = ctx.groups[0]
     if name in sys.modules:
+        prefix = T("Python Document")
         item = SearchResult()
-        item.name = T("Python Document") + " - %s" % name
-        item.url = "/system/document?name=%s" % name
+        item.name = f"【{prefix}】{name}"
+        item.url = f"/system/document?name={name}"
         item.content = ""
+        item.icon = "fa fa-file-text-o"
         ctx.tools.append(item)
 

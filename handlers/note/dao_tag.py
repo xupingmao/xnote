@@ -126,6 +126,9 @@ class _NoteTagInfoDaoImpl:
     def get_by_code(self, user_id=0, tag_code=""):
         return self.tag_info_service.get_first(user_id=user_id, tag_code=tag_code)
     
+    def search(self, user_id=0, tag_code_like="", order=None):
+        return self.tag_info_service.search(user_id=user_id, tag_code_like=tag_code_like, order=order)
+    
     def list(self, user_id=0, group_id=0, order=None) -> typing.List[TagInfoDO]:
         if group_id > 0:
             tags = NoteTagBindDao.get_by_note_id(user_id=user_id, note_id=group_id)

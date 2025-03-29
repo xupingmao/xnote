@@ -217,6 +217,13 @@ class TagInfoServiceImpl:
             return tag_type
         return self.tag_type
     
+    def _get_like_text(self, text=""):
+        if not text.startswith("%"):
+            text = "%" + text
+        if not text.endswith("%"):
+            text = text + "%"
+        return text
+    
     def get_page(self, user_id=0, tag_type=0, target_id_list=[], offset=0, limit=20, 
                  skip_count=False, skip_tag_type=False, order=None):
         where_sql = "user_id=$user_id"
@@ -259,6 +266,14 @@ class TagInfoServiceImpl:
         vars = dict(tag_id=tag_id, user_id=user_id, tag_code=tag_code)
         result = self.db.select_first(where=where_sql, vars=vars)
         return TagInfoDO.from_dict_or_None(result)
+    
+    def search(self, user_id=0, tag_code_like="", offset=0, limit=20, order=None):
+        where_sql = "user_id=$user_id AND tag_type=$tag_type AND tag_code LIKE $tag_code_like"
+        tag_code_like = self._get_like_text(tag_code_like)
+        tag_type = self.tag_type
+        vars = dict(user_id=user_id, tag_code_like=tag_code_like, tag_type=tag_type)
+        result = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit, order=order)
+        return TagInfoDO.from_dict_list(result)
         
     def update(self, tag_info: TagInfoDO):
         assert tag_info.user_id > 0
