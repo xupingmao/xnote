@@ -7,6 +7,7 @@ import handlers.note.dao_log as dao_log
 
 from xnote.core import xauth
 from xutils import webutil
+from xutils import textutil
 from handlers.note import dao
 from handlers.note.note_helper import assemble_notes_by_date
 
@@ -71,6 +72,20 @@ class StatApiHandler:
         return dict(code="success", data=dao.get_note_stat(user_name=user_name))
 
 
+class SelectNameHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        name = xutils.get_argument_str("search")
+        words = textutil.split_words(name)
+        creator = xauth.current_name_str()
+        results = []
+
+        for note_index in dao.search_name(words=words, creator=creator, limit=100):
+            results.append(dict(id=note_index.note_id, text=note_index.name))
+
+        return dict(results=results)
+
 xutils.register_func("page.list_recent_groups", list_recent_groups)
 xutils.register_func("page.list_recent_notes", list_recent_notes)
 xutils.register_func("note.get_date_by_type", get_date_by_type)
@@ -79,4 +94,5 @@ xutils.register_func("note.assemble_notes_by_date", assemble_notes_by_date)
 xurls = (
     r"/note/api/group", GroupApiHandler,
     r"/note/api/stat", StatApiHandler,
+    r"/note/api/select_name", SelectNameHandler,
 )

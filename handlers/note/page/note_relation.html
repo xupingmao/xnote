@@ -1,0 +1,9 @@
+<div class="card">
+    {% set xnote_table_var = "relation_table" %}
+    <div class="table-action-row">
+        <button class="btn" onclick="xnote.table.handleEditForm(this)"
+            data-url="/note/relation?action=edit&note_id={{file.id}}" 
+            data-title="{{create_btn_text}}">{{create_btn_text}}</button>
+    </div>
+    {% include common/table/table.html %}
+</div>

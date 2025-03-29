@@ -29,7 +29,8 @@ from . import dao_log
 from .models import OrderTypeEnum, NoteIndexDO, NoteTypeEnum
 from .dao_tag import NoteTagInfoDao
 from .dao import NoteIndexDao, NoteDO
-from handlers.note.note_service import NoteService
+from handlers.note.note_service import NoteService, NoteRelationService
+from xnote.plugin.table import DataTable
 
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -42,18 +43,22 @@ class NoteViewContext(Storage):
 
     def __init__(self, **kw):
         self.user_name = ""
+        self.user_id = 0
         self.recommended_notes = [] # type: list|object
         self.next_note = None # type: NoteIndexDO|None
         self.prev_note = None # type: NoteIndexDO|None
         
+        self.can_edit = False
         self.show_left = False
         self.show_groups = False
         self.show_aside = True
         self.show_contents_btn = False
         self.show_comment_edit = False
+        self.show_comment = True
         self.show_content = True
         self.show_ext_info = True
-        self.can_edit = False
+        self.show_nav = True
+        self.show_relation = False
 
         self.page = 1
         self.pagesize = 20
@@ -76,7 +81,17 @@ class NoteViewContext(Storage):
         self.show_pagination = False
         self.edit_token = ""
         self.tab = ""
+        self.create_btn_text = ""
+        self.relation_table = None # type: DataTable|None
+    
         self.update(kw)
+
+    def hide_components(self):
+        self.show_comment = False
+        self.show_comment_edit = False
+        self.show_content = False
+        self.show_relation = False
+        self.show_ext_info = False
 
 
 @xmanager.listen("note.view", is_async=False)
@@ -157,8 +172,15 @@ def view_or_edit_md_func(file: NoteDO, kw: NoteViewContext):
         kw.show_nav = False
 
     if kw.tab == "comment":
-        kw.show_content = False
-        kw.show_ext_info = False
+        kw.hide_components()
+        kw.show_comment = True
+        kw.show_comment_edit = True
+
+    if kw.tab == "relation":
+        kw.hide_components()
+        kw.show_relation = True
+        kw.create_btn_text = "创建关系"
+        kw.relation_table = NoteRelationService.get_table(note_id=file.note_id, user_id=kw.user_id)
 
 
 def view_group_timeline_func(note, kw):
@@ -342,6 +364,7 @@ class ViewHandler:
         kw = NoteViewContext()
         kw.op = op
         kw.user_name = user_name
+        kw.user_id = user_id
         kw.page = page
         kw.pagesize = pagesize
         kw.page_url = f"/note/view?id={id}&page="

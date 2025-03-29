@@ -137,6 +137,24 @@ class NoteIndexDao:
         vars = dict(note_id=note_id, creator_id=creator_id)
         first = cls.db.select_first(where=where_sql, vars=vars)
         return cls.fix_single_result(first)
+    
+    @classmethod
+    def get_note_name(cls, note_id=0, creator_id=0, check_user=False):
+        note_index = cls.get_by_id(note_id=note_id, creator_id=creator_id, check_user=check_user)
+        if note_index is None:
+            return ""
+        return note_index.name
+    
+    @classmethod
+    def get_name_dict(cls, note_id_list=[]):
+        where_sql = "id IN $note_id_list"
+        vars = dict(note_id_list=note_id_list)
+        result = cls.db.select(what="id, name", where=where_sql, vars=vars)
+        notes = NoteIndexDO.from_dict_list(result)
+        dict_result = {} # type: dict[int, str]
+        for note in notes:
+            dict_result[note.note_id] = note.name
+        return dict_result
 
     @classmethod
     def get_by_name(cls, creator_id=0, name=""):
@@ -197,7 +215,7 @@ class NoteIndexDao:
     @classmethod
     def list(cls, creator_id=0, parent_id=0, offset=0, limit=20, type=None, type_list=[], is_deleted=0, 
             level=None, date=None, date_start=None, date_end=None, date_end_exclusive=None, 
-            name_like=None, query_root=False, order="id desc"):
+            name_like="", query_root=False, order="id desc"):
         order = cls.to_sql_order(order)
 
         if type == "table":
@@ -232,7 +250,7 @@ class NoteIndexDao:
         if date_end_exclusive != None:
             where += " AND ctime < $date_end_exclusive"
 
-        if name_like != None:
+        if name_like != "":
             where += " AND name LIKE $name_like"
         if len(type_list) > 0:
             where += " AND type IN $type_list"
