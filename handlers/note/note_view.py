@@ -23,7 +23,7 @@ from xnote.core.xnote_user_config import UserConfig
 from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
 from .dao_api import NoteDao
-from handlers.note.models import NotePathInfo
+from handlers.note.models import NotePathInfo, NoteRelationGroup
 from . import dao_draft
 from . import dao_log
 from .models import OrderTypeEnum, NoteIndexDO, NoteTypeEnum
@@ -82,7 +82,9 @@ class NoteViewContext(Storage):
         self.edit_token = ""
         self.tab = ""
         self.create_btn_text = ""
+        self.relation_group_list = None # type: None|list[NoteRelationGroup]
         self.relation_table = None # type: DataTable|None
+        self.rev_relation_table = None # type: DataTable|None
     
         self.update(kw)
 
@@ -151,6 +153,7 @@ def view_or_edit_md_func(file: NoteDO, kw: NoteViewContext):
     kw.show_pagination = False
     kw.edit_token = textutil.create_uuid()
     kw.note_alias_list = NoteIndexDao.list(creator_id=creator_id, parent_id=note_id)
+    kw.relation_group_list = []
 
     if kw.op == "edit":
         if load_draft:
@@ -168,6 +171,7 @@ def view_or_edit_md_func(file: NoteDO, kw: NoteViewContext):
         # 强制使用移动端编辑器
         kw.template_name = "note/component/editor/markdown_edit.mobile.html"
 
+    
     if kw.op == "edit" and webutil.is_mobile_client():
         kw.show_nav = False
 
@@ -181,6 +185,7 @@ def view_or_edit_md_func(file: NoteDO, kw: NoteViewContext):
         kw.show_relation = True
         kw.create_btn_text = "创建关系"
         kw.relation_table = NoteRelationService.get_table(note_id=file.note_id, user_id=kw.user_id)
+        kw.rev_relation_table = NoteRelationService.get_rev_table(target_id=file.note_id, user_id=kw.user_id)
 
 
 def view_group_timeline_func(note, kw):

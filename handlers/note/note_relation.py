@@ -4,13 +4,15 @@ from xutils import Storage
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import FormRowType
 from .dao_relation import NoteRelationDao, NoteRelationDO
-from .dao import NoteIndexDao
+from .dao import NoteIndexDao, list_path
 from xnote.core import xauth
 from xutils import webutil
+from .note_service import NoteRelationService
 
 class NoteRelationHandler(BaseTablePlugin):
 
     require_login = True
+    title = "笔记关系编辑"
     
     EDIT_HTML = """
 <div class="card">
@@ -40,6 +42,34 @@ xnote.execute(function() {
 });
 </script>
 """
+
+    PAGE_HTML = """
+<div class="card">
+    {% include note/component/note_path.html %}
+</div>
+
+<div class="card">
+    <div class="table-action-row">
+        <button class="btn" onclick="xnote.table.handleEditForm(this)"
+            data-url="/note/relation?action=edit&note_id={{file.id}}" 
+            data-title="{{create_btn_text}}">{{create_btn_text}}</button>
+    </div>
+    {% include common/table/table.html %}
+</div>
+"""
+
+    def handle_page(self):
+        note_id = xutils.get_argument_int("note_id")
+        user_id = xauth.current_user_id()
+        note_index = NoteIndexDao.get_by_id(note_id=note_id, creator_id=user_id, check_user=True)
+        if note_index is None:
+            return "笔记不存在"
+        kw = Storage()
+        kw.create_btn_text = "创建关系"
+        kw.file = note_index
+        kw.pathlist = list_path(file=note_index)
+        kw.table = NoteRelationService.get_table(note_id=note_id, user_id=user_id)
+        return self.response_page(**kw)
 
     def handle_edit(self):
         relation_id = xutils.get_argument_int("relation_id")

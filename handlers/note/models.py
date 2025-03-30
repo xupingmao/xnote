@@ -10,6 +10,7 @@ from xnote.core import xconfig
 from xutils.db.dbutil_helper import new_from_dict
 from xutils.base import EnumItem, BaseDataRecord
 from handlers.note.constant import NoteType
+from xnote.plugin import TextLink
 
 NOTE_ICON_DICT = {
     "group": "fa-folder",
@@ -255,3 +256,8 @@ class NoteOptGroup(Storage):
         self.label = ""
         self.children = [] # type: list[NoteIndexDO]
 
+class NoteRelationGroup(BaseDataRecord):
+
+    def __init__(self, **kw):
+        self.label = ""
+        self.children = [] # type: list[TextLink]

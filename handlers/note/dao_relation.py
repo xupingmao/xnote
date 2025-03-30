@@ -28,9 +28,13 @@ class _NoteRelationDaoImpl:
 
     db = xtables.get_table_by_name("note_relation")
 
-    def list(self, note_id=0, user_id=0, offset=0, limit=20):
-        where_sql = "user_id=$user_id AND note_id=$note_id"
-        vars = dict(note_id=note_id, user_id=user_id)
+    def list(self, note_id=0, target_id=0, user_id=0, offset=0, limit=20):
+        where_sql = "user_id=$user_id"
+        if note_id != 0:
+            where_sql += " AND note_id=$note_id"
+        if target_id != 0:
+            where_sql += " AND target_id=$target_id"
+        vars = dict(note_id=note_id, user_id=user_id, target_id=target_id)
         result = self.db.select(where=where_sql, vars=vars, offset=offset, limit=limit)
         return NoteRelationDO.from_dict_list(result)
     
