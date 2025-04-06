@@ -215,6 +215,7 @@ def init_note_relation_table():
         manager.add_column("target_id", "bigint", default_value=0)
 
         manager.add_index("note_id")
+        manager.add_index("target_id")
 
 def init_share_info_table():
     comment = "分享记录"

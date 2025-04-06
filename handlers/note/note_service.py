@@ -68,8 +68,8 @@ class NoteService:
 
 class _NoteRelationServiceImpl:
 
-    def get_note_url(self, note_id=0):
-        return f"/note/view/{note_id}?tab=relation"
+    def get_note_url(self, note_id=0, tab="relation"):
+        return f"/note/view/{note_id}?tab={tab}"
 
     def render_table(self, relation_list: typing.List[NoteRelationDO]):
         table = DataTable()
@@ -80,6 +80,7 @@ class _NoteRelationServiceImpl:
         table.add_action(title="编辑", type=TableActionType.edit_form, link_field="edit_url")
         table.add_action(title="删除", type=TableActionType.confirm, link_field="delete_url", 
                          msg_field="delete_msg", css_class="btn danger")
+        table.action_head.default_style.min_width = "120px"
         
         note_id_list = [] # type: list[int]
         for item in relation_list:
@@ -109,6 +110,23 @@ class _NoteRelationServiceImpl:
     def get_rev_table(self, target_id=0, user_id=0, offset=0, limit=20):
         relation_list = NoteRelationDao.list(user_id=user_id, target_id=target_id)
         return self.render_table(relation_list)
+    
+    def get_related_notes(self, note_id=0, user_id=0, limit=10):
+        list1 = NoteRelationDao.list(user_id=user_id, note_id=note_id, limit=limit)
+        list2 = NoteRelationDao.list(user_id=user_id, target_id=note_id, limit=limit)
+        related_notes = list1 + list2
+        note_id_set = set()
+        for item in related_notes:
+            note_id_set.add(item.note_id)
+            note_id_set.add(item.target_id)
+        
+        if note_id in note_id_set:
+            note_id_set.remove(note_id)
+
+        name_dict = NoteIndexDao.get_name_dict(note_id_list=note_id_set)
+        result = [TextLink(text=name_dict.get(note_id, ""), href=self.get_note_url(note_id, tab="")) for note_id in note_id_set]
+        result.sort(key = lambda x:x.text)
+        return result
 
     def get_group_list(self, note_id=0, user_id=0):
         relation_list = NoteRelationDao.list(user_id=user_id, note_id=note_id, limit=100)

@@ -38,31 +38,37 @@
     {% include note/component/note_path.html %}
 </div>
 
-{% if len(note_alias_list) > 0 %}
-<div class="card">
-    {% include note/component/view_header_alias.html %}
-</div>
-{% end %}
-
-<div class="card btn-line-height">
-    {% include note/component/view_header_tag.html %}
-</div>
-
-{% if show_draft_edit %}
-<div class="card btn-line-height">
-    <span>发现未提交的草稿</span>
-    <a href="{{_server_home}}/note/edit?id={{file.id}}&is_iframe={{is_iframe}}&load_draft=true">前往编辑</a>
-</div>
-{% end %}
-
 <div class="card x-tab-box btn-style" data-tab-key="tab" data-tab-default="all">
     <a class="x-tab" data-tab-value="all">全部</a>
     <a class="x-tab" data-tab-value="comment">评论</a>
     <a class="x-tab" data-tab-value="relation">关系</a>
 </div>
 
+{% if len(note_alias_list) > 0 %}
+<div class="card">
+    {% include note/component/view_header_alias.html %}
+</div>
+{% end %}
+
+{% if show_tag %}
+<div class="card btn-line-height">
+    {% include note/component/view_header_tag.html %}
+</div>
+{% end %}
+
+{% if show_relation_row %}
+    {% include note/page/note_relation_row.html %}
+{% end %}
+
 {% if show_relation %}
     {% include note/page/note_relation.html %}
+{% end %}
+
+{% if show_draft_edit %}
+<div class="card btn-line-height">
+    <span>发现未提交的草稿</span>
+    <a href="{{_server_home}}/note/edit?id={{file.id}}&is_iframe={{is_iframe}}&load_draft=true">前往编辑</a>
+</div>
 {% end %}
 
 {% if show_content %}

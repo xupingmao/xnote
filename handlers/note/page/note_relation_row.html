@@ -1,0 +1,9 @@
+{% if len(related_notes) > 0 %}
+<div class="card btn-line-height">
+    <span>关联笔记</span>
+    {% for link in related_notes %}
+        <a class="tag lightgray large" href="{{link.href}}">{{link.text}}</a>
+    {% end %}
+</div>
+{% end %}
+

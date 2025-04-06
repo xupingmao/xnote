@@ -27,6 +27,7 @@ from handlers.note import dao_delete, dao_tag
 from handlers.note import html_importer
 from handlers.note import dao as note_dao
 from handlers.note.dao import NoteIndexDao
+from handlers.note.dao_relation import NoteRelationDao
 from handlers.note.models import NoteIndexDO
 
 from xutils import Storage
@@ -949,3 +950,27 @@ A example image
         alias_info = note_dao.get_by_name(name=alias_name, creator_id=user_id)
         assert alias_info == None
 
+    def test_note_relation(self):
+        user_id = xauth.current_user_id()
+        name1 = "relation-1"
+        name2 = "relation-2"
+        delete_note_for_test(name1)
+        delete_note_for_test(name2)
+
+        note_id1 = create_note_for_test(type="md", name=name1)
+        note_id2 = create_note_for_test(type="md", name=name2)
+
+        self.check_OK(f"/note/relation?note_id={note_id1}")
+        self.check_OK(f"/note/relation?action=edit&note_id={note_id1}")
+        data_str = xutils.tojson(dict(note_id=note_id1, target_id=note_id2, relation_name="关联"))
+        data_quote = xutils.quote(data_str)
+        self.check_OK(f"/note/relation?action=save&data={data_quote}")
+        self.check_OK(f"/note/relation?note_id={note_id1}")
+        self.check_OK(f"/note/relation?note_id={note_id2}")
+
+        relation_list = NoteRelationDao.list(note_id=note_id1, user_id=user_id)
+        assert len(relation_list) == 1
+        assert relation_list[0].target_id == note_id2
+
+        self.check_OK(f"/note/view/{note_id1}")
+        self.check_OK(f"/note/view/{note_id1}?tab=relation")

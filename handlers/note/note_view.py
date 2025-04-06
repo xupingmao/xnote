@@ -24,6 +24,7 @@ from .constant import CREATE_BTN_TEXT_DICT
 from . import dao_tag
 from .dao_api import NoteDao
 from handlers.note.models import NotePathInfo, NoteRelationGroup
+from xnote.plugin import TextLink
 from . import dao_draft
 from . import dao_log
 from .models import OrderTypeEnum, NoteIndexDO, NoteTypeEnum
@@ -59,6 +60,8 @@ class NoteViewContext(Storage):
         self.show_ext_info = True
         self.show_nav = True
         self.show_relation = False
+        self.show_relation_row = True
+        self.show_tag = True
 
         self.page = 1
         self.pagesize = 20
@@ -83,6 +86,7 @@ class NoteViewContext(Storage):
         self.tab = ""
         self.create_btn_text = ""
         self.relation_group_list = None # type: None|list[NoteRelationGroup]
+        self.related_notes = [] # type: list[TextLink]
         self.relation_table = None # type: DataTable|None
         self.rev_relation_table = None # type: DataTable|None
     
@@ -93,7 +97,9 @@ class NoteViewContext(Storage):
         self.show_comment_edit = False
         self.show_content = False
         self.show_relation = False
+        self.show_relation_row = False
         self.show_ext_info = False
+        self.show_tag = False
 
 
 @xmanager.listen("note.view", is_async=False)
@@ -154,6 +160,7 @@ def view_or_edit_md_func(file: NoteDO, kw: NoteViewContext):
     kw.edit_token = textutil.create_uuid()
     kw.note_alias_list = NoteIndexDao.list(creator_id=creator_id, parent_id=note_id)
     kw.relation_group_list = []
+    kw.related_notes = NoteRelationService.get_related_notes(note_id=note_id, user_id=creator_id)
 
     if kw.op == "edit":
         if load_draft:
