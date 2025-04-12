@@ -612,7 +612,7 @@ class PreviewPopupHandler:
         note_info = note_dao.get_by_name_or_alias(name = name, creator_id = user_id)
         if note_info is None:
             return self.render_search(name)
-        if not note_info.is_markdown():
+        if not note_info.is_markdown:
             return self.render_search(name)
         content = note_info.content
         try:

@@ -315,10 +315,15 @@ class TagBindDialogHandler:
         
         user_id = xauth.current_user_id()
         suggest_tag_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id, order="amount desc")
-        global_tag_list = [TagInfoDO(tag_name="待办", tag_code="$todo$")]
         all_tag_list = NoteTagInfoDao.list(user_id=user_id, order="amount desc")
+        todo_tag = TagInfoDO(tag_name="待办", tag_code="$todo$")
+        global_tag_list = [todo_tag]
         dup_codes = set([tag.tag_code for tag in suggest_tag_list + global_tag_list])
         other_tag_list = [tag for tag in all_tag_list if tag.tag_code not in dup_codes]
+
+        for tag in all_tag_list:
+            if tag.tag_code == todo_tag.tag_code:
+                todo_tag.amount = tag.amount
 
         def get_active_class(tag: dao_tag.TagInfoDO):
             if tag.tag_code in tags:

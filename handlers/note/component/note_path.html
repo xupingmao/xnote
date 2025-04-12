@@ -15,7 +15,7 @@
     <div class="float-right">
         {% if file != None %}
             {% if can_edit and _is_desktop and show_rename_btn %}
-                {% if file.is_markdown() %}
+                {% if file.is_markdown %}
                     <a class="btn btn-default" href="{{_server_home}}/note/alias/edit?parent_id={{file.id}}">管理别名</a>
                 {% end %}
                 <a class="btn btn-default rename-btn" data-id="{{file.id}}" data-name="{{file.name}}">重命名</a>

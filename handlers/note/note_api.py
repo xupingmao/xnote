@@ -77,12 +77,17 @@ class SelectNameHandler:
     @xauth.login_required()
     def GET(self):
         name = xutils.get_argument_str("search")
+        show_type = xutils.get_argument_bool("show_type", True)
         words = textutil.split_words(name)
         creator = xauth.current_name_str()
         results = []
 
         for note_index in dao.search_name(words=words, creator=creator, limit=100):
-            results.append(dict(id=note_index.note_id, text=note_index.name))
+            text = note_index.name
+            if show_type:
+                if note_index.is_group:
+                    text = "【笔记本】" + text
+            results.append(dict(id=note_index.note_id, text=text))
 
         return dict(results=results)
 

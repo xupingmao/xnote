@@ -29,13 +29,13 @@ xnote.execute(function() {
         ajax: {
             url: '/note/api/select_name',
             data: function (params) {
-            var query = {
-                search: params.term,
-                type: 'public'
-            }
+                var query = {
+                    search: params.term,
+                    type: 'public'
+                }
 
-            // Query parameters will be ?search=[term]&type=public
-            return query;
+                // Query parameters will be ?search=[term]&type=public
+                return query;
             }
         }
     });

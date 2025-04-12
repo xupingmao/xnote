@@ -118,9 +118,11 @@ class NoteIndexDO(BaseDataRecord):
     def note_id(self):
         return self.id
     
+    @property
     def is_group(self):
         return self.type == "group"
     
+    @property
     def is_markdown(self):
         return self.type == "md"
     

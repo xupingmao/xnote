@@ -667,7 +667,7 @@ class MoveAjaxHandler:
         if target_book.type != "group":
             return webutil.FailedResult(code="fail", message="只能移动到笔记本中")
         
-        if not file.is_group() and parent_id == 0:
+        if not file.is_group and parent_id == 0:
             return webutil.FailedResult(code="fail", message="不能移动普通笔记到根目录")
 
         pathlist = note_dao.list_path(target_book)

@@ -159,6 +159,8 @@ class _NoteTagInfoDaoImpl:
     def fix_dup_tag(self, user_id=0, tag_code=""):
         tag_list = self.tag_info_service.get_by_code_list(user_id=user_id, tag_code_list=[tag_code], order="tag_id")
         if len(tag_list) == 0:
+            new_tag = TagInfoDO(tag_code=tag_code, user_id=user_id)
+            self.tag_info_service.create(new_tag)
             return
         if len(tag_list) > 1:
             for tag in tag_list[1:]:

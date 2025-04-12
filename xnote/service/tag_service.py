@@ -291,6 +291,7 @@ class TagInfoServiceImpl:
         tag_type = self.handle_tag_type(tag_info.tag_type)
         assert tag_info.user_id > 0
         assert tag_type > 0
+        assert tag_info.tag_code != ""
 
         now = dateutil.format_datetime()
         tag_info.tag_type = tag_type
