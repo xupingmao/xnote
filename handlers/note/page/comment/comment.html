@@ -22,6 +22,7 @@
 
 <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/webuploader/webuploader.css">
 <script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
+{% include common/script/load_laydate.html %}
 
 {% if _has_login and show_comment_create %}
 <div class="card {{comment_class}}">

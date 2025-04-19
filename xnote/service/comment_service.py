@@ -66,3 +66,6 @@ class CommentService:
     
     def delete_by_id(self, id=0):
         return self.db.delete(where=dict(id=id))
+    
+    def update_ctime(self, id=0, ctime=""):
+        return self.db.update(where=dict(id=id), ctime=ctime)

@@ -17,6 +17,7 @@ from xnote.core.xtemplate import T
 from . import dao as note_dao
 from . import dao_comment
 from xutils import webutil
+from xutils import dateutil
 from xnote.core.models import SearchContext, SearchResult
 from .dao_comment import search_comment
 from xutils.text_parser import TokenType
@@ -259,12 +260,18 @@ class CommentAjaxHandler:
         if p == "update":
             comment = dao_comment.get_comment(comment_id)
             if comment == None:
-                return dict(code = "404", message = "评论不存在")
+                return webutil.FailedResult(code = "404", message = "评论不存在")
             if comment.user != user_name:
-                return dict(code = "403", message = "无权限操作")
+                return webutil.FailedResult(code = "403", message = "无权限操作")
             content = xutils.get_argument_str("content", "")
+            date = xutils.get_argument_str("date")
+            old_date = dateutil.parse_date_to_object(comment.ctime)
+            update_ctime = False
+            if date != old_date.format_date():
+                comment.ctime = f"{date} {old_date.time}"
+                update_ctime = True
             comment.content = content
-            dao_comment.update_comment(comment)
+            dao_comment.CommentDao.update(comment, update_ctime=update_ctime)
             return webutil.SuccessResult()
         return "未知的操作"
 

@@ -1,9 +1,9 @@
 <style>
 .comment-edit-textarea {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
+    top: 45px;
+    left: 10px;
+    right: 10px;
     bottom: 50px;
     width: inherit;
 }
@@ -21,7 +21,11 @@
 </style>
 
 <div class="card">
-    <div class="col-md-12">
+    <div class="">
+        <div class="pad5">
+            <span>时间</span>
+            <input id="commentDate">
+        </div>
         <textarea autoHeight=true class="no-outline comment-edit-textarea" id="commentUpdateContent">{{comment.content}}</textarea>
 
         <div class="comment-edit-bottom">
@@ -40,6 +44,11 @@
 <script type="text/javascript">
     $(function () {
 
+        laydate.render({
+            elem: '#commentDate',
+            value: "{{comment.date}}"
+        });
+
         function appendToEditBox(appendText) {
             var oldValue = $("#commentUpdateContent").val();
             if (oldValue != "") {
@@ -53,8 +62,9 @@
             params.p = "update";
             params.comment_id = "{{comment.id}}";
             params.content = $("#commentUpdateContent").val();
+            params.date = $("#commentDate").val();
             xnote.http.post("/note/comment", params, function (resp) {
-                if (resp.code == "success") {
+                if (resp.success) {
                     xnote.toast("更新成功");
                     xnote.fire("comment.refresh");
                     xnote.fire("comment.closeEditDialog");

@@ -35,6 +35,9 @@ class CommentDO(BaseDataRecord):
         self.mtime = now
         self.update(kw)
 
+    @property
+    def date(self):
+        return dateutil.format_date(self.ctime)
 
 class CommentDao:
 
@@ -60,13 +63,16 @@ class CommentDao:
         return index_id
         
     @classmethod
-    def update(cls, comment: CommentDO):
+    def update(cls, comment: CommentDO, update_ctime = False):
         assert comment != None
         assert comment.user != None
         assert comment.note_id != None
         comment.mtime = dateutil.format_datetime()
 
         _comment_db.update(comment)
+        if update_ctime:
+            comment_service.update_ctime(id = int(comment.id), ctime=comment.ctime)
+
         xmanager.fire("comment.update", comment)
         
     @classmethod
@@ -124,9 +130,6 @@ def get_comment(comment_id = 0):
 
 def create_comment(comment: CommentDO):
     return CommentDao.create(comment)
-
-def update_comment(comment):
-    return CommentDao.update(comment)
 
 def delete_comment(comment_id):
     return CommentDao.delete_by_id(comment_id)

@@ -66,6 +66,7 @@ class DateInfo:
         self.month = month
         self.day = day
         self.wday = 0 # week day
+        self.time = "00:00:00"
 
     def next_month(self):
         if self.month == 12:
@@ -243,12 +244,17 @@ def parse_date_to_object(date_str):
         (2020,1,1)
     """
     assert date_str != None
-    assert is_str(date_str)
+    assert isinstance(date_str, str)
     
-    date_str = date_str.split(" ")[0]
+    date_parts = date_str.split(" ")
+    date_str = date_parts[0]
+    time_str = "00:00:00"
+    if len(date_parts) > 1:
+        time_str = date_parts[1]
     parts = date_str.split("-")
     
     date_object = DateInfo()
+    date_object.time = time_str
 
     def _parse_int(value):
         try:
