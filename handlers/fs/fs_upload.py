@@ -96,6 +96,7 @@ def try_fix_orientation(fpath):
 
     tmp_path = fsutil.tmp_path(xutils.create_uuid())
     os.rename(fpath, tmp_path)
+    rename_back = False
 
     with Image.open(tmp_path) as img:
         exif = img.getexif()
@@ -103,7 +104,7 @@ def try_fix_orientation(fpath):
         orientation = exif.get(TAG_ORIENTATION)
 
         if orientation in (3, 6):
-            print("fix orientation")
+            logging.info("fix orientation, fpath=%s", fpath)
             img_new = img.copy()
             exif_new = img_new.getexif()
             exif_new[TAG_ORIENTATION] = 1
@@ -112,7 +113,11 @@ def try_fix_orientation(fpath):
             os.remove(tmp_path)
         else:
             # 重新命名回去
-            os.rename(tmp_path, fpath)
+            # 需要先关闭文件,然后再重命名,不然可能触发文件操作冲突
+            rename_back = True
+
+    if rename_back:
+        os.rename(tmp_path, fpath)
 
 # 业务上用到的函数
 
@@ -228,15 +233,16 @@ class UploadHandler:
             for chunk in file.file:
                 fout.write(chunk)
         
+        # 需要先处理旋转,不然触发upload事件可能导致文件操作冲突
+        try_fix_orientation(filepath)
+        try_touch_note(note_id)
+
         event = FileUploadEvent()
         event.fpath = filepath
         event.user_name = user_info.name
         event.user_id = user_info.id
         event.remark = file.filename
         xmanager.fire("fs.upload", event)
-
-        try_fix_orientation(filepath)
-        try_touch_note(note_id)
 
         result = webutil.SuccessResult()
         result.webpath = webpath

@@ -86,7 +86,7 @@ class SelectNameHandler:
             text = note_index.name
             if show_type:
                 if note_index.is_group:
-                    text = "【笔记本】" + text
+                    text = "[笔记本]" + text
             results.append(dict(id=note_index.note_id, text=text))
 
         return dict(results=results)
