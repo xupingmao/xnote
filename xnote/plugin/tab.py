@@ -18,7 +18,7 @@ class TabBox:
     <span class="x-tab title">{{title}}</span>
 {% end %}
 {% for item in tab_list %}
-    <a class="x-tab" 
+    <a class="x-tab {{item.css_class}}" 
         {% if item.href != "" %} href="{{item.href}}" {% end %}
         data-tab-value="{{item.value}}">{{item.title}}</a>
 {% end %}
@@ -33,8 +33,8 @@ class TabBox:
         self.title = title
         self.tab_list = [] # type: list[TabItem]
     
-    def add_tab(self, title="", value="", href=""):
-        item = TabItem(title=title, value=value, href=href)
+    def add_tab(self, title="", value="", href="", css_class=""):
+        item = TabItem(title=title, value=value, href=href, css_class=css_class)
         self.tab_list.append(item)
 
     def render(self):
@@ -47,10 +47,11 @@ class TabBox:
 
 
 class TabItem:
-    def __init__(self, title="", value="", href=""):
+    def __init__(self, title="", value="", href="", css_class=""):
         self.title = title
         self.value = value
         self.href = href
+        self.css_class = css_class
 
 
 

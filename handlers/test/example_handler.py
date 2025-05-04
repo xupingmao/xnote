@@ -116,6 +116,7 @@ class TableExampleHandler(BaseTablePlugin):
         tab = TabBox(tab_key="tab", tab_default="2", css_class="btn-style", title="后端tab组件")
         tab.add_tab(title="选项1", value="1", href="?tab=1")
         tab.add_tab(title="选项2", value="2")
+        tab.add_tab(title="选项3", value="3", css_class="hide")
         return tab
     
     def get_weight_table(self):
