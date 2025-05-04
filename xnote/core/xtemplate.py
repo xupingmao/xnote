@@ -418,7 +418,7 @@ class BasePlugin:
     fpath = None
 
     # {输入配置}
-    placeholder = u("")
+    placeholder = ""
     btn_text = T("处理")
     
     show_edit = True
@@ -445,7 +445,7 @@ class BasePlugin:
         self.output = u("")
         self.html = u("")
         self.css_style = u("")
-        self.option_links = []
+        self.option_links = [] # type: list[PluginOptionLink]
 
     def add_option_link(self, text="", href=""):
         self.option_links.append(PluginOptionLink(text, href))
@@ -602,6 +602,7 @@ class BasePlugin:
         kw.css_style = self.css_style
         kw.show_nav = self.show_nav
         kw.show_aside = self.show_aside
+        kw.show_right = self.show_right
         kw.show_search = self.show_search
         kw.search_action = self.search_action
         kw.search_placeholder = self.search_placeholder

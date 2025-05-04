@@ -46,20 +46,6 @@
 </style>
 {% end %}
 
-
-{# 侧边栏(右侧)是否显示 #}
-{% if not show_aside %}
-<style type="text/css">
-  .x-body {
-    right: 0px;
-  }
-
-  .aside {
-    display: none;
-  }
-</style>
-{% end %}
-
 <style type="text/css" id="layout-css"></style>
 
 <script type="text/javascript">
@@ -152,14 +138,19 @@
   })();
 </script>
 
+{# 侧边栏(右侧)是否显示 #}
 {% if not show_right %}
-
 <style>
   .content-left {
     width: 100%;
   }
-
   .content-right {
+    display: none;
+  }
+  .x-body {
+    right: 0px;
+  }
+  .aside {
     display: none;
   }
 </style>

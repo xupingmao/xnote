@@ -27,6 +27,8 @@ class TableExampleHandler(BaseTablePlugin):
     
     title = "表格测试"
 
+    show_aside = False
+
     PAGE_HTML = """
 {% include test/component/example_nav_tab.html %}
 
