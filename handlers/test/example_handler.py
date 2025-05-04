@@ -5,8 +5,23 @@ from xutils import Storage
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xmanager
+from xnote.core import xconfig
 from xnote.plugin.table_plugin import BaseTablePlugin
-from xnote.plugin import DataTable, TableActionType
+from xnote.plugin import DataTable, TableActionType, TabBox
+
+
+def get_example_tab():
+    server_home = xconfig.WebConfig.server_home
+    tab = TabBox(tab_key="name", title="案例:", css_class="btn-style")
+    tab.add_tab("文本示例", value="text", href=f"{server_home}/test/example?name=text")
+    tab.add_tab("按钮示例", value="btn", href=f"{server_home}/test/example?name=btn")
+    tab.add_tab("Tab示例", value="tab", href=f"{server_home}/test/example?name=tab")
+    tab.add_tab("Tag示例", value="tag", href=f"{server_home}/test/example?name=tag")
+    tab.add_tab("Dialog示例", value="dialog", href=f"{server_home}/test/example?name=dialog")
+    tab.add_tab("Dropdown示例", value="dropdown", href=f"{server_home}/test/example?name=dropdown")
+    tab.add_tab("Table示例", value="table", href=f"{server_home}/test/example/table?name=table")
+    tab.add_tab("Hammer示例", value="hammer", href=f"{server_home}/test/example?name=hammer")
+    return tab
 
 class TableExampleHandler(BaseTablePlugin):
     
@@ -14,6 +29,10 @@ class TableExampleHandler(BaseTablePlugin):
 
     PAGE_HTML = """
 {% include test/component/example_nav_tab.html %}
+
+<div class="card">
+    {% raw tab.render() %}
+</div>
 
 <div class="card">
     <form>
@@ -88,8 +107,16 @@ class TableExampleHandler(BaseTablePlugin):
 
         kw.weight_table = self.get_weight_table()
         kw.empty_table = self.get_empty_table()
+        kw.tab = self.get_tab_component()
+        kw.example_tab = get_example_tab()
 
         return self.response_page(**kw)
+    
+    def get_tab_component(self):
+        tab = TabBox(tab_key="tab", tab_default="2", css_class="btn-style", title="后端tab组件")
+        tab.add_tab(title="选项1", value="1", href="?tab=1")
+        tab.add_tab(title="选项2", value="2")
+        return tab
     
     def get_weight_table(self):
         table = DataTable()
@@ -135,10 +162,12 @@ class ExampleHandler:
         xmanager.add_visit_log(user_name, "/test/example")
         
         name = xutils.get_argument_str("name", "")
+        example_tab = get_example_tab()
+
         if name == "":
-            return xtemplate.render("test/page/example_index.html")
+            return xtemplate.render("test/page/example_index.html", example_tab=example_tab)
         else:
-            return xtemplate.render(f"test/page/example_{name}.html")
+            return xtemplate.render(f"test/page/example_{name}.html", example_tab=example_tab)
 
     def POST(self):
         return self.GET()

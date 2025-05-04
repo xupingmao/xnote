@@ -3,6 +3,12 @@
 {% block body_left %}
 {% include system/component/db_nav.html %}
 
+<style>
+    .table th {
+        min-width: 120px;
+    }
+</style>
+
 <div class="card">
     <div class="x-tab-box" data-tab-key="p2" data-tab-default="active">
         <a class="x-tab" href="{{_server_home}}/system/sqldb_admin?p=sqldb&p2=active" data-tab-value="active">活跃</a>
@@ -10,8 +16,7 @@
     </div>
 </div>
 
-<div class="card">
-
+<div class="card overflow-table-container">
     <table class="table">
         <tr>
             <th>表名</th>

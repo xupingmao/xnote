@@ -41,7 +41,7 @@ class PluginUploadHandler:
         
         xutils.makedirs(xconfig.FileConfig.plugins_upload_dir)
         plugin_path = os.path.join(xconfig.FileConfig.plugins_upload_dir, plugin_id + ".py")
-        with open(plugin_path, "w+") as fp:
+        with open(plugin_path, "w+", encoding="utf-8") as fp:
             fp.write(content)
         
         # 加载插件
