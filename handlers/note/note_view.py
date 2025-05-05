@@ -609,6 +609,8 @@ class PreviewPopupHandler:
     def GET(self):
         name = xutils.get_argument_str("name")
         user_id = xauth.current_user_id()
+        if name == "":
+            return "错误:笔记名称为空"
         note_info = note_dao.get_by_name_or_alias(name = name, creator_id = user_id)
         if note_info is None:
             return self.render_search(name)

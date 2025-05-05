@@ -57,14 +57,14 @@ class ImageCache:
         cls.cache.put(path, data)
 
 
-def do_create_thumbnail(path: str, debug=False):
+def do_create_thumbnail(path: str, version="v1", debug=False):
     if debug:
         return do_create_thumbnail_inner(path)
     else:
         logging.info("path=%s", path)
         # multiprocessing在Windows和Mac的性能比较差，因为他们默认使用新线程而不是fork的方式创建线程，
         script_path = os.path.join(xconfig.FileConfig.source_root_dir, "tools/image-thumbnail.py")
-        args = [sys.executable, script_path, path]
+        args = [sys.executable, script_path, path, version]
         with subprocess.Popen(args, stdout=subprocess.PIPE) as proc:
             assert proc.stdout != None
             buf = proc.stdout.read()
@@ -72,7 +72,7 @@ def do_create_thumbnail(path: str, debug=False):
                 return None
             return base64.b64decode(buf.decode("utf-8"))
 
-def create_thumbnail_data(path):
+def create_thumbnail_data(path: str, version="v1"):
     cache_data = ImageCache.get(path)
     if cache_data != None:
         logging.info("hit image cache, path=%s", path)
@@ -80,7 +80,7 @@ def create_thumbnail_data(path):
 
     try:
         # SAE上处理PIL存在泄漏，暂时先通过子进程处理
-        data = do_create_thumbnail(path)
+        data = do_create_thumbnail(path, version)
         if data != None:
             ImageCache.save(path, data)
         return data

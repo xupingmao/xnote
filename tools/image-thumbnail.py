@@ -3,10 +3,16 @@ import sys
 import logging
 import base64
 import traceback
+import typing
+
 from io import BytesIO
 
-def create_thumbnail(img_path):
+def create_thumbnail(img_path: str, version="v1"):
     """创建缩略图"""
+
+    if version == "v2":
+        return create_thumbnail_v2(img_path)
+
     im = None
     crop_im = None
 
@@ -15,7 +21,6 @@ def create_thumbnail(img_path):
         im = Image.open(img_path)
         w,h = im.size
         
-        # 先裁剪成正方形
         width = min(w,h)
         
         start_x = (w-width)//2
@@ -36,10 +41,34 @@ def create_thumbnail(img_path):
     except:
         traceback.print_exc()
         return None
+    
+
+def create_thumbnail_v2(img_path: str):
+    """创建缩略图"""
+    im = None
+    crop_im = None
+
+    try:
+        from PIL import Image
+        im = Image.open(img_path)
+        max_size = (200,200)
+        im.thumbnail(max_size)
+        img_bytes = BytesIO()
+        im.save(img_bytes, format=im.format)
+        return img_bytes.getvalue()
+    except:
+        traceback.print_exc()
+        return None
 
 if __name__ == "__main__":
+    """参数说明
+    image-thumbnail.py path [version]
+    """
     path = sys.argv[1]
-    data = create_thumbnail(path)
+    version = "v1"
+    if len(sys.argv) >= 3:
+        version = sys.argv[2]
+    data = create_thumbnail(path, version)
     if data != None:
         buf = base64.b64encode(data)
         sys.stdout.write(buf.decode("utf-8"))

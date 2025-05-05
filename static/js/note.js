@@ -705,7 +705,7 @@ NoteView.openPreviewPopup = function (e, targetSelector) {
     if (xnote.isMobile()) {
         offset.left = 0;
     }
-    xnote.http.get("/note/preview_popup?name="+encodeURI(name), function (html) {
+    xnote.http.get("/note/preview_popup?name="+encodeURIComponent(name), function (html) {
         if (html != "") {
             offset.top += 20;
             offset.left += 10;

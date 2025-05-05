@@ -255,10 +255,10 @@ class FileSystemHandler:
                 yield block
                 block = fp.read(blocksize)
             
-    def read_thumbnail(self, path, blocksize):
+    def read_thumbnail(self, path, blocksize, version="v1"):
         # TODO 限制进程数量
         # 在SAE环境中，pillow处理图片后无法释放内存，改成用子进程处理
-        data = fs_image.create_thumbnail_data(path)
+        data = fs_image.create_thumbnail_data(path, version)
         if data != None:
             yield data
         else:
@@ -314,6 +314,9 @@ class FileSystemHandler:
             mode = xutils.get_argument("mode", "")
             if mode == "thumbnail":
                 return self.read_thumbnail(path, blocksize)
+            if mode == "thumbnail_v2":
+                # 等比例缩放
+                return self.read_thumbnail(path, blocksize, version="v2")
             return self.read_all(path, blocksize)            
 
     def handle_get(self, path, content_type=None):

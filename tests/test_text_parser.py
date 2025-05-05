@@ -86,7 +86,7 @@ class TestTextParser(unittest.TestCase):
     def test_image(self):
         text = "图片file:///data/temp/1.png"
         href = "/data/temp/1.png"
-        thumb_href = f"{href}?mode=thumbnail"
+        thumb_href = f"{href}?mode=thumbnail_v2"
         parser = TextParser()
         tokens = parser.parse(text)
         print(tokens)

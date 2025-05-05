@@ -369,7 +369,7 @@ class ImageToken(TextToken):
         if self.html != "":
             return self.html
         href = self.href
-        thumb_href = f"{href}?mode=thumbnail"
+        thumb_href = f"{href}?mode=thumbnail_v2"
         if self.has_multi:
             return f'<div class="msg-img-box multi"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>'
         else:

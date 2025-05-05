@@ -174,7 +174,7 @@ class TestMain(unittest.TestCase):
         # self.assertEqual('Link&nbsp;<a href="/http">name</a>', html)
         text = "file:///data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0"
         href = "/data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0"
-        thumb_href = f"{href}?mode=thumbnail"
+        thumb_href = f"{href}?mode=thumbnail_v2"
         html = xutils.mark_text(text)
         expect_html = f"""<div class="msg-img-box"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>"""
         self.assertEqual(expect_html, html)
