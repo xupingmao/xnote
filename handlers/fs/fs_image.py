@@ -5,6 +5,7 @@ import sys
 import subprocess
 import base64
 import os
+import typing
 
 from xnote.core import xconfig
 from io import BytesIO
@@ -48,15 +49,15 @@ class ImageCache:
     cache = cacheutil.PrefixedCache("image-cache:")
 
     @classmethod
-    def get(cls, path):
+    def get(cls, path) -> typing.Optional[bytes]:
         cls.cache.get(path)
 
     @classmethod
-    def save(cls, path, data):
+    def save(cls, path, data: bytes):
         cls.cache.put(path, data)
 
 
-def do_create_thumbnail(path, debug=False):
+def do_create_thumbnail(path: str, debug=False):
     if debug:
         return do_create_thumbnail_inner(path)
     else:

@@ -173,8 +173,10 @@ class TestMain(unittest.TestCase):
         # html = xutils.mark_text(text)
         # self.assertEqual('Link&nbsp;<a href="/http">name</a>', html)
         text = "file:///data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0"
+        href = "/data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0"
+        thumb_href = f"{href}?mode=thumbnail"
         html = xutils.mark_text(text)
-        expect_html = """<div class="msg-img-box"><img class="msg-img x-photo" alt="/data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0" src="/data/files/admin/upload/2024/05/5Lit5paHLmpwZw.x0"></div>"""
+        expect_html = f"""<div class="msg-img-box"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>"""
         self.assertEqual(expect_html, html)
 
     def test_count_alpha(self):

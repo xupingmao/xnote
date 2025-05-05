@@ -85,11 +85,13 @@ class TestTextParser(unittest.TestCase):
 
     def test_image(self):
         text = "图片file:///data/temp/1.png"
+        href = "/data/temp/1.png"
+        thumb_href = f"{href}?mode=thumbnail"
         parser = TextParser()
         tokens = parser.parse(text)
         print(tokens)
         assert tokens[0] == "图片"
-        assert tokens[1] == '<div class="msg-img-box"><img class="msg-img x-photo" alt="/data/temp/1.png" src="/data/temp/1.png"></div>'
+        assert tokens[1] == f'<div class="msg-img-box"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>'
     
     def test_other(self):
         text = """#Topic1# #Topic2 Test#

@@ -369,12 +369,13 @@ class ImageToken(TextToken):
         if self.html != "":
             return self.html
         href = self.href
+        thumb_href = f"{href}?mode=thumbnail"
         if self.has_multi:
-            return '<div class="msg-img-box multi"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
+            return f'<div class="msg-img-box multi"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>'
         else:
-            return '<div class="msg-img-box"><img class="msg-img x-photo" alt="%s" src="%s"></div>' % (href, href)
+            return f'<div class="msg-img-box"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>'
 
-    def __eq__(self, value) -> bool:
+    def __eq__(self, value: "ImageToken") -> bool:
         return self.type == value.type and self.value == value.value and self.href == value.href
 
 class TextParser(TextParserBase):

@@ -655,21 +655,6 @@ class MessagePageHandler:
         tag = xutils.get_argument_str("tag")
         return self.do_get(tag)
 
-class MessageDetailAjaxHandler:
-
-    @xauth.login_required()
-    def GET(self):
-        id = xutils.get_argument_str("id")
-        user_name = xauth.current_name_str()
-        detail = msg_dao.get_message_by_id(id, user_name=user_name)
-        if detail == None:
-            return webutil.FailedResult(message="数据不存在")
-
-        if detail.ref != None:
-            detail = msg_dao.get_message_by_id(detail.ref, user_name=user_name)
-        
-        return webutil.SuccessResult(data = detail)
-
 class MessageEditDialogHandler:
     @xauth.login_required()
     def GET(self):

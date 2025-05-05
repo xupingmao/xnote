@@ -73,9 +73,9 @@ def get_sys_info_detail():
     sys_mem = psutil.virtual_memory()
     swap_memory = psutil.swap_memory()
     cpu_freq = psutil.cpu_freq()
-    active_mem = xutils.attrget(sys_mem, "active", 0)
-    inactive_mem = xutils.attrget(sys_mem, "inactive", 0)
-    wired_mem = xutils.attrget(sys_mem, "wired", 0)
+    active_mem = getattr(sys_mem, "active", 0)
+    inactive_mem = getattr(sys_mem, "inactive", 0)
+    wired_mem = getattr(sys_mem, "wired", 0)
 
     return Storage(
         cpu = Storage(
@@ -106,6 +106,24 @@ def get_sys_info_detail():
         db_info = get_db_info(),
     )
 
+class PythonLibInfo:
+
+    def __init__(self, name: str, lib_name: str):
+        self.name = name
+        self.lib_name = lib_name
+        self.value = ""
+        self.value_css_class = ""
+        self.check_lib_installed()
+
+    def check_lib_installed(self):
+        try:
+            __import__(self.lib_name)
+            self.value = "已安装"
+            self.value_css_class = "green"
+        except:
+            self.value = "未安装"
+            self.value_css_class = "red"
+
 class InfoHandler:
 
     @xauth.login_required("admin")
@@ -120,6 +138,8 @@ class InfoHandler:
             text = xutils.tojson(sys_info, format=True)
             comment = "wired代表macOS不可被交换的内存"
             return xtemplate.render("system/page/system_info_text.html", text=text, comment_html = comment)
+        if p == "python_lib":
+            return self.render_python_lib()
 
         mem_info = mem_util.get_mem_info()
         sys_mem_info = "%s/%s" % (mem_info.sys_mem_used, mem_info.sys_mem_total)
@@ -137,12 +157,30 @@ class InfoHandler:
             SystemInfoItem("操作系统版本", platform.version()),
             SystemInfoItem("系统启动时间", get_startup_time()),
             SystemInfoItem("系统配置", "查看", link = "/system/info?p=config_dict"),
+            SystemInfoItem("Python第三方库", "查看", link = "/system/info?p=python_lib"),
             SystemInfoItem("详细系统信息", "查看", link="/system/info?p=sys_info_detail"),
             SystemInfoItem("浏览器信息", "查看", link = "/tools/browser_info"),
         ]
 
         return xtemplate.render("system/page/system_info.html", items = items, 
             runtime_id = xconfig.RUNTIME_ID)
+    
+
+    def render_python_lib(self):
+        item_list = [
+            PythonLibInfo("Pillow", "PIL"),
+            PythonLibInfo("markdown", "markdown"),
+            PythonLibInfo("beautifulsoup4", "bs4"),
+            PythonLibInfo("requests", "requests"),
+            PythonLibInfo("wsgidav", "wsgidav"),
+            PythonLibInfo("psutil", "psutil"),
+            PythonLibInfo("leveldb", "leveldb"),
+        ]
+        return xtemplate.render(
+            "system/page/system_info_list.html",
+            title="Python第三方库",
+            item_list=item_list,
+        )
 
 
 xurls = (
