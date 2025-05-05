@@ -35,8 +35,7 @@
         <div class="todo-foot">
             {% if show_edit_btn %}
             <a class="todo-edit-btn btn btn-default" data-id="{{item.id}}" 
-                onclick="xnote.action.message.edit(this);"
-                data-url="/message/edit?id={{item.id}}">编辑</a>
+                onclick="xnote.action.message.edit(this);">编辑</a>
             {% end %}
 
             <a class="btn btn-default" data-id="{{item.id}}" onclick="xnote.action.message.createComment(this)">备注</a>

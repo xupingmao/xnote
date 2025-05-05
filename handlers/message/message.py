@@ -13,6 +13,7 @@
 tag: 短消息的类型
 key/keyword: 短消息关键字
 """
+import web
 import time
 import math
 import xutils
@@ -232,7 +233,7 @@ class ListAjaxHandler:
             item_list=msg_list
         )
 
-        return xtemplate.render("message/ajax/message_ajax.html", **kw)
+        return xtemplate.render("message/page/message_list_ajax.html", **kw)
 
     def get_top_keywords(self, msg_list):
         """返回热门的标签"""
@@ -562,11 +563,12 @@ class DateAjaxHandler:
 
         page_max = get_page_max(msg_count, xconfig.PAGE_SIZE)
 
-        return xtemplate.render("message/ajax/message_ajax.html",
-                                page_max=page_max,
-                                page=page,
-                                page_url=f"?date={date}&filterKey={quote(filter_key)}&page=",
-                                item_list=msg_list)
+        return xtemplate.render(
+            "message/page/message_list_ajax.html",
+            page_max=page_max,
+            page=page,
+            page_url=f"?date={date}&filterKey={quote(filter_key)}&page=",
+            item_list=msg_list)
 
 
 class MessagePageHandler:
@@ -666,7 +668,40 @@ class MessageDetailAjaxHandler:
         if detail.ref != None:
             detail = msg_dao.get_message_by_id(detail.ref, user_name=user_name)
         
-        return dict(code="success", data = detail)
+        return webutil.SuccessResult(data = detail)
+
+class MessageEditDialogHandler:
+    @xauth.login_required()
+    def GET(self):
+        id = xutils.get_argument_str("id")
+        user_name = xauth.current_name_str()
+        detail = msg_dao.get_message_by_id(id, user_name=user_name)
+        if detail == None:
+            web.ctx.status = "404 Not Found"
+            return "数据不存在"
+
+        if detail.ref != None:
+            detail = msg_dao.get_message_by_id(detail.ref, user_name=user_name)
+        
+        return xtemplate.render(
+            "message/page/message_edit_dialog.html",
+            detail = detail,
+            submitBtnText="更新",
+        )
+    
+class MessageCreateDialogHandler:
+    @xauth.login_required()
+    def GET(self):
+        keyword = xutils.get_argument_str("keyword")
+        tag = xutils.get_argument_str("tag")
+        detail = msg_dao.MessageDO()
+        detail.content = keyword
+        detail.tag = tag
+        return xtemplate.render(
+            "message/page/message_edit_dialog.html",
+            detail = detail,
+            submitBtnText="创建",
+        )
 
 class CalendarHandler:
 
@@ -846,7 +881,8 @@ xurls = (
     r"/message", MessagePageHandler,
     r"/message/calendar", CalendarHandler,
     r"/message/log", MessageLogHandler,
-    r"/message/detail", MessageDetailAjaxHandler,
+    r"/message/edit_dialog", MessageEditDialogHandler,
+    r"/message/create_dialog", MessageCreateDialogHandler,
 
     # 日记
     r"/message/dairy", MessageListByDayHandler,

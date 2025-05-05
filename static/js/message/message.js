@@ -139,21 +139,13 @@ MessageView.edit = function (target) {
     var params = {
         id: id
     };
-    xnote.http.get("/message/detail", params, function (resp) {
-        if (resp.code == "success") {
-            var html = $("#msg-edit-tpl").render({
-                detail: resp.data,
-                submitBtnText: "更新"
-            });
-            var layerId = xnote.openDialog("编辑", html);
-            MessageView.closeEdit = function () {
-                // console.log("close dialog:", layerId);
-                xnote.closeDialog(layerId);
-                MessageView.state.isEditDialog = false;
-            };
-        } else {
-            xnote.alert(resp.message);
-        }
+    xnote.http.get("/message/edit_dialog", params, function (html) {
+        var layerId = xnote.openDialog("编辑", html);
+        MessageView.closeEdit = function () {
+            // console.log("close dialog:", layerId);
+            xnote.closeDialog(layerId);
+            MessageView.state.isEditDialog = false;
+        };
     });
 };
 
@@ -207,19 +199,18 @@ MessageView.createMessageOnTag = function(target) {
     var keyword = $(target).attr("data-keyword");
     var tag = $(target).attr("data-tag");
     var title = $(target).attr("data-title");
-    var html = $("#msg-edit-tpl").render({
-        detail: {
-            content: keyword + " ",
-            tag: tag,
-        },
-        submitBtnText: "创建"
-    });
-    var layerId = xnote.openDialog(title, html);
-    self.closeEdit = function () {
-        // console.log("close dialog:", layerId);
-        xnote.closeDialog(layerId);
-        self.state.isEditDialog = false;
+    var params = {
+        "tag": tag,
+        "keyword": keyword
     };
+    xnote.http.get("/message/create_dialog", params, function (html) {
+        var layerId = xnote.openDialog(title, html);
+        self.closeEdit = function () {
+            // console.log("close dialog:", layerId);
+            xnote.closeDialog(layerId);
+            self.state.isEditDialog = false;
+        };
+    })
 };
 
 MessageView.upload = function () {
@@ -408,11 +399,11 @@ MessageView.deleteMessage = function(target) {
     });
 };
 
-$("body").on("keyup", ".nav-search-input", function (e) {
+MessageView.handleTopicSearchKeyUp = function (e) {
     console.log(e);
     var inputText = $(e.target).val();
     MessageView.searchTopic(inputText);
-});
+}
 
 $("body").on("focus", ".msg-edit-box textarea", function (e) {
     if (xnote.device.isIphone) {

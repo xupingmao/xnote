@@ -153,7 +153,7 @@ class TaskListAjaxHandler:
         kw.page_total = amount
         kw.item_list = chatlist
 
-        return xtemplate.render("message/ajax/message_ajax.html", **kw)
+        return xtemplate.render("message/page/message_list_ajax.html", **kw)
 
     def do_list_task(self, user_name, offset, limit):
         p = xutils.get_argument_str("p", "")

@@ -15,6 +15,7 @@ from xutils import dbutil
 from xutils import dateutil, dbutil
 from xutils import logutil
 from xnote.core.models import SearchContext
+from urllib.parse import quote
 
 # cannot perform relative import
 try:
@@ -92,8 +93,15 @@ class TestMain(BaseTestCase):
 
         self.assertEqual("New Content", data.content)
 
+        keyword = quote("#test#")
+        quoted_id = quote(data.id)
+        self.check_OK(f"/message/create_dialog?keyword={keyword}&tag=log")
+        self.check_OK(f"/message/edit_dialog?id={quoted_id}")
+
         json_request("/message/delete", method="POST",
                      data=dict(id=data.id))
+        
+        self.check_404(f"/message/edit_dialog?id={quoted_id}")
         
     def test_create_with_date(self):
         data = dict(content="Xnote-Date-Test", date="2020-01-01")
@@ -219,8 +227,6 @@ class TestMain(BaseTestCase):
         update_result = json_request_return_dict("/message/finish", method="POST",
                                                  data=dict(id=task_id))
         self.assertEqual("success", update_result.get("code"))
-
-        self.check_OK("/message/detail?id=%s" % task_id)
 
         logutil.wait_task_done()
 
