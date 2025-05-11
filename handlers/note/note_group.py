@@ -553,7 +553,7 @@ class BaseListHandler:
     def list_notes(self, user_name, offset, limit):
         return note_dao.list_by_type(user_name, self.note_type, offset, limit, self.orderby)
 
-    def map_notes(self, notes):
+    def map_notes(self, notes: typing.List[NoteIndexDO]):
         for note in notes:
             note.badge_info = dateutil.format_date(note.atime)
 

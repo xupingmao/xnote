@@ -119,6 +119,7 @@ class TableExampleHandler(BaseTablePlugin):
         tab.add_tab(title="选项1", value="1", href="?tab=1")
         tab.add_tab(title="选项2", value="2")
         tab.add_tab(title="选项3", value="3", css_class="hide")
+        tab.add_tab(title="onclick", href="#", onclick="javascript:alert('onclick!')")
         return tab
     
     def get_weight_table(self):
