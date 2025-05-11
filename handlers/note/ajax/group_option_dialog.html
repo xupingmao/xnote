@@ -12,11 +12,17 @@
 {% init share_to_list = [] %}
 {% init show_delete_btn = False %}
 
+<style>
+    select.status, select.orderby-select {
+        width: 100px;
+    }
+</style>
+
 <div class="card">
     <div class="list-item">
         <span>状态</span>
         <div class="float-right">
-            <select value="{{file.level}}"
+            <select class="status" value="{{file.level}}"
                 data-id="{{file.id}}"
                 onchange="xnote.api.note.changeStatus(this)">
                 <option value="1">置顶</option>

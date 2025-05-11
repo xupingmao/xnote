@@ -304,6 +304,10 @@ var XUI = function(window) {
         initRadio();
         initXRadio();
         xnote.table.adjustWidth(".default-table");
+
+        if (xnote.initSelect2) {
+            xnote.initSelect2();
+        }
     };
 
     // 刷新各种默认值

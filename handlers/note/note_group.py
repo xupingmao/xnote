@@ -564,6 +564,10 @@ class BaseListHandler:
     
     def get_page_url(self):
         return f"/note/all?type={self.note_type}&page="
+    
+    def hook_kw(self, kw: Storage):
+        """处理kw的钩子函数"""
+        pass
 
     @xauth.login_required()
     def GET(self):
@@ -594,6 +598,8 @@ class BaseListHandler:
         kw.show_path = False
         kw.file_type = "group"
         kw.sticky_position = "right"
+
+        self.hook_kw(kw)
 
         # 上级菜单
         parent = PathNode(T("根目录"), "/note/group")
@@ -686,6 +692,9 @@ class StickyListHandler(BaseListHandler):
 
     def get_page_url(self):
         return f"/note/sticky?type={self.note_type}&page="
+    
+    def hook_kw(self, kw: Storage):
+        kw.sticky_position = "left"
 
 class LogListHandler(BaseListHandler):
 

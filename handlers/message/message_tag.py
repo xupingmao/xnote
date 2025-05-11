@@ -194,7 +194,7 @@ class ListTagPage:
         kw = self.create_kw()
         kw.list_ajax_url = "/message/tag/list_ajax"
         kw.tag="key"
-        kw.search_type="message",
+        kw.search_type="message"
         kw.show_tag_btn=False
         kw.show_attachment_btn=False
         kw.show_system_tag=True

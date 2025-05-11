@@ -307,7 +307,7 @@ class SearchHandler:
         elif search_type == "comment":
             return self.do_search_comment(ctx, key)
         else:
-            raise Exception("不支持的搜索类型:%s" % search_type)
+            raise Exception(f"不支持的搜索类型:{search_type}")
 
     def GET(self, path_key = None):
         """search files by name and content"""
