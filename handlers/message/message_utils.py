@@ -383,7 +383,7 @@ def filter_msg_list_by_key(msg_list, filter_key):
 
     return result
 
-def list_by_date_and_key(user_id=0, month="", offset=0, limit=20, filter_key=""):
+def list_by_date_and_key(user_id=0, month="", offset=0, limit=20, filter_key="", tag=""):
     date_start = ""
     date_end = ""
     if month != "":
@@ -397,7 +397,10 @@ def list_by_date_and_key(user_id=0, month="", offset=0, limit=20, filter_key="")
         list_limit = MAX_LIST_LIMIT
 
     msg_list, amount = msg_dao.list_by_date_range(
-                user_id=user_id, offset=offset, limit=list_limit, date_start=date_start, date_end=date_end)
+                user_id=user_id, 
+                offset=offset, 
+                tag=tag,
+                limit=list_limit, date_start=date_start, date_end=date_end)
     if filter_key == "":
         return msg_list, amount
     msg_list = filter_msg_list_by_key(msg_list, filter_key)

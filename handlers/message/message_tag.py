@@ -42,10 +42,10 @@ def get_tag_list_by_msg_list(msg_list, date=""):
     result.sort(key = lambda x:x.amount, reverse=True)
     return result
 
-def get_tag_list_by_month(user_id=0, month="2000-01"):
+def get_tag_list_by_month(user_id=0, month="2000-01", tag=""):
     date_start = month + "-01"
     date_end = dateutil.date_str_add(date_start, months=1)
-    msg_list, amount = msg_dao.list_by_date_range(user_id=user_id, date_start=date_start, date_end=date_end)
+    msg_list, amount = msg_dao.list_by_date_range(user_id=user_id, tag=tag, date_start=date_start, date_end=date_end)
     result = get_tag_list_by_msg_list(msg_list, date=month)
     return result
 

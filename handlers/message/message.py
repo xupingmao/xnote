@@ -33,6 +33,7 @@ from handlers.message.message_date import MessageListByDayHandler
 from handlers.message.message_log import LogPageHandler
 from handlers.message.message_model import MessageTagEnum
 from xnote.core import xnote_event
+from xnote.plugin import TabBox
 
 from handlers.message.message_utils import (
     process_message,
@@ -170,7 +171,8 @@ class ListAjaxHandler:
             return self.do_search(user_name, key, offset, pagesize, search_tags=["log"])
         
         if tag == "log.date":
-            return MessageDateHandler().do_list_by_date(user_name=user_name, date=date, offset=offset, limit=pagesize, tag="log")
+            return MessageDateHandler().do_list_by_date(
+                user_name=user_name, date=date, offset=offset, limit=pagesize, tag="log")
 
         if tag == "date":
             # 日期
@@ -548,6 +550,7 @@ class DateAjaxHandler:
         page = xutils.get_argument_int("page", 1)
         filter_key = xutils.get_argument_str("filterKey")
         user_id = xauth.current_user_id()
+        tag = xutils.get_argument_str("tag", "log")
 
         if date == "":
             return xtemplate.render("error.html", error="date参数为空")
@@ -556,7 +559,12 @@ class DateAjaxHandler:
         limit = xconfig.PAGE_SIZE
 
         msg_list, msg_count = message_utils.list_by_date_and_key(
-            user_id=user_id, month=date, offset=offset, limit=limit, filter_key=filter_key)
+            user_id=user_id, 
+            month=date, 
+            offset=offset, 
+            limit=limit, 
+            filter_key=filter_key,
+            tag=tag)
 
         parser = MessageListParser(msg_list)
         parser.parse()
@@ -699,6 +707,13 @@ class CalendarHandler:
 
         date = "%s-%02d" % (year, month)
 
+        filter_tab = TabBox(tab_key="filterKey", tab_default="", title="标签", css_class="btn-style")
+        filter_tab.add_tab(title="全部", value="", href=f"{xconfig.WebConfig.server_home}/message/calendar?date={date}")
+
+        tag_list = message_tag.get_tag_list_by_month(user_id=user_id, month=date, tag="log")
+        for tag_info in tag_list:
+            filter_tab.add_tab(title=tag_info.name, value=tag_info.name)
+
         kw = Storage()
         kw.tag = "log.date"
         kw.year = year
@@ -706,7 +721,9 @@ class CalendarHandler:
         kw.date = date
         kw.html_title = T("随手记")
         kw.search_type = "message"
-        kw.tag_list = message_tag.get_tag_list_by_month(user_id=user_id, month=date)
+        kw.filter_tab = filter_tab
+        
+        # 实际数据从 /message/date 接口获取
 
         return xtemplate.render("message/page/message_calendar.html", **kw)
 

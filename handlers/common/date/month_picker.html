@@ -1,6 +1,7 @@
 {% init year  = 2021 %}
 {% init month = 1 %}
 {% init show_full_year = False %}
+{% include common/script/load_select2.html %}
 
 <style type="text/css">
     .date-box {
@@ -14,12 +15,16 @@
     .next-month-link {
         float: right;
     }
+    
+    select.year {
+        width: 100px;
+    }
 </style>
 
 <div class="card btn-line-height">
     <div class="date-box">
         <a class="prev-month-link btn btn-default">上个月</a>
-        <select name="year" value="{{year}}">
+        <select class="year" name="year" value="{{year}}">
             {% for j in range(year-5,year+6) %}
                 <option value="{{j}}">{{j}}年</option>
             {% end %}
