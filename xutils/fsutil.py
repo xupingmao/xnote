@@ -194,7 +194,7 @@ def format_file_size(fpath):
     return get_file_size(fpath, format=True)
 
 
-def get_file_size_int(fpath, raise_exception=False):
+def get_file_size_int(fpath: str, raise_exception=False):
     """读取文件大小,返回数字"""
     try:
         st = os.stat(fpath)

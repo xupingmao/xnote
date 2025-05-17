@@ -20,20 +20,16 @@ import socket
 import io
 import gzip
 import logging
+import http.client
 
 from urllib.parse import parse_qs
-from xutils.imports import try_decode, quote
+from xutils.imports import try_decode
 from xutils.base import print_exc
-
+from urllib.parse import quote
 
 # TODO fix SSLV3_ALERT_HANDSHAKE_FAILURE on MacOS
-try:
-    # try py3 first
-    from http.client import HTTPConnection
-    from urllib.request import urlopen, Request
-
-except ImportError as e:
-    from urllib2 import urlopen, Request
+from http.client import HTTPConnection
+from urllib.request import urlopen, Request
 
 try:
     import requests
@@ -97,7 +93,7 @@ def is_http_url(url):
     
     return True
 
-def get_host_by_url(url):
+def get_host_by_url(url: str):
     """
         >>> get_host("http://www.baidu.com/index.html")
         'www.baidu.com'
@@ -164,7 +160,17 @@ class HttpResponse:
         self.headers = headers
         self.content = content
 
-def do_http(method, url, headers, data = None, charset = 'utf-8'):
+class HttpError(Exception):
+    def __init__(self, status, message):
+        self.status = status
+        self.message = message
+        super().__init__(message)
+
+class HttpFileNotFoundError(HttpError):
+    def __init__(self, status, message):
+        super().__init__(status, message)
+
+def do_http(method, url: str, headers, data = None, charset = 'utf-8'):
     """使用低级API访问HTTP，可以任意设置header，data等
     """
     addr = get_host_by_url(url)
@@ -172,9 +178,9 @@ def do_http(method, url, headers, data = None, charset = 'utf-8'):
         raise Exception("invalid url (%s)" % url)
 
     if url.startswith("https://"):
-        conn = six.moves.http_client.HTTPSConnection(addr)
+        conn = http.client.HTTPSConnection(addr)
     else:
-        conn = six.moves.http_client.HTTPConnection(addr)
+        conn = http.client.HTTPConnection(addr)
 
     headers = headers or dict()
     if "User-Agent" not in headers:
@@ -269,7 +275,10 @@ def http_download_by_requests(url, destpath):
     assert requests != None
     resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
     if resp.status_code == 404:
-        raise FileNotFoundError(f"file {url} not found")
+        raise HttpFileNotFoundError(404, f"file {url} not found")
+    
+    if resp.status_code != 200:
+        raise HttpError(resp.status_code, f"StatusCode {resp.status_code}")
 
     with open(destpath, "wb") as fp:
         for chunk in resp.iter_content(chunk_size = BUFSIZE):

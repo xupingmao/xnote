@@ -99,35 +99,50 @@ class ConfigHandler:
 
         if key == "reset_offset":
             return self.reset_offset()
+        
+        if key == "reset_fs_offset":
+            return self.reset_fs_offset()
 
         if key == "trigger_sync":
             return self.trigger_sync()
         
+        if key == "trigger_fs_sync":
+            return self.trigger_fs_sync()
+        
         if key == "sync_status":
             return self.set_sync_status(value)
 
-        return dict(code="success")
+        return webutil.SuccessResult()
 
     def reset_offset(self):
         FOLLOWER.reset_sync()
-        return dict(code="success")
+        return webutil.SuccessResult()
+    
+    def reset_fs_offset(self):
+        FOLLOWER.reset_fs_offset()
+        return webutil.SuccessResult()
 
     def trigger_sync(self):
         FOLLOWER.ping_leader()
         FOLLOWER.sync_files_from_leader()
-        return dict(code="success")
+        return webutil.SuccessResult()
+    
+    def trigger_fs_sync(self):
+        FOLLOWER.ping_leader()
+        FOLLOWER.sync_files_from_leader()
+        return webutil.SuccessResult()
 
     def set_leader_host(self, host):
         assert xutils.is_str(host), "host is not str"
 
         if not netutil.is_http_url(host):
-            return dict(code="400", message="无效的URL地址(%s)" % host)
+            return webutil.FailedResult(code="400", message="无效的URL地址(%s)" % host)
         ClusterConfigDao.put_leader_host(host)
-        return dict(code="success")
+        return webutil.SuccessResult()
 
     def set_leader_token(self, token):
         ClusterConfigDao.put_leader_token(token)
-        return dict(code="success")
+        return webutil.SuccessResult()
     
     def set_sync_status(self, value):
         if value == None:
@@ -139,7 +154,7 @@ class ConfigHandler:
             message = "同步已开启"
         else:
             message = "同步已关闭"
-        return dict(code="success", message=message)
+        return webutil.SuccessResult(message=message)
 
 
 def get_leader_url():
@@ -261,7 +276,7 @@ class SyncHandler:
     def do_build_index(self):
         manager = system_sync_indexer.FileSyncIndexManager()
         manager.build_full_index()
-        return dict(code="success")
+        return webutil.SuccessResult()
 
     def do_ping(self):
         if SyncConfig.is_leader():
@@ -396,10 +411,6 @@ def on_sync_files_from_leader(ctx=None):
         return None
     
     if not SyncConfig.need_sync_files():
-        return None
-    
-    if FOLLOWER.is_at_full_sync():
-        # 优先等待db同步完
         return None
 
     try:

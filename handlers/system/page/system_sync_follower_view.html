@@ -36,7 +36,7 @@
 <div class="list-item">
     <span>文件索引同步</span>
     <div class="float-right">
-        <span>{{fs_current_index}} -> {{fs_max_index}}</span>
+        <span>{{fs_current_index}} -> {{fs_max_index}} (落后{{fs_max_index - fs_current_index}})</span>
     </div>
 </div>
 
@@ -44,6 +44,25 @@
     <span>文件同步进度</span>
     <div class="float-right">
         <span>{{sync_process}}</span>
+    </div>
+</div>
+
+<div class="list-item">
+    <span>重置文件同步位点</span>
+    <div class="float-right">
+        <a class="btn btn-default confirm-btn" 
+            data-title="确认重置文件同步位点?"
+            data-key="reset_fs_offset">重置</a>
+    </div>
+</div>
+
+<div class="list-item">
+    <span>触发一次文件同步</span>
+    <div class="float-right">
+        <a class="btn btn-default confirm-btn" 
+            data-title="确认同步一次?"
+            data-key="trigger_fs_sync">同步一次</a>
+        <!-- <i class="fa fa-chevron-right"></i> -->
     </div>
 </div>
 
@@ -84,7 +103,6 @@
         <a class="btn btn-default confirm-btn" 
             data-title="确认重置当前位点?"
             data-key="reset_offset">重置</a>
-        <!-- <i class="fa fa-chevron-right"></i> -->
     </div>
 </div>
 
@@ -110,7 +128,7 @@ $(function() {
         params.key = key;
         params.value = value;
 
-        $.post("/system/sync", params, function (resp) {
+        xnote.http.post("/system/sync", params, function (resp) {
             if (resp.code == "success") {
                 xnote.toast(resp.message);
             } else {

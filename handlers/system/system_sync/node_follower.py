@@ -29,9 +29,7 @@ from .system_sync_proxy import empty_http_client
 from .models import FileIndexInfo, LeaderStat
 from xutils.mem_util import log_mem_info_deco
 from .dao import ClusterConfigDao
-
-fs_sync_index_db = dbutil.get_hash_table("fs_sync_index")
-
+from .system_sync_indexer import count_fs_index
 
 def filter_result(result, offset):
     data = []
@@ -234,7 +232,7 @@ class Follower(NodeManagerBase):
         return self.fs_index_count
 
     def count_sync_done(self):
-        return dbutil.count_table("fs_sync_index_copy")
+        return count_fs_index()
 
     def count_sync_failed(self):
         return dbutil.count_table("fs_sync_index_failed")
@@ -246,6 +244,9 @@ class Follower(NodeManagerBase):
         db = dbutil.get_hash_table("fs_sync_index_copy")
         for key, value in db.iter(limit=-1):
             db.delete(key)
+
+    def reset_fs_offset(self):
+        ClusterConfigDao.put_fs_sync_last_id(0)
 
     def sync_db_from_leader(self):
         with DatabaseLockService.lock(lock_key="sync_db_from_leader", timeout_seconds=60):

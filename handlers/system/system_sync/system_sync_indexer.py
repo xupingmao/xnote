@@ -113,7 +113,7 @@ class FileSyncIndexManager:
         db = xtables.get_file_info_table()
         record_list = db.select(where="id > $last_id", vars=dict(last_id=last_id), 
                                offset=offset, limit=limit, order="id")
-        result = []
+        result = [] # type: list[FileIndexInfo]
         for item0 in record_list:
             item = FileIndexInfo(**item0)
             fpath = item.fpath
@@ -124,11 +124,12 @@ class FileSyncIndexManager:
             item.fsize = fsutil.get_file_size_int(fpath)
             item.exists = os.path.exists(fpath)
             item.sha1_sum = fsutil.get_sha1_sum(fpath)
+            item.fpath = fpath
             result.append(item)
 
             if not item.exists:
                 # 删除不存在的文件索引
-                FileInfoDao.delete_by_fpath(item.fpath)
+                FileInfoDao.delete_by_fpath(fpath)
 
         return result
 
@@ -228,10 +229,8 @@ def list_files(last_id = 0):
     manager = FileSyncIndexManager()
     return manager.list_files(last_id=last_id)
 
-def count_index():
+def count_fs_index():
     manager = FileSyncIndexManager()
     return manager.count_index()
 
-xutils.register_func("system_sync.list_files", list_files)
-xutils.register_func("system_sync.count_index", count_index)
 

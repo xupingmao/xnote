@@ -25,6 +25,7 @@ from xutils import fsutil
 from xutils import dbutil
 from xutils import jsonutil
 from xutils.mem_util import log_mem_info_deco
+from xutils.netutil import HttpFileNotFoundError, HttpError
 from .models import FileIndexInfo
 from .models import LeaderStat
 from .models import SystemSyncToken
@@ -86,6 +87,9 @@ class HttpClient:
             self.handle_token()
         
     def handle_token(self):
+        self.refresh_token()
+
+    def refresh_token(self):
         node_id = self.node_id
         port = self.port
         url = f"{self.host}/system/sync?p=refresh_token&leader_token={self.token}&node_id={node_id}&port={port}"
@@ -159,12 +163,9 @@ class HttpClient:
             return False
 
         stat = os.stat(dest_path)
-        remote_mtime = item.mtime
-        local_mtime = xutils.format_datetime(stat.st_mtime)
         local_sha1_sum = fsutil.get_sha1_sum(dest_path)
-        is_same_file = (item.fsize == stat.st_size and remote_mtime == local_mtime and local_sha1_sum == item.sha1_sum)
-        logging.debug("远程文件: %s, 本地文件: %s, is_same_file: %s", (remote_mtime, item.fsize), 
-                      (local_mtime, stat.st_size), is_same_file)
+        is_same_file = (item.fsize == stat.st_size and local_sha1_sum == item.sha1_sum)
+        logging.debug("is_same_file: %s, sha1_sum: %s", is_same_file, item.sha1_sum)
         return is_same_file
 
     def check_disk_space(self):
@@ -177,7 +178,7 @@ class HttpClient:
 
         return result
     
-    def is_ignore_file(self, webpath):
+    def is_ignore_file(self, webpath: str):
         skip_dir_list = ["/data/db", "/data/tmp", "/data/log", "/data/backup", "/data/cache", "/data/trash"]
         for skip_dir in skip_dir_list:
             if fsutil.is_parent_dir(skip_dir, webpath):
@@ -263,9 +264,14 @@ class HttpClient:
 
         try:
             netutil.http_download(url, dest_path)
-        except FileNotFoundError:
+        except HttpFileNotFoundError:
             logging.error("file not found: %s", webpath)
             return
+        except HttpError as err:
+            if err.status == 403:
+                logging.error("auth failed")
+                self.refresh_token()
+            raise err
         
         os.utime(dest_path, times=(mtime, mtime))
         local_sha1_sum = fsutil.get_sha1_sum(dest_path)

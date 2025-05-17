@@ -85,3 +85,4 @@ class SystemSyncToken(Storage):
         now = datetime.now()
         expire_time = dateutil.to_py_datetime(self.expire_time)
         return expire_time <= now
+    

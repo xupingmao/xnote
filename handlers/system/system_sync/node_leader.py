@@ -36,6 +36,7 @@ from .dao import ClusterConfigDao
 from .dao import SystemSyncTokenDao
 from .config import MAX_FOLLOWER_SIZE
 from handlers.fs.fs_helper import FileInfoDao
+from .system_sync_indexer import count_fs_index
 
 class Leader(NodeManagerBase):
 
@@ -99,7 +100,7 @@ class Leader(NodeManagerBase):
         pass
 
     def get_fs_index_count(self):
-        return xutils.call("system_sync.count_index")
+        return count_fs_index()
 
     def get_system_version(self):
         return xconfig.SystemConfig.get_str("version")
