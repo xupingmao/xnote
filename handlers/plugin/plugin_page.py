@@ -97,7 +97,7 @@ def get_category_icon_class_by_code(code):
     return category.icon_class
 
 
-def check_and_load_class(plugin):
+def check_and_load_class(plugin: PluginContext):
     if plugin.clazz is not None:
         return
 

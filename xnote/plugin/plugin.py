@@ -81,25 +81,25 @@ class PluginContext(Storage):
         return not self.is_external
 
     # sort方法重写__lt__即可
-    def __lt__(self, other):
+    def __lt__(self, other: "PluginContext"):
         return self.title < other.title
 
     # 兼容Python2
-    def __cmp__(self, other):
+    def __cmp__(self, other: "PluginContext"):
         return cmp(self.title, other.title)
 
-    def load_category_info(self, meta_obj):
+    def load_category_info(self, meta_obj: ScriptMeta):
         self.category = meta_obj.get_str_value("category")  # 这里取第一个分类
         self.category_list = meta_obj.get_list_value("category")  # 获取分类列表
         self.build_category()
 
-    def load_permission_info(self, meta_obj):
+    def load_permission_info(self, meta_obj: ScriptMeta):
         self.require_admin = meta_obj.get_bool_value(
             "require-admin", True)  # 访问是否要求管理员权限
         self.permitted_role_list = meta_obj.get_list_value(
             "permitted-role")  # 允许访问的角色
 
-    def load_from_meta(self, meta_obj):
+    def load_from_meta(self, meta_obj: ScriptMeta):
         self.api_level = meta_obj.get_float_value("api-level", 0.0)
 
         if self.api_level >= 2.8:

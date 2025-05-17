@@ -6,7 +6,7 @@
 
 from urllib.parse import quote
 
-def add_url_param(url, param_key, param_value):
+def add_url_param(url: str, param_key:str, param_value:str):
     """给URL增加参数，返回新的URL
     @param {str} url 老的URL
     @param {str} param_key 参数的name

@@ -262,14 +262,14 @@ def after(self, start):
     if p1 >= 0:
         return self[p1+len(start):]
 
-def split_chars(text):
+def split_chars(text: str):
     chars = []
     for c in text:
         if c.isprintable() and c not in BLANK_CHAR_SET:
             chars.append(c)
     return chars
 
-def split_first(text, sep = ' '):
+def split_first(text: str, sep = ' '):
     """
         >>> split_first("find a.name b.name")
         ('find', 'a.name b.name')
@@ -283,7 +283,7 @@ def split_first(text, sep = ' '):
         return text[:index], text[index+1:]
     return text, ""
 
-def find(text, key, show_line=False, ignore_case=True):
+def find(text: str, key: str, show_line=False, ignore_case=True):
     """ find key in text, return a list
 
         >>> find('hello,world', 'hello')
@@ -320,7 +320,7 @@ def find(text, key, show_line=False, ignore_case=True):
     return result
 
 
-def replace(text, origin, dest, ignore_case = False, use_template = False):
+def replace(text: str, origin: str, dest: str, ignore_case = False, use_template = False):
     """
         >>> replace('abc is good', 'iS', 'is not', True)
         'abc is not good'
@@ -351,7 +351,7 @@ def replace(text, origin, dest, ignore_case = False, use_template = False):
                 new_text += text[start:]
         return new_text
 
-def like(text, pattern):
+def like(text: str, pattern: str):
     """这个其实就是通配符，参考 fnmatch 模块
         >>> like("hello,world", "hello*")
         True
@@ -370,7 +370,7 @@ def like(text, pattern):
     return False
 
 
-def byte2str(buf):
+def byte2str(buf: bytes):
     for encoding in ("utf-8", "gbk", "gb2312"):
         try:
             return buf.decode(encoding)
@@ -649,7 +649,7 @@ def split_words(search_key: str):
     return words
 
 
-def try_split_key_value(line, token=":"):
+def try_split_key_value(line: typing.Optional[str], token=":"):
     if line is None:
         return None, None
     line = line.strip()
@@ -672,7 +672,7 @@ def split_key_value(line):
 ##   Html Utilities, Python 2 do not have this file
 #################################################################
 
-def html_escape(s, quote=True):
+def html_escape(s: str, quote=True):
     """
     Replace special characters "&", "<" and ">" to HTML-safe sequences.
     If the optional flag quote is true (the default), the quotation mark
@@ -687,15 +687,17 @@ def html_escape(s, quote=True):
         s = s.replace('\'', "&#x27;")
     return s
 
-def escape_html(text):
+def escape_html(text: str):
     """html转义, 参考`lib/tornado/escape.py`"""
     # 必须先处理&
     text = text.replace("&", "&amp;")
     text = text.replace("<", "&lt;")
     text = text.replace(">", "&gt;")
     text = text.replace('"', "&quot;")
-    text = text.replace(" ", "&nbsp;")
     text = text.replace("'", "&#39;")
+
+    # 这两个是新增的
+    text = text.replace(" ", "&nbsp;")
     text = text.replace("\n", "<br/>")
     return text
 

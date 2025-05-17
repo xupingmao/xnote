@@ -19,7 +19,7 @@ class UIComponent:
 class Panel(UIComponent):
 
     def __init__(self):
-        self.children = []
+        self.children = [] # type: list[UIComponent]
 
     def add(self, child):
         self.children.append(child)

@@ -29,7 +29,7 @@ _binlog = dbutil.BinLog.get_instance()
 TEMP_FNAME_SET = set([".DS_Store", ".thumbnail", ".git"])
 
 def get_system_role():
-    return xconfig.get_global_config("system.node_role")
+    return xconfig.WebConfig.node_role
 
 def print_debug_info(*args):
     new_args = [dateutil.format_time(), "[fs_sync_index]"]
