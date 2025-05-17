@@ -12,6 +12,7 @@
 import json
 import uuid
 import inspect
+import typing
 from datetime import datetime
 from datetime import date
 
@@ -35,7 +36,7 @@ class MyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def parse_json_to_dict(text=""):
+def parse_json_to_dict(text: typing.Union[str, bytes]):
     """json转dict"""
     result = json.loads(text)
     assert isinstance(result, dict)

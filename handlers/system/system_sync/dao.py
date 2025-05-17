@@ -113,8 +113,10 @@ class ClusterConfigDao:
 
     @classmethod
     def get_db_sync_state(cls):
-        return cls.db.get("follower_db_sync_state", "full")
-
+        result = cls.db.get("follower_db_sync_state", "full")
+        assert isinstance(result, str)
+        return result
+    
     @classmethod
     def put_db_sync_state(cls, state):
         assert state in ("full", "binlog")

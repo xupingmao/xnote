@@ -120,7 +120,13 @@ class FileInfoDao:
         vars = dict(id = last_id)
         file_info_list = cls.db.select(where=where, vars=vars, order="id", offset=0, limit=limit)
         return FileInfo.from_dict_list(file_info_list)
-
+    
+    @classmethod
+    def get_max_id(cls):
+        record = cls.db.select_first(order="id desc")
+        if record is None:
+            return 0
+        return FileInfo.from_dict(record).id
 
 def get_index_db(): # type: ()-> TableProxy
     return FileInfoDao.db

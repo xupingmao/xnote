@@ -52,14 +52,14 @@ def is_img_file(filename):
 def set_img_file_ext(img_set):
     TextParserConfig.img_ext_set = img_set
 
-def escape_html(text):
+def escape_html(text: str):
     # 必须先处理&
     text = text.replace("&", "&amp;")
     text = text.replace("<", "&lt;")
     text = text.replace(">", "&gt;")
     text = text.replace('"', "&quot;")
-    text = text.replace(" ", "&nbsp;")
     text = text.replace("'", "&#39;")
+    text = text.replace(" ", "&nbsp;")
     text = text.replace("\n", "<br/>")
     return text
 
@@ -90,8 +90,7 @@ class TextParserBase(object):
     # 空白字符
     blank_chars = set([" ", "\t", "\n", "\r"])
 
-    def init(self, text):
-        # type: (str)->None
+    def init(self, text: str):
         text = text.replace("\r", "")
         text = text.replace(u'\xad', '\n')
 
@@ -114,15 +113,18 @@ class TextParserBase(object):
         if self.i < self.length:
             return self.text[self.i]
         return None
+    
+    def read(self, count=1):
+        """往后读取 {count} 个字符"""
+        assert count > 0
+        pos = self.i
+        newpos = self.i + count
+        self.i = newpos
+        return self.text[pos+1:newpos+1]
 
     def read_next(self):
         """往后读取一个字符，返回读取的字符，如果已经读完了，返回None，改变索引下标"""
-        if self.i < self.max_index:
-            self.i += 1
-            return self.text[self.i]
-        elif self.i == self.max_index:
-            self.i += 1
-        return None
+        return self.read(1)
 
     def predict_next(self):
         """读取下一个字符，如果没有返回None，不改变当前索引下标"""
@@ -130,7 +132,7 @@ class TextParserBase(object):
             return self.text[self.i+1]
         return None
 
-    def get(self, index):
+    def get(self, index=0):
         if index < self.max_index:
             return self.text[index]
         return None
@@ -138,12 +140,12 @@ class TextParserBase(object):
     def set_index(self, index):
         self.i = index
 
-    def startswith(self, target):
+    def startswith(self, target: str):
         """当前字符是否以{target}开头"""
         length = len(target)
         return self.text[self.i:self.i+length] == target
 
-    def find(self, target):
+    def find(self, target: str):
         """以{self.i}作为开始下标，寻找目标字符串
         @param {string} target 
         @return 目标字符串的索引下标，如果找不到返回-1
@@ -169,7 +171,6 @@ class TextParserBase(object):
     def save_str_token(self):
         if self.str_token != "":
             token_str = self.str_token
-            # token = self.escape(token)
             token = TextToken(value=token_str)
             self.tokens.append(token)
         self.str_token = ""
@@ -203,13 +204,13 @@ class TextParserBase(object):
         self.i = self.length
         return self.text[start_index:]
 
-    def read_till_index(self, index):
+    def read_till_index(self, index: int):
         """包含目标索引，读取后{i}=index+1"""
         start_index = self.i
         self.i = min(self.length, index+1)
         return self.text[start_index:self.i]
 
-    def read_before_index(self, index):
+    def read_before_index(self, index: int):
         """不包含目标索引，读取后{i}=index"""
         start_index = self.i
         self.i = min(self.length, index)
@@ -232,7 +233,7 @@ class TextParserBase(object):
     def read_rest(self):
         return self.read_till_index(self.max_index)
 
-    def read_till_target(self, target):
+    def read_till_target(self, target: str):
         """返回值包含target，索引{i}移动到target之后"""
         end = self.text.find(target, self.i+1)
         if end < 0:
@@ -307,7 +308,7 @@ class TextToken(Storage):
             return self.html
         return escape_html(self.value)
     
-    def __eq__(self, value) -> bool:
+    def __eq__(self, value: "TextToken") -> bool:
         return self.type == value.type and self.value == value.value
     
     def is_topic(self):
@@ -371,9 +372,10 @@ class ImageToken(TextToken):
         href = self.href
         thumb_href = f"{href}?mode=thumbnail_v2"
         if self.has_multi:
-            return f'<div class="msg-img-box multi"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>'
+            box_class = "msg-img-box multi"
         else:
-            return f'<div class="msg-img-box"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>'
+            box_class = "msg-img-box"
+        return f'<div class="{box_class}"><img class="msg-img x-photo" alt="{href}" src="{thumb_href}" data-src="{href}"></div>'
 
     def __eq__(self, value: "ImageToken") -> bool:
         return self.type == value.type and self.value == value.value and self.href == value.href
@@ -520,7 +522,7 @@ class TextParser(TextParserBase):
     
     def handle_img_list(self, first_img_value="", href=""):
         restore_index = self.i
-        tmp_tokens = []
+        tmp_tokens = [] # type: list[ImageToken]
         tmp_tokens.append(ImageToken(value=first_img_value, href=href))
 
         while True:

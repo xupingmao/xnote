@@ -28,7 +28,7 @@
 <div class="card">
     <div class="list">
         {% if not is_leader %}
-            {% include system/component/system_sync_follower_view.html %}
+            {% include system/page/system_sync_follower_view.html %}
         {% end %}
 
         {% if is_leader %}
@@ -66,7 +66,7 @@
     </div>
 </div>
 
-{% include system/component/system_sync_cluster_info.html %}
+{% include system/page/system_sync_cluster_info.html %}
 
 <script type="text/javascript">
 $(function () {

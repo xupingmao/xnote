@@ -31,35 +31,16 @@ from .node_base import get_system_port
 from .models import LeaderStat
 from .models import SystemSyncToken
 from .models import FileIndexInfo
+from .models import FollwerInfo
 from .dao import ClusterConfigDao
 from .dao import SystemSyncTokenDao
-
-MAX_FOLLOWER_SIZE = 100
-EXPIRE_TIME = 60 * 60
-
-
-class FollwerInfo(Storage):
-
-    def init(self):
-        self.ping_time_ts = time.time()
-
-    def update_connect_info(self):
-        self.connected_time = dateutil.format_datetime()
-        self.connected_time_ts = time.time()
-
-    def is_expired(self):
-        gap = time.time() - self.ping_time_ts
-        return gap > EXPIRE_TIME
-
-    def update_ping_info(self):
-        self.ping_time = dateutil.format_datetime()
-        self.ping_time_ts = time.time()
-
+from .config import MAX_FOLLOWER_SIZE
+from handlers.fs.fs_helper import FileInfoDao
 
 class Leader(NodeManagerBase):
 
     _lock = threading.RLock()
-    FOLLOWER_DICT = dict()
+    FOLLOWER_DICT = dict() # type: dict[str, FollwerInfo]
     binlog = BinLog.get_instance()
     log_debug = False
 
@@ -136,7 +117,7 @@ class Leader(NodeManagerBase):
                     system_version=self.get_system_version(),
                     binlog_last_seq=self.binlog.last_seq)
 
-    def get_stat(self, port):
+    def get_stat(self, port=""):
         admin_info = xauth.get_user_by_name("admin")
         assert admin_info != None
         admin_token = admin_info.token
@@ -148,6 +129,7 @@ class Leader(NodeManagerBase):
         result.system_version = self.get_system_version()
         result.admin_token = admin_token
         result.fs_index_count = fs_index_count
+        result.fs_max_index = FileInfoDao.get_max_id()
 
         node_id = xutils.get_argument_str("node_id")
 

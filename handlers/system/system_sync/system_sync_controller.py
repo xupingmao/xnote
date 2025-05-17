@@ -79,7 +79,7 @@ FOLLOWER = Follower()
 
 
 def get_system_role_manager():
-    if get_system_role() == "leader":
+    if SyncConfig.is_leader():
         return LEADER
     else:
         return FOLLOWER
@@ -223,6 +223,13 @@ class SyncHandler:
         kw.follower_db_last_key = FOLLOWER.db_syncer.get_db_last_key()
         kw.sync_status = SyncConfig.need_sync_db()
 
+        if SyncConfig.is_leader():
+            pass
+        else:
+            # 从节点
+            kw.fs_max_index = FOLLOWER.fs_max_index
+            kw.fs_current_index = FOLLOWER.get_fs_sync_last_id()
+        
         return xtemplate.render("system/page/system_sync.html", **kw)
 
     @xauth.login_required("admin")
@@ -288,6 +295,9 @@ class LeaderHandler(SyncHandler):
         return web.HTTPError(status, headers, textutil.tojson(error))
 
     def check_token(self):
+        if xauth.is_admin():
+            return
+        
         token = xutils.get_argument_str("token", "")
         if token == "":
             raise self.build_error(code="404", message="token为空")
@@ -419,6 +429,7 @@ def on_sync_db_from_leader(ctx=None):
         xutils.print_exc()
         logging.error("sync_db_from_leader failed, wait 60 seconds...")
         time.sleep(60)
+
 
 xurls = (
     r"/system/sync", SyncHandler,

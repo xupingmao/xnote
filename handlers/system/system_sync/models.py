@@ -5,6 +5,7 @@ from xutils import Storage
 from xutils import dateutil
 from xnote.core import xtables
 from datetime import datetime
+from .config import EXPIRE_TIME
 
 class FileIndexInfo(Storage):
     """文件索引信息 (用于数据同步) """
@@ -20,6 +21,25 @@ class FileIndexInfo(Storage):
         self.sha1_sum = ""
         self.update(kw)
 
+
+class FollwerInfo(Storage):
+
+    def init(self):
+        self.ping_time_ts = time.time()
+
+    def update_connect_info(self):
+        self.connected_time = dateutil.format_datetime()
+        self.connected_time_ts = time.time()
+
+    def is_expired(self):
+        gap = time.time() - self.ping_time_ts
+        return gap > EXPIRE_TIME
+
+    def update_ping_info(self):
+        self.ping_time = dateutil.format_datetime()
+        self.ping_time_ts = time.time()
+
+
 class LeaderStat(Storage):
     """主节点信息"""
 
@@ -30,7 +50,8 @@ class LeaderStat(Storage):
         self.admin_token = ""
         self.access_token = ""
         self.fs_index_count = 0
-        self.follower_dict = {}
+        self.fs_max_index = 0
+        self.follower_dict = {} # type: dict[str, FollwerInfo]
         super().__init__(**kw)
 
     @classmethod

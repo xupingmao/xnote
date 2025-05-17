@@ -308,7 +308,9 @@ class HttpClient:
         leader_host = self.host
         params = dict(last_key=last_key, token=self.access_token)
         url = "{host}/system/sync/leader?p=list_db".format(host=leader_host)
-        return netutil.http_get(url, params=params)
+        result = netutil.http_get(url, params=params)
+        assert isinstance(result, str)
+        return result
 
 
 empty_http_client = HttpClient("", "", "")

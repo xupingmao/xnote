@@ -59,6 +59,7 @@ class Follower(NodeManagerBase):
         self.access_token = ""
         self.last_ping_time = -1
         self.fs_index_count = -1
+        self.fs_max_index = -1
         # 同步完成的时间
         self.fs_sync_done_time = -1
         self._debug = False
@@ -131,6 +132,7 @@ class Follower(NodeManagerBase):
         self.follower_list = convert_follower_dict_to_list(follower_dict)
         self.leader_info = result.get("leader")
         self.last_ping_time = time.time()
+        self.fs_max_index = result.fs_max_index
         self.access_token = result.access_token
 
         if len(self.follower_list) > 0:
@@ -299,13 +301,13 @@ class DBSyncer:
         self.debug = debug
         self.file_syncer = file_syncer
     
-    def get_table_by_key(self, key):
+    def get_table_by_key(self, key: str):
         table_name = key.split(":")[0]
         if dbutil.TableInfo.is_registered(table_name):
             return dbutil.get_table(table_name)
         return None
     
-    def get_table_name_by_key(self, key):
+    def get_table_name_by_key(self, key: str):
         return key.split(":")[0]
     
     def get_binlog_last_seq(self):
