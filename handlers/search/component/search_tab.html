@@ -26,6 +26,9 @@
 
             <a class="link" href="{{_server_home}}/search?key={{?key}}&search_type=message"
                 data-option="message" data-value="{{?category}}">记事</a>
+
+            <a class="link hide" href="{{_server_home}}/search?key={{?key}}&search_type=comment"
+                data-option="comment" data-value="{{?category}}">评论</a>
         </div>
     </div>
 {% end %}
@@ -50,9 +53,9 @@ $(function () {
     }
 
     if (!isEmpty(searchType)) {
-        $("[data-option=" + searchType + "]").addClass("selected-link");
+        $("[data-option=" + searchType + "]").addClass("selected-link").removeClass("hide");
     } else if (!isEmpty(category)) {
-        $("[data-option=" + category + "]").addClass("selected-link");
+        $("[data-option=" + category + "]").addClass("selected-link").removeClass("hide");
     } else {
         $("[data-option=default]").addClass("selected-link");
     }

@@ -9,6 +9,7 @@ import time
 from xutils.base import print_exc
 from xutils.config import UtilityConfig
 from xutils import six
+from os import system
 
 """os适配工具
 """
@@ -35,8 +36,6 @@ if six.PY2:
     getstatusoutput = py2_getstatusoutput
 else:
     getstatusoutput = subprocess.getstatusoutput
-
-from os import system
 
 def is_windows():
     return os.name == "nt"

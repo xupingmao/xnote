@@ -1,0 +1,24 @@
+{% init _is_markdown_loaded = False %}
+{% init markdown_content = "" %}
+{% from xutils import markdown_util %}
+
+{% if not _is_markdown_loaded %}
+    <!-- 加载markdown相关文件 -->
+
+    <!-- 代码高亮highlight依赖 -->
+    <link rel="stylesheet" href="{{_server_home}}/_static/lib/highlight.js/11.6.0/styles/default.min.css">
+    <link rel="stylesheet" href="{{_server_home}}/_static/lib/highlight.js/11.7.0/styles/a11y-dark.min.css">
+    <script src="{{_server_home}}/_static/lib/highlight.js/11.6.0/highlight.min.js"></script>
+    
+    <!-- 解析CSV依赖 -->
+    <script type="text/javascript" src="{{_server_home}}/_static/lib/csv.js/csv.js"></script>
+    <!-- csv编辑依赖 -->
+    <script type="text/javascript" src="{{_server_home}}/_static/js/editor-csv.js"></script>
+
+    {% if markdown_util.has_latex(markdown_content) %}
+        <!-- KaTeX 用于公式处理 -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js"></script>
+    {% end %}
+
+{% end %}

@@ -4,6 +4,10 @@
  */
 (function (window) {
 
+    var LATEX_INLINE_START = '.LATEX.INLINE.START.';
+    var LATEX_INLINE_END = '.LATEX.INLINE.END.';
+
+
     // 目录生成
     function MarkedContents() {
         this.id = 0;
@@ -136,7 +140,21 @@
     });
 
     marked.showMenu = true;
-    var oldParse = marked.parse;
+    var originalParse = marked.parse;
+    // 自定义转义函数
+    var originalEscapeRegexp = marked.InlineLexer.rules.escape;
+    
+    var newEscapeRegexp = /^\\([\\`*{}\[\]#+\-.!_>])/;
+    // 不对 \( 和 \) 进行转义
+    marked.InlineLexer.rules.escape = newEscapeRegexp;
+    marked.InlineLexer.rules.gfm.escape = newEscapeRegexp;
+    
+    // text 移除了反斜杠的终止符号
+    // var originalTextRegexp = marked.InlineLexer.rules.text;
+    // var newTextRegexp = /^[\s\S]+?(?=[<!\[_*`]| {2,}\n|$)/;
+    // marked.InlineLexer.rules.text = newTextRegexp;
+    // marked.InlineLexer.rules.gfm.text = newTextRegexp;
+
 
     // 扩展选项
     var extOptions = initExtOptions();
@@ -257,6 +275,20 @@
         }
     }
 
+    function katexRender(content) {
+        if (window.katex) {
+            try {
+                var result = katex.renderToString(content, { displayMode: false });
+            } catch {
+                var result = myRenderer.codespan("解析失败:" + content);
+            }
+            // console.debug("katex render", content, "result", result);
+            return result
+        } else {
+            return content;
+        }
+    }
+
     // 处理待办的样式
     function processCheckbox(text, clickable) {
         var result = {};
@@ -279,7 +311,7 @@
         }
 
         // 调试日志
-        console.info(extOptions.checkboxIndex, checkbox);
+        console.debug("checkboxIndex", extOptions.checkboxIndex, checkbox);
         // 处理同名的待办索引
         var index = extOptions.checkboxIndexMap[text]
         if (index === undefined) {
@@ -396,9 +428,15 @@
                 + '\n</code></pre>';
         }
 
+        lang = lang.toLowerCase()
         // csv
-        if ("csv" == lang.toLowerCase()) {
+        if ("csv" === lang) {
             return '<div>' + code + '</div>';
+        }
+
+        if (lang === 'latex') {
+            // 处理块级公式（用 $$ $$ 包裹）
+            return katexRender(code);
         }
 
         // 定义语言
@@ -494,14 +532,32 @@
         xnote.table.adjustWidth(".marked-table");
     }
 
+    // 处理行内公式（用 \( \) 包裹）
+    myRenderer.text = function(text) {
+        // text 已经被转义了
+        // console.log("text", text);
+        var regexp = new RegExp(LATEX_INLINE_START + "([\\s\\S]+?)" + LATEX_INLINE_END, 'g');
+        // var regexp = /\\\(([^\\]+?)\\\)/g
+        return text.replace(regexp, function(match, content) {
+            try {
+                content = atob(content);
+                console.debug("inline latex", content);
+                return katexRender(content);
+            } catch (e) {
+                console.error("process text failed, error:", e);
+                return text;
+            }
+        });
+    };
+
     // 重写parse方法
     marked.parse = function (text) {
         if (!marked.showMenu) {
-            return oldParse(text);
+            return originalParse(text);
         }
 
         myRenderer.headings = [];
-        var outtext = oldParse(text);
+        var outtext = originalParse(text);
         if (myRenderer.headings.length == 0) {
             return outtext;
         }
@@ -516,7 +572,17 @@
         return outtext;
     };
 
+    function preHandleText(text) {
+        // 预处理：替换行内公式定界符
+        var regexp = /\\\(([\s\S]*?)\\\)/g;
+        return text.replace(regexp, function (match, content) {
+            return LATEX_INLINE_START + btoa(content) + LATEX_INLINE_END;
+        });
+    }
+
     marked.parseAndRender = function (text, target, options) {
+        // 预处理text文本
+        text = preHandleText(text);
         // 处理扩展选项
         extOptions = initExtOptions(options);
         extOptions.text = text;

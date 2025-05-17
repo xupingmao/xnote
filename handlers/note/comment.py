@@ -92,7 +92,7 @@ def search_comment_detail(ctx: SearchContext):
 
     for item in comments:
         item.icon = "fa-comment-o"
-        item.name = "#评论 %s" % item.note_name
+        item.name = "[评论] %s" % item.note_name
         item.url  = item.note_url
         item.mtime = item.ctime
         result.append(item)
