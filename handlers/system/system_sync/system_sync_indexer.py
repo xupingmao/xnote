@@ -129,7 +129,7 @@ class FileSyncIndexManager:
 
             if not item.exists:
                 # 删除不存在的文件索引
-                FileInfoDao.delete_by_fpath(fpath)
+                FileInfoDao.delete_by_id(item.id)
 
         return result
 
