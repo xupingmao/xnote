@@ -1,140 +1,134 @@
 {% init leader_binlog_seq = -1 %}
 {% init follower_binlog_seq = -1 %}
 
-<div class="list-item">
-    <span>主节点服务器(<a href="{{leader_host}}">{{leader_host}}</a>)</span>
-    <div class="float-right">
-        <a class="btn btn-default config-btn" 
-            data-title="设置主服务器"
-            data-key="leader.host"
-            data-default="{{leader_host}}">设置</a>
-        <!-- <i class="fa fa-chevron-right"></i> -->
-    </div>
-</div>
-
-<div class="list-item">
-    <span>主服务器token</span>
-    <div class="float-right">
-        <a class="btn btn-default config-btn" 
-            data-title="设置主服务器token"
-            data-key="leader.token"
-            data-default="{{leader_token}}">设置</a>
-        <!-- <i class="fa fa-chevron-right"></i> -->
-    </div>
-</div>
-
-<div class="list-item">
-    <span>同步状态</span>
-    <div class="float-right">
-        <select class="config-select" data-key="sync_status" data-type="bool" value="{{sync_status}}">
-            <option value="True">开启</option>
-            <option value="False">关闭</option>
-        </select>
-    </div>
-</div>
-
-<div class="list-item">
-    <span>文件索引同步</span>
-    <div class="float-right">
-        <span>{{fs_current_index}} -> {{fs_max_index}} (落后{{fs_max_index - fs_current_index}})</span>
-    </div>
-</div>
-
-<div class="list-item">
-    <span>文件同步进度</span>
-    <div class="float-right">
-        <span>{{sync_process}}</span>
-    </div>
-</div>
-
-<div class="list-item">
-    <span>重置文件同步位点</span>
-    <div class="float-right">
-        <a class="btn btn-default confirm-btn" 
-            data-title="确认重置文件同步位点?"
-            data-key="reset_fs_offset">重置</a>
-    </div>
-</div>
-
-<div class="list-item">
-    <span>触发一次文件同步</span>
-    <div class="float-right">
-        <a class="btn btn-default confirm-btn" 
-            data-title="确认同步一次?"
-            data-key="trigger_fs_sync">同步一次</a>
-        <!-- <i class="fa fa-chevron-right"></i> -->
-    </div>
-</div>
-
-<div class="list-item">
-    <span>DB同步状态</span>
-    <div class="float-right">
-        {{follower_db_sync_state}}
-    </div>
-</div>
-
-{% if follower_db_sync_state == "full" %}
-<div class="list-item">
-    <span>全量同步当前key</span>
-    <div class="float-right">
-        {{follower_db_last_key}}
-    </div>
-</div>
-{% end %}
-
-<div class="list-item">
-    <span>同步失败</span>
-    <div class="float-right">
-        <a href="{{_server_home}}/system/db_scan?prefix=fs_sync_index_failed&reverse=true">{{sync_failed_count}}</a>
-    </div>
-</div>
-
-<div class="list-item">
-    <span>binlog位点</span>
-    <div class="float-right">
-        <span>{{follower_binlog_seq}}->{{leader_binlog_seq}}</span>
-        <span>(落后{{leader_binlog_seq-follower_binlog_seq}})</span>
-    </div>
-</div>
-
-<div class="list-item">
-    <span>重置当前位点</span>
-    <div class="float-right">
-        <a class="btn btn-default confirm-btn" 
-            data-title="确认重置当前位点?"
-            data-key="reset_offset">重置</a>
-    </div>
-</div>
-
-{% if False %}
+<div class="card">
     <div class="list-item">
-        <span>触发同步</span>
+        <span>主节点服务器(<a href="{{leader_host}}">{{leader_host}}</a>)</span>
         <div class="float-right">
-            <a class="btn btn-default confirm-btn" 
-                data-title="确认同步一次?"
-                data-key="trigger_sync">同步一次</a>
+            <a class="btn btn-default config-btn" data-title="设置主服务器" data-key="leader.host"
+                data-default="{{leader_host}}">设置</a>
             <!-- <i class="fa fa-chevron-right"></i> -->
         </div>
     </div>
-{% end %}
+
+    <div class="list-item">
+        <span>主服务器token</span>
+        <div class="float-right">
+            <a class="btn btn-default config-btn" data-title="设置主服务器token" data-key="leader.token"
+                data-default="{{leader_token}}">设置</a>
+            <!-- <i class="fa fa-chevron-right"></i> -->
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>同步状态</span>
+        <div class="float-right">
+            <select class="config-select" data-key="sync_status" data-type="bool" value="{{sync_status}}">
+                <option value="True">开启</option>
+                <option value="False">关闭</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="list-item">
+        <span>文件索引同步</span>
+        <div class="float-right">
+            <span>{{fs_current_index}} -> {{fs_max_index}} (落后{{fs_max_index - fs_current_index}})</span>
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>文件同步进度</span>
+        <div class="float-right">
+            <span>{{sync_process}}</span>
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>重置文件同步位点</span>
+        <div class="float-right">
+            <a class="btn btn-default confirm-btn" data-title="确认重置文件同步位点?" data-key="reset_fs_offset">重置</a>
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>触发一次文件同步</span>
+        <div class="float-right">
+            <a class="btn btn-default confirm-btn" data-title="确认同步一次?" data-key="trigger_fs_sync">同步一次</a>
+            <!-- <i class="fa fa-chevron-right"></i> -->
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="list-item">
+        <span>DB同步状态</span>
+        <div class="float-right">
+            {{follower_db_sync_state}}
+        </div>
+    </div>
+
+    {% if follower_db_sync_state == "full" %}
+    <div class="list-item">
+        <span>全量同步当前key</span>
+        <div class="float-right">
+            {{follower_db_last_key}}
+        </div>
+    </div>
+    {% end %}
+
+    <div class="list-item">
+        <span>同步失败</span>
+        <div class="float-right">
+            <a href="{{_server_home}}/system/db_scan?prefix=fs_sync_index_failed&reverse=true">{{sync_failed_count}}</a>
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>binlog位点</span>
+        <div class="float-right">
+            <span>{{follower_binlog_seq}}->{{leader_binlog_seq}}</span>
+            <span>(落后{{leader_binlog_seq-follower_binlog_seq}})</span>
+        </div>
+    </div>
+
+    <div class="list-item">
+        <span>重置当前位点</span>
+        <div class="float-right">
+            <a class="btn btn-default confirm-btn" data-title="确认重置当前位点?" data-key="reset_offset">重置</a>
+        </div>
+    </div>
+
+    {% if False %}
+    <div class="list-item">
+        <span>触发同步</span>
+        <div class="float-right">
+            <a class="btn btn-default confirm-btn" data-title="确认同步一次?" data-key="trigger_sync">同步一次</a>
+            <!-- <i class="fa fa-chevron-right"></i> -->
+        </div>
+    </div>
+    {% end %}
+</div>
 
 <script type="text/javascript">
-$(function() {
-    $(".config-select").change(function (e) {
-        var key = $(e.target).attr("data-key");
-        var value = $(e.target).val();
-        var params = {};
-        params.p = "set_config";
-        params.key = key;
-        params.value = value;
+    $(function () {
+        $(".config-select").change(function (e) {
+            var key = $(e.target).attr("data-key");
+            var value = $(e.target).val();
+            var params = {};
+            params.p = "set_config";
+            params.key = key;
+            params.value = value;
 
-        xnote.http.post("/system/sync", params, function (resp) {
-            if (resp.code == "success") {
-                xnote.toast(resp.message);
-            } else {
-                xnote.alert(resp.message);
-            }
+            xnote.http.post("/system/sync", params, function (resp) {
+                if (resp.code == "success") {
+                    xnote.toast(resp.message);
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
         });
-    });
-})
+    })
 </script>

@@ -25,46 +25,15 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="list">
-        {% if not is_leader %}
-            {% include system/page/system_sync_follower_view.html %}
-        {% end %}
 
-        {% if is_leader %}
-
-            <div class="list-item">
-                <span>授权token</span>
-                <div class="float-right">
-                    <a class="btn btn-default config-btn" 
-                        data-title="更新token"
-                        data-key="leader.token"
-                        data-default="{{leader_token}}">设置</a>
-                </div>
-            </div>
-
-            <div class="list-item">
-                <span>子节点IP白名单</span>
-                <div class="float-right">
-                    <a class="btn btn-default config-btn" 
-                        data-title="更新白名单"
-                        data-key="follower.whitelist"
-                        data-default="{{whitelist}}">设置</a>
-                </div>
-            </div>
+{% if is_leader %}
+    {% include system/page/system_sync_leader.html %}
+{% end %}
 
 
-            <div class="list-item">
-                <span>文件索引数</span>
-                <div class="float-right">
-                    <span>{{fs_index_count}}</span>
-                </div>
-            </div>
-
-        {% end %}
-
-    </div>
-</div>
+{% if not is_leader %}
+    {% include system/page/system_sync_follower_view.html %}
+{% end %}
 
 {% include system/page/system_sync_cluster_info.html %}
 

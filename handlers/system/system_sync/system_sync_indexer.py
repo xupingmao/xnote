@@ -133,8 +133,10 @@ class FileSyncIndexManager:
 
         return result
 
-    def count_index(self):
-        return self.db.count()
+    def count_index(self, exclude_ftypes = ["dir"]):
+        where = "ftype NOT IN $exclude_ftypes"
+        vars = dict(exclude_ftypes = exclude_ftypes)
+        return self.db.count(where=where, vars=vars)
 
 class Refrence:
 
