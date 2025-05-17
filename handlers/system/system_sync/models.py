@@ -14,6 +14,7 @@ class FileIndexInfo(Storage):
         self.webpath = ""
         self.fpath = ""
         self.mtime = xtables.DEFAULT_DATETIME
+        self.user_id = 0
         self.fsize = 0
         self.ftype = ""
         self.last_try_time = 0.0

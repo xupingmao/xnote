@@ -42,11 +42,12 @@ def convert_time_to_str(mtime):
 def is_temp_file(fname):
     return fname in TEMP_FNAME_SET
 
-def build_index_by_fpath(fpath, user_id=0, remark=""):
+def build_index_by_fpath(fpath, user_id=0, remark="", file_id=0):
     # TODO 如果 user_id=0 尝试根据路径推测用户
     from handlers.fs.fs_helper import FileInfo, FileInfoDao
     st = os.stat(fpath)
     file_info = FileInfo()
+    file_info.id = file_id
     file_info.fpath = fpath
     file_info.user_id = user_id
     file_info.fsize = fsutil.get_file_size_int(fpath)
@@ -57,7 +58,10 @@ def build_index_by_fpath(fpath, user_id=0, remark=""):
     else:
         file_info.ftype = fsutil.get_file_ext(fpath)
         file_info.sha256 = fsutil.get_sha256_sum(fpath)
-    FileInfoDao.upsert(file_info)
+    if file_id > 0:
+        FileInfoDao.replace(file_info)
+    else:
+        FileInfoDao.upsert(file_info)
     logging.debug("更新文件索引:%s", file_info)
 
 class FileSyncIndexManager:

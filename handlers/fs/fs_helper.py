@@ -36,6 +36,12 @@ class FileInfo(BaseDataRecord):
         self.remark = ""
         self.sha256 = ""
 
+    def to_replace_dict(self):
+        result = dict(**self)
+        if self.id == 0:
+            result.pop("id")
+        return result
+
     def to_save_dict(self):
         result = dict(**self)
         result.pop("id")
@@ -92,6 +98,11 @@ class FileInfoDao:
         else:
             save_dict = info.to_save_dict()
             cls.db.update(**save_dict, where = dict(id=old.id))
+
+    @classmethod
+    def replace(cls, info: FileInfo):
+        save_dict = info.to_replace_dict()
+        cls.db.replace(**save_dict)
 
     @classmethod
     def list(cls, user_id=0, offset=0, limit=100, start_time_inclusive="", end_time_exclusive="", is_admin=False, order="ctime desc"):

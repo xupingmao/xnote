@@ -255,6 +255,7 @@ class HttpClient:
         if self.is_same_file(dest_path, item):
             logging.debug("文件没有变化，跳过:%s", webpath)
             self.delete_retry_task(item)
+            build_index_by_fpath(dest_path, user_id=item.user_id, file_id=item.id)
             return
 
         fsutil.makedirs(dirname)
@@ -279,7 +280,7 @@ class HttpClient:
             self.delete_retry_task(item) # 重试也不能成功了
             raise Exception(f"sha1校验码检查失败, local={local_sha1_sum}, remote={item.sha1_sum}, webpath={item.webpath}, download_url={url}")
 
-        build_index_by_fpath(dest_path)
+        build_index_by_fpath(dest_path, user_id=item.user_id, file_id=item.id)
 
     def download_files(self, result):
         for item in result.data:

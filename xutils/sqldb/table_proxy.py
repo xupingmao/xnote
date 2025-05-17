@@ -269,7 +269,7 @@ class TableProxy(SQLDBInterface):
         return self.table_info.column_names
 
 
-    def replace_values(self, seqname=None, _test=False, **values):
+    def replace(self, seqname=None, _test=False, **values):
         """XXX: 测试中
         执行replace操作
         """
@@ -288,7 +288,7 @@ class TableProxy(SQLDBInterface):
             "REPLACE INTO %s " % tablename + q(_keys) + " VALUES " + q(_values)
         )
 
-        return self.query(sql_query)
+        return self.db.query(sql_query)
 
     def _new_profile_log(self):
         log = ProfileLog()

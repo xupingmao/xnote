@@ -37,6 +37,7 @@ from .dao import SystemSyncTokenDao
 from .config import MAX_FOLLOWER_SIZE
 from handlers.fs.fs_helper import FileInfoDao
 from .system_sync_indexer import count_fs_index
+from . import system_sync_indexer
 
 class Leader(NodeManagerBase):
 
@@ -294,3 +295,7 @@ class Leader(NodeManagerBase):
             return webutil.SuccessResult(data=token_info)
         else:
             return webutil.FailedResult(code="403", message="无效的token")
+        
+
+    def list_files(self, last_id=0):
+        return system_sync_indexer.list_files(last_id=last_id)

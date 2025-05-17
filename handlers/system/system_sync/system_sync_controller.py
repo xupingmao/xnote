@@ -328,8 +328,7 @@ class LeaderHandler(SyncHandler):
         result = webutil.SuccessResult()
         result.code = "success"
         result.req_last_id = last_id
-
-        data = system_sync_indexer.list_files(last_id=last_id)
+        data = LEADER.list_files(last_id=last_id)
         result.data = data
         return result
 
