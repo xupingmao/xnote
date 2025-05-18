@@ -54,26 +54,10 @@ class HttpClient:
         self.debug = True
         self.node_id = xconfig.get_global_config("system.node_id", "unknown_node_id")
         self.port = xconfig.get_global_config("system.port")
+        self.fs_sync_failed_msg = ""
 
     def get_table(self):
         return dbutil.get_hash_table("fs_sync_index_copy")
-
-    def get_failed_table(self):
-        return dbutil.get_table("fs_sync_index_failed")
-
-    def delete_retry_task(self, item):
-        db = self.get_failed_table()
-        result = db.list(filter_func = lambda k,x:x.webpath==item.webpath)
-        for result_item in result:
-            db.delete(result_item)
-    
-    def upsert_retry_task(self, item):
-        db = self.get_failed_table()
-        first = db.get_first(where = dict(webpath=item.webpath))
-        if first == None:
-            db.insert(item)
-        else:
-            db.update_by_key(first._key, item)
 
     def check_failed(self):
         if self.host is None:
@@ -204,6 +188,7 @@ class HttpClient:
 
         if not self.check_disk_space():
             logging.error("磁盘容量不足，跳过")
+            self.fs_sync_failed_msg = "磁盘容量不足"
             raise Exception("磁盘容量不足")
         
         if not item.exists:
@@ -222,7 +207,6 @@ class HttpClient:
             logging.info("跳过系统/临时文件, fpath=%s", item.fpath)
             return
 
-        fpath = item.fpath
         webpath = item.webpath
 
         if isinstance(item.mtime, float):
@@ -232,17 +216,6 @@ class HttpClient:
                 mtime = dateutil.parse_datetime(item.mtime)
             except:
                 mtime = time.time()
-
-        table = self.get_table()
-        item.last_try_time = time.time()
-        
-        try:
-            # 文件名太长会导致保存失败
-            # 保存文件索引信息
-            table.put(webpath, item)
-        except:
-            item.err_msg = xutils.print_exc()
-            self.upsert_retry_task(item)
 
         encoded_fpath = xutils.encode_base64(webpath)
         url = "{host}/fs_download".format(host = self.host)
@@ -254,7 +227,6 @@ class HttpClient:
 
         if self.is_same_file(dest_path, item):
             logging.debug("文件没有变化，跳过:%s", webpath)
-            self.delete_retry_task(item)
             build_index_by_fpath(dest_path, user_id=item.user_id, file_id=item.id)
             return
 
@@ -272,15 +244,20 @@ class HttpClient:
             if err.status == 403:
                 logging.error("auth failed")
                 self.refresh_token()
+            
+            self.fs_sync_failed_msg = str(err)
             raise err
         
         os.utime(dest_path, times=(mtime, mtime))
         local_sha1_sum = fsutil.get_sha1_sum(dest_path)
         if local_sha1_sum != item.sha1_sum:
-            self.delete_retry_task(item) # 重试也不能成功了
-            raise Exception(f"sha1校验码检查失败, local={local_sha1_sum}, remote={item.sha1_sum}, webpath={item.webpath}, download_url={url}")
+            # 重试也不能成功了
+            faild_msg = f"sha1校验码检查失败, local={local_sha1_sum}, remote={item.sha1_sum}, webpath={item.webpath}, download_url={url}"
+            self.fs_sync_failed_msg = faild_msg
+            raise Exception(faild_msg)
 
         build_index_by_fpath(dest_path, user_id=item.user_id, file_id=item.id)
+        self.fs_sync_failed_msg = ""
 
     def download_files(self, result):
         for item in result.data:

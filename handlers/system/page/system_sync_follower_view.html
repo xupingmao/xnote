@@ -60,6 +60,17 @@
             <!-- <i class="fa fa-chevron-right"></i> -->
         </div>
     </div>
+
+    {% if fs_sync_failed_msg != "" %}
+    <div class="list-item">
+        <span>文件同步失败信息</span>
+        <div class="float-right">
+            <button class="btn btn-default" data-value="{{fs_sync_failed_msg}}" 
+            onclick="xnote.viewElementValue(this)">查看</button>
+        </div>
+    </div>
+    {% end %}
+
 </div>
 
 <div class="card">
@@ -78,13 +89,6 @@
         </div>
     </div>
     {% end %}
-
-    <div class="list-item">
-        <span>同步失败</span>
-        <div class="float-right">
-            <a href="{{_server_home}}/system/db_scan?prefix=fs_sync_index_failed&reverse=true">{{sync_failed_count}}</a>
-        </div>
-    </div>
 
     <div class="list-item">
         <span>binlog位点</span>
@@ -130,5 +134,10 @@
                 }
             });
         });
-    })
+    });
+
+    xnote.viewElementValue = function(ele) {
+        var value = $(ele).attr("data-value");
+        xnote.openTextDialog("文本信息", value);
+    }
 </script>

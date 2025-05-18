@@ -10,10 +10,12 @@
 """
 
 import threading
+import typing
+
 from xutils import Storage
 from xutils.db.dbutil_base import create_write_batch, db_get, db_put
 from xutils.db.encode import encode_index_value
-
+from xutils.db.dbutil_base import WriteBatchProxy
 
 class MetaInfo(Storage):
     """双端队列的元信息"""
@@ -45,13 +47,13 @@ class DequeTable:
             result.update(info)
             return result
 
-    def update_meta_info(self, info):
+    def update_meta_info(self, info: MetaInfo):
         db_put(self.meta_key, info)
 
     def __len__(self):
         return self.get_meta_info().size
 
-    def build_key(self, id):
+    def build_key(self, id: int):
         return self.table_name + ":" + encode_index_value(id)
 
     def get_by_id(self, id):
@@ -89,7 +91,7 @@ class DequeTable:
                 batch.put(self.meta_key, meta)
                 batch.commit()
 
-    def appendleft(self, value, batch=None):
+    def appendleft(self, value, batch: typing.Optional[WriteBatchProxy]=None):
         with self._lock:
             meta = self.get_meta_info()
             first_id = meta.first_id

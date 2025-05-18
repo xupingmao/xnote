@@ -534,6 +534,7 @@ def load_user_config_properties():
 def load_cron_config():
     fpath = resolve_config_path("./config/cron/cron.json")
     text = fsutil.readfile(fpath)
+    assert isinstance(text, str)
     return json.loads(text)
 
 def makedirs(dirname):

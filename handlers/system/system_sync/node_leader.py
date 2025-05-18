@@ -24,7 +24,7 @@ from xutils import Storage
 from xutils import webutil
 from xutils import dbutil
 from xutils import fsutil
-from xutils.db.binlog import BinLog, BinLogOpType
+from xutils.db.binlog import BinLog, BinLogOpType, BinLogRecord
 
 from .node_base import NodeManagerBase, convert_follower_dict_to_list
 from .node_base import get_system_port
@@ -232,7 +232,7 @@ class Leader(NodeManagerBase):
         log.value = value
         return log
     
-    def process_log(self, log):
+    def process_log(self, log: BinLogRecord):
         # TODO 补充单元测试
         optype = log.optype
         if optype in (BinLogOpType.sql_upsert, BinLogOpType.sql_delete):

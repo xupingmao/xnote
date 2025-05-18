@@ -244,6 +244,7 @@ class SyncHandler:
             # 从节点
             kw.fs_max_index = FOLLOWER.fs_max_index
             kw.fs_current_index = FOLLOWER.get_fs_sync_last_id()
+            kw.fs_sync_failed_msg = FOLLOWER.http_client.fs_sync_failed_msg
         
         return xtemplate.render("system/page/system_sync.html", **kw)
 

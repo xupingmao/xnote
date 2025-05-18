@@ -104,7 +104,7 @@ def encode_float(value):
     # 16位整数+小数点+6位小数
     return prefix + "%023.6f" % value
 
-def encode_str(value):
+def encode_str(value: str):
     """编码字符串
     >>> encode_str("a:b")
     'a%3Ab'
@@ -117,12 +117,12 @@ def encode_str(value):
     value = value.replace(":", "%3A")
     return value
 
-def decode_str(value):
+def decode_str(value: str):
     value = value.replace("%3A", ":")
     value = value.replace("%25", "%")
     return value
 
-def encode_str_index(value):
+def encode_str_index(value: str):
     value = value.replace("%", "%25")
     value = value.replace(":", "%3A")
     value = value.replace(",", "%2C")
@@ -160,7 +160,7 @@ def convert_object_to_json(obj):
 def convert_object_to_bytes(obj):
     return convert_object_to_json(obj).encode("utf-8")
 
-def convert_bytes_to_object(bytes, parse_json=True):
+def convert_bytes_to_object(bytes: bytes, parse_json=True):
     if bytes is None:
         return None
     str_value = bytes.decode("utf-8")

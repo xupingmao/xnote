@@ -8,15 +8,18 @@
 @FilePath     : /xnote/xutils/db/binlog.py
 @Description  : 数据库的binlog,用于同步
 """
-from web import Storage
-from xutils.db.dbutil_base import count_table, prefix_iter
-from xutils.db.dbutil_base import db_put, prefix_list, register_table, db_batch_delete
-from xutils.db.dbutil_id_gen import IdGenerator
 
 import struct
 import threading
 import logging
 import base64
+
+
+from web import Storage
+from xutils.db.dbutil_base import count_table, prefix_iter
+from xutils.db.dbutil_base import db_put, prefix_list, register_table, db_batch_delete
+from xutils.db.dbutil_id_gen import IdGenerator
+from xutils.base import BaseDataRecord
 
 register_table("_binlog", "数据同步的binlog")
 
@@ -41,6 +44,14 @@ class FileLog(Storage):
         self.webpath = ""
         self.old_webpath = ""
         self.mtime = 0.0
+
+class BinLogRecord(BaseDataRecord):
+    def __init__(self, **kw):
+        self.optype = ""
+        self.key = "" # type: str | int
+        self.value = None # type: object
+        self.table_name = ""
+        super().__init__(**kw)
 
 class BinLog:
     _table_name = "_binlog"
@@ -73,9 +84,6 @@ class BinLog:
             return struct.unpack('>Q', id_bytes)[0]
 
         raise Exception("can not unpack value: %r" % id_str)
-
-    def _pack_id_v0(self, log_id=0):
-        return "%020d" % log_id
 
     @property
     def last_seq(self):
@@ -187,15 +195,6 @@ class BinLog:
                         self.delete_batch(keys)
                         keys = []
                 
-                # 兼容历史版本
-                key_from_old = self._table_name + ":" + self._pack_id_v0(start_seq)
-                key_to_old = self._table_name + ":" + self._pack_id_v0(start_seq + limit)
-                for key, value in prefix_iter(self._table_name, key_from=key_from_old, key_to=key_to_old, include_key=True):
-                    keys.append(key)
-                    if len(keys) >= batch_size:
-                        self.delete_batch(keys)
-                        keys = []
-                
                 self.delete_batch(keys)
     
     def delete_batch(self, keys):
@@ -204,3 +203,14 @@ class BinLog:
         if self.log_debug:
             self.logger.info("Delete keys: %s", keys)
         db_batch_delete(keys)
+
+
+    def _drop_table(self, batch_size=20):
+        """清空binlog,后台使用"""
+        keys = []
+        for key, value in prefix_iter(self._table_name, limit=-1, include_key=True):
+            keys.append(key)
+            if len(keys) >= batch_size:
+                self.delete_batch(keys)
+                keys = []
+        self.delete_batch(keys)
