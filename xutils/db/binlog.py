@@ -47,7 +47,7 @@ class FileLog(Storage):
 
 class BinLogRecord(BaseDataRecord):
     def __init__(self, **kw):
-        self.optype = ""
+        self.optype = "" # see BinLogOpType
         self.key = "" # type: str | int
         self.value = None # type: object
         self.table_name = ""

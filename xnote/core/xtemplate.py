@@ -388,6 +388,11 @@ class BasePlugin:
     title = u"插件名称"
     description = ""
 
+    # {分类的配置}
+    # 插件分类 {note, dir, system, network}
+    show_category = True
+    category = ""
+
     # {权限配置}
     # 默认需要管理员权限访问
     require_admin = True
@@ -395,11 +400,6 @@ class BasePlugin:
     require_login = True
     # 允许访问的权限列表
     permitted_role_list = [] # type: list[str]
-
-    # {分类的配置}
-    # 插件分类 {note, dir, system, network}
-    show_category = True
-    category = ""
 
     # {侧边栏自定义HTML}
     show_aside = False

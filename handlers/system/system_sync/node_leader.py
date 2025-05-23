@@ -31,7 +31,8 @@ from .node_base import get_system_port
 from .models import LeaderStat
 from .models import SystemSyncToken
 from .models import FileIndexInfo
-from .models import FollwerInfo
+from .models import FollowerInfo
+from .models import LeaderBaseInfo
 from .dao import ClusterConfigDao
 from .dao import SystemSyncTokenDao
 from .config import MAX_FOLLOWER_SIZE
@@ -42,7 +43,7 @@ from . import system_sync_indexer
 class Leader(NodeManagerBase):
 
     _lock = threading.RLock()
-    FOLLOWER_DICT = dict() # type: dict[str, FollwerInfo]
+    FOLLOWER_DICT = dict() # type: dict[str, FollowerInfo]
     binlog = BinLog.get_instance()
     log_debug = False
 
@@ -52,10 +53,10 @@ class Leader(NodeManagerBase):
             ip=client_ip, port=port, node_id=node_id)
         return url
 
-    def get_follower_info(self, client_id):
+    def get_follower_info(self, client_id: str):
         client_info = self.FOLLOWER_DICT.get(client_id)
         if client_info == None:
-            client_info = FollwerInfo()
+            client_info = FollowerInfo()
             client_info.init()
             client_info.client_id = client_id
             client_info.update_connect_info()
@@ -66,7 +67,7 @@ class Leader(NodeManagerBase):
             return len(self.FOLLOWER_DICT) <= MAX_FOLLOWER_SIZE
         return True
 
-    def update_follower_info(self, client_info):
+    def update_follower_info(self, client_info: FollowerInfo):
         url = client_info.url
         self.FOLLOWER_DICT[url] = client_info
 
@@ -113,7 +114,7 @@ class Leader(NodeManagerBase):
                 del self.FOLLOWER_DICT[key]
 
     def get_leader_info(self):
-        return dict(token=self.get_leader_token(),
+        return LeaderBaseInfo(token=self.get_leader_token(),
                     node_id=self.get_node_id(),
                     fs_index_count=self.get_fs_index_count(),
                     system_version=self.get_system_version(),
@@ -254,7 +255,7 @@ class Leader(NodeManagerBase):
             key = log.key
             log.value = dbutil.get(key)
             if log.value == None:
-                log.optype = "delete"
+                log.optype = BinLogOpType.delete
         
         return log
 

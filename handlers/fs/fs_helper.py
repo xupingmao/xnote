@@ -96,6 +96,7 @@ class FileInfoDao:
             save_dict = info.to_save_dict()
             return cls.db.insert(**save_dict)
         else:
+            info.id = old.id
             save_dict = info.to_save_dict()
             cls.db.update(**save_dict, where = dict(id=old.id))
 

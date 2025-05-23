@@ -3,28 +3,29 @@
 # @since 2022/02/12 18:13:41
 # @modified 2022/02/12 18:13:46
 # @filename node_base.py
-
+import typing
 
 from xutils import cacheutil
 from xutils import Storage
 from xnote.core import xconfig
 from .dao import ClusterConfigDao
+from .models import FollowerInfo
 
 """节点管理的基类"""
 
 def get_system_port():
-    return xconfig.get_global_config("port")
+    return xconfig.WebConfig.port
 
-def format_http_url(url):
+def format_http_url(url: str):
     if url.startswith("http://") or url.startswith("https://"):
         return url
     return "http://" + url
 
-def convert_follower_dict_to_list(follower_dict):
+def convert_follower_dict_to_list(follower_dict: typing.Dict[str, FollowerInfo]):
     follower_list = []
     for key in sorted(follower_dict.keys()):
-        info = follower_dict.get(key)
-        info = Storage(**info)
+        info = follower_dict[key]
+        info = FollowerInfo(**info)
         info.http_url = format_http_url(info.url)
         follower_list.append(info)
     return follower_list

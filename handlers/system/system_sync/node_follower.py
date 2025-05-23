@@ -26,7 +26,7 @@ from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .system_sync_proxy import HttpClient
 from .system_sync_proxy import empty_http_client
-from .models import FileIndexInfo, LeaderStat
+from .models import FileIndexInfo, LeaderStat, FollowerInfo
 from xutils.mem_util import log_mem_info_deco
 from .dao import ClusterConfigDao
 from .system_sync_indexer import count_fs_index
@@ -49,10 +49,9 @@ class Follower(NodeManagerBase):
     PING_INTERVAL = 600
 
     def __init__(self):
-        self.follower_list = []
-        self.leader_info = None
-        self.ping_error = None
-        self.ping_result = None
+        self.ping_error = ""
+        self.ping_result = None # type: LeaderStat|None
+        self.follower_list = [] # type: list[FollowerInfo]
         self.admin_token = ""
         self.access_token = ""
         self.last_ping_time = -1
@@ -77,12 +76,12 @@ class Follower(NodeManagerBase):
         return xconfig.get_global_config("system.node_id", "unknown_node_id")
 
     def get_leader_node_id(self):
-        if self.leader_info != None:
-            return self.leader_info.get("node_id")
+        if self.ping_result != None:
+            return self.ping_result.node_id
         return "<unknown>"
 
     def get_current_port(self):
-        return xconfig.get_global_config("system.port")
+        return xconfig.WebConfig.port
     
     def is_token_active(self):
         now = time.time()
@@ -106,7 +105,6 @@ class Follower(NodeManagerBase):
             params = dict(port=port, fs_sync_offset=fs_sync_offset,
                           node_id=self.get_node_id())
             result_obj = client.get_stat(params)
-
             self.update_ping_result(result_obj)
             return result_obj
 
@@ -124,11 +122,10 @@ class Follower(NodeManagerBase):
 
         logging.debug("PING主节点成功")
 
-        self.ping_error = None
+        self.ping_error = ""
         self.ping_result = result
-        follower_dict = result.get("follower_dict", {})
+        follower_dict = result.follower_dict
         self.follower_list = convert_follower_dict_to_list(follower_dict)
-        self.leader_info = result.get("leader")
         self.last_ping_time = time.time()
         self.fs_max_index = result.fs_max_index
         self.access_token = result.access_token
@@ -147,7 +144,7 @@ class Follower(NodeManagerBase):
     
     def get_leader_info(self):
         if self.ping_result != None:
-            return self.ping_result.get("leader")
+            return self.ping_result.leader
         return None
 
     def get_ping_error(self):

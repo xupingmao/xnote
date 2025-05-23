@@ -92,7 +92,7 @@ class HttpClient:
         self.access_token = token_info.token
         self.token_info = token_info
 
-    def get_stat(self, params):
+    def get_stat(self, params: dict):
         self.check_disk_space()
         self.handle_token()
 
@@ -269,6 +269,7 @@ class HttpClient:
 
     @log_mem_info_deco("proxy.list_binlog")
     def list_binlog(self, last_seq=0) -> dict:
+        # TODO 这里做类型解析和转换
         assert isinstance(last_seq, int)
         params = dict(last_seq=str(last_seq), include_req_seq="false")
         self.check_access_token()
@@ -288,6 +289,7 @@ class HttpClient:
     
     def list_db(self, last_key):
         # type: (str) -> str
+        # TODO 这里做类型解析和转换
         self.check_access_token()
         leader_host = self.host
         params = dict(last_key=last_key, token=self.access_token)
