@@ -46,7 +46,7 @@ class IndexBuilder:
         return size
 
 
-    def calc_size(self, db, fpath, depth=1000): 
+    def calc_size(self, db, fpath: str, depth=1000): 
         # type: (TableProxy, str, int) -> int
         if depth <= 0:
             logging.error("too deep depth")
@@ -69,15 +69,21 @@ class IndexBuilder:
             info.ctime = xutils.format_datetime(st.st_ctime)
             info.mtime = xutils.format_datetime(st.st_mtime)
             info.ftype = fsutil.get_file_ext(fpath)
-            FileInfoDao.upsert(info)
+            self.upsert_file_index(info)
             return st.st_size
         except:
             xutils.print_exc()
             info = FileInfo()
             info.fsize = -1
             info.fpath = fpath
-            FileInfoDao.upsert(info)
+            self.upsert_file_index(info)
             return 0
+        
+    def upsert_file_index(self, info: FileInfo):
+        if not fsutil.is_parent_dir(xconfig.FileConfig.data_dir, info.fpath):
+            logging.info("not in data dir, skip, fpath=%s", info.fpath)
+            return
+        return FileInfoDao.upsert(info)
 
     @classmethod
     def build_fs_index(cls, dirname, sync=False):

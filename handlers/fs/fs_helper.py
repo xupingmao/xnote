@@ -49,6 +49,9 @@ class FileInfo(BaseDataRecord):
             # 更新操作
             result.pop("ctime", None) # 不更新创建时间
             result.pop("user_id", None)
+        if self.remark == "":
+            # 不更新remark的空值
+            result.pop("remark", None)
         return result
 
     @property
@@ -99,6 +102,7 @@ class FileInfoDao:
             info.id = old.id
             save_dict = info.to_save_dict()
             cls.db.update(**save_dict, where = dict(id=old.id))
+            return info.id
 
     @classmethod
     def replace(cls, info: FileInfo):

@@ -8,9 +8,10 @@ import os
 from xnote.core import xconfig
 from xnote.core import xauth
 from xutils import textutil
-from .test_base import json_request, BaseTestCase, request_html
+from .test_base import json_request, BaseTestCase, request_html, json_request_return_dict
 from .test_base import init as init_app, get_test_file_path
 from handlers.fs.fs_index import build_fs_index
+from handlers.fs.fs_helper import FileInfoDao, FileInfo
 
 init_app()
 
@@ -46,8 +47,10 @@ class TestMain(BaseTestCase):
 
     def test_create_dir(self):
         path = xconfig.DATA_DIR
-        resp = json_request("/fs_api/add_dir", method="POST",
-                            data=dict(path=path, filename="test_fs_dir"))
+        resp = json_request_return_dict(
+            "/fs_api/add_dir", 
+            method="POST",
+            data=dict(path=path, filename="test_fs_dir"))
         print(resp)
         self.assertEqual("success", resp["code"])
     
@@ -57,6 +60,13 @@ class TestMain(BaseTestCase):
     def test_build_fs_index(self):
         size = build_fs_index(xconfig.DATA_DIR, sync=True)
         self.assertTrue(size > 0)
+
+        dao = FileInfoDao()
+        info = FileInfo()
+        info.fpath = "/data/xxx"
+        id1 = dao.upsert(info)
+        id2 = dao.upsert(info)
+        assert id1 == id2
     
     def test_fs_index_manage_page(self):
         path = xutils.quote("./testdata")

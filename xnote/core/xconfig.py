@@ -222,7 +222,7 @@ EXIT_CODE = 0
 
 class FileReplacement:
     "文件替换符"
-    data_dir = "$data"
+    data_dir = "${data}"
 
 class FileConfig:
 

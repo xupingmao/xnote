@@ -87,7 +87,7 @@ def get_real_path_encode_first(path):
     return path
 
 
-def is_parent_dir(parent, child):
+def is_parent_dir(parent: str, child: str):
     """判断是否是父级目录 arg0.is_parent_dir_of(arg1)
     @param {string} parent 父级路径
     @param {string} child 子路径
@@ -109,7 +109,7 @@ def is_parent_dir(parent, child):
     return child_path.startswith(parent_path)
 
 
-def get_relative_path(path, parent):
+def get_relative_path(path:str, parent:str):
     """获取文件相对parent的路径
     @param {str} path 当前文件路径
     @param {str} parent 父级文件路径
