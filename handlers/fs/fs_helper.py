@@ -106,6 +106,7 @@ class FileInfoDao:
 
     @classmethod
     def replace(cls, info: FileInfo):
+        info.fpath = cls.get_virtual_path(info.fpath)
         save_dict = info.to_replace_dict()
         cls.db.replace(**save_dict)
 

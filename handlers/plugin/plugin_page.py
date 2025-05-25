@@ -589,7 +589,7 @@ class LoadPluginHandler:
 
 class LoadInnerToolHandler:
 
-    def GET(self, name):
+    def GET(self, name: str):
         user_name = xauth.current_name()
         url = "/tools/" + name
         fname = xutils.unquote(name)

@@ -15,20 +15,25 @@
     {% include "tools/base_title.html" %}
 </div>
 
+{% include tools/text_tab.html %}
+
 <div class="card">
-    <div class="col-md-6">
+    <div class="row">
         <label>Input</label>
         <textarea id="input" class="col-md-12" rows=10></textarea>
     </div>
-
-    <div class="col-md-6">
-        <label>Output</label>
-        <textarea id="output" class="col-md-12" rows=10></textarea>
+    
+    <div class="col-md-12 top-offset-1">
+        <button class="btn" onclick="base64Encode()">Encode</button>
+        <button class="btn" onclick="base64Decode()">Decode</button>
     </div>
 
-    <div class="col-md-12">
-        <button onclick="base64Encode()">Encode</button>
-        <button onclick="base64Decode()">Decode</button>
+</div>
+
+<div class="card">
+    <div class="row">
+        <label>Output</label>
+        <textarea id="output" class="col-md-12" rows=10></textarea>
     </div>
 </div>
 
@@ -39,9 +44,14 @@ function base64Encode() {
 }
 
 function base64Decode() {
-    var chars = atob($("#input").val());
-    var str = utf8to16(chars);
-    $("#output").val(str);
+    try {
+        var chars = atob($("#input").val());
+        var str = utf8to16(chars);
+        $("#output").val(str);
+    } catch (e) {
+        $("#output").val("");
+        xnote.alert("" + e);
+    }
 }
 </script>
 {% end %}

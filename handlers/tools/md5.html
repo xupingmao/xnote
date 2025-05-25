@@ -10,6 +10,8 @@
     {% include "tools/base_title.html" %}
 </div>
 
+{% include tools/text_tab.html %}
+
 <div class="card">
     <div class="col-md-6">
         <label>Input</label>
@@ -21,8 +23,8 @@
         <textarea id="output" class="col-md-12" rows=10></textarea>
     </div>
 
-    <div class="col-md-12">
-        <button onclick="md5Encode()">Encode</button>
+    <div class="col-md-12 top-offset-1">
+        <button class="btn" onclick="md5Encode()">Encode</button>
     </div>
 </div>
 

@@ -308,6 +308,9 @@ class TypedDict:
     def get_bool(self, key: str) -> bool:
         return self.dict_.get(key, False)
     
+    def get_str(self, key: str) -> str:
+        return self.dict_.get(key, "")
+    
     def get(self, key, default_value=None):
         return self.dict_.get(key, default_value)
     

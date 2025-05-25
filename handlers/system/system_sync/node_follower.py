@@ -223,7 +223,7 @@ class Follower(NodeManagerBase):
         return "%.2f%%" % (count / self.fs_index_count * 100.0)
 
     def sync_for_home_page(self):
-        return self.ping_leader() != None
+        return self.ping_leader(force=False) != None
 
     def get_fs_index_count(self):
         return self.fs_index_count
