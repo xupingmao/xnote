@@ -123,7 +123,7 @@ def load_plugin_dir(dirname=None):
     load_inner_plugins()
 
 
-def can_visit_by_role(plugin, current_role):
+def can_visit_by_role(plugin: PluginContext, current_role: str):
     if current_role == "admin":
         return True
 

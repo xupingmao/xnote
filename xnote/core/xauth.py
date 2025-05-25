@@ -692,7 +692,7 @@ def get_current_role():
     user = get_current_user()
     if user is None:
         return None
-    name = user.get("name")
+    name = user.name
     if name == "admin":
         return "admin"
     else:

@@ -69,7 +69,9 @@ class DataForm:
         self.model_name = "default"
         self.path = ""
     
-    def add_row(self, title="", field="", placeholder="", value="", type="input", css_class="", readonly=False):
+    def add_row(self, title="", field="", placeholder="", value="", 
+                type="input", css_class="", readonly=False,
+                date_type = FormRowDateType.date):
         self.row_id += 1
         row = FormRow()
         row.id = f"row_{self.id}_{self.row_id}"
@@ -80,6 +82,7 @@ class DataForm:
         row.type = type
         row.css_class = css_class
         row.readonly = readonly
+        row.date_type = date_type
         
         self.rows.append(row)
         return row
