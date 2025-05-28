@@ -115,16 +115,17 @@ class IndexBuilder:
         
 
 def build_fs_index(dirname, sync=False):
+    is_data_dir = fsutil.is_same_file(dirname, xconfig.FileConfig.data_dir)
+    is_sub_dir = fsutil.is_parent_dir(xconfig.FileConfig.data_dir, dirname)
+    is_valid_dir = is_data_dir or is_sub_dir
+    if not is_valid_dir:
+        raise Exception("只允许构建 /data 目录的文件索引")
     return IndexBuilder.build_fs_index(dirname, sync)
 
 
 def update_file_index():
     # 创建新的索引
-    build_fs_index(xconfig.DATA_DIR)
-
-    # 构建外部索引目录的索引
-    for dirname in get_index_dirs():
-        build_fs_index(dirname)
+    build_fs_index(xconfig.FileConfig.data_dir)
 
 class IndexHandler(BaseTablePlugin):
     """文件索引管理"""
@@ -132,7 +133,6 @@ class IndexHandler(BaseTablePlugin):
     title = "索引管理"
     require_admin = True
     show_aside = True
-    show_right = True
 
     PAGE_HTML = """
 {% init index_size = 0 %}
@@ -255,7 +255,7 @@ class IndexHandler(BaseTablePlugin):
         path = self.get_arg_path()
         t1 = time.time()
 
-        print("重建索引:", path)
+        logging.info("重建索引:%s", path)
 
         if path != "":
             build_fs_index(path)

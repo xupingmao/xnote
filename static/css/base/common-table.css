@@ -28,7 +28,7 @@
 .table tr:hover{
     background-color: #eee;
 }
- */
+*/
 
 .row-no, .index-td {
     width: 50px;
@@ -42,7 +42,7 @@
     background-color: #eee;
 }
 
-.table-action-row {
+.table-action-row, .table-action-bar {
     padding-bottom: 5px;
     width: 100%;
     float: left;

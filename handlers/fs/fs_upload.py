@@ -28,7 +28,6 @@ try:
 except ImportError:
     Image = None
 
-
 # 完整的元信息参考文档 https://zhuanlan.zhihu.com/p/366726838
 TAG_ORIENTATION = 0x112
 
@@ -75,10 +74,6 @@ def upload_link_by_month(year, month, delta=0):
 def try_touch_note(note_id):
     if note_id != None and note_id != "":
         xutils.call("note.touch", note_id)
-
-
-def try_lock_file(fpath):
-    return True
 
 def try_fix_orientation(fpath):
     fix_orientation = xutils.get_argument_bool("fix_orientation", False)
@@ -131,10 +126,12 @@ def get_auto_file_path(filename: str):
     assert len(filename) > 10
     first_dir = filename[0:2]
     second_dir = filename[2:4]
-    # TODO 虽然概率极低，最好还是check下文件名是否重复
     dirname = os.path.join(xconfig.FileConfig.files_dir, first_dir, second_dir)
     fsutil.makedirs(dirname)
     fpath = os.path.join(dirname, filename)
+    # 虽然概率极低，最好还是check下文件名是否重复
+    if os.path.exists(fpath):
+        raise Exception("文件名冲突,请重试")
     return os.path.abspath(fpath), get_webpath(fpath)
 
 
@@ -175,7 +172,7 @@ def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=Fal
 class UploadHandler:
 
     def get_recovery_path(self, fpath=""):
-        fpath = fpath.replace("$data", xconfig.FileConfig.data_dir)
+        fpath = fpath.replace(xconfig.FileReplacement.data_dir, xconfig.FileConfig.data_dir)
         return fpath, fsutil.get_webpath(fpath)
 
     @xauth.login_required()
@@ -343,9 +340,13 @@ class RangeUploadHandler:
         dirname = dirname.replace("$DATA", xconfig.DATA_DIR)
         note_id = xutils.get_argument("note_id")
 
+        # TODO 第一个部分上传的时候生成uuid文件名，并且记录映射关系
+        # 第2次及以后上传的部分查找映射关系来定位到uuid文件名
+        # 上传完成后删除映射关系
+
         # 不能访问上级目录
         if ".." in dirname:
-            return dict(code="fail", message="can not access parent directory")
+            return webutil.FailedResult(code="fail", message="can not access parent directory")
 
         if not hasattr(file, "filename"):
             return webutil.FailedResult(code="400", message="请选择文件")
@@ -376,11 +377,11 @@ class RangeUploadHandler:
             filename = os.path.basename(filepath)
         else:
             # check permission.
-            if xauth.current_role() != "admin":
+            if not xauth.is_admin():
                 # 普通用户操作
                 user_upload_dir = get_user_upload_dir(user_name)
                 if not fsutil.is_parent_dir(user_upload_dir, dirname):
-                    return dict(code="403", message="无权操作")
+                    return webutil.FailedResult(code="403", message="无权操作")
 
             filepath = os.path.join(dirname, filename)
         
@@ -388,13 +389,10 @@ class RangeUploadHandler:
             filename = self.find_available_path(origin_name)
             filepath = os.path.join(dirname, filename)
 
-        if chunk == 0:
-            lock = try_lock_file(filepath)
-
         if os.path.exists(filepath):
             # return dict(code = "fail", message = "文件已存在")
             web.ctx.status = "500 Server Error"
-            return dict(code="fail", message="文件已存在")
+            return webutil.FailedResult(code="fail", message="文件已存在")
 
         if part_file:
             tmp_name = "%s_%d.part" % (filename, chunk)
@@ -421,7 +419,11 @@ class RangeUploadHandler:
 
         if note_id != None and note_id != "":
             xutils.call("note.touch", note_id)
-        return dict(code="success", webpath=webpath, link=get_link(origin_name, webpath))
+
+        result = webutil.SuccessResult()
+        result.webpath=webpath
+        result.link=get_link(origin_name, webpath)
+        return result
 
 
 class UploadSearchHandler:

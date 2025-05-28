@@ -11,6 +11,8 @@
 import typing
 import re
 
+from xnote.core import xtemplate
+
 DEFAULT_WIDTH = "auto"
 
 class TableActionType:
@@ -183,10 +185,12 @@ class DataTable:
         self.create_btn_text = "新增记录"
         self.heads = [] # type:list[TableHead]
         self.rows = []
-        self.actions = []
-        self.action_head = TableHead(self)
+        self.actions = [] # 操作列表
+        self.action_head = TableHead(self) # 操作表头
         self.default_head_style = DefaultHeadStyle()
         self.action_head.default_style = self.default_head_style
+        self.action_bar_html = ""
+        self.pagination_html = ""
     
     def add_head(self, title="", field = "", type="", link_field="", 
                  width=DEFAULT_WIDTH, width_weight=0, min_width="", max_width="",
@@ -263,3 +267,5 @@ class DataTable:
         total += self.action_head._fix_width_weight()
         return total
 
+    def render(self):
+        return xtemplate.render("common/table/table.html", table = self)

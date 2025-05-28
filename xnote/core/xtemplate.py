@@ -145,10 +145,10 @@ class XnoteLoader(Loader):
 
     def _create_template(self, name: str):
         if name.startswith(self.memory_prefix):
-            return Template("<blank>", name=name, loader=self)
+            raise Exception(f"memory template not init: {name}")
         
         if name.endswith(".str"):
-            return Template("<blank>", name=name, loader=self)
+            raise Exception(f"str template not init: {name}")
         
         path = name
         with open(path, "rb") as f:
@@ -218,7 +218,7 @@ def render_after_kw(kw):
     kw["_cost_time"] = xnote_trace.get_cost_time()
 
 
-def get_mobile_template(name):
+def get_mobile_template(name: str):
     global _mobile_name_dict
     global TEMPLATE_DIR
 
@@ -246,12 +246,12 @@ def get_device_platform():
     if platform != None:
         return platform
 
-    platform = do_get_device_platform()
+    platform = _do_get_device_platform()
     web.ctx.xnote_platform = platform
     return platform
 
 
-def do_get_device_platform():
+def _do_get_device_platform():
     return xutils.get_client_platform()
 
 

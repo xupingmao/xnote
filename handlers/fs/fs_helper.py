@@ -10,6 +10,7 @@
 
 import os
 import xutils
+import typing
 
 from xnote.core import xconfig
 from xnote.core import xauth
@@ -111,10 +112,13 @@ class FileInfoDao:
         cls.db.replace(**save_dict)
 
     @classmethod
-    def list(cls, user_id=0, offset=0, limit=100, start_time_inclusive="", end_time_exclusive="", is_admin=False, order="ctime desc"):
+    def list(cls, user_id=0, offset=0, limit=100, 
+             start_time_inclusive="", end_time_exclusive="", 
+             is_admin=False, order="ctime desc"):
         if not is_admin:
             assert user_id > 0
-        vars = dict(user_id=user_id, start_time_inclusive=start_time_inclusive, end_time_exclusive=end_time_exclusive)
+        vars = dict(user_id=user_id, start_time_inclusive=start_time_inclusive, 
+                    end_time_exclusive=end_time_exclusive)
         where = "1=1"
         if user_id != 0:
             where += " AND user_id=$user_id"
@@ -152,7 +156,7 @@ def get_index_db(): # type: ()-> TableProxy
 class FileInfoModel(FileInfoDao):
     pass
 
-def handle_file_item(item):
+def handle_file_item(item: fsutil.FileItem):
     """文件的后置处理器"""
     if item.type == "dir":
         item.icon = "fa-folder orange"
@@ -173,7 +177,7 @@ def handle_file_item(item):
     item.show_opt_btn = True
     return item
 
-def handle_file_url(item):
+def handle_file_url(item: fsutil.FileItem):
     item.css_class = ""
     server_home = xconfig.WebConfig.server_home
     if item.type == "dir":
@@ -209,7 +213,7 @@ def get_file_thumbnail(fpath):
     if xutils.is_text_file(fpath):
         return "/_static/image/icon_txt.png"
 
-    # 位置类型
+    # 未知类型
     return "/_static/image/file2.png"
 
 def get_file_download_link(fpath):
@@ -223,7 +227,7 @@ def get_file_download_link(fpath):
     return download_link
 
 
-def sort_files_by_size(filelist):
+def sort_files_by_size(filelist: typing.List[FileItem]):
     for file in filelist:
         fpath = file.path
         fpath = os.path.abspath(fpath)

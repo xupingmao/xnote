@@ -493,7 +493,7 @@ class _Node(object):
     def generate(self, writer):
         raise NotImplementedError()
 
-    def find_named_blocks(self, loader, named_blocks):
+    def find_named_blocks(self, loader: Loader, named_blocks):
         for child in self.each_child():
             child.find_named_blocks(loader, named_blocks)
 
@@ -554,7 +554,7 @@ class _ExtendsBlock(_Node):
 
 
 class _IncludeBlock(_Node):
-    def __init__(self, name, reader, line):
+    def __init__(self, name: str, reader: "_TemplateReader", line: int):
         self.name = name
         self.template_name = reader.name
         self.line = line
@@ -563,7 +563,7 @@ class _IncludeBlock(_Node):
         included = loader.load(self.name, self.template_name)
         included.file.find_named_blocks(loader, named_blocks)
 
-    def generate(self, writer):
+    def generate(self, writer: "_CodeWriter"):
         included = writer.loader.load(self.name, self.template_name)
         with writer.include(included, self.line):
             included.file.body.generate(writer)
@@ -613,18 +613,18 @@ class _IntermediateControlBlock(_Node):
         self.statement = statement
         self.line = line
 
-    def generate(self, writer):
+    def generate(self, writer: "_CodeWriter"):
         # In case the previous block was empty
         writer.write_line("pass", self.line)
         writer.write_line("%s:" % self.statement, self.line, writer.indent_size() - 1)
 
 
 class _Statement(_Node):
-    def __init__(self, statement, line):
+    def __init__(self, statement: str, line: int):
         self.statement = statement
         self.line = line
 
-    def generate(self, writer):
+    def generate(self, writer: "_CodeWriter"):
         writer.write_line(self.statement, self.line)
 
 
@@ -634,7 +634,7 @@ class _Expression(_Node):
         self.line = line
         self.raw = raw
 
-    def generate(self, writer):
+    def generate(self, writer: "_CodeWriter"):
         if self.expression[0] == '?': # support default value, modified by xupingmao
             name = self.expression[1:]
             values = name.split(",")
@@ -659,11 +659,11 @@ class _Expression(_Node):
 
 class _Init(_Node):
 
-    def __init__(self, expression, line):
+    def __init__(self, expression: str, line):
         self.expression = expression
         self.line = line
 
-    def generate(self, writer):
+    def generate(self, writer: "_CodeWriter"):
         name, value = self.expression.split("=", 1)
         name = name.strip()
         line = "if %r not in globals(): globals()[%r] = %s" % (name, name, value)
@@ -671,11 +671,11 @@ class _Init(_Node):
 
 class _SetGlobal(_Node):
 
-    def __init__(self, expression, line):
+    def __init__(self, expression: str, line):
         self.expression = expression
         self.line = line
 
-    def generate(self, writer):
+    def generate(self, writer: "_CodeWriter"):
         name, value = self.expression.split("=", 1)
         name = name.strip()
         line = "globals()[%r] = %s" % (name, value)
@@ -693,7 +693,7 @@ class _Text(_Node):
         self.line = line
         self.whitespace = whitespace
 
-    def generate(self, writer):
+    def generate(self, writer: "_CodeWriter"):
         value = self.value
 
         # Compress whitespace if requested, with a crude heuristic to avoid
@@ -726,7 +726,7 @@ class ParseError(Exception):
 
 
 class _CodeWriter(object):
-    def __init__(self, file, named_blocks, loader, current_template):
+    def __init__(self, file, named_blocks, loader: Loader, current_template):
         self.file = file
         self.named_blocks = named_blocks
         self.loader = loader
@@ -834,7 +834,7 @@ class _TemplateReader(object):
         raise ParseError(msg, self.name, self.line)
 
 
-def _format_code(code):
+def _format_code(code: str):
     lines = code.splitlines()
     format = "%%%dd  %%s\n" % len(repr(len(lines) + 1))
     return "".join([format % (i + 1, line) for (i, line) in enumerate(lines)])

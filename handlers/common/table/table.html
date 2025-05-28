@@ -1,6 +1,8 @@
 {% init xnote_table_var = "table" %}
 {% set _xnote_table = globals()[xnote_table_var] %}
 
+{% raw _xnote_table.action_bar_html %}
+
 <div class="overflow-table-container">
 <table class="table">
     <tr>
@@ -65,3 +67,5 @@
     }
 </script>
 {% include common/table/table_script.html %}
+
+{% raw _xnote_table.pagination_html %}

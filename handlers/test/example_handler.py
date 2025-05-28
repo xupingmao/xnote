@@ -72,8 +72,7 @@ class TableExampleHandler(BaseTablePlugin):
 </div>
 
 <div class="card">
-    {% set-global xnote_table_var = "empty_table" %}
-    {% include common/table/table_v2.html %}
+    {% raw empty_table.render() %}
 </div>
 """
 
@@ -148,8 +147,6 @@ class TableExampleHandler(BaseTablePlugin):
     
     def get_empty_table(self):
         table = DataTable()
-        table.title = "表格3-空表格"
-        table.create_btn_text = "新建"
         table.add_head("权重1", field="value1", width_weight=1)
         table.add_head("权重1", field="value2", width_weight=1)
         table.add_head("权重2", field="value3", width_weight=2)
@@ -157,6 +154,15 @@ class TableExampleHandler(BaseTablePlugin):
         table.add_action("编辑", link_field="edit_url", type=TableActionType.edit_form)
         table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, 
                          msg_field="delete_msg", css_class="btn danger")
+        
+        table.action_bar_html = xtemplate.render_text("""
+<div class="table-action-bar">
+    <span>表格3-空表格-action_bar_html</span>
+    <div class="float-right">
+        <button class="btn" onclick="xnote.table.handleEditForm(this)"
+            data-url="?action=edit" data-title="新建">新建</button>
+    </div>                                                
+</div>""")
         return table
 
 class ExampleHandler:
