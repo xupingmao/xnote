@@ -4,8 +4,9 @@ from xnote.core import xauth
 from xnote.core import xtemplate
 from xutils import Storage
 from xutils import dateutil
+from xutils.base import BaseDataRecord
 
-class PageVisitLogDO(Storage):
+class PageVisitLogDO(BaseDataRecord):
     def __init__(self, **kw):
         self.user_id = 0
         self.url = ""

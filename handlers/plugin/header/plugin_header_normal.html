@@ -1,6 +1,6 @@
 {% init baseurl = "/plugin_list" %}
 {% init show_category = True %}
-{% init show_back = "false" %}
+{% init show_back = False %}
 {% init title = "插件中心" %}
 {% init title_url = _server_home + "/plugin_category_list" %}
 {% init category_name = None %}
@@ -8,23 +8,17 @@
 <div class="card">
     <div class="card-title">
         <a class="link2" href="{{title_url}}">{{ title }}</a>
-        {% if _is_mobile and category_name != None and category_name != "" %}
-            <span>/</span>
-            <span>{{category_name}}</span>
-        {% end %}
         <div class="float-right">
-            <a class="btn btn-default mobile-only" href="{{_server_home}}/plugin_category_list">分类</a>
             {% if _is_admin %}
                 <a class="btn btn-default" href="{{_server_home}}/fs_link/scripts/plugins">管理</a>
             {% end %}
 
-            {% if show_back == "true" %}
+            {% if show_back %}
                 {% include common/button/back_button.html %}
             {% end %}
         </div>
     </div>
 </div> 
 
-{% if show_category %}
-    {% include plugin/header/plugin_category.html %}
-{% end %}
+
+{% include plugin/header/plugin_category.html %}

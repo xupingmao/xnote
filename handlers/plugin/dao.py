@@ -11,6 +11,7 @@
 import xutils
 from xnote.core import xtables
 from xnote.core import xauth
+from xnote.core import xnote_hooks
 from xutils import dateutil
 from handlers.plugin.models import PageVisitLogDO
 
@@ -31,9 +32,7 @@ class PageVisitDao:
     def find_one(cls, user_id=0, url=""):
         url = cls.format_url(url)
         result = cls.db.select_first(where = dict(user_id=user_id, url=url))
-        if result != None:
-            return PageVisitLogDO(**result)
-        return None
+        return PageVisitLogDO.from_dict_or_None(result)
     
     @classmethod
     def list_logs(cls, user_id=0, offset=0, limit=1000, order="visit_time desc"):
@@ -85,4 +84,4 @@ def add_visit_log(user_name="", url="", name = "", args = ""):
     log.visit_cnt = 1
     PageVisitDao.create(log)
 
-xutils.register_func("plugin.add_visit_log", add_visit_log)
+xnote_hooks.add_visit_log = add_visit_log

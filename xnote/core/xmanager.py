@@ -900,7 +900,7 @@ def find_plugins(category, orderby=None):
 @logutil.async_func_deco()
 def add_visit_log(user_name, url):
     # type: (str, str) -> None
-    return xutils.call("plugin.add_visit_log", user_name, url)
+    return xnote_hooks.add_visit_log(user_name, url)
 
 
 def restart():

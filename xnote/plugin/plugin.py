@@ -12,9 +12,11 @@
 import os
 import xutils
 import enum
+import typing
 
 from xnote.core import xconfig
 from xutils import mem_util, fsutil, Storage, attrget, ScriptMeta
+from xnote.core.xtemplate import BasePlugin
 
 DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
 
@@ -58,7 +60,7 @@ class PluginContext(Storage):
         self.atime = ""
         self.editable = True
         self.edit_link = ""
-        self.clazz = None
+        self.clazz = None # BasePlugin的类型
         self.priority = 0
         self.icon = DEFAULT_PLUGIN_ICON_CLASS
         self.author = None
@@ -156,7 +158,7 @@ def load_plugin_file(fpath, fname=None, raise_exception=False):
     dirname = os.path.dirname(fpath)
 
     # 相对于插件目录的名称
-    plugin_name = fsutil.get_relative_path(fpath, xconfig.PLUGINS_DIR)
+    plugin_name = fsutil.get_relative_path(fpath, xconfig.FileConfig.plugins_dir)
 
     vars = dict()
     vars["script_name"] = plugin_name
@@ -201,7 +203,7 @@ def load_plugin_by_context(context: PluginContext):
     plugin_name = context.plugin_name
     xconfig.PLUGINS_DICT[plugin_name] = context
 
-def load_plugin_by_context_and_class(context: PluginContext, main_class=None):
+def load_plugin_by_context_and_class(context: PluginContext, main_class = None):
     if main_class != None:
         fname = context.fname
         fpath = context.fpath

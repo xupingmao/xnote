@@ -21,7 +21,7 @@ def inner_plugin(name, url, category="inner", url_query="", icon= "fa fa-cube"):
     return context
 
 
-def note_plugin(name, url, icon=None, required_role="user", url_query="", visible_in_list=True):
+def note_plugin(name, url, icon="", required_role="user", url_query="", visible_in_list=True):
     context = PluginContext()
     context.name = name
     context.title = name

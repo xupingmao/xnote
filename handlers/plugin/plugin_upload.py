@@ -12,9 +12,9 @@
 import xutils
 import re
 import os
+
 from xnote.core import xauth, xconfig
 from xnote.plugin import PluginMetaKey
-
 from .plugin_page import load_plugin_file
 from xutils.webutil import SuccessResult, FailedResult
 

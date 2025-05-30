@@ -134,21 +134,14 @@ class IndexHandler(BaseTablePlugin):
     require_admin = True
     show_aside = True
 
-    PAGE_HTML = """
-{% init index_size = 0 %}
-<div class="card">
+    action_bar_html = """
+    {% init index_size = 0 %}
     <div class="table-action-row">
         <button class="btn" onclick="xnote.table.handleConfirmAction(this)"
             data-url="?action=rebuild" data-msg="确定要重建索引吗?">重建索引</button>
         <span>索引数量: {{index_size}}</span>
     </div>
-    {% include common/table/table.html %}
-</div>
-
-<div class="card">
-    {% include common/pagination.html %}
-</div>
-"""
+    """
 
     def get_aside_html(self):
         return xtemplate.render_text("{% include fs/component/fs_sidebar.html %}")
@@ -182,6 +175,7 @@ class IndexHandler(BaseTablePlugin):
 
             table.add_row(file_info)
                 
+        table.action_bar_html = xtemplate.render_text(self.action_bar_html, index_size=index_size)
         kw = Storage()
         kw.table = table
         kw.index_size = index_size

@@ -123,7 +123,7 @@ def load_plugin_dir(dirname=None):
     load_inner_plugins()
 
 
-def can_visit_by_role(plugin: PluginContext, current_role: str):
+def can_visit_by_role(plugin: PluginContext, current_role: typing.Optional[str]):
     if current_role == "admin":
         return True
 
@@ -256,7 +256,7 @@ def list_other_plugins(user_name, sort=True):
 
 
 @logutil.timeit_deco(name="list_plugins")
-def list_plugins(category, sort=True, orderby=None):
+def list_plugins(category: str, sort=True, orderby=None):
     user_name = xauth.current_name()
 
     if category == "other":
@@ -394,7 +394,7 @@ class PluginListHandler:
         key = xutils.get_argument("key", "")
         header = xutils.get_argument("header", "")
         version = xutils.get_argument("version", "")
-        show_back = xutils.get_argument("show_back", "")
+        show_back = xutils.get_argument_bool("show_back")
         orderby = xutils.get_argument("orderby", "")
 
         context = Storage()
@@ -451,7 +451,7 @@ class PluginCategoryListHandler:
         count_dict = dict()
 
         for k in xconfig.PLUGINS_DICT:
-            p = xconfig.PLUGINS_DICT[k]
+            p = xconfig.PLUGINS_DICT[k] # type: PluginContext
             if not can_visit_by_role(p, current_role):
                 continue
 
@@ -659,11 +659,7 @@ def reload_plugins_by_config(ctx=None):
 
 xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.get_category_list", get_plugin_category_list)
-xutils.register_func("plugin.get_category_url_by_code",
-                     get_category_url_by_code)
-xutils.register_func("plugin.get_category_name_by_code",
-                     get_category_name_by_code)
-xutils.register_func("plugin.define_category", CategoryService.define_plugin_category)
+xutils.register_func("plugin.get_category_url_by_code",get_category_url_by_code)
 
 xurls = (
     r"/plugin/(.+)", LoadPluginHandler,
