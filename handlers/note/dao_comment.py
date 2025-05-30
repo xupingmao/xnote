@@ -148,7 +148,8 @@ def count_comment_by_note(note_id):
     except:
         return 0
 
-def search_comment(user_name, *, keywords=[], offset=0, limit=xconfig.PAGE_SIZE, note_id=None):
+def search_comment(user_name, *, keywords=[], offset=0, 
+                   limit=xconfig.PAGE_SIZE, note_id=None) -> typing.List[CommentDO]:
     if user_name is None:
         return []
     user_id = xauth.UserDao.get_id_by_name(user_name)

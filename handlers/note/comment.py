@@ -31,7 +31,7 @@ def get_page_max(count):
     return int(math.ceil(count/xconfig.PAGE_SIZE))
 
 
-def translate_search(key0):
+def translate_search(key0: str):
     key = key0.lstrip("")
     key = key.rstrip("")
     quoted_key = textutil.quote(key)

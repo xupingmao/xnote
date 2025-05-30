@@ -45,6 +45,8 @@ if (window.xnote === undefined) {
     xnote.editor = {};
     // 对话框模块
     xnote.dialog = {};
+    // 布局相关模块
+    xnote.layout = {};
 
     // 业务状态
     xnote.state = {};

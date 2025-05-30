@@ -37,7 +37,7 @@
 </style>
 
 <div class="form-body">
-    <form id="xnoteForm{{_xnote_form.id}}">
+    <form id="xnoteForm{{_xnote_form.id}}" class="x-form">
         {% for row in _xnote_form.rows %}
             <div class="form-row {{row.css_class}}">
                 <label>{{row.title}}</label>
@@ -73,6 +73,12 @@
 <script>
     // 刷新默认值
     xnote.refresh();
+    // 自动计算textarea的高度
+    $(".x-form textarea").each(function (index, elem) {
+        var height = xnote.layout.getTextareaTextHeight(elem);
+        height = Math.min(height + 20, 200);
+        $(elem).height(height);
+    });
     xnote.handleFormSubmit = function(target) {
         var request = {};
         var formId = $(target).attr("data-form-id");

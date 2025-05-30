@@ -60,7 +60,6 @@ class DictHandler(BaseTablePlugin):
 
     title = "词典"
     show_aside = True
-    show_right = True
     dict_type = ""
     search_type = "dict"
     search_placeholder = "搜索词典"
@@ -179,8 +178,9 @@ class DictHandler(BaseTablePlugin):
         return self.response_form(**kw)
     
     def handle_save(self):
-        check_edit_auth()
         data_dict = self.get_data_dict()
+        dict_type = data_dict.get_int("dict_type")
+        check_edit_auth(dict_type=dict_type)
         dict_id = data_dict.get_int("dict_id")
         key = data_dict.get_str("key")
         value = data_dict.get_str("value")
