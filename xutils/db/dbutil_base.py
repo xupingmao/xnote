@@ -529,23 +529,19 @@ def get_table_index_names(table_name):
 def get_index_table_name(table_name, index_name):
     return IndexInfo.build_prefix(table_name, index_name)
 
-
-def get(*args, **kw):
-    return db_get(*args, **kw)
-
-
-def db_get(key, default_value=None):
+def db_get(key: str, default_value=None):
+    assert key != None
     check_leveldb()
     try:
-        if key == "" or key == None:
+        if key == "":
             return None
         
         if not isinstance(key, str):
             # print("key=%r", key)
             raise TypeError("expect str but see %r" % type(key))
 
-        key = key.encode("utf-8")
-        value = _leveldb.Get(key)
+        bkey = key.encode("utf-8")
+        value = _leveldb.Get(bkey)
         result = convert_bytes_to_object(value)
         if result is None:
             return default_value
@@ -599,23 +595,17 @@ def db_batch_get(key_list, default_value=None):
     return result
 
 
-def db_put(key, obj_value, sync=False, check_table=True):
+def db_put(key: str, obj_value, sync=False, check_table=True):
     """往数据库中写入键值对
     :param {string} key: 数据库主键
     :param {object} obj_value: 值，会转换成JSON格式
     :param {boolean} sync: 是否同步写入，默认为False
     """
     check_before_write(key, check_table)
-
-    key = key.encode("utf-8")
+    bkey = key.encode("utf-8")
     # 注意json序列化有个问题，会把dict中数字开头的key转成字符串
     value = convert_object_to_json(obj_value)
-    _leveldb.Put(key, value.encode("utf-8"), sync=sync)
-
-
-def put(*args, **kw):
-    return db_put(*args, **kw)
-
+    _leveldb.Put(bkey, value.encode("utf-8"), sync=sync)
 
 def put_bytes(key, value, sync=False):
     check_before_write(key.decode("utf-8"))
@@ -631,10 +621,6 @@ def db_delete(key, sync=False):
 
     key = key.encode("utf-8")
     _leveldb.Delete(key, sync=sync)
-
-
-def delete(*args, **kw):
-    return db_delete(*args, **kw)
 
 def db_batch_delete(keys=[]):
     check_leveldb()
@@ -930,6 +916,11 @@ def set_driver_name(driver_name):
 
 def get_driver_name():
     return KvDataBase.driver_name
+
+# 别名
+put = db_put
+get = db_get
+delete = db_delete
 
 
 if __name__ == "__main__":

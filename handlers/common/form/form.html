@@ -106,6 +106,10 @@
         laydate.render({
             elem: elem,
             type: $(elem).attr("data-date-type"),
+            change: function(value, date, endDate) {
+                // 数据变化就更新
+                $(elem).val(value);
+            },
             show: true
         });
         
