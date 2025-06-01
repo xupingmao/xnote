@@ -14,7 +14,7 @@ import json
 from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import webutil
-from xnote.plugin import DataForm, FormRowType, DataTable, TableActionType
+from xnote.plugin import DataForm, FormRowType, FormRowDateType, DataTable, TableActionType
 
 
 class ParamDict:
@@ -43,12 +43,19 @@ class BaseTablePlugin(BasePlugin):
     rows = 0
     show_edit = False
 
+    # 增加引用,方便子类调用
+    FormRowType = FormRowType
+    FormRowDateType = FormRowDateType
+    TableActionType = TableActionType
+
+    # 导航html
     NAV_HTML = """
 <div class="card">
     <button class="btn" onclick="xnote.table.handleEditForm(this)"
         data-url="?action=edit" data-title="新增记录">新增记录</button>
 </div>
 """
+    # 表格html
     TABLE_HTML = """
 <div class="card">
     {% include common/table/table.html %}
@@ -59,16 +66,20 @@ class BaseTablePlugin(BasePlugin):
 </div>
 """
 
+    # 编辑表单的html
     EDIT_HTML = """
 <div class="card">
     {% include common/form/form.html %}
 </div>
 """
 
-    PAGE_HTML = NAV_HTML + TABLE_HTML
+    # 最终渲染的html, 如果不设置, 等价于 NAV_HTML + TABLE_HTML
+    PAGE_HTML = ""
     
     def get_page_html(self):
         """可以通过重写这个方法实现自定义的页面"""
+        if self.PAGE_HTML == "":
+            return self.NAV_HTML + self.TABLE_HTML
         return self.PAGE_HTML
 
     @classmethod

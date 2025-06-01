@@ -29,7 +29,7 @@ def clear_file_index():
         # key的格式为 fs_index:fpath
         index_db.delete(index_obj)
 
-def find_in_cache0(key):
+def find_in_cache0(key: str):
     input_key = key.upper()
     plist = []
 

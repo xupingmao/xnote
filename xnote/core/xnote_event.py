@@ -1,5 +1,10 @@
 # encoding=utf-8
 from xutils import Storage
+from xutils.base import BaseEnum, EnumItem
+
+class EventTypeEnum(BaseEnum):
+    sys_reload = EnumItem("系统重新加载", "sys.reload")
+    sys_init = EnumItem("系统初始化", "sys.init")
 
 class FileUploadEvent(Storage):
     """文件上传事件"""
@@ -10,7 +15,6 @@ class FileUploadEvent(Storage):
         self.user_id = 0
         self.fpath = ""
         self.remark = ""
-
 
 class FileDeleteEvent(FileUploadEvent):
     """文件删除事件"""

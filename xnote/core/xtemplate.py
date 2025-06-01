@@ -222,9 +222,9 @@ def get_mobile_template(name: str):
     global _mobile_name_dict
     global TEMPLATE_DIR
 
-    mobile_name = _mobile_name_dict.get(name)
-    if mobile_name != None:
-        return mobile_name
+    cached_name = _mobile_name_dict.get(name)
+    if cached_name != None:
+        return cached_name
 
     if name.endswith(".html"):
         # 检查文件是否存在
@@ -381,7 +381,16 @@ class BasePlugin:
     """插件的基类"""
 
     api_level = 0.0  # 插件的API版本 用于处理各种兼容性问题
+
+    # {布局信息}
     show_nav = True  # 是否展示导航 (顶层 or 左侧)
+    show_aside = False # 是否展示侧边栏
+    CONTENT_WIDTH = 1000  # 内容的宽度
+    # {侧边栏自定义HTML}
+    aside_html = ""
+    header_html = ""
+    footer_html = ""
+    option_html = ""
 
     # 插件的标题
     show_title = True
@@ -401,13 +410,6 @@ class BasePlugin:
     # 允许访问的权限列表
     permitted_role_list = [] # type: list[str]
 
-    # {侧边栏自定义HTML}
-    show_aside = False
-    aside_html = ""
-    header_html = ""
-    footer_html = ""
-    option_html = ""
-
     # {搜索配置}
     show_search = True
     search_type = "default"
@@ -420,15 +422,13 @@ class BasePlugin:
     # {输入配置}
     placeholder = ""
     btn_text = T("处理")
-    
+    # 输入框的行数
+    rows = 20
+    # 是否展示编辑插件的按钮
     show_edit = True
     # deprecated 使用 show_edit
     editable = True 
-    
-    # 输入框的行数
-    rows = 20
-    CONTENT_WIDTH = 1000  # 内容的宽度
-    
+        
     # {输出配置}
     # 分页配置
     show_pagenation = False
@@ -482,7 +482,6 @@ class BasePlugin:
 
     def write_aside(self, template, **kw):
         self.show_aside = True
-        self.show_right = True
         self.aside_html = render_text(template, **kw)
 
     def ajax_response(self, template, **kw):
@@ -510,10 +509,16 @@ class BasePlugin:
         html = render_text(template, **kw)
         return TextResponse(html)
 
-    def handle(self, input):
-        """子类实现这个方法"""
+    def handle(self, input = ""):
+        """插件类需要实现这个方法"""
         raise NotImplementedError()
-
+    
+    def handle_sub_plugin(self, sub_plugin: "BasePlugin"):
+        """处理子插件的逻辑"""
+        result = sub_plugin.handle()
+        self.html += sub_plugin.html
+        return result
+    
     def get_input(self):
         return xutils.get_argument_str("input", "")
 
@@ -541,7 +546,7 @@ class BasePlugin:
     def render(self):
         """图形界面入口,实际的调用入口请查看`plugins.py`文件"""
 
-        # 访问检查
+        # 访问权限检查
         self.check_access()
 
         input = self.get_input()
@@ -598,6 +603,7 @@ class BasePlugin:
         kw.title = self.title
         kw.method = self.method
         kw.rows = self.rows
+        # 插件的主体部分html
         kw.html = self.html
         kw.css_style = self.css_style
         kw.show_nav = self.show_nav

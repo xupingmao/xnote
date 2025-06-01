@@ -214,21 +214,16 @@ def remove_head(text, head):
 
     return text[len(head):]
 
-def remove_tail(text, tail):
+def remove_tail(text: str, tail: str):
     """移除尾部的字符
         >>> remove_tail("person.age", ".age")
         "person"
         >>> remove_tail("person.age", "name")
         "person.age"
     """
-    assert is_str(tail)
-    
-    if text is None:
-        return text
-
+    assert isinstance(text, str)
     if not text.endswith(tail):
         return text
-
     return text[:-len(tail)]
 
 def between(self, start, end):

@@ -37,7 +37,7 @@ from handlers.note import dao_draft
 from xutils.base import BaseDataRecord
 from .dao import NoteIndexDao
 from xnote.plugin.table_plugin import BaseTablePlugin, TableActionType
-from xnote.plugin import AsideTemplate
+from xnote.plugin import sidebar
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -894,7 +894,7 @@ class NoteAliasEditHandler(BaseTablePlugin):
         return self.PAGE_HTML
     
     def get_aside_html(self):
-        return AsideTemplate.get_default_aside_html()
+        return sidebar.get_default_sidebar_html()
 
     def handle_page(self):
         parent_id = xutils.get_argument_int("parent_id")

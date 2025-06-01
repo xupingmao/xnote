@@ -53,7 +53,7 @@ __author__ = "xupingmao (578749341@qq.com)"
 __copyright__ = "(C) 2016-2023 xupingmao. GNU GPL 3."
 __contributors__ = []
 
-def resolve_config_path(fpath):
+def resolve_config_path(fpath: str):
     xnote_core_dir = os.path.dirname(__file__)
     xnote_dir = os.path.dirname(xnote_core_dir)
     xnote_root = os.path.dirname(xnote_dir)

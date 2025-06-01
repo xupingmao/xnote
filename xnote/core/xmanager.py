@@ -31,7 +31,7 @@ from collections.abc import Callable
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
-__copyright__ = "(C) 2016-2021 xupingmao. GNU GPL 3."
+__copyright__ = "(C) 2016-2025 xupingmao. GNU GPL 3."
 __contributors__ = []
 
 dbutil.register_table("schedule", "任务调度表 <schedule:id>")
@@ -432,13 +432,13 @@ class HandlerManager:
 class CronTaskManager:
     """定时任务管理器，模拟crontab"""
 
-    def __init__(self, app):
+    def __init__(self, app: web.application):
         self.task_list = []
         self.ext_task_list = [] # 扩展任务
         self.app = app
         self.thread_started = False
 
-    def _match(self, current, pattern):
+    def _match(self, current: int, pattern: str):
         if pattern == "mod5":
             return current % 5 == 0
         return str(current) == pattern or pattern == "*" or pattern == "no-repeat"

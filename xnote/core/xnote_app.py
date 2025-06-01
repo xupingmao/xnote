@@ -184,7 +184,7 @@ class XnoteFound(web.Redirect):
 
 class XnoteSeeOther(web.Redirect):
     """A `303 See Other` redirect."""
-    def __init__(self, url, absolute=False):
+    def __init__(self, url: str, absolute=False):
         url = xconfig.WebConfig.server_home + url
         web.Redirect.__init__(self, url, '303 See Other', absolute=absolute)
 

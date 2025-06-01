@@ -21,6 +21,7 @@ from xutils.sqldb import TableProxy
 from xutils import fsutil, webutil
 from .fs_helper import get_index_dirs, get_index_db, FileInfoDao, FileInfo
 from xnote.plugin.table_plugin import BaseTablePlugin
+from xnote.plugin import sidebar
 
 class IndexBuilder:
 
@@ -134,6 +135,8 @@ class IndexHandler(BaseTablePlugin):
     require_admin = True
     show_aside = True
 
+    NAV_HTML = ""
+
     action_bar_html = """
     {% init index_size = 0 %}
     <div class="table-action-row">
@@ -144,10 +147,7 @@ class IndexHandler(BaseTablePlugin):
     """
 
     def get_aside_html(self):
-        return xtemplate.render_text("{% include fs/component/fs_sidebar.html %}")
-    
-    def get_page_html(self):
-        return self.PAGE_HTML
+        return sidebar.get_fs_sidebar_html()
 
     def handle_page(self):
         table = self.create_table()

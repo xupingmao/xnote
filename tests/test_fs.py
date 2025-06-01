@@ -27,8 +27,9 @@ class TestMain(BaseTestCase):
     def test_fs_view_mode(self):
         cwd = os.getcwd()
 
-        self.check_OK("/fs/~{cwd}".format(cwd=cwd))
-        self.check_OK("/fs/~{cwd}?mode=grid".format(cwd=cwd))
+        self.check_OK(f"/fs/~{cwd}")
+        self.check_OK(f"/fs/~{cwd}?mode=grid")
+        self.check_OK(f"/fs/~{cwd}?mode=sidebar")
 
     def test_fs_hex(self):
         self.check_OK("/fs_hex")
@@ -40,7 +41,7 @@ class TestMain(BaseTestCase):
 
     def test_create_file(self):
         path = xconfig.DATA_DIR
-        resp = json_request("/fs_api/add_file", method="POST",
+        resp = json_request_return_dict("/fs_api/add_file", method="POST",
                             data=dict(path=path, filename="test_fs.txt"))
         print(resp)
         self.assertEqual("success", resp["code"])
@@ -75,7 +76,7 @@ class TestMain(BaseTestCase):
         self.check_OK("/fs_index")
 
     def test_config_fs_order(self):
-        resp = json_request("/fs_api/config", method = "POST", data = dict(action = "sort", order = "size"))
+        resp = json_request_return_dict("/fs_api/config", method = "POST", data = dict(action = "sort", order = "size"))
         print(resp)
         self.assertEqual("success", resp["code"])
         
@@ -83,7 +84,7 @@ class TestMain(BaseTestCase):
         self.assertEqual("size", xauth.get_user_config(user_name, "fs_order"))
     
     def test_fs_config_error(self):
-        resp = json_request("/fs_api/config", method = "POST", data = dict(action = "notfount", order = "size"))
+        resp = json_request_return_dict("/fs_api/config", method = "POST", data = dict(action = "notfount", order = "size"))
         print(resp)
         self.assertEqual("error", resp["code"])
     
