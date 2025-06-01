@@ -13,7 +13,8 @@ from xutils import dateutil
 from xnote.core.xtemplate import T
 from xnote.service.search_service import SearchHistoryDO, SearchHistoryType, SearchHistoryService
 from xutils.db.dbutil_helper import new_from_dict
-from xnote.service import MsgTagBindService, TagTypeEnum
+from xnote.service import MsgTagBindService as _MsgTagBindService
+from xnote.service import TagTypeEnum
 from .message_model import is_task_tag
 from .message_model import MessageDO
 from .message_model import MsgIndex
@@ -22,7 +23,7 @@ from .message_model import MessageHistory
 from .message_model import MessageStatItem
 from .message_model import MOBILE_LENGTH
 from .message_model import MsgTagInfo
-from .message_model import MessageTagEnum
+from .message_model import MessageTagEnum, MessageSecondTypeEnum
 from xnote.service import TagInfoDO
 
 
@@ -112,14 +113,14 @@ def create_message(message: MessageDO):
     """
     assert isinstance(message, MessageDO)
     message.check_before_create()
-    message.fix_before_update()
+    message.fix_before_save()
     return _create_message_with_date(message)
 
 
 def update_message(message: MessageDO):
     assert isinstance(message, MessageDO)
     message.check_before_update()
-    message.fix_before_update()
+    message.fix_before_save()
     _msg_db.update(message)
     MsgIndexDao.touch(int(message._id))
     execute_after_update(message)
@@ -301,57 +302,6 @@ def query_special_page(user_name="", filter_func=None, offset=0, limit=10):
     amount = _msg_db.count(filter_func=filter_func, user_name=str(user_id))
     return chatlist, amount
 
-def list_file_page(user, offset, limit):
-    def filter_func(key, value):
-        if value.content is None:
-            return False
-        return value.content.find("file://") >= 0
-    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
-
-
-def list_link_page(user, offset, limit):
-    def filter_func(key, value):
-        if value.content is None:
-            return False
-        return value.content.find("http://") >= 0 or value.content.find("https://") >= 0
-    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
-
-
-def list_book_page(user, offset, limit, key=None):
-    pattern = re.compile(r"《.+》")
-
-    def filter_func(key, value):
-        if value.content is None:
-            return False
-        return pattern.search(value.content)
-    
-    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
-
-
-def list_people_page(user, offset, limit, key=None):
-    def filter_func(key, value):
-        if value.content is None:
-            return False
-        return value.content.find("@") >= 0
-
-    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
-
-
-def list_phone_page(user, offset, limit, key=None):
-    pattern = re.compile(r"([0-9]+)")
-
-    def filter_func(key, value):
-        if value.content is None:
-            return False
-        result = pattern.findall(value.content)
-        for item in result:
-            if len(item) == MOBILE_LENGTH:
-                return True
-        return False
-
-    return query_special_page(user_name=user, offset=offset, limit=limit, filter_func=filter_func)
-
-
 def filter_todo_func(key, value):
     # 兼容老版本的数据
     return value.tag in ("task", "cron", "todo") or value.status == 0 or value.status == 50
@@ -406,8 +356,12 @@ def list_task(user, offset=0, limit=xconfig.PAGE_SIZE):
 def list_task_done(user, offset=0, limit=xconfig.PAGE_SIZE):
     return list_by_tag(user, "done", offset, limit)
 
+def list_by_system_tag(user_id:int, tag_code: str, offset=0, limit=xconfig.PAGE_SIZE):
+    second_type = MessageSecondTypeEnum.log.int_value
+    return search_message_by_user_tag(user_id=user_id, key=tag_code, 
+                                      offset=offset, limit=limit, second_type=second_type)
 
-def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
+def list_by_tag(user: str, tag: str, offset=0, limit=xconfig.PAGE_SIZE):
     check_param_user(user)
 
     if tag == "key":
@@ -416,6 +370,10 @@ def list_by_tag(user, tag, offset=0, limit=xconfig.PAGE_SIZE):
         user_id = xauth.UserDao.get_id_by_name(user)
         index_list = MsgIndexDao.list(user_id=user_id, tag=tag, offset=offset, limit=limit)
         chatlist = MessageDao.batch_get_by_index_list(index_list, user_id=user_id)
+
+    if MessageTagEnum.is_system_tag_code(tag):
+        # 系统标签处理
+        return list_by_system_tag(user_id, tag, offset, limit)
 
     # 利用message_stat优化count查询
     if tag == "done":
@@ -793,7 +751,7 @@ class MsgTagInfoDao:
 
 class MsgTagBindDao:
 
-    tag_bind_service = MsgTagBindService
+    tag_bind_service = _MsgTagBindService
 
     @classmethod
     def bind_tags(cls, user_id=0, msg_id=0, tags=[], second_type=0, sort_value=""):
@@ -856,7 +814,8 @@ class MessageDao:
     def update_user_tags(message:MessageDO):
         msg_id = message.get_int_id()
         sort_value = str(message.change_time)
-        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=message.full_keywords, 
+        tags = set(message.full_keywords).union(set(message.system_tags))
+        MsgTagBindDao.bind_tags(message.user_id, msg_id=msg_id, tags=tags, 
                                 second_type=message.get_second_type(), sort_value=sort_value)
     
     @classmethod
@@ -936,11 +895,6 @@ xutils.register_func("message.get_by_content", get_by_content)
 xutils.register_func("message.get_message_tag", get_message_stat_item)
 
 xutils.register_func("message.list", list_message_page)
-xutils.register_func("message.list_file", list_file_page)
-xutils.register_func("message.list_link", list_link_page)
-xutils.register_func("message.list_book", list_book_page)
-xutils.register_func("message.list_people", list_people_page)
-xutils.register_func("message.list_phone", list_phone_page)
 xutils.register_func("message.list_task", list_task)
 xutils.register_func("message.list_task_done", list_task_done)
 xutils.register_func("message.list_by_tag",  list_by_tag)

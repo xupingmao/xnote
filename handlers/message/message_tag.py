@@ -24,7 +24,7 @@ MAX_LIST_LIMIT = 1000
 
 
 def get_tag_list():
-    user_name = xauth.current_name()
+    user_name = xauth.current_name_str()
     offset = 0
     msg_list, amount = msg_dao.list_by_tag(
         user_name, "key", offset, MAX_LIST_LIMIT)
@@ -165,19 +165,25 @@ class ListTagAjaxHandler:
         return webutil.SuccessResult(tag_info_list)
 
 class ListTagPage:
+
+    def get_param_tag(self):
+        sys_tag = xutils.get_argument_str("sys_tag")
+        if sys_tag != "":
+            return sys_tag
+        return xutils.get_argument_str("tag")
     
     @xauth.login_required()
     def GET(self):
-        sys_tag = xutils.get_argument_str("sys_tag")
-        if MessageTagEnum.is_system_tag_code(sys_tag):
-            return self.get_system_tag_page(sys_tag)
+        tag = self.get_param_tag()
+        if MessageTagEnum.is_system_tag_code(tag):
+            return self.get_system_tag_page(tag)
         return self.get_log_tags_page()
     
     def create_kw(self):
         kw = Storage()
         return kw
 
-    def get_system_tag_page(self, tag):
+    def get_system_tag_page(self, tag: str):
         kw = self.create_kw()
         kw.message_tag=tag
         kw.search_type="message"

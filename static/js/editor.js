@@ -346,7 +346,7 @@ MarkdownHeading.prototype.formatName = function (text) {
     for (end = text.length-1; end >= 0; end --) {
         var c = text[end];
         if (c == "*" || c == " " || c == "\t") {
-            continue
+            continue;
         } else {
             break;
         }
@@ -390,5 +390,5 @@ MarkdownHeading.prototype.load = function(text) {
 }
 
 MarkdownHeading.prototype.getHeadings = function() {
-    return this.headings
+    return this.headings;
 }

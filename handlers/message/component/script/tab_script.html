@@ -22,7 +22,7 @@ $(function() {
     }
     
     function onMessageUpdated() {
-        $.get("/message/stat", function (resp) {
+        xnote.http.get("/message/stat", function (resp) {
             $(".task-count").text(resp.task_count);
             $(".done-count").text(resp.done_count);
             $(".log-count").text(resp.log_count);

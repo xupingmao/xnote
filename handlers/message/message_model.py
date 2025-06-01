@@ -34,12 +34,6 @@ sys_comment_dict = {
     "$reopen_task$": T("重新开启任务"),
 }
 
-second_type_dict = {
-    "log": 1,
-    "task": 2,
-    "done": 3,
-}
-
 class BaseMsgDO(Storage):
     def get_time_info(self):
         return ""
@@ -60,11 +54,11 @@ class MessageTagEnum(BaseEnum):
     done = MessageTagItem(name="完成", value="done")
     log = MessageTagItem(name="随手记", value="log")
 
-    book = MessageTagItem("书籍", "book")
-    people = MessageTagItem("人物", "people")
-    file = MessageTagItem("文件", "file")
-    phone = MessageTagItem("电话", "phone")
-    link = MessageTagItem("链接", "link")
+    book = MessageTagItem("书籍", "$book$")
+    people = MessageTagItem("人物", "$people$")
+    file = MessageTagItem("文件", "$file$")
+    phone = MessageTagItem("电话", "$phone$")
+    link = MessageTagItem("链接", "$link$")
 
     system_tag_list = [file, link, book, people, phone]
     first_tag_list = [task, done, log]
@@ -82,6 +76,22 @@ class MessageTagEnum(BaseEnum):
             if tag_code == item.value:
                 return True
         return False
+
+class MessageSecondTypeEnum(BaseEnum):
+    """随手记标签的二级类型"""
+    
+    log = EnumItem("log", "1")
+    task = EnumItem("task", "2")
+    done = EnumItem("done", "3")
+
+    _enums = [log, task, done]
+
+    @classmethod
+    def get_type_by_name(cls, name=""):
+        for item in cls._enums:
+            if item.name == name:
+                return item.int_value
+        return 0
 
 class MessageFolder(Storage):
 
@@ -172,7 +182,7 @@ class MessageStatItem(BaseMsgDO):
 
     @classmethod
     def get_second_type_by_code(cls, code=""):
-        return second_type_dict.get(code, 0)
+        return MessageSecondTypeEnum.get_type_by_name(code)
 
 def is_task_tag(tag: str):
     return tag in ("task", "done", "task.search", "done.search")
@@ -228,7 +238,8 @@ class MessageDO(BaseMsgDO):
         self.visit_cnt = 0
         self.status = None # 老的结构
         self.keywords = None # type: None|set[str]
-        self.full_keywords = set()
+        self.full_keywords = set() # 包括普通的hashtag和书名号等在内的默认实体
+        self.system_tags = [] # 系统标签
         self.no_tag = True
         self.amount = 0 # keyword对象的数量
         self.done_time = None # type: str|None
@@ -262,7 +273,7 @@ class MessageDO(BaseMsgDO):
         if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
             raise Exception("[msg.update] invalid message id:%s" % id)
 
-    def fix_before_update(self):
+    def fix_before_save(self):
         if self.tag is None:
             # 修复tag为空的情况，这种一般是之前的待办任务，只有状态没有tag
             if self.status == 100:
@@ -273,7 +284,8 @@ class MessageDO(BaseMsgDO):
         del_dict_key(self, "html")
         del_dict_key(self, "tag_text")
         del_dict_key(self, "full_keywords")
-        
+        del_dict_key(self, "system_tags")
+
         if self.status == None:
             self.pop("status", None)
         if self.amount == None:
@@ -307,8 +319,12 @@ class MessageDO(BaseMsgDO):
     def get_int_id(self):
         return int(self._id)
     
+    @property
+    def int_id(self):
+        return int(self._id)
+    
     def get_second_type(self):
-        return second_type_dict.get(self.tag, 0)
+        return MessageSecondTypeEnum.get_type_by_name(self.tag)
     
     def get_time_info(self):
         if is_task_tag(self.tag):

@@ -9,6 +9,7 @@
  #} -->
 {% from handlers.message.message_model import MessageTagEnum %}
 <div class="card x-tab-box btn-style" data-tab-key="sys_tag" data-tab-default="">
+    <span class="x-tab title">系统标签</span>
     <a class="x-tab" href="?tag=log.tags" data-tab-value="">全部</a>
     {% for sys_tag_info in MessageTagEnum.system_tag_list %}
     <a class="x-tab" href="{{sys_tag_info.url}}" data-tab-value="{{sys_tag_info.value}}">{{sys_tag_info.name}}</a>

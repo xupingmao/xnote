@@ -46,3 +46,11 @@ class MessageEvent(Storage):
         self.tag = tag
         self.user_id = user_id
         self.content = content
+
+class MessageUpdateEvent(Storage):
+
+    def __init__(self):
+        self.msg_id = 0
+        self.msg_key = ""
+        self.user_id = 0
+        self.content = ""

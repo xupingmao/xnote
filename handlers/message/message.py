@@ -181,11 +181,7 @@ class ListAjaxHandler:
         if filter_date != "":
             return self.do_list_by_date(user_name, filter_date, offset, pagesize)
         
-        list_func = xutils.lookup_func("message.list_%s" % tag)
-        if list_func != None:
-            return list_func(user_name, offset, pagesize)
-        else:
-            return msg_dao.list_by_tag(user_name, tag, offset, pagesize)
+        return msg_dao.list_by_tag(user_name, tag, offset, pagesize)
 
     def do_get_html(self, msg_list, page: int, page_max: int, tag="task"):
         show_todo_check = True
@@ -198,6 +194,7 @@ class ListAjaxHandler:
         orderby = xutils.get_argument("orderby", "")
         p = xutils.get_argument("p", "")
         xutils.get_argument_bool("show_marked_tag", True)
+        sys_tag = xutils.get_argument_str("sys_tag")
 
         show_edit_btn = (p != "done")
 
@@ -213,6 +210,7 @@ class ListAjaxHandler:
 
         params = dict(
             tag=tag,
+            sys_tag=sys_tag,
             displayTag=display_tag,
             key=key,
             date=date,
@@ -271,26 +269,7 @@ class ListAjaxHandler:
         return MessageDateHandler().do_list_by_date(user_name=user_name, date=date, offset=offset, limit=pagesize)
 
 
-def update_message_status(id, status):
-    user_name = xauth.current_name()
-    data = MessageDao.get_by_id(id)
-    if data and data.user == user_name:
-        data.status = status
-        data.mtime = xutils.format_datetime()
-
-        MessageDao.update(data)
-        MessageDao.refresh_message_stat(user_name, ["task", "done"])
-
-        event = Storage(id=id, user=user_name,
-                        status=status, content=data.content)
-        xmanager.fire("message.updated", event)
-        xmanager.fire("message.update", event)
-        return dict(code="success")
-    else:
-        return failure(message="无操作权限")
-
-
-def update_message_content(id, user_name, content):
+def update_message_content(id: str, user_name, content):
     data = MessageDao.get_by_id(id)
     if data and data.user == user_name:
         if data.user_id == 0:
@@ -304,8 +283,12 @@ def update_message_content(id, user_name, content):
         data.version = data.get('version', 0) + 1
         MessageDao.update(data)
 
-        xmanager.fire("message.update", dict(
-            id=id, user=user_name, content=content))
+        event = xnote_event.MessageUpdateEvent()
+        event.msg_id = data.int_id
+        event.msg_key = id
+        event.user_id = data.user_id
+        event.content = content
+        xmanager.fire("message.update", event)
 
         after_message_create_or_update(data)
 
@@ -512,7 +495,7 @@ class SaveAjaxHandler:
 
     @xauth.login_required()
     def do_post(self):
-        id = xutils.get_argument("id")
+        id = xutils.get_argument_str("id")
         content = xutils.get_argument_str("content")
         tag = xutils.get_argument_str("tag", DEFAULT_TAG)
         location = xutils.get_argument_str("location", "")
@@ -520,14 +503,14 @@ class SaveAjaxHandler:
         ip = get_remote_ip()
 
         if content == "":
-            return dict(code="fail", message="输入内容为空!")
+            return webutil.FailedResult(code="fail", message="输入内容为空!")
         
         tag = TagHelper.get_create_tag(tag)
 
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
         self.apply_rules(user_name, id, tag, content)
 
-        if id == "" or id is None:
+        if id == "":
             message = create_message(user_name, tag, content, ip)
             return webutil.SuccessResult(data=message)
         else:

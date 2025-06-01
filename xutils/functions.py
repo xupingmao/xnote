@@ -286,7 +286,7 @@ def get_dict_values(dict):
     """获取字典的值，返回一个列表"""
     return list(dict.values())
 
-def del_dict_key(dict_obj, key):
+def del_dict_key(dict_obj: dict, key):
     """删除字典的key，如果key不存在也不抛异常"""
     assert isinstance(dict_obj, dict)
     dict_obj.pop(key, None)

@@ -17,6 +17,7 @@
 import xutils
 import web
 import typing
+import re
 
 from xnote.core import xconfig
 from xnote.core.xtemplate import T
@@ -38,6 +39,7 @@ from xutils.text_parser import TextToken
 
 from . import dao as msg_dao
 from .message_model import MessageDO
+from .message_model import MessageTagEnum
 
 MSG_DAO = xutils.DAO("message")
 TAG_TEXT_DICT = dict(
@@ -105,7 +107,7 @@ class TagHelper:
     default_search_type = "message"
 
     @classmethod
-    def get_search_tag(cls, tag):
+    def get_search_tag(cls, tag: str):
         return cls.search_tag_mapping.get(tag, tag)
     
     @classmethod
@@ -370,12 +372,12 @@ def get_length(item):
         return -1
 
 
-def filter_msg_list_by_key(msg_list, filter_key):
+def filter_msg_list_by_key(msg_list: typing.List[MessageDO], filter_key):
     result = []
 
     for msg_item in msg_list:
         process_message(msg_item)
-
+        assert msg_item.keywords != None
         if filter_key == "$no_tag" and len(msg_item.keywords) == 0:
             result.append(msg_item)
         elif filter_key in msg_item.keywords:
@@ -438,6 +440,10 @@ def get_similar_key(key: str):
     else:
         return "#" + key + "#"
 
+class PatternCache:
+    book_pattern = re.compile(r"《.+》")
+    phone_pattern = re.compile(r"([0-9]{11})")
+
 
 class MessageListParser(object):
 
@@ -449,7 +455,7 @@ class MessageListParser(object):
     def parse(self):
         self.do_process_message_list(self.chatlist)
 
-    def prehandle_message(self, message):
+    def prehandle_message(self, message: MessageDO):
         if message.status in (0, 50):
             # 兼容历史数据
             message.tag = "task"
@@ -463,13 +469,12 @@ class MessageListParser(object):
         if message.tag == None:
             message.tag = self.tag
 
-    def process_message(self, message: typing.Union[MessageDO, MessageTag]) -> Storage:
+    def process_message(self, message: MessageDO) -> Storage:
         self.prehandle_message(message)
 
         message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
 
-        if message.content is None:
-            message.content = ""
+        if message.content == "":
             return message
         
         if isinstance(message, MessageTag):
@@ -480,6 +485,7 @@ class MessageListParser(object):
         message.html = result.result_text
         message.keywords = result.keywords
         message.full_keywords = result.full_keywords
+        message.system_tags = self.get_system_tags(message)
 
         if message.tag == "done":
             self.build_done_html(message)
@@ -488,6 +494,27 @@ class MessageListParser(object):
             self._build_keyword_html(message)
 
         return message
+    
+    def get_system_tags(self, message: MessageDO):
+        result = [] # type: list[str]
+        content = message.content
+        if "@" in content:
+            result.append(MessageTagEnum.people.value)
+        
+        if content.find("https://")>=0 or content.find("http://")>=0:
+            result.append(MessageTagEnum.link.value)
+
+        if content.find("file://")>=0:
+            result.append(MessageTagEnum.file.value)
+        
+        if PatternCache.book_pattern.search(content):
+            result.append(MessageTagEnum.book.value)
+
+        if PatternCache.phone_pattern.search(content):
+            result.append(MessageTagEnum.phone.value)
+
+        return result
+
 
     def build_done_html(self, message: typing.Union[MessageDO, MessageTag]):
         task = None
