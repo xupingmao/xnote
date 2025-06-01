@@ -1,17 +1,12 @@
 {% extends base.html %} 
 
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/codemirror/5.65.12/codemirror.css">
-    <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/codemirror/theme/monokai.min.css">
-    <script type="text/javascript" src="{{_server_home}}/_static/lib/codemirror/5.65.12/codemirror.js"></script>
-    <script type="text/javascript" src="{{_server_home}}/_static/lib/codemirror/mode/markdown.js"></script>
-    <script type="text/javascript" src="{{_server_home}}/_static/lib/codemirror/keymap/sublime.js"></script>
+    {% include common/script/load_codemirror.html %}
     <script type="text/javascript" src="{{_server_home}}/_static/lib/csv.js/csv.js"></script>
     <script type="text/javascript" src="{{_server_home}}/_static/lib/marked/marked.js"></script>
-    <script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
-    <script type="text/javascript" src="{{_server_home}}/_static/js/upload.js"></script>
     <script type="text/javascript" src="{{_server_home}}/_static/js/marked-ext.js?ts={{_ts}}"></script>
-    <script type="text/javascript" src="{{_server_home}}/_static/js/editor.js?ts={{_ts}}"></script>
+
+    <script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
     {% include note/component/css/edit_css.html %}
 {% end %} 
 
@@ -51,7 +46,7 @@
                 <input type="button" id="insertStrong" class="toolbox-btn" value="加粗" />
                 <input type="button" id="insertDel" class="toolbox-btn" value="删除线" />
                 <input type="file" id="file" name="file" class="hidden-file" />
-                <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" />
+                <input type="button" id="uploadBtn" class="toolbox-btn" value="文件" onclick="xnote.editor.uploadFile()"/>
                 <input type="button" class="toolbox-btn" value="笔记链接" onclick="xnote.note.openDialogToAddLink()"/>
                 <input type="button" class="toolbox-btn" value="格式化" onclick="xnote.editor.formatMarkdownTable()" />
                 <div class="float-right">
@@ -310,15 +305,15 @@
             }
         };
 
-        // 文件上传
-        $("#uploadBtn").click(function () {
+        // 文件上传        
+        xnote.editor.uploadFile = function () {
             console.log("准备上传文件...");
             xnote.requestUploadAuto("#file", false, function (resp) {
                 console.log("上传文件:", resp);
                 var fileLink = resp.link;
                 codeInsert(fileLink);
             });
-        });
+        };
 
         // 通过剪切板上传
         $(document).on("paste", function (e) {

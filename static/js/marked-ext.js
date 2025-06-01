@@ -496,7 +496,16 @@
         return out;
     };
 
+    function formatMenuText(text) {
+        if (text.startsWith("**") && text.endsWith("**")) {
+            return text.substring(2, text.length - 2);
+        } else {
+            return text;
+        }
+    }
+
     function buildMenuLink(text, link) {
+        text = formatMenuText(text);
         return '<li><a href="#link">text</a></li>'.replace(/mleft|link|text/g, function (match, index) {
             // console.log(match, index);
             if (match == "link") {
@@ -507,7 +516,7 @@
                 return text;
             }
         });
-    }
+    };
 
     function repeatElement(element, times) {
         var text = "";

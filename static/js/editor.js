@@ -323,12 +323,38 @@ MarkdownHeading.prototype.getHeadingInfo = function (name, lineNo, prev) {
     }
 
     return {
-        name: name.substring(start),
+        name: this.formatName(name),
         lineNo: lineNo,
         level: level,
         levelText: levelText,
         lastIndex: lastIndex,
         parent: parent
+    }
+}
+
+MarkdownHeading.prototype.formatName = function (text) {
+    var start = 0;
+    var end = 0;
+    for (start = 0; start < text.length; start ++) {
+        var c = text[start];
+        if (c == " " || c == "\t" || c == "#" || c == "*") {
+            continue;
+        } else {
+            break;
+        }
+    }
+    for (end = text.length-1; end >= 0; end --) {
+        var c = text[end];
+        if (c == "*" || c == " " || c == "\t") {
+            continue
+        } else {
+            break;
+        }
+    }
+    if (end >= start) {
+        return text.substring(start, end + 1);
+    } else {
+        return text;
     }
 }
 

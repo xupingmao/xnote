@@ -187,12 +187,6 @@ String.prototype.endsWith = String.prototype.endsWith || function (ends) {
     
     function _StrEndsWith(str, ends) {
         return str.lastIndexOf(ends) === (str.length - ends.length);
-        // for (var i = ends.length-1, j = str.length - 1; i >= 0; i--, j--) {
-        //     if (str[j] != ends[i]) {
-        //         return false;
-        //     }
-        // }
-        // return true;
     } 
         
     if (!ends instanceof Array){
