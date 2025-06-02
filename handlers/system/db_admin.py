@@ -419,7 +419,7 @@ class DatabaseDriverInfoHandler:
 
     def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma):
         db_result = db.query("pragma %s" % pragma)
-        if not isinstance(db_result, web.db.ResultSet):
+        if not isinstance(db_result, web.db.BaseResultSet):
             return str(db_result)
         result = db_result.first().get(pragma)
         if pragma == "synchronous":
