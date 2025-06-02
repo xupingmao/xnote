@@ -829,7 +829,7 @@ def load_ini_config(fpath):
     return result
 
 
-def get_webpath(fpath):
+def get_webpath(fpath: str):
     if is_parent_dir(FileUtilConfig.data_dir, fpath):
         rpath = get_relative_path(fpath, FileUtilConfig.data_dir)
         return "/data/" + rpath

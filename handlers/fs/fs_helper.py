@@ -79,9 +79,14 @@ class FileInfoDao:
     def get_by_fpath(cls, fpath = ""):
         fpath = cls.get_virtual_path(fpath)
         result = cls.db.select_first(where = dict(fpath = fpath))
-        if result is None:
-            return None
-        return FileInfo.from_dict(result)
+        return FileInfo.from_dict_or_None(result)
+    
+    @classmethod
+    def get_by_sha256(cls, user_id=0, sha256=""):
+        assert user_id > 0
+        assert len(sha256) > 0
+        result = cls.db.select_first(where = dict(user_id=user_id, sha256=sha256))
+        return FileInfo.from_dict_or_None(result)
     
     @classmethod
     def delete_by_fpath(cls, fpath=""):

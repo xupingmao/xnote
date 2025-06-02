@@ -197,6 +197,7 @@ class UploadHandler:
         user_info = xauth.current_user()
         assert user_info != None
         user_name = user_info.name
+        user_id = user_info.user_id
         webpath = ""
         filename = ""
 
@@ -233,8 +234,23 @@ class UploadHandler:
         with open(tmp_file, "wb") as fout:
             for chunk in file.file:
                 upload_size += len(chunk)
-                fs_checker.check_upload_size(upload_size)
+                try:
+                    fs_checker.check_upload_size(upload_size)
+                except Exception as e:
+                    # 检查失败,删除临时文件
+                    fsutil.remove_file(tmp_file)
+                    raise e
                 fout.write(chunk)
+
+        sha256 = fsutil.get_sha256_sum(tmp_file)
+        file_info = FileInfoDao.get_by_sha256(user_id=user_id, sha256=sha256)
+        if file_info != None:
+            fsutil.remove_file(tmp_file, hard=True)
+            # 已经上传过,直接复用
+            result = webutil.SuccessResult()
+            result.webpath = fsutil.get_webpath(file_info.realpath)
+            result.link = get_link(file.filename, webpath)
+            return result
         
         # 上传成功后重命名
         os.rename(tmp_file, filepath)
