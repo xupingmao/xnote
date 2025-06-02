@@ -214,7 +214,7 @@ class MySQLTableManager(BaseTableManager):
     
     def add_column(self, colname, coltype,
                    default_value=None, not_null=True, **kw):
-        if coltype == "text":
+        if coltype in ("text", "blob", "longblob"):
             # MySQL5.7不支持默认值
             default_value = None
         super().add_column(colname, coltype, default_value, not_null)
