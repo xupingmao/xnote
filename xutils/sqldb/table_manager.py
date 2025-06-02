@@ -178,13 +178,19 @@ class MySQLTableManager(BaseTableManager):
         pk_len = self.pk_len
         pk_comment = self.pk_comment
         if self.pk_type == "blob":
+            # MySQL的blob不能作为主键,需要转换成 varbinary
             sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
-                `{pk_name}` blob not null comment '{pk_comment}',
+                `{pk_name}` varbinary(100) not null comment '{pk_comment}',
                 PRIMARY KEY (`{pk_name}`({pk_len}))
             )"""
-        else:
+        elif self.pk_type == "int":
             sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
                 `{pk_name}` bigint unsigned not null auto_increment,
+                PRIMARY KEY (`{pk_name}`)
+            ) CHARACTER SET utf8mb4;"""
+        else:
+            sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
+                `{pk_name}` {self.pk_type} not null,
                 PRIMARY KEY (`{pk_name}`)
             ) CHARACTER SET utf8mb4;"""
         self.db.query(sql)
@@ -257,13 +263,13 @@ class SqliteTableManager(BaseTableManager):
         table_name = self.tablename
         pk_name = self.pk_name
 
-        if self.pk_type == "blob":
-            sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
-                {pk_name} blob primary key
-            );"""
-        else:
+        if self.pk_type == "int":
             sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}`(
                 {pk_name} integer primary key autoincrement
+            );"""
+        else:
+            sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
+                {pk_name} {self.pk_type} primary key
             );"""
         self.execute(sql)
 
