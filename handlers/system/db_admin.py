@@ -416,20 +416,27 @@ class DatabaseDriverInfoHandler:
         else:
             kw.info_text = self.get_kv_driver_info_text()
         return xtemplate.render("system/page/db/driver_info.html", **kw)
-
-    def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma):
-        db_result = db.query("pragma %s" % pragma)
-        if not isinstance(db_result, web.db.BaseResultSet):
-            return str(db_result)
-        result = db_result.first().get(pragma)
+    
+    def format_pragma(self, pragma="", result=""):
         if pragma == "synchronous":
-            result = str(result)
             if result == "0":
                 result += " (off)"
             if result == "1":
                 result += " (normal)"
             if result == "2":
                 result += " (full)"
+        return result
+
+    def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma):
+        db_result = db.query("pragma %s" % pragma)
+        if isinstance(db_result, web.db.BaseResultSet):
+            first = db_result.first()
+            if isinstance(first, dict):
+                result = self.format_pragma(pragma, str(first.get(pragma)))
+            else:
+                result = "None"
+        else:
+            result = str(db_result)
         return "\n\n%s: %s" % (pragma, result)
     
     def get_mysql_variable(self, db: web.db.DB, var_name, format_size=False):
