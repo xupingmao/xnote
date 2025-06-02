@@ -508,7 +508,7 @@ def init_kv_store_table():
     kw["comment"] = "kv存储"
     dbpath = xconfig.FileConfig.kv_db_file
     with create_table_manager_with_dbpath("kv_store", dbpath=dbpath, **kw) as manager:
-        manager.add_column("value", "longblob")
+        manager.add_column("value", "longblob", default_value="")
         manager.add_column("version", "int", default_value=0)
 
 def init_kv_zset_table(db=None):
