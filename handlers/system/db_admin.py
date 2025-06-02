@@ -418,7 +418,10 @@ class DatabaseDriverInfoHandler:
         return xtemplate.render("system/page/db/driver_info.html", **kw)
 
     def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma):
-        result = db.query("pragma %s" % pragma).first().get(pragma)
+        db_result = db.query("pragma %s" % pragma)
+        if not isinstance(db_result, web.db.ResultSet):
+            return str(db_result)
+        result = db_result.first().get(pragma)
         if pragma == "synchronous":
             result = str(result)
             if result == "0":

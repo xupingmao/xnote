@@ -8,7 +8,6 @@ import os
 import sys
 import re
 import socket
-import six
 import xutils
 
 from xnote.core import xmanager
