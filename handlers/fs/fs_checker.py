@@ -11,6 +11,7 @@
 
 from xnote.core import xconfig
 from xutils.base import XnoteException
+from xutils import fsutil
 
 def check_file_name(filename=""):
     if filename == "":
@@ -22,3 +23,9 @@ def check_file_name(filename=""):
     max_file_name = xconfig.FileConfig.fs_max_name_length
     if len(filename) > max_file_name:
         raise XnoteException(code="400", message=f"文件名不能超过{max_file_name}")
+
+def check_upload_size(file_size: int):
+    # 检查文件大小
+    fs_max_upload_size = xconfig.FileConfig.fs_max_upload_size
+    if file_size > fs_max_upload_size:
+        raise XnoteException(message=f"文件大小不能超过 {fsutil.format_size(fs_max_upload_size)}")

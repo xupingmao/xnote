@@ -250,6 +250,7 @@ class FileConfig:
     template_base_nav_top = ""
 
     fs_max_name_length = 50
+    fs_max_upload_size = 20*1024**2 # 20MB
 
     enable_boot_lock = False
 

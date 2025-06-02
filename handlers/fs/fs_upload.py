@@ -206,14 +206,16 @@ class UploadHandler:
         if file.filename is None:
             return webutil.FailedResult(code="400", message="file.filename is None")
         
-        filename = get_safe_file_name(file.filename)
+        logging.info("upload filename=%s, length=%s", file.filename, file.length)
+        
+        # 检查文件大小
+        fs_checker.check_upload_size(file.length)
+        
         # 扩展名要从原始的文件名获取
         _, ext = os.path.splitext(file.filename)
-        if name == "auto":
-            # iOS上传文件截图文件固定是image.png
-            filename = get_auto_filename(ext)
-        else:
-            fs_checker.check_file_name(file.filename)
+
+        # iOS上传文件截图文件固定是image.png
+        filename = get_auto_filename(ext)
 
         if upload_type == "recovery":
             if not xauth.is_admin():
@@ -221,14 +223,21 @@ class UploadHandler:
             filepath, webpath = self.get_recovery_path(filename)
             dirs = os.path.dirname(filepath)
             fsutil.makedirs(dirs)
-        elif name == "auto":
-            filepath, webpath = get_auto_file_path(filename)
         else:
-            filepath, webpath = get_upload_file_path(user_name, filename)
+            filepath, webpath = get_auto_file_path(filename)
+        
+        tmp_file = os.path.join(xconfig.FileConfig.tmp_dir, filename)
+        tmp_file += ".upload"
 
-        with open(filepath, "wb") as fout:
+        upload_size = 0
+        with open(tmp_file, "wb") as fout:
             for chunk in file.file:
+                upload_size += len(chunk)
+                fs_checker.check_upload_size(upload_size)
                 fout.write(chunk)
+        
+        # 上传成功后重命名
+        os.rename(tmp_file, filepath)
         
         # 需要先处理旋转,不然触发upload事件可能导致文件操作冲突
         try_fix_orientation(filepath)
@@ -329,6 +338,8 @@ class RangeUploadHandler:
 
     @xauth.login_required()
     def do_post(self):
+        return webutil.FailedResult(code="500", message="接口禁用")
+    
         user_name = xauth.current_name()
         part_file = True
         chunksize = 5 * 1024 * 1024
@@ -364,6 +375,9 @@ class RangeUploadHandler:
         origin_name = file.filename
         fs_checker.check_file_name(origin_name)
 
+        logging.info("upload filename=%s, length=%s", file.filename, file.length)
+        
+        fs_checker.check_upload_size(file.length)
         xutils.trace("UploadFile", file.filename)
         
         filename = os.path.basename(origin_name)
@@ -404,11 +418,14 @@ class RangeUploadHandler:
         xutils.makedirs(dirname)
         tmp_path = os.path.join(dirname, tmp_name)
 
+        upload_size = seek
         with open(tmp_path, "wb") as fp:
             fp.seek(seek)
             if seek != 0:
                 logging.info("seek to %s", seek)
             for file_chunk in file.file:
+                upload_size += len(file_chunk)
+                fs_checker.check_upload_size(upload_size)
                 fp.write(file_chunk)
         
         if part_file and chunk+1 == chunks:

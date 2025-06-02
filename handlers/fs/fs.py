@@ -436,25 +436,29 @@ class RemoveAjaxHandler:
     def POST(self):
         path = xutils.get_argument("path")
         assert isinstance(path, str)
-        user_name = xauth.current_name()
+        user_name = xauth.current_name_str()
+        user_id = xauth.current_user_id()
+
         if not xauth.is_admin() and not check_file_auth(path, user_name):
-            return dict(code="fail", message="unauthorized")
+            return webutil.FailedResult(code="fail", message="unauthorized")
         try:
             if not os.path.exists(path):
                 basename = os.path.basename(path)
-                return dict(code="fail", message="源文件`%s`不存在" % basename)
+                return webutil.FailedResult(code="fail", message="源文件`%s`不存在" % basename)
             xutils.remove(path)
 
             event = xnote_event.FileDeleteEvent()
             event.fpath = path
+            event.user_name = user_name
+            event.user_id = user_id
             
             xmanager.fire("fs.remove", event)
             xmanager.fire("fs.delete", event)
 
-            return dict(code="success")
+            return webutil.SuccessResult()
         except Exception as e:
             xutils.print_exc()
-            return dict(code="fail", message=str(e))
+            return webutil.FailedResult(code="fail", message=str(e))
     
     def GET(self):
         return self.POST()

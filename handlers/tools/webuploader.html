@@ -69,12 +69,12 @@ var uploader = WebUploader.create({
     pick: '#filePicker',
 
     // 需要分片
-    chunked: true,
+    chunked: false,
     // 默认5M
     // chunkSize: 1024 * 1024 * 5,
-    chunkSize: 1024 * 1024 * 5,
+    // chunkSize: 1024 * 1024 * 5,
     // 重试次数
-    chunkRetry: 10,
+    // chunkRetry: 10,
     // 文件上传域的name
     fileVal: "file",
     // 不开启并发
