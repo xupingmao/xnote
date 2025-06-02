@@ -1,4 +1,5 @@
 {% init _is_codemirror_loaded = False %}
+{% init codemirror_show_hint = True %}
 
 {% if not _is_codemirror_loaded %}
 
@@ -8,7 +9,6 @@
 <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/codemirror/theme/monokai.min.css">
 <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/codemirror/theme/xq-light.css">
 <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/codemirror/addon/dialog/dialog.css">
-<link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/codemirror/addon/hint/show-hint.css">
 
 <script type="text/javascript" src="{{_server_home}}/_static/lib/codemirror/5.65.12/codemirror.js"></script>
 <script type="text/javascript" src="{{_server_home}}/_static/lib/codemirror/mode/clike/clike.js"></script>
@@ -22,8 +22,11 @@
 <!-- 搜索的输入框 -->
 <script type="text/javascript" src="{{_server_home}}/_static/lib/codemirror/addon/dialog/dialog.js"></script>
 
+{% if codemirror_show_hint %}
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/codemirror/addon/hint/show-hint.css">
 <script type="text/javascript" src="{{_server_home}}/_static/lib/codemirror/addon/hint/show-hint.js"></script>
 <script type="text/javascript" src="{{_server_home}}/_static/lib/codemirror/addon/hint/anyword-hint.js"></script>
+{% end %}
 
 <script type="text/javascript" src="{{_server_home}}/_static/js/editor.js?ts={{_ts}}"></script>
 
