@@ -51,7 +51,7 @@ from xutils.db.dbutil_cache import DatabaseCache
 from xutils.base import is_str
 
 _cache_dict = dict() # type: dict[str, CacheObj]
-_cache_queue = deque()
+_cache_queue = deque() # type: deque[CacheObj]
 
 class CacheConfig:
     """缓存配置"""
@@ -63,7 +63,7 @@ def encode_key(text):
     # return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8") + ".pk"
 
 
-def decode_key(text):
+def decode_key(text: str):
     """解码文件名称为key值，暂时没有使用"""
     return base64.urlsafe_b64decode(text[:-3].encode("utf-8")).decode("utf-8")
 
@@ -473,11 +473,6 @@ def kw_cache_deco(prefix="", expire=600, expire_random=600):
         return handle
     return deco
 
-
-def cache(*args, **kw):
-    return cache_deco(*args, **kw)
-
-
 def put(key, value=None, expire=-1):
     """设置缓存的值
     @param {object} value value对象必须可以json序列化，如果value为None，会删除key对应的对象
@@ -508,14 +503,6 @@ def prefix_del(prefix):
     for key in _global_cache.dict:
         if key.startswith(prefix):
             _global_cache.delete(key)
-
-
-# 方法别名
-cache_get = get
-cache_put = put
-cache_del = delete
-set = put
-
 
 def get_cache_obj(key, default_value=None, type=None):
     if not is_str(key):
@@ -784,3 +771,11 @@ def clear_temp():
 def init(storage_dir=""):
     CacheConfig.storage_dir = storage_dir
 
+
+
+# 方法别名
+cache = cache_deco
+cache_get = get
+cache_put = put
+cache_del = delete
+set = put

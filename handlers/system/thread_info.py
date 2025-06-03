@@ -10,6 +10,7 @@ from xutils import Storage
 from xutils import MyStdout
 from xutils import textutil
 from xnote.plugin.table_plugin import BaseTablePlugin
+from xnote.plugin import sidebar
 
 def get_thread_log(thread):
     records = MyStdout.get_records(thread)
@@ -29,18 +30,17 @@ class ThreadInfoHandler(BaseTablePlugin):
     title = "线程列表"
     PAGE_HTML = BaseTablePlugin.TABLE_HTML
     show_aside = True
-    show_right = True
 
     def get_aside_html(self):
-        return xtemplate.render_text("{% include system/component/admin_nav.html %}")
+        return sidebar.get_admin_sidebar_html()
 
     def handle_page(self):
         table = self.create_table()
-        table.default_head_style.width = "25%"
+        table.default_head_style.min_width = "100px"
         table.add_head("编号", "no")
         table.add_head("Name", "name")
         table.add_head("处理器", "handler")
-        table.add_head("详情", "detail_short", detail_field="detail")
+        table.add_head("详情", "detail_short", detail_field="detail", min_width="200px")
         
         for idx, info in enumerate(threading.enumerate()):
             row = {}

@@ -100,7 +100,8 @@ class ListHandler(BaseTablePlugin):
 
     def handle_page(self):
         table = DataTable()
-        table.add_head("编号", "index")
+        table.default_head_style.min_width = "100px"
+        table.add_head("编号", "index", min_width="80px")
         table.add_head("任务", "display_name", link_field="script_url")
         table.add_head("时间", "time_rule")
 

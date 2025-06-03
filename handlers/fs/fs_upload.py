@@ -75,7 +75,7 @@ def try_touch_note(note_id):
     if note_id != None and note_id != "":
         xutils.call("note.touch", note_id)
 
-def try_fix_orientation(fpath):
+def try_fix_orientation(fpath: str):
     fix_orientation = xutils.get_argument_bool("fix_orientation", False)
     # print("fix_orientation", fix_orientation)
     if not fix_orientation:
@@ -168,6 +168,13 @@ def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=Fal
         fileindex += 1
     return os.path.abspath(newfilepath), webpath
 
+class UploadContext:
+    def __init__(self):
+        self.tmp_file = ""
+
+    def remove_tmp_file(self):
+        if self.tmp_file != "":
+            fsutil.remove_file(self.tmp_file, hard=True)
 
 class UploadHandler:
 
@@ -177,18 +184,22 @@ class UploadHandler:
 
     @xauth.login_required()
     def POST(self):
+        ctx = UploadContext()
         try:
-            return self.do_post()
+            return self.do_post(ctx)
         except XnoteException as e:
+            ctx.remove_tmp_file()
             return webutil.FailedResult(code=e.code, message=e.message)
         except Exception as e:
             err_stack = xutils.print_exc()
             err_msg = str(e)
             if xauth.is_admin():
                 err_msg = err_stack
+            
+            ctx.remove_tmp_file()
             return webutil.FailedResult(code="500", message=err_msg)
         
-    def do_post(self):
+    def do_post(self, ctx: UploadContext):
         file = xutils.get_argument_field_storage("file")
         name = xutils.get_argument_str("name")
         note_id = xutils.get_argument_str("note_id")
@@ -227,20 +238,18 @@ class UploadHandler:
         else:
             filepath, webpath = get_auto_file_path(filename)
         
-        tmp_file = os.path.join(xconfig.FileConfig.tmp_dir, filename)
-        tmp_file += ".upload"
+        tmp_file = os.path.join(xconfig.FileConfig.tmp_dir, "upload." + filename)
+        ctx.tmp_file = tmp_file
 
         upload_size = 0
         with open(tmp_file, "wb") as fout:
             for chunk in file.file:
                 upload_size += len(chunk)
-                try:
-                    fs_checker.check_upload_size(upload_size)
-                except Exception as e:
-                    # 检查失败,删除临时文件
-                    fsutil.remove_file(tmp_file)
-                    raise e
+                fs_checker.check_upload_size(upload_size)
                 fout.write(chunk)
+
+        # 需要先处理旋转,不然触发upload事件可能导致文件操作冲突
+        try_fix_orientation(tmp_file)
 
         sha256 = fsutil.get_sha256_sum(tmp_file)
         file_info = FileInfoDao.get_by_sha256(user_id=user_id, sha256=sha256)
@@ -248,15 +257,14 @@ class UploadHandler:
             fsutil.remove_file(tmp_file, hard=True)
             # 已经上传过,直接复用
             result = webutil.SuccessResult()
-            result.webpath = fsutil.get_webpath(file_info.realpath)
+            webpath = fsutil.get_webpath(file_info.realpath)
+            result.webpath = webpath
             result.link = get_link(file.filename, webpath)
             return result
         
         # 上传成功后重命名
         os.rename(tmp_file, filepath)
-        
-        # 需要先处理旋转,不然触发upload事件可能导致文件操作冲突
-        try_fix_orientation(filepath)
+
         try_touch_note(note_id)
 
         event = FileUploadEvent()
