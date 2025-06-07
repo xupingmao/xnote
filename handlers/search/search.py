@@ -209,7 +209,7 @@ class SearchHandler:
 
         return result
 
-    def do_search_dict(self, ctx, key):
+    def do_search_dict(self, ctx: SearchContext, key):
         offset = ctx.offset
         limit  = ctx.limit
         notes, count = dict_dao.search_dict(key, offset, limit)

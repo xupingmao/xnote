@@ -64,7 +64,7 @@ class DataForm:
     def __init__(self):
         self.id = "0"
         self.row_id = 0
-        self.rows = []
+        self.rows = [] # type: list[FormRow]
         self.save_action = "save"
         self.model_name = "default"
         self.path = ""

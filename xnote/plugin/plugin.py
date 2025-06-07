@@ -17,6 +17,7 @@ import typing
 from xnote.core import xconfig
 from xutils import mem_util, fsutil, Storage, attrget, ScriptMeta
 from xnote.core.xtemplate import BasePlugin
+from xnote.core import xtables
 
 DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
 
@@ -69,6 +70,8 @@ class PluginContext(Storage):
         self.badge_info = "" # 角标信息
         self.is_external = False # 是否是外部插件
         self.visible_in_list = True # 是否在列表中展示
+        self.visit_time = xtables.DEFAULT_DATETIME # 访问时间
+        self.visit_cnt = 0
     
     @property
     def link(self):

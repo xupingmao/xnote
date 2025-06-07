@@ -6,8 +6,9 @@ import web
 import os
 import xutils
 import subprocess
-import xauth
 import sys
+
+from xnote.core import xauth
 
 class OpenHandler:
     @xauth.login_required("admin")
@@ -57,8 +58,8 @@ class CommandHandler:
 
     @xauth.login_required("admin")
     def GET(self):
-        command = xutils.get_argument("command", "")
-        path    = xutils.get_argument("path", "")
+        command = xutils.get_argument_str("command", "")
+        path    = xutils.get_argument_str("path", "")
         # command = xutils.readfile(path)
         # subprocess和os.popen不能执行多条命令(win32)
         # subprocess在IDLE下会创建新的会话窗口，cmd下也不会创建新窗口
@@ -84,7 +85,7 @@ class CommandHandler:
     @xauth.login_required("admin")
     def POST(self):
         bufsize = 1024
-        input_str = xutils.get_argument("command")
+        input_str = xutils.get_argument_str("command")
         p = None
         try:
             p = subprocess.Popen(input_str, 

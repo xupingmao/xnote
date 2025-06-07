@@ -3,8 +3,8 @@
 # @since 2019/05/18 09:44:13
 # @modified 2022/03/12 11:07:34
 
-import xmanager
-from xtemplate import BasePlugin
+from xnote.core import xmanager
+from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 
 

@@ -21,12 +21,12 @@ from xutils import webutil
 from xutils import textutil
 
 from xnote.plugin.table_plugin import BaseTablePlugin
+from xnote.plugin import sidebar
 
 class CacheHandler(BaseTablePlugin):
     title = "缓存信息"
     require_admin = True
     show_aside = True
-    show_right = True
 
     NAV_HTML = """
 <div class="card">
@@ -41,10 +41,9 @@ class CacheHandler(BaseTablePlugin):
     <span>缓存大小: {{cache_size}}</span>
 </div>
 """
-    PAGE_HTML = NAV_HTML + BaseTablePlugin.TABLE_HTML
 
     def get_aside_html(self):
-        return xtemplate.render_text("{% include system/component/admin_nav.html %}")
+        return sidebar.get_admin_sidebar_html()
 
     def handle_page(self):
         page = xutils.get_argument_int("page", 1)

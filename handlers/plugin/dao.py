@@ -40,7 +40,7 @@ class PageVisitDao:
         for item0 in cls.db.select(where=dict(user_id=user_id), offset=offset, limit=limit, order=order):
             item = PageVisitLogDO(**item0)
             results.append(item)
-        return results
+        return PageVisitLogDO.from_dict_list(results)
         
     
     @classmethod

@@ -48,8 +48,10 @@ def file_plugin(name, url, icon= "fa fa-cube"):
     return inner_plugin(name, url, "dir", icon=icon)
 
 
-def dev_plugin(name, url):
-    return inner_plugin(name, url, "develop")
+def dev_plugin(name, url, visible_in_list = True):
+    result = inner_plugin(name, url, "develop")
+    result.visible_in_list = visible_in_list
+    return result
 
 
 def system_plugin(name, url):
@@ -61,13 +63,6 @@ def load_inner_tools():
 
 
 INNER_TOOLS = [
-    # 工具集/插件集
-    # index_plugin("笔记工具", "/plugin_list?category=note", url_query = "&show_back=true"),
-    # index_plugin("文件工具", "/plugin_list?category=dir" , url_query = "&show_back=true"),
-    # index_plugin("开发工具", "/plugin_list?category=develop", url_query = "&show_back=true"),
-    # index_plugin("网络工具", "/plugin_list?category=network", url_query = "&show_back=true"),
-    # index_plugin("系统工具", "/plugin_list?category=system" , url_query = "&show_back=true"),
-
     # 开发工具
     dev_plugin("浏览器信息", "/tools/browser_info"),
     dev_plugin("系统模块", "/system/module_list"),
@@ -85,13 +80,14 @@ INNER_TOOLS = [
     dev_plugin("图像灰度化", "/tools/img2gray"),
 
     # 编解码
-    dev_plugin("base64", "/tools/base64"),
-    dev_plugin("HEX转换", "/tools/hex"),
-    dev_plugin("md5签名", "/tools/md5"),
-    dev_plugin("sha1签名", "/tools/sha1"),
-    dev_plugin("URL编解码", "/tools/urlcoder"),
-    dev_plugin("条形码", "/tools/barcode"),
-    dev_plugin("二维码", "/tools/qrcode"),
+    dev_plugin("编解码工具", "/tools/base64?nav=true"),
+    dev_plugin("base64", "/tools/base64", visible_in_list=False),
+    dev_plugin("HEX转换", "/tools/hex", visible_in_list=False),
+    dev_plugin("md5签名", "/tools/md5", visible_in_list=False),
+    dev_plugin("sha1签名", "/tools/sha1", visible_in_list=False),
+    dev_plugin("URL编解码", "/tools/urlcoder", visible_in_list=False),
+    dev_plugin("条形码", "/tools/barcode", visible_in_list=False),
+    dev_plugin("二维码", "/tools/qrcode", visible_in_list=False),
     dev_plugin("插件目录v2", "/plugin_list_v2"),
 
     # 其他工具

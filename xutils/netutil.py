@@ -59,7 +59,8 @@ def splithost(url):
     if match: return match.group(3, 4)
     return None, url
 
-def get_path(web_root, webpath):
+def join_web_path(web_root: str, webpath: str):
+    """连接网络路径"""
     if len(webpath) > 0 and webpath[0] == "/":
         webpath = webpath[1:]
     if os.name == "nt":

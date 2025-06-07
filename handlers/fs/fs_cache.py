@@ -15,15 +15,14 @@ from xnote.core import xconfig
 from urllib.parse import urlparse
 from xutils import netutil
 from xutils import dbutil
+from xutils import webutil
 from .fs import FileSystemHandler
-
-_ct_db = dbutil.get_hash_table("fs_ctype")
 
 class ImageCacheHandler:
 	"""图片缓存处理"""
 
 	def GET(self):
-		return dict(code = "500", message="暂不支持")
+		return webutil.FailedResult(code = "500", message="暂不支持")
 
 		url = xutils.get_argument("url")
 		if url == "" or url == None:

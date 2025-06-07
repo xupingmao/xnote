@@ -15,12 +15,14 @@ from xnote.core import xauth
 from xnote.core import xmanager
 from xnote.core import xnote_hooks
 from xnote.core.models import SearchContext
+from urllib.parse import urlparse
 
 from xnote.core.xtemplate import T
 from xutils import Storage
 from xutils import logutil
 from xutils import textutil, SearchResult, dateutil, u
 from xutils import mem_util
+from xutils import netutil
 from configparser import ConfigParser
 from handlers.plugin.dao import (
     add_visit_log, list_visit_logs, PageVisitLogDO)
@@ -157,19 +159,11 @@ def find_plugins(category, orderby=None):
         category = "other"
 
     for fname in xconfig.PLUGINS_DICT:
-        p = xconfig.PLUGINS_DICT.get(fname)
+        p = xconfig.PLUGINS_DICT[fname] # type: PluginContext
         if p and category in p.category_list:
             if can_visit_by_role(p, current_role):
                 plugins.append(p)
     return sorted_plugins(user_name, plugins, orderby)
-
-
-def get_inner_tool_name(url):
-    for tool in INNER_TOOLS:
-        if tool.url == url:
-            return tool.name
-    return url
-
 
 def build_inner_tools(user_name=None):
     if user_name is None:
@@ -189,14 +183,21 @@ class PluginSort:
         self.user_name = user_name
         self.logs = list_visit_logs(user_name)
 
-    def get_log_by_url(self, url):
+    def get_log_by_url(self, url: str):
+        # 先精确搜索一次
         for log in self.logs:
             if log.url == url:
                 assert isinstance(log, PageVisitLogDO)
                 return log
+        # 再用path搜索一次
+        result = urlparse(url)
+        webpath = result.path
+        for log in self.logs:
+            if log.url == webpath:
+                return log
         return None
 
-    def sort_by_visit_cnt_desc(self, plugins):
+    def sort_by_visit_cnt_desc(self, plugins: typing.List[PluginContext]):
         for p in plugins:
             log = self.get_log_by_url(p.url)
             if log:
@@ -205,7 +206,7 @@ class PluginSort:
                 p.visit_cnt = 0
         plugins.sort(key=lambda x: x.visit_cnt, reverse=True)
 
-    def sort_by_recent(self, plugins):
+    def sort_by_recent(self, plugins: typing.List[PluginContext]):
         for p in plugins:
             log = self.get_log_by_url(p.url)
             if log:
@@ -657,6 +658,41 @@ def reload_plugins_by_config(ctx=None):
     PluginState.config_tools = tmp_tools
 
 
+class TccHandler:
+
+    C_TEMPLATE = """
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main(int argc, char* argv) {
+    printf("hello,world!");
+    return 0;
+}
+"""
+
+    @xauth.login_required("admin")
+    def GET(self):
+        code = xutils.get_argument_str("code")
+        return_json = xutils.get_argument_bool("json")
+        output = ""
+        if code == "":
+            code = self.C_TEMPLATE
+        else:
+            path = os.path.join(xconfig.TMP_DIR, "temp.c")
+            xutils.savetofile(path, code)
+            status, output = xutils.getstatusoutput("D:\\tcc\\tcc.exe -run %s" % path)
+
+            if return_json:
+                return xutils.json_str(status=status, output=output)
+        return xtemplate.render("tools/tcc.html", 
+            show_aside = False,
+            code = code,
+            output = output)
+            
+    def POST(self):
+        return self.GET()
+
 xutils.register_func("plugin.find_plugins", find_plugins)
 xutils.register_func("plugin.get_category_list", get_plugin_category_list)
 xutils.register_func("plugin.get_category_url_by_code",get_category_url_by_code)
@@ -667,5 +703,6 @@ xurls = (
     r"/plugin_category_list", PluginCategoryListHandler,
     r"/plugin_list_v2", PluginV2Handler,
     r"/plugin_log", PluginLogHandler,
+    r"/tools/tcc", TccHandler,
     r"/tools/(.+)", LoadInnerToolHandler,
 )

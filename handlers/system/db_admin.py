@@ -13,6 +13,8 @@ import typing
 from xnote.core import xauth, xtables, xtemplate, xconfig
 from xutils.sqldb import TableProxy, TempTableProxy
 from xnote.plugin import DataTable
+from xnote.plugin import sidebar
+from xnote.plugin.table_plugin import BaseTablePlugin
 
 def get_display_value(value):
     if value is None:
@@ -405,17 +407,42 @@ class DropTableHandler:
         dbutil.count_table(table_name, use_cache=False)
         return dict(code="success")
 
-class DatabaseDriverInfoHandler:
 
-    @xauth.login_required("admin")
-    def GET(self):
+class DatabaseInfoRow(Storage):
+    def __init__(self, name="", value="", remark=""):
+        self.name = name
+        self.value = value
+        self.remark = remark
+
+class DatabaseDriverInfoHandler(BaseTablePlugin):
+
+    require_admin = True
+    title = "数据库引擎信息"
+    NAV_HTML = ""
+    show_aside = True
+
+    def get_aside_html(self):
+        return sidebar.get_admin_sidebar_html()
+
+    def handle_page(self):
         type = xutils.get_argument_str("type")
         kw = Storage()
         if type == "sql":
-            kw.info_text = self.get_sql_driver_info_text()
+            info_list = self.get_sql_driver_info_list()
         else:
-            kw.info_text = self.get_kv_driver_info_text()
-        return xtemplate.render("system/page/db/driver_info.html", **kw)
+            info_list = self.get_kv_driver_info_list()
+
+        table = self.create_table()
+        table.default_head_style.min_width = "100px"
+        table.add_head("名称", field="name")
+        table.add_head("描述", field="value")
+        table.add_head("备注", field="remark")
+
+        for row in info_list:
+            table.add_row(row)
+
+        kw.table = table
+        return self.response_page(**kw)
     
     def format_pragma(self, pragma="", result=""):
         if pragma == "synchronous":
@@ -427,7 +454,7 @@ class DatabaseDriverInfoHandler:
                 result += " (full)"
         return result
 
-    def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma):
+    def get_sqlite_pragma(self, db: web.db.SqliteDB, pragma: str):
         db_result = db.query("pragma %s" % pragma)
         if isinstance(db_result, web.db.BaseResultSet):
             first = db_result.first()
@@ -437,7 +464,7 @@ class DatabaseDriverInfoHandler:
                 result = "None"
         else:
             result = str(db_result)
-        return "\n\n%s: %s" % (pragma, result)
+        return DatabaseInfoRow(pragma, result)
     
     def get_mysql_variable(self, db: web.db.DB, var_name, format_size=False):
         # TODO 可以一次性取出所有的变量
@@ -449,64 +476,62 @@ class DatabaseDriverInfoHandler:
                 self.mysql_vars[key] = value
                 
         result = self.mysql_vars.get(var_name, "")
-        if format_size:
+        if textutil.is_number(result):
             value_int = int(result)
             result += f" ({xutils.format_size(value_int)})"
-        return "\n\n%s: %s" % (var_name, result)
+        return DatabaseInfoRow(var_name, result)
     
-    def get_sql_driver_info_text(self):
-        info = "%s: %s" % ("db_driver", xconfig.DatabaseConfig.db_driver_sql)
+    def get_sql_driver_info_list(self):
+        info_list = [DatabaseInfoRow("db_driver", xconfig.DatabaseConfig.db_driver_sql)]
         if xconfig.DatabaseConfig.db_driver_sql == "sqlite":
-            info += self.get_sqlite_info(xtables.get_default_db_instance())
+            info_list += self.get_sqlite_info(xtables.get_default_db_instance())
         elif xconfig.DatabaseConfig.db_driver_sql == "mysql":
-            info += self.get_mysql_info()
-        return info
+            info_list += self.get_mysql_info()
+        return info_list
     
     def get_mysql_info(self):
         db = xtables.get_default_db_instance()
-        info = ""
-        info += self.get_mysql_variable(db, "key_buffer_size", format_size=True)
-        info += self.get_mysql_variable(db, "table_open_cache")
-        info += self.get_mysql_variable(db, "sort_buffer_size", format_size=True)
-        info += self.get_mysql_variable(db, "read_buffer_size", format_size=True)
-        info += self.get_mysql_variable(db, "open_files_limit")
-        info += self.get_mysql_variable(db, "innodb_buffer_pool_size", format_size=True)
-        info += self.get_mysql_variable(db, "innodb_flush_log_at_trx_commit")
-        info += self.get_mysql_variable(db, "sync_binlog")
-        info += self.get_mysql_variable(db, "max_allowed_packet", format_size=True)
-        return info
+        info_list: typing.List[DatabaseInfoRow] = []
+        var_name_list = [
+            "key_buffer_size",
+            "table_open_cache",
+            "sort_buffer_size",
+            "read_buffer_size",
+            "open_files_limit",
+            "innodb_buffer_pool_size",
+            "innodb_flush_log_at_trx_commit",
+            "sync_binlog",
+            "max_allowed_packet",
+        ]
+        for var_name in var_name_list:
+            info_list.append(self.get_mysql_variable(db, var_name))
+        return info_list
     
     def get_sqlite_info(self, db):
-        info = ""
         assert isinstance(db, xtables.MySqliteDB)
-        info += "\n\ndb_path: %s" % db.dbpath
-        info += self.get_sqlite_pragma(db, "journal_mode")
-        info += self.get_sqlite_pragma(db, "journal_size_limit")
-        info += self.get_sqlite_pragma(db, "synchronous")
-        info += self.get_sqlite_pragma(db, "cache_size")
-        info += self.get_sqlite_pragma(db, "data_version")
-        info += self.get_sqlite_pragma(db, "busy_timeout")
-        info += self.get_sqlite_pragma(db, "encoding")
-        info += self.get_sqlite_pragma(db, "mmap_size")
-        info += self.get_sqlite_pragma(db, "locking_mode")
-        info += self.get_sqlite_pragma(db, "wal_autocheckpoint")
-        info += self.get_sqlite_pragma(db, "page_count")
-        info += self.get_sqlite_pragma(db, "page_size")
-        info += self.get_sqlite_pragma(db, "max_page_count")
-        return info
+        info_list = [DatabaseInfoRow("db_path", db.dbpath)]
+        pragma_list = [
+            "journal_mode", "journal_size_limit","synchronous",
+            "cache_size", "data_version", "busy_timeout", "encoding",
+            "mmap_size", "locking_mode", "wal_autocheckpoint",
+            "page_count", "page_size", "max_page_count"
+        ]
+        for pragma in pragma_list:
+            info_list.append(self.get_sqlite_pragma(db, pragma))
+        return info_list
 
-    def get_kv_driver_info_text(self):
-        info = "%s: %s" % ("db_driver", xconfig.DatabaseConfig.db_driver)
+    def get_kv_driver_info_list(self):
+        info_list = [DatabaseInfoRow("db_driver", xconfig.DatabaseConfig.db_driver)]
         instance = dbutil.get_instance()
         if xconfig.DatabaseConfig.db_driver == "sqlite":
             db = xtables.get_db_instance(xconfig.FileConfig.kv_db_file)
-            info += self.get_sqlite_info(db)
+            info_list += self.get_sqlite_info(db)
         if xconfig.DatabaseConfig.db_driver == "leveldb":
             from xutils.db.driver_leveldb import LevelDBImpl
             assert isinstance(instance, LevelDBImpl)
-            info += "\n\n" + instance.GetStats()
+            info_list += [DatabaseInfoRow("Stats", instance.GetStats())]
 
-        return info
+        return info_list
 
 class TableData:
     def __init__(self, head=[], items=[]):

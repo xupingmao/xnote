@@ -9,8 +9,8 @@ import threading
 import time
 
 import xutils
-import xmanager
-import xconfig
+from xnote.core import xmanager
+from xnote.core import xconfig
 
 if xconfig.get_global_config("system.ringtone"):
     xutils.say("系统已经启动上线")

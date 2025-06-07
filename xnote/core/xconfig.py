@@ -110,7 +110,7 @@ USER_JS = None
 
 # 插件相关 具体的代码参考 handlers/plugins 目录
 LOAD_PLUGINS_ON_INIT = True
-PLUGINS_DICT = {}
+PLUGINS_DICT = {} # key = url, value = PluginContext
 PLUGIN_TEMPLATE = ""
 
 # 菜单配置
@@ -414,6 +414,12 @@ class WebConfig:
     @classmethod
     def is_leader(cls):
         return cls.node_role in cls.leader_roles
+    
+    @classmethod
+    def resolve_path(cls, path: str):
+        if path.startswith(cls.server_home):
+            return path
+        return cls.server_home + path
 
 
 class TemplateConfig:
@@ -1033,4 +1039,4 @@ class NavItem:
             return not xauth.has_login() and self.check_platform()
 
         return self.check_platform()
-    
+

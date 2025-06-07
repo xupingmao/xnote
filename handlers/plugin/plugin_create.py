@@ -21,9 +21,9 @@ from . import dao as dao_visit_log
 PLUGIN_API = xutils.Module("plugin")
 
 DEFAULT_PLUGIN_TEMPLATE = '''# -*- coding:utf-8 -*-
-# @since $since
-# @author $author
-# @plugin_id $plugin_id
+# @since ${since}
+# @author ${author}
+# @plugin_id ${plugin_id}
 import os
 import re
 import math
@@ -78,9 +78,9 @@ class NewPluginHandler(BasePlugin):
                 return u("文件[%s]已经存在!") % u(name)
             user_name = xauth.current_name_str()
             code = xconfig.get_str("NEW_PLUGIN_TEMPLATE", DEFAULT_PLUGIN_TEMPLATE)
-            code = code.replace("$since", xutils.format_datetime())
-            code = code.replace("$author", user_name)
-            code = code.replace("$plugin_id", xutils.create_uuid())
+            code = code.replace("${since}", xutils.format_datetime())
+            code = code.replace("${author}", user_name)
+            code = code.replace("${plugin_id}", xutils.create_uuid())
             xutils.writefile(name, code)
             # 添加一个访问记录，使得新增的插件排在前面
             basename = os.path.basename(name)
@@ -89,8 +89,8 @@ class NewPluginHandler(BasePlugin):
 
 
 DEFAULT_COMMAND_TEMPLATE = '''# -*- coding:utf-8 -*-
-# @since $since
-# @author $author
+# @since ${since}
+# @author ${author}
 import os
 import xutils
 
@@ -117,8 +117,8 @@ class NewCommandPlugin(BasePlugin):
                 return u("文件[%s]已经存在!") % u(name)
             user_name = xauth.current_name_str()
             code = xconfig.get_str("NEW_COMMAND_TEMPLATE", DEFAULT_COMMAND_TEMPLATE)
-            code = code.replace("$since", xutils.format_datetime())
-            code = code.replace("$author", user_name)
+            code = code.replace("${since}", xutils.format_datetime())
+            code = code.replace("${author}", user_name)
             xutils.writefile(name, code)
             raise web.seeother('/code/edit?path=%s' % name)
 

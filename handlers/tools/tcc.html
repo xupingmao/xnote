@@ -21,8 +21,10 @@
   <form method="POST">
     <div class="col-md-12">
       <textarea id="editor" class="col-md-12" rows="20" name="code">{{code}}</textarea>
-      <button id="run" class="btn">Run</button>
-      <textarea id="output" class="col-md-12" rows="5">{{output}}</textarea>
+      <div class="row top-offset-1 bottom-offset-1">
+        <button id="run" class="btn">执行</button>
+      </div>
+      <textarea id="output" class="col-md-12" rows="5" placeholder="程序输出...">{{output}}</textarea>
     </div>
   </form>
 </div>

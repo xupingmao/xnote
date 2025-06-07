@@ -29,7 +29,6 @@ def init():
     
     # 网络文件映射到本地文件
     dbutil.register_table("fs_map", "文件映射")
-    dbutil.register_table("fs_ctype", "缓存的Content-Type")
     
     txt_info_index = xtables.get_table_by_name("txt_info_index")
     dbutil.register_table("txt_info", "txt文件信息", index_db=txt_info_index)

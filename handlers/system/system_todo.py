@@ -1,5 +1,5 @@
 # encoding=utf-8
-import xtemplate
+from xnote.core import xtemplate
 
 HTML = """
 {% extends base %}

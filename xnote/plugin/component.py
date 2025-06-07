@@ -35,12 +35,12 @@ class Panel(UIComponent):
 class Input(UIComponent):
     """输入文本框"""
 
-    _code = """
+    _template = xtemplate.compile_template("""
 <div class="x-plugin-input">
     <label class="x-plugin-input-label">{{info.label}}</label>
     <input class="x-plugin-input-text" name="{{info.name}}" value="{{info.value}}">
 </div>
-"""
+""", name="xnote.plugin.input")
 
     def __init__(self, label, name, value):
         self.label = label
@@ -48,7 +48,7 @@ class Input(UIComponent):
         self.value = value
 
     def render(self):
-        return xtemplate.render_text(text=self._code, template_name="xnote.plugin.input", info=self)
+        return self._template.generate(info = self)
 
 
 class Textarea:
