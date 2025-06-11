@@ -17,7 +17,6 @@ import typing
 import re
 import random
 import json
-import inspect
 import hashlib
 import base64
 from xutils.base import is_str
@@ -545,21 +544,9 @@ def create_uuid():
     """生成UUID"""
     return generate_uuid()
 
-def _encode_json(obj):
-    """基本类型不会拦截"""
-    if inspect.isfunction(obj):
-        return "<function>"
-    elif inspect.isclass(obj):
-        return "<class>"
-    elif inspect.ismodule(obj):
-        return "<module>"
-    return str(obj)
-
 def tojson(obj, format=False, ensure_ascii=False):
-    if format:
-        return json.dumps(obj, sort_keys=True, default=_encode_json, indent=2, ensure_ascii=ensure_ascii)
-    else:
-        return json.dumps(obj, default=_encode_json, ensure_ascii=ensure_ascii)
+    from xutils import jsonutil
+    return jsonutil.tojson(obj, ensure_ascii=ensure_ascii, format=format)
 
 def tojson_ignore_error(obj, format=False):
     try:

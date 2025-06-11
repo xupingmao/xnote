@@ -21,6 +21,10 @@
     margin-top: 0px;
 }
 
+.input-group.row {
+    width: 100%;
+}
+
 .input-group-row {
     float: left;
     width: 100%;

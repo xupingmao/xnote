@@ -17,6 +17,7 @@ from datetime import datetime
 from datetime import date
 
 class MyEncoder(json.JSONEncoder):
+
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.strftime('%Y-%m-%d %H:%M:%S')
@@ -33,7 +34,7 @@ class MyEncoder(json.JSONEncoder):
         if inspect.ismodule(obj):
             return "<module>"
 
-        return json.JSONEncoder.default(self, obj)
+        return str(obj)
 
 
 def parse_json_to_dict(text: typing.Union[str, bytes]):
@@ -42,7 +43,12 @@ def parse_json_to_dict(text: typing.Union[str, bytes]):
     assert isinstance(result, dict)
     return result
 
-def tojson(obj, ensure_ascii=False):
+def tojson(obj, ensure_ascii=False, format=False):
     """对象转json"""
-    return json.dumps(obj, cls=MyEncoder, ensure_ascii=ensure_ascii, separators=(',', ':'))
+    separators=(',', ':')
+    if format:
+        return json.dumps(obj, cls=MyEncoder, sort_keys=True, indent=2, 
+                          ensure_ascii=ensure_ascii, separators=separators)
+    else:
+        return json.dumps(obj, cls=MyEncoder, ensure_ascii=ensure_ascii, separators=separators)
 

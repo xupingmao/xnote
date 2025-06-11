@@ -12,6 +12,7 @@ import typing
 import re
 
 from xnote.core import xtemplate
+from web.utils import group
 
 DEFAULT_WIDTH = "auto"
 
@@ -156,22 +157,20 @@ class TableAction:
         self.msg_field = ""
         self.default_msg = ""
     
-    def get_title(self, row):
-        assert isinstance(row, dict)
+    def get_title(self, row: dict):
         if self.title_field == "":
             return self.title
         return row.get(self.title_field)
     
-    def get_msg(self, row):
-        assert isinstance(row, dict)
+    def get_msg(self, row: dict):
         if self.msg_field == "":
             return self.default_msg
         return row.get(self.msg_field)
     
-    def get_link(self, row):
+    def get_link(self, row: dict):
         return row.get(self.link_field)
     
-    def has_link(self, row):
+    def has_link(self, row: dict):
         if self.link_field == "":
             return False
         link = self.get_link(row)
@@ -181,7 +180,7 @@ class DataTable:
     """数据表格"""
     
     def __init__(self):
-        self.title = "表格明细"
+        self.title = "表格名称"
         self.create_btn_text = "新增记录"
         self.heads = [] # type:list[TableHead]
         self.rows = []
@@ -226,14 +225,10 @@ class DataTable:
         head.default_style = self.default_head_style
         self.heads.append(head)
         
-    def add_row(self, obj):
-        assert isinstance(obj, dict)
+    def add_row(self, obj: dict):
         self.rows.append(obj)
         
-    def set_rows(self, rows):
-        assert isinstance(rows, list)
-        for row in rows:
-            assert isinstance(row, dict)
+    def set_rows(self, rows: "list[dict]"):
         self.rows = rows
 
     def set_action_style(self, width="auto", width_weight=0, min_width="", max_width=""):
@@ -269,3 +264,32 @@ class DataTable:
 
     def render(self):
         return xtemplate.render("common/table/table.html", table = self)
+    
+class InfoItem:
+    def __init__(self, name="", value="", href="", index=0):
+        self.name = name
+        self.value = value
+        self.href = href
+        self.index = index
+
+class InfoTable:
+    """信息表格,用于展示一个对象的信息"""
+
+    def __init__(self):
+        self.cols = 2 # 默认2列,这种最简单,各个设备都能正常展示
+        self.items = [] # type: list[InfoItem]
+    
+    def add_item(self, item: InfoItem):
+        item.index = len(self.items)
+        self.items.append(item)
+
+    @property
+    def item_groups(self) -> "list[list[InfoItem]]":
+        return group(self.items, self.cols//2) # type:ignore
+
+    def render(self):
+        padding_count = (len(self.items) * 2) % self.cols
+        for i in range(padding_count//2):
+            self.add_item(InfoItem())
+
+        return xtemplate.render("common/table/info_table.html", info_table = self)

@@ -1,0 +1,18 @@
+<div class="overflow-table-container">
+    <table class="info-table col-{{info_table.cols}}">
+        {% for item_group in info_table.item_groups %}
+            <tr class="hover-tr">
+                {% for item in item_group %}
+                    <td class="name">{{item.name}}</td>
+                    <td class="value">
+                        {% if item.href %} 
+                            <a href="{{item.href}}">{{item.value}}</a>
+                        {% else %} 
+                            {{item.value}}
+                        {% end %}
+                    </td>
+                {% end %}
+            </tr>
+        {% end %}
+    </table>
+</div>

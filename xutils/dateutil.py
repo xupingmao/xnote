@@ -82,14 +82,22 @@ class DateInfo:
     def __repr__(self):
         return "(%r,%r,%r)" % (self.year, self.month, self.day)
 
-def to_py_date(date_info):
-    """转换成python内置的date类型"""
+def to_py_date(date_info: str|datetime.date):
+    """转换成python内置的date类型
+    >>> to_py_date("2020-01-02")
+    datetime.date(2020, 1, 2)
+    >>> to_py_date("2020-01-02 00:00:00")
+    datetime.date(2020, 1, 2)
+    """
     if isinstance(date_info, str):
-        return datetime.date.fromisoformat(date_info)
+        try:
+            return datetime.date.fromisoformat(date_info)
+        except:
+            return datetime.datetime.fromisoformat(date_info).date()
     assert isinstance(date_info, datetime.date)
     return date_info
 
-def to_py_datetime(datetime_info):
+def to_py_datetime(datetime_info: str|datetime.date):
     """转换成python内置的datetime类型
     >>> to_py_datetime("2020-01-01 00:00:00")
     datetime.datetime(2020, 1, 1, 0, 0)

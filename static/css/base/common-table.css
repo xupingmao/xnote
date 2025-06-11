@@ -35,6 +35,7 @@
 }
 
 .hover-tr:hover td {
+    /* td的背景不展示才能让tr的背景展示出来 */
     background: none;
 }
 
@@ -46,4 +47,33 @@
     padding-bottom: 5px;
     width: 100%;
     float: left;
+}
+
+.info-table {
+    width: 100%;
+}
+
+.info-table .name {
+    font-weight: bold;
+    width: 20%;
+}
+
+.info-table .value {
+    width: 30%;
+}
+
+/* 2列信息表格定制样式 */
+.info-table.col-2 .name {
+    width: 150px;
+}
+.info-table.col-2 .value {
+    width: auto;
+}
+
+/* 6列信息表格 */
+.info-table.col-6 .name {
+    width: 10%;
+}
+.info-table.col-6 .value {
+    width: 13.3%;
 }

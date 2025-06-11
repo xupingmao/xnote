@@ -43,6 +43,12 @@
     </div>
 {% end %}
 
+{% if len(relevant_words) > 0 %}
+<div class="card">
+    {% raw relevant_tab.render() %}
+</div>
+{% end %}
+
 <script type="text/javascript">
 $(function () {
     var searchType = getUrlParam("search_type");

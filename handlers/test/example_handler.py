@@ -8,6 +8,7 @@ from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable, TableActionType, TabBox
+from xnote.plugin.table import InfoTable, InfoItem
 
 
 def get_example_tab():
@@ -34,6 +35,10 @@ class TableExampleHandler(BaseTablePlugin):
 
 <div class="card">
     {% raw tab.render() %}
+</div>
+
+<div class="card">
+    {% raw info_table.render() %}
 </div>
 
 <div class="card">
@@ -110,6 +115,7 @@ class TableExampleHandler(BaseTablePlugin):
         kw.empty_table = self.get_empty_table()
         kw.tab = self.get_tab_component()
         kw.example_tab = get_example_tab()
+        kw.info_table = self.get_info_table()
 
         return self.response_page(**kw)
     
@@ -163,6 +169,15 @@ class TableExampleHandler(BaseTablePlugin):
             data-url="?action=edit" data-title="新建">新建</button>
     </div>                                                
 </div>""")
+        return table
+    
+    def get_info_table(self):
+        table = InfoTable()
+        table.cols = xutils.get_argument_int("cols", 2)
+        table.add_item(InfoItem(name="组件名称", value="信息表格"))
+        table.add_item(InfoItem(name="用途", value="展示对象的详细信息"))
+        table.add_item(InfoItem(name="链接", value="xnote首页", href="/"))
+        table.add_item(InfoItem(name="其他"))
         return table
 
 class ExampleHandler:

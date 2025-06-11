@@ -15,22 +15,3 @@
     </div>
     {% include common/table/table.html %}
 </div>
-
-
-{% if False %}
-<!-- 合并关系数据 -->
-<div class="card">
-    <div class="card-title">
-        <span>笔记关系</span>
-        <a href="/note/relation?note_id={{file.id}}">[编辑]</a>
-    </div>
-    {% for relation_group in relation_group_list %}
-    <div class="row pad5">
-        <span>{{relation_group.label}}</span>
-        {% for link in relation_group.children %}
-        <a href="{{link.href}}">{{link.text}}</a>
-        {% end %}
-    </div>
-    {% end %}
-</div>
-{% end %}

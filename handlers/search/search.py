@@ -21,6 +21,7 @@ from xutils import six
 from xnote.core.xtemplate import T
 from xnote.core.models import SearchContext, SearchResult
 from xnote.service.search_service import SearchHistoryDO
+from xnote.plugin.tab import TabBox
 
 SEARCH_TYPE_DICT = dict() # type: dict[str, Storage]
 
@@ -335,6 +336,11 @@ class SearchHandler:
 
         files, count = self.do_search_with_profile(ctx, key, offset, pagesize)
 
+        relevant_words = dict_dao.get_relevant_words(key)
+        relevant_tab = TabBox(title="相关搜索", tab_key="key", css_class="btn-style")
+        for word in relevant_words:
+            relevant_tab.add_tab_item(title=word, value=word)
+
         kw = Storage()
         kw.show_aside = True
         kw.category = category
@@ -344,7 +350,8 @@ class SearchHandler:
         kw.title = title
         kw.page_max = int(math.ceil(count/pagesize))
         kw.page_url = page_url
-        kw.relevant_words = dict_dao.get_relevant_words(key)
+        kw.relevant_words = relevant_words
+        kw.relevant_tab = relevant_tab
 
         return xtemplate.render("search/page/search_result.html", **kw)
 

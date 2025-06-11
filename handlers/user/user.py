@@ -121,9 +121,10 @@ class UserHandler:
         log_list = OP_LOG_TABLE.list_by_user(user_id=user_id, offset=offset, limit=page_size)
 
         table = DataTable()
+        table.default_head_style.min_width = "100px"
         table.add_head("操作类型", "type")
-        table.add_head("操作时间", "ctime")
-        table.add_head("详情", "detail")
+        table.add_head("操作时间", "ctime", min_width="200px")
+        table.add_head("详情", "detail", min_width="200px")
 
         for item in log_list:
             table.add_row(item)
