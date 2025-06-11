@@ -44,6 +44,7 @@ SECONDS_PER_DAY = 3600 * 24
 DEFAULT_FORMAT = '%Y-%m-%d %H:%M:%S'
 FORMAT = DEFAULT_FORMAT
 DATE_FORMAT = "%Y-%m-%d"
+DATETIME_FORMAT = DEFAULT_FORMAT
 DEFAULT_DATETIME = "1970-01-01 00:00:00"
 DEFAULT_DATE = "1970-01-01"
 DEFAULT_DATETIME_OBJ = datetime.datetime(1970, 1, 1)
@@ -91,9 +92,9 @@ def to_py_date(date_info: "str|datetime.date"):
     """
     if isinstance(date_info, str):
         try:
-            return datetime.date.fromisoformat(date_info)
+            return datetime.datetime.strptime(date_info, DATE_FORMAT).date()
         except:
-            return datetime.datetime.fromisoformat(date_info).date()
+            return datetime.datetime.strptime(date_info, DATETIME_FORMAT).date()
     assert isinstance(date_info, datetime.date)
     return date_info
 
