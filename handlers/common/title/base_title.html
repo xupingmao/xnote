@@ -4,7 +4,7 @@
 
 <!-- <a href="{{_server_home}}/system/index" class="link">系统</a> › -->
 <h3 class="card-title btn-line-height">
-    {% if parent_link != None %}
+    {% if parent_link %}
         <a class="link2" href="{{parent_link.href}}">{{parent_link.text}}</a>
         <span>/</span>
     {% end %}
@@ -12,8 +12,8 @@
     <span>{{title}}</span>
     
     <div class="float-right">
-        {% if right_link is not None %}
-            <a class="link" href="{{right_link.get('link')}}">{{right_link.get('name')}}</a>
+        {% if right_link %}
+            <a class="link" href="{{right_link.href}}">{{right_link.text}}</a>
         {% end %}
 
         {% if back_link != None %}

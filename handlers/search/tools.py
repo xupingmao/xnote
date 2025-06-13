@@ -73,16 +73,16 @@ def get_server_ip():
     return ip_list[0]
 
 @xmanager.searchable('addr')
-def show_addr_qrcode(ctx):
+def show_addr_qrcode(ctx: SearchContext):
     r = SearchResult()
     r.show_move = False
     r.icon = "icon-barcode"
     addr = "http://" + get_server_ip() + ":" + str(xconfig.PORT)
     r.url = addr
-    r.name = '地址 - %s' % addr
-    r.html = """<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
+    r.name = '[地址] %s' % addr
+    r.html = f"""<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>
     <div id='qrcode'></div>
     <script>$("#qrcode").qrcode('{addr}');</script>
-    <div class="top-offset-1">相关工具: <a href="{{_server_home}}/tools/qrcode">二维码生成器</a></div>""".format(addr = addr)
+    <div class="top-offset-1">相关工具: <a href="{xconfig.WebConfig.server_home}/tools/qrcode">二维码生成器</a></div>"""
     ctx.commands.append(r)
 

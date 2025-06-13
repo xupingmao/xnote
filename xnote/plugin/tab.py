@@ -35,7 +35,7 @@ class TabBox:
         self.title = title
         self.tab_list = [] # type: list[TabItem]
     
-    def add_tab_item(self, title="", value="", href="", css_class="", onclick="", item_id=""):
+    def add_item(self, title="", value="", href="", css_class="", onclick="", item_id=""):
         item = TabItem(title=title, value=value, href=href, css_class=css_class, onclick=onclick, item_id=item_id)
 
         if len(item_id) > 0:
@@ -46,7 +46,7 @@ class TabBox:
 
         self.tab_list.append(item)
 
-    add_tab = add_tab_item
+    add_tab = add_item
 
     def render(self):
         return self._compiled_template.generate(
@@ -72,12 +72,14 @@ class TabConfig:
 
     # 编解码工具
     codecs_tab = TabBox(tab_key="tab", tab_default="base64", css_class="btn-style")
-    codecs_tab.add_tab_item(title="base64", value="base64", href="/tools/base64?tab=base64")
-    codecs_tab.add_tab_item(title="16进制转换", value="hex", href="/tools/hex?tab=hex")
-    codecs_tab.add_tab_item(title="URL编解码", value="urlcoder", href="/tools/urlcoder?tab=urlcoder")
-    codecs_tab.add_tab_item(title="md5", value="md5", href="/tools/md5?tab=md5")
-    codecs_tab.add_tab_item(title="sha1", value="sha1", href="/tools/sha1?tab=sha1")
-    codecs_tab.add_tab_item(title="条形码", value="barcode", href="/tools/barcode?tab=barcode")
-    codecs_tab.add_tab_item(title="二维码", value="qrcode", href="/tools/qrcode?tab=qrcode")
+    codecs_tab.add_item(title="BASE64", value="base64", href="/tools/base64?tab=base64")
+    codecs_tab.add_item(title="16进制转换", value="hex", href="/tools/hex?tab=hex")
+    codecs_tab.add_item(title="URL编解码", value="urlcoder", href="/tools/urlcoder?tab=urlcoder")
+    codecs_tab.add_item(title="MD5", value="md5", href="/tools/md5?tab=md5")
+    codecs_tab.add_item(title="SHA1", value="sha1", href="/tools/sha1?tab=sha1")
+    codecs_tab.add_item(title="条形码", value="barcode", href="/tools/barcode?tab=barcode")
+    codecs_tab.add_item(title="二维码", value="qrcode", href="/tools/qrcode?tab=qrcode")
 
 
+    # 图片工具
+    img_tab = TabBox(tab_key="tab", tab_default="img_split", css_class="btn-style")

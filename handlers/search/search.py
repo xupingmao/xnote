@@ -339,7 +339,7 @@ class SearchHandler:
         relevant_words = dict_dao.get_relevant_words(key)
         relevant_tab = TabBox(title="相关搜索", tab_key="key", css_class="btn-style")
         for word in relevant_words:
-            relevant_tab.add_tab_item(title=word, value=word)
+            relevant_tab.add_item(title=word, value=word)
 
         kw = Storage()
         kw.show_aside = True
