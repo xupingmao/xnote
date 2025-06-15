@@ -61,9 +61,12 @@ class BaseTablePlugin(BasePlugin):
     {% include common/table/table.html %}
 </div>
 
-<div class="card">
-    {% include common/pagination.html %}
-</div>
+{% init page_max = 0 %}
+{% if page_max > 0 %}
+    <div class="card">
+        {% include common/pagination.html %}
+    </div>
+{% end %}
 """
 
     # 编辑表单的html

@@ -304,6 +304,7 @@ class UploadHandler:
             pathlist.append(item.realpath)
         
         kw = Storage()
+        kw.title = T("上传管理")
         kw.html_title = T("文件")
         kw.files = files
         kw.pathlist = pathlist
@@ -481,16 +482,21 @@ class UploadSearchHandler:
         else:
             plist = sorted(xutils.search_path(user_dir, find_key, "file"))
 
+        kw = Storage()
+        kw.title = T("文件搜索结果")
+        kw.page = "search"
+        kw.type_list = NoteTypeInfo.get_type_list()
+        kw.note_type = "file"
+
         return xtemplate.render("fs/page/fs_upload.html",
                                 show_aside=False,
                                 html_title=T("文件"),
-                                page="search",
                                 pathlist=plist,
                                 path=user_dir,
                                 dirname=user_dir,
                                 get_webpath=get_webpath,
                                 upload_link_by_month=upload_link_by_month,
-                                get_display_name=get_display_name)
+                                get_display_name=get_display_name, **kw)
 
 
 class CheckHandler:

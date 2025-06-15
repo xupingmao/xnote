@@ -13,6 +13,8 @@ import json
 import uuid
 import inspect
 import typing
+import base64
+
 from datetime import datetime
 from datetime import date
 
@@ -24,7 +26,8 @@ class MyEncoder(json.JSONEncoder):
         if isinstance(obj, date):
             return obj.strftime('%Y-%m-%d')
         if isinstance(obj, bytes):
-            return str(obj, encoding='utf-8')
+            # 对于非法的utf-8字符使用转义字符表示
+            return str(obj, encoding='utf-8', errors='backslashreplace')
         if isinstance(obj,uuid.UUID):
             return obj.hex
         if inspect.isfunction(obj):

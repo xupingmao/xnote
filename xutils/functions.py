@@ -279,10 +279,10 @@ def dictsort(dictionary, key='value'):
 
     raise Exception("dictsort: unsupported key: %s" % key)
 
-def dictvalues(dict):
+def dictvalues(dict: dict):
     return get_dict_values(dict)
 
-def get_dict_values(dict):
+def get_dict_values(dict: dict):
     """获取字典的值，返回一个列表"""
     return list(dict.values())
 

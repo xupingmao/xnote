@@ -1,0 +1,46 @@
+{% extends base %}
+
+{% block init_vars_block %}
+    {% init show_right = False %}
+{% end %}
+
+{% block body %}
+{% set hash_type = xutils.get_argument_str("type") %}
+
+<div class="card">
+    {% set title = hash_type %}
+    {% include "common/title/base_title.html" %}
+</div>
+
+{% include tools/text_tab.html %}
+
+<div class="card">
+    <div class="col-md-12">
+        <textarea id="input" name="input" class="col-md-12" rows=10 placeholder="请输入内容"></textarea>
+    </div>
+    <div class="col-md-12 top-offset-1">
+        <button class="btn" onclick="encodeText()">编码</button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="col-md-12">
+        <textarea id="output" class="col-md-12" rows=10 placeholder="输出结果"></textarea>
+    </div>
+</div>
+
+<script>
+    function encodeText() {
+        var inputText = $("#input").val();
+        var params = {type:"{{hash_type}}", input: inputText};
+        xnote.http.post("/api/encode", params, function (resp) {
+            if (resp.success) {
+                $("#output").val(resp.data);
+            } else {
+                xnote.toast(resp.message);
+            }
+        })
+    }
+</script>
+
+{% end %}

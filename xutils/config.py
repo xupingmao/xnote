@@ -14,5 +14,6 @@
 class UtilityConfig:
     """工具类的配置"""
     is_test = False
+    encoding = "utf-8"
 
 

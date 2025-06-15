@@ -632,8 +632,10 @@ class EventHandler:
         self.is_async = is_async
         self.description = description
         self.profile = True
+        self.remark = ""
 
         func_name = get_func_abs_name(func)
+        self.func_name = func_name
 
         if self.description:
             self.key = f"{func_name}:{self.description}"
@@ -695,7 +697,7 @@ class SearchHandler(EventHandler):
         return "<SearchHandler /%s/ %s>" % (pattern, self.key)
 
 
-def get_func_abs_name(func):
+def get_func_abs_name(func) -> str:
     module = inspect.getmodule(func)
     if module is not None:
         return module.__name__ + "." + func.__name__
@@ -886,8 +888,9 @@ def searchable(pattern=r".*", description="", event_type="search"):
         assert _event_manager != None
         handler = SearchHandler(event_type, func, description=description)
         # unicode_pat = r"^%s\Z" % u(pattern)
-        unicode_pat = u(pattern)
+        unicode_pat = str(pattern)
         handler.pattern = re.compile(unicode_pat)
+        handler.remark = unicode_pat
         _event_manager.add_handler(handler)
         return func
     return deco

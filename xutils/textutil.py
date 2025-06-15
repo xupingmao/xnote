@@ -24,6 +24,7 @@ from configparser import ConfigParser
 from xutils.textutil_url import *
 from collections import OrderedDict
 from urllib.parse import quote, unquote
+from xutils.config import UtilityConfig
 
 __doc__ = """文本处理函数库
 
@@ -34,7 +35,7 @@ ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 BLANK_CHAR_SET = set(" \n\t\r")
 SEQUENCE_TYPES = (list, tuple, set)
 
-def contains_all(text: str, words):
+def contains_all(text: str, words: typing.Sequence):
     """
         >>> contains_all("abc is good", "abc")
         True
@@ -43,7 +44,7 @@ def contains_all(text: str, words):
         >>> contains_all("hello,world,yep", ["hello", "yep"])
         True
     """
-    if is_str(words):
+    if isinstance(words, str):
         return words in text
     elif isinstance(words, SEQUENCE_TYPES):
         for word in words:
@@ -66,7 +67,7 @@ def contains_any(text, words):
     else:
         raise TypeError("unsupported type, words require str, list, tuple")
 
-def count_alpha(text):
+def count_alpha(text: str):
     count = 0
     for c in text:
         if _isalpha(c):
@@ -93,13 +94,13 @@ def count_end_nl(content):
             break
     return count
 
-def _isalpha(c):
+def _isalpha(c: str):
     return (c >='a' and c <='z') or (c >= 'A' and c <= 'Z')
 
-def _isdigit(c):
+def _isdigit(c: str):
     return (c>='0' and c<='9')
 
-def _isalnum(c):
+def _isalnum(c: str):
     return _isalpha(c) or _isdigit(c)
 
 def _chk_list(text, func):
@@ -498,7 +499,7 @@ short_text = get_short_text
 shortfor = get_short_text
 get_ellipsis_text = get_short_text
 
-def get_camel_case(name, upper = False):
+def get_camel_case(name: str, upper = False):
     """
         >>> get_camel_case('name')
         'name'
@@ -519,7 +520,7 @@ def get_camel_case(name, upper = False):
     return target
 to_camel_case = get_camel_case
 
-def get_underscore(name):
+def get_underscore(name: str):
     """
         >>> get_underscore('getName')
         'get_name'
@@ -566,13 +567,13 @@ def parse_json(json_str, ignore_error = False):
 def set_doctype(type):
     print("#!%s\n" % type)
 
-def get_doctype(text):
+def get_doctype(text: str):
     if text.startswith("#!html"):
         return "html"
     return "text"
 
 
-def is_img_file(filename):
+def is_img_file(filename: str):
     """根据文件后缀判断是否是图片"""
     import os
     from xnote.core import xconfig
@@ -642,7 +643,7 @@ def try_split_key_value(line: typing.Optional[str], token=":"):
         return None, None
     return cols[0].strip(), cols[1].strip()
 
-def split_key_value(line):
+def split_key_value(line: str):
     for token in (":", "=", " "):
         key, value = try_split_key_value(line, token)
         if key != None:
@@ -707,11 +708,11 @@ b64encode = encode_base64
 b64decode = decode_base64
 
 
-def b32encode(text):
+def b32encode(text:str):
     result = base64.b32encode(text.encode('utf-8'))
     return result.decode('utf-8').rstrip("=")
 
-def b32decode(enc_text):
+def b32decode(enc_text:str):
     padding = 8 - len(enc_text) % 8
     enc_text = enc_text + "=" * padding
     return base64.b32decode(enc_text).decode("utf-8")
@@ -728,12 +729,24 @@ def encode_uri_component(text):
 
 def md5_hex(string=""):
     """生成MD5哈希校验码, 长度是32"""
-    return hashlib.md5(string.encode("utf-8")).hexdigest()
+    encoding = UtilityConfig.encoding
+    return hashlib.md5(string.encode(encoding)).hexdigest()
 
 def sha1_hex(string=""):
-    """生产SHA-1哈希校验码, 长度是40"""
-    return hashlib.sha1(string.encode("utf-8")).hexdigest()
-        
+    """生成SHA-1哈希校验码, 长度是40"""
+    encoding = UtilityConfig.encoding
+    return hashlib.sha1(string.encode(encoding)).hexdigest()
+
+def sha256_hex(string=""):
+    """生成SHA-256哈希校验码, 长度是64"""
+    encoding = UtilityConfig.encoding
+    return hashlib.sha256(string.encode(encoding)).hexdigest()
+
+def sha512_hex(string=""):
+    """生成SHA-512哈希校验码, 长度是128"""
+    encoding = UtilityConfig.encoding
+    return hashlib.sha512(string.encode(encoding)).hexdigest()
+
 class Properties(object): 
     
     """Properties 文件处理器"""
@@ -750,7 +763,7 @@ class Properties(object):
         else:
             return {}
 
-    def _set_dict(self, strName, dict, value): 
+    def _set_dict(self, strName:str, dict:dict, value:str): 
         strName = strName.strip()
         value = value.strip()
 

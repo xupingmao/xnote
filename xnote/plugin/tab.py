@@ -11,6 +11,8 @@
 from xnote.core import xtemplate
 from xnote.core import xconfig
 
+# TODO: 支持多级tab, 例如 tab=dev.text
+
 class TabBox:
     
     TAB_HTML = """
@@ -48,11 +50,14 @@ class TabBox:
 
     add_tab = add_item
 
-    def render(self):
+    def render(self, tab_value=""):
+        tab_default = self.tab_default
+        if tab_value != "":
+            tab_default = tab_value
         return self._compiled_template.generate(
             css_class=self.css_class, 
             tab_key=self.tab_key,
-            tab_default=self.tab_default,
+            tab_default=tab_default,
             title=self.title,
             tab_list=self.tab_list)
 
@@ -75,8 +80,10 @@ class TabConfig:
     codecs_tab.add_item(title="BASE64", value="base64", href="/tools/base64?tab=base64")
     codecs_tab.add_item(title="16进制转换", value="hex", href="/tools/hex?tab=hex")
     codecs_tab.add_item(title="URL编解码", value="urlcoder", href="/tools/urlcoder?tab=urlcoder")
-    codecs_tab.add_item(title="MD5", value="md5", href="/tools/md5?tab=md5")
-    codecs_tab.add_item(title="SHA1", value="sha1", href="/tools/sha1?tab=sha1")
+    codecs_tab.add_item(title="MD5", value="md5", href="/tools/hash?tab=md5&type=md5")
+    codecs_tab.add_item(title="SHA-1", value="sha1", href="/tools/hash?tab=sha1&type=sha1")
+    codecs_tab.add_item(title="SHA-256", value="sha256", href="/tools/hash?tab=sha256&type=sha256")
+    codecs_tab.add_item(title="SHA-512", value="sha512", href="/tools/hash?tab=sha512&type=sha512")
     codecs_tab.add_item(title="条形码", value="barcode", href="/tools/barcode?tab=barcode")
     codecs_tab.add_item(title="二维码", value="qrcode", href="/tools/qrcode?tab=qrcode")
 

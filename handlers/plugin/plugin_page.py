@@ -339,7 +339,7 @@ def on_search_plugins(ctx: SearchContext):
     ctx.tools += result_list
 
 
-def is_plugin_matched(p, words):
+def is_plugin_matched(p: PluginContext, words):
     return textutil.contains_all(p.title, words) \
         or textutil.contains_all(p.url, words) \
         or textutil.contains_all(p.fname, words)
@@ -492,53 +492,6 @@ class PluginCategoryListHandler:
 
         template_file = get_template_by_version(version)
         return xtemplate.render(template_file, plugins=plugins, plugin_category="index")
-
-
-def get_plugin_category(category):
-    plugin_categories = []
-
-    recent = list_recent_plugins()
-    plugins = list_plugins(category)
-    note_plugins = list_plugins("note")
-    dev_plugins = list_plugins("develop")
-    sys_plugins = list_plugins("system")
-    dir_plugins = list_plugins("dir")
-    net_plugins = list_plugins("network")
-    other_plugins = list(filter(lambda x: x.category not in (
-        "inner", "note", "develop", "system", "dir", "network"), plugins))
-
-    plugin_categories.append(["最近", recent])
-    plugin_categories.append(["默认工具", build_inner_tools()])
-    plugin_categories.append(["笔记", note_plugins])
-    plugin_categories.append(["开发工具", dev_plugins])
-    plugin_categories.append(["系统", sys_plugins])
-    plugin_categories.append(["文件", dir_plugins])
-    plugin_categories.append(["网络", net_plugins])
-    plugin_categories.append(["其他", other_plugins])
-    return plugin_categories
-
-
-class PluginV2Handler:
-
-    @xauth.login_required()
-    def GET(self):
-        category = xutils.get_argument_str("category", "")
-        key = xutils.get_argument_str("key", "")
-        plugin_categories = []
-
-        if xauth.is_admin():
-            if key != None and key != "":
-                plugin_categories.append(["搜索", search_plugins(key)])
-            else:
-                plugin_categories = get_plugin_category(category)
-        else:
-            plugins = build_inner_tools()
-            plugin_categories.append(["默认工具", plugins])
-
-        return xtemplate.render("plugin/page/plugins_v2.html",
-                                category=category,
-                                html_title="插件",
-                                plugin_categories=plugin_categories)
 
 
 class LoadPluginHandler:
@@ -701,7 +654,6 @@ xurls = (
     r"/plugin/(.+)", LoadPluginHandler,
     r"/plugin_list", PluginListHandler,
     r"/plugin_category_list", PluginCategoryListHandler,
-    r"/plugin_list_v2", PluginV2Handler,
     r"/plugin_log", PluginLogHandler,
     r"/tools/tcc", TccHandler,
     r"/tools/(.+)", LoadInnerToolHandler,

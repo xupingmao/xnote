@@ -5,88 +5,64 @@
 
 from xnote.core import xmanager
 from xnote.core.xtemplate import BasePlugin
+from xnote.plugin.table_plugin import BaseTablePlugin
 from xutils import Storage
+from xnote.core import xtemplate
+from xnote.plugin import sidebar
 
+class EventHandler(BaseTablePlugin):
 
-HTML = r"""
-<style>
-    .card-body {
-        display:none;
-    }
-</style>
-
-<div class="row">
-    <div class="card btn-line-height">
-        <span>系统一共注册{{event_handler_count}}个事件处理器</span>
-    </div>
-
-    {% for index, event_type in enumerate(event_type_list) %}
-        {% set temp_handler_list = handlers.get(event_type) %}
-        <div class="card">
-            <div class="card-title">
-                <a id="{{event_type}}">{{event_type}}</a>
-                <span>({{len(temp_handler_list)}})</span>
-                <div class="float-right">
-                    <button class="toggle-btn btn-default" data-index="{{index}}" data-toggle="折叠">展开</button>
-                </div>
-            </div>
-            <div class="card-body event-body-{{index}}">
-            {% for temp_handler in temp_handler_list %}
-                <div class="list-item">{{temp_handler}}</div>
-            {% end %}
-            </div>
-        </div>
-    {% end %}
-
-    <script>
-    $(function () {
-        $(".toggle-btn").click(function () {
-            // 切换展示状态
-            var index = $(this).attr("data-index");
-            $(".event-body-" + index).toggle();
-
-            // 切换文本
-            var text = $(this).text();
-            var toggle = $(this).attr("data-toggle");
-            $(this).attr("data-toggle", text);
-            $(this).text(toggle);
-        }); 
-    });
-    </script>
+    title = '系统事件'
+    title_style = "left"
+    category = "admin"
+    show_category = True
+    show_title = True
+    show_aside = True
+    require_admin = True
+    show_pagenation = False
+    NAV_HTML = """
+<div class="card btn-line-height">
+    <span>系统一共注册{{event_handler_count}}个事件处理器</span>
 </div>
 """
 
-ASIDE_HTML = """
-{% include system/component/admin_nav.html %}
-"""
+    def get_aside_html(self):
+        return sidebar.get_admin_sidebar_html()
 
-class EventHandler(BasePlugin):
-    
-    title = '系统事件'
-    title_style = "left"
-    category = "system"
-    editable = False
-    show_category = False
-    show_title = True
-    show_aside = True
-    
-    def handle(self, content):
-        self.rows = 0
+    def handle_page(self):    
         self.show_aside = True
         event_type_list = []
-        handlers = xmanager._event_manager._handlers
+        handlers = xmanager.get_event_manager()._handlers
         event_type_list = sorted(handlers.keys())
         
         count = 0
         for key in event_type_list:
-            count += len(handlers.get(key))
+            count += len(handlers[key])
         
+        table = self.create_table()
+        table.default_head_style.min_width = "100px"
+        table.add_head("事件名称", field="name", min_width="150px")
+        table.add_head("事件处理器", field="func_name", min_width="200px")
+        table.add_head("描述", field="description")
+        table.add_head("备注", field="remark")
+        table.add_head("是否异步", field="is_async")
+
+        for key in event_type_list:
+            event_handlers = handlers[key]
+            for handler in event_handlers:
+                row = dict()
+                row["name"] = key
+                row["func_name"] = handler.func_name
+                row["description"] = handler.description
+                row["is_async"] = handler.is_async
+                row["remark"] = handler.remark
+                table.add_row(row)
+
+
         kw = Storage()
-        kw.handlers = handlers
-        kw.event_type_list = event_type_list
+        kw.table = table
         kw.event_handler_count = count
-        self.writehtml(HTML, **kw)
-        self.write_aside(ASIDE_HTML)
+        return self.response_page(**kw)
     
 xurls = (
     r"/system/event", EventHandler

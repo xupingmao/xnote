@@ -61,7 +61,7 @@ class PluginContext(Storage):
         self.atime = ""
         self.editable = True
         self.edit_link = ""
-        self.clazz = None # BasePlugin的类型
+        self.clazz = None # type: None|type[BasePlugin] # BasePlugin的类型
         self.priority = 0
         self.icon = DEFAULT_PLUGIN_ICON_CLASS
         self.author = None

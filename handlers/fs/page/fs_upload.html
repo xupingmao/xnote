@@ -47,7 +47,7 @@
 
     <div class="card">
         <h3 class="card-title btn-line-height">
-            <span>上传管理</span>
+            <span>{{title}}</span>
             <div class="float-right">
                 {% if _is_admin %}
                     <a class="btn btn-default" href="{{_server_home}}/fs_list">文件管理</a>
@@ -77,12 +77,6 @@
             <a href="{{upload_link_by_month(year, month, -1)}}" class="default-path-link">上个月</a>
             <a href="{{upload_link_by_month(year, month, 1)}}" class="default-path-link">下个月</a>
         </div>
-    </div>
-    {% end %}
-
-    {% if page == "search" %}
-    <div class="card">
-        <h3>搜索结果</h3>
     </div>
     {% end %}
 
