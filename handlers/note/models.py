@@ -248,6 +248,17 @@ class NotePathInfo(Storage):
         self.is_public = 0
         self.update(kw)
 
+    @classmethod
+    def public_from_note_index(cls, index: NoteIndexDO):
+        result = NotePathInfo()
+        result.name = index.name
+        result.is_public = True
+        result.url = xconfig.WebConfig.resolve_path(f"/note/view/public?id={index.note_id}")
+        result.id = index.id
+        result.type = index.type
+        result.priority = index.priority
+        return result
+
 class NoteGroupDO(NoteIndexDO):
     def __init__(self):
         self.children = []

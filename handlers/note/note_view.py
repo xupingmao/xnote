@@ -32,6 +32,7 @@ from .dao_tag import NoteTagInfoDao
 from .dao import NoteIndexDao, NoteDO
 from handlers.note.note_service import NoteService, NoteRelationService
 from xnote.plugin.table import DataTable
+from xnote.plugin import TabBox
 
 
 PAGE_SIZE = xconfig.PAGE_SIZE
@@ -41,6 +42,8 @@ def is_empty_id(note_id):
     return note_id == 0 or note_id == ""
 
 class NoteViewContext(Storage):
+
+    note_detail_tab: TabBox
 
     def __init__(self, **kw):
         self.user_name = ""
@@ -62,6 +65,8 @@ class NoteViewContext(Storage):
         self.show_relation = False
         self.show_relation_row = True
         self.show_tag = True
+        self.show_search_div = True
+        self.show_parent_link = True
 
         self.page = 1
         self.pagesize = 20
@@ -154,6 +159,14 @@ def view_or_edit_md_func(file: NoteDO, kw: NoteViewContext):
     load_draft = xutils.get_argument_bool("load_draft")
     creator_id = file.creator_id
     note_id = file.note_id
+
+    note_tab = TabBox(tab_key="tab", tab_default="all", css_class="btn-style")
+    note_tab.add_item(title="全部", value="all")
+    if not kw.is_public_page:
+        note_tab.add_item(title="关系", value="relation")
+    note_tab.add_item(title="评论", value="comment")
+
+    kw.note_detail_tab = note_tab
     kw.content = file.content
     kw.show_recommend = True
     kw.show_pagination = False
@@ -199,8 +212,7 @@ def view_group_timeline_func(note, kw):
     raise web.found("/note/timeline?type=default&parent_id=%s" % note.id)
 
 
-def view_group_detail_func(file: note_dao.NoteDO, kw):
-    user_name = kw.user_name
+def view_group_detail_func(file: note_dao.NoteDO, kw: NoteViewContext):
     page = kw.page
     # pagesize  = kw.pagesize
     pagesize = 1000
@@ -225,9 +237,10 @@ def view_group_detail_func(file: note_dao.NoteDO, kw):
         kw.show_timeline_body = True
     else:
         offset = max(page-1, 0) * pagesize
-        files = note_dao.list_by_parent(file.creator, parent_id=file.id,
-                                        offset=offset, limit=pagesize,
-                                        order_type=file.order_type, tags=q_tags)
+        files = note_dao.list_by_parent(
+            file.creator, parent_id=file.id,
+            offset=offset, limit=pagesize,
+            order_type=file.order_type, tags=q_tags)
 
     if is_public_page:
         files = list(filter(lambda x: x.is_public, files))
@@ -334,12 +347,13 @@ class ViewHandler:
         is_valid_type = (file.type != "group") and (file.parent_id != "0")
         kw.show_contents_btn = is_valid_type and can_edit
 
-    def handle_pathlist(self, file, is_public_page):
+    def handle_pathlist(self, file: NoteIndexDO, is_public_page=False):
         if is_public_page:
             root = NotePathInfo()
             root.url = f"{xconfig.WebConfig.server_home}/note/public"
             root.name = "根目录"
-            return [root, file]
+            file_path = NotePathInfo.public_from_note_index(file)
+            return [root, file_path]
         else:
             return note_dao.list_path(file)
 

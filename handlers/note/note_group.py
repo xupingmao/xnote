@@ -515,7 +515,7 @@ class GroupSelectHandler:
             # view == flat
             q_parent_id = None
 
-        files = note_dao.list_group(
+        files = note_dao.list_group_v2(
             user_name, orderby="default", parent_id=q_parent_id)
 
         parent = note_dao.get_by_id_creator(parent_id, user_name)

@@ -160,7 +160,7 @@ class ImportNoteHandler:
     def get_kw(self):
         user_name = xauth.current_name()
         kw = Storage()
-        kw.groups = dao.list_group(user_name, orderby="name")
+        kw.groups = dao.list_group_v2(user_name, orderby="name")
         return kw
 
     def GET(self):
@@ -177,9 +177,9 @@ class ImportNoteHandler:
         kw = self.get_kw()
         kw.url = address
         kw.address = address
+        kw.show_aside = False
 
-        return xtemplate.render(self.template_path,
-                                show_aside=False, **kw)
+        return xtemplate.render(self.template_path, **kw)
 
     @xauth.login_required()
     def POST(self):
@@ -200,6 +200,7 @@ class ImportNoteHandler:
             else:
                 # 读取文件
                 html = ""
+                assert file.file is not None
                 for chunk in file.file:
                     html += chunk.decode("utf-8")
 

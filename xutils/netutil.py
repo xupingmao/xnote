@@ -21,6 +21,7 @@ import io
 import gzip
 import logging
 import http.client
+import typing
 
 from urllib.parse import parse_qs
 from xutils.imports import try_decode
@@ -40,7 +41,13 @@ BUFSIZE = 1024 * 512
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36"
 
-_mock = None
+class NetworkMock:
+    def http_get(self, url: str, charset, params):
+        raise NotImplementedError("http_get")
+    def http_post(self, url: str, body:str, charset:str):
+        raise NotImplementedError("http_post")
+
+_mock : typing.Optional[NetworkMock] = None
 
 def set_net_mock(mock):
     """设置单元测试mock"""
@@ -229,7 +236,7 @@ def _join_url_and_params(url, params, *, skip_empty_value=False):
     else:
         return url + "?" + query_string
 
-def http_get(url, charset=None, params = None, skip_empty_value=False):
+def http_get(url:str, charset=None, params = None, skip_empty_value=False):
     """Http的GET请求"""
     url = _join_url_and_params(url, params, skip_empty_value=skip_empty_value)
 
@@ -260,7 +267,7 @@ def http_get(url, charset=None, params = None, skip_empty_value=False):
     finally:
         conn.close()
 
-def http_post(url, body='', charset='utf-8'):
+def http_post(url:str, body='', charset='utf-8'):
     """HTTP的POST请求
     :arg str url: 请求的地址
     :arg str body: POST请求体

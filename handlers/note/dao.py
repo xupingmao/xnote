@@ -392,7 +392,7 @@ class ShareInfoDao:
     def list(cls, share_type="", offset=0, limit=20, order="id desc"):
         where=dict(share_type=share_type)
         result = cls.db.select(where=where, offset=offset,limit=limit,order=order)
-        return result
+        return ShareInfoDO.from_dict_list(result)
     
     @classmethod
     def count(cls, share_type=""):
@@ -652,7 +652,7 @@ def build_note_info(note: typing.Optional[NoteIndexDO], orderby=None, order_type
     return note
 
 
-def _build_book_default_info(note):
+def _build_book_default_info(note: NoteIndexDO):
     if note.children_count == None:
         note.children_count = 0
 
@@ -663,7 +663,7 @@ def convert_to_path_item(note: NoteIndexDO):
 
 
 @xutils.timeit(name="NoteDao.ListPath:leveldb", logfile=True)
-def list_path(file: NoteIndexDO, limit=5):
+def list_path(file: typing.Optional[NoteIndexDO], limit=5):
     assert file != None
 
     pathlist: typing.List[NotePathInfo] = []
@@ -694,7 +694,7 @@ def get_full_by_id(note_id: int) -> typing.Optional[NoteDO]:
         result.id = note_id
     return result
 
-@xutils.timeit(name="NoteDao.GetById:leveldb", logfile=True)
+# @xutils.timeit(name="NoteDao.GetById:leveldb", logfile=True)
 def get_by_id(id, include_full=True, creator=None):
     if id == "" or id is None:
         return None
@@ -742,14 +742,14 @@ def delete_note_skey(note):
     pass
 
 
-def get_or_create_note(skey, creator, creator_id=0):
+def get_or_create_note(skey: str, creator: str, creator_id=0):
     """根据skey查询或者创建笔记
     @param {string} skey 笔记的特殊key，用户维度唯一
     @param {string} creator 笔记的创建者
     @throws {exception} 创建异常
     """
     assert creator_id != 0
-    if skey is None or skey == "":
+    if skey == "":
         return None
     skey = skey.replace("-", "_")
 
@@ -776,7 +776,9 @@ def get_or_create_note(skey, creator, creator_id=0):
     return get_by_id(note_id)
 
 
-def create_note_base(note_dict, date_str=None, note_id=None) -> int:
+def create_note_base(note_dict: NoteDO, 
+                     date_str: typing.Optional[str] = None, 
+                     note_id: typing.Optional[int] = None) -> int:
     """创建笔记的基础部分，无锁"""
     # 真实的创建时间
     ctime0 = dateutil.format_datetime()
@@ -1270,7 +1272,7 @@ def list_group_with_count(creator=None,
     if category == "all":
         category = None
 
-    def filter_group_func(value):
+    def filter_group_func(value: NoteDO):
         # print(f"note_id={value.id}, archived={value.archived}")
 
         if skip_archived and value.archived:
@@ -1397,7 +1399,7 @@ def list_public(offset, limit, orderby="ctime_desc"):
         else:
             note_info.url = "/note/view/public?id=%s" % note_info.id
             if orderby == "hot":
-                note_info.badge_info = share_info.visit_cnt
+                note_info.badge_info = str(share_info.visit_cnt)
             else:
                 note_info.badge_info = dateutil.format_date(share_info.ctime)
             result.append(note_info)
@@ -1432,7 +1434,7 @@ def list_by_parent(creator="", parent_id=None, offset=0, limit=1000,
     parent_id_int = int(parent_id)
     parent_id = str(parent_id)
 
-    def filter_note_func(value):
+    def filter_note_func(value: NoteDO):
         if skip_group and value.type == "group":
             return False
 
