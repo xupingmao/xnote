@@ -11,6 +11,9 @@
 import typing
 import re
 
+from xnote.plugin.base import BaseComponent, BaseContainer
+from xnote.plugin.container import ActionBar
+
 from xnote.core import xtemplate
 from web.utils import group
 
@@ -278,6 +281,7 @@ class InfoTable:
     def __init__(self):
         self.cols = 2 # 默认2列,这种最简单,各个设备都能正常展示
         self.items = [] # type: list[InfoItem]
+        self.bottom_action_bar = ActionBar(css_class="margin-top-5") # 底部的操作栏
     
     def add_item(self, item: InfoItem):
         item.index = len(self.items)

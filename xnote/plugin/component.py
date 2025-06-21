@@ -9,30 +9,17 @@
 @Description  : 描述
 """
 
+from xnote.plugin.base import BaseComponent, BaseContainer
 from xnote.core import xtemplate
+from xutils import escape_html
 
-class UIComponent:
-    """UI组件的基类"""
-    def render(self):
-        return ""
+class Panel(BaseContainer):
 
-class Panel(UIComponent):
-
-    def __init__(self):
-        self.children = [] # type: list[UIComponent]
-
-    def add(self, child):
-        self.children.append(child)
-
-    def render(self):
-        html = '<div class="row x-plugin-panel">'
-        for child in self.children:
-            html += child.render()
-        html += '</div>'
-        return html
+    def __init__(self, css_class=""):
+        super().__init__(css_class=f"row x-plugin-panel {css_class}")
 
 
-class Input(UIComponent):
+class Input(BaseComponent):
     """输入文本框"""
 
     _template = xtemplate.compile_template("""
@@ -52,9 +39,10 @@ class Input(UIComponent):
 
 
 class Textarea:
-
     def __init__(self, label, name, value):
-        pass
+        self.label = label
+        self.name = name
+        self.value = value
 
 
 class TabLink:
@@ -67,33 +55,77 @@ class TabLink:
 class SubmitButton:
     """提交按钮"""
 
-    def __init__(self, label):
+    def __init__(self, text):
         pass
 
 
 class ActionButton:
     """查询后的操作行为按钮，比如删除、刷新等"""
 
-    def __init__(self, label, action, context=None):
+    def __init__(self, text, action, context=None):
         pass
 
 
-class ConfirmButton:
+class ConfirmButton(BaseComponent):
     """确认按钮"""
+    def __init__(self, text="", url="", message="", method="GET", reload_url="", css_class=""):
+        self.text = text
+        self.url = url
+        self.method = method
+        self.css_class = css_class
+        self.message = message
+        self.reload_url = reload_url
 
-    def __init__(self, label, action, context=None):
-        pass
-
+    def render(self):
+        text = escape_html(self.text)
+        message = escape_html(self.message)
+        css_class = self.css_class
+        url = self.url
+        method = self.method
+        reload_url = self.reload_url
+        return f"""<button class="btn btn-default {css_class}" onclick="xnote.table.handleConfirmAction(this)" 
+        data-url="{url}" data-msg="{message}" data-method="{method}" data-reload-url="{reload_url}">{text}</button>
+        """
 
 class PromptButton:
     """询问输入按钮"""
-
-    def __init__(self, label, action, context=None):
+    def __init__(self, text, action, context=None):
         pass
 
+class EditFormButton(BaseComponent):
+    """编辑表单的按钮"""
+    def __init__(self, text = "", url = "", css_class=""):
+        self.text = text
+        self.url = url
+        self.css_class = css_class
 
-class TextLink:
+    def render(self):
+        text = escape_html(self.text)
+        return f"""
+<button class="btn" onclick="xnote.table.handleEditForm(this)"
+    data-url="{self.url}" data-title="{text}">{text}</button>
+"""
+
+class TextLink(BaseComponent):
     """文本链接"""
     def __init__(self, text="", href=""):
         self.text = text
         self.href = href
+
+    def render(self):
+        text = escape_html(self.text)
+        href = self.href
+        return f"""<a href="{href}">{text}</a>"""
+
+
+class TextSpan(BaseComponent):
+    """行内文本"""
+    def __init__(self, text="", css_class=""):
+        self.text = text
+        self.css_class = css_class
+
+    def render(self):
+        text = escape_html(self.text)
+        return f"""<span class="{self.css_class}">{text}</span>"""
+
+    

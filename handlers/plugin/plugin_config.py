@@ -132,9 +132,10 @@ INNER_TOOLS = [
     # 管理后台
     admin_plugin("系统注册表", "/system/event"),
     admin_plugin("集群管理", "/system/sync"),
+    admin_plugin("系统日志", "/system/log"),
 
     # 系统工具
-    system_plugin("系统日志", "/system/log"),
+    # system_plugin("系统日志", "/system/log"),
 ]
 
 class CategoryService:

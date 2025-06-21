@@ -8,7 +8,7 @@ from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable, TableActionType, TabBox
-from xnote.plugin.table import InfoTable, InfoItem
+from xnote.plugin.table import InfoTable, InfoItem, ActionBar
 
 
 def get_example_tab():
@@ -161,14 +161,10 @@ class TableExampleHandler(BaseTablePlugin):
         table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, 
                          msg_field="delete_msg", css_class="btn danger")
         
-        table.action_bar_html = xtemplate.render_text("""
-<div class="table-action-bar">
-    <span>表格3-空表格-action_bar_html</span>
-    <div class="float-right">
-        <button class="btn" onclick="xnote.table.handleEditForm(this)"
-            data-url="?action=edit" data-title="新建">新建</button>
-    </div>                                                
-</div>""")
+        action_bar = ActionBar()
+        action_bar.add_span(text="表格3-空表格-action_bar_html")
+        action_bar.add_edit_button(text="新建", url="?action=edit", float_right=True)
+        table.action_bar_html = action_bar.render()
         return table
     
     def get_info_table(self):

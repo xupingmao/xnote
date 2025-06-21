@@ -130,6 +130,10 @@ class UserDO(xutils.Storage):
         if self.status == UserStatusEnum.deleted.value:
             return "删除"
         return f"未知({self.status})"
+    
+    @property
+    def is_admin(self):
+        return self.name == "admin"
 
 class UserDao:
 
@@ -1002,7 +1006,7 @@ class UserOpLogDao:
         cls.log_buf_size = 20
 
     @classmethod
-    def create_op_log(cls, op_log):
+    def create_op_log(cls, op_log: UserOpLog):
         assert isinstance(op_log, UserOpLog)
         assert op_log.user_id != 0
         assert op_log.ctime != ""

@@ -2,6 +2,9 @@
 # @modified 2022/04/04 14:01:57
 import web
 import json
+import typing
+import xutils
+import math
 
 from xnote.core import xauth
 from xnote.core import xtemplate
@@ -9,16 +12,15 @@ from xnote.core import xmanager
 from xnote.core.xtemplate import T
 from xnote.core import xconfig
 
-import xutils
-import math
 from xutils import textutil
 from xutils import Storage
 from xutils import dbutil
 from xutils import webutil
+from xnote.core.xauth import UserDO
 from . import dao
 
 from xnote.plugin.table_plugin import BaseTablePlugin
-from xnote.plugin import DataTable, TableActionType
+from xnote.plugin import DataTable, TableActionType, InfoTable, InfoItem
 from xnote.plugin import DataForm
 from xnote.plugin.form import FormRowType
 
@@ -145,11 +147,33 @@ class UserHandler:
         kw = Storage()
         kw.name = name
         kw.user_info = user_info
+        kw.info_table = self.get_info_table(user_info)
 
         if user_info != None:
             self.handle_user_log(kw, user_info=user_info)
 
         return xtemplate.render("user/page/user_manage.html", **kw)
+    
+    def get_info_table(self, user_info: typing.Optional[UserDO]):
+        if user_info is None:
+            return None
+        
+        info = InfoTable()
+        info.add_item(InfoItem(name="用户名", value=user_info.name))
+        info.add_item(InfoItem(name="salt", value=user_info.salt))
+        info.add_item(InfoItem(name="token", value=user_info.token))
+        info.add_item(InfoItem(name="最近更新", value=user_info.mtime))
+        info.add_item(InfoItem(name="上次登录", value=user_info.login_time))
+        if not user_info.is_admin:
+            user_id = user_info.user_id
+            user_name = user_info.name
+            info.bottom_action_bar.add_confirm_button(
+                "删除用户", url=f"/system/user/remove?user_id={user_id}", 
+                message=f"确定删除用户[{user_name}]吗?", css_class="danger", reload_url="/user/list")
+            info.bottom_action_bar.add_confirm_button(
+                "重置密码", url=f"/system/user/reset_password?user_id={user_id}&user_name={user_name}",
+                message=f"确定重置用户[{user_name}]的密码吗?", method="POST", css_class="danger")
+        return info
 
     @xauth.login_required("admin")
     def POST(self):
@@ -258,7 +282,7 @@ class ResetPasswordHandler:
         new_password = xutils.random_number_str(8)
         xauth.update_user(user_name, Storage(password=new_password))
         create_op_log(user_name, dao.UserOpTypeEnum.reset_password.value, "重置密码")
-        return dict(code="success", data=new_password)
+        return webutil.SuccessResult(data=new_password)
 
 class UserOpLogHandler(BaseTablePlugin):
 

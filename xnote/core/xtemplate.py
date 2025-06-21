@@ -389,7 +389,7 @@ class BasePlugin:
     # {侧边栏自定义HTML}
     aside_html = ""
     header_html = ""
-    footer_html = ""
+    # 展示在标题栏的右侧
     option_html = ""
 
     # 插件的标题
@@ -465,10 +465,6 @@ class BasePlugin:
     def writebody(self, html, **kw):
         """写内容区"""
         self.writetemplate(html, **kw)
-
-    def writefooter(self, html, **kw):
-        """TODO: 模板上还没有渲染"""
-        self.footer_html = render_text(html, **kw)
 
     def writehtml(self, html, **kw):
         """@deprecated 请使用 #writebody

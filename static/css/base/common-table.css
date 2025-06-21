@@ -43,7 +43,7 @@
     background-color: #eee;
 }
 
-.table-action-row, .table-action-bar {
+.table-action-row, .table-action-bar, .action-bar {
     padding-bottom: 5px;
     width: 100%;
     float: left;
@@ -53,6 +53,7 @@
     width: 100%;
 }
 
+/* 默认样式:4列表格 */
 .info-table .name {
     font-weight: bold;
     width: 20%;

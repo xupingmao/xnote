@@ -203,6 +203,18 @@ xnote.http.get = function (url, data, callback, type) {
     return $.get(newURL, data, callback, type).fail(xnote.http.defaultFailHandler);
 }
 
+// http-ajax请求
+xnote.http.ajax = function(method, url, data, callback, dataType) {
+    var newURL = xnote.http.resolveURL(url);
+    return $.ajax({
+        url: newURL,
+        type: method,
+        dataType: dataType,
+        data: data,
+        success: callback
+    }).fail(xnote.http.defaultFailHandler);
+}
+
 // http-get内部请求
 xnote.http.internalGet = function(url, data, callback, type) {
     return $.get(xnote.config.serverHome + url, data, callback, type);

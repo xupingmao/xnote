@@ -1,21 +1,5 @@
 {% extends base %}
 
-{% block head %}
-
-<style>
-    .td-no {
-        width: 50px;
-    }
-
-    .label {
-        width: 150px;
-        font-weight: bold;
-        display: table-cell;
-    }
-</style>
-
-{% end %}
-
 {% block body_left %}
 
 <div class="card">
@@ -28,42 +12,8 @@
 </div>
 
 <div class="card">
-    <input type="hidden" name="name" value="{{user_info.name}}">
-    <table class="table col-md-12">
-        <tr>
-            <td class="label">用户名</td>
-            <td>{{user_info.name}}</td>
-        </tr>
-        <tr>
-            <td class="label">salt</td>
-            <td>{{user_info.salt}}</td>
-        </tr>
-        <tr>
-            <td class="label">token</td>
-            <td>{{user_info.token}}</td>
-        </tr>
-        <tr>
-            <td class="label">最近更新</td>
-            <td>{{user_info.mtime}}</td>
-        </tr>
-        <tr>
-            <td class="label">上次登录</td>
-            <td>{{user_info.login_time}}</td>
-        </tr>
-    </table>
-
-    {% if user_info.name != "admin" %}
-        <div class="row pad-top-5">
-            <input class="btn danger" type="button" 
-                data-name="{{user_info.name}}" data-id="{{user_info.id}}"
-                onclick="xnoteDeleteUser(this)"
-                value="删除用户">
-            
-            <input class="btn danger" type="button" 
-                data-name="{{user_info.name}}" data-id="{{user_info.id}}"
-                onclick="xnoteResetUserPassword(this)"
-                value="重置用户密码">
-        </div>
+    {% if info_table %}
+        {% raw info_table.render() %}
     {% end %}
 </div>
 

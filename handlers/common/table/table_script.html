@@ -8,14 +8,26 @@
     }
     
     xnote.table.handleConfirmAction = function (target) {
+        var method = $(target).attr("data-method");
         var url = $(target).attr("data-url");
         var msg = $(target).attr("data-msg");
+        var reloadUrl = $(target).attr("data-reload-url");
+        if (method == "") {
+            method = "GET";
+        }
         xnote.confirm(msg, function () {
-            xnote.http.get(url, function (resp) {
+            xnote.http.ajax(method, url, "", function (resp) {
+                console.log(resp);
                 if (resp.success) {
                     var msg = resp.message || "操作成功";
                     xnote.toast(msg);
-                    window.location.reload();
+                    setTimeout(function() {
+                        if (reloadUrl) {
+                            window.location.href = reloadUrl;
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 1000);
                 } else {
                     xnote.toast(resp.message);
                 }

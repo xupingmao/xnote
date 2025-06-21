@@ -124,10 +124,9 @@ class LogHandler(BasePlugin):
 
     title = 'xnote系统日志'
     # description = "查看系统日志"
-    show_category = False
     show_aside = True
-    category = 'system'
     editable = False
+    category = "admin"
     rows = 0
 
     def get_arg_date(self):
