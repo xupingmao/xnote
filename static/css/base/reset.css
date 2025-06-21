@@ -153,5 +153,5 @@ table td {
 }
 
 span {
-    line-height: 2;
+    line-height: 1.2; /* 浏览器默认值 */
 }

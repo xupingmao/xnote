@@ -24,7 +24,7 @@ def main():
         os.system(command)
     else:
         print("cloc command not found, use duck-rush code-count-lines command")
-        os.system("code-count-lines xnote handlers xutils xnote_migrate --exclude py3.8 py3.7 py3.6 lib static/lib data* htmlcov dist build tmp")
+        os.system("code-count-lines xnote handlers xutils xnote_migrate static/js/ --exclude py3.8 py3.7 py3.6 lib static/lib data* htmlcov dist build tmp *.build.js")
 
 if __name__ == "__main__":
     main()
