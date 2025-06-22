@@ -20,12 +20,14 @@
 <button class="btn danger">按钮4</button>
 """ %}
 
+<span class="card-title">代码</span>
 <div class="card">
-    <p>按钮</p>
     <pre class="marked-code">{{html1}}</pre>
-    <div class="row pad-top-5">
-        {% raw html1 %}
-    </div>
+</div>
+
+<span class="card-title">效果</span>
+<div class="card">
+    {% raw html1 %}
 </div>
 
 {% end %}

@@ -19,7 +19,7 @@ from xnote.core import xtables
 from xnote.core import xmanager
 from xutils import sqlite3, Storage, cacheutil
 from xnote.core.xtemplate import T
-from xutils import logutil
+from xutils import logutil, webutil
 
 try:
     import psutil
@@ -179,20 +179,17 @@ class ConfigHandler:
         
         return value
     
-    @xauth.login_required("admin")
+    @xauth.login_required()
     def POST(self):
-        key   = xutils.get_argument("key")
+        key   = xutils.get_argument_str("key")
         value = xutils.get_argument_str("value", "")
         type  = xutils.get_argument_str("type")
-        p     = xutils.get_argument("p")
+        p     = xutils.get_argument_str("p")
 
         update_msg = "%s,%s,%s" % (type, key, value)
         logging.info(update_msg)
         xutils.info("UpdateConfig", update_msg)
         value = self.parse_value(type, value)
-
-        if key == "BASE_TEMPLATE":
-            xmanager.reload()
 
         if key in ("DEV_MODE", "DEBUG"):
             xconfig.DEBUG = value
@@ -208,9 +205,9 @@ class ConfigHandler:
             else:
                 update_sys_config(key, value)
         except Exception as e:
-            return dict(code = "fail", message = "设置失败:" + str(e))
+            return webutil.FailedResult(code = "fail", message = "设置失败:" + str(e))
             
-        return dict(code="success")
+        return webutil.SuccessResult()
 
 class HomeEntrySettingsHandler:
 

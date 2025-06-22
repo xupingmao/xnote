@@ -102,7 +102,7 @@ class EditFormButton(BaseComponent):
     def render(self):
         text = escape_html(self.text)
         return f"""
-<button class="btn" onclick="xnote.table.handleEditForm(this)"
+<button class="btn {self.css_class}" onclick="xnote.table.handleEditForm(this)"
     data-url="{self.url}" data-title="{text}">{text}</button>
 """
 

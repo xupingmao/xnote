@@ -44,17 +44,17 @@
 
 <script type="text/javascript">
     function updateSetting(key, value, type, p) {
-        $.post("{{_server_home}}/system/config", 
+        xnote.http.post("/system/config", 
             {key: key, value: value, type: type, p:p}, 
             function (data) {
-                if (data.code == "success") {
+                if (data.success) {
                     window.location.reload();
                 } else {
                     xnote.alert(data.message);
                 }
         }).fail(function (resp) {
             console.log(resp);
-            xnote.alert("设置失败");
+            xnote.alert(resp.message);
         });
     }
 

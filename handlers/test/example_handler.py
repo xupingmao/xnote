@@ -174,6 +174,8 @@ class TableExampleHandler(BaseTablePlugin):
         table.add_item(InfoItem(name="用途", value="展示对象的详细信息"))
         table.add_item(InfoItem(name="链接", value="xnote首页", href="/"))
         table.add_item(InfoItem(name="其他"))
+        table.bottom_action_bar.add_edit_button("编辑", "?action=edit", css_class="btn-default")
+        table.bottom_action_bar.add_confirm_button("删除", url="?action=delete", message="确认删除吗?", css_class="danger")
         return table
 
 class ExampleHandler:

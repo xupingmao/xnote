@@ -1014,13 +1014,13 @@ select.no-border {
 .bottom-offset-1{margin-bottom:5px;}
 .bottom-offset-2{margin-bottom:10px;}
 .row{float: left;width: 100%;overflow: auto;}
-.pad5 {padding: 5px;}
-.pad10 {padding: 10px;}
-.pad-top-5 {padding-top: 5px;}
-.pad-top-10 {padding-top: 10px;}
-.pad-left-5 {padding-left: 5px;}
-.pad-bottom-5 {padding-bottom: 5px;}
-.pad-bottom-10 {padding-bottom: 10px}
+.padding-5 {padding: 5px;}
+.padding-10 {padding: 10px;}
+.padding-top-5 {padding-top: 5px;}
+.padding-top-10 {padding-top: 10px;}
+.padding-left-5 {padding-left: 5px;}
+.padding-bottom-5 {padding-bottom: 5px;}
+.padding-bottom-10 {padding-bottom: 10px}
 .margin-top-5 {margin-top: 5px;}
 .margin-top-10 {margin-top: 10px;}
 .margin-bottom-5 {margin-bottom: 5px;}

@@ -12,7 +12,8 @@
                 if (parent.length == 0) {
                     parent = undefined;
                 }
-                
+                // select2默认支持 data-placeholder
+                // https://select2.org/configuration/data-attributes
                 $(elem).select2({
                     minimumResultsForSearch: 10,
                     dropdownParent:parent

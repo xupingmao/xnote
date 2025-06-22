@@ -127,7 +127,7 @@ class TagManageHandler(BaseTagManageHandler):
 
 <div class="card">
     {% include common/table/table.html %}
-    <div class="pad-top-5 pad-bottom-5">
+    <div class="padding-top-5 padding-bottom-5">
         {% include common/base/pagination.html %}
     </div>
 </div>

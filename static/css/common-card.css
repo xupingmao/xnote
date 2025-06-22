@@ -71,7 +71,6 @@ body {
 }
 
 .card-title, .grid-title, .card>h1,.card>h2,.card>h3,.card>h4 {
-    background-color: #fff;
     font-weight: bold;
     border-left: none;
     line-height: 32px;

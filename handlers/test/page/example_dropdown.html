@@ -2,10 +2,27 @@
 
 {% block body %}
 
-	{% include test/component/example_nav.html %}
+{% include test/component/example_nav.html %}
+{% include common/script/load_select2.html %}
+
+{% init select2_html = """
+<select style="width: 100px;" data-placeholder="选项">
+    <option value="1">选项1</option>
+    <option value="2">选项2</option>
+</select>
+""" %}
+
+<span class="card-title">select2风格</span>
+<div class="card">
+	<pre class="marked-code">{{select2_html}}</pre>
+    <div class="margin-top-5">
+        {% raw select2_html %}
+    </div>
+</div>
+
 
 {% init html1 = """
-<div class="x-dropdown">
+<div class="x-dropdown margin-top-5">
     <span class="dropdown-btn btn">更多▾</span>
     <div class="dropdown-content">
         <a class="dropdown-option">选项1</a>
@@ -15,7 +32,7 @@
 """ %}
 
 {% init html2 = """
-<div class="x-dropdown align-right">
+<div class="x-dropdown align-right margin-top-5">
     <span class="dropdown-btn btn">更多▾</span>
     <div class="dropdown-content">
         <a class="dropdown-option">选项1</a>
