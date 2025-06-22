@@ -572,10 +572,12 @@
 
     function preHandleText(text) {
         // 预处理：替换行内公式定界符
-        var regexp = /\\\(([\s\S]*?)\\\)/g;
-        return text.replace(regexp, function (match, content) {
+        var replace_func = function(match, content) {
             return LATEX_INLINE_START + btoa(content) + LATEX_INLINE_END;
-        });
+        }
+        text = text.replace(/\\\(([\s\S]*?)\\\)/g, replace_func);
+        text = text.replace(/\\\[([\s\S]*?)\\\]/g, replace_func);
+        return text;
     }
 
     marked.parseAndRender = function (text, target, options) {

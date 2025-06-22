@@ -19,10 +19,9 @@ from xutils import quote
 
 class SystemTagEnum(BaseEnum):
     todo = EnumItem("待办", "$todo$")
+    important = EnumItem("重要", "$1$")
 
-    tag_name_dict = {
-        "$todo$": "待办",
-    }
+    _enums = [todo, important]
 
     @staticmethod
     def is_sys_tag(tag_code=""):
@@ -30,7 +29,17 @@ class SystemTagEnum(BaseEnum):
     
     @classmethod
     def get_name_by_code(cls, tag_code=""):
-        return cls.tag_name_dict.get(tag_code, tag_code)
+        for item in cls._enums:
+            if item.value == tag_code:
+                return item.name
+        return tag_code
+    
+    @classmethod
+    def to_tag_list(cls):
+        result = [] # type: list[TagInfoDO]
+        for item in cls._enums:
+            result.append(TagInfoDO(tag_code=item.value, tag_name=item.name))
+        return result
 
 class TagTypeEnum(BaseEnum):
     """枚举无法扩展,所以这里不用,从外部添加枚举值可以直接设置新的属性"""

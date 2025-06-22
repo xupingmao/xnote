@@ -15,7 +15,7 @@ from xutils import Storage
 from xutils import dbutil, webutil
 from xnote.core.xtemplate import T
 from . import dao_tag
-from .dao_tag import NoteTagInfoDao, NoteTagBindDao, TagTypeEnum, TagInfoDO, TagCategoryDetail
+from .dao_tag import NoteTagInfoDao, NoteTagBindDao, TagTypeEnum, TagInfoDO, TagCategoryDetail, SystemTagEnum
 from . import dao as note_dao
 from xnote.plugin import TextLink
 
@@ -316,14 +316,18 @@ class TagBindDialogHandler:
         user_id = xauth.current_user_id()
         suggest_tag_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id, order="amount desc")
         all_tag_list = NoteTagInfoDao.list(user_id=user_id, order="amount desc")
-        todo_tag = TagInfoDO(tag_name="待办", tag_code="$todo$")
-        global_tag_list = [todo_tag]
+        global_tag_list = SystemTagEnum.to_tag_list()
         dup_codes = set([tag.tag_code for tag in suggest_tag_list + global_tag_list])
         other_tag_list = [tag for tag in all_tag_list if tag.tag_code not in dup_codes]
 
-        for tag in all_tag_list:
-            if tag.tag_code == todo_tag.tag_code:
-                todo_tag.amount = tag.amount
+        def find_amount(tag_code:str):
+            for item in all_tag_list:
+                if item.tag_code == tag_code:
+                    return item.amount
+            return 0
+
+        for tag_info in global_tag_list:
+            tag_info.amount = find_amount(tag_info.tag_code)
 
         def get_active_class(tag: dao_tag.TagInfoDO):
             if tag.tag_code in tags:
