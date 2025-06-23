@@ -252,9 +252,7 @@ class GroupListHandler:
             return
 
         if order_type == OrderTypeEnum.size.int_value:
-            for note in notes:
-                note.badge_info = str(note.children_count)
-            notes.sort(key=lambda x: x.children_count or 0, reverse=True)
+            note_dao.sort_notes(notes, orderby="children_count_desc")
             return
 
         note_dao.sort_notes(notes, order_type=kw.order_type)

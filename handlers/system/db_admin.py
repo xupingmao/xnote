@@ -541,8 +541,14 @@ class TableData:
     def to_data_table(self):
         result = DataTable()
 
+        min_width_dict = {
+            "dflt_value": "150px",
+            "type": "150px",
+        }
+
         for head in self.head:
-            result.add_head(title=head, field=head, min_width="100px")
+            min_width = min_width_dict.get(head, "100px")
+            result.add_head(title=head, field=head, min_width=min_width)
         result.set_rows(self.items)
         return result
 

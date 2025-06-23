@@ -491,7 +491,7 @@ def sort_by_atime_desc(notes):
     notes.sort(key=lambda x: x.atime, reverse=True)
 
 
-def sort_by_priority(notes):
+def sort_by_priority(notes: typing.List[NoteIndexDO]):
     # 置顶笔记
     notes.sort(key=lambda x: x.priority, reverse=True)
 
@@ -541,19 +541,27 @@ def sort_by_dtime_asc(notes):
     notes.sort(key=lambda x: x.dtime)
 
 
-def sort_by_hot_index(notes):
+def sort_by_hot_index(notes: typing.List[NoteIndexDO]):
     notes.sort(key=lambda x: x.hot_index or 0, reverse=True)
     sort_by_priority(notes)
 
     for note in notes:
         note.badge_info = "热度(%d)" % note.hot_index
 
-def sort_by_size_desc(notes):
+def sort_by_size_desc(notes: typing.List[NoteIndexDO]):
     notes.sort(key=lambda x:x.size or 0, reverse=True)
     sort_by_priority(notes)
     
     for note in notes:
         note.badge_info = "%s" % note.size
+
+def sort_by_children_count_desc(notes: typing.List[NoteIndexDO]):
+    notes.sort(key=lambda x:x.children_count, reverse=True)
+    sort_by_priority(notes)
+    
+    for note in notes:
+        note.badge_info = f"{note.children_count}"
+
 
 def empty_sort_func(notes, orderby=""):
     pass
@@ -574,6 +582,7 @@ SORT_FUNC_DICT = {
     "hot_index": sort_by_hot_index,
     "hot_desc": sort_by_hot_index,
     "size_desc": sort_by_size_desc,
+    "children_count_desc": sort_by_children_count_desc,
     "default": sort_by_default,
     "atime_desc": empty_sort_func,
 }
@@ -1894,7 +1903,7 @@ def get_virtual_group(user_name, name):
     if name == "ungrouped":
         creator_id = xauth.UserDao.get_id_by_name(user_name)
         files_count = NoteIndexDao.count(creator_id=creator_id, query_root=True, is_not_group=True)
-        group = NoteDO()
+        group = NoteIndexDO()
         group.name = "未分类笔记"
         group.url = "/note/default"
         group.size = files_count
