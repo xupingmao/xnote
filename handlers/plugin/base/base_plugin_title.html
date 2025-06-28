@@ -8,8 +8,11 @@
     <!-- 插件默认的header -->
     <div class="plugin-head card">
         <div class="card-title btn-line-height">
-            {% if model.show_category and model.category %}
-                <a class="link2" href="{{category_url}}">{{model.category_name}}</a>
+            {% if model.parent_link %}
+                <a class="link2 path-link" href="{{model.parent_link.href}}">{{model.parent_link.text}}</a>
+                <span>/</span>
+            {% elif model.show_category and model.category %}
+                <a class="link2 path-link" href="{{category_url}}">{{model.category_name}}</a>
                 <span>/</span>
             {% end %}
             <span>{{title}}</span>

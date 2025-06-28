@@ -14,14 +14,19 @@ import logging
 import xutils
 import web.db
 from .table_config import TableConfig
+from xutils.functions import list_replace
 
 empty_db = web.db.DB(None, {})
 
 class ColumnInfo:
-
     def __init__(self):
         self.name = ""
         self.type = ""
+
+def quote_name(name: str):
+    if "`" in name:
+        return name
+    return f"`{name}`"
 
 class TableHelper:
 
@@ -95,7 +100,7 @@ class BaseTableManager:
         self.mysql_database = kw.get("mysql_database", "")
         self.pk_name = kw.get("pk_name", "id")
         self.pk_type = kw.get("pk_type", "int")
-        self.pk_len = kw.get("pk_len", 0)
+        self.pk_len = kw.get("pk_len", 0) # 废弃字段
         self.pk_comment = kw.get("pk_comment", "主键")
         pk_type = TableHelper.get_type_name(self.pk_type)
         # 目前只支持这两种主键
@@ -147,6 +152,16 @@ class BaseTableManager:
             sql += " NOT NULL"
         self.execute(sql)
 
+    def rename_column(self, old_name="", new_name=""):
+        columns = self.desc_columns()
+        names = [col.name for col in columns]
+        if new_name in names:
+            return
+        if old_name not in names:
+            return
+        sql = f"ALTER TABLE {self.tablename} RENAME {quote_name(old_name)} TO {quote_name(new_name)}"
+        self.execute(sql)
+
     def add_index(self, colname, is_unique=False, **kw):
         raise Exception("not implemented")
 
@@ -162,9 +177,7 @@ class BaseTableManager:
 
     
     def quote_col(self, colname=""):
-        if "`" in colname:
-            return colname
-        return "`%s`" % colname
+        return quote_name(colname)
 
 class MySQLTableManager(BaseTableManager):
     # TODO 待实现测试
@@ -175,15 +188,12 @@ class MySQLTableManager(BaseTableManager):
     def create_table(self):
         table_name = self.tablename
         pk_name = self.pk_name
-        pk_len = self.pk_len
         pk_comment = self.pk_comment
         if self.pk_type == "blob":
             # MySQL的blob不能作为主键,需要转换成 varbinary
-            sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
-                `{pk_name}` varbinary(100) not null comment '{pk_comment}',
-                PRIMARY KEY (`{pk_name}`({pk_len}))
-            )"""
-        elif self.pk_type == "int":
+            self.pk_type = "varbinary(100)"
+        
+        if self.pk_type == "int":
             sql = f"""CREATE TABLE IF NOT EXISTS `{table_name}` (
                 `{pk_name}` bigint unsigned not null auto_increment,
                 PRIMARY KEY (`{pk_name}`)
@@ -311,11 +321,11 @@ class SqliteTableManager(BaseTableManager):
 
     def drop_column(self, colname):
         # sqlite不支持 DROP COLUMN 得使用中间表
+        # Update: 新版已经支持了
         pass
 
     def desc_columns(self):
-        columns = self.execute("pragma table_info('%s')" %
-                        self.tablename)
+        columns = self.execute(f"pragma table_info('{self.tablename}')")
         result = []
         for col in columns:
             item = ColumnInfo()
@@ -344,6 +354,12 @@ class SqliteTableManager(BaseTableManager):
         sql = f"DROP INDEX IF EXISTS {index_name}"
         self.execute(sql)
 
+class ColumnDef:
+    def __init__(self, name: str, args, kw: dict):
+        self.name = name
+        self.args = args
+        self.kw = kw
+
 class TableInfo:
 
     def __init__(self, tablename = ""):
@@ -352,7 +368,7 @@ class TableInfo:
         self.db_type = "" # 数据库类型, 比如 mysql/sqlite
         self.comment = "" # 表的描述
         self.column_names = []
-        self.columns = [] # 这个主要用于记录[args, kw]参数用于复制表结构
+        self.columns = [] # type:list[ColumnDef] # 这个主要用于记录[args, kw]参数用于复制表结构
         self.indexes = [] # 这个主要用于记录[args, kw]参数用于复制表结构
         self.dbpath = "" # sqlite文件路径
         self.enable_binlog = True
@@ -361,20 +377,27 @@ class TableInfo:
     
     def add_column(self, colname, *args, **kw):
         self.column_names.append(colname)
-        self.columns.append([(colname, ) + args, kw])
+        column_def = ColumnDef(colname, args, kw)
+        self.columns.append(column_def)
+
+    def rename_column(self, old_name: str, new_name:str):
+        self.column_names = list_replace(self.column_names, old_name, new_name)
+        for column in self.columns:
+            if column.name == old_name:
+                column.name = new_name
     
     def add_index(self, *args, **kw):
         self.indexes.append([args, kw])
 
     def get_column_comment(self, colname=""):
-        for args, kw in self.columns:
-            if args[0] == colname:
-                return kw.get("comment", "")
+        for info in self.columns:
+            if info.name == colname:
+                return info.kw.get("comment", "")
         return ""
 
 class TableManagerFacade:
 
-    table_dict = {}
+    table_dict = {} # type: dict[str, TableInfo]
 
     def __init__(self, tablename, db = empty_db, is_backup = False, **kw):
         self.table_info = TableInfo(tablename)
@@ -426,6 +449,12 @@ class TableManagerFacade:
         
         self.table_info.add_column(colname, coltype, default_value, not_null, comment=comment)
         self.manager.add_column(colname, coltype, default_value, not_null, comment=comment)
+
+    def rename_column(self, old_name: str, new_name: str):
+        """TODO: 重命名字段
+        """
+        self.table_info.rename_column(old_name, new_name)
+        self.manager.rename_column(old_name, new_name)
     
     def drop_column(self, colname, coltype,
                    default_value=None, not_null=True):

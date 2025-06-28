@@ -24,7 +24,7 @@ from xnote.core.xtemplate import BasePlugin
 from xutils.functions import iter_exists
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable
-from xnote.plugin import TableActionType
+from xnote.plugin import TableActionType, LinkConfig
 
 uv_db = dbutil.get_table("uv")
 
@@ -122,12 +122,13 @@ def read_tail_lines(fpath, lines):
 
 class LogHandler(BasePlugin):
 
-    title = 'xnote系统日志'
+    title = '系统日志'
     # description = "查看系统日志"
     show_aside = True
     editable = False
-    category = "admin"
     rows = 0
+    parent_link = LinkConfig.app_index
+    category = "admin"
 
     def get_arg_date(self):
         date = xutils.get_argument("date")
@@ -244,6 +245,7 @@ class LogVisitHandler:
 class DatabaseLogHandler(BaseTablePlugin):
     
     title = "数据库日志"
+    parent_link = LinkConfig.app_index
     
     NAV_HTML = """
     {% include system/component/system_log_tab.html %}

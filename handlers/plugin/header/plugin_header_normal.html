@@ -4,9 +4,14 @@
 {% init title = "插件中心" %}
 {% init title_url = _server_home + "/plugin_category_list" %}
 {% init category_name = None %}
+{% init parent_link = None %}
 
 <div class="card">
     <div class="card-title">
+        {% if parent_link %}
+            <a class="link2" href="{{parent_link.href}}">{{parent_link.text}}</a>
+            <span>/</span>
+        {% end %}
         <a class="link2" href="{{title_url}}">{{ title }}</a>
         <div class="float-right">
             {% if _is_admin %}

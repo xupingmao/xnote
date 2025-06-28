@@ -34,6 +34,9 @@ class ParamDict:
         if strip:
             return result.strip()
         return result
+    
+    def get_bool(self, key: str, default_value=False):
+        return bool(self.dict.get(key, default_value))
 
     def get(self, key: str):
         return self.dict.get(key)

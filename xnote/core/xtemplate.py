@@ -401,6 +401,7 @@ class BasePlugin:
     # 插件分类 {note, dir, system, network}
     show_category = True
     category = ""
+    parent_link = None # 上级功能链接
 
     # {权限配置}
     # 默认需要管理员权限访问

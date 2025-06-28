@@ -144,6 +144,7 @@ h3.marked-heading {
 .path-link, .default-path-link {
     line-height: 28px;
     color: #000;
+    margin-right: 0;
 }
 
 .path-link:hover, .default-path-link:hover {

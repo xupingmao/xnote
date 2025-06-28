@@ -250,6 +250,13 @@ def listmerge(list1, list2):
             target.append(c)
     return target
 
+def list_replace(lst: list, old, new):
+    def replace_func(item):
+        if item == old:
+            return new
+        return item
+    return list(map(replace_func, lst))
+
 def first_or_none(list):
     """返回集合的第一个元素
 

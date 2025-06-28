@@ -709,8 +709,8 @@ def init_backup_table(tablename, db, dbpath=""):
         raise Exception("table not defined: %s" % tablename)
     pk_name = table_info.pk_name
     with TableManager(tablename, db=db, is_backup=True, dbpath = dbpath, pk_name=pk_name) as manager:
-        for args, kw in table_info.columns:
-            manager.add_column(*args, **kw)
+        for col in table_info.columns:
+            manager.add_column(col.name, *col.args, **col.kw)
 
         for args, kw in table_info.indexes:
             manager.add_index(*args, **kw)

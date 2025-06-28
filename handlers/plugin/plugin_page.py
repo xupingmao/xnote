@@ -28,7 +28,7 @@ from handlers.plugin.dao import (
     add_visit_log, list_visit_logs, PageVisitLogDO)
 from handlers.plugin.service import CategoryService
 from handlers.plugin import plugin_util
-from xnote.plugin import load_plugin_file, PluginContext
+from xnote.plugin import load_plugin_file, PluginContext, LinkConfig
 from handlers.plugin.plugin_config import INNER_TOOLS
 
 """xnote插件模块，由于插件的权限较大，开发权限只开放给管理员，普通用户可以使用
@@ -436,6 +436,7 @@ class PluginListHandler:
             context.plugin_category = "all"
 
         template_file = get_template_by_version(version)
+        context.parent_link = LinkConfig.app_index
         return xtemplate.render(template_file, **context)
     
     def filter_plugins(self, plugins: typing.List[PluginContext]):
@@ -491,7 +492,11 @@ class PluginCategoryListHandler:
             plugins.append(p)
 
         template_file = get_template_by_version(version)
-        return xtemplate.render(template_file, plugins=plugins, plugin_category="index")
+        kw = Storage()
+        kw.plugins = plugins
+        kw.plugin_category = "index"
+        kw.parent_link = LinkConfig.app_index
+        return xtemplate.render(template_file, **kw)
 
 
 class LoadPluginHandler:

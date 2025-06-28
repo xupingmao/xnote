@@ -10,7 +10,7 @@ from xutils import Storage
 from xutils import MyStdout
 from xutils import textutil
 from xnote.plugin.table_plugin import BaseTablePlugin
-from xnote.plugin import sidebar
+from xnote.plugin import sidebar, LinkConfig
 
 def get_thread_log(thread):
     records = MyStdout.get_records(thread)
@@ -30,6 +30,7 @@ class ThreadInfoHandler(BaseTablePlugin):
     title = "线程列表"
     PAGE_HTML = BaseTablePlugin.TABLE_HTML
     show_aside = True
+    parent_link = LinkConfig.app_index
 
     def get_aside_html(self):
         return sidebar.get_admin_sidebar_html()

@@ -128,4 +128,6 @@ class TextSpan(BaseComponent):
         text = escape_html(self.text)
         return f"""<span class="{self.css_class}">{text}</span>"""
 
-    
+
+class LinkConfig:
+    app_index = TextLink(text="应用", href="/system/index")

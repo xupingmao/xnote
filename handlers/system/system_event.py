@@ -8,14 +8,14 @@ from xnote.core.xtemplate import BasePlugin
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xutils import Storage
 from xnote.core import xtemplate
-from xnote.plugin import sidebar
+from xnote.plugin import sidebar, LinkConfig
 
 class EventHandler(BaseTablePlugin):
 
     title = '系统事件'
     title_style = "left"
     category = "admin"
-    show_category = True
+    parent_link = LinkConfig.app_index
     show_title = True
     show_aside = True
     require_admin = True

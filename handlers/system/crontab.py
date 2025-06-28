@@ -13,6 +13,7 @@ import xutils
 from xnote.core import xconfig
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable, TableActionType, DataForm, FormRowType
+from xnote.plugin import LinkConfig
 from .dao_cron import CronJobDao
 
 from xutils import dbutil
@@ -97,6 +98,7 @@ class ListHandler(BaseTablePlugin):
     require_admin = True
     show_aside = True
     PAGE_HTML = BaseTablePlugin.TABLE_HTML
+    parent_link = LinkConfig.app_index
 
     def handle_page(self):
         table = DataTable()

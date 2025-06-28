@@ -21,7 +21,7 @@ from . import dao
 
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable, TableActionType, InfoTable, InfoItem
-from xnote.plugin import DataForm
+from xnote.plugin import DataForm, LinkConfig
 from xnote.plugin.form import FormRowType
 
 OP_LOG_TABLE = xauth.UserOpLogDao
@@ -44,6 +44,7 @@ class UserListHandler(BaseTablePlugin):
             data-url="?action=edit" data-title="创建新用户">创建新用户</button>"""
     NAV_HTML = ""
     PAGE_HTML = BaseTablePlugin.TABLE_HTML
+    parent_link = LinkConfig.app_index
 
     def handle_page(self):
         page = xutils.get_argument_int("page", 1)

@@ -15,7 +15,7 @@ import json
 from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import webutil
-from xnote.plugin import DataTable, DataForm
+from xnote.plugin import DataTable, DataForm, LinkConfig
 from xnote.service import JobService, SysJob, JobStatusEnum
 from xnote.core import xauth
 from xutils import dateutil
@@ -49,6 +49,7 @@ class JobHandler(BasePlugin):
     title = '任务管理'
     show_edit = False
     rows = 0
+    parent_link = LinkConfig.app_index
     
     def handle_view(self):
         self.show_nav = False
@@ -129,7 +130,7 @@ class JobHandler(BasePlugin):
         table.add_head("任务类型", "job_type", width="20%")
         table.add_head("任务状态", "status_title", width="20%")
         
-        table.add_action("查看详情", link_field="view_url")
+        # table.add_action("查看详情", link_field="view_url")
         table.add_action("编辑", link_field="edit_url", type="edit_form")
         table.add_action("删除", type="confirm", link_field="delete_url", msg_field="delete_msg", css_class="btn danger")
         table.set_action_style(min_width="100px")
