@@ -1,0 +1,276 @@
+<style>
+    .calendar-header {
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .calendar-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #24292e;
+    }
+
+    .calendar-controls {
+        align-items: center;
+        gap: 8px;
+    }
+
+    .calendar-year {
+        font-size: 14px;
+        color: #586069;
+    }
+
+    .calendar-nav {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #959da5;
+        padding: 4px;
+    }
+
+    .calendar-nav:hover {
+        color: #24292e;
+    }
+
+    .legend {
+        float: left;
+        margin-bottom: 10px;
+        font-size: 12px;
+        color: #586069;
+    }
+
+    .legend-colors {
+        float: left;
+        padding-top: 2px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .legend-color {
+        width: 11px;
+        height: 11px;
+        margin-right: 1px;
+    }
+
+    .legend-item {
+        display: block;
+        float: left;
+    }
+
+    .calendar-grid {
+        float: left;
+        margin-bottom: 10px;
+    }
+
+    .calendar-day {
+        width: 11px;
+        height: 11px;
+        border-radius: 2px;
+        margin: 1px;
+        background-color: #ebedf0;
+        transition: transform 0.1s, box-shadow 0.1s;
+        float: left;
+        position: relative;
+    }
+
+    .weekday-label {
+        float: left;
+        font-size: 10px;
+        line-height: 13px;
+        width: 13px;
+    }
+
+    .calendar-row {
+        height: 13px;
+        overflow: visible;
+    }
+
+    .calendar-day:hover {
+        transform: scale(1.3);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+    }
+
+    .calendar-tooltip {
+        position: fixed;
+        background-color: #24292e;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s;
+        z-index: 20;
+    }
+
+    .calendar-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #24292e transparent transparent transparent;
+    }
+
+    .month-labels {
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-size: 10px;
+        color: #7b8794;
+    }
+
+    .month-1-cols {
+        width: 13px;
+        float: left;
+        font-size: 1px;
+        /* 不展示了 */
+    }
+
+    .month-2-cols {
+        width: 27px;
+        float: left;
+    }
+
+    .month-3-cols {
+        width: 40px;
+        float: left;
+    }
+
+    .month-4-cols {
+        float: left;
+        width: 53px;
+    }
+
+    .month-5-cols {
+        float: left;
+        width: 66px;
+    }
+
+    .stats {
+        float: left;
+        width: 100%;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #586069;
+    }
+
+    .stats-item {
+        margin-bottom: 4px;
+    }
+
+    .stats-value {
+        font-weight: 600;
+        color: #24292e;
+    }
+
+    /* 贡献颜色 */
+    .contribution-0 {
+        background-color: #ebedf0;
+    }
+
+    .contribution-1 {
+        background-color: #9be9a8;
+    }
+
+    .contribution-2 {
+        background-color: #40c463;
+    }
+
+    .contribution-3 {
+        background-color: #30a14e;
+    }
+
+    .contribution-4 {
+        background-color: #216e39;
+    }
+
+    /* 高亮效果 */
+    .highlight-current {
+        box-shadow: 0 0 0 1px #0366d6;
+    }
+
+    .highlight-high {
+        box-shadow: 0 0 0 1px #ffd33d;
+    }
+</style>
+<div class="calendar-container">
+    <div class="row legend">
+        <span class="legend-item">较少</span>
+        <div class="legend-colors">
+            <div class="legend-item legend-color contribution-0"></div>
+            <div class="legend-item legend-color contribution-1"></div>
+            <div class="legend-item legend-color contribution-2"></div>
+            <div class="legend-item legend-color contribution-3"></div>
+            <div class="legend-item legend-color contribution-4"></div>
+        </div>
+        <span class="legend-item">较多</span>
+    </div>
+
+    <div class="row">
+        <div class="month-labels row" style="{{calendar.row_style}}">
+            <div class="weekday-label">&nbsp;</div>
+            {% for month in calendar.month_list %}
+            <span class="month-label month-{{month.cols}}-cols">{{month.label}}</span>
+            {% end %}
+        </div>
+
+        <div id="calendar-grid" class="calendar-grid">
+            {% for row in calendar.rows %}
+            <div class="row calendar-row" style="{{calendar.row_style}}">
+                <div class="weekday-label">{{row.label}}</div>
+                {% for cell in row.items %}
+                    <div class="calendar-day {{cell.css_class}}" data-tip="{{cell.tip}}" onmouseenter="showTooltip(event, this);" onmouseleave="hideTooltip()"></div>
+                {% end %}
+            </div>
+            {% end %}
+        </div>
+    </div>
+
+    <div id="tooltip-{{calendar.id}}" class="calendar-tooltip"></div>
+
+    {% if calendar.show_stats %}
+    <div class="stats">
+        <div class="stats-item" id="stats-total">总贡献: <span id="total-contributions" class="stats-value">0</span></div>
+        <div class="stats-item" id="stats-high">最长连续贡献: <span id="high-streak" class="stats-value">0</span> 天</div>
+        <div class="stats-item" id="stats-current">当前连续贡献: <span id="current-streak" class="stats-value">0</span> 天
+        </div>
+    </div>
+    {% end %}
+</div>
+
+<script>
+    // 显示提示信息
+    function showTooltip(event, target) {
+        const tooltip = document.getElementById("tooltip-{{calendar.id}}");
+        tooltip.textContent = $(target).attr("data-tip");
+
+        // 定位提示框，避免超出视口
+        const rect = event.target.getBoundingClientRect();
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+
+        let left = rect.left + window.scrollX + (rect.width - tooltipWidth) / 2;
+        let top = rect.top + window.scrollY - tooltipHeight - 8;
+
+        // 边界检查
+        if (left < 0) left = 0;
+        if (left + tooltipWidth > window.innerWidth) {
+            left = window.innerWidth - tooltipWidth;
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+        tooltip.style.opacity = '1';
+    }
+
+    // 隐藏提示信息
+    function hideTooltip() {
+        const tooltip = document.getElementById("tooltip-{{calendar.id}}");
+        tooltip.style.opacity = '0';
+    }
+</script>

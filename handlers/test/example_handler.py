@@ -1,27 +1,30 @@
 # encoding=utf-8
 # Created by xupingmao on 2024/09/15
 import xutils
+from datetime import date
 from xutils import Storage
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xmanager
 from xnote.core import xconfig
-from xnote.plugin.table_plugin import BaseTablePlugin
+from xnote.plugin.table_plugin import BaseTablePlugin, BasePlugin
 from xnote.plugin import DataTable, TableActionType, TabBox
 from xnote.plugin.table import InfoTable, InfoItem, ActionBar
+from xnote.plugin.calendar import ContributionCalendar
+from xutils import textutil
 
 
 def get_example_tab():
-    server_home = xconfig.WebConfig.server_home
     tab = TabBox(tab_key="name", title="案例:", css_class="btn-style")
-    tab.add_tab("文本示例", value="text", href=f"{server_home}/test/example?name=text")
-    tab.add_tab("按钮示例", value="btn", href=f"{server_home}/test/example?name=btn")
-    tab.add_tab("Tab示例", value="tab", href=f"{server_home}/test/example?name=tab")
-    tab.add_tab("Tag示例", value="tag", href=f"{server_home}/test/example?name=tag")
-    tab.add_tab("Dialog示例", value="dialog", href=f"{server_home}/test/example?name=dialog")
-    tab.add_tab("Dropdown示例", value="dropdown", href=f"{server_home}/test/example?name=dropdown")
-    tab.add_tab("Table示例", value="table", href=f"{server_home}/test/example/table?name=table")
-    tab.add_tab("Hammer示例", value="hammer", href=f"{server_home}/test/example?name=hammer")
+    tab.add_tab("文本示例", value="text", href=f"/test/example?name=text")
+    tab.add_tab("按钮示例", value="btn", href=f"/test/example?name=btn")
+    tab.add_tab("Tab示例", value="tab", href=f"/test/example?name=tab")
+    tab.add_tab("Tag示例", value="tag", href=f"/test/example?name=tag")
+    tab.add_tab("Dialog示例", value="dialog", href=f"/test/example?name=dialog")
+    tab.add_tab("Dropdown示例", value="dropdown", href=f"/test/example?name=dropdown")
+    tab.add_tab("Table示例", value="table", href=f"/test/example/table?name=table")
+    tab.add_tab("日历组件", value="calendar", href="/test/example/calendar?name=calendar")
+    tab.add_tab("Hammer示例", value="hammer", href=f"/test/example?name=hammer")
     return tab
 
 class TableExampleHandler(BaseTablePlugin):
@@ -196,7 +199,35 @@ class ExampleHandler:
         return self.GET()
 
 
+class CalendarExampleHandler(BasePlugin):
+    title = "日历组件"
+    rows = 0
+
+    HTML = """
+{% include test/component/example_nav_tab.html %}
+
+<div class="card">
+    {% raw calendar.render() %}
+</div>
+"""
+
+    def handle(self, input=""):
+        start = date(2020, 1, 1)
+        end = date(2020, 12, 31)
+        data = {
+            "2020-01-01": 5,
+            "2020-02-16": 1,
+            "2020-03-11": 10,
+            "2020-04-01": 20,
+        }
+        calendar = ContributionCalendar(start_date=start, end_date=end, data = data)
+        kw = Storage()
+        kw.example_tab = get_example_tab()
+        kw.calendar = calendar
+        self.writehtml(self.HTML, **kw)
+
 xurls = (
     r"/test/example", ExampleHandler,
     r"/test/example/table", TableExampleHandler,
+    r"/test/example/calendar", CalendarExampleHandler,
 )
