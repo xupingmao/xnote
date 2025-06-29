@@ -245,7 +245,7 @@ class FileSystemHandler:
             # 处理不了，返回所有的数据
             yield self.read_all(path, blocksize)
 
-    def read_all(self, path, blocksize):
+    def read_all(self, path, blocksize: int):
         total_size = os.stat(path).st_size
         web.header("Content-Length", total_size)
         with open(path, "rb") as fp:
@@ -255,7 +255,7 @@ class FileSystemHandler:
                 yield block
                 block = fp.read(blocksize)
             
-    def read_thumbnail(self, path, blocksize, version="v1"):
+    def read_thumbnail(self, path, blocksize: int, version="v1"):
         # TODO 限制进程数量
         # 在SAE环境中，pillow处理图片后无法释放内存，改成用子进程处理
         data = fs_image.create_thumbnail_data(path, version)

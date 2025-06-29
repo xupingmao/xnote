@@ -68,7 +68,7 @@ def do_create_thumbnail(path: str, version="v1", debug=False):
         with subprocess.Popen(args, stdout=subprocess.PIPE) as proc:
             assert proc.stdout != None
             buf = proc.stdout.read()
-            if buf.strip() == "":
+            if len(buf.strip()) == 0:
                 return None
             return base64.b64decode(buf.decode("utf-8"))
 

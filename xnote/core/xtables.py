@@ -263,7 +263,8 @@ def init_user_session():
     # 2025/06/29
     # 用户会话信息
     comment = "用户会话信息"
-    with create_default_table_manager("user_session", comment=comment) as manager:
+    table_name = "user_session"
+    with create_default_table_manager(table_name, comment=comment) as manager:
         manager.add_column("user_name", "varchar(64)", "")
         manager.add_column("user_id", "bigint", "")
         manager.add_column("sid", "varchar(50)", "")
@@ -276,6 +277,8 @@ def init_user_session():
         # 索引
         manager.add_index("sid", is_unique=True)
         manager.add_index("user_id")
+    
+    TableConfig.disable_binlog(table_name)
 
 def init_user_op_log_table():
     # 2023/07/15 用户操作日志，从kv迁移到sql
