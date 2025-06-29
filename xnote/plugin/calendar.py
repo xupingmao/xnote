@@ -1,3 +1,4 @@
+import typing
 from xnote.core import xtemplate
 from datetime import date, timedelta
 from xutils import textutil
@@ -8,9 +9,9 @@ class CalendarItem:
         self.count = count
         self.css_class = self.calc_css_class(count)
         if count == 0:
-            self.tip = "无事发生"
+            self.tip = f"{self.date} 无事发生"
         else:
-            self.tip = f"发生了{count}个事件"
+            self.tip = f"{self.date} 发生了{count}个事件"
 
 
     def calc_css_class(self, count=0):
@@ -27,7 +28,7 @@ class CalendarItem:
 class CalendarRow:
     def __init__(self, label: str):
         self.label = label
-        self.items = []
+        self.items = [] # type: list[CalendarItem]
 
 class MonthInfo:
     def __init__(self, label="", month = 1, cols = 1):
@@ -47,6 +48,12 @@ class MonthList:
         else:
             self.items[-1].cols += 1
 
+    def handle_rows(self, rows: typing.List[CalendarRow]):
+        # 以每周的最后一天的月份为准
+        for cell in rows[6].items:
+            self.add_month(cell.date.month)
+
+
 class ContributionStats:
     pass
 
@@ -55,7 +62,7 @@ class ContributionCalendar:
     show_stats = False
     stats = ContributionStats()
 
-    def __init__(self, start_date = date(2020, 1, 1), end_date = date(2020, 12, 31), data = {}):
+    def __init__(self, start_date = date(2020, 1, 1), end_date = date(2020, 12, 31), data:dict = {}):
         self.id = textutil.create_uuid()
         self.rows = [] # type: list[CalendarRow]
         month_list = MonthList()
@@ -69,19 +76,19 @@ class ContributionCalendar:
         max_count = 1000
         count = 0
         while date <= end_date and count < max_count:
-            if date.weekday() == 0:
-                month_list.add_month(date.month)
             row = rows[date.weekday()]
             count = data.get(str(date), 0)
             row.items.append(CalendarItem(date=date, count=count))
             date = date + timedelta(days=1)
             count += 1
+        
+        month_list.handle_rows(rows)
         self.rows = rows
         self.month_list = month_list.items
 
         # 星期占1列, 一个月最多占5列, 最后一个月可能不完整
         cols = len(rows[0].items) + 6
-        width = cols * 13 + 1
+        width = cols * 12 + 1
         self.row_style = f"min-width: {width}px"
 
 

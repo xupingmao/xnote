@@ -12,6 +12,7 @@
 import re
 import logging
 import xutils
+import typing
 import web.db
 from .table_config import TableConfig
 from xutils.functions import list_replace
@@ -261,7 +262,7 @@ class MySQLTableManager(BaseTableManager):
         assert len(self.mysql_database) > 0
         sql = "SELECT COUNT(*) as amount FROM information_schema.statistics WHERE table_schema=$database AND table_name = $table_name AND index_name = $index_name"
         first = self.db.query(sql, vars=dict(database=self.mysql_database, table_name=self.tablename, index_name=index_name)).first()
-        return first.amount > 0
+        return first.amount > 0 # type:ignore
     
 
 class SqliteTableManager(BaseTableManager):
@@ -299,7 +300,7 @@ class SqliteTableManager(BaseTableManager):
         columns = self.execute("pragma table_info('%s')" % self.tablename)
         new_names = []
         old_names = []
-        for column in columns:
+        for column in columns: # type:ignore
             name = column["name"]
             type = column["type"]
             old_names.append(name)
@@ -327,7 +328,7 @@ class SqliteTableManager(BaseTableManager):
     def desc_columns(self):
         columns = self.execute(f"pragma table_info('{self.tablename}')")
         result = []
-        for col in columns:
+        for col in columns: # type:ignore
             item = ColumnInfo()
             item.type = col["type"]
             item.name = col["name"]
@@ -439,7 +440,20 @@ class TableManagerFacade:
         return cls.table_dict
 
     def add_column(self, colname, coltype: str,
-                   default_value=None, not_null=True, comment=""):
+                   default_value=None, not_null=True, comment="", 
+                   old_names:typing.List[str]=[]):
+        """Check and add column, do nothing if column exists.
+        Args:
+            - colname: column name
+            - coltype: column type
+            - default_value: default value
+            - not_null: not null constriants
+            - comment: comment
+            - old_names: if old_names is passed, rename old column names to new column name.
+        """
+        for old_name in old_names:
+            self.rename_column(old_name=old_name, new_name=colname)
+
         coltype_lower = coltype.lower()
 
         if "varchar" in coltype_lower:
@@ -451,14 +465,14 @@ class TableManagerFacade:
         self.manager.add_column(colname, coltype, default_value, not_null, comment=comment)
 
     def rename_column(self, old_name: str, new_name: str):
-        """TODO: 重命名字段
+        """Rename column. do nothing if old_name not exists or new_name exists.
         """
         self.table_info.rename_column(old_name, new_name)
         self.manager.rename_column(old_name, new_name)
     
     def drop_column(self, colname, coltype,
                    default_value=None, not_null=True):
-        """只会打一个告警日志,不会实际删除"""
+        """只会打一个告警日志,不会实际删除,删除字段请使用rename_column或者重建表,更加安全"""
         logging.warning(f"drop column {colname}")
 
     def add_index(self, colname, is_unique=False, **kw):
