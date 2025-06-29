@@ -45,7 +45,8 @@ BUILTIN_USER_DICT = None
 NAME_LENGTH_MIN = 4
 PASSWORD_LEN_MIN = 6
 INVALID_NAMES = None
-SESSION_EXPIRE = 24 * 3600 * 7
+# 会话有效期
+SESSION_EXPIRE = 2 * 3600 * 7
 PRINT_DEBUG_LOG = False
 
 
@@ -415,7 +416,7 @@ def _get_users(force_reload=False):
     raise Exception("_get_users已经废弃")
 
 
-def _setcookie(key, value, expires=24*3600*2):
+def _setcookie(key, value, expires=SESSION_EXPIRE):
     # 默认保留两天,但是只要保持登录会自动刷新
     assert isinstance(key, str)
     assert isinstance(value, str)
