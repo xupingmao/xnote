@@ -136,7 +136,9 @@
 
     marked.setOptions({
         renderer: myRenderer,
-        highlight: highlight
+        highlight: highlight,
+        // 换行替换成<br>
+        breaks: true
     });
 
     marked.showMenu = true;
