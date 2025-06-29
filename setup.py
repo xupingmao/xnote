@@ -10,7 +10,7 @@ data_ext_list =  ["*.txt", "*.json", "*.properties", "*.js", "*.html", "*.css"]
 
 setuptools.setup(
     name = "xnote_web",
-    version = "0.2.2",
+    version = "0.2.3",
     author = "mark",
     author_email = "578749341@qq.com",
     description = "xnote-web框架",
