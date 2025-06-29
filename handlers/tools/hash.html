@@ -5,10 +5,11 @@
 {% end %}
 
 {% block body %}
+{% set hash_name = xutils.get_argument_str("tab") %}
 {% set hash_type = xutils.get_argument_str("type") %}
 
 <div class="card">
-    {% set title = hash_type %}
+    {% set title = hash_name %}
     {% include "common/title/base_title.html" %}
 </div>
 

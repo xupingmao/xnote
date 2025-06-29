@@ -18,15 +18,11 @@
 {% include tools/text_tab.html %}
 
 <div class="card">
-    <div class="col-md-6">
+    <div class="row">
         <textarea id="input" class="col-md-12" rows=10 placeholder="输入"></textarea>
     </div>
 
-    <div class="col-md-6">
-        <textarea id="output" class="col-md-12" rows=10 placeholder="输出"></textarea>
-    </div>
-
-    <div class="col-md-12">
+    <div class="col-md-12 top-offset-1">
         <button class="btn" onclick="hexToUtf8()">Hex->UTF8</button>
         <button class="btn" onclick="utf8ToHex()">UTF8->Hex</button>
         <button class="btn" onclick="numToHex()">Number->Hex</button>
@@ -38,6 +34,12 @@
 
     <div class="col-md-12">
         <p>hex格式省略0x, 比如'hello'写成16进制为<code>68656c6c6f</code></p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="row">
+        <textarea id="output" class="col-md-12" rows=10 placeholder="输出"></textarea>
     </div>
 </div>
 

@@ -16,10 +16,15 @@
 
 <div class="card">
     <textarea id="qrcode_input" class="col-md-12" rows=5></textarea>
-    <button class="btn" id="generate">生成</button>
+    <div class="row top-offset-1">
+        <button class="btn" id="generate">生成</button>
+    </div>
 </div>
-   
-<div id="qrcode" class="card hide"></div>
+
+<div class="card">
+    <h1 class="card-title">结果</h1>
+    <div id="qrcode"></div>
+</div>
 
     <script>
     $(function () {
