@@ -23,7 +23,6 @@ class TestUser(BaseTestCase):
     def test_login_page(self):
         self.check_OK("/login")
 
-
     def test_change_password(self):
         self.check_OK("/user/change_password")
 
@@ -33,4 +32,11 @@ class TestUser(BaseTestCase):
     def test_user_session(self):
         self.check_OK("/user/session")
 
-        
+    def test_refresh_session(self):
+        session_info = xauth.login_user_by_name("admin", "127.0.0.1")
+        new_session = xauth.refresh_user_session(session_info=session_info)
+        assert new_session.sid != session_info.sid
+
+        # test cache hit
+        new_session = xauth.refresh_user_session(session_info=session_info)
+        assert new_session.sid == session_info.sid

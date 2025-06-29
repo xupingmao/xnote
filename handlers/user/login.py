@@ -21,14 +21,15 @@ def get_real_ip():
 def save_login_info(name, error=None):
     if name != "":
         real_ip = get_real_ip()
-        detail = "登录IP: %s" % real_ip
+        detail = ""
         if error != None:
-            detail += ",登录失败:%s" % error
+            detail = f"登录失败:{error}"
+        else:
+            detail = "登录成功"
         user_id = xauth.UserDao.get_id_by_name(name)
         if user_id == 0:
             user_id = -1
             detail += f",login_name:{name}"
-        
         log = user_dao.UserOpLog()
         log.detail = detail
         log.type = user_dao.UserOpTypeEnum.login.value
@@ -66,7 +67,7 @@ class LoginHandler:
         return self.do_login_with_redirect(name,pswd,target)
 
 
-    def do_login_with_redirect(self,name, pswd, target=""):
+    def do_login_with_redirect(self,name:str, pswd:str, target=""):
         error = self.do_login_with_error(name, pswd)
         if error == "":
             if target == "":
@@ -74,7 +75,7 @@ class LoginHandler:
             raise web.found(target)
         return error
 
-    def do_login_with_error(self, name, pswd, count=0):
+    def do_login_with_error(self, name:str, pswd:str, count=0):
         name = name.strip()
         pswd = pswd.strip()
         count = _login_failed_count.get(name, 0)

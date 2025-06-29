@@ -176,8 +176,8 @@ class TableProxy(SQLDBInterface):
     def transaction(self):
         return self.db.transaction()
     
-    def iter(self):
-        for records in self.iter_batch():
+    def iter(self, where="", vars=None):
+        for records in self.iter_batch(where=where, vars=vars):
             for record in records:
                 yield record
 

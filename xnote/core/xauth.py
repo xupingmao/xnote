@@ -20,9 +20,10 @@ import warnings
 import time
 import datetime
 import typing
+import enum
 
 from xnote.core import xtables, xconfig, xmanager
-import enum
+from xnote.core import xnote_event
 from xutils import textutil, dbutil, fsutil, dateutil
 from xutils import Storage
 from xutils import logutil
@@ -30,9 +31,11 @@ from xutils import cacheutil
 from xutils import six
 from xutils.sqldb.utils import safe_str
 from xutils import webutil
+from xutils.base import BaseDataRecord
 
 session_cache = cacheutil.PrefixedCache(prefix="session:")
 user_cache = cacheutil.PrefixedCache(prefix="user:")
+refresh_cache = cacheutil.PrefixedCache(prefix="session_refresh:")
 
 DEFAULT_CACHE_EXPIRE = 60 * 5
 
@@ -137,13 +140,12 @@ class UserDO(xutils.Storage):
 
 class UserDao:
 
-    _db = None
+    @classmethod
+    def init(cls):
+        cls._db = xtables.get_user_table()
 
     @classmethod
     def _get_db(cls):
-        if cls._db != None:
-            return cls._db
-        cls._db = xtables.get_user_table()
         return cls._db
     
     @classmethod
@@ -235,15 +237,18 @@ class UserDao:
         user_cache.delete(user_info.name)
         #有问题  临时加try-catch
         try:
+            event = xnote_event.UserUpdateEvent()
+            event.user_id = user_info.user_id
+            event.user_name = user_info.name
             xutils.trace("UserUpdate", user_info)
             # 刷新完成之后再发送消息
-            xmanager.fire("user.update", dict(user_name=user_info.name))
+            xmanager.fire("user.update", event)
         except:
             pass
 
 
     @classmethod
-    def delete(cls, user_info):
+    def delete(cls, user_info: UserDO):
         db = get_user_db()
         db.update(where=dict(id=user_info.id), status=UserStatusEnum.deleted.value)
 
@@ -258,7 +263,7 @@ class UserDao:
 
     @classmethod
     def delete_by_id(cls, id=0):
-        get_user_db().update(where=dict(id=id), status=UserStatusEnum.deleted.value)
+        cls._db.update(where=dict(id=id), status=UserStatusEnum.deleted.value)
 
     @classmethod
     def batch_get_name_by_ids(cls, ids=[]):
@@ -275,7 +280,7 @@ class UserDao:
     def get_name_by_id(cls, user_id=0):
         if user_id == 0:
             return None
-        first = cls._get_db().select_first(what = "id, name", where = dict(id = user_id))
+        first = cls._db.select_first(what = "id, name", where = dict(id = user_id))
         if first != None:
             return first.get("name", "")
         return None
@@ -284,24 +289,39 @@ class UserModel(UserDao):
     pass
 
 
-class SessionInfo(Storage):
-
+class SessionInfo(BaseDataRecord):
     def __init__(self) -> None:
         self.user_name = ""
         self.user_id = 0
         self.sid = ""
         self.token = ""
-        self.expire_time = 0.0  # 时间
+        self.expire_time = xtables.DEFAULT_DATETIME
         self.login_ip = ""
-        self.login_time = 0.0  # 时间
+        self.login_time = xtables.DEFAULT_DATETIME
         self.mobile = ""
+
+    def to_save_dict(self):
+        result = dict(**self)
+        result.pop("id", None)
+        return result
+
+    @property
+    def is_expired(self):
+        now = datetime.datetime.now()
+        expire_time = dateutil.to_py_datetime(self.expire_time)
+        return expire_time < now
+
+    def need_refresh(self):
+        now = datetime.datetime.now()
+        login_time = dateutil.to_py_datetime(self.login_time)
+        return now - login_time > datetime.timedelta(days=1)
 
 
 class SessionDao:
 
     @classmethod
     def init(cls):
-        cls.db = dbutil.get_table("session")
+        cls.db = xtables.get_table_by_name("user_session")
 
     @classmethod
     def get_by_sid(cls, sid=""):
@@ -309,64 +329,58 @@ class SessionDao:
             return None
         record = session_cache.get(sid)
         if record == None:
-            record = cls.db.get_by_id(sid)
+            record = cls.db.select_first(where=dict(sid=sid))
             if record != None:
                 session_cache.put(sid, record, expire=DEFAULT_CACHE_EXPIRE)
 
         if record == None or session_cache.is_empty(record):
             return None
 
-        session_info = dict_to_session_info(record)
+        session_info = SessionInfo.from_dict(record)
         if session_info.user_name is None:
             delete_user_session_by_id(sid)
             return None
 
-        if time.time() > session_info.expire_time:
+        if session_info.is_expired:
             delete_user_session_by_id(sid)
             return None
 
         return session_info
 
     @classmethod
-    def create(cls, session_info):
+    def create(cls, session_info: SessionInfo):
         assert isinstance(session_info, SessionInfo)
-        new_id = cls.db.update_by_id(session_info.sid, session_info)
+        save_dict = session_info.to_save_dict()
+        new_id = cls.db.insert(**save_dict)
         session_cache.delete(session_info.sid)
         return new_id
 
     @classmethod
     def list_by_user_name(cls, user_name=""):
-        records = cls.db.list_by_index("user", index_value=user_name)
-        result = []
-        for item in records:
-            result.append(dict_to_session_info(item))
-        return result
+        user_id = UserDao.get_id_by_name(user_name)
+        records = cls.db.select(where=dict(user_id=user_id))
+        return SessionInfo.from_dict_list(records)
 
     @classmethod
     def delete_by_sid(cls, sid=""):
-        cls.db.delete_by_id(sid)
+        cls.db.delete(where=dict(sid=sid))
         session_cache.delete(sid)
 
 class SessionModel(SessionDao):
     pass
 
-def dict_to_session_info(dict_value):
-    info = SessionInfo()
-    info.update(**dict_value)
-    return info
-
-
 def _is_debug_enabled():
     return PRINT_DEBUG_LOG
 
 
-def log_debug(fmt, *args):
+def log_debug(fmt:str, *args):
     if PRINT_DEBUG_LOG:
         print("[xauth]", fmt.format(*args))
 
 
-def is_valid_username(name):
+def is_valid_username(name: str):
     """有效的用户名为字母+数字"""
+    assert INVALID_NAMES != None
     if name in INVALID_NAMES:
         return False
     if len(name) < NAME_LENGTH_MIN:
@@ -379,7 +393,7 @@ def is_valid_username(name):
     return True
 
 
-def validate_password_error(password):
+def validate_password_error(password: str):
     if len(password) < PASSWORD_LEN_MIN:
         return "密码不能少于6位"
     return None
@@ -401,9 +415,12 @@ def _get_users(force_reload=False):
     raise Exception("_get_users已经废弃")
 
 
-def _setcookie(key, value, expires=24*3600*30):
+def _setcookie(key, value, expires=24*3600*2):
+    # 默认保留两天,但是只要保持登录会自动刷新
     assert isinstance(key, str)
     assert isinstance(value, str)
+    if xconfig.IS_TEST:
+        return
     web.setcookie(key, value, expires) # type: ignore
 
 
@@ -441,16 +458,6 @@ def get_user(name):
 def get_user_by_name(user_name):
     return UserDao.get_by_name(user_name)
 
-
-def create_uuid():
-    import uuid
-    return uuid.uuid4().hex
-
-
-def is_session_expired(session_info):
-    return time.time() > session_info.expire_time
-
-
 def get_valid_session_by_id(sid):
     return SessionDao.get_by_sid(sid)
 
@@ -459,7 +466,7 @@ def list_user_session_detail(user_name):
     return SessionDao.list_by_user_name(user_name)
 
 
-def create_user_session(user_name, expires=SESSION_EXPIRE, login_ip=""):
+def create_user_session(user_name:str, expires=SESSION_EXPIRE, login_ip=""):
     # type: (str, int, str) -> SessionInfo
     user_detail = get_user_by_name(user_name)
     if user_detail is None:
@@ -471,7 +478,7 @@ def create_session_by_user(user_detail, expires=SESSION_EXPIRE, login_ip=""):
     assert isinstance(user_detail, UserDO)
     user_name = user_detail.name
 
-    session_id = create_uuid()
+    session_id = textutil.create_uuid()
     session_list = list_user_session_detail(user_name)
     session_list.sort(key=lambda x: x.expire_time)
 
@@ -486,9 +493,9 @@ def create_session_by_user(user_detail, expires=SESSION_EXPIRE, login_ip=""):
     session_info.user_id = user_detail.id
     session_info.sid = session_id
     session_info.token = user_detail.token
-    session_info.login_time = time.time()
+    session_info.login_time = dateutil.format_datetime()
     session_info.login_ip = login_ip
-    session_info.expire_time = time.time() + expires
+    session_info.expire_time = dateutil.format_datetime(time.time() + expires)
     if user_detail.mobile != None and user_detail.mobile != "":
         session_info.mobile = user_detail.mobile[0:3]+"********"
     else :
@@ -667,16 +674,15 @@ def current_user():
 def current_user_id():
     user = get_current_user()
     if user != None:
-        return user.id
+        return user.user_id
     return 0
 
 def get_current_name():
-    # type: () -> str|None
     """获取当前用户名"""
     user = get_current_user()
     if user is None:
         return None
-    return user.get("name")
+    return user.name
 
 
 def current_name():
@@ -702,18 +708,17 @@ def get_current_role():
     else:
         return "user"
 
-
 def current_role():
     return get_current_role()
 
 
-def get_md5_hex(pswd):
+def get_md5_hex(pswd: str):
     pswd_md5 = hashlib.md5()
     pswd_md5.update(pswd.encode("utf-8"))
     return pswd_md5.hexdigest()
 
 
-def encode_password(password, salt):
+def encode_password(password, salt: typing.Optional[str]):
     # 加上日期防止cookie泄露意义不大
     # 考虑使用session失效检测或者定时提醒更新密码
     # password = password + xutils.format_date()
@@ -770,7 +775,7 @@ def create_quick_user():
     raise Exception("create user name conflict")
 
 
-def create_user(name, password, fire_event=True, check_username=True):
+def create_user(name:str, password:str, fire_event=True, check_username=True):
     if name == "" or name == None:
         return webutil.FailedResult(code="PARAM_ERROR", message="name为空")
     if password == "" or password == None:
@@ -802,7 +807,7 @@ def _check_password(password):
         raise Exception(error)
 
 
-def update_user(name, update_dict):
+def update_user(name:str, update_dict:dict):
     if name == "" or name == None:
         return
     name = name.lower()
@@ -837,7 +842,7 @@ def has_login_by_cookie(name=None):
     session_id = cookies.get("sid")
     return has_login_by_sid(name, session_id)
 
-def has_login_by_sid(name, session_id):
+def has_login_by_sid(name: typing.Optional[str], session_id):
     session_info = get_valid_session_by_id(session_id)
 
     if session_info is None:
@@ -861,7 +866,29 @@ def has_login_by_sid(name, session_id):
     if name is None:
         return True
     else:
-        return name_in_cookie == name
+        has_login = (name_in_cookie == name)
+        if has_login and session_info.need_refresh():
+            refresh_user_session(session_info)
+        return has_login
+
+
+def refresh_user_session(session_info: SessionInfo):
+    cache_key = str(session_info.user_id)
+    cache = refresh_cache.get(cache_key)
+    if cache:
+        return session_info
+    
+    login_ip = webutil.get_real_ip()
+    new_session = login_user_by_name(session_info.user_name, login_ip=login_ip)
+    op_log = UserOpLog()
+    op_log.user_id = session_info.user_id
+    op_log.type = UserOpTypeEnum.refresh_session.value
+    op_log.ip = login_ip
+    op_log.detail = "刷新登录态成功"
+    UserOpLogDao.create_op_log(op_log)
+
+    refresh_cache.put(cache_key, 1, expire=60*5)
+    return new_session
 
 
 @logutil.timeit_deco(logargs=True, logret=True, switch_func=_is_debug_enabled)
@@ -928,7 +955,7 @@ def get_user_data_dir(user_name, mkdirs=False):
     return fpath
 
 
-def login_user_by_name(user_name, login_ip="", write_cookie=True):
+def login_user_by_name(user_name: str, login_ip="", write_cookie=True):
     assert user_name != None
     user_info = UserDao.get_by_name(user_name)
     if user_info == None:
@@ -978,6 +1005,9 @@ class UserOpTypeEnum(enum.Enum):
 
     # 管理员重置密码
     reset_password = "reset_password"
+
+    # 刷新会话
+    refresh_session = "refresh_session"
 
 class UserOpLog(Storage):
 
@@ -1037,10 +1067,10 @@ class UserOpLogDao:
         return cls.db.count(where=dict(user_id=user_id))
     
 def init():
-    global USER_TABLE
     global INVALID_NAMES
 
     INVALID_NAMES = xconfig.load_invalid_names()
+    UserDao.init()
     UserConfigDao.init()
     SessionDao.init()
     UserOpLogDao.init()

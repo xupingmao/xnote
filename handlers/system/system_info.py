@@ -15,6 +15,7 @@ from xutils import dateutil
 from xutils import fsutil
 from xutils import mem_util
 from xutils import Storage
+from xnote.plugin import LinkConfig
 
 try:
     import sqlite3
@@ -162,8 +163,13 @@ class InfoHandler:
             SystemInfoItem("浏览器信息", "查看", link = "/tools/browser_info"),
         ]
 
-        return xtemplate.render("system/page/system_info.html", items = items, 
-            runtime_id = xconfig.RUNTIME_ID)
+        kw = Storage()
+        kw.info_items = items
+        kw.runtime_id = xconfig.RUNTIME_ID
+        kw.title = "系统信息"
+        kw.parent_link = LinkConfig.app_index
+
+        return xtemplate.render("system/page/system_info.html", **kw)
     
 
     def render_python_lib(self):

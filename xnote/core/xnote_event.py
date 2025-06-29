@@ -54,3 +54,9 @@ class MessageUpdateEvent(Storage):
         self.msg_key = ""
         self.user_id = 0
         self.content = ""
+
+
+class UserUpdateEvent(Storage):
+    def __init__(self):
+        self.user_id = 0
+        self.user_name = ""

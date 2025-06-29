@@ -259,6 +259,24 @@ def init_user_table():
         manager.drop_column("privileges", "text", "")
 
 
+def init_user_session():
+    # 2025/06/29
+    # 用户会话信息
+    comment = "用户会话信息"
+    with create_default_table_manager("user_session", comment=comment) as manager:
+        manager.add_column("user_name", "varchar(64)", "")
+        manager.add_column("user_id", "bigint", "")
+        manager.add_column("sid", "varchar(50)", "")
+        manager.add_column("token", "varchar(50)", "")
+        manager.add_column("mobile", "varchar(32)", "")
+        manager.add_column("login_time", "datetime", default_value=DEFAULT_DATETIME)
+        manager.add_column("login_ip", "varchar(50)", "")
+        manager.add_column("expire_time", "datetime", default_value=DEFAULT_DATETIME)
+
+        # 索引
+        manager.add_index("sid", is_unique=True)
+        manager.add_index("user_id")
+
 def init_user_op_log_table():
     # 2023/07/15 用户操作日志，从kv迁移到sql
     with create_default_table_manager("user_op_log") as manager:
@@ -759,6 +777,7 @@ def init():
     init_dict_table()    
     init_record_table()
     init_user_table()
+    init_user_session()
     init_file_info()
     
     # 持久化任务表

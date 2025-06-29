@@ -361,7 +361,7 @@ class HandlerManager:
         elif hasattr(module, "handler"):
             self.resolve_module_old(module, modname)
 
-    def get_url_old(self, name):
+    def get_url_old(self, name: str):
         namelist = name.split(".")
         del namelist[0]
         return "/" + "/".join(namelist)

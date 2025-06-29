@@ -208,8 +208,8 @@ class MySQLTableManager(BaseTableManager):
 
     
     def desc_columns(self):
-        sql = "DESC `%s`" % self.tablename
-        columns = list(self.db.query(sql))
+        sql = f"DESC `{self.tablename}`"
+        columns = list(self.db.query(sql)) # type: ignore
         if self.debug:
             print("desc %s, columns=%s" % (self.tablename, columns))
         result = []
@@ -261,7 +261,8 @@ class MySQLTableManager(BaseTableManager):
     def is_index_exists(self, index_name=""):
         assert len(self.mysql_database) > 0
         sql = "SELECT COUNT(*) as amount FROM information_schema.statistics WHERE table_schema=$database AND table_name = $table_name AND index_name = $index_name"
-        first = self.db.query(sql, vars=dict(database=self.mysql_database, table_name=self.tablename, index_name=index_name)).first()
+        vars = dict(database=self.mysql_database, table_name=self.tablename, index_name=index_name)
+        first = self.db.query(sql, vars=vars).first() # type: ignore
         return first.amount > 0 # type:ignore
     
 

@@ -9,16 +9,11 @@
     {% include system/component/system_css.html %}
 
 <div class="card">
-    <div class="card-title">
-        <span>系统信息</span>
-        <div class="float-right">
-            {% include common/button/back_button.html %}
-        </div>
-    </div>
+    {% include common/title/base_title.html %}
 </div>
 
 <div class="card">
-    {% for item in items %}
+    {% for item in info_items %}
         <div class="settings-row">
             <div class="settings-key">{{item.name}}</div>
             <div class="settings-value">

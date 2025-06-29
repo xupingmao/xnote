@@ -158,6 +158,8 @@ def is_desktop_client(user_agent = None):
     return get_client_platform(user_agent) == "desktop"
 
 def get_real_ip():
+    if UtilityConfig.is_test:
+        return "127.0.0.1"
     x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for != None:
         return x_forwarded_for.split(",")[0]
