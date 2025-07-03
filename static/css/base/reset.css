@@ -152,6 +152,4 @@ table td {
     overflow-x: auto;
 }
 
-span {
-    line-height: 1.2; /* 浏览器默认值 */
-}
+/* line-height 默认是继承父级元素的行高计算方式，所以不能设置默认值 */

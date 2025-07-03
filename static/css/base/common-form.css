@@ -42,6 +42,7 @@
     width: 100px;
     display: block;
     float: left;
+    line-height: 29px;
 }
 
 .form-row input, .form-row select, .form-row textarea {

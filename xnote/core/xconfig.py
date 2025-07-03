@@ -359,6 +359,9 @@ class WebConfig:
     # 定时任务开关
     cron_enabled = True
 
+    # 插件的API等级
+    api_level = 2.9
+
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")

@@ -629,7 +629,7 @@ class _Statement(_Node):
 
 
 class _Expression(_Node):
-    def __init__(self, expression, line, raw=False):
+    def __init__(self, expression:str, line, raw=False):
         self.expression = expression
         self.line = line
         self.raw = raw
@@ -680,6 +680,13 @@ class _SetGlobal(_Node):
         name = name.strip()
         line = "globals()[%r] = %s" % (name, value)
         writer.write_line(line, self.line)
+
+class _Render(_Node):
+    def __init__(self, expression: str, line):
+        self.expr = _Expression(f"{expression}.render()", line, raw=True)
+
+    def generate(self, writer: "_CodeWriter"):
+        return self.expr.generate(writer)
 
 class _Module(_Expression):
     def __init__(self, expression, line):
@@ -949,7 +956,7 @@ def _parse(reader: _TemplateReader, template, in_block=None, in_loop=None):
 
         elif operator in ("extends", "include", "set", "import", "from",
                           "comment", "autoescape", "whitespace", "raw",
-                          "module", "init", "set-global"):
+                          "module", "init", "set-global", "render"):
             if operator == "comment":
                 continue
             if operator == "extends":
@@ -994,6 +1001,8 @@ def _parse(reader: _TemplateReader, template, in_block=None, in_loop=None):
                 if not suffix:
                     reader.raise_parse_error("set-global missing statement")
                 block = _SetGlobal(suffix, line)
+            elif operator == "render":
+                block = _Render(suffix, line)
             body.chunks.append(block)
             continue
 

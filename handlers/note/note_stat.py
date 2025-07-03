@@ -12,6 +12,7 @@ from xnote.service import SearchHistoryService, SearchHistoryType
 from xutils import dbutil, Storage
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable
+from xnote.plugin import LinkConfig
 
 
 class StatInfo(Storage):
@@ -27,11 +28,19 @@ class StatHandler(BaseTablePlugin):
     editable = False
     require_admin = False
     rows = 0
+    parent_link = LinkConfig.app_index
 
     BODY_HTML = """
+    {% init admin_table = None %}
     <div class="card">
-        {% include common/table/table.html %}
+        {% render user_table %}
     </div>
+    {% if admin_table %}
+        <div class="card">
+            <h3 class="card-title">后台统计数据</h3>
+            {% render admin_table %}
+        </div>
+    {% end %}
 """
     SIDEBAR_HTML = """
 {% include note/component/sidebar/group_list_sidebar.html %}
@@ -47,7 +56,6 @@ class StatHandler(BaseTablePlugin):
         note_count = note_stat.total
         comment_count = note_stat.comment_count
         search_count = SearchHistoryService.count(user_id=user_id, search_type=SearchHistoryType.default)
-        plugin_count = len(xconfig.PLUGINS_DICT)
 
         stat_list.append(StatInfo("我的笔记本", group_count))
         stat_list.append(StatInfo("我的笔记", note_count, f"{server_home}/note/group/year"))
@@ -56,22 +64,38 @@ class StatHandler(BaseTablePlugin):
         stat_list.append(StatInfo("我的记事", message_stat.log_count))
         stat_list.append(StatInfo("搜索记录", search_count, f"{server_home}/search/history"))
         stat_list.append(StatInfo("我的评论", comment_count))
-        if xauth.is_admin():
-            stat_list.append(StatInfo("系统插件", plugin_count))
+        
         return stat_list
+    
+    def create_table(self):
+        table = DataTable()
+        table.add_head("项目", width="60%", field="title", link_field="url")
+        table.add_head("数量", width="40%", field="amount")
+        return table
+    
+    def get_admin_table(self):
+        table = self.create_table()
+        plugin_count = len(xconfig.PLUGINS_DICT)
+        table.add_row(StatInfo("插件数量", plugin_count))
+        return table
+        
+    def get_user_table(self, user_name=""):
+        table = self.create_table()
+        for stat_info in self.get_stat_list(user_name):
+            table.add_row(stat_info)
+        return table
 
     def handle(self, input=""):
         user_name = xauth.current_name_str()
         xmanager.add_visit_log(user_name, "/note/stat")
         
-        table = DataTable()
-        table.add_head("项目", width="60%", field="title", link_field="url")
-        table.add_head("数量", width="40%", field="amount")
-
-        for stat_info in self.get_stat_list(user_name):
-            table.add_row(stat_info)
         
-        self.writehtml(self.BODY_HTML, table=table)
+        kw = Storage()
+        kw.user_table = self.get_user_table(user_name)
+        if xauth.is_admin():
+            kw.admin_table = self.get_admin_table()
+        
+        self.writehtml(self.BODY_HTML, **kw)
         self.write_aside(self.SIDEBAR_HTML)
 
 xurls = (

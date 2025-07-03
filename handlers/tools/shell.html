@@ -19,27 +19,20 @@
 
 {% block body_left %}
 
-
+{% from xnote.plugin import LinkConfig %}
 {% init code = "" %}
 {% init output = "" %}
 
 <div class="card">
-    <h3 class="card-title btn-line-height">
-        <span>Shell控制台</span>
-
-        <div class="float-right">
-            <button class="btn-default" onclick="javascript:history.back()">返回</button>
-        </div>
-    </h3>
-
+    {% init title = "Shell控制台" %}
+    {% include common/title/base_title.html %}
 </div>
 
 <div class="card">
     <div class="col-md-12">
         <textarea id="editor" class="col-md-12" rows="20" id="code">{{code}}</textarea>
-        <input type="button" class="margin-top-5" value="Run" id="run"/>
+        <input type="button" class="btn margin-top-5" value="运行" onclick="runShellCode()"/>
     </div>
-
 </div>
 
 <div class="col-md-12 card">
@@ -49,25 +42,26 @@
 
 <script type="text/javascript">
 $(function () {
-  var editor = CodeMirror.fromTextArea($("#editor")[0], {
-    lineNumbers: true,
-    mode: "text/x-sh"
-  });
-  editor.on("update", function (codeMirror, changeObj) {
-    console.log("update");
-    $("#editor").val(codeMirror.doc.getValue());
-})
-
-    $("#run").click(function() {
-        $("#output").val("");
-        var code = $("#editor").val();
-        $.post("/system/command", {type:"shell", command:code}, 
-            function (data, status) {
-                // alert(status);
-                $("#output").val(data);
-            })
-    })
+    var editor = CodeMirror.fromTextArea($("#editor")[0], {
+        lineNumbers: true,
+        mode: "text/x-sh"
+    });
+    editor.on("update", function (codeMirror, changeObj) {
+        console.log("update");
+        $("#editor").val(codeMirror.doc.getValue());
+    });
 });
+
+function runShellCode() {
+    $("#output").val("");
+    var code = $("#editor").val();
+    xnote.http.post("/system/command", {type:"shell", command:code}, 
+        function (data, status) {
+            // alert(status);
+            $("#output").val(data);
+        });
+};
+
 
 </script>
 

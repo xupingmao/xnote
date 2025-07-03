@@ -190,7 +190,7 @@ class TextParserBase(object):
             self.i = end
         return found
     
-    def read_till_target_char(self, char_list, start_index = None):
+    def read_include_target_char(self, char_list, start_index = None):
         """包含目标{char_list},读取后索引{i}位于any之后的字符"""
         if start_index is None:
             start_index = self.i
