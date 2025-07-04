@@ -85,3 +85,4 @@ start-cmd.bat
 /xnote_web.egg-info/*
 /dist/
 pypi_token.txt
+xnote-reboot.txt
