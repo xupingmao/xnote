@@ -127,6 +127,11 @@ def update_tag_amount_by_msg(msg_item: msg_dao.MessageDO):
             continue
         message = msg_dao.MsgTagInfoDao.get_or_create(msg_item.user_id, keyword)
         update_tag_amount(message, user_id, keyword)
+    
+    # 系统标签
+    for keyword in safe_list(msg_item.system_tags):
+        message = msg_dao.MsgTagInfoDao.get_or_create(msg_item.user_id, keyword)
+        update_tag_amount(message, user_id, keyword)
 
 class DeleteTagAjaxHandler:
 

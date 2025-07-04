@@ -20,8 +20,13 @@ from xutils import quote
 class SystemTagEnum(BaseEnum):
     todo = EnumItem("待办", "$todo$")
     important = EnumItem("重要", "$1$")
+    file = EnumItem("文件", "$file$")
+    link = EnumItem("链接", "$link$")
+    book = EnumItem("书籍", "$book$")
+    people = EnumItem("人物", "$people$")
+    phone = EnumItem("电话", "$phone$")
 
-    _enums = [todo, important]
+    _enums = [todo, important, file, link, book, people, phone]
 
     @staticmethod
     def is_sys_tag(tag_code=""):
@@ -76,6 +81,8 @@ class TagInfoDO(BaseDataRecord):
     @property
     def url(self):
         if self.tag_type == TagTypeEnum.msg_tag.int_value:
+            if SystemTagEnum.is_sys_tag(self.tag_code):
+                return f"/message/tag/list?tag=log.tags&sys_tag={self.tag_code}"
             return f"/message?tag=search&key={quote(self.tag_code)}"
         return f"/note/taginfo?tag_code={quote(self.tag_code)}"
     

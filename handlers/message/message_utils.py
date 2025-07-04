@@ -310,12 +310,10 @@ def filter_default_content(content):
         return content + " "
 
 
-def is_system_tag(tag):
-    assert isinstance(tag, str)
+def is_system_tag(tag: str):
     return tag.startswith("$")
 
-def is_standard_tag(tag):
-    assert isinstance(tag, str)
+def is_standard_tag(tag: str):
     return tag.startswith("#") and tag.endswith("#")
 
 def get_standard_tag_set(tags):
