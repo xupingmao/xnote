@@ -33,6 +33,7 @@ from handlers.note import dao_edit
 class FsMapRecord(BaseDataRecord):
     url = ""
     webpath = ""
+    content_type = ""
     version = 0
 
 class FsMapDao:
@@ -46,7 +47,10 @@ class FsMapDao:
             return FsMapRecord.from_dict_or_None(record)
 
         record = cls.fs_map_db.get(url)
-        return FsMapRecord.from_dict_or_None(record)
+        result = FsMapRecord.from_dict_or_None(record)
+        if result:
+            result.url = url
+        return result
     
     @classmethod
     def save(cls, record: FsMapRecord):
@@ -344,7 +348,8 @@ class MarkdownImageParser(TextParserBase):
         map_record = FsMapRecord()
         map_record.url = url
         map_record.webpath = webpath
-        map_record.version = 1
+        map_record.content_type = content_type
+        map_record.version = 2
         FsMapDao.save(map_record)
         return webpath
 
