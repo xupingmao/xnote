@@ -484,9 +484,11 @@ def rmdir(path, hard=False):
         return target
 
 
-def rmfile(path, hard=False):
+def remove_file(path, hard=False):
     # type: (str, bool) -> bool
-    """删除文件，默认软删除，移动到trash目录中，如果已经在trash目录或者硬删除，从磁盘中抹除
+    """删除文件，默认软删除，移动到trash目录中
+    - 如果已经在trash目录或者硬删除, 从磁盘中抹除
+    - 如果文件不存在, 不报错
     @param {str} path
     @param {bool} hard=False 是否硬删除
     @return {str} path in trash.
@@ -533,8 +535,8 @@ def rmfile(path, hard=False):
     return True
 
 
+rmfile = remove_file
 remove = rmfile
-remove_file = rmfile
 
 
 def copy(src, dest):
@@ -828,8 +830,14 @@ def load_ini_config(fpath):
         setattr(result.items, section, item)
     return result
 
+def get_safe_webpath(fpath: str):
+    if not is_parent_dir(FileUtilConfig.data_dir, fpath):
+        raise Exception(f"unsafe fpath: {fpath}")
+    rpath = get_relative_path(fpath, FileUtilConfig.data_dir)
+    return "/data/" + rpath
 
 def get_webpath(fpath: str):
+    """TODO 这个方法不安全, 待重构"""
     if is_parent_dir(FileUtilConfig.data_dir, fpath):
         rpath = get_relative_path(fpath, FileUtilConfig.data_dir)
         return "/data/" + rpath

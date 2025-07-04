@@ -61,8 +61,7 @@ def get_display_name(fpath, parent):
     return xutils.unquote(path)
 
 def get_webpath(fpath):
-    rpath = xutils.get_relative_path(fpath, xconfig.DATA_DIR)
-    return "/data/" + rpath
+    return fsutil.get_safe_webpath(fpath)
 
 
 def upload_link_by_month(year, month, delta=0):
@@ -132,7 +131,7 @@ def get_auto_file_path(filename: str):
     # 虽然概率极低，最好还是check下文件名是否重复
     if os.path.exists(fpath):
         raise Exception("文件名冲突,请重试")
-    return os.path.abspath(fpath), get_webpath(fpath)
+    return os.path.abspath(fpath)
 
 
 def get_upload_file_path(user, filename, upload_dir="files", rename_conflict=False):
@@ -236,7 +235,8 @@ class UploadHandler:
             dirs = os.path.dirname(filepath)
             fsutil.makedirs(dirs)
         else:
-            filepath, webpath = get_auto_file_path(filename)
+            filepath = get_auto_file_path(filename)
+            webpath = get_webpath(filepath)
         
         tmp_file = os.path.join(xconfig.FileConfig.tmp_dir, "upload." + filename)
         ctx.tmp_file = tmp_file

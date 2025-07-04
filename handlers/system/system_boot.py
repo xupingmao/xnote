@@ -7,20 +7,18 @@
 import webbrowser
 import threading
 import time
-
 import xutils
+
 from xnote.core import xmanager
 from xnote.core import xconfig
 
-if xconfig.get_global_config("system.ringtone"):
+if xconfig.WebConfig.ringtone:
     xutils.say("系统已经启动上线")
 
 
 # 启动打开浏览器选项
-if xconfig.get_global_config("system.open_browser"):
-    
+if xconfig.WebConfig.open_browser:
     class OpenThread(threading.Thread):
-
         def run(self):
             time.sleep(2)
             webbrowser.open("http://localhost:%s/" % xconfig.PORT)

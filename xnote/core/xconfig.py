@@ -83,8 +83,6 @@ port = PORT
 
 # 线程数
 MIN_THREADS = 20
-# 打开浏览器
-OPEN_IN_BROWSER = False
 # 启用数据库的缓存搜索
 USE_CACHE_SEARCH = False
 # 文件系统使用urlencode方式,适用于只支持ASCII字符的系统
@@ -362,6 +360,11 @@ class WebConfig:
     # 插件的API等级
     api_level = 2.9
 
+    # 启动是否播放语音
+    ringtone = False
+    # 启动是否打开浏览器
+    open_browser = False
+
     @classmethod
     def init(cls):
         cls.server_home = SystemConfig.get_str("server_home", "")
@@ -387,6 +390,9 @@ class WebConfig:
         cls.cron_enabled = SystemConfig.get_bool("cron_enabled", True)
         cls.force_https = SystemConfig.get_bool("force_https", False)
         cls.record_location = SystemConfig.get_bool("record_location", False)
+
+        cls.ringtone = SystemConfig.get_bool("ringtone", False)
+        cls.open_browser = SystemConfig.get_bool("open_browser", False)
     
     @classmethod
     def load_nav_list(cls):

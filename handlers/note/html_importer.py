@@ -10,6 +10,7 @@ from xnote.core import xauth
 from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.core import xnote_event
+from io import StringIO
 try:
     from bs4 import BeautifulSoup
 except ImportError:
@@ -21,12 +22,40 @@ from xutils import dbutil
 from xutils import fsutil
 from xutils import textutil
 from xutils import webutil
+from xutils import BaseDataRecord
 from xutils.text_parser import TextParserBase
 from . import dao
 from . import dao_edit
 from .dao_api import NoteDao
 from handlers.note.models import NoteDO
 from handlers.note import dao_edit
+
+class FsMapRecord(BaseDataRecord):
+    url = ""
+    webpath = ""
+    version = 0
+
+class FsMapDao:
+    fs_map_db = dbutil.get_hash_table("fs_map")
+
+    @classmethod
+    def get_by_url(cls, url: str):
+        hash_key = textutil.sha256_hex(url)
+        record = cls.fs_map_db.get(hash_key)
+        if record != None:
+            return FsMapRecord.from_dict_or_None(record)
+
+        record = cls.fs_map_db.get(url)
+        return FsMapRecord.from_dict_or_None(record)
+    
+    @classmethod
+    def save(cls, record: FsMapRecord):
+        assert record.url != ""
+        assert record.webpath != ""
+        assert record.version > 0
+        key = textutil.sha256_hex(record.url)
+        cls.fs_map_db.put(key, record)
+
 
 def get_addr(src, host):
     if src is None:
@@ -36,7 +65,7 @@ def get_addr(src, host):
     return src
 
 
-def readhttp(url):
+def readhttp(url: str):
     url = xutils.quote_unicode(url)
     return netutil.http_get(url)
 
@@ -93,8 +122,8 @@ def bs_get_text(result, element, blacklist=None):
         bs_get_text(result, child, blacklist)
 
 
-def clean_whitespace(text):
-    buf = xutils.StringIO()
+def clean_whitespace(text:str):
+    buf = StringIO()
     buf.seek(0)
     whitespace = " \t\r\n\b"
     prev = "\0"
@@ -106,14 +135,6 @@ def clean_whitespace(text):
         buf.write(c)
     buf.seek(0)
     return buf.read()
-
-
-def save_to_archive_dir(name, text=""):
-    dirname = os.path.join(xconfig.DATA_DIR, time.strftime("archive/%Y/%m/%d"))
-    xutils.makedirs(dirname)
-    path = os.path.join(dirname, "%s_%s.md" % (name, time.strftime("%H%M%S")))
-    xutils.savetofile(path, text)
-    print("save file %s" % path)
 
 
 def get_html_title(soup):
@@ -145,6 +166,7 @@ def import_from_html(html, baseurl=""):
     scripts = get_addr_list(scripts)
 
     return Storage(plain_text=plain_text,
+                   images=images,
                    title=title,
                    links=links,
                    csses=csses,
@@ -208,9 +230,6 @@ class ImportNoteHandler:
 
             result = import_from_html(html, address)
 
-            if name != "" and name != None:
-                save_to_archive_dir(name, html)
-
             kw = self.get_kw()
             kw.address = address
             kw.url = address
@@ -256,6 +275,7 @@ class MarkdownImageParser(TextParserBase):
             raise e
 
     def handle_image(self, url: str, user_name: str):
+        from handlers.fs import fs_upload
         # TODO 注意越权问题 host不能是内部地址
         # 1. host不能是内网地址
         # 2. 防止缓存数据过大拖垮服务器
@@ -285,20 +305,20 @@ class MarkdownImageParser(TextParserBase):
         
         if url.strip() == "":
             return url
-        
-        fs_map_db = dbutil.get_hash_table("fs_map")
-        map_info = fs_map_db.get(url)
-        if map_info != None and isinstance(map_info, dict):
+
+        map_info = FsMapDao.get_by_url(url)
+        if map_info != None:
             return map_info.webpath
 
-        upload_dir = xconfig.get_upload_dir(user_name)
-        date_dir = time.strftime("%Y/%m")
+       
         filename = textutil.create_uuid()
-        fpath = os.path.join(upload_dir, date_dir, filename)
-        dirname = os.path.join(upload_dir, date_dir)
-        xutils.makedirs(dirname)
-
-        resp_headers = self.download(url, fpath)
+        tmp_file = os.path.join(xconfig.FileConfig.tmp_dir, "upload." + filename)
+        try:
+            resp_headers = self.download(url, tmp_file)
+            fpath = fs_upload.get_auto_file_path(filename)
+            os.rename(tmp_file, fpath)
+        finally:
+            fsutil.remove_file(tmp_file, hard=True)
 
         event = xnote_event.FileUploadEvent()
         event.fpath = fpath
@@ -310,21 +330,22 @@ class MarkdownImageParser(TextParserBase):
             content_type = resp_headers["Content-Type"]
             ext = self.get_ext_by_content_type(content_type)
             if ext != None:
-                filename_new = filename + ext
-                os.rename(os.path.join(dirname, filename),
-                          os.path.join(dirname, filename_new))
-                filename = filename_new
+                new_fpath = fpath + ext
+                if fpath != new_fpath:
+                    os.rename(fpath, new_fpath)
+                    event = xnote_event.FileRenameEvent()
+                    event.fpath = new_fpath
+                    event.old_fpath = fpath
+                    event.user_name = user_name
+                    xmanager.fire("fs.rename", event)
+                    fpath = new_fpath
 
-                fpath = os.path.join(dirname, filename)
-                event = xnote_event.FileUploadEvent()
-                event.fpath = fpath
-                event.user_name = user_name
-                xmanager.fire("fs.upload", event)
-
-        webpath = "/data/files/%s/upload/%s/%s" % (
-            user_name, date_dir, filename)
-        fs_map_db.put(url, dict(webpath=webpath,
-                      content_type=content_type, version=1))
+        webpath = fsutil.get_safe_webpath(fpath=fpath)
+        map_record = FsMapRecord()
+        map_record.url = url
+        map_record.webpath = webpath
+        map_record.version = 1
+        FsMapDao.save(map_record)
         return webpath
 
     def parse(self, text, user_name):

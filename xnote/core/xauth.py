@@ -406,9 +406,6 @@ def _create_temp_user(user_name):
         create_user(user_name, "123456", fire_event=False,
                     check_username=False)
 
-    upload_dirname = xconfig.get_upload_dir(user_name)
-    fsutil.makedirs(upload_dirname)
-
 
 def _get_users(force_reload=False):
     """获取用户，内部接口"""

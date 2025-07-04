@@ -159,11 +159,11 @@ def is_desktop_client(user_agent = None):
 
 def get_real_ip():
     if UtilityConfig.is_test:
-        return "127.0.0.1"
+        return "0.0.0.0"
     x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for != None:
         return x_forwarded_for.split(",")[0]
-    return web.ctx.env.get("REMOTE_ADDR")
+    return web.ctx.env.get("REMOTE_ADDR", "0.0.0.0")
 
 def get_client_ip():
     return get_real_ip()

@@ -214,6 +214,8 @@ def do_http(method, url: str, headers, data = None, charset = 'utf-8'):
 def http_get_by_requests(url, charset = None):
     assert requests != None
     resp = requests.get(url, headers = {"User-Agent": USER_AGENT})
+    # 自动检测编码
+    resp.encoding = resp.apparent_encoding
     return resp.text
 
 def build_query_string(params, *, skip_empty_value=False):

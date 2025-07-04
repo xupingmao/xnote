@@ -687,7 +687,7 @@ def prefix_list(*args, **kw):
 
 
 def prefix_iter(prefix,  # type: str
-                filter_func=None,  # type: function|None
+                filter_func=None,  # type: typing.Callable|None
                 offset=0,  # type: int
                 limit=-1,  # type: int
                 reverse=False,
@@ -742,12 +742,12 @@ def prefix_iter(prefix,  # type: str
     result_size = 0
 
     if parse_json:
-        convert_value_func = convert_bytes_to_object_strict
+        convert_value_func = convert_bytes_to_object_strict # type: ignore
     else:
         def convert_value_func(bytes_value: bytes): 
             return bytes_value.decode("utf-8")
 
-    for key_bytes, value_bytes in iterator:
+    for key_bytes, value_bytes in iterator: # type: ignore
         key_bytes: bytes
         value_bytes: bytes
         if not key_bytes.startswith(prefix_bytes):

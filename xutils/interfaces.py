@@ -277,7 +277,7 @@ class SQLDBInterface:
     def update(self, where, vars=None, _test=False, **values):
         pass
 
-    def delete(self,  where, using=None, vars=None, _test=False):
+    def delete(self, where, using=None, vars=None, _test=False):
         pass
 
     def get_column_names(self):
