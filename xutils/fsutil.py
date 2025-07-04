@@ -327,7 +327,7 @@ def data_path(fname):
 ### 文件操作部分
 from xutils.base import makedirs
 
-def _try_readfile(path, mode="r", limit=-1, encoding='utf-8'):
+def _try_readfile(path, mode="r", limit=-1, encoding='utf-8') -> str:
     if PY2:
         with open(path) as fp:
             if limit > 0:
@@ -345,7 +345,7 @@ def _try_readfile(path, mode="r", limit=-1, encoding='utf-8'):
             return content
 
 
-def readfile(path, mode="r", limit=-1, raise_error=True):
+def readfile(path: str, mode="r", limit=-1, raise_error=True):
     """读取文件，尝试多种编码，编码别名参考标准库`Lib/encodings/aliases.py`
     * utf-8 是一种边长编码，兼容ASCII
     * GBK 是一种双字节编码，全称《汉字内码扩展规范》，兼容GB2312
@@ -493,7 +493,6 @@ def remove_file(path, hard=False):
     @param {bool} hard=False 是否硬删除
     @return {str} path in trash.
     """
-    trash_dir = FileUtilConfig.get_trash_dir()
 
     if not os.path.exists(path):
         # 尝试转换一下path
@@ -508,6 +507,8 @@ def remove_file(path, hard=False):
             # 软链接直接删除
             os.remove(path)
             return True
+
+        trash_dir = FileUtilConfig.get_trash_dir()
         dirname = os.path.dirname(path)
         dirname = os.path.abspath(dirname)
         dustbin = os.path.abspath(trash_dir)

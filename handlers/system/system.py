@@ -6,6 +6,8 @@ import os
 import web
 import xutils
 import subprocess
+import logging
+
 from . import system_config
 from xnote.core import xconfig
 from xnote.core import xtemplate
@@ -63,7 +65,7 @@ class AdminHandler:
 
 class ReloadHandler:
 
-    @xauth.login_required("admin")
+    @xauth.admin_required()
     def GET(self):
         # autoreload will load new handlers
         import web
@@ -74,7 +76,9 @@ class ReloadHandler:
             xmanager.restart()
             raise web.seeother("/system/index")
         else:
-            return dict(code="success", status="running")
+            result = webutil.SuccessResult()
+            result.status = "running"
+            return result
 
     def POST(self):
         return self.GET()
@@ -91,6 +95,9 @@ class PullCodeHandler:
         process = subprocess.Popen("git pull", shell=True, 
                                  stdout=subprocess.PIPE, 
                                  stderr=subprocess.PIPE)
+        # subprocess.Popen默认异步执行
+        # 等待5秒等进程执行完成
+        process.wait(timeout=5)
         if process.returncode not in (0, None):
             err_msg = f"returncode:({process.returncode})"
             if process.stderr != None:
@@ -99,6 +106,7 @@ class PullCodeHandler:
                 err_msg = process.stdout.read()
             return webutil.FailedResult(code="500", message=f"升级失败:{err_msg}")
         
+        logging.info("pull code success")
         return webutil.SuccessResult()
     
     def POST(self):

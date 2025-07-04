@@ -32,6 +32,7 @@ from xutils import Storage
 from xutils import dbutil
 from xutils import cacheutil, interfaces
 from xutils.sqldb import TableProxy
+from xutils import fsutil
 from . import xnote_code_builder
 from . import xnote_hooks, xnote_trace, xtables, xtables_kv, xconfig, xtemplate, xmanager, xauth
 import threading
@@ -58,8 +59,7 @@ class XnoteApp:
         return DummyLock()
     
     def delete_reboot_file(self):
-        if os.path.exists(xconfig.FileConfig.reboot_file):
-            os.remove(xconfig.FileConfig.reboot_file)
+        fsutil.remove_file(xconfig.FileConfig.reboot_file, hard=True)
     
     def init_app_internal(self, boot_config_kw=None):
         """初始化APP内部方法"""
@@ -336,12 +336,11 @@ def init_kv_db():
     xtables_kv.init()
 
 def init_autoreload():
-
     if not xconfig.WebConfig.fast_reload:
         logging.info("fast_reload is disabled")
         return
 
-    def register_watch(autoreload_thread):
+    def register_watch(autoreload_thread: AutoReloadThread):
         """监控文件夹及文件的变更"""
         autoreload_thread.watch_dir(xconfig.HANDLERS_DIR, recursive=True)
         autoreload_thread.watch_dir(xconfig.resolve_config_path("static/js"), recursive=True)

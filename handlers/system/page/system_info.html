@@ -52,7 +52,7 @@ $(function () {
     function checkSystemStatus() {
         xnote.http.internalPost("/system/reload?runtime_id={{runtime_id}}", function (resp) {
             console.log(resp)
-            if (resp.code == "success") {
+            if (resp.success) {
                 xnote.toast("重启成功!");
                 window.location.reload();                
             } else {
