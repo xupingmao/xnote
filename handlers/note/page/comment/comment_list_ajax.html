@@ -23,7 +23,7 @@
                 <a class="btn btn-default edit-comment-btn" data-id="{{comment.id}}">编辑</a>
             {% end %}
 
-            {% if comment.user == _user_name %}
+            {% if _user_id == comment.user_id %}
                 <div class="float-right">
                     <a class="btn btn-default delete-comment-btn" data-id="{{comment.id}}" data-content="{{comment.content}}">删除</a>
                 </div>

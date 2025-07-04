@@ -98,6 +98,7 @@ def list_comments_by_idx_list(idx_list: typing.List[CommentIndexDO], user_name="
         if item != None:
             item_do = CommentDO.from_dict(item)
             item_do.id = index.id
+            item_do.user_id = index.user_id
             result.append(item_do)
         else:
             item = CommentDO()
