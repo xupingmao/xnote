@@ -21,6 +21,7 @@ import time
 import datetime
 import typing
 import enum
+import logging
 
 from xnote.core import xtables, xconfig, xmanager
 from xnote.core import xnote_event
@@ -743,7 +744,7 @@ def get_user_cookie(name):
     else:
         sid = session_list[0].sid
 
-    return "sid=%s" % sid
+    return f"sid={sid}; skip_refresh=1"
 
 
 def gen_new_token():
@@ -838,9 +839,10 @@ def delete_user(name):
 def has_login_by_cookie(name=None):
     cookies = web.cookies()
     session_id = cookies.get("sid")
-    return has_login_by_sid(name, session_id)
+    skip_refresh = cookies.get("skip_refresh", "")
+    return has_login_by_sid(name, session_id, skip_refresh=skip_refresh)
 
-def has_login_by_sid(name: typing.Optional[str], session_id):
+def has_login_by_sid(name: typing.Optional[str], session_id, skip_refresh=""):
     session_info = get_valid_session_by_id(session_id)
 
     if session_info is None:
@@ -862,15 +864,19 @@ def has_login_by_sid(name: typing.Optional[str], session_id):
         return False
 
     if name is None:
-        check_and_refresh_session(session_info)
+        check_and_refresh_session(session_info, skip_refresh=skip_refresh)
         return True
     else:
         has_login = (name_in_cookie == name)
         if has_login:
-            check_and_refresh_session(session_info)
+            check_and_refresh_session(session_info, skip_refresh=skip_refresh)
         return has_login
 
-def check_and_refresh_session(session_info: SessionInfo):
+def check_and_refresh_session(session_info: SessionInfo, skip_refresh=""):
+    if skip_refresh == "1":
+        logging.info("skip refresh session")
+        return
+    
     if session_info.need_refresh():
         refresh_user_session(session_info)
 

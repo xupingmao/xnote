@@ -5,13 +5,13 @@
 """Description here"""
 
 import re
+import xutils
 try:
     from bs4 import BeautifulSoup
 except ImportError:
     bs4 = None
-import xutils
-import xtables
-import xconfig
+
+from xnote.core import xconfig, xtables, xauth
 from xutils import u, six
 
 """
@@ -20,11 +20,10 @@ from xutils import u, six
 
 class handler:
 
+    @xauth.admin_required()
     def GET(self):
-        city_code = xutils.get_argument("city_code", "101020100")
-        city_name = xutils.get_argument("city_name", "上海")
-        city_name = xutils.u(city_name)
-
+        city_code = xutils.get_argument_str("city_code", "101020100")
+        city_name = xutils.get_argument_str("city_name", "上海")
         message = None
 
         db = xtables.get_record_table()

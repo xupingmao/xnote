@@ -58,7 +58,7 @@ class KvTableV2:
         id = self._get_id_from_obj(obj)
         return int(id)
 
-    def _get_id_from_key(self, key):
+    def _get_id_from_key(self, key: str):
         return decode_str(key.rsplit(":", 1)[-1])
 
     def _get_int_id_from_key(self, key):
@@ -86,7 +86,7 @@ class KvTableV2:
         if not isinstance(obj, dict):
             raise Exception("key:%r, invalid obj:%r, expected dict" % (key, obj))
 
-    def _check_key(self, key):
+    def _check_key(self, key: str):
         if not key.startswith(self.prefix):
             raise Exception("invalid key:(%s), prefix:(%s)" %
                             (key, self.prefix))

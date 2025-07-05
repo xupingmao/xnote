@@ -587,7 +587,7 @@ def db_batch_get(key_list, default_value=None):
     batch_result = _leveldb.BatchGet(key_bytes_list)
     result = dict()
     for key in batch_result:
-        value = batch_result.get(key)
+        value = batch_result[key]
         object = convert_bytes_to_object(value)
         if object is None:
             object = default_value
@@ -661,7 +661,7 @@ def scan(key_from=None,
         key_from, key_to,
         include_value=True, reverse=reverse)
 
-    for key_bytes, value_bytes in iterator:
+    for key_bytes, value_bytes in iterator: # type: ignore
         key_bytes: bytes
         value_bytes: bytes
         key = key_bytes.decode("utf-8")

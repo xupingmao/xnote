@@ -323,6 +323,12 @@ class TypedDict:
     
     def __getitem__(self, key):
         return self.dict_[key]
+    
+    def __str__(self):
+        return str(self.dict_)
+    
+    def __repr__(self):
+        return repr(self.dict_)
 
 def dict_get_dict(dict_:dict, key:str) -> dict:
     value = dict_.get(key)

@@ -283,9 +283,7 @@ class KeyParser:
             return self.parts[index]
         return None
     
-    def substr(self, start=0, end=-1):
-        if end < 0:
-            end = len(self.parts) + end
+    def substr(self, start=0, end=None):
         parts = self.parts[start:end]
         return ":".join(parts)
     

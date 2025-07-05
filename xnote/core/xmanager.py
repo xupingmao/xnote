@@ -455,7 +455,7 @@ class CronTaskManager:
             return True
         return False
     
-    def request_url(self, task):
+    def request_url(self, task: CronJobRecord):
         url = task.url
         if url is None:
             url = ""
@@ -475,7 +475,7 @@ class CronTaskManager:
 
         return self.app.request(url, headers=dict(COOKIE=cookie))
 
-    def check_and_run(self, task, tm):
+    def check_and_run(self, task: CronJobRecord, tm):
         if self.match(task, tm):
             put_task_async(self.request_url, task)
             try:

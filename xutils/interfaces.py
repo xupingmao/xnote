@@ -48,6 +48,7 @@ class DBInterface:
         raise NotImplementedError("Get")
     
     def BatchGet(self, keys=[]):
+        # type: (list[bytes]) -> dict[bytes, bytes]
         """批量get操作"""
         result = dict()
         for key in keys:
