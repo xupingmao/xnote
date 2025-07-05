@@ -241,3 +241,10 @@ def load_plugin_by_context_and_class(context: PluginContext, main_class = None):
         xconfig.PLUGINS_DICT[plugin_name] = context
         context.build()
         return context
+
+def find_plugin(url: str) -> typing.Optional[PluginContext]:
+    return xconfig.PLUGINS_DICT.get(url)
+
+
+def iter_plugins() -> typing.Generator[PluginContext, None, None]:
+    yield from xconfig.PLUGINS_DICT.values()

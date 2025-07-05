@@ -28,6 +28,7 @@ from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, u, dbutil
 from collections.abc import Callable
+from xnote.core.models import CronJobRecord
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -537,19 +538,19 @@ class CronTaskManager:
             return False
 
     def do_load_tasks(self):
-        self.task_list = []
+        self.task_list = [] # type: list[CronJobRecord]
         self.load_system_cron_task()
-        tasks = dbutil.prefix_list("schedule")
+        tasks = CronJobRecord.from_dict_list(dbutil.prefix_list("schedule"))
         self.task_list += list(tasks)
 
     def load_system_cron_task(self):
         # 系统默认的任务
         task_config = xconfig.load_cron_config()
         for task in task_config:
-            self.task_list.append(Storage(**task))
+            self.task_list.append(CronJobRecord(**task))
         
         for task in self.ext_task_list:
-            self.task_list.append(Storage(**task))
+            self.task_list.append(CronJobRecord(**task))
 
     def save_tasks(self):
         self.do_load_tasks()
@@ -768,6 +769,7 @@ def init(app: web.application, vars, last_mapping=None):
 
 def instance():
     global _manager
+    assert _manager != None
     return _manager
 
 

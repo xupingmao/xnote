@@ -1,6 +1,8 @@
 # encoding=utf-8
 
+from xutils import dateutil
 from xutils import SearchResult
+from xutils import BaseDataRecord
 
 class SearchOption:
     def __init__(self) -> None:
@@ -46,3 +48,20 @@ class SearchContext:
 
     def join_as_files(self):
         return self.commands + self.tools + self.dicts + self.messages + self.notes + self.files
+
+
+class CronJobRecord(BaseDataRecord):
+    """定时任务记录"""
+    def __init__(self, **kw):
+        self.id = 0
+        self.name = ""
+        self.url = ""
+        self.ctime = dateutil.format_datetime()
+        self.mtime = dateutil.format_datetime()
+        self.tm_wday = ""
+        self.tm_hour = ""
+        self.tm_min = ""
+        self.message = ""
+        self.sound = 0
+        self.webpage = 0
+        self.update(kw)

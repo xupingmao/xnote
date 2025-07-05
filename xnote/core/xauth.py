@@ -862,13 +862,17 @@ def has_login_by_sid(name: typing.Optional[str], session_id):
         return False
 
     if name is None:
+        check_and_refresh_session(session_info)
         return True
     else:
         has_login = (name_in_cookie == name)
-        if has_login and session_info.need_refresh():
-            refresh_user_session(session_info)
+        if has_login:
+            check_and_refresh_session(session_info)
         return has_login
 
+def check_and_refresh_session(session_info: SessionInfo):
+    if session_info.need_refresh():
+        refresh_user_session(session_info)
 
 def refresh_user_session(session_info: SessionInfo):
     cache_key = str(session_info.user_id)

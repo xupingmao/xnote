@@ -12,7 +12,7 @@ from xnote.service import SearchHistoryService, SearchHistoryType
 from xutils import dbutil, Storage
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable
-from xnote.plugin import LinkConfig
+from xnote.plugin import LinkConfig, find_plugin, iter_plugins
 
 
 class StatInfo(Storage):
@@ -75,8 +75,15 @@ class StatHandler(BaseTablePlugin):
     
     def get_admin_table(self):
         table = self.create_table()
-        plugin_count = len(xconfig.PLUGINS_DICT)
-        table.add_row(StatInfo("插件数量", plugin_count))
+        plugin_count = 0
+        external_plugin_count = 0
+        for plugin in iter_plugins():
+            plugin_count += 1
+            if plugin.is_external:
+                external_plugin_count += 1
+
+        table.add_row(StatInfo("全部插件", plugin_count))
+        table.add_row(StatInfo("第三方插件", external_plugin_count))
         return table
         
     def get_user_table(self, user_name=""):

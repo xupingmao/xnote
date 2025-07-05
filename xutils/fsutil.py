@@ -21,6 +21,7 @@ try:
 except ImportError:
     ctypes = None
 
+from io import BufferedReader
 from xutils import six
 from xutils.imports import *
 from xutils.base import Storage
@@ -920,7 +921,7 @@ class FileHasher:
     def __init__(self, fpath, hash_type="md5"):
         self.fpath = fpath
         self.hash_type = hash_type
-        self.chunksize = 8096
+        self.chunksize = 8192 # 8K
 
     def get_hash_algo(self):
         hash_type = self.hash_type
@@ -930,6 +931,8 @@ class FileHasher:
             return hashlib.sha1()
         if hash_type == "sha256":
             return hashlib.sha256()
+        if hash_type == "sha512":
+            return hashlib.sha512()
         raise Exception(f"unsupported hash_type:{hash_type}")
     
     def get_hash_hex(self):
@@ -939,7 +942,7 @@ class FileHasher:
             return ""
         if os.path.isdir(fpath):
             return ""
-        def read_chunks(fh):
+        def read_chunks(fh: BufferedReader):
             fh.seek(0)
             chunk = fh.read(chunk_size)
             while chunk:

@@ -6,17 +6,18 @@
 import os
 import web
 import json
+import xutils
+
+
 from xutils import webutil
+from xutils import dbutil
 from xnote.core import xauth
 from xnote.core import xmanager
-import xutils
 from xnote.core import xconfig
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable, TableActionType, DataForm, FormRowType
 from xnote.plugin import LinkConfig
 from .dao_cron import CronJobDao
-
-from xutils import dbutil
 
 SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")
 
