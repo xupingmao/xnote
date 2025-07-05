@@ -4,9 +4,10 @@
 # @modified 2022/04/23 16:29:02
 # @filename format-code.py
 import os
+import sys
 
 def format_code(fpath):
-    os.system("python3 -m yapf -i %s" % fpath)
+    os.system(f"{sys.executable} -m yapf -i {fpath}")
 
 
 def main():

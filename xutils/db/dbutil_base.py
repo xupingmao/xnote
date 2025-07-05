@@ -109,7 +109,7 @@ class IndexTypeEnum(enum.Enum):
 
 get_write_lock = interfaces.get_write_lock
 
-def print_debug_info(fmt, *args):
+def print_debug_info(fmt: str, *args):
     new_args = [dateutil.format_time(), "[dbutil]"]
     new_args.append(fmt.format(*args))
     print(*new_args)
@@ -254,7 +254,7 @@ def check_write_state():
         raise Exception("read_only mode!")
 
 
-def check_before_write(key, check_table=True):
+def check_before_write(key: str, check_table=True):
     check_leveldb()
     check_write_state()
     check_not_empty(key, "[dbutil.put] key can not be None")
@@ -693,7 +693,9 @@ def prefix_iter(prefix,  # type: str
                 reverse=False,
                 include_key=False,
                 *,
-                key_from=None, key_to=None, map_func=None,
+                key_from=None, # type: str|None
+                key_to=None,   # type: str|None
+                map_func=None,
                 **kw):
     """通过前缀迭代查询
     :param {string} prefix: 遍历前缀
@@ -777,27 +779,32 @@ def prefix_iter(prefix,  # type: str
             break
         position += 1
 
+_always_true_filter = lambda x,y: True
 
-def count(key_from=None, key_to=None, filter_func=None):
+def count(key_from=None,  # type: str|None
+          key_to=None,    # type: str|None
+          filter_func=_always_true_filter # type: typing.Callable
+          ):
     check_leveldb()
 
+    key_from_bytes = b''
+    key_to_bytes = b'0xff'
+
     if key_from:
-        key_from = key_from.encode("utf-8")
-    else:
-        key_from = b''
+        key_from_bytes = key_from.encode("utf-8")
 
     if key_to:
-        key_to = key_to.encode("utf-8")
-    else:
-        key_to = b'0xff'
+        key_to_bytes = key_to.encode("utf-8")
         
-    iterator = _leveldb.RangeIter(key_from, key_to, include_value=True)
+    iterator = _leveldb.RangeIter(key_from_bytes, key_to_bytes, include_value=True)
 
     count = 0
-    for key, value in iterator:
-        key = key.decode("utf-8")
-        value = convert_bytes_to_object(value)
-        if filter_func(key, value):
+    for key, value in iterator: # type: ignore
+        key: bytes
+        value: bytes
+        key_str = key.decode("utf-8")
+        value_obj = convert_bytes_to_object(value)
+        if filter_func(key_str, value_obj):
             count += 1
     return count
 

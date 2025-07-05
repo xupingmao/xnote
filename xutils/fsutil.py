@@ -802,7 +802,13 @@ def load_prop_config(fpath):
 
 def load_json_config(fpath):
     text = readfile(fpath)
+    assert text != None
     return json.loads(text)
+
+def load_json_dict(fpath: str):
+    from xutils.functions import TypedDict
+    obj = load_json_config(fpath)
+    return TypedDict(obj)
 
 
 class IniConfigData:

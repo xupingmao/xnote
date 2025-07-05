@@ -196,7 +196,7 @@ def clean_value_before_update(value):
         _dict_del(value, "_id")
         _dict_del(value, "_key")
 
-def encode_id(id_value):
+def encode_id(id_value: int):
     """对ID进行编码, 第一位是标记位, 起步5位, 指数增长
     数据标志位的好处是可以和正常的数字一样处理
     >>> encode_id(100) > encode_id(50)
@@ -220,8 +220,8 @@ def encode_id(id_value):
     
     raise Exception("too large id value")
 
-def encode_id_v1(id_value):
-    """对ID进行编码
+def encode_id_v1(id_value: int):
+    """【废弃】对ID进行编码
     >>> encode_id(100) > encode_id(50)
     True
     >>> encode_id(10**5+10) > encode_id(20)
@@ -277,6 +277,17 @@ class KeyParser:
     def __init__(self, key=""):
         self.parts = key.split(":")
         self.index = 0
+
+    def get(self, index=0):
+        if index <= len(self.parts):
+            return self.parts[index]
+        return None
+    
+    def substr(self, start=0, end=-1):
+        if end < 0:
+            end = len(self.parts) + end
+        parts = self.parts[start:end]
+        return ":".join(parts)
     
     def pop_left(self):
         if self.index < len(self.parts):

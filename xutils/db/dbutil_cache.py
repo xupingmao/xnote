@@ -26,7 +26,7 @@ ttl的几种方案
 import time
 import random
 import logging
-from .dbutil_base import db_get, db_put, db_delete, register_table, prefix_iter
+from xutils.db.dbutil_base import db_get, db_put, db_delete, register_table, prefix_iter
 from xutils.db import encode
 from xutils import interfaces
 

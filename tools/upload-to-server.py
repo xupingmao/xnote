@@ -24,6 +24,7 @@ class Uploader:
     upload_server = "http://server:port"
     upload_path = "/fs_upload"
     upload_token = "your_token"
+    upload_domain = ""
 
     def init_db(self):
         table_name = "upload_record"
@@ -37,9 +38,10 @@ class Uploader:
     def __init__(self):
         self.init_db()
         self.db = xtables.get_table_by_name("upload_record")
-        config = xutils.load_json_config("./upload.config.json")
-        self.upload_domain = config.get("upload_server")
-        self.upload_token = config.get("upload_token")
+        config = xutils.load_json_dict("./upload.config.json")
+        assert isinstance(config, dict)
+        self.upload_domain = config.get_str("upload_server")
+        self.upload_token = config.get_str("upload_token")
         assert self.upload_domain != None
         assert self.upload_token != None
 

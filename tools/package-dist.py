@@ -13,6 +13,7 @@
 import zipfile
 import sys
 import os
+import fire
 
 print("__file__=", __file__)
 project_root = os.path.dirname(os.path.dirname(__file__))
@@ -23,7 +24,7 @@ sys.path.append(lib_dir)
 from xutils import fsutil
 
 
-def zip_append(zip, fpath, parent = "."):
+def zip_append(zip: zipfile.ZipFile, fpath, parent = "."):
     if os.path.isdir(fpath):
         # todo
         for child_name in os.listdir(fpath):
@@ -33,10 +34,7 @@ def zip_append(zip, fpath, parent = "."):
         relative_path = fsutil.get_relative_path(fpath, parent)
         zip.write(fpath, relative_path)
 
-def main(target = None):
-    if target == None:
-        target = "xnote.zip"
-    
+def main(target = "xnote.zip"):
     if os.path.exists(target):
         print("打包失败, 文件%s已经存在" % target, file = sys.stderr)
         sys.exit(1)
@@ -47,7 +45,7 @@ def main(target = None):
 
     zip = zipfile.ZipFile(target, "w")
     zip_append(zip, "config")
-    zip_append(zip, "core")
+    zip_append(zip, "xnote")
     zip_append(zip, "handlers")
     zip_append(zip, "lib")
     zip_append(zip, "static")
@@ -59,4 +57,5 @@ def main(target = None):
     zip.write("tools/android-main.py", "main.py")
     zip.close()
 
-main()
+if __name__ == "__main__":
+    fire.Fire(main)
