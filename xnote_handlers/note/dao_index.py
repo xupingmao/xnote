@@ -357,14 +357,21 @@ class NoteIndexDao:
     
     @classmethod
     def update_field(cls, meta_info: NoteMetaRecord):
+        now = dateutil.format_datetime()
         if meta_info.meta_key == "_create_date":
             time_obj = dateutil.parse_date_to_object(meta_info.meta_value)
             ctime = meta_info.meta_value + " " + time_obj.time_str
-            cls.db.update(where=dict(id=meta_info.note_id, creator_id=meta_info.user_id), ctime = ctime)
+            cls.db.update(
+                where=dict(id=meta_info.note_id, creator_id=meta_info.user_id), 
+                ctime = ctime, 
+                mtime = now)
             return
         
         if meta_info.meta_key == "_manual_short_desc":
-            cls.db.update(where=dict(id=meta_info.note_id, creator_id=meta_info.user_id), manual_short_desc = meta_info.meta_value)
+            cls.db.update(
+                where=dict(id=meta_info.note_id, creator_id=meta_info.user_id), 
+                manual_short_desc = meta_info.meta_value,
+                mtime = now)
             return
         
         raise Exception(f"invalid meta_key:{meta_info.meta_key}")

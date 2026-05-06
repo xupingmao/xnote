@@ -16,7 +16,7 @@ class TextContainer(BaseContainer):
         for _ in range(count):
             self.children.append(TextBr())
         
-    def add_nsbp(self, count=1):
+    def add_nbsp(self, count=1):
         for _ in range(count):
             self.children.append(TextNbsp())
     
