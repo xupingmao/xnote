@@ -501,7 +501,7 @@ class RemoveAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        path = xutils.get_argument("path")
+        path = xutils.get_argument_str("path")
         assert isinstance(path, str)
         user_name = xauth.current_name_str()
         user_id = xauth.current_user_id()

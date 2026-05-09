@@ -13,7 +13,9 @@ import time
 import logging
 import typing
 import xutils
+import os
 
+from typing import Optional
 from xnote.core import xconfig, xtables
 
 from xutils import Storage
@@ -22,6 +24,7 @@ from xutils import dbutil, six
 from xnote.service import DatabaseLockService
 
 from xutils.db.binlog import BinLog, FileLog, BinLogOpType, BinLogRecord
+from xutils.fsutil import delete_file
 from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .system_sync_proxy import HttpClient
@@ -30,6 +33,7 @@ from .models import FileIndexInfo, LeaderStat, FollowerInfo
 from xutils.mem_util import log_mem_info_deco
 from .dao import ClusterConfigDao
 from .system_sync_indexer import count_fs_index
+from xnote.core import xnote_event
 
 def filter_result(result, offset):
     data = []
@@ -268,16 +272,28 @@ class FileSyncer:
     def __init__(self, http_client = empty_http_client):
         self.http_client = http_client
 
-    def handle_file_binlog(self, key, value):
+    def handle_file_binlog(self, key: str, value: Optional[dict]):
         self.http_client.handle_token()
         if value == None:
             logging.warning("value is None, key=%s", key)
             return
         self.sync_file(value)
     
-    def sync_file(self, item):
+    def sync_file(self, item: dict):
         new_item = FileIndexInfo(**item)
         self.http_client.download_file(new_item)
+        
+    def handle_file_delete(self, item: dict):
+        file_info = FileIndexInfo(**item)
+        logging.info("删除文件: %s", file_info.webpath)
+        webpath = file_info.webpath
+        realpath = self.http_client.get_dest_path(webpath)
+        xutils.remove_file(realpath)
+        
+        event = xnote_event.FileDeleteEvent()
+        event.fpath = realpath
+        event.user_id = file_info.user_id or 1
+        event.fire()
 
 empty_file_syncer = FileSyncer()
 
@@ -482,8 +498,7 @@ class DBSyncer:
                 # TODO 重命名需要考虑删除原来的文件
                 self.file_syncer.handle_file_binlog(key, value)
             elif optype == "file_delete":
-                # TODO 考虑移动到一个删除文件夹下面
-                logging.info("【不处理】删除文件操作: %s", data)
+                self.file_syncer.handle_file_delete(value)
             elif optype in (BinLogOpType.sql_upsert, BinLogOpType.sql_delete):
                 self.handle_sql_binlog(data)
             else:

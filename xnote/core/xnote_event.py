@@ -65,7 +65,7 @@ class FileUploadEvent(BaseEvent):
         super().__init__()
         self.user_name = ""
         self.user_id = 0
-        self.fpath = ""
+        self.fpath = "" # real file path
         self.remark = ""
 
         self.add_field_desc("user_id", "int", not_empty=True)

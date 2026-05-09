@@ -471,8 +471,7 @@ def rmdir(path, hard=False):
         return target
 
 
-def remove_file(path, hard=False):
-    # type: (str, bool) -> bool
+def remove_file(path: str, hard=False) -> bool:
     """删除文件，默认软删除，移动到trash目录中
     - 如果已经在trash目录或者硬删除, 从磁盘中抹除
     - 如果文件不存在, 不报错
@@ -525,6 +524,7 @@ def remove_file(path, hard=False):
 
 rmfile = remove_file
 remove = rmfile
+delete_file = remove_file
 
 
 def copy(src: str, dest: str):

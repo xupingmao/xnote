@@ -196,6 +196,7 @@ def on_fs_upload(ctx: xnote_event.FileUploadEvent):
     log_data = FileLog()
     log_data.fpath = filepath
     log_data.user_name = ctx.user_name
+    log_data.user_id = ctx.user_id
     log_data.webpath = fsutil.get_webpath(filepath)
     stat = os.stat(filepath)
     log_data.mtime = stat.st_mtime
@@ -210,6 +211,7 @@ def on_fs_remove(ctx: xnote_event.FileDeleteEvent):
 
     log_data = FileLog()
     log_data.fpath = ctx.fpath
+    log_data.user_id = ctx.user_id
     log_data.user_name = ctx.user_name
     log_data.webpath = fsutil.get_webpath(ctx.fpath)
     _binlog.add_log(BinLogOpType.file_delete, ctx.fpath, log_data, record_value=True)
