@@ -57,8 +57,8 @@ class ListPluginHandler(BaseListPlugin):
             list_item.add_br()
             list_item.add_span(f"更新于 {now}", css_style="color:#999;")
             quote_text = xutils.quote(text)
-            list_item.right_div.add(EditFormActionLink(text="编辑", url=f"?action=edit&value={quote_text}"))
-            list_item.right_div.add(ConfirmActionLink(text="删除", url="?action=delete", msg=f"确认删除[{text}]吗?", css_class="danger"))
+            list_item.aside.add(EditFormActionLink(text="编辑", url=f"?action=edit&value={quote_text}"))
+            list_item.aside.add(ConfirmActionLink(text="删除", url="?action=delete", msg=f"确认删除[{text}]吗?", css_class="danger"))
             
             list_view.add_item(list_item)
 

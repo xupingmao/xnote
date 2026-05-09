@@ -58,36 +58,40 @@ class ListViewItem(TextContainer):
         self.show_chevron_right = show_chevron_right
         self.tags = []
         self.action_html = action_html
-        self.right_div = TextContainer(css_class="float-right")
+        self.aside = TextContainer(css_class="float-right")
         self._right_html = ""
-        
+
         if text:
             self.add_span(text=text)
 
         if href == "":
             self.is_link_outside = False
 
+    @property
+    def right_div(self):
+        return self.aside
+
     def render(self):
         self._children_html = "".join([item.render() for item in self.children])
         self._right_html = self._render_right_html()
-        
+
         if self.is_link_outside:
             return self._outside_code.generate(item = self)
         else:
             return self._intside_code.generate(item = self)
-        
+
     def _render_right_html(self):
-        right_div = Div(css_class=self.right_div.css_class, css_style=self.right_div.css_style)
+        right_div = Div(css_class=self.aside.css_class, css_style=self.aside.css_style)
         if self.badge_info:
             right_div.add(TextSpan(text=self.badge_info, css_class="badge-info"))
         if self.action_btn:
             right_div.add(self.action_btn)
         if self.action_html:
             right_div.add(RawHtml(self.action_html))
-        
-        for child in self.right_div.children:
+
+        for child in self.aside.children:
             right_div.add(child)
-        
+
         if self.show_chevron_right:
             right_div.add(RawHtml('<i class="fa fa-chevron-right"></i>'))
         return right_div.render()

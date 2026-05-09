@@ -23,7 +23,7 @@ def handle_template_tab(kw: Storage, default_content: str, template_type="log"):
                 template_tab.tab_default = str(template_list[0].template_id)
     
     edit_link = ActionLink(text="编辑模板", href=f"/message/template?template_type={template_type}", css_class="bold")
-    template_tab.right_div.add(edit_link)
+    template_tab.aside.add(edit_link)
     
     kw.message_template_tab = template_tab
     kw.template_type = template_type
