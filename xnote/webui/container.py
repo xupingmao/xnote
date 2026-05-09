@@ -24,10 +24,10 @@ class TextContainer(BaseContainer):
         self.children.append(TextItemSep())
 
 class ActionBar(TextContainer):
-    """表格动作栏"""
+    """操作栏"""
     def __init__(self, css_class="", css_style=""):
         super().__init__(css_class=f"action-bar {css_class}", css_style=css_style)
-        self.aside = TextContainer("float-right")
+        self.aside = TextContainer("row-aside")
         self.add(self.aside)
 
     @property
@@ -80,6 +80,13 @@ class Card(BaseContainer):
         super().__init__(css_class="card " + css_class)
 
 
+class RowPanel(TextContainer):
+    """行面板容器"""
+    def __init__(self, css_class="") -> None:
+        super().__init__(css_class="row " + css_class)
+        self.aside = TextContainer("row-aside")
+        self.add(self.aside)
+
 class RowDiv(BaseContainer):
     """行容器"""
     def __init__(self, css_class="") -> None:
@@ -89,6 +96,7 @@ class RowDiv(BaseContainer):
 
     @property
     def right_div(self):
+        # deprecated: 请使用 aside 替代
         return self.aside
 
 CardRow = RowDiv

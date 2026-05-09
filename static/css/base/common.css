@@ -857,7 +857,11 @@ li.menu-item:hover {
 .top-offset-2 {margin-top:10px;}
 .bottom-offset-1{margin-bottom:5px;}
 .bottom-offset-2{margin-bottom:10px;}
+
 .row{float: left;width: 100%;overflow: auto;}
+.row-aside {
+    float: right;
+}
 
 .padding-5, .padding-sm {
     padding: 5px;

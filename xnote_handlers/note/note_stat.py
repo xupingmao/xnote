@@ -5,13 +5,14 @@
 import xnote_handlers.message.dao as msg_dao
 import xnote_handlers.note.dao as note_dao
 
+from typing import List
 from xnote.core import xauth
 from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.service import SearchHistoryService, SearchHistoryType
 from xutils import dbutil, Storage
 from xnote.plugin.table_plugin import BaseTablePlugin
-from xnote.plugin import DataTable
+from xnote.webui import ListView, ListViewItem
 from xnote.plugin import LinkConfig, find_plugin, iter_plugins
 
 
@@ -47,9 +48,8 @@ class StatHandler(BaseTablePlugin):
 """
 
     def get_stat_list(self, user_name):
-        server_home = xconfig.WebConfig.server_home
         user_id = xauth.UserDao.get_id_by_name(user_name)
-        stat_list = [] # type: list[StatInfo]
+        stat_list: List[StatInfo] = []
         message_stat = msg_dao.get_message_stat(user_name)
         note_stat = note_dao.get_note_stat(user_name)
         group_count = note_stat.group_count
@@ -67,14 +67,11 @@ class StatHandler(BaseTablePlugin):
         
         return stat_list
     
-    def create_table(self):
-        table = DataTable()
-        table.add_head("项目", width="60%", field="title", link_field="url")
-        table.add_head("数量", width="40%", field="amount")
-        return table
+    def create_list(self):
+        return ListView()
     
     def get_admin_table(self):
-        table = self.create_table()
+        list_view = self.create_list()
         plugin_count = 0
         external_plugin_count = 0
         for plugin in iter_plugins():
@@ -82,15 +79,17 @@ class StatHandler(BaseTablePlugin):
             if plugin.is_external:
                 external_plugin_count += 1
 
-        table.add_row(StatInfo("全部插件", plugin_count, url="/plugin_list"))
-        table.add_row(StatInfo("第三方插件", external_plugin_count))
-        return table
+        list_view.add_item(ListViewItem(text="全部插件", href="/plugin_list", badge_info=str(plugin_count), show_chevron_right=True))
+        list_view.add_item(ListViewItem(text="第三方插件", href="/plugin_list", badge_info=str(external_plugin_count), show_chevron_right=True))
+        return list_view
         
     def get_user_table(self, user_name=""):
-        table = self.create_table()
+        list_view = self.create_list()
         for stat_info in self.get_stat_list(user_name):
-            table.add_row(stat_info)
-        return table
+            list_item = ListViewItem(text=stat_info.title, href=stat_info.url, badge_info=str(stat_info.amount))
+            list_item.show_chevron_right = True
+            list_view.add_item(list_item)
+        return list_view
 
     def handle(self, input=""):
         user_name = xauth.current_name_str()
