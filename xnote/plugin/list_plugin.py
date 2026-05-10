@@ -9,7 +9,6 @@ from xnote.plugin import DataForm, FormRowType, FormRowDateType
 from .base import BasePluginV2
 
 class BaseListPlugin(BasePluginV2):
-    rows = 0
 
     page_html = """
 {% include common/script/load_select2.html %}

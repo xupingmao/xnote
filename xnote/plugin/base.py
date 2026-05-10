@@ -4,6 +4,8 @@ from xnote.core import xconfig
 from xutils import quote
 
 class BasePluginV2(BasePlugin):
+    rows = 0
+    show_edit = False
     
     def add_component(self, component: BaseComponent):
         html = component.render()

@@ -17,10 +17,9 @@ from xutils import webutil
 from xnote.plugin import DataForm, FormRowType, FormRowDateType, DataTable, TableActionType, TableRowType
 from xnote.plugin.utils import ParamDict
 
-class BaseTablePlugin(BasePlugin):
-    rows = 0
-    show_edit = False
+from .base import BasePluginV2
 
+class BaseTablePlugin(BasePluginV2):
     # 增加引用,方便子类调用
     FormRowType = FormRowType
     FormRowDateType = FormRowDateType

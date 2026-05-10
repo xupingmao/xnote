@@ -15,6 +15,11 @@
     padding-right: 5px;
 }
 
+.padding-x-mid {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .padding-y-small {
     padding-top: 5px;
     padding-bottom: 5px;

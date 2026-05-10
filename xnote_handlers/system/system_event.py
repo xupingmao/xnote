@@ -9,10 +9,11 @@ from xnote.plugin.table_plugin import BaseTablePlugin
 from xutils import Storage
 from xnote.core import xtemplate
 from xnote.plugin import sidebar, LinkConfig
+from xnote.webui import ListView, ListViewItem, Card
 
 class EventHandler(BaseTablePlugin):
 
-    title = '系统事件'
+    title = '事件注册'
     title_style = "left"
     category = "admin"
     parent_link = LinkConfig.app_index
@@ -21,7 +22,7 @@ class EventHandler(BaseTablePlugin):
     require_admin = True
     show_pagenation = False
     NAV_HTML = """
-<div class="card btn-line-height">
+<div class="card btn-line-height padding-x-mid">
     <span>系统一共注册{{event_handler_count}}个事件处理器</span>
 </div>
 """
@@ -39,30 +40,27 @@ class EventHandler(BaseTablePlugin):
         for key in event_type_list:
             count += len(handlers[key])
         
-        table = self.create_table()
-        table.default_head_style.min_width = "100px"
-        table.add_head("事件名称", field="name", min_width="150px")
-        table.add_head("事件处理器", field="func_name", min_width="200px")
-        table.add_head("描述", field="description")
-        table.add_head("备注", field="remark")
-        table.add_head("是否异步", field="is_async")
-
+        list_view = ListView()
         for key in event_type_list:
             event_handlers = handlers[key]
             for handler in event_handlers:
-                row = dict()
-                row["name"] = key
-                row["func_name"] = handler.func_name
-                row["description"] = handler.description
-                row["is_async"] = handler.is_async
-                row["remark"] = handler.remark
-                table.add_row(row)
+                item_text = f"{key}"
+                list_item = ListViewItem()
+                list_item.add_span(item_text, css_class="bold")
+                list_item.add_br()
+                list_item.add_span(f"处理器: {handler.func_name}")
+                if handler.description:
+                    list_item.add_span(f" | 描述: {handler.description}")
+                if handler.remark:
+                    list_item.add_span(f" | 备注: {handler.remark}")
+                if handler.is_async:
+                    list_item.add_span(f" | 异步执行")
+                list_view.add(list_item)
 
-
-        kw = Storage()
-        kw.table = table
-        kw.event_handler_count = count
-        return self.response_page(**kw)
+        self.writehtml(self.NAV_HTML, event_handler_count=count)
+        card = Card()
+        card.add(list_view)
+        self.add_component(card)
     
 xurls = (
     r"/system/event", EventHandler
