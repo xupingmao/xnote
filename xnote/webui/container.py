@@ -87,13 +87,9 @@ class RowPanel(TextContainer):
         self.extra = TextContainer("row-extra")
         self.add(self.extra)
 
-class RowDiv(BaseContainer):
+class RowDiv(RowPanel):
     """行容器"""
-    def __init__(self, css_class="") -> None:
-        super().__init__(css_class="row " + css_class)
-        self.extra = Div()
-        self.add(self.extra)
-
+    
     @property
     def right_div(self):
         # deprecated: 请使用 extra 替代
