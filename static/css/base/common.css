@@ -859,7 +859,7 @@ li.menu-item:hover {
 .bottom-offset-2{margin-bottom:10px;}
 
 .row{float: left;width: 100%;overflow: auto;}
-.row-aside {
+.row-extra {
     float: right;
 }
 

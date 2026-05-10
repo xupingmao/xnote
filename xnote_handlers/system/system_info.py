@@ -169,12 +169,12 @@ class InfoHandler(BaseListPlugin):
 
         # 重启
         list_item = ListViewItem(text="重启系统")
-        list_item.right_div.add(ActionButton(text="重启", onclick="javascript:xnote.admin.onRestart()", css_class="btn danger"))
+        list_item.extra.add(ActionButton(text="重启", onclick="javascript:xnote.admin.onRestart()", css_class="btn danger"))
         list_view.add(list_item)
         
         # 升级
         list_item = ListViewItem(text="升级系统")
-        list_item.right_div.add(ActionButton(text="升级", onclick="javascript:xnote.admin.onUpgrade()", css_class="btn danger"))
+        list_item.extra.add(ActionButton(text="升级", onclick="javascript:xnote.admin.onUpgrade()", css_class="btn danger"))
         list_view.add(list_item)
         
         card = Card()

@@ -36,7 +36,7 @@ class TabBox(BaseComponent):
         {% end %}
     </div>
     
-    {% render aside %}
+    {% render extra %}
 </div>
 """
     _template_v1 = xtemplate.compile_template(_tab_html_v1, "xnote.plugin.tab_v1")
@@ -51,11 +51,11 @@ class TabBox(BaseComponent):
         self.block_title = BlockTitle()
         self._title_style = ""
         self._tabs_style = ""
-        self.aside = BaseContainer("float-right")
+        self.extra = BaseContainer("float-right")
 
     @property
     def right_div(self):
-        return self.aside
+        return self.extra
     
     def add_item(self, title="", value="", href="", css_class="", onclick="", item_id=""):
         item = TabItem(title=title, value=value, href=href, css_class=css_class, onclick=onclick, item_id=item_id)
@@ -90,7 +90,7 @@ class TabBox(BaseComponent):
             block_title=self.block_title,
             title_style=self._title_style,
             tabs_style=self._tabs_style,
-            aside=self.aside)
+            extra=self.extra)
 
 
 class TabItem:

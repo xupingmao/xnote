@@ -159,7 +159,7 @@ class DictHandler(BaseListPlugin):
             edit_url = f"?action=edit&dict_type={item.dict_type}&dict_id={item.dict_id}"
             
             if self.show_edit_action():
-                list_item.aside.add(EditFormActionLink(text="编辑", url=edit_url))
+                list_item.extra.add(EditFormActionLink(text="编辑", url=edit_url))
             
             list_view.add(list_item)
 

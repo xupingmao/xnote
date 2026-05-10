@@ -25,7 +25,7 @@ class ListViewItem(TextContainer):
         {% raw item._children_html %}
         {% for tag in item.tags %} {% render tag %} {% end %}
         
-        {% raw item._aside_html %}
+        {% raw item._extra_html %}
     </a>
 </div>
 """
@@ -38,7 +38,7 @@ class ListViewItem(TextContainer):
     {% raw item._children_html %}
     {% for tag in item.tags %} {% render tag %} {% end %}
     
-    {% raw item._aside_html %}
+    {% raw item._extra_html %}
 </div>
 """
 
@@ -58,8 +58,8 @@ class ListViewItem(TextContainer):
         self.show_chevron_right = show_chevron_right
         self.tags = []
         self.action_html = action_html
-        self.aside = TextContainer(css_class="float-right")
-        self._aside_html = ""
+        self.extra = TextContainer(css_class="float-right")
+        self._extra_html = ""
 
         if text:
             self.add_span(text=text)
@@ -69,33 +69,33 @@ class ListViewItem(TextContainer):
 
     @property
     def right_div(self):
-        # deprecated: 请使用 aside 替代
-        return self.aside
+        # deprecated: 请使用 extra 替代
+        return self.extra
 
     def render(self):
         self._children_html = "".join([item.render() for item in self.children])
-        self._aside_html = self._render_aside_html()
+        self._extra_html = self._render_extra_html()
 
         if self.is_link_outside:
             return self._outside_code.generate(item = self)
         else:
             return self._intside_code.generate(item = self)
 
-    def _render_aside_html(self):
-        new_aside = Div(css_class=self.aside.css_class, css_style=self.aside.css_style)
+    def _render_extra_html(self):
+        new_extra = Div(css_class=self.extra.css_class, css_style=self.extra.css_style)
         if self.badge_info:
-            new_aside.add(TextSpan(text=self.badge_info, css_class="badge-info"))
+            new_extra.add(TextSpan(text=self.badge_info, css_class="badge-info"))
         if self.action_btn:
-            new_aside.add(self.action_btn)
+            new_extra.add(self.action_btn)
         if self.action_html:
-            new_aside.add(RawHtml(self.action_html))
+            new_extra.add(RawHtml(self.action_html))
 
-        for child in self.aside.children:
-            new_aside.add(child)
+        for child in self.extra.children:
+            new_extra.add(child)
 
         if self.show_chevron_right:
-            new_aside.add(RawHtml(' <i class="fa fa-chevron-right"></i>'))
-        return new_aside.render()
+            new_extra.add(RawHtml(' <i class="fa fa-chevron-right"></i>'))
+        return new_extra.render()
 
 class _ListViewOption:
 

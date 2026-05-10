@@ -27,15 +27,15 @@ class ActionBar(TextContainer):
     """操作栏"""
     def __init__(self, css_class="", css_style=""):
         super().__init__(css_class=f"action-bar {css_class}", css_style=css_style)
-        self.aside = TextContainer("row-aside")
-        self.add(self.aside)
+        self.extra = TextContainer("row-extra")
+        self.add(self.extra)
 
     @property
     def right_div(self):
-        return self.aside
+        return self.extra
 
     def is_empty(self):
-        return len(self.aside.children) == 0 and len(self.children) == 1
+        return len(self.extra.children) == 0 and len(self.children) == 1
     
     @property
     def visible(self):
@@ -43,12 +43,12 @@ class ActionBar(TextContainer):
 
     def _add(self, item: BaseComponent, float_right=False):
         if float_right:
-            self.aside.add(item)
+            self.extra.add(item)
         else:
             self.add(item)
 
     def add_right(self, item: BaseComponent):
-        self.aside.add(item)
+        self.extra.add(item)
 
     def add_span(self, text="", css_class="", float_right=False, id=""):
         span = TextSpan(text=text, css_class=css_class, id=id)
@@ -84,19 +84,19 @@ class RowPanel(TextContainer):
     """行面板容器"""
     def __init__(self, css_class="") -> None:
         super().__init__(css_class="row " + css_class)
-        self.aside = TextContainer("row-aside")
-        self.add(self.aside)
+        self.extra = TextContainer("row-extra")
+        self.add(self.extra)
 
 class RowDiv(BaseContainer):
     """行容器"""
     def __init__(self, css_class="") -> None:
         super().__init__(css_class="row " + css_class)
-        self.aside = Div()
-        self.add(self.aside)
+        self.extra = Div()
+        self.add(self.extra)
 
     @property
     def right_div(self):
-        # deprecated: 请使用 aside 替代
-        return self.aside
+        # deprecated: 请使用 extra 替代
+        return self.extra
 
 CardRow = RowDiv

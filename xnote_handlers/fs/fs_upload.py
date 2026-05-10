@@ -298,14 +298,14 @@ def create_list_card_from_files(files: List[FileInfo]):
         data_dict = dict(src=get_file_download_link(item.realpath))
         list_item = ListViewItem()
         list_item.add(HtmlImage(src=thumbnail_url, width="100", css_class="fs-thumbnail x-photo", data_dict=data_dict))
-        list_item.aside.css_style = "float:right; width: calc(100% - 100px); padding:5px"
-        list_item.aside.add_span(item.display_name)
-        list_item.aside.add_br()
-        list_item.aside.add_span(f"文件大小: {fsize}", css_class="gray")
-        list_item.aside.add_br()
-        list_item.aside.add_link(text="下载", href=download_url, is_bracketed=True)
-        list_item.aside.add(EditFormActionLink(text="详细信息", url=view_url))
-        list_item.aside.add(ConfirmActionLink(text="删除", url=delete_url, msg=delete_msg, css_class="red"))
+        list_item.extra.css_style = "float:right; width: calc(100% - 100px); padding:5px"
+        list_item.extra.add_span(item.display_name)
+        list_item.extra.add_br()
+        list_item.extra.add_span(f"文件大小: {fsize}", css_class="gray")
+        list_item.extra.add_br()
+        list_item.extra.add_link(text="下载", href=download_url, is_bracketed=True)
+        list_item.extra.add(EditFormActionLink(text="详细信息", url=view_url))
+        list_item.extra.add(ConfirmActionLink(text="删除", url=delete_url, msg=delete_msg, css_class="red"))
         
         list_view.add(list_item)
     
