@@ -2,6 +2,7 @@
 from xnote.plugin import TextLink
 from xnote.plugin import TabBox
 from .aside_config import AsideConfig
+from xnote.core.xtemplate import LOAD_TIME
 
 class LinkConfig:
     app_index = TextLink(text="应用", href="/system/index")
@@ -25,6 +26,8 @@ class LinkConfig:
     create_note = TextLink(text="新建笔记", href="/note/create")
     calendar = TextLink(text="今天", href="/note/calendar")
     user_settings = TextLink(text="用户设置", href="/user/info")
+    driver_info_sql = TextLink(text="数据库驱动", href="/system/db/driver_info?type=sql")
+    driver_info_kv = TextLink(text="KV数据库驱动", href="/system/db/driver_info")
 
 
 class TabConfig:
@@ -57,3 +60,7 @@ class TabConfig:
     img_tab.add_item(title="图片拆分", value="split", href="/tools/img_split?tab=split")
     img_tab.add_item(title="图片灰度", value="gray", href="/tools/img_gray?tab=gray")
     
+
+class ScriptConfig:
+    
+    admin_js = f"/_static/js/admin.js?ts={LOAD_TIME}"

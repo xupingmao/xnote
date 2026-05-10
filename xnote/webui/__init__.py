@@ -1,7 +1,7 @@
 from .table import *
 from .form import *
 from .base import Div
-from .component import LinkConfig, TagSpan, BaseContainer, EditFormActionLink, TextTag
+from .component import LinkConfig, TagSpan, BaseContainer, EditFormActionLink, TextTag, Textarea
 from .component import EditFormButton, ActionButton, ConfirmButton
 from .component import RawHtml
 from .tab import TabBox, TabTable

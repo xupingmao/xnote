@@ -13,6 +13,7 @@ from xnote.webui.base import BaseComponent, BaseContainer
 from xnote.core import xtemplate
 from xutils import escape_html
 from .link import TextLink, EditFormActionLink
+from .utils import build_attrs
 
 class RawHtml(BaseComponent):
     def __init__(self, html: str) -> None:
@@ -46,11 +47,34 @@ class Input(BaseComponent):
         return self._template.generate(info = self)
 
 
-class Textarea:
-    def __init__(self, label, name, value):
-        self.label = label
+class Textarea(BaseComponent):
+    def __init__(self, value: str, name = "", placeholder = "", rows = "", cols = "", css_class="", label = ""):
         self.name = name
         self.value = value
+        self.placeholder = placeholder
+        # TODO 待实现
+        self.label = label
+        self.rows = rows
+        self.cols = cols
+        self.css_class = css_class
+    
+    def render(self):
+        attr_dict = {}
+        if self.name:
+            attr_dict["name"] = self.name
+        if self.placeholder:
+            attr_dict["placeholder"] = self.placeholder
+        if self.rows:
+            attr_dict["rows"] = self.rows
+        if self.cols:
+            attr_dict["cols"] = self.cols
+        if self.css_class:
+            attr_dict["class"] = self.css_class
+            
+        attrs = build_attrs(attr_dict)
+        value = escape_html(self.value, escape_blank=False)
+        return f"""<textarea {attrs}>{value}</textarea>"""
+    
 
 
 class TabLink:

@@ -11,6 +11,8 @@
 - delete_user       删除用户
 """
 
+from typing import Optional
+
 import os
 import hashlib
 import copy
@@ -62,6 +64,11 @@ def get_user_db():
 class UserStatusEnum(enum.Enum):
     normal = 0
     deleted = -1
+    
+class UserRoleEnum(enum.Enum):
+    admin = "admin"
+    user = "user"
+    guest = "guest"
 
 class UserDO(BaseDataRecord):
 
@@ -706,21 +713,26 @@ def current_name_str() -> str:
     assert isinstance(name, str)
     return name
 
-
-def get_current_role():
+def get_current_role_enum() -> UserRoleEnum:
     """获取当前用户的角色"""
     user = get_current_user()
     if user is None:
-        return None
+        # 兼容旧逻辑
+        return UserRoleEnum.guest
     name = user.name
     if name == "admin":
-        return "admin"
+        return UserRoleEnum.admin
     else:
-        return "user"
+        return UserRoleEnum.user
 
-def current_role():
-    return get_current_role()
+def get_current_role() -> Optional[str]:
+    """获取当前用户的角色"""
+    role = get_current_role_enum()
+    if role == UserRoleEnum.guest:
+        return None
+    return role.value
 
+current_role = get_current_role
 
 def get_md5_hex(pswd: str):
     pswd_md5 = hashlib.md5()

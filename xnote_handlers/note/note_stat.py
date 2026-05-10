@@ -60,7 +60,7 @@ class StatHandler(BaseTablePlugin):
         stat_list.append(StatInfo("我的笔记本", group_count, url="/note/group_list"))
         stat_list.append(StatInfo("我的笔记", note_count, url="/note/group/year"))
         stat_list.append(StatInfo("我的待办", message_stat.task_count, url="/message/task"))
-        stat_list.append(StatInfo("完成待办", message_stat.done_count, url="/message/task/done"))
+        stat_list.append(StatInfo("已完成任务", message_stat.done_count, url="/message/task/done"))
         stat_list.append(StatInfo("我的记事", message_stat.log_count, url="/message"))
         stat_list.append(StatInfo("搜索记录", search_count, url="/search/history"))
         stat_list.append(StatInfo("我的评论", comment_count, url="/note/comment/mine"))

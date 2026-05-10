@@ -11,7 +11,7 @@
 /**
  * @typedef {import('./xnote-ui/docs.js')}
  */
-var AdminView = {}
+var AdminView = {};
 xnote.admin = AdminView;
 
 // 查看主数据
@@ -41,5 +41,54 @@ AdminView.installPythonLib = function (target) {
                 xnote.alert("安装失败:" + resp.message);
             }
         });
+    });
+};
+
+AdminView.doRestart = function () {
+    xnote.toast("重启中，请等待2-5分钟...");
+    var runtimeId = $("input[name=runtimeId]").val();
+    var checkInterval = 500;
+
+    var checkSystemStatus = function() {
+        xnote.http.internalPost("/system/reload?runtime_id=" + runtimeId, function (resp) {
+            console.log(resp)
+            if (resp.success) {
+                xnote.toast("重启成功!");
+                window.location.reload();                
+            } else {
+                setTimeout(checkSystemStatus, checkInterval)
+            }
+        }).fail(function (err) {
+            console.error("checkSystemStatus failed, wait to retry", err);
+            setTimeout(checkSystemStatus, checkInterval);
+        })
+    };
+
+    var loadingIndex = layer.load(1);
+    checkSystemStatus();
+};
+
+/**
+ * 处理重启命令
+ */
+AdminView.onRestart = function () {
+    xnote.confirm("确定重启吗?", function () {
+        AdminView.doRestart();
+    })
+};
+
+AdminView.onUpgrade = function() {
+    var doUpgrade = function() {
+        xnote.http.post("/system/pull_code", function (resp) {
+            if (resp.success) {
+                AdminView.doRestart();
+            } else {
+                xnote.alert(resp.message);
+            }
+        })
+    }
+
+    xnote.confirm("确定升级系统吗?", function () {
+        doUpgrade();
     });
 };

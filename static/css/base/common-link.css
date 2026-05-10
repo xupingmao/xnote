@@ -9,7 +9,6 @@
 }
 
 .link, .black-link, .link2 {
-    margin-right: 5px;
     cursor: pointer;
 }
 
@@ -22,7 +21,7 @@
     margin: 0px;
 }
 
-.black-link {
+.black-link, .link.black {
     color: black;
 }
 

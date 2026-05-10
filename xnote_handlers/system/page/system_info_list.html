@@ -1,11 +1,3 @@
-{% extends base.html %}
-
-{% block body_right %}
-    {% include system/component/admin_nav.html %}
-{% end %}
-
-{% block body_left %}
-
 {% include system/component/system_css.html %}
 {% init comment_html = "" %}
 
@@ -21,10 +13,6 @@
 </style>
 
 <div class="card">
-    {% include common/title/base_title.html %}
-</div>
-
-<div class="card">
     {% for item in item_list %}
         <div class="list-item">
             <span>{{item.name}}</span>
@@ -37,4 +25,3 @@
         </div>
     {% end %}
 </div>
-{% end %}

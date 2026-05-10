@@ -4,6 +4,7 @@
 # @modified 2022/03/19 10:20:23
 import sys
 import platform
+from turtle import onclick
 import xutils
 import os
 import logging
@@ -18,10 +19,13 @@ from xutils import fsutil
 from xutils import mem_util
 from xutils import Storage
 from xutils import webutil
-from xnote_handlers.config import LinkConfig
+from xnote_handlers.config import LinkConfig, ScriptConfig
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin.sidebar import get_admin_sidebar_html
 from xnote.service.lock_service import DatabaseLockService
+from xnote.plugin.list_plugin import BaseListPlugin
+from xnote_handlers.config.aside_config import AsideConfig
+from xnote.webui import ListView, ListViewItem, Card, ActionButton, Textarea, Div
 
 try:
     import sqlite3
@@ -58,14 +62,6 @@ def get_free_data_space():
     except:
         xutils.print_exc()
         return "<未知>"
-
-class SystemInfoItem:
-
-    def __init__(self, name = "", value = "", link = "", extra_link=""):
-        self.name  = name
-        self.value = value
-        self.link = link
-        self.extra_link = extra_link
 
 def get_db_info():
     return Storage(
@@ -133,48 +129,78 @@ class PythonLibInfo:
             self.value = "未安装"
             self.value_css_class = "red"
 
-class InfoHandler:
-
-    @xauth.login_required("admin")
-    def GET(self):
-        p = xutils.get_argument("p", "")
+class InfoHandler(BaseListPlugin):
+    require_admin = True
+    title = "系统信息"
+    parent_link = LinkConfig.app_index
+    
+    def handle_page(self):
+        p = xutils.get_argument_str("p")
+        
+        self.update_aside(AsideConfig.get_admin_aside_html())
+        
         if p == "sys_info_detail":
-            sys_info = get_sys_info_detail()
-            text = xutils.tojson(sys_info, format=True)
-            comment = "wired代表macOS不可被交换的内存"
-            return xtemplate.render("system/page/system_info_text.html", text=text, comment_html = comment)
+            return self.render_sys_info_detail()
+        
         if p == "python_lib":
             return self.render_python_lib()
 
         mem_info = mem_util.get_mem_info()
-        items = [
-            SystemInfoItem("Python版本", value = get_python_version()),
-            SystemInfoItem("Xnote版本", value = get_xnote_version()),
-            SystemInfoItem("应用内存使用量", value = mem_info.mem_used),
-            SystemInfoItem("磁盘可用容量", get_free_data_space()),
-            SystemInfoItem("数据库驱动", xconfig.DatabaseConfig.db_driver_sql, extra_link="/system/db/driver_info?type=sql"),
-            SystemInfoItem("KV数据库驱动", xconfig.DatabaseConfig.db_driver_kv, extra_link="/system/db/driver_info"),
-            SystemInfoItem("sqlite版本", sqlite3.sqlite_version if sqlite3 != None else ''),
-            SystemInfoItem("CPU型号", platform.processor()),
-            SystemInfoItem("操作系统", platform.system()),
-            SystemInfoItem("操作系统版本", platform.version()),
-            SystemInfoItem("系统启动时间", get_startup_time()),
-            SystemInfoItem("启动配置", "查看", link = "/system/info/boot_config"),
-            SystemInfoItem("Python第三方库", "查看", link = "/system/info?p=python_lib"),
-            SystemInfoItem("详细系统信息", "查看", link="/system/info?p=sys_info_detail"),
-            SystemInfoItem("浏览器信息", "查看", link = "/tools/browser_info"),
-        ]
+        sqlite_version = sqlite3.sqlite_version if sqlite3 != None else ''
+        
+        list_view = ListView()
+        list_view.add(ListViewItem(text="Python版本", badge_info=get_python_version()))
+        list_view.add(ListViewItem(text="Xnote版本", badge_info = get_xnote_version()))
+        list_view.add(ListViewItem(text="应用内存使用量", badge_info = mem_info.mem_used))
+        list_view.add(ListViewItem(text="磁盘可用容量", badge_info = get_free_data_space()))
+        list_view.add(ListViewItem(text="数据库驱动", badge_info =xconfig.DatabaseConfig.db_driver_sql, 
+                                   href=LinkConfig.driver_info_sql.href, show_chevron_right=True, css_class="black"))
+        list_view.add(ListViewItem(text="KV数据库驱动", badge_info =xconfig.DatabaseConfig.db_driver_kv, 
+                                   href=LinkConfig.driver_info_kv.href, show_chevron_right=True, css_class="black"))
+        list_view.add(ListViewItem(text="sqlite版本", badge_info = sqlite_version))
+        list_view.add(ListViewItem(text="CPU型号", badge_info = platform.processor()))
+        list_view.add(ListViewItem(text="操作系统", badge_info = platform.system()))
+        list_view.add(ListViewItem(text="操作系统版本", badge_info = platform.version()))
+        list_view.add(ListViewItem(text="系统启动时间", badge_info = get_startup_time()))
+        list_view.add(ListViewItem(text="启动配置", badge_info = "查看", href = "/system/info/boot_config", show_chevron_right=True, css_class="black"))
+        list_view.add(ListViewItem(text="Python第三方库", badge_info = "查看", href = "/system/info?p=python_lib", show_chevron_right=True, css_class="black"))
+        list_view.add(ListViewItem(text="详细系统信息", badge_info = "查看", href = "/system/info?p=sys_info_detail", show_chevron_right=True, css_class="black"))
+        list_view.add(ListViewItem(text="浏览器信息", badge_info = "查看", href = "/tools/browser_info", show_chevron_right=True, css_class="black"))
 
-        kw = Storage()
-        kw.info_items = items
-        kw.runtime_id = xconfig.RUNTIME_ID
-        kw.title = "系统信息"
-        kw.parent_link = LinkConfig.app_index
-
-        return xtemplate.render("system/page/system_info.html", **kw)
+        # 重启
+        list_item = ListViewItem(text="重启系统")
+        list_item.right_div.add(ActionButton(text="重启", onclick="javascript:xnote.admin.onRestart()", css_class="btn danger"))
+        list_view.add(list_item)
+        
+        # 升级
+        list_item = ListViewItem(text="升级系统")
+        list_item.right_div.add(ActionButton(text="升级", onclick="javascript:xnote.admin.onUpgrade()", css_class="btn danger"))
+        list_view.add(list_item)
+        
+        card = Card()
+        card.add(list_view)
+        
+        self.set_html_var("runtimeId", xconfig.RUNTIME_ID)
+        self.load_script(ScriptConfig.admin_js)
+        self.add_component(card)
     
-
+    def render_sys_info_detail(self):
+        self.title = "详细系统信息"
+        self.parent_link = LinkConfig.system_info
+        
+        sys_info = get_sys_info_detail()
+        text = xutils.tojson(sys_info, format=True)
+        comment = "wired代表macOS不可被交换的内存"
+        
+        card = Card()
+        card.add(Textarea(value=text, css_class="row", rows="30"))
+        card.add(Div(css_class="info light", html = comment))
+        self.add_component(card)
+        
     def render_python_lib(self):
+        self.title = "Python第三方库"
+        self.parent_link = LinkConfig.system_info
+        
         item_list = [
             PythonLibInfo("Pillow", "PIL"),
             PythonLibInfo("markdown", "markdown"),
@@ -185,12 +211,14 @@ class InfoHandler:
             PythonLibInfo("leveldb", "leveldb"),
             PythonLibInfo("pyperclip", "pyperclip"),
         ]
-        return xtemplate.render(
+        html = xtemplate.render(
             "system/page/system_info_list.html",
             title="Python第三方库",
             parent_link = LinkConfig.system_info,
             item_list=item_list,
         )
+        
+        self.write_plain_html(html)
 
 class BootConfigHandler(BaseTablePlugin):
     require_admin = True
@@ -238,6 +266,10 @@ class InstallLibHandler:
                 encoding="utf-8"
             )
             # TODO 写入安装日志到缓存
+            if result == 0:
+                return webutil.SuccessResult()
+            else:
+                return webutil.FailedResult("500", message=f"status_code: {result}")
         return webutil.SuccessResult()
 
 xurls = (

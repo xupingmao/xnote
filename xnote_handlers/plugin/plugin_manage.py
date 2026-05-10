@@ -8,6 +8,7 @@ from xnote.plugin.table import TableActionType
 from xnote.plugin import iter_plugins, TabBox
 from .plugin_page import list_all_plugins, list_plugins
 from .plugin_config import CategoryService
+from xnote_handlers.config.aside_config import AsideConfig
 
 class PluginManageHandler(BaseTablePlugin):
     title = "插件管理"
@@ -23,6 +24,8 @@ class PluginManageHandler(BaseTablePlugin):
 """
 
     def handle_page(self):
+        self.update_aside(AsideConfig.get_default_aside_html())
+        
         filter_tab = TabBox(tab_key="category", tab_default="all")
 
         for category in CategoryService.category_list:

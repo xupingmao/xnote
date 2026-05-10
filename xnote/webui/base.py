@@ -13,10 +13,11 @@ class BaseComponent:
         return ""
 
 class BaseContainer(BaseComponent):
-    def __init__(self, css_class="", css_style=""):
+    def __init__(self, css_class="", css_style="", html = ""):
         self.css_class = css_class
         self.css_style = css_style
         self.children: List[BaseComponent] = []
+        self.html = html
 
     def add(self, item: BaseComponent):
         self.children.append(item)
@@ -26,7 +27,7 @@ class BaseContainer(BaseComponent):
         self.children = children
 
     def is_empty(self):
-        return len(self.children) == 0
+        return len(self.children) == 0 and self.html == ""
 
     def render(self) -> str:
         if self.is_empty():
@@ -36,6 +37,7 @@ class BaseContainer(BaseComponent):
             css_style_attr = f'style="{self.css_style}"'
         out = []
         out.append(f"""<div class="{self.css_class}" {css_style_attr}>""")
+        out.append(self.html)
         for item in self.children:
             item._depth += 1
             if item._depth > MAX_DEPTH:

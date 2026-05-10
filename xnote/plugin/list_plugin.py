@@ -6,9 +6,9 @@ from xutils import webutil
 from xutils import Storage
 from xnote.webui import ListView, ListViewItem
 from xnote.plugin import DataForm, FormRowType, FormRowDateType
+from .base import BasePluginV2
 
-
-class BaseListPlugin(BasePlugin):
+class BaseListPlugin(BasePluginV2):
     rows = 0
 
     page_html = """

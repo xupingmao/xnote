@@ -689,7 +689,7 @@ def html_escape(s: str, quote=True):
         s = s.replace('\'', "&#x27;")
     return s
 
-def escape_html(text: str):
+def escape_html(text: str, escape_blank = True):
     """html转义, 参考`lib/tornado/escape.py`"""
     # 必须先处理&
     text = text.replace("&", "&amp;")
@@ -698,9 +698,10 @@ def escape_html(text: str):
     text = text.replace('"', "&quot;")
     text = text.replace("'", "&#39;")
 
-    # 这两个是新增的
-    text = text.replace(" ", "&nbsp;")
-    text = text.replace("\n", "<br/>")
+    if escape_blank:
+        # 这两个是新增的
+        text = text.replace(" ", "&nbsp;")
+        text = text.replace("\n", "<br/>")
     return text
 
 def encode_base64(text: typing.Union[str, bytes], strip = True):
