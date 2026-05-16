@@ -8,6 +8,16 @@
         <input type="hidden" id="messageEditId" value="{{detail._key}}"/>
         <input type="hidden" id="messageEditTag" value="{{detail.tag}}"/>
 
+        <div id="messageEditImgRow" class="message-edit-img-row">
+        {% for _img_src in detail.files %}
+            {% set _img_id = xutils.create_uuid() %}
+            <div id="upload_{{_img_id}}" class="upload-img-div">
+                <img class="upload-img x-photo" src="{{_img_src}}?mode=thumbnail" data-src="{{_img_src}}">
+                <a onclick="xnote.comment.removeUploadedImg(this)" data-id="upload_{{_img_id}}">删除</a>
+            </div>
+        {% end %}
+        </div>
+
         <div class="msg-dialog-bottom-bar">
             <input type="button" class="send-button btn btn-default" 
                 onclick="xnote.action.message.showTopicDialog(this);" value="#标签">

@@ -17,6 +17,7 @@ MessageView.state = {};
 MessageView.state.isEditDialog = false;
 MessageView.listAjaxUrl = "/message/list";
 xnote.action.message = MessageView;
+xnote.message = MessageView;
 
 
 MessageView.refreshList = function() {
@@ -176,6 +177,16 @@ MessageView.showTopicDialog = function (target) {
     });
 };
 
+MessageView.buildFiles = function() {
+    var result = [];
+    $(".upload-img").each(function (index, ele) {
+        var src = $(ele).attr("data-src");
+        result.push(src);
+    });
+    return result;
+}
+
+
 MessageView.saveMessage = function (target) {
     // 保存信息
     var id = $("#messageEditId").val();
@@ -187,7 +198,8 @@ MessageView.saveMessage = function (target) {
         content: content,
         tag: tag
     }
-
+    
+    params.files = MessageView.buildFiles();
     var self = this;
 
     xnote.http.post("/message/update", params, function (resp) {
@@ -208,6 +220,8 @@ MessageView.createMessage = function (target) {
     var content = $(".input-box").val();
     var date = getUrlParam("date");
     var params = {content:content, tag: createTag, date: date};
+    params.files = MessageView.buildFiles();
+
     xnote.http.post("/message/save", 
         params,
         function (respText) {
@@ -358,13 +372,13 @@ MessageView.createComment = function (target) {
     });
 }
 
-MessageView.deleteComment = function (target) {
-    var msgId = $(target).attr("data-id");
-    var time = $(target).attr("data-time");
-    var req = {};
-    req.id = msgId;
-    req.time = time;
-    console.log("deleteComment req:", req);
+/**
+ * 执行删除备注动作
+ * @param {req.id} msgId
+ * @param {req.time} time
+ */
+MessageView.doDeleteComment = function (req) {
+    var msgId = req.id;
     xnote.http.post("/message/comment/delete", req, function (resp) {
         if (resp.success) {
             xnote.toast("删除备注成功");
@@ -372,6 +386,18 @@ MessageView.deleteComment = function (target) {
         } else {
             xnote.toast(resp.message);
         }
+    });
+}
+
+MessageView.deleteComment = function (target) {
+    var msgId = $(target).attr("data-id");
+    var time = $(target).attr("data-time");
+    var req = {};
+    req.id = msgId;
+    req.time = time;
+    console.log("deleteComment req:", req);
+    xnote.confirm("确认删除备注吗?", function (result) {
+        MessageView.doDeleteComment(req);
     });
 }
 
@@ -429,6 +455,31 @@ MessageView.handleTopicSearchKeyUp = function (e) {
     var inputText = $(e.target).val();
     MessageView.searchTopic(inputText);
 }
+
+
+MessageView.removeUploadedImg = function(target) {
+    var targetId = $(target).attr("data-id");
+    $("#" + targetId).remove();
+}
+
+
+MessageView.renderUploadedImg = function(link) {
+    var targetSelector = "";
+    if (MessageView.state.isEditDialog) {
+        targetSelector = "#messageEditImgRow";
+    } else {
+        targetSelector = "#messageImgRow";
+    }
+    var id = "upload_" + xnote.createNewId();
+    var div = $("<div>").addClass("upload-img-div").attr("id", id);
+    var img = $("<img>").addClass("upload-img");
+    img.attr("src", link + "?mode=thumbnail");
+    img.attr("data-src", link);
+    var deleteLink = $("<a>").text("删除").attr("data-id", id).attr("onclick", "xnote.message.removeUploadedImg(this)");
+    div.append(img).append(deleteLink);
+    $(targetSelector).append(div);
+}
+
 
 $("body").on("focus", ".msg-edit-box textarea", function (e) {
     if (xnote.device.isIphone) {
@@ -495,8 +546,7 @@ $(function() {
         chunked: false,
         successFn: function (resp) {
             console.log("文件上传成功", resp);
-            var webpath = "file://" + resp.webpath
-            xnote.action.message.updateInputBox(webpath);
+            xnote.message.renderUploadedImg(resp.webpath);
         },
         fixOrientation: true,
         fileName: "auto"
@@ -506,9 +556,8 @@ $(function() {
     $("body").on("paste", ".edit-box,.input-box", function (e) {
         var filePrefix = "";
         xnote.requestUploadByClip(e, filePrefix, function (resp) {
-            console.log(resp);
-            var webpath = "file://" + resp.webpath;
-            xnote.action.message.updateInputBox(webpath);
+            console.log("剪贴板上传成功", resp);
+            xnote.message.renderUploadedImg(resp.webpath);
         });
     });
 

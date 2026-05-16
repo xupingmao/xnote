@@ -31,7 +31,19 @@
                 {% end %}
             </div>
         </div>
+
+        {% if item.html %}
         <div class="todo-content">{% raw item.html %}</div>
+        {% end %}
+
+        {% if item.files %}
+            <div class="comment-img-row">
+            {% for _img_src in item.files %}
+                <img class="comment-img x-photo" alt="{{_img_src}}" src="{{_img_src}}?mode=thumbnail" data-src="{{_img_src}}">
+            {% end %}
+            </div>
+        {% end %}
+
         <div class="todo-foot">
             {% if show_edit_btn %}
             <a class="todo-edit-btn btn btn-default" data-id="{{item.id}}" 

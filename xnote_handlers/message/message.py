@@ -253,7 +253,7 @@ class ListAjaxHandler:
             no_tag=no_tag, date=date)
 
 
-def update_message_content(id: str, user_id: int, content):
+def update_message_content(id: str, user_id: int, content, files: List[str] = None):
     data = MessageDao.get_by_id(id)
     if data is None:
         return
@@ -265,6 +265,7 @@ def update_message_content(id: str, user_id: int, content):
         
     data.content = content
     data.mtime = xutils.format_datetime()
+    data.files = files
     data.version = data.get('version', 0) + 1
     MessageDao.update(data)
 
@@ -422,7 +423,7 @@ class CalendarRule(BaseRule):
         ctx.type = "calendar"
 
 
-def create_message(user_name, tag, content, ip):
+def create_message(user_name, tag, content, ip, files: List[str] = None):
     assert isinstance(user_name, str)
     assert isinstance(tag, str)
     assert isinstance(content, str)
@@ -441,6 +442,7 @@ def create_message(user_name, tag, content, ip):
     message.mtime = ctime
     message.content = content
     message.change_time = ctime
+    message.files = files
     
     id = MessageDao.create(message)
     MessageDao.refresh_message_stat(user_name, [message.tag])
@@ -473,11 +475,12 @@ class SaveAjaxHandler:
         content = xutils.get_argument_str("content")
         tag = xutils.get_argument_str("tag", DEFAULT_TAG)
         location = xutils.get_argument_str("location", "")
+        files = xutils.get_list_argument("files[]")
         user_name = xauth.get_current_name()
         user_id = xauth.current_user_id()
         ip = get_remote_ip()
 
-        if content == "":
+        if content == "" and len(files) == 0:
             return webutil.FailedResult(code="fail", message="输入内容为空!")
         
         tag = TagHelper.get_create_tag(tag)
@@ -486,10 +489,10 @@ class SaveAjaxHandler:
         self.apply_rules(user_name, id, tag, content)
 
         if id == "":
-            message = create_message(user_name, tag, content, ip)
+            message = create_message(user_name, tag, content, ip, files)
             return webutil.SuccessResult(data=message)
         else:
-            update_message_content(id, user_id, content)
+            update_message_content(id, user_id, content, files)
         return webutil.SuccessResult(data=dict(id=id))
 
     def POST(self):

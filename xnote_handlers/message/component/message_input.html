@@ -15,6 +15,8 @@
     <textarea class="col-md-12 input-box" rows=3 autoHeight=true 
         placeholder="{{message_placeholder}}">{{filter_default_content(default_content)}}</textarea>
 
+    <div id="messageImgRow" class="comment-img-row row"></div>
+
     <div class="col-md-12 btn-line-height">
         {% if show_tag_btn %}
             <!-- <input type="button" name="" class="send-button btn btn-default select-topic-btn" value="#标签" @click=""> -->
@@ -41,27 +43,3 @@
     {% end %}
 
 </div>
-
-<script type="text/javascript">
-$(function () {
-    function onFileUploaded(event) {
-        var inputText = event.target;
-        var oldText = $(".input-box").val();
-        var newText = oldText + "\n" + inputText + "\n";
-        $(".input-box").val(newText);
-    }
-
-    function onTopicSelected(event) {
-        xnote.closeAllDialog();
-        var topic = event.target;
-        var oldText = $(".input-box").val();
-        $(".input-box").val(topic + " " + oldText);
-    }
-
-    $('textarea[autoHeight]').autoHeight();    
-
-    // 监听上传事件
-    xnote.on("message.upload", onFileUploaded);
-    xnote.on("message.topic.selected", onTopicSelected);
-})
-</script>

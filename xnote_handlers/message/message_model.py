@@ -18,6 +18,7 @@ from xutils.base import BaseEnum, EnumItem
 from xnote.service.tag_service import SystemTagEnum
 from xnote_handlers.config import LinkConfig
 from xutils import quote
+from typing import List
 
 """消息模型相关的内容
 任务：默认按照修改时间排序
@@ -266,6 +267,7 @@ class MessageDO(BaseMsgDO):
         self.html = ""
         self.query_source = ""
         self.query_key = ""
+        self.files: List[str] = [] # 上传的文件
 
     @classmethod
     def from_dict(cls, dict_value: dict):
@@ -323,8 +325,8 @@ class MessageDO(BaseMsgDO):
         if self.ctime == "":
             raise Exception("message.dao.create: key `ctime` is missing")
 
-        if self.tag != "done" and self.content == "":
-            raise Exception("message.dao.create: key `content` is missing")
+        if self.tag != "done" and self.content == "" and len(self.files) == 0:
+            raise Exception("message.dao.create: key `content` or `files` is empty")
 
         if self.tag not in VALID_TAG_SET:
             raise Exception("message.dao.create: tag `%s` is invalid" % self.tag)

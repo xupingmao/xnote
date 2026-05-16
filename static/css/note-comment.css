@@ -66,6 +66,7 @@
 
 .comment-img-row {
     width: 100%;
+    float: left;
 }
 
 .comment-img {

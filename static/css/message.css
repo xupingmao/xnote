@@ -280,7 +280,7 @@
 
 .layui-layer-content .msg-edit-box textarea {
     position: absolute;
-    bottom: 50px;
+    bottom: 185px;
     top: 10px;
     left: 10px;
     right: 10px;
@@ -333,6 +333,14 @@
 .hashtag-filter.active {
     color: white;
     background-color: #08c;
+}
+
+.message-edit-img-row {
+    width: 100%;
+    position: absolute;
+    bottom: 50px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 /** 移动端样式放在最后 **/
