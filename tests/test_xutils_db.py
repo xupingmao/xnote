@@ -256,6 +256,7 @@ def to_str_list(list):
     return result
 
 class TestMain(BaseTestCase):
+    is_mysql_inited = False
 
     def test_dbutil_lmdb(self):
         from xutils.db.driver_lmdb import LmdbKV
@@ -307,6 +308,25 @@ class TestMain(BaseTestCase):
         xconfig.DatabaseConfig.mysql_database = database
         db_instance = web.db.MySQLDB(host=host, user=user, pw = password, database=database, port=port)
         db_instance.dbname = "mysql"
+        
+        if self.is_mysql_inited:
+            return db_instance
+        
+        logging.info("init mysql tables")
+        xconfig.TestConfig.test_mysql = True
+        db_driver_sql = xconfig.DatabaseConfig.db_driver_sql
+        try:
+            xconfig.DatabaseConfig.db_driver_sql = "mysql"
+            xconfig.set_system_config("mysql_host", host)
+            xconfig.set_system_config("mysql_user", user)
+            xconfig.set_system_config("mysql_password", password)
+            xconfig.set_system_config("mysql_database", database)
+            xconfig.set_system_config("mysql_port", port)
+            xtables.init_kv_store_table()
+        finally:
+            xconfig.DatabaseConfig.db_driver_sql = db_driver_sql
+        
+        self.is_mysql_inited = True
         return db_instance
 
     def get_mysql_kv(self):
@@ -932,6 +952,7 @@ class TestMain(BaseTestCase):
         engine.scan_limit = 10
 
         dbutil.set_driver_name("mysql")
+        
         dbutil.register_table("range_test", "range test")
         db = dbutil.get_table("range_test")
 

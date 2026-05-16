@@ -55,7 +55,13 @@ class ListPluginHandler(BaseListPlugin):
             list_item.add_span("说明XXX", css_class="gray")
             list_item.add_link(text=" 详情", href="")
             list_item.add_br()
+            
+            # 新行的第一个分隔符会自动跳过
+            list_item.add_item_sep()
             list_item.add_span(f"更新于 {now}", css_style="color:#999;")
+            list_item.add_item_sep()
+            list_item.add_span("标签", css_class="gray")
+            
             quote_text = xutils.quote(text)
             list_item.extra.add(EditFormActionLink(text="编辑", url=f"?action=edit&value={quote_text}"))
             list_item.extra.add(ConfirmActionLink(text="删除", url="?action=delete", msg=f"确认删除[{text}]吗?", css_class="danger"))

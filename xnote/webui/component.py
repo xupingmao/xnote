@@ -9,6 +9,7 @@
 @Description  : 描述
 """
 
+from typing import Optional
 from xnote.webui.base import BaseComponent, BaseContainer
 from xnote.core import xtemplate
 from xutils import escape_html
@@ -264,4 +265,5 @@ class TextNbsp(BaseComponent):
 
 class TextItemSep(BaseComponent):
     def render(self) -> str:
-        return " · "
+        # return " · "
+        return " | "

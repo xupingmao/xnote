@@ -541,6 +541,10 @@ class DatabaseConfig:
         if cls.db_driver_kv == "":
             cls.db_driver_kv = cls.db_driver
 
+
+class TestConfig:
+    test_mysql = False
+
 def read_properties_file(fpath):
     fpath = resolve_config_path(fpath)
     return fsutil.readfile(fpath)

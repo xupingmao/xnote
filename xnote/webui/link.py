@@ -1,7 +1,7 @@
 from typing import Optional
 from xutils import escape_html
 from .base import BaseComponent
-from .utils import build_data_attrs
+from .utils import build_data_attrs, get_first_valid_arg
 
 class TextLink(BaseComponent):
     """文本链接"""
@@ -58,6 +58,7 @@ class EditFormActionLink(ActionLink):
 
 class ConfirmActionLink(ActionLink):
     """确认操作链接"""
-    def __init__(self, text = "", url = "", msg = "", css_class=""):
+    def __init__(self, text = "", url = "", message = "", msg: Optional[str] = None, css_class=""):
+        msg = get_first_valid_arg(msg, message)
         data_dict = dict(url = url, msg=msg)
         super().__init__(text = text, css_class=css_class, onclick="xnote.table.handleConfirmAction(this)", data_dict=data_dict)

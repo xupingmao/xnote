@@ -740,6 +740,10 @@ def init_kv_store_table():
     kw["comment"] = "kv存储"
     table_name = "kv_store"
     dbpath = xconfig.FileConfig.kv_db_file
+    
+    if xconfig.TestConfig.test_mysql:
+        kw["check_table_define"] = False
+    
     with create_table_manager_with_dbpath(table_name, dbpath=dbpath, **kw) as manager:
         manager.add_column("value", "longblob", default_value="")
         manager.add_column("version", "int", default_value=0)

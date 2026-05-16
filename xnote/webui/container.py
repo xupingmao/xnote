@@ -5,6 +5,7 @@ from xnote.core import xtemplate
 from typing import Optional
 
 class TextContainer(BaseContainer):
+    _is_first_sep = True
     
     def add_span(self, text="", css_class="", css_style="", id=""):
         self.children.append(TextSpan(text=text, css_class=css_class, css_style=css_style, id=id))
@@ -16,12 +17,17 @@ class TextContainer(BaseContainer):
         for _ in range(count):
             self.children.append(TextBr())
         
+        self._is_first_sep = True
+        
     def add_nbsp(self, count=1):
         for _ in range(count):
             self.children.append(TextNbsp())
     
     def add_item_sep(self):
-        self.children.append(TextItemSep())
+        """增加换行符号"""
+        if not self._is_first_sep:
+            self.children.append(TextItemSep())
+        self._is_first_sep = False
 
 class ActionBar(TextContainer):
     """操作栏"""
