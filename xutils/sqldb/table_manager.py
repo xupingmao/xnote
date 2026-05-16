@@ -14,6 +14,7 @@ import logging
 import xutils
 import typing
 import web.db
+from typing import Union, List, Dict
 from .table_config import TableConfig
 from xutils.functions import list_replace
 from xutils.sqldb import table_validator
@@ -389,8 +390,8 @@ class TableInfo:
         self.pk_type = DefaultValues.pk_type
         self.db_type = "" # 数据库类型, 比如 mysql/sqlite
         self.comment = "" # 表的描述
-        self.column_names = [] # type:list[str]
-        self.columns = [] # type:list[ColumnDef] # 这个主要用于记录[args, kw]参数用于复制表结构
+        self.column_names: List[str] = [] 
+        self.columns: List[ColumnDef] = [] # 这个主要用于记录[args, kw]参数用于复制表结构
         self.indexes = [] # 这个主要用于记录[args, kw]参数用于复制表结构
         self.dbpath = "" # sqlite文件路径
         self.enable_binlog = True
@@ -425,7 +426,7 @@ class TableInfo:
 
 class TableManagerFacade:
 
-    table_dict = {} # type: dict[str, TableInfo]
+    table_dict: Dict[str, TableInfo] = {}
 
     def __init__(self, tablename: str, db = empty_db, is_backup = False, is_plugin = False, **kw):
         """初始化表管理器门面
@@ -470,12 +471,10 @@ class TableManagerFacade:
     
     @classmethod
     def get_table_info(cls, tablename=""):
-        # type: (str) -> TableInfo|None
         return cls.table_dict.get(tablename)
     
     @classmethod
     def get_table_info_dict(cls):
-        # type: () -> dict[str, TableInfo]
         return cls.table_dict
 
     def add_column(self, colname: str, coltype: str,
@@ -517,12 +516,12 @@ class TableManagerFacade:
         """只会打一个告警日志,不会实际删除,删除字段请使用rename_column或者重建表,更加安全"""
         logging.warning(f"drop column {colname}")
 
-    def add_index(self, colname, is_unique=False, index_name="", **kw):
+    def add_index(self, colname: Union[str, List[str]], is_unique=False, index_name="", **kw):
         table_validator.validate_index_name(index_name, is_unique)
         self.table_info.add_index(colname, is_unique)
         self.manager.add_index(colname, is_unique, index_name=index_name, **kw)
 
-    def drop_index(self, colname, is_unique=False, **kw):
+    def drop_index(self, colname: Union[str, List[str]], is_unique=False, **kw):
         self.manager.drop_index(colname, is_unique, **kw)
 
     def __enter__(self):

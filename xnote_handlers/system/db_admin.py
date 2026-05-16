@@ -17,6 +17,8 @@ from xnote.plugin import sidebar
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote_handlers.config import LinkConfig
 from xutils.db.binlog import BinLog, BinLogOpType
+from xnote.plugin import ListView, ListViewItem
+from typing import List
 
 def get_display_value(value: str):
     return textutil.get_short_text(value, 100)
@@ -575,7 +577,7 @@ class DatabaseDriverInfoHandler(BaseTablePlugin):
 class TableData:
     def __init__(self, head=[], items=[]):
         self.head = head
-        self.items = items # items 是 list[dict] 结构
+        self.items: List[dict] = items # items
 
     def to_data_table(self):
         result = DataTable()
@@ -590,6 +592,19 @@ class TableData:
             min_width = min_width_dict.get(head, "100px")
             result.add_head(title=head, field=head, min_width=min_width)
         result.set_rows(self.items)
+        return result
+    
+    def to_list_view(self):
+        result = ListView()
+        for item in self.items:
+            list_item = ListViewItem()
+            for head in self.head:
+                value = item.get(head, "")
+                if value == "":
+                    continue
+                list_item.add_span(f"{head}: {value}")
+                list_item.add_br()
+            result.add_item(list_item)
         return result
 
 
@@ -709,7 +724,7 @@ class StructHandler:
         kw.create_sql = helper.get_create_sql()
         kw.error = ""
         kw.column_table = column_info.to_data_table()
-        kw.index_table = index_info.to_data_table()
+        kw.index_table = index_info.to_list_view()
 
         return xtemplate.render("system/page/db/db_struct.html", **kw)
 

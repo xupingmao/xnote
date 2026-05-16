@@ -17,6 +17,7 @@ from xnote.core import xconfig
 from xnote.core import xtables
 from xutils import dbutil, Storage
 from xutils import dateutil
+from xutils.base import BaseDataRecord
 
 class MigradeFailedDO(Storage):
 
@@ -31,16 +32,58 @@ dbutil.register_table("db_upgrade_log", "数据库升级日志", type="hash")
 sys_log_db = dbutil.get_table("sys_log")
 failed_db = dbutil.get_table("migrate_failed")
 
+class SystemUpgradeLogRecord(BaseDataRecord):
+    _ignore_save_fields = ["id"]
+    def __init__(self):
+        timestamp = dateutil.timestamp_ms()
+        self.create_time = timestamp
+        self.update_time = timestamp
+        self.log_key = ""
+        self.log_content = ""
+        self.cost_time = 0
+        
+    def validate(self):
+        if self.log_key == "":
+            raise ValueError("log_key is empty")
+        if self.log_content == "":
+            raise ValueError("log_content is empty")
+        if len(self.log_key) > 100:
+            raise ValueError("log_key is too long")
+
+class SystemUpgradeLogDao:
+    db = xtables.get_table_by_name("system_upgrade_log")
+    
+    @classmethod
+    def delete(cls, log_key: str):
+        return cls.db.delete(where = dict(log_key=log_key))
+    
+    @classmethod
+    def get(cls, log_key: str):
+        result = cls.db.select_first(where = dict(log_key=log_key))
+        if result == None:
+            return None
+        return SystemUpgradeLogRecord.from_dict(result).log_content
+    
+    @classmethod
+    def put(cls, log_key: str, log_content: str, cost_time: int = 0):
+        log = SystemUpgradeLogRecord()
+        log.log_key = log_key
+        log.log_content = log_content
+        log.cost_time = cost_time
+        log.validate()
+        values = log.to_save_dict()
+        cls.db.insert(**values)
+
 def get_upgrade_log_table():
-    return dbutil.get_hash_table("db_upgrade_log")
+    return SystemUpgradeLogDao
 
 def is_upgrade_done(op_flag):
     db = get_upgrade_log_table()
-    return db.get(op_flag) == "1"
+    return db.get(op_flag) != None
 
-def mark_upgrade_done(op_flag):
+def mark_upgrade_done(op_flag, cost_time: int = 0):
     db = get_upgrade_log_table()
-    db.put(op_flag, "1")
+    db.put(op_flag, "1", cost_time)
 
 def delete_old_flag(op_flag):
     db = get_upgrade_log_table()
@@ -55,12 +98,13 @@ def log_error(fmt, *args):
 def log_warn(fmt, *args):
     print(dateutil.format_time(), "[upgrade]", fmt.format(*args))
 
-
 def execute_upgrade(key = "", fn = lambda:None):
     if is_upgrade_done(key):
         return
+    start_time = dateutil.timestamp_ms()
     fn()
-    mark_upgrade_done(key)
+    cost_time = dateutil.timestamp_ms() - start_time
+    mark_upgrade_done(key, cost_time = cost_time)
 
 def move_upgrade_key(old_key="", new_key=""):
     """迁移升级的key,用于统一规范"""

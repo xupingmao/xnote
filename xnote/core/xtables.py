@@ -654,6 +654,18 @@ def init_system_log_table():
         manager.add_column("log_content", "text", default_value="")
         manager.add_column("cost_time", "int", default_value=0)
 
+def init_system_upgrade_log_table():
+    """系统升级日志表"""
+    table_name = "system_upgrade_log"
+    comment = "系统升级日志表"
+    with create_default_table_manager(table_name, comment=comment) as manager:
+        manager.add_column("create_time", "bigint", default_value=0)
+        manager.add_column("update_time", "bigint", default_value=0)
+        manager.add_column("log_key", "varchar(100)", default_value="")
+        manager.add_column("log_content", "text", default_value="")
+        manager.add_column("cost_time", "int", default_value=0, comment="耗时,毫秒")
+        manager.add_index("log_key", is_unique=True, index_name="uk_system_upgrade_log_logKey")
+
 def init_id_generator_table():
     """
     ID生成器
@@ -1008,10 +1020,11 @@ def init():
     init_system_sync_binlog_table()
 
     # 其他系统表
-    init_system_info_table() # 已删除, 占位
+    init_system_info_table() # 已删除, 占位, 使用system_meta表
     init_system_meta_table()
     init_system_log_table()
     init_id_generator_table()
+    init_system_upgrade_log_table()
     
     # 统计信息
     init_site_visit_log()

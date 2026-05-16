@@ -153,7 +153,9 @@ class ListViewDropdown(BaseComponent):
 class ListView(BaseContainer):    
     _code = xtemplate.compile_template("""
 {% if len(item_list) == 0 %}
+    <div class="row">
     {% include common/text/empty_text.html %}
+    </div>
 {% end %}
 
 {% for item in item_list %}
