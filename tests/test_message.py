@@ -68,6 +68,14 @@ class TextPage(xtemplate.BaseTextPlugin):
 
 
 class TestMain(BaseTestCase):
+    
+    
+    def create_msg(self, content: str):
+        response = json_request_return_dict(
+            "/message/save", method="POST", data=dict(content="Xnote-Unit-Test"))
+        self.assertEqual("success", response.get("code"))
+        data = response.get_dict("data")
+        return data.get_int("id")
 
     def test_message_create_and_update(self):
         # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
@@ -435,3 +443,26 @@ class TestMain(BaseTestCase):
         assert result.get_bool("success")
 
         self.check_OK("/message/template?type=task")
+
+    def test_update_msg_date(self):
+        msg_id = self.create_msg("update-date-test")
+        new_date = "2020-01-01"
+        new_time = new_date + " 00:00:00"
+        response = json_request_return_dict(
+            "/message/save", method="POST", data=dict(id = msg_id, content = "update date", date = new_date))
+        
+        assert response.get_bool("success")
+        
+        msg_info = msg_dao.MessageDao.get_by_int_id(msg_id)
+        msg_index = msg_dao.MsgIndexDao.get_by_id(msg_id)
+        
+        assert msg_info != None
+        assert msg_index != None
+        
+        assert msg_info.date == new_date
+        assert msg_info.change_time == new_time
+        assert msg_info.ctime == new_time
+        
+        assert str(msg_index.date) == new_date
+        assert msg_index.change_time == new_time
+        assert msg_index.ctime == new_time

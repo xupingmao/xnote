@@ -128,7 +128,7 @@ def update_message(message: MessageDO):
     message.fix_before_save()
     _msg_db.update(message.to_save_dict())
     if message._update_date:
-        MsgIndexDao.update_ctime(message.int_id, message.ctime)
+        MsgIndexDao.update_ctime(message.int_id, message.ctime, message.date)
     else:
         MsgIndexDao.touch(int(message._id))
     execute_after_update(message)
@@ -638,9 +638,10 @@ class MsgIndexDao:
         return cls.db.update(mtime=now, where=dict(id=id))
     
     @classmethod
-    def update_ctime(cls, id = 0, ctime = ""):
+    def update_ctime(cls, id = 0, ctime = "", date = ""):
         now = xutils.format_datetime()
-        return cls.db.update(mtime = now, ctime = ctime, change_time = ctime, where = dict(id=id))
+        return cls.db.update(where = dict(id=id), 
+                             mtime = now, ctime = ctime, change_time = ctime, date=date)
     
     @classmethod
     def get_first(cls, user_id=0, content="", tag=""):
