@@ -281,7 +281,7 @@
 .layui-layer-content .msg-edit-box textarea {
     position: absolute;
     bottom: 185px;
-    top: 10px;
+    top: 45px;
     left: 10px;
     right: 10px;
     width: unset;
@@ -342,6 +342,12 @@
     padding-left: 5px;
     padding-right: 5px;
 }
+
+.msg-date {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
 
 /** 移动端样式放在最后 **/
 @media screen and (max-width: 500px) {

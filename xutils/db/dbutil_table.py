@@ -359,7 +359,7 @@ class LdbTable:
                 return key
         raise Exception("insert conflict")
 
-    def update(self, obj):
+    def update(self, obj: dict):
         """从`obj`中获取主键`key`进行更新"""
         self._check_value(obj)
 
@@ -370,7 +370,7 @@ class LdbTable:
 
         self._put_obj(obj_key, obj)
 
-    def put_by_id(self, id, obj, user_name=None, encode_key=True):
+    def put_by_id(self, id: Union[str, int], obj: dict, user_name=None, encode_key=True):
         """通过ID进行更新，如果key包含用户，必须有user_name(初始化定义或者传入参数)
         :param {str} id: 指定ID
         :param {dict} obj: 写入的对象

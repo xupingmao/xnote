@@ -83,12 +83,13 @@ class TestMain(BaseTestCase):
                      data=dict(id=data.get("id")))
 
         msg_id = data.get("id")
+        assert isinstance(msg_id, int)
 
         update_result = json_request_return_dict(
             "/message/save", method="POST", data=dict(id=msg_id, content="New Content"))
         self.assertEqual("success", update_result["code"])
 
-        data = MessageDao.get_by_key(msg_id)
+        data = MessageDao.get_by_int_id(msg_id)
         assert data != None
         assert data.tag == "log"
         assert data.status == None
@@ -96,21 +97,20 @@ class TestMain(BaseTestCase):
         self.assertEqual("New Content", data.content)
 
         keyword = quote("#test#")
-        quoted_id = quote(data.id)
         self.check_OK(f"/message/create_dialog?keyword={keyword}&tag=log")
-        self.check_OK(f"/message/edit_dialog?id={quoted_id}")
+        self.check_OK(f"/message/edit_dialog?id={data.int_id}")
 
         json_request("/message/delete", method="POST",
                      data=dict(id=data.int_id))
         
-        self.check_404(f"/message/edit_dialog?id={quoted_id}")
+        self.check_404(f"/message/edit_dialog?id={data.int_id}")
         
     def test_create_with_date(self):
         data = dict(content="Xnote-Date-Test", date="2020-01-01")
         result = json_request_return_dict("/message/save", method="POST", data=data)
         assert result.get_bool("success") == True
         msg_id = result.get_dict("data").get_int("id")
-        data = msg_dao.MessageDao.get_by_key(msg_id)
+        data = msg_dao.MessageDao.get_by_int_id(msg_id)
         assert data != None
         assert data.change_time == "2020-01-01 23:59:00"
 
@@ -227,7 +227,7 @@ class TestMain(BaseTestCase):
         # Py2: 判断的时候必须使用unicode
         self.assertEqual(u"Xnote-Unit-Test-Task", data.get("content"))
 
-        task_id = data["id"]
+        task_id = int(data["id"])
 
         update_result = json_request_return_dict("/message/finish", method="POST",
                                                  data=dict(id=task_id))
@@ -240,7 +240,7 @@ class TestMain(BaseTestCase):
                                                data=dict(id=task_id, tag="task"))
         assert open_result["success"] == True
 
-        data = msg_dao.get_message_by_id(task_id)
+        data = msg_dao.MessageDao.get_by_int_id(task_id)
         assert data != None
         assert data.tag == "task"
 
@@ -281,7 +281,7 @@ class TestMain(BaseTestCase):
             user_name=user_name, key="xnote")
         assert amount == 1
         assert len(search_list) == 1
-        assert search_list[0].id == new_msg_id
+        assert search_list[0].int_id == new_msg_id
         assert search_list[0].sort_value != ""
 
     def test_search_log(self):

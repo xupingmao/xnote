@@ -4,25 +4,29 @@
 {% end %}
 
 <script>
-    $("input.date").each(function(index, elem) {
-        if ($(elem).attr("data-laydate-bind")) {
-            return;
-        }
-        var dateType = $(elem).attr("data-date-type");
-
-        laydate.render({
-            elem: elem,
-            type: dateType,
-            change: function(value, date, endDate) {
-                // 数据变化就更新
-                $(elem).val(value);
-                // 年份、月份选择器不会自动关闭
-                if (dateType == "year" || dateType == "month") {
-                    $(".layui-laydate").remove();
-                }
+    xnote.initLaydate = function () {
+        $("input.date").each(function(index, elem) {
+            if ($(elem).attr("data-laydate-bind")) {
+                return;
             }
+            var dateType = $(elem).attr("data-date-type");
+
+            laydate.render({
+                elem: elem,
+                type: dateType,
+                change: function(value, date, endDate) {
+                    // 数据变化就更新
+                    $(elem).val(value);
+                    // 年份、月份选择器不会自动关闭
+                    if (dateType == "year" || dateType == "month") {
+                        $(".layui-laydate").remove();
+                    }
+                }
+            });
+            
+            $(elem).attr("data-laydate-bind", true);
         });
-        
-        $(elem).attr("data-laydate-bind", true);
-    });
+    };
+
+    xnote.initLaydate();
 </script>

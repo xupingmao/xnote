@@ -253,8 +253,8 @@ class ListAjaxHandler:
             no_tag=no_tag, date=date)
 
 
-def update_message_content(id: str, user_id: int, content, files: List[str] = None):
-    data = MessageDao.get_by_id(id)
+def update_message_content(id: int, user_id: int, content, files: List[str] = [], date = ""):
+    data = MessageDao.get_by_int_id(id)
     if data is None:
         return
     if data.user_id != user_id:
@@ -267,11 +267,17 @@ def update_message_content(id: str, user_id: int, content, files: List[str] = No
     data.mtime = xutils.format_datetime()
     data.files = files
     data.version = data.get('version', 0) + 1
+    if date and data.date != date:
+        data._update_date = True
+        data.ctime = date + " 00:00:00"
+        data.date = date
+        data.change_time = data.ctime
+        
     MessageDao.update(data)
 
     event = xnote_event.MessageUpdateEvent()
     event.msg_id = data.int_id
-    event.msg_key = id
+    event.msg_key = data._key
     event.user_id = data.user_id
     event.content = content
     event.fire()
@@ -279,10 +285,10 @@ def update_message_content(id: str, user_id: int, content, files: List[str] = No
     after_message_create_or_update(data)
 
 
-def update_message_tag(id, tag):
+def update_message_tag(id:int, tag):
     """更新message的tag字段"""
     user_name = xauth.current_name()
-    data = MessageDao.get_by_key(id)
+    data = MessageDao.get_by_int_id(id)
     if data == None:
         return webutil.FailedResult(message="数据不存在")
     if data.user != user_name:
@@ -306,14 +312,15 @@ def update_message_tag(id, tag):
         data.append_comment("$reopen_task$")
 
         ref = data.ref
-        origin_data = MessageDao.get_by_id(ref)
-        if origin_data != None:
-            # 更新原始任务后删除当前的完成记录
-            origin_data.append_comment("$reopen_task$")
-            MessageDao.update_tag(origin_data, tag)
-            MessageDao.delete_by_key(data.id)
-            need_update = False
-    
+        if ref:
+            origin_data = MessageDao.get_by_full_key(ref)
+            if origin_data != None:
+                # 更新原始任务后删除当前的完成记录
+                origin_data.append_comment("$reopen_task$")
+                MessageDao.update_tag(origin_data, tag)
+                MessageDao.delete_by_int_id(data.int_id)
+                need_update = False
+        
     if need_update:    
         MessageDao.update_tag(data, tag)
 
@@ -327,8 +334,8 @@ class FinishMessageAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument_str("id")
-        if id == "":
+        id = xutils.get_argument_int("id")
+        if id == 0:
             return
         return update_message_tag(id, "done")
 
@@ -337,8 +344,8 @@ class OpenMessageAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument("id")
-        if id == "":
+        id = xutils.get_argument_int("id")
+        if id == 0:
             return
         return update_message_tag(id, "task")
 
@@ -347,7 +354,7 @@ class OpenMessageAjaxHandler:
 class TouchAjaxHandler:
 
     def do_touch_by_id(self, id):
-        msg = MessageDao.get_by_id(id)
+        msg = MessageDao.get_by_full_key(id)
         if msg is None:
             return failure(message="message not found, id:%s" % id)
         if msg.user != xauth.current_name():
@@ -423,7 +430,7 @@ class CalendarRule(BaseRule):
         ctx.type = "calendar"
 
 
-def create_message(user_name, tag, content, ip, files: List[str] = None):
+def create_message(user_name, tag, content, ip, files: List[str] = []):
     assert isinstance(user_name, str)
     assert isinstance(tag, str)
     assert isinstance(content, str)
@@ -444,10 +451,10 @@ def create_message(user_name, tag, content, ip, files: List[str] = None):
     message.change_time = ctime
     message.files = files
     
-    id = MessageDao.create(message)
+    msg_id = MessageDao.create(message)
     MessageDao.refresh_message_stat(user_name, [message.tag])
 
-    created_msg = MessageDao.get_by_id(id)
+    created_msg = MessageDao.get_by_int_id(msg_id)
     assert created_msg != None
     
     after_message_create_or_update(created_msg)
@@ -471,7 +478,7 @@ class SaveAjaxHandler:
 
     @xauth.login_required()
     def do_post(self):
-        id = xutils.get_argument_str("id")
+        msg_id = xutils.get_argument_int("id")
         content = xutils.get_argument_str("content")
         tag = xutils.get_argument_str("tag", DEFAULT_TAG)
         location = xutils.get_argument_str("location", "")
@@ -479,6 +486,7 @@ class SaveAjaxHandler:
         user_name = xauth.get_current_name()
         user_id = xauth.current_user_id()
         ip = get_remote_ip()
+        date = xutils.get_argument_str("date")
 
         if content == "" and len(files) == 0:
             return webutil.FailedResult(code="fail", message="输入内容为空!")
@@ -488,12 +496,12 @@ class SaveAjaxHandler:
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
         self.apply_rules(user_name, id, tag, content)
 
-        if id == "":
+        if msg_id == 0:
             message = create_message(user_name, tag, content, ip, files)
             return webutil.SuccessResult(data=message)
         else:
-            update_message_content(id, user_id, content, files)
-        return webutil.SuccessResult(data=dict(id=id))
+            update_message_content(msg_id, user_id, content, files, date = date)
+        return webutil.SuccessResult(data=dict(id=msg_id))
 
     def POST(self):
         try:
@@ -550,8 +558,6 @@ class MessagePageHandler:
         """
         user = xauth.current_name_str()
         type_ = xutils.get_argument("type", "")
-        op = xutils.get_argument("op", "")
-        date = xutils.get_argument("date", "")
 
         # 记录日志
         xmanager.add_visit_log(user, "/message?tag=%s" % tag)
@@ -580,15 +586,16 @@ class MessagePageHandler:
 class MessageEditDialogHandler:
     @xauth.login_required()
     def GET(self):
-        id = xutils.get_argument_str("id")
+        id = xutils.get_argument_int("id")
         user_name = xauth.current_name_str()
-        detail = msg_dao.get_message_by_id(id, user_name=user_name)
+        user_id = xauth.current_user_id()
+        detail = msg_dao.MessageDao.get_by_int_id(id, user_id=user_id)
         if detail == None:
             web.ctx.status = "404 Not Found"
             return "数据不存在"
 
         if detail.ref != None:
-            detail = msg_dao.get_message_by_id(detail.ref, user_name=user_name)
+            detail = msg_dao.get_message_by_key(detail.ref, user_name=user_name)
         
         return xtemplate.render(
             "message/page/message_edit_dialog.html",
@@ -680,14 +687,14 @@ class CreateCommentHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument_str("id")
+        id = xutils.get_argument_int("id")
         content = xutils.get_argument_str("content")
 
         if content == "":
             return webutil.FailedResult(message="备注内容不能为空")
 
-        user_name = xauth.current_name_str()
-        msg = dao.get_message_by_id(id, user_name=user_name)
+        user_id = xauth.current_user_id()
+        msg = dao.MessageDao.get_by_int_id(id, user_id=user_id)
         if msg == None:
             return webutil.FailedResult(message="随手记不存在")
         comment = MessageComment()
@@ -702,13 +709,13 @@ class DeleteCommentHandler:
     
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument_str("id")
+        id = xutils.get_argument_int("id")
         time_str = xutils.get_argument_str("time")
 
         if time_str == "":
             return webutil.FailedResult(message="备注时间不能为空")
-        user_name = xauth.current_name_str()
-        msg = dao.get_message_by_id(id, user_name=user_name)
+        user_id = xauth.current_user_id()
+        msg = dao.MessageDao.get_by_int_id(id, user_id = user_id)
         if msg == None:
             return webutil.FailedResult(message="随手记不存在")
         
@@ -740,9 +747,9 @@ class ListCommentHandler:
     
     @xauth.login_required()
     def POST(self):
-        msg_id = xutils.get_argument_str("id")
-        user_name = xauth.current_name_str()
-        msg = dao.get_message_by_id(msg_id, user_name=user_name)
+        msg_id = xutils.get_argument_int("id")
+        user_id = xauth.current_user_id()
+        msg = dao.MessageDao.get_by_int_id(msg_id, user_id=user_id)
         if msg == None:
             return "随手记不存在"
         
@@ -765,7 +772,7 @@ class UpdateTagAjaxHandler:
 
     @xauth.login_required()
     def POST(self):
-        id = xutils.get_argument_str("id")
+        id = xutils.get_argument_int("id")
         tag = xutils.get_argument_str("tag")
         if id == "":
             return webutil.FailedResult(code="404", message="id为空")

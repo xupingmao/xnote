@@ -36,7 +36,7 @@ sys_comment_dict = {
     "$reopen_task$": T("重新开启任务"),
 }
 
-class BaseMsgDO(Storage):
+class BaseMsgDO(BaseDataRecord):
     def get_time_info(self):
         return ""
 
@@ -238,11 +238,21 @@ class QuerySourceType:
 class MessageDO(BaseMsgDO):
     tag_text: str
     
+    _ignore_save_fields = [
+        "id",
+        "html",
+        "tag_text",
+        "full_keywords",
+        "system_tags",
+        "query_source",
+        "query_key",
+        "_update_date",
+    ]
+    
     def __init__(self):
         self._key = "" # kv的主键
         self._id = "" # kv的ID
-
-        self.id = "" # 主键
+        self.id = 0 # 非持久化字段
         self.tag = "" # tag标签 {task, done, log, key}
         self.user = "" # 用户名
         self.user_id = 0 # 用户ID
@@ -268,12 +278,13 @@ class MessageDO(BaseMsgDO):
         self.query_source = ""
         self.query_key = ""
         self.files: List[str] = [] # 上传的文件
+        self._update_date = False # 非持久化字段
 
     @classmethod
     def from_dict(cls, dict_value: dict):
         result = MessageDO()
         result.update(dict_value)
-        result.id = result._key
+        result.id = int(result._id)
         if result.comments == None:
             result.comments = []
         result.comments = MessageComment.from_dict_list(result.comments)
@@ -293,9 +304,7 @@ class MessageDO(BaseMsgDO):
         return cls.from_dict(dict_value)
 
     def check_before_update(self):
-        id = self.id
-        if not id.startswith(VALID_MESSAGE_PREFIX_TUPLE):
-            raise Exception("[msg.update] invalid message id:%s" % id)
+        pass
 
     def fix_before_save(self):
         if self.tag is None:
@@ -304,21 +313,10 @@ class MessageDO(BaseMsgDO):
                 self.tag = "done"
             if self.status in (0, 50):
                 self.tag = "task"
-
-        del_dict_key(self, "html")
-        del_dict_key(self, "tag_text")
-        del_dict_key(self, "full_keywords")
-        del_dict_key(self, "system_tags")
-        del_dict_key(self, "query_source")
-        del_dict_key(self, "query_key")
-
         # remove None values
         delete_None_values(self)
 
     def check_before_create(self):
-        if self.id != "":
-            raise Exception("message.dao.create: can not set id")
-        
         if self.user == "":
             raise Exception("message.dao.create: key `user` is missing")
 
@@ -337,10 +335,16 @@ class MessageDO(BaseMsgDO):
         self.comments.append(comment)
 
     def get_int_id(self):
+        if self._id == "":
+            # 创建的时候
+            return 0
         return int(self._id)
     
     @property
     def int_id(self):
+        if self._id == "":
+            # 创建的时候
+            return 0
         return int(self._id)
     
     def get_second_type(self):
@@ -362,10 +366,9 @@ class MessageDO(BaseMsgDO):
     @classmethod
     def from_index(cls, index: MsgIndex):
         result = MessageDO()
-        key = f"msg_v3:{index.id}"
-        result.id = key
+        result.id = index.id
         result._id = str(index.id)
-        result._key = key
+        result._key = f"msg_v3:{index.id}"
         result.content = "[数据已丢失]"
         result.update_index(index)
         return result

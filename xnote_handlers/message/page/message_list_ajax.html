@@ -23,11 +23,11 @@
             {% end %}
             <div class="float-right">
                 {% if item.tag == "task" %}
-                    <button class="btn-default" data-id="{{item.id}}" onclick="onMessageDone(this)">完成</button>
+                    <button class="btn-default" data-id="{{item.int_id}}" onclick="onMessageDone(this)">完成</button>
                 {% end %}
 
                 {% if item.tag == "done" %}
-                    <button class="btn-default" data-id="{{item.id}}" onclick="xnote.action.message.reopen(this)">重做</button>
+                    <button class="btn-default" data-id="{{item.int_id}}" onclick="xnote.action.message.reopen(this)">重做</button>
                 {% end %}
             </div>
         </div>
@@ -46,17 +46,17 @@
 
         <div class="todo-foot">
             {% if show_edit_btn %}
-            <a class="todo-edit-btn btn btn-default" data-id="{{item.id}}" 
+            <a class="todo-edit-btn btn btn-default" data-id="{{item.int_id}}" 
                 onclick="xnote.action.message.edit(this);">编辑</a>
             {% end %}
 
-            <a class="btn btn-default" data-id="{{item.id}}" onclick="xnote.action.message.createComment(this)">备注</a>
+            <a class="btn btn-default" data-id="{{item.int_id}}" onclick="xnote.action.message.createComment(this)">备注</a>
             <a class="todo-delete-btn btn btn-default" data-id="{{item.int_id}}" data-content="{{item.content}}" onclick="xnote.action.message.deleteMessage(this)">删除</a>
         </div>
         {% if item.comments != None and len(item.comments) > 0 %}
         <div class="todo-comment">
             <span>备注:</span><span class="last-comment">{{item.comments[-1].get("content")}}</span>
-            <a data-id="{{item.id}}" onclick="xnote.action.message.showAllComments(this, '#msgCommentListTpl')">查看全部</a>
+            <a data-id="{{item.int_id}}" onclick="xnote.action.message.showAllComments(this, '#msgCommentListTpl')">查看全部</a>
         </div>
         {% end %}
     </div>

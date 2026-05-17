@@ -200,6 +200,8 @@ MessageView.saveMessage = function (target) {
     }
     
     params.files = MessageView.buildFiles();
+    params.date = $("#msgDate").val();
+
     var self = this;
 
     xnote.http.post("/message/update", params, function (resp) {

@@ -51,7 +51,7 @@ def execute_after_update(kw):
 def execute_after_delete(kw):
     build_task_index(kw)
 
-def _create_message_with_date(kw):
+def _create_message_with_date(kw: MessageDO) -> int:
     assert isinstance(kw, MessageDO)
     date = kw.date
     today = dateutil.get_today()
@@ -78,12 +78,14 @@ def _create_message_with_date(kw):
     msg_index.date = date
     msg_index.change_time = change_time
     msg_id = MsgIndexDao.insert(msg_index)
-    _msg_db.update_by_id(str(msg_id), kw)
-    kw.id = kw._key
-    return kw._key
+    _msg_db.update_by_id(str(msg_id), kw.to_save_dict())
+    kw.id = msg_id
+    kw._id = str(msg_id)
+    
+    return int(msg_id) # type: ignore
 
 
-def _create_message_without_date(kw):
+def _create_message_without_date(kw) -> int:
     assert isinstance(kw, MessageDO)
 
     tag = kw.tag
@@ -99,15 +101,14 @@ def _create_message_without_date(kw):
     index.change_time = ctime
 
     msg_id = MsgIndexDao.insert(index)
-    _msg_db.update_by_id(str(msg_id), kw)
-    
-    kw.id = kw._key
+    _msg_db.update_by_id(str(msg_id), kw.to_save_dict())
+    kw.id = int(msg_id) # type: ignore
+    kw._id = str(msg_id)
     execute_after_create(kw)
-    return kw._key
+    return int(msg_id) # type: ignore
 
 
-def create_message(message: MessageDO):
-    # type: (MessageDO) -> str
+def create_message(message: MessageDO) -> int:
     """创建信息
     :param {str} user: 用户名
     :param {str} tag: 类型
@@ -125,8 +126,11 @@ def update_message(message: MessageDO):
     assert isinstance(message, MessageDO)
     message.check_before_update()
     message.fix_before_save()
-    _msg_db.update(message)
-    MsgIndexDao.touch(int(message._id))
+    _msg_db.update(message.to_save_dict())
+    if message._update_date:
+        MsgIndexDao.update_ctime(message.int_id, message.ctime)
+    else:
+        MsgIndexDao.touch(int(message._id))
     execute_after_update(message)
 
 
@@ -235,7 +239,7 @@ def delete_message_by_id(id: str):
     # type: (str) -> None
     check_before_delete(id)
 
-    old = get_message_by_id(id)
+    old = get_message_by_key(id)
 
     if old == None:
         return
@@ -273,15 +277,12 @@ def get_message_by_key(full_key:str, user_name=""):
     value = _msg_db.get_by_key(full_key)
     if value != None:
         value = MessageDO.from_dict(value)
-        value.id = full_key
         value.update_index(index)
         if user_name != "" and user_name != value.user:
             return None
     else:
         value = MessageDO.from_index(index)
     return value
-
-get_message_by_id = get_message_by_key
 
 def check_param_user(user_name):
     if user_name is None or user_name == "":
@@ -637,6 +638,11 @@ class MsgIndexDao:
         return cls.db.update(mtime=now, where=dict(id=id))
     
     @classmethod
+    def update_ctime(cls, id = 0, ctime = ""):
+        now = xutils.format_datetime()
+        return cls.db.update(mtime = now, ctime = ctime, change_time = ctime, where = dict(id=id))
+    
+    @classmethod
     def get_first(cls, user_id=0, content="", tag=""):
         where = "1=1"
         if user_id != 0:
@@ -796,7 +802,6 @@ class MessageDao:
         value = _msg_db.get_by_id(int_id)
         if value != None:
             value = MessageDO.from_dict(value)
-            value.id = f"msg_v3:{int_id}"
             value.update_index(index)
             if user_id != 0 and user_id != value.user_id:
                 return None
@@ -805,7 +810,7 @@ class MessageDao:
         return value
 
     @staticmethod
-    def get_by_id(full_key):
+    def get_by_full_key(full_key: str):
         return get_message_by_key(full_key)
     
     @staticmethod
@@ -959,11 +964,8 @@ class MessageDao:
 xutils.register_func("message.create", create_message)
 xutils.register_func("message.update", update_message)
 xutils.register_func("message.search", search_message)
-xutils.register_func("message.delete", delete_message_by_id)
 xutils.register_func("message.count", count_message)
 
-xutils.register_func("message.find_by_id", get_message_by_id)
-xutils.register_func("message.get_by_id",  get_message_by_id)
 xutils.register_func("message.get_by_content", get_by_content)
 xutils.register_func("message.get_message_tag", get_message_stat_item)
 

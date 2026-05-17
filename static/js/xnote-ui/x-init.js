@@ -343,6 +343,10 @@ var XUI = function(window) {
         if (xnote.initSelect2) {
             xnote.initSelect2();
         }
+
+        if (xnote.initLaydate) {
+            xnote.initLaydate();
+        }
     };
 
     // 刷新各种默认值

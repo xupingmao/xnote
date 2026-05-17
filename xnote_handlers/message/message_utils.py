@@ -601,7 +601,7 @@ class MessageListParser(object):
         task = None
         done_time = message.done_time
         if message.ref != None:
-            task = msg_dao.get_message_by_id(message.ref)
+            task = msg_dao.MessageDao.get_by_full_key(message.ref)
 
         if task != None:
             html, keywords = mark_text(task.content, "done.search")
