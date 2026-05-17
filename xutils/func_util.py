@@ -12,7 +12,9 @@ _FUNC_DICT = dict() # type: dict[str, typing.Callable]
 _FUNC_SOURCE_DICT = dict() # type: dict[str, str]
 
 def register_func(name: str, func: typing.Callable, source = None):
-    """注册函数
+    """
+    deprecated: 不推荐使用, 请直接使用python模块
+    注册函数
     @param {string} name 函数名称，格式为 [protocol:] + [module] + name
     @param {func} func 函数
     """

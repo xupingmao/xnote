@@ -9,7 +9,7 @@
 @Description  : 数据库表-API, 不建议使用, 建议使用 dbutil_table_v2
 """
 
-from typing import Union
+from typing import Union, Optional, Any
 from urllib.parse import quote
 from xutils import Storage
 from xutils.db.dbutil_base import *
@@ -52,7 +52,7 @@ class LdbTable:
         比较麻烦，要重新构建主键
     """
 
-    def __init__(self, table_name:str, user_name=None, skip_user_check=False, skip_index = False):
+    def __init__(self, table_name:str, user_name:Optional[str]=None, skip_user_check=False, skip_index = False):
         # 参数检查
         check_table_name(table_name)
         table_info = get_table_info(table_name)
@@ -825,7 +825,7 @@ class ErrorLog(Storage):
     def __init__(self, **kw):
         super().__init__(**kw)
         self.key = ""
-        self.value = ""
+        self.value: Any = "" # 只要可以序列化即可
         self.ctime = "1970-01-01 00:00:00"
         self.type = "exception"
         self.err_msg = "error"

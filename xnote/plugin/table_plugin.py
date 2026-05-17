@@ -32,7 +32,9 @@ class BaseTablePlugin(BasePluginV2):
     TABLE_HTML = """
 {% init page_max = 0 %}
 {% init page_total = 0 %}
+{% init table = None %}
 
+{% if table %}
 <div class="card">
     {% include common/table/table.html %}
 
@@ -42,6 +44,7 @@ class BaseTablePlugin(BasePluginV2):
         </div>
     {% end %}
 </div>
+{% end %}
 """
 
     # 编辑表单的html

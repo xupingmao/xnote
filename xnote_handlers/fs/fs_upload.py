@@ -322,7 +322,7 @@ class UploadManageHandler:
         xmanager.add_visit_log(user_name, "/fs_upload/manage")
         page = xutils.get_argument_int("page", 1)
         assert page >= 1
-        page_size = 50
+        page_size = 20
         offset = (page-1) * page_size
 
         year = xutils.get_argument_int("year", dateutil.get_current_year())

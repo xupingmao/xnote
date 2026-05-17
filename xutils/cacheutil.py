@@ -44,7 +44,7 @@ import traceback
 import base64
 import typing
 
-from typing import Optional
+from typing import Optional, Callable
 from xutils import dateutil
 from xutils import textutil
 from collections import OrderedDict, deque
@@ -58,31 +58,6 @@ _cache_queue = deque() # type: deque[_InternalCacheObj]
 class CacheConfig:
     """缓存配置"""
     storage_dir = ""
-
-def encode_key(text):
-    """编码key为文件名"""
-    return text + ".json"
-    # return base64.urlsafe_b64encode(text.encode("utf-8")).decode("utf-8") + ".pk"
-
-
-def decode_key(text: str):
-    """解码文件名称为key值，暂时没有使用"""
-    return base64.urlsafe_b64decode(text[:-3].encode("utf-8")).decode("utf-8")
-
-
-def format_key(key):
-    """格式化key，先简单实现一版"""
-    result = []
-    for c in key:
-        if c == "/":
-            result.append("%47")
-        elif c == "%":
-            result.append("%25")
-        elif c == ":":
-            result.append("%58")
-        else:
-            result.append(c)
-    return "".join(result)
 
 
 def log_debug(msg):
@@ -343,7 +318,7 @@ class _InternalCacheObj:
     max_size = -1
     valid_key_pattern = re.compile(r"^[0-9a-zA-Z\[\]_\-\.\(\)\@\#,'\"\$ ]+$")
 
-    def __init__(self, key, value, expire=-1, type="object", need_save=True):
+    def __init__(self, key: str, value, expire=-1, type="object", need_save=True):
         global _cache_dict
         global _cache_queue
 
@@ -400,7 +375,7 @@ class _InternalCacheObj:
     def is_valid_key(self, key):
         return self.valid_key_pattern.match(key) != None
 
-    def _get_path(self, key):
+    def _get_path(self, key: str):
         assert CacheConfig.storage_dir != ""
         return os.path.join(CacheConfig.storage_dir, key + ".json")
 
@@ -416,8 +391,7 @@ class _InternalCacheObj:
             return
 
         # save to disk
-        raise Exception(
-            "cacheutil.%s to disk is no longer supprted, please use dbutil" % method_name)
+        raise Exception(f"cacheutil.{method_name} to disk is no longer supprted, please use database")
 
 
     def is_alive(self):
@@ -449,7 +423,7 @@ class _InternalCacheObj:
             os.remove(path)
 
 
-def cache_deco(key=None, prefix=None, expire=600, expire_random=600):
+def cache_deco(key:Optional[str]=None, prefix:Optional[str]=None, expire=600, expire_random=600):
     """缓存的装饰器，会自动清理失效的缓存
     注意：不考虑持久化，如果有持久化需要使用db实现
     @param {str} key    指定缓存的key，也就是使用固定的key
@@ -486,7 +460,7 @@ def cache_deco(key=None, prefix=None, expire=600, expire_random=600):
     return deco
 
 
-def cache_call(cache_key, func, expire=600, expire_random=600):
+def cache_call(cache_key: str, func: Callable, expire=600, expire_random=600):
     """带缓存的函数调用,这种方式可以生成可读性更高的cache_key"""
     assert isinstance(cache_key, str)
     cache_value = _global_cache.get(key=cache_key)
@@ -526,7 +500,7 @@ def kw_cache_deco(prefix="", expire=600, expire_random=600):
         return handle
     return deco
 
-def put(key, value=None, expire=-1):
+def put(key:str, value=None, expire=-1):
     """设置缓存的值
     @param {object} value value对象必须可以json序列化，如果value为None，会删除key对应的对象
     @param {integer} expire 失效时间，单位秒，如果小于等于0认为不失效，会持久化到文件
@@ -534,14 +508,14 @@ def put(key, value=None, expire=-1):
     return _global_cache.put(key, value=value, expire=expire)
 
 
-def get(key, default_value=None):
+def get(key:str, default_value=None):
     """读取缓存对象
     @param {object} default_value 如果缓存对象不存在，返回default_value
     """
     return _global_cache.get(key=key, default_value=default_value)
 
 
-def delete(key=None, prefix=None, args=None):
+def delete(key:Optional[str]=None, prefix:Optional[str]=None, args:Optional[tuple]=None):
     """使key对应的缓存失效，成功返回True
     del与python关键字冲突
     @param {string} key 缓存的key
@@ -551,13 +525,13 @@ def delete(key=None, prefix=None, args=None):
     return _global_cache.delete(key=key)
 
 
-def prefix_del(prefix):
+def prefix_del(prefix:str):
     """使用前缀删除"""
     for key in _global_cache.dict:
         if key.startswith(prefix):
             _global_cache.delete(key)
 
-def get_cache_obj(key, default_value=None, type=None):
+def get_cache_obj(key:str, default_value=None, type=None):
     if not is_str(key):
         raise TypeError("cache key must be string")
     obj = _cache_dict.get(key)
@@ -570,19 +544,11 @@ def get_cache_obj(key, default_value=None, type=None):
     obj.clear()
     return None
 
-
-def update_cache_by_key(key):
-    """直接通过key来更新缓存，前提是缓存已经存在"""
-    obj = _cache_dict.get(key)
-    if obj != None:
-        func = obj.func
-        args = obj.args
-        obj.value = func(*args)
-
-
 def lpush(key, value):
     obj = get_cache_obj(key, type="list")
     if obj != None and obj.value != None:
+        if not isinstance(obj.value, list):
+            raise ValueError(f"expect list value but see {type(obj.value)}")
         obj.value.insert(0, value)
         obj.save()
     else:
@@ -593,6 +559,8 @@ def lpush(key, value):
 def rpush(key, value):
     obj = get_cache_obj(key, type="list")
     if obj != None and obj.value != None:
+        if not isinstance(obj.value, list):
+            raise ValueError(f"expect list value but see {type(obj.value)}")
         obj.value.append(value)
         obj.save()
     else:
@@ -650,7 +618,7 @@ class SortedObject:
         return self.value < obj.value
 
     def __cmp__(self, obj):
-        return cmp(self.value, obj.value)
+        return cmp(self.value, obj.value) # type: ignore
 
 
 def zadd(key, score, member):

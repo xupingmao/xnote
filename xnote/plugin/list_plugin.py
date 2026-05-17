@@ -14,16 +14,20 @@ class BaseListPlugin(BasePluginV2):
 {% include common/script/load_select2.html %}
 {% include common/script/load_laydate.html %}
 
-<div class="card">
-    {% render list_view %}
-</div>
-
+{% init list_view = None %}
 {% init page_max = 0 %}
 {% init page_total = 0 %}
-{% if page_max > 0 or page_total > 0 %}
-    <div class="card">
-        {% include common/pagination.html %}
-    </div>
+
+{% if list_view %}
+<div class="card">
+    {% render list_view %}
+    
+    {% if page_max > 0 or page_total > 0 %}
+        <div class="row padding-top-md padding-bottom-md">
+            {% include common/pagination.html %}
+        </div>
+    {% end %}
+</div>
 {% end %}
 """
 

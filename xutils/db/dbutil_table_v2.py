@@ -9,7 +9,7 @@
 @Description  : 数据库表-API
 """
 
-from typing import Union
+from typing import Union, List
 from xutils import Storage
 from xutils.db.dbutil_base import *
 from xutils.db.encode import decode_str
@@ -129,7 +129,7 @@ class KvTableV2:
                 return self._format_value(key, index_result)
         return result
 
-    def batch_get_by_id(self, row_id_list, default_value=None):
+    def batch_get_by_id(self, row_id_list: Union[List[str], List[int]], default_value=None):
         key_list = []
         key_id_dict = {}
         for row_id in row_id_list:
@@ -147,7 +147,7 @@ class KvTableV2:
             result[id] = object
         return result
     
-    def batch_get_by_index_list(self, row_list, default_value=None):
+    def batch_get_by_index_list(self, row_list: List[Storage], default_value=None):
         key_list = []
         dict_result = {}
 
@@ -168,7 +168,7 @@ class KvTableV2:
                 result.append(object)
         return result
 
-    def get_by_key(self, key, default_value=None):
+    def get_by_key(self, key: str, default_value=None):
         """通过key查询记录
         :param key: kv数据库的key
         :param default_value: 默认值
@@ -182,7 +182,7 @@ class KvTableV2:
 
         return self._format_value(key, value)
 
-    def batch_get_by_key(self, key_list, default_value=None):
+    def batch_get_by_key(self, key_list: List[str], default_value=None):
         for key in key_list:
             self._check_key(key)
 
@@ -351,11 +351,10 @@ class KvTableV2:
         :param ignore_error=False: 忽略错误
         :param ignore_invalid_id=False: 忽略无效的ID
         """
-        idx_version_key = "_idx_version:%s" % self.table_name
+        idx_version_key = f"_idx_version:{self.table_name}"
         current_version = db_get(idx_version_key)
         if current_version == version:
-            logging.info("当前索引已经是最新版本, table=%s, version=%s" %
-                            (self.table_name, version))
+            logging.info("当前索引已经是最新版本, table=%s, version=%s", self.table_name, version)
             return
         self.rebuild_index_no_check(**kw)
         db_put(idx_version_key, version)
@@ -367,10 +366,11 @@ class KvTableV2:
             self.rebuild_record_index(key, item, **kw) # type: ignore
 
     def rebuild_record_index(self, key: str, item: dict, **kw):
+        """重建单条记录的索引"""
+        
         ignore_invalid_id = kw.get("ignore_invalid_id", False)
         ignore_error = kw.get("ignore_error", False)
         
-        """重建单条记录的索引"""
         sql_record = self.build_sql_record(item)
         try:
             id = self._get_int_id_from_key(key)
