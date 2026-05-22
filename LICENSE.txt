@@ -1,0 +1,5 @@
+IconPark 图标版权
+================
+Copyright 2019-present Bytedance Inc.
+Licensed under the Apache License, Version 2.0
+

@@ -9,6 +9,11 @@
 .icon {
     width: 16px;
     height: 16px;
+    display: block;
+    margin-right: 5px;
+    margin-top: 5px; /* line-height是25px */
+    float: left;
+    background-size: cover;
 }
 
 .icon-check {
@@ -101,3 +106,10 @@
     background-image: url(/static/image/icons/icon_work.png);
 }
 
+.icon-terminal {
+    background-image: url(/static/image/icons/icon_terminal.png);
+}
+
+.icon-shell {
+    background-image: url(/static/image/icons/icon_shell.png);
+}

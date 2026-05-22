@@ -6,6 +6,7 @@ import os
 import xutils
 from xnote.core import xconfig
 from xnote.core import xauth
+from xnote.core import xmanager
 from xnote.core.models import SearchContext
 from xutils import six
 
@@ -31,12 +32,15 @@ def init_name_dict():
 
 init_name_dict()
 
-def search(ctx: SearchContext, name):
+@xmanager.searchable(r"([^ ]*)", description="系统接口搜索")
+def search_api(ctx: SearchContext):
+    """系统接口搜索"""
     global _api_name_dict
     if not xauth.is_admin():
         return
     if not ctx.search_tool:
         return
+    name = ctx.groups[0] if ctx.groups else ""
     results = []
     for task_name in _api_name_dict:
         task_command = _api_name_dict[task_name]
@@ -47,4 +51,5 @@ def search(ctx: SearchContext, name):
             result.command = f"/api/{task_command}"
             result.url = result.command
             results.append(result)
-    return results
+    if results:
+        ctx.tools.extend(results)

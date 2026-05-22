@@ -47,7 +47,7 @@ class SearchContext:
         self.offset = 1
         self.limit = 20
         
-        # 初始化的html文件
+        # 初始化的html内容
         self.init_html = ""
 
     def join_as_files(self):

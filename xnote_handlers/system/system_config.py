@@ -30,13 +30,14 @@ def link(name, url, user="", icon="cube"):
     return result
 
 
-def admin_link(name, url, icon="cube"):
+def admin_link(name, url, icon="cube", img_src = None):
     link = AppLink()
     link.name = name
     link.url = url
     link.icon = icon
     link.is_admin = True
     link.user = "admin"
+    link.img_src = img_src
     link.build()
     return link
 
@@ -92,7 +93,7 @@ SYS_TOOLS = [
     admin_link("事件注册", "/system/event"),
     admin_link("线程管理", "/system/thread_info"),
     admin_link("Menu_Log",    "/system/log/db"),
-    admin_link("Shell",    "/tools/shell", "terminal"),
+    admin_link("Shell",    "/tools/shell", img_src="/static/image/icons/icon_terminal.png"),
     admin_link("集群管理", "/system/sync?p=home", "server"),
     admin_link("开发者", "/plugin_list?category=develop", icon="fa-code"),
 
