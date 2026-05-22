@@ -1,5 +1,6 @@
 # encoding=utf-8
 
+from typing import Any
 from xutils import dateutil
 from xutils import SearchResult
 from xutils import BaseDataRecord
@@ -34,13 +35,13 @@ class SearchContext:
         self.stop             = False
         
         # 处理的结果集，优先级: 系统功能 > 字典 > 个人数据
-        self.commands = [] # type: list[SearchResult] # 命令
-        self.tools    = [] # type: list[SearchResult] # 工具
-        self.dicts    = [] # type: list[SearchResult] # 词典 -- 公共
-        self.messages = [] # type: list[SearchResult] # 待办/记事/通知/评论
-        self.notes    = [] # type: list[SearchResult] # 笔记
-        self.files    = [] # type: list[SearchResult] # 文件
-        self.parent_note = None # type: object # 上级笔记
+        self.commands: List[SearchResult]    = [] # # 命令
+        self.tools: List[SearchResult]    = [] # # 工具
+        self.dicts: List[SearchResult]    = [] # # 词典 -- 公共
+        self.messages: List[SearchResult]    = [] # # 待办/记事/通知/评论
+        self.notes: List[SearchResult]    = [] # # 笔记
+        self.files: List[SearchResult]    = [] # # 文件
+        self.parent_note: Any = None # 上级笔记
 
         # 分页信息
         self.offset = 1

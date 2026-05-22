@@ -63,7 +63,7 @@
                 {% end %}
 
                 {% if file.show_move == True %}
-                    <a class="item-option move-btn" data-id="{{file.id}}">移动</a>
+                    <a class="item-option move-btn" data-id="{{file.id}}" onclick="xnote.note.openDialogToMoveByElement(this);">移动</a>
                 {% end %}
 
                 {# 插件 #}
@@ -108,7 +108,7 @@
                         <span class="tag orange-tag">置顶</span>
                     {% end %}
 
-                    {% if file.creator != None %}
+                    {% if file.creator %}
                         <span class="tag lightgray">{{file.creator}}</span>
                     {% end %}
 
@@ -148,24 +148,6 @@
                 $("#executeResult").text(JSON.stringify(obj.data));
             }
         });
-    });
-
-    // 移动笔记
-    $(".move-btn").click(function (e) {
-        var req = {};
-        var noteId = $(e.target).attr("data-id");
-
-        req.callback = function (parentId) {
-            if (parentId === undefined || parentId == "") {
-                xnote.alert("parentId is undefined");
-                return;
-            }
-            xnote.http.post("/note/move", { id: noteId, parent_id: parentId }, function (resp) {
-                console.log(resp);
-                window.location.reload();
-            });
-        };
-        xnote.api["note.move.dialog"](req);
     });
 </script>
 

@@ -28,8 +28,8 @@ from threading import Thread
 from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, u, dbutil
-from collections.abc import Callable
 from xnote.core.models import CronJobRecord
+from xnote.core.models import SearchContext
 
 __version__ = "1.0"
 __author__ = "xupingmao (578749341@qq.com)"
@@ -683,7 +683,7 @@ class SearchHandler(EventHandler):
 
     pattern = re.compile(r".*")
 
-    def execute(self, ctx, is_async = None):
+    def execute(self, ctx: SearchContext, is_async = None):
         try:
             matched = self.pattern.match(ctx.key)
             if not matched:

@@ -454,7 +454,6 @@ class RuleManager:
         cls.add_rule(r"静音(.*)", "mute.search")
         cls.add_rule(r"mute(.*)", "mute.search")
         cls.add_rule(r"取消静音",  "mute.cancel")
-        cls.add_rule(r"(.*)", "note.search")
         cls.is_loaded = True
 
     @classmethod

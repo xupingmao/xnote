@@ -94,6 +94,7 @@ class SearchResult(Storage):
     """搜索结果"""
     def __init__(self, name="", url='#', raw=None, **kw):
         super().__init__()
+        self.id = 0
         self.name = name
         self.name_html = ""
         self.short_desc = ""
@@ -112,6 +113,7 @@ class SearchResult(Storage):
         self.parent_name = ""
         self.badge_info = ""
         self.category = ""
+        self.creator = ""
         self.update(kw)
 
     @property

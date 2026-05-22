@@ -56,7 +56,7 @@ def search_tag(ctx: SearchContext, max_result=5):
         result.append(tag_result)
     return result
 
-
+@xmanager.searchable(".+", description="搜索笔记")
 def search(ctx: SearchContext, expression=None):
     from xnote_handlers.note import dao as note_dao
     words = ctx.words
@@ -76,10 +76,13 @@ def search(ctx: SearchContext, expression=None):
     
     if ctx.search_note:
         files = note_dao.search_name(words, creator_id=user_id, exclude_types=["group"])
+        files_by_short_desc = note_dao.search_short_desc(words, creator_id=user_id, exclude_types=["group"])
+        files = note_dao.merge_notes(files, files_by_short_desc)
+        files = note_dao.to_search_results(files)
 
     for item in files:
         item.category = 'note'
 
     logging.debug("len(files)=%s", len(files))
-    return tags + groups + files
+    ctx.notes += tags + groups + files
 

@@ -44,10 +44,6 @@ def execute_after_create(kw):
     build_task_index(kw)
 
 
-def execute_after_update(kw):
-    build_task_index(kw)
-
-
 def execute_after_delete(kw):
     build_task_index(kw)
 
@@ -79,7 +75,7 @@ def _create_message_with_date(kw: MessageDO) -> int:
     msg_index.change_time = change_time
     msg_id = MsgIndexDao.insert(msg_index)
     _msg_db.update_by_id(str(msg_id), kw.to_save_dict())
-    kw.id = msg_id
+    kw.id = int(msg_id) # type: ignore
     kw._id = str(msg_id)
     
     return int(msg_id) # type: ignore
@@ -128,10 +124,9 @@ def update_message(message: MessageDO):
     message.fix_before_save()
     _msg_db.update(message.to_save_dict())
     if message._update_date:
-        MsgIndexDao.update_ctime(message.int_id, message.ctime, message.date)
+        MsgIndexDao.update_date(message.int_id, message.ctime, message.date)
     else:
         MsgIndexDao.touch(int(message._id))
-    execute_after_update(message)
 
 
 def add_message_history(message: MessageDO):
@@ -638,7 +633,7 @@ class MsgIndexDao:
         return cls.db.update(mtime=now, where=dict(id=id))
     
     @classmethod
-    def update_ctime(cls, id = 0, ctime = "", date = ""):
+    def update_date(cls, id = 0, ctime = "", date = ""):
         now = xutils.format_datetime()
         return cls.db.update(where = dict(id=id), 
                              mtime = now, ctime = ctime, change_time = ctime, date=date)

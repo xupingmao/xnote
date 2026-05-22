@@ -195,3 +195,20 @@ def merge_notes(a: List[NoteIndexDO], b: List[NoteIndexDO],  orderby="hot_index"
     sort_notes(result, orderby)
     sort_by_priority(result)
     return result
+
+def to_search_results(notes: List[NoteIndexDO]) -> typing.List[SearchResult]:
+    result = []
+    for note in notes:
+        item = SearchResult()
+        item.id = note.note_id
+        item.name = note.name
+        item.url = note.url
+        item.html = note.html
+        item.icon = note.icon
+        item.show_move = False
+        item.short_desc = note.manual_short_desc
+        item.parent_id = note.parent_id
+        item.creator = note.creator
+        item.badge_info = note.badge_info
+        result.append(item)
+    return result

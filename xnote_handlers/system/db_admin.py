@@ -602,7 +602,8 @@ class TableData:
                 value = item.get(head, "")
                 if value == "":
                     continue
-                list_item.add_span(f"{head}: {value}")
+                list_item.add_span(f"{head}: ", css_class="bold")
+                list_item.add_span(value)
                 list_item.add_br()
             result.add_item(list_item)
         return result
@@ -724,7 +725,7 @@ class StructHandler:
         kw.create_sql = helper.get_create_sql()
         kw.error = ""
         kw.column_table = column_info.to_data_table()
-        kw.index_table = index_info.to_list_view()
+        kw.index_info = index_info.to_list_view()
 
         return xtemplate.render("system/page/db/db_struct.html", **kw)
 
