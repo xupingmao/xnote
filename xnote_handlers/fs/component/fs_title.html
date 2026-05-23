@@ -10,8 +10,14 @@
 
 {% init fs_title = "文件管理" %}
 {% init fs_mode = "list" %}
+{% init parent_link = None %}
 
 <h3 class="card-title btn-line-height">
+    {% if parent_link %}
+        <a class="link2 path-link" href="{{parent_link.href}}">{{parent_link.text}}</a>
+        <span>/</span>
+    {% end %}
+
     <span>{{fs_title}}</span>
     
     <div class="float-right">

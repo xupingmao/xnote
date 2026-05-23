@@ -17,6 +17,7 @@ import datetime
 
 import mimetypes
 import web
+from xnote_handlers.config import LinkConfig
 import xutils
 import logging
 import zipfile
@@ -724,6 +725,7 @@ class BookmarkHandler:
         kw.fake_path_name = "文件收藏夹"
         kw.filelist = filelist
         kw.fs_toolbar = self.get_fs_toolbar()
+        kw.parent_link = LinkConfig.app_index
         
         return xtemplate.render("fs/page/fs_bookmark.html", **kw)
     

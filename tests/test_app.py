@@ -259,9 +259,21 @@ class TestMain(BaseTestCase):
     def test_search_mute(self):
         self.check_200(xutils.quote_unicode("/search?key=静音"))
         self.assertTrue(xconfig.MUTE_END_TIME != None)
+    
+    def test_search_mute_en(self):
+        self.check_200(xutils.quote_unicode("/search?key=mute"))
+        self.assertTrue(xconfig.MUTE_END_TIME != None)
+    
+    def test_search_unmute(self):
+        xconfig.MUTE_END_TIME = xutils.dateutil.timestamp_ms() + 3600000
+        self.check_200(xutils.quote_unicode("/search?key=取消静音"))
+        self.assertTrue(xconfig.MUTE_END_TIME == None)
 
     def test_search_translate(self):
         self.check_200(xutils.quote_unicode("/search?key=翻译test"))
+
+    def test_search_api(self):
+        self.check_200(xutils.quote_unicode("/search?key=weather"))
 
     def test_http_headers(self):
         data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
