@@ -28,7 +28,8 @@ from xnote_handlers.plugin.dao import (
     add_visit_log, list_visit_logs, PageVisitLogDO)
 from xnote_handlers.plugin.service import CategoryService
 from xnote_handlers.plugin import plugin_util
-from xnote.plugin import load_plugin_file, PluginContext, LinkConfig
+from xnote.plugin import load_plugin_file, PluginContext
+from xnote_handlers.config import LinkConfig
 from xnote.plugin import TagSpan, BaseContainer
 from xnote.plugin import iter_plugins
 from xnote_handlers.plugin.plugin_config import INNER_TOOLS

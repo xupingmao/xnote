@@ -25,7 +25,7 @@ from xutils import webutil
 from xutils.db.driver_sqlite import SqliteKV
 from xnote.core import xtables
 from xnote.service import JobService, SysJob, JobStatusEnum, DatabaseLockService
-from xnote.plugin import LinkConfig
+from xnote_handlers.config import LinkConfig
 from xnote.service.system_meta_service import SystemMetaEnum
 from xnote.webui import ListView, ListViewItem, ActionButton
 from xutils.db.binlog import BinLog

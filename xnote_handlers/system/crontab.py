@@ -16,7 +16,7 @@ from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable, TableActionType, DataForm, FormRowType
-from xnote.plugin import LinkConfig
+from xnote_handlers.config import LinkConfig
 from .dao_cron import CronJobDao
 
 SCRIPT_EXT_TUPLE = (".py", ".bat", ".sh", ".command")

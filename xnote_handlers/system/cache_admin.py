@@ -21,7 +21,8 @@ from xutils import webutil
 from xutils import textutil
 
 from xnote.plugin.table_plugin import BaseTablePlugin
-from xnote.plugin import sidebar, LinkConfig
+from xnote.plugin import sidebar
+from xnote_handlers.config import LinkConfig
 
 class CacheHandler(BaseTablePlugin):
     title = "缓存信息"

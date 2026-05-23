@@ -8,7 +8,8 @@ from xnote.core.xtemplate import BasePlugin
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xutils import Storage
 from xnote.core import xtemplate
-from xnote.plugin import sidebar, LinkConfig
+from xnote.plugin import sidebar
+from xnote_handlers.config import LinkConfig
 from xnote.webui import ListView, ListViewItem, Card
 
 class EventHandler(BaseTablePlugin):

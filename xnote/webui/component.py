@@ -234,10 +234,6 @@ class Dropdown(BaseContainer):
     def render(self):
         return self._template.generate(children = self.children)
 
-class LinkConfig:
-    """废弃了, 请到 handlers/config 模块进行配置"""
-    app_index = TextLink(text="应用", href="/system/index")
-
 
 class BlockTitle(BaseComponent):
     _code = """

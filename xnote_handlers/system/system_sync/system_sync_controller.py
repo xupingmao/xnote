@@ -36,7 +36,7 @@ from . import system_sync_indexer
 from .dao import SystemSyncTokenDao
 from xnote_handlers.system.system_sync.dao import ClusterConfigDao
 from xnote.core.xtemplate import T
-from xnote.plugin import LinkConfig
+from xnote_handlers.config import LinkConfig
 from .system_sync_instances import LeaderInstance, FollowerInstance
 from . import system_sync_open_api
 from .node_leader import Leader

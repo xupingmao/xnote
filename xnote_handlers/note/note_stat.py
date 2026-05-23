@@ -13,7 +13,8 @@ from xnote.service import SearchHistoryService, SearchHistoryType
 from xutils import dbutil, Storage
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.webui import ListView, ListViewItem
-from xnote.plugin import LinkConfig, find_plugin, iter_plugins
+from xnote.plugin import find_plugin, iter_plugins
+from xnote_handlers.config import LinkConfig
 
 
 class StatInfo(Storage):

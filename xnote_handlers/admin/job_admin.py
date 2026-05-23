@@ -15,7 +15,8 @@ import json
 from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import webutil
-from xnote.plugin import DataTable, DataForm, LinkConfig
+from xnote.plugin import DataTable, DataForm
+from xnote_handlers.config import LinkConfig
 from xnote.service import JobService, SysJob, JobStatusEnum
 from xnote.core import xauth
 from xutils import dateutil
