@@ -14,7 +14,7 @@ from .test_base import json_request, json_request_return_dict, BaseTestCase
 from .test_base import init as init_app
 from xnote_handlers.dict import dict_dao
 from xnote_handlers.note.dao import NoteIndexDao, NoteIndexDO
-from xnote_handlers.note.dao_comment import CommentDao, CommentRecord
+from xnote_handlers.note.dao_comment import CommentDao, CommentVO
 from xnote.core.models import SearchContext
 from xnote.core import xauth
 from tests.test_base_note import delete_note_for_test, create_note_for_test
@@ -29,7 +29,7 @@ def delete_comment_for_test(id):
 
 def create_comment_for_test(note_id=0, user_id=0, content="hello"):
     assert note_id > 0
-    comment = CommentRecord()
+    comment = CommentVO()
     comment.user_id = user_id
     comment.note_id = note_id
     comment.content = content
@@ -137,3 +137,55 @@ class TestMain(BaseTestCase):
             self.check_OK(f"/note/comments?note_id={note_id}")
         finally:
             login_test_user()
+
+    def test_comment_create_time_update_time(self):
+        """测试评论的 create_time/update_time 字段（毫秒时间戳）"""
+        delete_note_for_test(name="comment-time-test")
+        note_id = create_note_for_test(type="md", name="comment-time-test")
+        
+        # 清理评论
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        for comment in data:
+            delete_comment_for_test(comment['id'])
+        
+        # 创建评论
+        request = dict(note_id=str(note_id), content="test time fields")
+        json_request("/note/comment/save", method="POST", data=request)
+        
+        # 查询评论，验证 create_time/update_time 字段
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        self.assertEqual(1, len(data))
+        
+        comment = data[0]
+        self.assertIn("create_time", comment)
+        self.assertIn("update_time", comment)
+        
+        # 验证时间戳是毫秒级别的（大于10^12）
+        create_time = comment["create_time"]
+        update_time = comment["update_time"]
+        self.assertGreater(create_time, 10**12, "create_time 应该是毫秒时间戳")
+        self.assertGreater(update_time, 10**12, "update_time 应该是毫秒时间戳")
+        self.assertEqual(create_time, update_time, "新建评论的 create_time 和 update_time 应该相等")
+        
+        # 获取评论详情，验证 date 属性
+        comment_id = comment["id"]
+        from xnote_handlers.note.dao_comment import get_comment
+        comment_record = get_comment(comment_id)
+        self.assertIsNotNone(comment_record)
+        self.assertEqual(comment_record.create_time, create_time)
+        self.assertEqual(comment_record.update_time, update_time)
+        self.assertNotEqual(comment_record.date, "", "date 属性应该有值")
+        self.assertEqual(len(comment_record.date), 10, "date 格式应该是 YYYY-MM-DD")
+        
+        # 更新评论，验证 update_time 变化
+        import time
+        time.sleep(0.01)  # 等待10毫秒确保时间戳有差异
+        data = json_request_return_dict(f"/note/comment?comment_id={comment_id}&p=update&content=updated content")
+        self.assertEqual("success", data["code"])
+        
+        # 再次获取评论，验证 update_time 已更新
+        updated_record = get_comment(comment_id)
+        self.assertGreater(updated_record.update_time, update_time, "更新后 update_time 应该增大")
+        
+        # 清理
+        delete_comment_for_test(comment_id)

@@ -707,13 +707,13 @@ A example image
 
 
     def test_comment_search(self):
-        from xnote_handlers.note.dao_comment import CommentRecord
+        from xnote_handlers.note.dao_comment import CommentVO
         note_id = create_note_for_test("list", "check-list-test")
 
         user_info = xauth.current_user()
         assert user_info != None
 
-        comment = CommentRecord()
+        comment = CommentVO()
         comment.user = user_info.name
         comment.user_id = user_info.id
         comment.type = "list_item"
@@ -787,8 +787,8 @@ A example image
     def test_checklist_search(self):
         delete_note_for_test("checklist-test")
         note_id = create_note_for_test("list", "checklist-test")
-        from xnote_handlers.note.dao_comment import CommentDao, CommentRecord
-        comment = CommentRecord()
+        from xnote_handlers.note.dao_comment import CommentDao, CommentVO
+        comment = CommentVO()
         comment.type = "list_item"
         comment.content = "comment content"
         comment.user_id = xauth.current_user_id()

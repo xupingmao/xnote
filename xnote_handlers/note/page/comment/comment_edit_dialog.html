@@ -53,6 +53,7 @@
             params.content = $("#commentUpdateContent").val();
             params.date = $("#commentDate").val();
             params.files = buildFiles();
+            params.version = "{{comment.version}}";
             xnote.http.post("/note/comment", params, function (resp) {
                 if (resp.success) {
                     xnote.toast("更新成功");

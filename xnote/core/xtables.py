@@ -806,8 +806,30 @@ def init_comment_index_table():
         manager.add_column("user_id", "bigint", 0, comment="用户ID")
         manager.add_column("target_id", "bigint", 0, comment="关联的对象ID")
         manager.add_column("pin_level", "tinyint", default_value=0, comment="置顶级别,0-普通,1-置顶")
+        manager.add_column("parent_comment_id", "bigint", default_value=0, comment="父评论ID,0-根评论")
         
         manager.add_index(["user_id", "ctime"])
+        manager.add_index("target_id")
+
+def init_comment_data_table():
+    """评论数据"""
+    table_name = "comment_data"
+    comment = "评论数据"
+    dbpath = xconfig.FileConfig.kv_db_file
+    with create_default_table_manager(table_name=table_name, comment=comment, dbpath=dbpath) as manager:
+        # 展示创建时间
+        manager.add_column("create_time", "bigint", default_value=0, comment="创建时间毫秒时间戳")
+        # 修改时间
+        manager.add_column("update_time", "bigint", default_value=0, comment="更新时间毫秒时间戳")
+        manager.add_column("version", "int", default_value=0, comment="版本号")
+        manager.add_column("type", "varchar(16)", default_value="", comment="评论类型")
+        manager.add_column("user_id", "bigint", 0, comment="用户ID")
+        manager.add_column("target_id", "bigint", 0, comment="关联的对象ID")
+        manager.add_column("pin_level", "tinyint", default_value=0, comment="置顶级别,0-普通,1-置顶")
+        manager.add_column("parent_comment_id", "bigint", default_value=0, comment="父评论ID,0-根评论")
+        manager.add_column("content", "text", default_value="", comment="评论内容")
+        manager.add_column("extra", "text", default_value="", comment="额外字段, json格式")
+        manager.add_index(["user_id", "create_time"])
         manager.add_index("target_id")
 
 
@@ -1039,6 +1061,7 @@ def init():
 
     # 评论相关
     init_comment_index_table()
+    init_comment_data_table()
 
     # 随手记
     init_msg_index_table()

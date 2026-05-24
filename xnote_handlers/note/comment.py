@@ -21,7 +21,7 @@ from . import dao_comment
 from xutils import webutil
 from xutils import dateutil
 from xnote.core.models import SearchContext, SearchResult
-from .dao_comment import search_comment, CommentRecord
+from .dao_comment import search_comment, CommentVO
 from .dao_meta import NoteMetaDao
 from xutils.text_parser import TokenType
 from .models import NoteTypeInfo
@@ -62,7 +62,7 @@ def mark_text(content):
     text_tokens = parser.get_text_tokens(tokens)
     return "".join(text_tokens)
 
-def process_comments(comments: typing.List[CommentRecord], show_note = False):
+def process_comments(comments: typing.List[CommentVO], show_note = False):
     for comment in comments:
         if comment.content is None:
             continue
@@ -98,7 +98,10 @@ def search_comment_detail(ctx: SearchContext):
         item.icon = "fa-comment-o"
         item.name = "[评论] %s" % item.note_name
         item.url  = item.note_url
-        item.mtime = item.ctime
+        # 转换为可读时间字符串
+        if item.create_time > 0:
+            item.mtime = dateutil.format_datetime(item.create_time, is_ms=True)
+            item.ctime = item.mtime
         result.append(item)
 
     ctx.messages += result
@@ -112,7 +115,7 @@ def on_search_comments(ctx: SearchContext):
         search_comment_detail(ctx)
 
 def render_to_html(
-    comments: List[CommentRecord], show_note = False, page = 1, page_max = 1, show_edit = False, 
+    comments: List[CommentVO], show_note = False, page = 1, page_max = 1, show_edit = False, 
     note_user_id=0):
     return xtemplate.render("note/page/comment/comment_list_ajax.html", 
         show_comment_edit = show_edit,
@@ -206,7 +209,7 @@ class SaveCommentAjaxHandler:
         if content == "" and len(files) == 0:
             return webutil.FailedResult(code = "400", message = "content参数为空")
 
-        comment = dao_comment.CommentRecord()
+        comment = dao_comment.CommentVO()
         comment.user = user_info.name
         comment.user_id = user_info.id
         comment.type = type
@@ -263,6 +266,7 @@ class CommentAjaxHandler:
         p = xutils.get_argument_str("p")
         user_name = xauth.current_name()
         comment_id = xutils.get_argument_int("comment_id")
+        version = xutils.get_argument_int("version", 0)
 
         if p == "edit":
             comment = dao_comment.get_comment(comment_id)
@@ -280,14 +284,25 @@ class CommentAjaxHandler:
                 return webutil.FailedResult(code = "403", message = "无权限操作")
             content = xutils.get_argument_str("content", "")
             date = xutils.get_argument_str("date")
-            old_date = dateutil.parse_date_to_object(comment.ctime)
             update_ctime = False
-            if date != old_date.format_date():
-                comment.ctime = f"{date} {old_date.time}"
-                update_ctime = True
+            if date:
+                # create_time 是毫秒时间戳
+                import datetime
+                old_datetime = datetime.datetime.fromtimestamp(comment.create_time / 1000)
+                old_date_str = old_datetime.strftime("%Y-%m-%d")
+                if date != old_date_str:
+                    # 构建新的时间字符串并转换为毫秒时间戳
+                    new_datetime_str = f"{date} {old_datetime.strftime('%H:%M:%S')}"
+                    new_datetime = dateutil.parse_datetime(new_datetime_str)
+                    comment.create_time = int(new_datetime * 1000)
+                    update_ctime = True
             comment.content = content
             comment.files = xutils.get_list_argument("files[]")
-            dao_comment.CommentDao.update(comment, update_ctime=update_ctime)
+            comment.version = version
+            try:
+                dao_comment.CommentDao.update(comment, update_ctime=update_ctime)
+            except ValueError as e:
+                return webutil.FailedResult(code = "400", message = str(e))
             return webutil.SuccessResult()
         return "未知的操作"
 

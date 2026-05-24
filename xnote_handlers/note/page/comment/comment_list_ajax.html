@@ -15,8 +15,7 @@
             <span class="orange">[置顶]</span>
         {% end %}
         <span class="comment-user">{{comment.user}}</span>
-        <div class="comment-time">{{comment.ctime}}</div>
-        
+        <div class="comment-time">{{comment.ctime_str}}</div>
         {% if comment.html %}
         <div class="comment-content">{% raw comment.html %}</div>
         {% end %}

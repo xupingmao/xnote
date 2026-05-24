@@ -134,6 +134,11 @@ def run_test(args: Namespace):
         py_exec("-m pytest tests/test_webui.py --doctest-modules --cov xnote_migrate --capture no")
         py_exec("-m coverage html -i")
         return
+    
+    if target == "comment":
+        py_exec("-m pytest tests/test_comment.py --doctest-modules --cov xnote_handlers.note --capture no")
+        py_exec("-m coverage html -i")
+        return
 
     if target != "all":
         print("未知的操作:", target)

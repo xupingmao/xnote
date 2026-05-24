@@ -150,7 +150,7 @@ def init_note_tables():
     db.delete_table()
 
 
-    db = dbutil.register_table("comment", "评论模型", category="note")
+    db = dbutil.register_table("comment", "评论模型", category="note", is_deleted=True)
     db.drop_index("user", comment = "用户索引")
     db.drop_index("note_id", comment = "笔记ID索引")
 
