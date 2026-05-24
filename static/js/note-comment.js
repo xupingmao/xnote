@@ -1,7 +1,76 @@
 
+xnote.comment.editIndex = null;
+
 xnote.comment.removeUploadedImg = function(target) {
     var targetId = $(target).attr("data-id");
     $("#" + targetId).remove();
+}
+
+// 构建已上传文件列表
+xnote.comment.buildFiles = function(imgRowSelector) {
+    var result = [];
+    $(imgRowSelector + " .upload-img").each(function (index, ele) {
+        var src = $(ele).attr("data-src");
+        result.push(src);
+    });
+    return result;
+}
+
+// 初始化评论编辑对话框
+xnote.comment.initEditDialog = function() {
+    // laydate 渲染
+    if (typeof laydate !== 'undefined') {
+        laydate.render({
+            elem: '#commentDate',
+            value: $("#commentDate").attr("data-value") || ""
+        });
+    }
+    
+    // 附件按钮点击
+    $(".attachment-btn").click(function (e) {
+        $("#commentFilePicker2").click();
+    });
+
+    // 文件上传器
+    xnote.createUploaderEx({
+        fileSelector: "#commentFilePicker2",
+        chunked: false,
+        successFn: function (resp) {
+            console.log("文件上传成功", resp);
+            xnote.comment.renderUploadedImg(resp.webpath, "#commentEditImgRow");
+        },
+        fixOrientation: true
+    });
+
+    // 通过剪切板上传
+    $("#commentUpdateContent").on("paste", function (e) {
+        xnote.requestUploadByClip(e, "msg", function (respJson) {
+            console.log(respJson);
+            xnote.comment.renderUploadedImg(respJson.webpath, "#commentEditImgRow");
+        });
+    });
+}
+
+// 更新评论
+xnote.comment.updateComment = function() {
+    var params = {};
+    params.p = "update";
+    params.comment_id = $("#commentUpdateContent").attr("data-comment-id");
+    params.content = $("#commentUpdateContent").val();
+    params.date = $("#commentDate").val();
+    params.files = xnote.comment.buildFiles("#commentEditImgRow");
+    params.version = $("#commentUpdateContent").attr("data-version");
+    xnote.http.post("/note/comment", params, function (resp) {
+        if (resp.success) {
+            xnote.toast("更新成功");
+            xnote.fire("comment.refresh");
+            if (xnote.comment.editIndex != null) {
+                xnote.closeDialog(xnote.comment.editIndex);
+            }
+        } else {
+            xnote.alert(resp.message);
+        }
+    });
 }
 
 
@@ -20,7 +89,7 @@ xnote.comment.renderUploadedImg = function(link, targetSelector) {
 xnote.comment.openEditDialog = function(element) {
     var id = $(element).attr("data-id");
     xnote.http.get("/note/comment?p=edit&comment_id=" + id, function (resp) {
-        editIndex = xnote.showDialog("编辑", resp);
+        xnote.comment.editIndex = xnote.showDialog("编辑", resp);
     });
 }
 

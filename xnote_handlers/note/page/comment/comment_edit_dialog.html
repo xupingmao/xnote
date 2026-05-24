@@ -2,9 +2,9 @@
     <div class="">
         <div class="comment-date">
             <span>时间</span>
-            <input id="commentDate">
+            <input id="commentDate" data-value="{{comment.date}}">
         </div>
-        <textarea class="no-outline comment-edit-textarea" id="commentUpdateContent">{{comment.content}}</textarea>
+        <textarea class="no-outline comment-edit-textarea" id="commentUpdateContent" data-comment-id="{{comment.id}}" data-version="{{comment.version}}">{{comment.content}}</textarea>
 
         <div id="commentEditImgRow" class="comment-edit-img-row">
         {% for _img_src in comment.files %}
@@ -20,7 +20,7 @@
             <input type="file" id="commentFilePicker2" class="hide" multiple />
             <div class="float-left">
                 <button class="btn btn-default attachment-btn">添加附件</button>
-                <button class="btn" onclick="xnote.updateComment()">更新</button>
+                <button class="btn" onclick="xnote.comment.updateComment()">更新</button>
             </div>
             <div class="float-right">
                 <button class="large btn-default" onclick="xnote.dialog.closeByElement(this)">关闭</button>
@@ -31,60 +31,6 @@
 
 <script type="text/javascript">
     $(function () {
-
-        laydate.render({
-            elem: '#commentDate',
-            value: "{{comment.date}}"
-        });
-        
-        function buildFiles() {
-            var result = [];
-            $("#commentEditImgRow .upload-img").each(function (index, ele) {
-                var src = $(ele).attr("data-src");
-                result.push(src);
-            });
-            return result;
-        }
-
-        xnote.updateComment = function() {
-            var params = {};
-            params.p = "update";
-            params.comment_id = "{{comment.id}}";
-            params.content = $("#commentUpdateContent").val();
-            params.date = $("#commentDate").val();
-            params.files = buildFiles();
-            params.version = "{{comment.version}}";
-            xnote.http.post("/note/comment", params, function (resp) {
-                if (resp.success) {
-                    xnote.toast("更新成功");
-                    xnote.fire("comment.refresh");
-                    xnote.fire("comment.closeEditDialog");
-                } else {
-                    xnote.alert(resp.message);
-                }
-            });
-        };
-
-        $(".attachment-btn").click(function (e) {
-            $("#commentFilePicker2").click();
-        });
-
-        xnote.createUploaderEx({
-            fileSelector: "#commentFilePicker2",
-            chunked: false,
-            successFn: function (resp) {
-                console.log("文件上传成功", resp);
-                xnote.comment.renderUploadedImg(resp.webpath, "#commentEditImgRow");
-            },
-            fixOrientation: true
-        });
-
-        // 通过剪切板上传
-        $("#commentUpdateContent").on("paste", function (e) {
-            xnote.requestUploadByClip(e, "msg", function (respJson) {
-                console.log(respJson);
-                xnote.comment.renderUploadedImg(respJson.webpath, "#commentEditImgRow");
-            });
-        });
+        xnote.comment.initEditDialog();
     });
 </script>

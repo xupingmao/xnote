@@ -221,12 +221,6 @@ class TestMain(BaseTestCase):
         for comment in data:
             delete_comment_for_test(comment['id'])
         
-        # 清理用户 admin 的所有评论（避免用户维度列表受影响）
-        user_comments = json_request_return_list("/note/comment/list?list_type=user")
-        for comment in user_comments:
-            if comment.get("user_id") == 1:  # admin 的 user_id
-                delete_comment_for_test(comment['id'])
-        
         # 创建主评论
         request = dict(note_id=str(note_id), content="main comment")
         json_request("/note/comment/save", method="POST", data=request)
