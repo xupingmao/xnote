@@ -73,6 +73,11 @@ def process_comments(comments: typing.List[CommentVO], show_note = False):
             if note != None:
                 comment.note_name = note.name
                 comment.note_url  = note.url
+        
+        # 获取被回复的用户信息
+        if comment.ref_user_id > 0:
+            ref_user_name = xauth.UserDao.get_name_by_id(comment.ref_user_id)
+            comment.ref_user = ref_user_name or ""
 
 def search_comment_summary(ctx: SearchContext):
     comments = dao_comment.search_comment(user_name = ctx.user_name, keywords = ctx.words)
@@ -354,12 +359,6 @@ class CommentRepliesAjaxHandler:
         # 处理评论内容
         process_comments(replies, show_note=False)
         
-        # 获取被回复的用户信息
-        for reply in replies:
-            if reply.ref_user_id > 0:
-                ref_user = xauth.UserDao.get_name_by_id(reply.ref_user_id)
-                reply.ref_user = ref_user or ""
-        
         return webutil.SuccessResult(data={
             "replies": replies,
             "total": total,
@@ -379,11 +378,6 @@ class CommentReplyListHandler:
         
         replies, total = dao_comment.list_replies(note_id, parent_comment_id, offset=0, limit=100)
         process_comments(replies, show_note=False)
-        
-        for reply in replies:
-            if reply.ref_user_id > 0:
-                ref_user_name = xauth.UserDao.get_name_by_id(reply.ref_user_id)
-                reply.ref_user = ref_user_name or ""
         
         return xtemplate.render("note/page/comment/comment_reply_list.html",
             replies=replies,

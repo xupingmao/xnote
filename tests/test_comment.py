@@ -40,10 +40,17 @@ class TestMain(BaseTestCase):
     def test_note_comment(self):
         delete_note_for_test(name="comment-test")
         note_id = create_note_for_test(type="md", name="comment-test")
-        # clean comments
+        
+        # 清理该笔记下的评论
         data = json_request_return_list(f"/note/comments?note_id={note_id}")
         for comment in data:
             delete_comment_for_test(comment['id'])
+        
+        # 清理用户 admin 的所有评论（避免用户维度列表受影响）
+        user_comments = json_request_return_list("/note/comment/list?list_type=user")
+        for comment in user_comments:
+            if comment.get("user_id") == 1:  # admin 的 user_id
+                delete_comment_for_test(comment['id'])
 
         # 创建一个评论
         request = dict(note_id = str(note_id), content = "hello")
@@ -189,3 +196,125 @@ class TestMain(BaseTestCase):
         
         # 清理
         delete_comment_for_test(comment_id)
+
+    def test_comment_replies(self):
+        """测试评论回复功能"""
+        # 获取当前用户
+        user_id = xauth.current_user_id()
+        
+        # 先尝试获取已有的笔记，优先用 test_note_comment 用的 comment-test
+        note_index = NoteIndexDao.get_by_name(creator_id=user_id, name="comment-test")
+        if note_index is not None:
+            note_id = note_index.id
+        else:
+            # 如果找不到，用任意一个已有的笔记
+            from xnote_handlers.note.dao_base import list_by_parent
+            notes = list_by_parent(creator_id=user_id, parent_id=0, offset=0, limit=10)
+            if len(notes) > 0:
+                note_id = notes[0].id
+            else:
+                # 如果没有，就创建一个
+                note_id = 1  # default_group_id 这个已经存在了
+        
+        # 清理该笔记下的评论
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        for comment in data:
+            delete_comment_for_test(comment['id'])
+        
+        # 清理用户 admin 的所有评论（避免用户维度列表受影响）
+        user_comments = json_request_return_list("/note/comment/list?list_type=user")
+        for comment in user_comments:
+            if comment.get("user_id") == 1:  # admin 的 user_id
+                delete_comment_for_test(comment['id'])
+        
+        # 创建主评论
+        request = dict(note_id=str(note_id), content="main comment")
+        json_request("/note/comment/save", method="POST", data=request)
+        
+        # 查询主评论
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        self.assertEqual(1, len(data))
+        main_comment_id = data[0]["id"]
+        main_user_id = data[0]["user_id"]
+        main_user_name = data[0]["user"]
+        
+        # 验证回复数量为0
+        self.assertEqual(0, data[0]["reply_count"])
+        
+        # 创建第一个回复 - 回复主评论
+        reply1_request = dict(
+            note_id=str(note_id),
+            content="first reply to main comment",
+            parent_comment_id=str(main_comment_id),
+            ref_comment_id=str(main_comment_id),
+            ref_user_id=str(main_user_id)
+        )
+        json_request("/note/comment/save", method="POST", data=reply1_request)
+        
+        # 验证回复数量变为1
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        self.assertEqual(1, len(data))
+        self.assertEqual(1, data[0]["reply_count"])
+        
+        # 获取回复列表 - 测试JSON接口
+        reply_data = json_request_return_dict(
+            f"/note/comment/replies?note_id={note_id}&parent_comment_id={main_comment_id}"
+        )
+        self.assertTrue(reply_data["success"])
+        replies = reply_data["data"]["replies"]
+        self.assertEqual(1, len(replies))
+        self.assertEqual("first reply to main comment", replies[0]["content"])
+        self.assertEqual(main_comment_id, replies[0]["parent_comment_id"])
+        self.assertEqual(main_comment_id, replies[0]["ref_comment_id"])
+        self.assertEqual(main_user_id, replies[0]["ref_user_id"])
+        
+        # 获取回复列表 - 测试HTML接口
+        from tests.test_base import request_html
+        html_resp = request_html(
+            f"/note/comment/reply_list?note_id={note_id}&parent_comment_id={main_comment_id}"
+        )
+        html_str = html_resp.decode("utf-8")
+        self.assertIn("first", html_str)
+        self.assertIn("reply", html_str)
+        
+        # 创建第二个回复 - 回复第一个回复
+        reply1_id = replies[0]["id"]
+        reply1_user_id = replies[0]["user_id"]
+        reply2_request = dict(
+            note_id=str(note_id),
+            content="reply to first reply",
+            parent_comment_id=str(main_comment_id),
+            ref_comment_id=str(reply1_id),
+            ref_user_id=str(reply1_user_id)
+        )
+        json_request("/note/comment/save", method="POST", data=reply2_request)
+        
+        # 验证回复数量变为2
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        self.assertEqual(2, data[0]["reply_count"])
+        
+        # 获取回复列表，验证第二条回复
+        reply_data = json_request_return_dict(
+            f"/note/comment/replies?note_id={note_id}&parent_comment_id={main_comment_id}"
+        )
+        replies = reply_data["data"]["replies"]
+        self.assertEqual(2, len(replies))
+        self.assertEqual("reply to first reply", replies[1]["content"])
+        self.assertEqual(reply1_id, replies[1]["ref_comment_id"])
+        self.assertEqual(reply1_user_id, replies[1]["ref_user_id"])
+        
+        # 直接查询评论验证 ref_user 字段是否被正确处理
+        from xnote_handlers.note.comment import process_comments
+        from xnote_handlers.note.dao_comment import list_replies
+        reply_comments, _ = list_replies(note_id, main_comment_id, 0, 10)
+        process_comments(reply_comments, show_note=False)
+        
+        # 验证第二个回复的 ref_user 是否正确填充
+        reply2_comment = reply_comments[1]
+        reply1_user = reply_comments[0]["user"]
+        self.assertEqual(reply1_user, reply2_comment.ref_user)
+        
+        # 清理评论
+        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        for comment in data:
+            delete_comment_for_test(comment['id'])

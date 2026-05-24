@@ -107,3 +107,52 @@
 .comment-edit-img-row {
     width: 100%;
 }
+
+/** 评论回复 **/
+.comment-reply-header {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+.comment-reply-to-user {
+    color: #1e90ff;
+    font-weight: bold;
+}
+.comment-reply-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+.comment-reply-textarea {
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+.comment-reply-form {
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+.reply-row {
+    padding: 10px;
+}
+.comment-reply-at {
+    color: #1e90ff;
+    margin-right: 5px;
+}
+.comment-empty {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+.comment-reply-info {
+    padding: 5px 0;
+    margin-top: 5px;
+}
+.comment-reply-info a {
+    color: #1e90ff;
+    cursor: pointer;
+}

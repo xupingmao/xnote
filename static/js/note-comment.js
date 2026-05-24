@@ -75,3 +75,79 @@ xnote.comment.viewReplies = function(element) {
         xnote.showDialog("回复 " + user, resp);
     });
 };
+
+// 初始化评论回复对话框
+xnote.comment.initReplyDialog = function(context) {
+    xnote.comment.replyContext = context;
+    
+    // 加载回复列表
+    xnote.comment.loadReplyList = function() {
+        xnote.http.get("/note/comment/reply_list", {
+            note_id: xnote.comment.replyContext.note_id,
+            parent_comment_id: xnote.comment.replyContext.parent_comment_id
+        }, function(resp) {
+            $("#commentReplyList").html(resp);
+        });
+    };
+    
+    // 点击回复按钮
+    xnote.comment.replyTo = function(element) {
+        var user = $(element).data("user");
+        var userId = $(element).data("user-id");
+        var commentId = $(element).data("id");
+        xnote.comment.replyContext.ref_comment_id = commentId;
+        xnote.comment.replyContext.ref_user_id = userId;
+        xnote.comment.replyContext.ref_user = user;
+        $("#commentReplyContent").attr("placeholder", "回复 @" + user + ":").focus();
+    };
+    
+    // 提交回复
+    xnote.comment.submitReply = function() {
+        var content = $("#commentReplyContent").val();
+        if (content == "") {
+            xnote.alert("回复内容不能为空");
+            return;
+        }
+        
+        xnote.http.post("/note/comment/save", {
+            note_id: xnote.comment.replyContext.note_id,
+            content: content,
+            parent_comment_id: xnote.comment.replyContext.parent_comment_id,
+            ref_comment_id: xnote.comment.replyContext.ref_comment_id,
+            ref_user_id: xnote.comment.replyContext.ref_user_id
+        }, function(resp) {
+            if (resp.success) {
+                xnote.toast("回复成功");
+                $("#commentReplyContent").val("");
+                // 重置ref信息
+                xnote.comment.replyContext.ref_comment_id = xnote.comment.replyContext.parent_comment_id;
+                xnote.comment.replyContext.ref_user_id = xnote.comment.replyContext.original_ref_user_id;
+                xnote.comment.replyContext.ref_user = xnote.comment.replyContext.original_ref_user;
+                $("#commentReplyContent").attr("placeholder", "写下你的回复...");
+                // 刷新回复列表
+                xnote.comment.loadReplyList();
+                xnote.fire("comment.refresh");
+            } else {
+                xnote.alert(resp.message);
+            }
+        });
+    };
+    
+    // 初始化附件上传
+    $(".attachment-btn").click(function (e) {
+        $("#commentReplyFilePicker").click();
+    });
+
+    xnote.createUploaderEx({
+        fileSelector: "#commentReplyFilePicker",
+        chunked: false,
+        successFn: function (resp) {
+            console.log("文件上传成功", resp);
+            xnote.comment.renderUploadedImg(resp.webpath, "#commentReplyImgRow");
+        },
+        fixOrientation: true
+    });
+    
+    // 初始化时加载回复列表
+    xnote.comment.loadReplyList();
+};

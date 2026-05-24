@@ -17,7 +17,12 @@
         <span class="comment-user">{{comment.user}}</span>
         <div class="comment-time">{{comment.ctime_str}}</div>
         {% if comment.html %}
-        <div class="comment-content">{% raw comment.html %}</div>
+        <div class="comment-content">
+            {% if comment.ref_user %}
+                <span class="comment-reply-at">@{{comment.ref_user}}</span>
+            {% end %}
+            {% raw comment.html %}
+        </div>
         {% end %}
 
         {% if comment.files %}
@@ -106,15 +111,3 @@
         }
     });
 </script>
-
-<style>
-.comment-reply-info {
-    padding: 5px 0;
-    margin-top: 5px;
-    border-top: 1px dashed #eee;
-}
-.comment-reply-info a {
-    color: #1e90ff;
-    cursor: pointer;
-}
-</style>
