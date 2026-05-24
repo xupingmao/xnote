@@ -34,6 +34,11 @@ class CommentVO(BaseDataRecord):
         self.version = 0
         self.pin_level = 0
         self.files = []
+        self.parent_comment_id = 0  # 父评论ID
+        self.ref_comment_id = 0     # 被回复的评论ID
+        self.ref_user_id = 0        # 被回复的用户ID
+        self.reply_count = 0       # 回复数量
+        self.ref_user = ""          # 被回复的用户名
         self.update(kw)
 
     def update_index(self, index: CommentIndexRecord):
@@ -86,10 +91,13 @@ class CommentDao:
         data_record.target_id = int(comment.note_id)
         data_record.pin_level = comment.pin_level
         data_record.content = comment.content
+        data_record.parent_comment_id = comment.parent_comment_id
         
         # 保存额外字段到 extra
         data_record.extra_data.user = comment.user
         data_record.extra_data.files = comment.files
+        data_record.extra_data.ref_comment_id = comment.ref_comment_id
+        data_record.extra_data.ref_user_id = comment.ref_user_id
         data_record.extra = jsonutil.to_json(data_record.extra_data.to_dict())
         
         comment_service.create_data(data_record)
@@ -124,10 +132,13 @@ class CommentDao:
         new_record.target_id = int(comment.note_id)
         new_record.pin_level = comment.pin_level
         new_record.content = comment.content
+        new_record.parent_comment_id = comment.parent_comment_id
         
         # 保存额外字段到 extra
         new_record.extra_data.user = comment.user
         new_record.extra_data.files = comment.files
+        new_record.extra_data.ref_comment_id = comment.ref_comment_id
+        new_record.extra_data.ref_user_id = comment.ref_user_id
         new_record.extra = jsonutil.to_json(new_record.extra_data.to_dict())
         
         rows = comment_service.update_data(new_record, old_version=old_version)
@@ -179,6 +190,9 @@ def list_comments_by_idx_list(idx_list: typing.List[CommentIndexRecord], user_na
             extra_data = data_record.extra_data
             item.user = extra_data.user
             item.files = extra_data.files
+            item.ref_comment_id = extra_data.ref_comment_id
+            item.ref_user_id = extra_data.ref_user_id
+            item.parent_comment_id = data_record.parent_comment_id
             
             result.append(item)
         else:
@@ -212,6 +226,47 @@ def list_comments_by_user(user_id=0, date="", offset=0, limit=0, order=""):
 def count_comments_by_user(user_id=0, date=""):
     return comment_service.count(user_id=user_id, date=date)
 
+def list_replies(note_id=0, parent_comment_id=0, offset=0, limit=100):
+    """获取某个评论的回复列表"""
+    assert parent_comment_id > 0
+    # 加载该笔记的所有评论并过滤出回复
+    all_comments = list_comments_by_idx_list(
+        comment_service.list(target_id=note_id, offset=0, limit=10000, order="ctime asc")
+    )
+    replies = []
+    for comment in all_comments:
+        if comment.parent_comment_id == parent_comment_id:
+            replies.append(comment)
+    
+    # 按时间排序
+    replies.sort(key=lambda x: x.create_time)
+    
+    # 分页
+    total = len(replies)
+    paged_replies = replies[offset:offset+limit]
+    
+    return paged_replies, total
+
+def count_replies(note_id=0, parent_comment_id=0):
+    """获取某个评论的回复数量"""
+    replies, total = list_replies(note_id, parent_comment_id, offset=0, limit=10000)
+    return total
+
+def list_parent_comments(note_id=0, offset=0, limit=100, user_name="", order="latest"):
+    """获取一级评论（不含回复）"""
+    all_comments = list_comments(note_id=note_id, offset=0, limit=10000, user_name=user_name, order=order)
+    parent_comments = []
+    for comment in all_comments:
+        if comment.parent_comment_id == 0:
+            # 计算回复数量
+            comment.reply_count = count_replies(note_id, comment.id)
+            parent_comments.append(comment)
+    
+    # 分页
+    total = len(parent_comments)
+    paged_comments = parent_comments[offset:offset+limit]
+    return paged_comments, total
+
 def get_comment(comment_id = 0):
     """通过comment_id实际上是根据key获取comment"""
     index = comment_service.get_by_id(comment_id)
@@ -237,6 +292,9 @@ def get_comment(comment_id = 0):
     extra_data = data_record.extra_data
     item.user = extra_data.user
     item.files = extra_data.files
+    item.ref_comment_id = extra_data.ref_comment_id
+    item.ref_user_id = extra_data.ref_user_id
+    item.parent_comment_id = data_record.parent_comment_id
     
     return item
 

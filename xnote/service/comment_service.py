@@ -31,6 +31,8 @@ class CommentExtraData(BaseDataRecord):
     def __init__(self, **kw):
         self.user = ""
         self.files = []
+        self.ref_comment_id = 0  # 被回复的评论ID
+        self.ref_user_id = 0     # 被回复的用户ID
         self.update(kw)
     
     def to_dict(self):

@@ -38,7 +38,8 @@
 
 .comment-source-info {
     float: left;
-    line-height: 20px;
+    line-height: 32px;
+    margin-right: 10px;
 }
 
 .edit-comment-btn, .delete-comment-btn {

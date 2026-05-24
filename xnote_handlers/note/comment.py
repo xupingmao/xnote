@@ -167,9 +167,9 @@ class CommentListAjaxHandler:
                 raise Exception("笔记不存在")
             share_token = xutils.get_argument_str("share_token")
             NoteService.check_auth(note_index, user_id=user_id, share_token=share_token)
-            comments  = dao_comment.list_comments(note_id, offset = offset, limit = page_size, 
+            # 只获取一级评论（不含回复）
+            comments, count = dao_comment.list_parent_comments(note_id, offset=offset, limit=page_size, 
                                                   user_name=user_name, order=comment_order)
-            count = dao_comment.count_comment_by_note(note_id)
             note_user_id = note_index.creator_id
         
         page_max = get_page_max(count)
@@ -199,6 +199,9 @@ class SaveCommentAjaxHandler:
         type = xutils.get_argument_str("type")
         user_info = xauth.current_user()
         files = xutils.get_list_argument("files[]")
+        parent_comment_id = xutils.get_argument_int("parent_comment_id")
+        ref_comment_id = xutils.get_argument_int("ref_comment_id")
+        ref_user_id = xutils.get_argument_int("ref_user_id")
     
         if user_info == None:
             return webutil.FailedResult(code="403", message="请登录进行操作~")
@@ -216,6 +219,9 @@ class SaveCommentAjaxHandler:
         comment.content = content
         comment.note_id = note_id
         comment.files = files
+        comment.parent_comment_id = parent_comment_id
+        comment.ref_comment_id = ref_comment_id
+        comment.ref_user_id = ref_user_id
 
         dao_comment.create_comment(comment)
         note_dao.touch_note(note_id)
@@ -330,6 +336,79 @@ class UpdatePinLevelHandler:
 
 xutils.register_func("note.search_comment_detail", search_comment_detail)
 
+class CommentRepliesAjaxHandler:
+    """获取评论的回复列表"""
+    
+    def GET(self):
+        note_id = xutils.get_argument_int("note_id")
+        parent_comment_id = xutils.get_argument_int("parent_comment_id")
+        page = xutils.get_argument_int("page", 1)
+        page_size = xutils.get_argument_int("page_size", 20)
+        
+        if note_id == 0 or parent_comment_id == 0:
+            return webutil.FailedResult(message="参数错误")
+        
+        offset = max(0, page - 1) * page_size
+        replies, total = dao_comment.list_replies(note_id, parent_comment_id, offset, page_size)
+        
+        # 处理评论内容
+        process_comments(replies, show_note=False)
+        
+        # 获取被回复的用户信息
+        for reply in replies:
+            if reply.ref_user_id > 0:
+                ref_user = xauth.UserDao.get_name_by_id(reply.ref_user_id)
+                reply.ref_user = ref_user or ""
+        
+        return webutil.SuccessResult(data={
+            "replies": replies,
+            "total": total,
+            "page": page,
+            "page_size": page_size
+        })
+
+class CommentReplyListHandler:
+    """获取评论回复列表（返回HTML片段）"""
+    
+    def GET(self):
+        note_id = xutils.get_argument_int("note_id")
+        parent_comment_id = xutils.get_argument_int("parent_comment_id")
+        
+        if note_id == 0 or parent_comment_id == 0:
+            return "参数错误"
+        
+        replies, total = dao_comment.list_replies(note_id, parent_comment_id, offset=0, limit=100)
+        process_comments(replies, show_note=False)
+        
+        for reply in replies:
+            if reply.ref_user_id > 0:
+                ref_user_name = xauth.UserDao.get_name_by_id(reply.ref_user_id)
+                reply.ref_user = ref_user_name or ""
+        
+        return xtemplate.render("note/page/comment/comment_reply_list.html",
+            replies=replies,
+            total=total)
+
+class CommentReplyDialogHandler:
+    """回复对话框页面"""
+    
+    def GET(self):
+        note_id = xutils.get_argument_int("note_id")
+        parent_comment_id = xutils.get_argument_int("parent_comment_id")
+        ref_comment_id = xutils.get_argument_int("ref_comment_id")
+        ref_user_id = xutils.get_argument_int("ref_user_id")
+        ref_user = xutils.get_argument_str("ref_user")
+        
+        if note_id == 0 or parent_comment_id == 0:
+            return "参数错误"
+        
+        return xtemplate.render("note/page/comment/comment_reply_dialog.html",
+            note_id=note_id,
+            parent_comment_id=parent_comment_id,
+            ref_comment_id=ref_comment_id,
+            ref_user_id=ref_user_id,
+            ref_user=ref_user)
+
 xurls = (
     r"/note/comment", CommentAjaxHandler,
     r"/note/comments", CommentListAjaxHandler,
@@ -338,4 +417,7 @@ xurls = (
     r"/note/comment/delete", DeleteCommentAjaxHandler,
     r"/note/comment/mine", MyCommentsHandler,
     r"/note/comment/update_pin_level", UpdatePinLevelHandler,
+    r"/note/comment/replies", CommentRepliesAjaxHandler,
+    r"/note/comment/reply_list", CommentReplyListHandler,
+    r"/note/comment/reply_dialog", CommentReplyDialogHandler,
 )

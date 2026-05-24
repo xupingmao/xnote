@@ -113,26 +113,7 @@
                 }
             });
         };
-
-        $("#comments").on("click", ".delete-comment-btn", function () {
-            var id = $(this).attr("data-id");
-            var content = $(this).attr("data-content");
-            xnote.confirm("确定删除`" + content + "`?", function (conf) {
-                if (conf) {
-                    xnote.http.post("/note/comment/delete", { comment_id: id }, function (resp) {
-                        refreshComments();
-                    });
-                }
-            });
-        });
-
-        $("#comments").on("click", ".edit-comment-btn", function () {
-            var id = $(this).attr("data-id");
-            xnote.http.get("/note/comment?p=edit&comment_id=" + id, function (resp) {
-                editIndex = xnote.showDialog("编辑", resp);
-            });
-        });
-
+        
         // 触发文件上传操作
         $("#commentFilePickerBtn").on("click", function (event) {
             console.log("select file button click");

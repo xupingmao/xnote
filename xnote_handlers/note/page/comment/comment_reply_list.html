@@ -1,0 +1,31 @@
+{% if len(replies) == 0 %}
+    <div class="comment-empty">暂无回复</div>
+{% end %}
+{% for reply in replies %}
+<div class="comment-row reply-row">
+    <span class="comment-user">{{reply.user}}</span>
+    <span class="comment-time">{{reply.ctime_str}}</span>
+    {% if reply.html %}
+    <div class="comment-content">
+        {% if reply.ref_user %}
+            <span class="comment-reply-at">@{{reply.ref_user}}</span>
+        {% end %}
+        {% raw reply.html %}
+    </div>
+    {% end %}
+    {% if reply.files %}
+    <div class="comment-img-row">
+        {% for _img_src in reply.files %}
+        <img class="comment-img x-photo" src="{{_img_src}}?mode=thumbnail" data-src="{{_img_src}}">
+        {% end %}
+    </div>
+    {% end %}
+    <div class="comment-foot">
+        <a class="btn btn-default reply-to-btn" 
+           data-id="{{reply.id}}" 
+           data-user="{{reply.user}}" 
+           data-user-id="{{reply.user_id}}"
+           onclick="xnote.comment.replyTo(this)">回复</a>
+    </div>
+</div>
+{% end %}

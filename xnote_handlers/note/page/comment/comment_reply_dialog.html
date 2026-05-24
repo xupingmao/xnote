@@ -1,0 +1,152 @@
+<div class="card">
+    <div class="">
+        <div class="comment-reply-header">
+            <span>回复: </span>
+            <span class="comment-reply-to-user">{{ref_user}}</span>
+        </div>
+        
+        <div class="comment-reply-list" id="commentReplyList">
+            <!-- 回复列表通过AJAX加载 -->
+        </div>
+        
+        <div class="comment-reply-form">
+            <textarea class="no-outline comment-reply-textarea" id="commentReplyContent" placeholder="写下你的回复..."></textarea>
+            
+            <div class="comment-edit-bottom">
+                <input type="file" id="commentReplyFilePicker" class="hide" multiple />
+                <div class="float-left">
+                    <!-- <button class="btn btn-default attachment-btn">添加附件</button> -->
+                    <button class="btn" onclick="xnote.comment.submitReply()">发送</button>
+                </div>
+                <div class="float-right">
+                    <button class="large btn-default" onclick="xnote.dialog.closeByElement(this)">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        xnote.comment = xnote.comment || {};
+        
+        // 存储当前回复上下文
+        xnote.comment.replyContext = {
+            note_id: "{{note_id}}",
+            parent_comment_id: "{{parent_comment_id}}",
+            ref_comment_id: "{{ref_comment_id}}",
+            ref_user_id: "{{ref_user_id}}",
+            ref_user: "{{ref_user}}"
+        };
+        
+        // 加载回复列表
+        xnote.comment.loadReplyList = function() {
+            xnote.http.get("/note/comment/reply_list", {
+                note_id: xnote.comment.replyContext.note_id,
+                parent_comment_id: xnote.comment.replyContext.parent_comment_id
+            }, function(resp) {
+                $("#commentReplyList").html(resp);
+            });
+        };
+        
+        // 点击回复按钮
+        xnote.comment.replyTo = function(element) {
+            var user = $(element).data("user");
+            var userId = $(element).data("user-id");
+            var commentId = $(element).data("id");
+            xnote.comment.replyContext.ref_comment_id = commentId;
+            xnote.comment.replyContext.ref_user_id = userId;
+            xnote.comment.replyContext.ref_user = user;
+            $("#commentReplyContent").attr("placeholder", "回复 @" + user + ":").focus();
+        };
+        
+        // 提交回复
+        xnote.comment.submitReply = function() {
+            var content = $("#commentReplyContent").val();
+            if (content == "") {
+                xnote.alert("回复内容不能为空");
+                return;
+            }
+            
+            xnote.http.post("/note/comment/save", {
+                note_id: xnote.comment.replyContext.note_id,
+                content: content,
+                parent_comment_id: xnote.comment.replyContext.parent_comment_id,
+                ref_comment_id: xnote.comment.replyContext.ref_comment_id,
+                ref_user_id: xnote.comment.replyContext.ref_user_id
+            }, function(resp) {
+                if (resp.success) {
+                    xnote.toast("回复成功");
+                    $("#commentReplyContent").val("");
+                    // 重置ref信息
+                    xnote.comment.replyContext.ref_comment_id = "{{ref_comment_id}}";
+                    xnote.comment.replyContext.ref_user_id = "{{ref_user_id}}";
+                    xnote.comment.replyContext.ref_user = "{{ref_user}}";
+                    $("#commentReplyContent").attr("placeholder", "写下你的回复...");
+                    // 刷新回复列表
+                    xnote.comment.loadReplyList();
+                    xnote.fire("comment.refresh");
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        };
+        
+        // 初始化附件上传
+        $(".attachment-btn").click(function (e) {
+            $("#commentReplyFilePicker").click();
+        });
+
+        xnote.createUploaderEx({
+            fileSelector: "#commentReplyFilePicker",
+            chunked: false,
+            successFn: function (resp) {
+                console.log("文件上传成功", resp);
+                xnote.comment.renderUploadedImg(resp.webpath, "#commentReplyImgRow");
+            },
+            fixOrientation: true
+        });
+        
+        // 初始化时加载回复列表
+        xnote.comment.loadReplyList();
+    });
+</script>
+
+<style>
+.comment-reply-header {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+.comment-reply-to-user {
+    color: #1e90ff;
+    font-weight: bold;
+}
+.comment-reply-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+.comment-reply-textarea {
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+.comment-reply-form {
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+.comment-reply-at {
+    color: #1e90ff;
+    margin-right: 5px;
+}
+.comment-empty {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+</style>
