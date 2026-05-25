@@ -42,9 +42,10 @@ class TestMain(BaseTestCase):
         note_id = create_note_for_test(type="md", name="comment-test")
         
         # 清理该笔记下的评论
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
-        for comment in data:
-            delete_comment_for_test(comment['id'])
+        from xnote_handlers.note.dao_comment import list_comments
+        all_comments = list_comments(note_id, offset=0, limit=1000)
+        for comment in all_comments:
+            delete_comment_for_test(comment.id)
         
         # 清理用户 admin 的所有评论（避免用户维度列表受影响）
         user_comments = json_request_return_list("/note/comment/list?list_type=user")
@@ -217,9 +218,10 @@ class TestMain(BaseTestCase):
                 note_id = 1  # default_group_id 这个已经存在了
         
         # 清理该笔记下的评论
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
-        for comment in data:
-            delete_comment_for_test(comment['id'])
+        from xnote_handlers.note.dao_comment import list_comments
+        all_comments = list_comments(note_id, offset=0, limit=1000)
+        for comment in all_comments:
+            delete_comment_for_test(comment.id)
         
         # 创建主评论
         request = dict(note_id=str(note_id), content="main comment")
@@ -247,6 +249,8 @@ class TestMain(BaseTestCase):
         
         # 验证回复数量变为1
         data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        print("=== data ===")
+        print(data)
         self.assertEqual(1, len(data))
         self.assertEqual(1, data[0]["reply_count"])
         

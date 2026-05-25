@@ -26,6 +26,10 @@
            data-user="{{reply.user}}" 
            data-user-id="{{reply.user_id}}"
            onclick="xnote.comment.replyTo(this)">回复</a>
+        <a class="btn danger btn-sm" 
+           data-id="{{reply.id}}" 
+           data-content="{{reply.content}}"
+           onclick="xnote.comment.deleteReply(this)">删除</a>
     </div>
 </div>
 {% end %}

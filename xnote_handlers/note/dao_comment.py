@@ -78,7 +78,7 @@ class CommentDao:
         cls.check(comment)
         comment.create_time = dateutil.timestamp_ms()
         comment.update_time = comment.create_time
-        index_id = comment_service.create(type=comment.type, user_id=comment.user_id, target_id=int(comment.note_id))
+        index_id = comment_service.create(type=comment.type, user_id=comment.user_id, target_id=int(comment.note_id), parent_comment_id=comment.parent_comment_id)
         comment.id = index_id
         
         # 保存到 comment_data 表
@@ -220,54 +220,53 @@ def list_comments(note_id=0, offset=0, limit=100, user_name="", order="latest"):
 
 def list_comments_by_user(user_id=0, date="", offset=0, limit=0, order=""):
     idx_list = comment_service.list(user_id=user_id,date=date,offset=offset,limit=limit, order=_get_order_by_user(order))
-    return list_comments_by_idx_list(idx_list)
+    comments = list_comments_by_idx_list(idx_list)
+    # 为一级评论计算回复数量
+    for comment in comments:
+        if comment.parent_comment_id == 0:
+            comment.reply_count = count_replies(comment.note_id, comment.id)
+    return comments
 
 
-def count_comments_by_user(user_id=0, date=""):
+def count_comments_by_user(user_id: int=0, date: str=""):
     return comment_service.count(user_id=user_id, date=date)
 
-def list_replies(note_id=0, parent_comment_id=0, offset=0, limit=100):
+def list_replies(note_id: int=0, parent_comment_id: int=0, offset: int=0, limit: int=100):
     """获取某个评论的回复列表"""
     assert parent_comment_id > 0
-    # 加载该笔记的所有评论并过滤出回复
-    all_comments = list_comments_by_idx_list(
-        comment_service.list(target_id=note_id, offset=0, limit=10000, order="ctime asc")
-    )
-    replies = []
-    for comment in all_comments:
-        if comment.parent_comment_id == parent_comment_id:
-            replies.append(comment)
     
-    # 按时间排序
-    replies.sort(key=lambda x: x.create_time)
+    # 获取总数
+    total = comment_service.count(target_id=note_id, parent_comment_id=parent_comment_id)
     
-    # 分页
-    total = len(replies)
-    paged_replies = replies[offset:offset+limit]
+    # 直接使用数据库分页
+    idx_list = comment_service.list(target_id=note_id, parent_comment_id=parent_comment_id, offset=offset, limit=limit, order="ctime asc")
+    replies = list_comments_by_idx_list(idx_list)
     
-    return paged_replies, total
+    return replies, total
 
-def count_replies(note_id=0, parent_comment_id=0):
+def count_replies(note_id: int=0, parent_comment_id: int=0):
     """获取某个评论的回复数量"""
-    replies, total = list_replies(note_id, parent_comment_id, offset=0, limit=10000)
-    return total
+    return comment_service.count(target_id=note_id, parent_comment_id=parent_comment_id)
 
-def list_parent_comments(note_id=0, offset=0, limit=100, user_name="", order="latest"):
+def list_parent_comments(note_id: int=0, offset: int=0, limit: int=100, user_name: str="", order: str="latest"):
     """获取一级评论（不含回复）"""
-    all_comments = list_comments(note_id=note_id, offset=0, limit=10000, user_name=user_name, order=order)
-    parent_comments = []
-    for comment in all_comments:
-        if comment.parent_comment_id == 0:
-            # 计算回复数量
-            comment.reply_count = count_replies(note_id, comment.id)
-            parent_comments.append(comment)
+    # 获取总数
+    total = comment_service.count(target_id=note_id, parent_comment_id=0)
     
-    # 分页
-    total = len(parent_comments)
-    paged_comments = parent_comments[offset:offset+limit]
-    return paged_comments, total
+    # 直接使用数据库分页
+    idx_list = comment_service.list(target_id=note_id, parent_comment_id=0, offset=offset, limit=limit, order=_get_order(order))
+    
+    # 使用 list_comments_by_idx_list 处理评论
+    comments = list_comments_by_idx_list(idx_list, user_name=user_name)
+    
+    # 计算回复数量
+    for comment in comments:
+        if comment.parent_comment_id == 0:
+            comment.reply_count = count_replies(note_id, comment.id)
+    
+    return comments, total
 
-def get_comment(comment_id = 0):
+def get_comment(comment_id: int=0):
     """通过comment_id实际上是根据key获取comment"""
     index = comment_service.get_by_id(comment_id)
     if index is None:

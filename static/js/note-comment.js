@@ -1,5 +1,6 @@
 
 xnote.comment.editIndex = null;
+xnote.comment.replyIndex = null;
 
 xnote.comment.removeUploadedImg = function(target) {
     var targetId = $(target).attr("data-id");
@@ -106,6 +107,24 @@ xnote.comment.deleteComment =function (element) {
     });
 };
 
+// 删除回复
+xnote.comment.deleteReply = function(element) {
+    var id = $(element).attr("data-id");
+    var content = $(element).attr("data-content");
+    xnote.confirm("确定删除回复`" + content + "`?", function (conf) {
+        if (conf) {
+            xnote.http.post("/note/comment/delete", { comment_id: id }, function (resp) {
+                if (resp.success) {
+                    xnote.fire("comment.refresh");
+                    xnote.comment.refreshReplyList();
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        }
+    });
+};
+
 
 // 打开回复对话框
 xnote.comment.openReplyDialog = function(element) {
@@ -122,7 +141,7 @@ xnote.comment.openReplyDialog = function(element) {
             + "&ref_user=" + encodeURIComponent(user);
     
     xnote.http.get(url, function (resp) {
-        xnote.showDialog("回复 " + user, resp);
+        xnote.comment.replyIndex = xnote.showDialog("回复 " + user, resp);
     });
 };
 
@@ -141,7 +160,7 @@ xnote.comment.viewReplies = function(element) {
             + "&ref_user=" + encodeURIComponent(user);
     
     xnote.http.get(url, function (resp) {
-        xnote.showDialog("回复 " + user, resp);
+        xnote.comment.replyIndex = xnote.showDialog("回复 " + user, resp);
     });
 };
 
@@ -157,6 +176,11 @@ xnote.comment.initReplyDialog = function(context) {
         }, function(resp) {
             $("#commentReplyList").html(resp);
         });
+    };
+    
+    // 刷新回复列表
+    xnote.comment.refreshReplyList = function() {
+        xnote.comment.loadReplyList();
     };
     
     // 点击回复按钮

@@ -2,6 +2,7 @@
 
 
 import xutils
+import typing
 from xnote.core import xtables
 from xutils import dateutil
 from xutils import jsonutil
@@ -24,8 +25,6 @@ class CommentIndexRecord(BaseDataRecord):
         self.pin_level = 0
         self.parent_comment_id = 0
 
-CommentIndexDO = CommentIndexRecord
-
 class CommentExtraData(BaseDataRecord):
     """评论额外数据"""
     def __init__(self, **kw):
@@ -47,8 +46,6 @@ class CommentExtraData(BaseDataRecord):
             return CommentExtraData(**extra_dict)
         except:
             return CommentExtraData()
-
-CommentExtraDO = CommentExtraData
 
 class CommentDataRecord(BaseDataRecord):
     _ignore_save_fields = ["_extra_data"]
@@ -74,8 +71,6 @@ class CommentDataRecord(BaseDataRecord):
             self._extra_data = CommentExtraData.from_dict(self.extra)
         return self._extra_data
 
-CommentDataDO = CommentDataRecord
-
 class CommentService:
 
     db = xtables.get_table_by_name("comment_index")
@@ -84,9 +79,9 @@ class CommentService:
     def __init__(self):
         pass
     
-    def create(self, user_id=0, target_id=0, type=""):
+    def create(self, user_id=0, target_id=0, type="", parent_comment_id=0):
         now = dateutil.format_datetime()
-        new_id = self.db.insert(ctime=now, mtime=now, type=type, user_id=user_id, target_id=target_id)
+        new_id = self.db.insert(ctime=now, mtime=now, type=type, user_id=user_id, target_id=target_id, parent_comment_id=parent_comment_id)
         assert isinstance(new_id, int)
         return new_id
     
@@ -110,7 +105,7 @@ class CommentService:
     def delete_data_by_id(self, id=0):
         return self.data_db.delete(where=dict(id=id))
     
-    def build_where(self, user_id=0, target_id=0, date=None, type=""):
+    def build_where(self, user_id: int=0, target_id: int=0, date: typing.Optional[str]=None, type: str="", parent_comment_id: typing.Optional[int]=None):
         date_like = date
         where = "1=1"
         if user_id != 0:
@@ -122,19 +117,21 @@ class CommentService:
             date_like = date + "%"
         if type != "":
             where += " AND type=$type"
+        if parent_comment_id is not None:
+            where += " AND parent_comment_id = $parent_comment_id"
         
-        vars = dict(type=type, user_id=user_id, target_id=target_id, date_like=date_like)
+        vars = dict(type=type, user_id=user_id, target_id=target_id, date_like=date_like, parent_comment_id=parent_comment_id)
         return where, vars
     
-    def list(self, user_id=0, target_id=0, date=None, type="", offset=0,limit=20, order="ctime desc", what="*"):
+    def list(self, user_id: int=0, target_id: int=0, date: typing.Optional[str]=None, type: str="", parent_comment_id: typing.Optional[int]=None, offset: int=0, limit: int=20, order: str="ctime desc", what: str="*"):
         if user_id ==0 and target_id == 0:
             raise Exception("user_id,target_id不能同时为0")
         
-        where, vars = self.build_where(user_id=user_id, target_id=target_id,date=date,type=type)
+        where, vars = self.build_where(user_id=user_id, target_id=target_id,date=date,type=type,parent_comment_id=parent_comment_id)
         result = self.db.select(where=where, vars=vars, offset=offset,limit=limit,order=order)
         return CommentIndexRecord.from_dict_list(result)
     
-    def list_iter(self, user_id=0, target_id=0, date=None, type="", batch_size=100, order="ctime desc"):
+    def list_iter(self, user_id: int=0, target_id: int=0, date: typing.Optional[str]=None, type: str="", batch_size: int=100, order: str="ctime desc"):
         """分批迭代查询评论索引
         
         使用迭代器分批获取数据，避免一次性加载大量数据到内存
@@ -155,15 +152,15 @@ class CommentService:
                 break
             offset += batch_size
     
-    def get_by_id(self, comment_id=0, user_id=0):
+    def get_by_id(self, comment_id: int=0, user_id: int=0):
         where_dict = dict(id = comment_id)
         if user_id > 0:
             where_dict["user_id"] = user_id
         result = self.db.select_first(where=where_dict)
         return CommentIndexRecord.from_dict_or_None(result)
 
-    def count(self, user_id=0, target_id=0, date=None,type=""):
-        where, vars = self.build_where(user_id=user_id, target_id=target_id,date=date,type=type)
+    def count(self, user_id: int=0, target_id: int=0, date: typing.Optional[str]=None, type: str="", parent_comment_id: typing.Optional[int]=None):
+        where, vars = self.build_where(user_id=user_id, target_id=target_id,date=date,type=type,parent_comment_id=parent_comment_id)
         return self.db.count(where=where, vars=vars)
     
     def delete_by_id(self, id=0):
