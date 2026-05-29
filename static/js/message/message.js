@@ -16,6 +16,8 @@ var MessageView = {};
 MessageView.state = {};
 MessageView.state.isEditDialog = false;
 MessageView.listAjaxUrl = "/message/list";
+MessageView.filterKey = "";
+
 xnote.action.message = MessageView;
 xnote.message = MessageView;
 
@@ -84,7 +86,7 @@ MessageView.refreshList = function() {
     params.tag  = getParamTag();
     params.page = getParamPage();
     params.key = getParamKey();
-
+    params.filterKey = MessageView.filterKey;
     doRefreshMessageList(params);
 }
 

@@ -12,7 +12,7 @@ from xnote.core.xtemplate import T
 from xnote.plugin import TabBox
 from xnote_handlers.message import message_utils
 from xnote_handlers.message import message_tag
-from xnote_handlers.message.message_utils import filter_key
+from xnote_handlers.message.message_utils import format_filter_key
 from .dao_template import MessageTemplateDao
 from .message_template_service import handle_template_tab
 from .message_utils import mark_filter_text
@@ -26,7 +26,22 @@ class LogPageHandler:
         input_tag = xutils.get_argument_str("tag", "log")
         user_name = xauth.current_name_str()
         user_id = xauth.current_user_id()
-        default_content = filter_key(key)
+        default_content = format_filter_key(key)
+        filter_tag1 = xutils.get_argument_str("filter_tag1")
+        filter_tag2 = xutils.get_argument_str("filter_tag2")
+        filter_tag3 = xutils.get_argument_str("filter_tag3")
+        
+                
+        filter_keys = []
+        if key != "":
+            filter_keys.append(key)
+        if filter_tag1 != "":
+            filter_keys.append(filter_tag1)
+        if filter_tag2 != "":
+            filter_keys.append(filter_tag2)
+        if filter_tag3 != "":
+            filter_keys.append(filter_tag3)
+        filter_key = ",".join(filter_keys)
 
         kw = Storage()
 
@@ -44,11 +59,12 @@ class LogPageHandler:
         kw.message_left_class = "hide"
         kw.message_right_class = "row"
         kw.message_tab_component = get_message_log_tab(user_name, input_tag)
+        kw.filter_key = filter_key
         
         filter_content = UserConfig.msg_filter.get_str(user_id=user_id)
         kw.show_tag_filter = True
         kw.filter_config_key = UserConfig.msg_filter.key
-        kw.filter_html = mark_filter_text(filter_content, link_type="log", selected_key=key).result_text
+        kw.filter_html = mark_filter_text(filter_content, link_type="log", selected_key=key)
         handle_template_tab(kw, default_content)
         
         return xtemplate.render("message/page/message_list_view.html", **kw)

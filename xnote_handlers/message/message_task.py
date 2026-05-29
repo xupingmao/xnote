@@ -14,7 +14,7 @@ from xnote_handlers.message.message_utils import is_marked_keyword
 from xnote_handlers.message.message_utils import sort_keywords_by_marked, MessageListParser
 from xnote_handlers.message.message_model import MessageTag, MessageTagEnum
 from xnote_handlers.message.message_utils import MAX_LIST_LIMIT
-from xnote_handlers.message.message_utils import filter_msg_list_by_key, mark_filter_text
+from xnote_handlers.message.message_utils import filter_msg_list_by_keys, mark_filter_text
 from xnote_handlers.message.message_template_service import handle_template_tab
 from .message_tab import get_task_tab
 
@@ -49,6 +49,21 @@ class TaskListHandler:
     @classmethod
     def get_task_create_page(cls):
         filter_key = xutils.get_argument_str("filterKey")
+        filter_tag1 = xutils.get_argument_str("filter_tag1")
+        filter_tag2 = xutils.get_argument_str("filter_tag2")
+        filter_tag3 = xutils.get_argument_str("filter_tag3")
+        
+        filter_keys = []
+        if filter_key != "":
+            filter_keys.append(filter_key)
+        if filter_tag1 != "":
+            filter_keys.append(filter_tag1)
+        if filter_tag2 != "":
+            filter_keys.append(filter_tag2)
+        if filter_tag3 != "":
+            filter_keys.append(filter_tag3)
+        filter_key = ",".join(filter_keys)
+        
         user_id = xauth.current_user_id()
         filter_content = UserConfig.task_filter.get_str(user_id)
         filter_config_key = UserConfig.task_filter.key
@@ -67,7 +82,8 @@ class TaskListHandler:
         kw.search_ext_dict = dict(tag = "task.search")
         kw.message_tag = "task"
         kw.filter_config_key = filter_config_key
-        kw.filter_html = mark_filter_text(filter_content, link_type="task", selected_key=filter_key).result_text
+        kw.filter_html = mark_filter_text(filter_content, link_type="task", selected_key=filter_key)
+        kw.filter_key = filter_key
 
         if not show_side_tags:
             cls.hide_side_tags(kw)
@@ -186,7 +202,7 @@ class TaskListAjaxHandler:
         if filter_key != "":
             msg_list, amount = msg_dao.list_task(
                 user_name, offset=0, limit=MAX_LIST_LIMIT)
-            msg_list = filter_msg_list_by_key(msg_list, filter_key)
+            msg_list = filter_msg_list_by_keys(msg_list, filter_key.split(","))
             return msg_list[offset:offset+limit], len(msg_list)
         else:
             return msg_dao.list_task(user_name, offset, limit)

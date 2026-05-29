@@ -63,6 +63,7 @@ class FormRow:
     readonly = False
     multiple = False
     html : typing.Union[str, bytes] = ""
+    rows = 0 # textarea 行数
 
     _select_html = """
 <select id="{{row.id}}" name="{{row.field}}" class="form-row-value" value="{{row.value}}" {% raw row.html_attr %}>
@@ -113,6 +114,9 @@ class FormRow:
         
         if self.multiple:
             result += f" multiple=\"multiple\""
+        
+        if self.rows > 0:
+            result += f" rows=\"{self.rows}\""
         
         return result
     
@@ -209,7 +213,7 @@ class DataForm:
         return row
     
     def add_textarea(self, title="", field="", placeholder="", value="", 
-                css_class="", readonly=False):
+                css_class="", readonly=False, rows = 0):
         row = FormRow()
         row.id = self._create_row_id()
         row.title = title
@@ -218,7 +222,8 @@ class DataForm:
         row.value = value
         row.type = FormRowType.textarea
         row.css_class = css_class
-        row.readonly = readonly        
+        row.readonly = readonly
+        row.rows = rows
         self.rows.append(row)
         return row
 

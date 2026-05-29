@@ -1,15 +1,19 @@
 # encoding=utf-8
 
 import typing
+import json
 import xutils
 import logging
 
+from typing import List
 from xnote.core import xauth, xtemplate, xconfig, xmanager
 from xnote.core.xtemplate import T
 from xutils import Storage, webutil, dateutil
+from xutils.base import BaseDataRecord
 from xutils.textutil import quote
 from xutils.db.dbutil_helper import new_from_dict
 from . import dao as msg_dao
+from . import dao_filter
 from . import message_utils
 from .message_model import MsgTagInfo, MessageTagEnum
 from .message_tab import get_message_log_tab, get_system_tag_tabs
@@ -18,6 +22,7 @@ from xutils import netutil
 from xutils.functions import safe_list
 from xnote_handlers.note import dao_tag
 from xnote_handlers.note.dao_tag import TagTypeEnum
+from xnote.plugin.table_plugin import BaseTablePlugin
 
 
 """
@@ -291,6 +296,87 @@ class ListAjaxHandler:
             return 5
         return 20
 
+
+class FilterEditHandler(BaseTablePlugin):
+    """标签过滤器编辑器"""
+    require_login = True
+    
+    def handle_edit(self):
+        user_id = xauth.current_user_id()
+        
+        # 获取 filter_config_key 参数，决定是编辑 task_filter 还是 msg_filter
+        filter_config_key = xutils.get_argument_str("filter_config_key", "task.filter")
+        
+        # 查询并解析过滤器配置
+        filter_config = dao_filter.get_filter_config(user_id, filter_config_key)
+        
+        # 创建表单
+        form = self.create_form()
+        form.path = "/message/tag/filter"
+        form.model_name = "filter"
+        form.id = "filter_edit"
+        
+        # 添加隐藏字段存储 filter_config_key
+        form.add_row("", "filter_config_key", css_class="hide", value=filter_config_key)
+        
+        # 添加待办过滤器字段
+        form.add_textarea(
+            title="tag1",
+            field="tag1",
+            placeholder="输入标签，使用空格、逗号或换行分隔",
+            value=filter_config.get_tag1_str(),
+            rows=5
+        )
+        
+        # 添加随手记过滤器字段
+        form.add_textarea(
+            title="tag2",
+            field="tag2",
+            placeholder="输入标签，使用空格、逗号或换行分隔",
+            value=filter_config.get_tag2_str(),
+            rows=5
+        )
+        
+        # 保留第三个字段以备将来扩展
+        form.add_textarea(
+            title="tag3",
+            field="tag3",
+            placeholder="输入标签，使用空格、逗号或换行分隔",
+            value=filter_config.get_tag3_str(),
+            rows=5
+        )
+        
+        kw = Storage()
+        kw.form = form
+        return self.response_form(**kw)
+    
+    def handle_save(self):
+        user_id = xauth.current_user_id()
+        
+        # 支持两种数据格式：
+        # 1. 前端通过 JSON data 参数提交（BaseTablePlugin 标准方式）
+        # 2. 直接通过表单字段提交（兼容测试）
+        param_dict = self.get_data_dict()
+        tag1 = param_dict.get("tag1", "")
+        tag2 = param_dict.get("tag2", "")
+        tag3 = param_dict.get("tag3", "")
+        filter_config_key = param_dict.get("filter_config_key")
+        if filter_config_key == "":
+            return webutil.FailedResult(message="filter_config_key 不能为空")
+    
+        # 格式化标签：处理空格、逗号和换行
+        tag1_list = message_utils.parse_tags_to_list(tag1)
+        tag2_list = message_utils.parse_tags_to_list(tag2)
+        tag3_list = message_utils.parse_tags_to_list(tag3)
+        
+        # 保存过滤器配置
+        config_item = dao_filter.save_filter_config(
+            user_id, tag1_list, tag2_list, tag3_list, filter_config_key)
+        if config_item is None:
+            return webutil.FailedResult(message="无效的过滤器配置")
+        
+        return webutil.SuccessResult(message="保存成功")
+    
 xurls = (
     r"/message/add_tag", AddTagHandler,
     r"/message/tag/delete", DeleteTagAjaxHandler,
@@ -299,4 +385,5 @@ xurls = (
     r"/message/tag/search_dialog", SearchDialogHandler,
     r"/message/tag/system_tag", SystemTagHandler,
     r"/api/message/tag/list", ListTagAjaxHandler,
+    r"/message/tag/filter", FilterEditHandler,
 )

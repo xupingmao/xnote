@@ -139,7 +139,7 @@ class DateDetailHandler:
 
 xurls = (
     # 日记
-    r"/message/dairy", MessageListByDayHandler,
+    r"/message/diary", MessageListByDayHandler,
     r"/message/list_by_day", MessageListByDayHandler,
     r"/message/calendar", CalendarHandler,
     r"/message/date_detail", DateDetailHandler,

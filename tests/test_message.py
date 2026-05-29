@@ -252,9 +252,9 @@ class TestMain(BaseTestCase):
         assert data != None
         assert data.tag == "task"
 
-    def test_message_dairy(self):
+    def test_message_diary(self):
         date = dateutil.format_date()
-        self.check_OK("/message/dairy")
+        self.check_OK("/message/diary")
         self.check_OK(f"/message/date_detail?date={date}")
 
     def do_test_search(self, content="", tag="", tag_name=""):

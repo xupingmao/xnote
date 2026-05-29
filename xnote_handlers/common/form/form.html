@@ -61,6 +61,10 @@
     });
     // 自动计算textarea的高度
     $(".x-form textarea").each(function (index, elem) {
+        var rows = parseInt($(elem).attr("rows"));
+        if (rows > 0) {
+            return;
+        }
         var height = xnote.layout.getTextareaTextHeight(elem);
         height = Math.min(height + 100, 200);
         $(elem).height(height);

@@ -158,7 +158,12 @@ class ListAjaxHandler:
     def do_list_message(self, user_name, tag, offset, pagesize) -> Tuple[list, int]:
         key = xutils.get_argument_str("key", "")
         date = xutils.get_argument_str("date", "")
-        filter_date = xutils.get_argument_str("filterDate", "")
+        filter_key = xutils.get_argument_str("filterKey", "")
+        
+        if filter_key:
+            # 多标签搜索
+            key = filter_key.replace(",", " ")
+            return self.do_search(user_name, key, offset, pagesize, search_tags=["log"])
 
         if tag == "task.search":
             return self.do_search(user_name, key, offset, pagesize,search_tags=["task"])

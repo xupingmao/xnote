@@ -35,7 +35,10 @@ from xutils.text_parser import TextParser
 from xnote_handlers.message.message_model import MessageFolder, MessageTag, is_task_tag
 from xnote.core import xconfig
 from xnote.service.tag_service import TagPrefixEnum
+from xutils import jsonutil
+from .message_model import TagFilterConfig
 from xnote.plugin import TextLink
+from xnote.plugin import TabBox
 from xutils.text_parser import TextParser
 from xutils.text_parser import set_img_file_ext
 from xutils.text_parser import TextToken, HeadingToken
@@ -91,28 +94,17 @@ def get_search_html(value="", tag=""):
     server_home = xconfig.WebConfig.server_home
     return f"<a class=\"link\" href=\"{server_home}/message?tag={tag}&key={quoted_key}\">{value}</a>"
 
-def build_filter_html(link_type="task", key="", selected_key=""):
-    key = key.strip()
-    quoted_key = textutil.quote(key)
-    server_home = xconfig.WebConfig.server_home
-    css_class = ""
-    if key == selected_key:
-        css_class = "active"
-
-    if key == "#_all#":
-        key = "全部"
-        quoted_key = ""
-        if selected_key == "":
-            css_class = "active"
+def _build_filter_tabbox(tag_list, tab_key, title="", selected_key=""):
+    if not tag_list:
+        return ""
+    tab_box = TabBox(tab_key=tab_key, title=title, css_class="btn-style")
     
-    if key == "#_reset#":
-        key = "重置"
-        quoted_key = ""
+    tab_box.add_item(title="全部", value="")
+    for tag_value in tag_list:
+        tab_box.add_item(title=tag_value, value=tag_value)
+    
+    return tab_box.render().decode("utf-8")
 
-    if link_type == "task":
-        return f"<a class=\"hashtag-filter {css_class}\" href=\"{server_home}/message/task?filterKey={quoted_key}\">{key}</a>"
-    else:
-        return f"<a class=\"hashtag-filter {css_class}\" href=\"{server_home}/message?key={quoted_key}\">{key}</a>"
 
 class TagHelper:
 
@@ -213,18 +205,26 @@ def mark_text_v2(msg: MessageDO):
     text_tokens = parser.get_text_tokens(tokens)
     return MarkResult("".join(text_tokens), keywords=get_user_tag_or_heading_set(keywords), full_keywords=keywords)
 
-def mark_filter_text(content="", link_type="log", selected_key=""):
-    # 设置图片文集后缀
-    set_img_file_ext(xconfig.FS_IMG_EXT_LIST)    
-    parser = TextParser()
-    tokens = parser.parse_to_tokens(text=content)
-    
-    for token in tokens:
-        if token.type in (TokenType.topic, TokenType.search):
-            token.html = build_filter_html(link_type=link_type, key = token.value, selected_key=selected_key)
+class TagFilterInfo:
+    def __init__(self, tab_title="", tab_key="", tags=[]):
+        self.tab_title = tab_title
+        self.tab_key = tab_key
+        self.tags = tags
 
-    text_tokens = parser.get_text_tokens(tokens)
-    return MarkResult("".join(text_tokens))
+def mark_filter_text(content="", link_type="log", selected_key=""):
+    config = parse_filter_config(content)
+    # group_titles = ["待办", "随手记", "其他"]
+    group_configs = [
+        TagFilterInfo("", "filter_tag1", config.tag1), 
+        TagFilterInfo("", "filter_tag2", config.tag2), 
+        TagFilterInfo("", "filter_tag3", config.tag3)
+    ]
+    parts = []
+    for title in group_configs:
+            parts.append(_build_filter_tabbox(
+                title.tags, title=title.tab_title, 
+                tab_key=title.tab_key, selected_key=selected_key))
+    return "\n".join(parts)
 
 def mark_text_to_tokens(content="", tag="log"):
     parser = TextParser()
@@ -464,6 +464,17 @@ def filter_msg_list_by_key(msg_list: typing.List[MessageDO], filter_key: str):
 
     return result
 
+def filter_msg_list_by_keys(msg_list: typing.List[MessageDO], filter_keys: List[str]):
+    filter_keys = [key.lower() for key in filter_keys]
+    result: List[MessageDO] = []
+    for msg_item in msg_list:
+        process_message(msg_item)
+        assert msg_item.keywords != None
+        if textutil.contains_all(msg_item.keywords, filter_keys):
+            result.append(msg_item)
+        
+    return result
+
 def list_by_date_and_key(user_id=0, month="", offset=0, limit=20, filter_key="", tag=""):
     date_start = ""
     date_end = ""
@@ -488,7 +499,7 @@ def list_by_date_and_key(user_id=0, month="", offset=0, limit=20, filter_key="",
     return msg_list[offset:offset+limit], len(msg_list)
 
 
-def filter_key(key: str) -> str:
+def format_filter_key(key: str) -> str:
     if key == None or key == "":
         return ""
     if key[0] == '#':
@@ -502,6 +513,7 @@ def filter_key(key: str) -> str:
 
     return "#%s#" % key
 
+filter_key = format_filter_key
 
 def get_remote_ip():
     x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
@@ -731,6 +743,44 @@ def format_tag_list(tag_list: typing.List[MsgTagInfo], search_tag="log"):
     for item in tag_list:            
         item.html = build_tag_html(item, search_tag=search_tag)
     return tag_list
+
+def parse_tags_to_list(text: str) -> list:
+    """将标签文本解析为列表，处理空格、逗号和换行分隔"""
+    if not text:
+        return []
+    
+    text = text.replace("\n", " ").replace(",", " ")
+    
+    tags = [tag.strip() for tag in text.split(" ") if tag.strip()]
+    
+    seen = set()
+    unique_tags = []
+    for tag in tags:
+        if tag not in seen:
+            seen.add(tag)
+            unique_tags.append(tag)
+    
+    return unique_tags
+
+
+def parse_filter_config(config_value: str) -> TagFilterConfig:
+    """解析过滤器配置，兼容旧的纯文本格式和新的 JSON 格式"""
+    if not config_value:
+        return TagFilterConfig()
+    
+    try:
+        config_data = jsonutil.from_json(config_value)
+        if isinstance(config_data, dict):
+            tag1 = config_data.get("tag1", [])
+            tag2 = config_data.get("tag2", [])
+            tag3 = config_data.get("tag3", [])
+            return TagFilterConfig(tag1=tag1, tag2=tag2, tag3=tag3)
+    except Exception:
+        pass
+    
+    tag1_list = parse_tags_to_list(config_value)
+    return TagFilterConfig(tag1=tag1_list, tag2=[], tag3=[])
+
 
 xutils.register_func("message.list_hot_tags", list_hot_tags)
 xutils.register_func("message.filter_default_content", filter_default_content)

@@ -7,7 +7,7 @@ def get_message_log_tab(user: str, tab_default="log"):
     tab = TabBox(tab_key="tag", tab_default=tab_default, css_class="card message-tab")
     tab.add_item(f"记事({stat.log_count})", value="log", href="/message?tag=log")
     tab.add_item(f"标签({stat.key_count})", value="log.tags", href="/message/tag/list")
-    tab.add_item(f"日期", value="log.date", href="/message/dairy?tag=log.date")
+    tab.add_item(f"日期", value="log.date", href="/message/diary?tag=log.date")
     return tab
 
 

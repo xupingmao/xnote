@@ -16,20 +16,17 @@
 xnote.state.codeEditDialogId = 0;
 function xnoteEditFilter(target) {
     console.log(target);
-    var key = $(target).attr("data-key");
-    var url = "/code/edit/user_config?is_iframe=true&config_key=" + encodeURIComponent(key);
-    xnote.state.codeEditDialogId = xnote.showIframeDialog("编辑", url);
+    var configKey = $(target).attr("data-key");
+    var url = "/message/tag/filter?action=edit&filter_config_key=" + encodeURIComponent(configKey);
+    xnote.http.get(url, function (html) {
+        xnote.state.codeEditDialogId = xnote.showDialog("编辑标签过滤器", html);
+    });
 }
 
 // 处理编辑后的回调事件
-xnote.on("code_edit", function (event) {
+xnote.on("message_tag.filter.save", function (event) {
     console.log("event=", event);
     xnote.closeDialog(xnote.state.codeEditDialogId);
     window.location.reload();
-});
-
-// 处理关闭事件
-xnote.on("code_edit.close", function (event) {
-    xnote.closeDialog(xnote.state.codeEditDialogId);
 });
 </script>

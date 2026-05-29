@@ -418,3 +418,23 @@ class MessageStatVO(xutils.Storage):
         self.canceled_count = ""
         self.search_count = ""
         self.update(kw)
+
+
+class TagFilterConfig:
+    """标签过滤器配置"""
+    def __init__(self, tag1: List[str] = None, tag2: List[str] = None, tag3: List[str] = None):
+        self.tag1 = tag1 or []
+        self.tag2 = tag2 or []
+        self.tag3 = tag3 or []
+
+    def get_tag1_str(self) -> str:
+        """获取 tag1 的字符串形式，用于表单显示"""
+        return " ".join(self.tag1)
+
+    def get_tag2_str(self) -> str:
+        """获取 tag2 的字符串形式，用于表单显示"""
+        return " ".join(self.tag2)
+
+    def get_tag3_str(self) -> str:
+        """获取 tag3 的字符串形式，用于表单显示"""
+        return " ".join(self.tag3)

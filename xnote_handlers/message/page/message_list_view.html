@@ -29,6 +29,7 @@
     {% init message_right_class = "message-right" %}
     {% init list_ajax_url = "/message/list" %}
     {% init system_tag_tabs = None %}
+    {% init filter_key = "" %}
 
     <!-- 事件转换 -->
     {% include message/component/message_event.html %}
@@ -70,6 +71,7 @@
         xnote.state.message.messageTag = "{{message_tag}}";
         xnote.state.message.tag = "{{tag}}";
         MessageView.listAjaxUrl = "{{list_ajax_url}}";
+        MessageView.filterKey = "{{filter_key}}";
         MessageView.refreshList();
     </script>
 
