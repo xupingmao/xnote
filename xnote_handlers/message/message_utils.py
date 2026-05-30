@@ -562,7 +562,7 @@ class MessageListParser(object):
         if message.tag == None:
             message.tag = self.tag
 
-    def process_message(self, message: MessageDO) -> Storage:
+    def process_message(self, message: MessageDO) -> MessageDO:
         self.prehandle_message(message)
 
         message.tag_text = TAG_TEXT_DICT.get(message.tag, message.tag)
@@ -597,7 +597,7 @@ class MessageListParser(object):
         if content.find("https://")>=0 or content.find("http://")>=0:
             result.append(MessageTagEnum.link.value)
 
-        if content.find("file://")>=0:
+        if content.find("file://")>=0 or len(message.files) > 0:
             result.append(MessageTagEnum.file.value)
         
         if PatternCache.book_pattern.search(content):
