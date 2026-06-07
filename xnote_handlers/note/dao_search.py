@@ -8,10 +8,10 @@ from .dao_index import NoteIndexDao, NoteIndexDO, NoteDO
 from .dao_index import build_note_info, build_note_list_info
 from xnote.core.models import SearchResult
 from xutils import htmlutil, textutil, dateutil
-from xnote.webui import TagSpan
-from .dao_base import _full_db, sort_notes, sort_by_priority
+from xnote.webui import TagSpan, TextTag
+from .dao_base import _full_db, sort_notes, sort_by_priority, fill_parent_name
 from xnote.service.search_service import SearchHistoryDO, SearchHistoryService, SearchHistoryType
-
+from xnote.webui import RowPanel
 
 MAX_SEARCH_SIZE = 1000
 MAX_SEARCH_KEY_LENGTH = 20
@@ -196,19 +196,35 @@ def merge_notes(a: List[NoteIndexDO], b: List[NoteIndexDO],  orderby="hot_index"
     sort_by_priority(result)
     return result
 
-def to_search_results(notes: List[NoteIndexDO]) -> typing.List[SearchResult]:
+def to_search_results(notes: List[NoteIndexDO], words: List[str]) -> typing.List[SearchResult]:
+    fill_parent_name(notes)
+    
     result = []
     for note in notes:
         item = SearchResult()
         item.id = note.note_id
         item.name = note.name
         item.url = note.url
-        item.html = note.html
         item.icon = note.icon
-        item.show_move = False
-        item.short_desc = note.manual_short_desc
+        item.show_move = True
         item.parent_id = note.parent_id
         item.creator = note.creator
         item.badge_info = note.badge_info
+        item.name_html = htmlutil.highlight(note.name, words)
+        item.short_desc = htmlutil.highlight(note.manual_short_desc, words)
+        item.html = build_note_extra_html(note)
         result.append(item)
     return result
+
+def build_note_extra_html(note: NoteIndexDO):
+    result = RowPanel(css_class="margin-top-sm")
+    if note.is_pinned:
+        result.add(TextTag(text="置顶", css_class="orange-tag"))
+    if note.is_public:
+        result.add(TextTag(text="公开", css_class="green-tag"))
+    if note.creator:
+        result.add(TextTag(text=note.creator, css_class="lightgray"))
+    if note.parent_name:
+        result.add(TextTag(text=note.parent_name, css_class="lightgray", href=note.url))
+    result.extra.add_span(note.badge_info, css_class="search-badge-info")
+    return result.render()

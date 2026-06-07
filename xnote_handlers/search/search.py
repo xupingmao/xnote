@@ -57,23 +57,6 @@ def get_search_handler(search_type) -> Storage:
 # 注册到xtemplate的实现
 xnote_hooks.get_search_handler = get_search_handler
 
-def fill_note_info(files: typing.List[SearchResult], words:List[str]=[]):
-    ids = []
-    for file in files:
-        file.name_html = htmlutil.highlight(file.name, words)
-        file.short_desc = htmlutil.highlight(file.short_desc, words)
-        if file.category == "note":
-            ids.append(file.parent_id)
-    
-    note_dict = note_dao.batch_query_dict(ids)
-    for file in files:
-        file.parent_name = ""
-        parent = note_dict.get(file.parent_id)
-        if parent is not None:
-            file.parent_name = parent.name
-        if file.category == "note":
-            file.show_move = True
-
 def log_search_history(user, key, category = "default", cost_time = 0):
     note_dao.add_search_history(user, key, category, cost_time)
 
@@ -178,7 +161,6 @@ class SearchHandler:
         logger.info("after fire search.after")
 
         search_result = ctx.join_as_files()
-        fill_note_info(search_result, ctx.words)
         return search_result[offset:offset+limit], len(search_result)
 
     @mem_util.log_mem_info_deco("do_search_with_profile", log_args = True)
@@ -234,8 +216,6 @@ class SearchHandler:
         
         notes = [note_to_search_result(item) for item in notes]
         
-        fill_note_info(notes, ctx.words)
-
         if parent_id != "" and parent_id != None:
             ctx.parent_note = note_dao.get_by_id(parent_id, include_full=False)
 

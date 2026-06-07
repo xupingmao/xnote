@@ -35,7 +35,7 @@ ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 BLANK_CHAR_SET = set(" \n\t\r")
 SEQUENCE_TYPES = (list, tuple, set)
 
-def contains_all(text: str, words: typing.Sequence):
+def contains_all(text: str, words: typing.Sequence[str]):
     """
         >>> contains_all("abc is good", "abc")
         True

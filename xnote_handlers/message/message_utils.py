@@ -470,7 +470,7 @@ def filter_msg_list_by_keys(msg_list: typing.List[MessageDO], filter_keys: List[
     for msg_item in msg_list:
         process_message(msg_item)
         assert msg_item.keywords != None
-        if textutil.contains_all(msg_item.keywords, filter_keys):
+        if textutil.contains_all(msg_item.content, filter_keys):
             result.append(msg_item)
         
     return result

@@ -855,7 +855,6 @@ def update_children_count(parent_id, db=None, parent_note=None):
 def fill_parent_name(files: typing.List[NoteIndexDO]):
     id_list = []
     for item in files:
-        build_note_info(item)
         id_list.append(item.parent_id)
 
     note_dict = batch_query_dict(id_list)

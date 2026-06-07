@@ -202,12 +202,15 @@ class TagSpan(BaseComponent):
 </span>"""
 
 class TextTag(BaseComponent):
-    def __init__(self, text="", css_class=""):
+    def __init__(self, text="", css_class="", href=""):
         self.text = text
         self.css_class = css_class
+        self.href = href
     
     def render(self):
         text = escape_html(self.text)
+        if self.href:
+            return f"""<span class="tag {self.css_class}"><a href="{self.href}">{text}</a></span>"""
         return f"""<span class="tag {self.css_class}">{text}</span>"""
     
 class DropdownOption(BaseComponent):
