@@ -3,11 +3,12 @@
 {% block head %}
     {% init codemirror_show_hint = False %}
     {% include common/script/load_codemirror.html %}
-    <script type="text/javascript" src="{{_server_home}}/_static/lib/csv.js/csv.js"></script>
-    <script type="text/javascript" src="{{_server_home}}/_static/lib/marked/marked.js"></script>
-    <script type="text/javascript" src="{{_server_home}}/_static/js/marked-ext.js?ts={{_ts}}"></script>
+
+    {% set-global markdown_content = file.content %}
+    {% include common/script/load_markdown.html %}
 
     <script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
+
     {% include note/component/css/edit_css.html %}
 {% end %} 
 

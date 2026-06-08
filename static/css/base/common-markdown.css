@@ -106,7 +106,13 @@ div.xnote-done {
     background-color: #98FB98;
 }
 
-/* 代码行容器 */
+/* mermaid 图表容器 */
+.mermaid {
+    text-align: center;
+    margin: 10px 0;
+    overflow: auto;
+}
+
 .code-line {
     background-color: #eee;
     padding: 0 10px;

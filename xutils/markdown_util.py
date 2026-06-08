@@ -15,6 +15,12 @@ def has_latex(content: str):
         return True
     return False
 
+def has_mermaid(content: str):
+    """检测文本中是否含有mermaid图表"""
+    if "```mermaid" in content:
+        return True
+    return False
+
 def render_html(text: str) -> str:
     if markdown:
         return markdown.markdown(text)

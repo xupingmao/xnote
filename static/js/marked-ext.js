@@ -483,6 +483,14 @@ var markedConfig = {
 
     // 重写code
     myRenderer.code = function (code, lang, escaped) {
+        if (lang) {
+            lang = lang.toLowerCase();
+
+            if (lang === 'mermaid') {
+                return '<pre class="mermaid">' + escape(code, true) + '</pre>';
+            }
+        }
+
         if (this.options.highlight) {
             var out = this.options.highlight(code, lang);
             if (out != null && out !== code) {
@@ -498,7 +506,6 @@ var markedConfig = {
                 + '\n</code></pre>';
         }
 
-        lang = lang.toLowerCase()
         // csv
         if ("csv" === lang) {
             return '<div>' + code + '</div>';
@@ -782,11 +789,19 @@ var markedConfig = {
         })
     }
 
+    // 更新mermaid图表
+    marked._updateMermaid = function () {
+        if (window.mermaid) {
+            mermaid.run();
+        }
+    }
+
 
     // 渲染后更新操作
     marked.afterRender = function () {
         this._updateHashLinks();
         this._updateLatex();
+        this._updateMermaid();
         
         adjustTableWidth();
 

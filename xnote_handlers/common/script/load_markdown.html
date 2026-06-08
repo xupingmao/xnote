@@ -3,7 +3,7 @@
 {% from xutils import markdown_util %}
 
 {% if not _is_markdown_loaded %}
-    <!-- 加载markdown相关文件 -->
+    {% set-global _is_markdown_loaded = True %}
 
     <!-- 代码高亮highlight依赖 -->
     <link rel="stylesheet" href="{{_server_home}}/_static/lib/highlight.js/11.6.0/styles/github.css">
@@ -14,10 +14,20 @@
     <!-- csv编辑依赖 -->
     <script type="text/javascript" src="{{_server_home}}/_static/js/editor-csv.js"></script>
 
+    <!-- core markdown parser -->
+    <script type="text/javascript" src="{{_server_home}}/_static/lib/marked/marked.js"></script>
+    <script type="text/javascript" src="{{_server_home}}/_static/js/marked-ext.js?ts={{_ts}}"></script>
+
     {% if markdown_util.has_latex(markdown_content) %}
         <!-- KaTeX 用于公式处理 -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css">
         <script src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js"></script>
+    {% end %}
+
+    {% if markdown_util.has_mermaid(markdown_content) %}
+        <!-- Mermaid 用于图表渲染 -->
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({ startOnLoad: false });</script>
     {% end %}
 
 {% end %}

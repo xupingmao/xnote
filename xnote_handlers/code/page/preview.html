@@ -1,9 +1,8 @@
 {% extends wide_base %}
 
 {% block head %}
-<script type="text/javascript" src="{{_server_home}}/_static/lib/csv.js/csv.js"></script>
-<script type="text/javascript" src="{{_server_home}}/_static/lib/marked/marked.js"></script>
-<script type="text/javascript" src="{{_server_home}}/_static/js/marked-ext.js?ts={{_ts}}"></script>
+{% set-global markdown_content = content %}
+{% include common/script/load_markdown.html %}
 <style>
 .CodeMirror {
     width: 60rem;
