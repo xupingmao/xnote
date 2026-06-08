@@ -12,9 +12,12 @@
 | **marked.js** (v0.3.x) | 客户端 Markdown 解析引擎 | `static/lib/marked/marked.js` |
 | **marked-ext.js** | 自定义 Renderer 扩展（任务列表、LaTeX、CSV、TOC 等） | `static/js/marked-ext.js` |
 | **TextParser** (自研) | Python-Markdown 不可用时的回退解析器 | `xutils/text_parser.py` |
-| **KaTeX** | LaTeX 数学公式客户端渲染（CDN 按需加载） | `common/script/load_markdown.html` |
-| **Highlight.js** | 代码高亮客户端渲染（CDN 按需加载） | `common/script/load_markdown.html` |
+| **KaTeX** | LaTeX 数学公式客户端渲染（CDN 按需加载） | `load_markdown.html` |
+| **Highlight.js** | 代码高亮客户端渲染（CDN 按需加载） | `load_markdown.html` |
+| **Mermaid** | 图表/流程图客户端渲染（CDN 按需加载） | `load_markdown.html` |
 | **CodeMirror** | 桌面端 Markdown 编辑器 | `static/lib/codemirror/mode/markdown.js` |
+
+所有前端资源通过 `load_markdown.html` 统一加载（见第 7 章）。
 
 ---
 
@@ -84,7 +87,7 @@ ViewHandler.GET() → VIEW_FUNC_DICT["md"] = view_or_edit_md_func()
 
 ```
 markdown.html 页面加载
-  ├─ load_markdown.html 按需加载 Highlight.js / KaTeX
+  ├─ load_markdown.html 按需加载 Highlight.js / KaTeX / Mermaid
   ├─ textarea 隐藏域存放原始 Markdown（{{!markdown_content}}）
   └─ marked.parseAndRender(input, "#markdown-output-div", options)
         │
@@ -95,7 +98,7 @@ markdown.html 页面加载
         │     ├─ heading  → 添加 id、class="marked-heading"、记录 TOC
         │     ├─ listitem → 解析 [ ]/[x] 生成可点击 checkbox
         │     ├─ paragraph→ 处理段落内 checkbox
-        │     ├─ code     → 高亮分发 (CSV→表格, latex→KaTeX, 其他→hljs)
+        │     ├─ code     → mermaid→<pre class="mermaid">, CSV→表格, latex→KaTeX, 其他→hljs
         │     ├─ codespan → <code class="marked-codespan">
         │     ├─ strong   → <strong class="marked-strong"> 搜索链接
         │     ├─ image    → 包裹 <p class="marked-img"> + x-photo 类
@@ -107,6 +110,7 @@ markdown.html 页面加载
         └─ afterRender()
               ├─ 更新 hash 链接
               ├─ _updateLatex() → KaTeX.render()
+              ├─ _updateMermaid() → mermaid.run()
               └─ 表格宽度自适应
 ```
 
@@ -182,18 +186,72 @@ PreviewPopupHandler  →  note_view.py:576
 - `MarkdownImageParser`（`html_importer.py:269-398`）：解析 `![...](url)`，下载到本地
 - 使用 `FsMapDao` 缓存，避免重复下载
 
+### 6.6 Mermaid 图表
+
+- **检测**：`markdown_util.has_mermaid()` 匹配 ` ```mermaid `
+- **加载**：`load_markdown.html` 根据 `markdown_content` 变量条件加载 Mermaid JS（CDN）
+- **渲染**：
+  - `myRenderer.code` 遇到 `lang === 'mermaid'` 时输出 `<pre class="mermaid">{code}</pre>`，绕过 highlight 流程
+  - `_updateMermaid()` 调用 `mermaid.run()` 渲染所有 `.mermaid` 元素
+- 所有 Mermaid 图表类型均支持（流程图、时序图、甘特图、类图等）
+
 ---
 
-## 7. 样式
+## 7. 资源加载架构
+
+所有 Markdown 相关前端资源统一通过 `load_markdown.html` 加载，各页面不再直接引用 script/link 标签。
+
+### 7.1 `load_markdown.html` 加载清单
+
+| 资源 | 时机 | 位置 |
+|------|------|------|
+| highlight.js CSS + JS | 始终 | CDN + `static/lib/highlight.js/` |
+| csv.js | 始终 | `static/lib/csv.js/csv.js` |
+| editor-csv.js | 始终 | `static/js/editor-csv.js` |
+| marked.js | 始终 | `static/lib/marked/marked.js` |
+| marked-ext.js | 始终 | `static/js/marked-ext.js` |
+| KaTeX CSS + JS | 按需（`has_latex`） | CDN |
+| Mermaid JS | 按需（`has_mermaid`） | CDN |
+
+### 7.2 防重复加载
+
+```
+{% init _is_markdown_loaded = False %}
+{% if not _is_markdown_loaded %}
+    {% set-global _is_markdown_loaded = True %}
+    ... 加载资源 ...
+{% end %}
+```
+
+第一次 include 时资源加载并翻转标志，后续 include 跳过，避免单个页面内重复加载。
+
+### 7.3 使用 `load_markdown.html` 的页面
+
+| 页面 | `markdown_content` 来源 | 说明 |
+|------|------------------------|------|
+| `note/component/editor/markdown.html` | `{% set-global markdown_content = file.content %}` | 笔记查看视图（通过 `note_detail.html` 等引用） |
+| `note/component/editor/markdown_edit.html` | `{% set-global markdown_content = file.content %}` | 桌面端 Markdown 编辑器 |
+| `note/page/print.html` | `{% set-global markdown_content = note.content %}` | 打印视图 |
+| `note/page/detail/note_detail.html` | `{% set-global markdown_content = file.content %}` | 笔记详情页 |
+| `note/page/detail/group_detail.html` | `{% set-global markdown_content = note.content %}` | 目录/分组详情页 |
+| `note/page/detail/form_detail.html` | `{% set-global markdown_content = "" %}` | 表单详情页（不触发条件加载） |
+| `code/page/preview.html` | `{% set-global markdown_content = content %}` | 通用 Markdown 文件预览 |
+| `code/page/wiki_edit.html` | `{% set-global markdown_content = content %}` | Wiki 编辑器 |
+| `message/page/message_list_view.html` | 未设置（默认 `""`） | 消息列表 |
+| `message/page/task_index.html` | 未设置（默认 `""`） | 任务索引 |
+
+---
+
+## 8. 样式
 
 | 文件 | 说明 |
 |------|------|
-| `static/css/base/common-markdown.css`（160行） | `.marked-heading`、`.marked-img`、`.marked-contents`、`.marked-code`、`.marked-codespan`、`.marked-strong`、`.xnote-todo/done`、`.code-line/container/header` |
+| `static/css/base/common-markdown.css`（167行） | `.marked-heading`、`.marked-img`、`.marked-contents`、`.marked-code`、`.marked-codespan`、`.marked-strong`、`.xnote-todo/done`、`.code-line/container/header`、`.mermaid` |
 | 构建系统纳入 | `xnote_code_builder.py:99` |
 
 ---
 
-## 8. 用户配置
+## 9. 用户配置
 
 ```
 show_md_preview = true    // config/user/user_config.default.properties
@@ -203,7 +261,7 @@ show_md_preview = true    // config/user/user_config.default.properties
 
 ---
 
-## 9. 测试
+## 10. 测试
 
 | 测试 | 文件位置 |
 |------|----------|
@@ -213,7 +271,7 @@ show_md_preview = true    // config/user/user_config.default.properties
 
 ---
 
-## 10. 完整文件清单
+## 11. 完整文件清单
 
 | 分类 | 文件 |
 |------|------|
