@@ -23,7 +23,7 @@ import logging
 import http.client
 import typing
 
-from typing import Optional
+from typing import Optional, Dict, Any
 from urllib.parse import parse_qs
 from xutils.imports import try_decode
 from xutils.base import print_exc
@@ -225,7 +225,7 @@ def http_get_by_requests(url, charset = None):
     resp.encoding = resp.apparent_encoding
     return resp.text
 
-def build_query_string(params, *, skip_empty_value=False):
+def build_query_string(params: Dict[str, str], *, skip_empty_value=False):
     temp = []
     for key in params:
         value = params[key]
@@ -235,7 +235,7 @@ def build_query_string(params, *, skip_empty_value=False):
 
     return "&".join(temp)
 
-def _join_url_and_params(url, params, *, skip_empty_value=False):
+def _join_url_and_params(url: str, params: Optional[Dict[str, str]], *, skip_empty_value=False):
     if params is None:
         return url
 

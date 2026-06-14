@@ -464,7 +464,7 @@ def filter_msg_list_by_key(msg_list: typing.List[MessageDO], filter_key: str):
 
     return result
 
-def filter_msg_list_by_keys(msg_list: typing.List[MessageDO], filter_keys: List[str]):
+def filter_msg_list_by_keys(msg_list: List[MessageDO], filter_keys: List[str]):
     filter_keys = [key.lower() for key in filter_keys]
     result: List[MessageDO] = []
     for msg_item in msg_list:

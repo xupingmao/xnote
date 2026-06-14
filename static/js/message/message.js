@@ -32,6 +32,9 @@ MessageView.refreshList = function() {
 
         params.format = "html";
         params.displayTag = getUrlParam("displayTag", "");
+        params.filter_tag1 = getUrlParam("filter_tag1", "");
+        params.filter_tag2 = getUrlParam("filter_tag2", "");
+        params.filter_tag3 = getUrlParam("filter_tag3", "");
 
         console.log("[message] refresh messageList");
         

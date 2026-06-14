@@ -5,6 +5,7 @@ import xutils
 import xnote_handlers.message.dao as msg_dao
 
 from xutils import Storage
+from xutils.functions import uniq_list_add
 from xnote.core import xtemplate, xauth
 from xnote.core.xnote_user_config import UserConfig
 from xnote.core.xtemplate import T
@@ -53,15 +54,10 @@ class TaskListHandler:
         filter_tag2 = xutils.get_argument_str("filter_tag2")
         filter_tag3 = xutils.get_argument_str("filter_tag3")
         
-        filter_keys = []
-        if filter_key != "":
-            filter_keys.append(filter_key)
-        if filter_tag1 != "":
-            filter_keys.append(filter_tag1)
-        if filter_tag2 != "":
-            filter_keys.append(filter_tag2)
-        if filter_tag3 != "":
-            filter_keys.append(filter_tag3)
+        filter_keys = filter_key.split(",")
+        uniq_list_add(filter_keys, filter_tag1)
+        uniq_list_add(filter_keys, filter_tag2)
+        uniq_list_add(filter_keys, filter_tag3)
         filter_key = ",".join(filter_keys)
         
         user_id = xauth.current_user_id()
@@ -171,9 +167,6 @@ class TaskListAjaxHandler:
 
     @xauth.login_required()
     def GET(self):
-        filter_key = xutils.get_argument_str("filterKey")
-        quote_key = xutils.quote(filter_key)
-        
         user_name = xauth.current_name_str()
         limit = 20
         page = xutils.get_argument_int("page", default_value=1)
@@ -188,8 +181,6 @@ class TaskListAjaxHandler:
         kw.page = page
         kw.page_total = amount
         kw.item_list = chatlist
-        kw.page_url = f"?filterKey={quote_key}&page="
-
         return xtemplate.render("message/page/message_list_ajax.html", **kw)
 
     def do_list_task(self, user_name, offset, limit):

@@ -217,16 +217,11 @@ class ListAjaxHandler:
             p=p,
         )
 
-        page_url = "?" + \
-            netutil.build_query_string(
-                params=params, skip_empty_value=True) + "&page="
-
         kw = Storage(
             show_todo_check=show_todo_check,
             show_edit_btn=show_edit_btn,
             show_to_log_btn=show_to_log_btn,
             page=page,
-            page_url=page_url,
             page_total = page_total,
             page_size = page_size,
             item_list=msg_list
@@ -549,7 +544,6 @@ class DateAjaxHandler:
             "message/page/message_list_ajax.html",
             page_max=page_max,
             page=page,
-            page_url=f"?date={date}&filterKey={quote(filter_key)}&page=",
             item_list=msg_list)
 
 

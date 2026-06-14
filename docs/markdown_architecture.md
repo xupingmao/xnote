@@ -1,6 +1,6 @@
 # xnote Markdown 处理架构
 
-> 总结于 2026-06-08，涵盖整个项目中 Markdown 的存储、编辑、渲染、预览流程。
+> 总结于 2026-06-09，涵盖整个项目中 Markdown 的存储、编辑、渲染、预览流程。
 
 ---
 
@@ -281,12 +281,13 @@ show_md_preview = true    // config/user/user_config.default.properties
 | 客户端扩展 | `static/js/marked-ext.js` |
 | CodeMirror 模式 | `static/lib/codemirror/mode/markdown.js` |
 | 编辑器 JS | `static/js/editor.js` |
+| Mermaid 图表库 | CDN（通过 `load_markdown.html` 按需加载） |
 | 样式 | `static/css/base/common-markdown.css` |
 | 视图模板 | `note/component/editor/markdown.html` |
 | 桌面编辑器 | `note/component/editor/markdown_edit.html` |
 | 移动编辑器 | `note/component/editor/markdown_edit.mobile.html` |
 | 编辑器侧栏 | `note/component/sidebar/markdown_edit_sidebar.html` |
-| 脚本加载器 | `common/script/load_markdown.html` |
+| 资源加载器（核心） | `common/script/load_markdown.html` |
 | 打印模板 | `note/page/print.html` |
 | 代码预览 | `code/page/preview.html` |
 | 模型 | `note/models.py` |

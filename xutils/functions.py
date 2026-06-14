@@ -259,6 +259,12 @@ def list_replace(lst: list, old, new):
         return item
     return list(map(replace_func, lst))
 
+def uniq_list_add(lst: list, item, ignore_empty=False):
+    if ignore_empty and not item:
+        return
+    if item not in lst:
+        lst.append(item)
+
 def first_or_none(list):
     """返回集合的第一个元素
 

@@ -2,7 +2,7 @@
 
 import xutils
 
-
+from typing import Optional, List
 from xutils import Storage
 from xutils import webutil
 from xutils import netutil
@@ -18,9 +18,10 @@ from .message_template_service import handle_template_tab
 from .message_utils import mark_filter_text
 from .message_tab import get_message_log_tab
 from xnote.core.xnote_user_config import UserConfig
+from xutils.functions import uniq_list_add
 
 class LogPageHandler:
-
+            
     def do_get(self):
         key = xutils.get_argument_str("key", "")
         input_tag = xutils.get_argument_str("tag", "log")
@@ -33,14 +34,11 @@ class LogPageHandler:
         
                 
         filter_keys = []
-        if key != "":
-            filter_keys.append(key)
-        if filter_tag1 != "":
-            filter_keys.append(filter_tag1)
-        if filter_tag2 != "":
-            filter_keys.append(filter_tag2)
-        if filter_tag3 != "":
-            filter_keys.append(filter_tag3)
+        uniq_list_add(filter_keys, key)
+        uniq_list_add(filter_keys, filter_tag1)
+        uniq_list_add(filter_keys, filter_tag2)
+        uniq_list_add(filter_keys, filter_tag3)
+        
         filter_key = ",".join(filter_keys)
 
         kw = Storage()

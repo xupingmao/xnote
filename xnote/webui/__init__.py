@@ -9,3 +9,4 @@ from .container import Card, CardRow, RowDiv, RowPanel
 from .link import TextLink, ActionLink, EditFormActionLink, ConfirmActionLink
 from ._list import ListView, ListViewItem, ListItem, ListViewDropdown, ItemList
 from ._image import Image
+from ._pagination import Pagination
