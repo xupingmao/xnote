@@ -96,7 +96,7 @@ class RepairHandler(BaseTablePlugin):
     title = "数据修复"
     show_aside = True
     require_admin = True
-    parent_link = LinkConfig.admin_plugin_index
+    parent_link = LinkConfig.app_index
 
     repair_rows: List[BaseRepairTool] = [
         RepairMsgTag(code="fix_msg_tag", name="待办/随手记索引"),

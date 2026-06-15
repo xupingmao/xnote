@@ -113,8 +113,6 @@ LOAD_PLUGINS_ON_INIT = True
 PLUGINS_DICT = {} # key = url, value = PluginContext
 PLUGIN_TEMPLATE = ""
 
-# 菜单配置
-MENU_LIST = []
 # 导航配置
 NAV_LIST = []
 # 笔记的扩展配置

@@ -152,3 +152,7 @@ class TestMain(test_base.BaseTestCase):
         for tool in RepairHandler.repair_rows:
             tool.do_repair()
 
+
+    def test_tools_shell(self):
+        self.check_OK("/tools/shell")
+        

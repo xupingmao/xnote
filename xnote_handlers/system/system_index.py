@@ -16,7 +16,7 @@ from xnote.core import xauth
 from xnote.core import xmanager
 from xutils import Storage
 from xutils import webutil
-from .system_config import AppLink
+from .system_config import AppLink, MENU_LIST
 from xnote.plugin.grid import AppGrid, AppInfo
 from xnote.plugin import BasePlugin
 from xnote_handlers.config import LinkConfig, AsideConfig
@@ -50,7 +50,7 @@ class IndexHandler(BasePlugin):
                 return True
             return link.user == user_name
 
-        for category in xconfig.MENU_LIST:
+        for category in MENU_LIST:
             children = category.children
             if len(children) == 0:
                 continue

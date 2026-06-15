@@ -122,14 +122,21 @@ NOTE_TOOLS = [
 DATA_TOOLS = [
     admin_link("数据库", "/system/sqldb_admin?p=sqldb", "database"),
     admin_link("缓存管理", "/system/cache", "database"),
+    admin_link("数据迁移", "/admin/repair", "wrench"),
     # admin_link("消息队列", "/system/todo", "database"),
 ]
 
+class MenuGroup:
+    def __init__(self, name = "", children=[], need_login=True):
+        self.name = name
+        self.children = children
+        self.need_login = need_login
+
 # 所有功能配置
-xconfig.MENU_LIST = [
-    Storage(name="Note", children=NOTE_TOOLS, need_login=True),
-    Storage(name="System", children=SYS_TOOLS, need_login=True),
-    Storage(name="数据管理", children=DATA_TOOLS, need_login=True),
+MENU_LIST = [
+    MenuGroup(name="Note", children=NOTE_TOOLS),
+    MenuGroup(name="System", children=SYS_TOOLS),
+    MenuGroup(name="数据管理", children=DATA_TOOLS),
     # TODO 增加一栏自定义的插件
 ]
 
