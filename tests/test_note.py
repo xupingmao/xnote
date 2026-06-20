@@ -300,6 +300,8 @@ class TestMain(BaseTestCase):
         self.check_200("/note/group/select?id=1234")
         self.check_200("/note/date?year=2019&month=1")
         self.check_200("/note/sticky")
+        group_id = get_default_group_id()
+        self.check_OK(f"/note/view/{group_id}")
 
     def test_note_share(self):
         delete_note_for_test("xnote-share-test")

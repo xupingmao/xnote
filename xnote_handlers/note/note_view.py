@@ -406,6 +406,7 @@ class ViewHandler:
         del kw['template_name']
 
         kw.file = file
+        kw.note = file
         kw.can_edit = can_edit
         kw.get_tag_name_by_code = dao_tag.get_name_by_code
 

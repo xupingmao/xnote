@@ -499,6 +499,9 @@ class DatabaseConfig:
     # ssdb相关配置
     ssdb_host = ""
     ssdb_port = 8888
+    
+    # 备份相关
+    db_backup = True
 
     @classmethod
     def init(cls):
@@ -526,6 +529,8 @@ class DatabaseConfig:
 
         cls.ssdb_host = SystemConfig.get_str("ssdb_host", "127.0.0.1")
         cls.ssdb_port = SystemConfig.get_int("ssdb_port", 8888)
+        
+        cls.db_backup = SystemConfig.get_bool("db_backup")
 
         if cls.db_driver == "":
             raise Exception("db_driver config is empty")
@@ -1005,7 +1010,7 @@ class SystemConfig:
             return default_value
         if isinstance(value, str):
             value = value.replace("_", "") # 支持 100_000 这种格式
-        return int(value)
+        return int(value) # type:ignore
     
     @classmethod
     def get_str(cls, name, default_value=""):

@@ -259,7 +259,7 @@ def list_replace(lst: list, old, new):
         return item
     return list(map(replace_func, lst))
 
-def uniq_list_add(lst: list, item, ignore_empty=False):
+def uniq_list_add(lst: list, item, ignore_empty=True):
     if ignore_empty and not item:
         return
     if item not in lst:
