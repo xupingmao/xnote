@@ -210,12 +210,8 @@ def merge_notes(a: List[NoteIndexDO], b: List[NoteIndexDO],  words=[], orderby="
             continue
         result.append(item)
     
-    if len(words) > 0:
-        sorter = NoteSearchSorter(words)
-        result.sort(key = sorter.key)
-    else:
-        sort_notes(result, orderby)
-        sort_by_priority(result)
+    sorter = NoteSearchSorter(words)
+    result.sort(key = sorter.key)
     return result
 
 def to_search_results(notes: Sequence[NoteIndexDO], words: List[str]) -> typing.List[SearchResult]:

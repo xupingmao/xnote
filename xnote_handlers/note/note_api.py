@@ -4,8 +4,12 @@
 # @modified 2021/07/24 17:51:17
 import xutils
 import xnote_handlers.note.dao_log as dao_log
+import xnote_handlers.message.dao as msg_dao
+import xnote_handlers.note.dao_book as book_dao
 
 from xnote.core import xauth
+from xnote.core import xconfig
+from xnote.core.xtemplate import T
 from xutils import webutil
 from xutils import textutil
 from xnote_handlers.note import dao
@@ -97,6 +101,92 @@ xutils.register_func("page.list_recent_groups", list_recent_groups)
 xutils.register_func("page.list_recent_notes", list_recent_notes)
 xutils.register_func("note.get_date_by_type", get_date_by_type)
 xutils.register_func("note.assemble_notes_by_date", assemble_notes_by_date)
+
+
+class NoteLink:
+    def __init__(self, name, url, icon = "fa-cube", size = None, roles = None, category = "000"):
+        self.type = "link"
+        self.name = T(name)
+        self.url  = url
+        self.icon = icon
+        self.size = size
+        self.priority = 0
+        self.ctime = ""
+        self.hide  = False
+        self.show_next  = True
+        self.is_deleted = 0
+        self.category = category
+
+        if roles is None:
+            roles = ("admin", "user")
+        self.roles = roles
+
+    def __str__(self):
+        return str(self.__dict__)
+
+class DictEntryLink(NoteLink):
+    def __init__(self, size):
+        NoteLink.__init__(self, "词典", "/note/dict",  "icon-dict", size = size)
+        self.hide = xconfig.HIDE_DICT_ENTRY
+
+
+def list_note_types(user_name = None):
+    if user_name is None:
+        user_name = xauth.current_name()
+
+    note_stat = dao.get_note_stat(user_name)
+
+    return [
+        NoteLink("标签", "/note/taglist", "fa-tags", size=note_stat.tag_count),
+        NoteLink("文档", "/note/document", "fa-file-text", size = note_stat.doc_count),
+        NoteLink("相册", "/note/gallery", "fa-image", size = note_stat.gallery_count),
+        NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
+        NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
+        DictEntryLink(size = note_stat.dict_count),
+        NoteLink("评论", "/note/comment/mine", "fa-file-text", size = note_stat.comment_count),
+        NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
+    ]
+
+def list_msg_types(user_name = None):
+    if user_name is None:
+        user_name = xauth.current_name_str()
+
+    msg_stat  = msg_dao.get_message_stat(user_name)
+
+    return [
+        NoteLink("待办任务", "/message/todo", "fa-calendar-check-o", size = msg_stat.task_count),
+        NoteLink("随手记", "/message?tag=log", "fa-file-text-o", size = msg_stat.log_count),
+    ]
+
+def list_system_types(user_name = None):
+    if user_name is None:
+        user_name = xauth.current_name_str()
+
+    msg_stat  = msg_dao.get_message_stat(user_name)
+
+    return [
+        NoteLink("插件", "/plugin_list", "fa-th-large", size = msg_stat.task_count),
+        NoteLink("设置", "/system/settings", "fa-gear", size = ""),
+    ]
+
+def list_special_groups(user_name = None):
+    if user_name is None:
+        user_name = xauth.current_name()
+
+    fixed_books = []
+    fixed_books.append(msg_dao.get_message_stat_item(user_name, "task"))
+    fixed_books.append(msg_dao.get_message_stat_item(user_name, "log"))
+    fixed_books.append(NoteLink("智能笔记本", "/note/group_list?tab=smart&show_back=true", 
+        size = book_dao.SmartGroupService.count_smart_group(), 
+        icon = "fa-folder"))
+
+    return fixed_books
+
+
+xutils.register_func("page.list_note_types", list_note_types)
+xutils.register_func("page.list_msg_types", list_msg_types)
+xutils.register_func("page.list_system_types", list_system_types)
+xutils.register_func("page.list_special_groups", list_special_groups)
 
 xurls = (
     r"/note/api/group", GroupApiHandler,

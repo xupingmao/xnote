@@ -580,9 +580,6 @@ class TestMain(BaseTestCase):
         json_data = json_request_return_dict("/note/api/group?list_type=all")
         self.assertEqual("success", json_data["code"])
 
-    def test_workspace(self):
-        self.check_OK("/note/workspace")
-
     def test_import_from_html(self):
         html = """<html>
         <title>MyTitle</title>
