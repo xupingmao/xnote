@@ -852,7 +852,7 @@ def update_children_count(parent_id, db=None, parent_note=None):
     update_index(parent_note)
 
 
-def fill_parent_name(files: typing.List[NoteIndexDO]):
+def fill_parent_name(files: typing.Sequence[NoteIndexDO]):
     id_list = []
     for item in files:
         id_list.append(item.parent_id)

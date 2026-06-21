@@ -72,12 +72,12 @@ def search(ctx: SearchContext, expression=None):
         return files
 
     if ctx.search_note_content:
-        files += note_dao.search_content(words, xauth.current_name_str())
+        files += note_dao.search_content(words, xauth.current_user_id())
     
     if ctx.search_note:
         files = note_dao.search_name(words, creator_id=user_id, exclude_types=["group"])
         files_by_short_desc = note_dao.search_short_desc(words, creator_id=user_id, exclude_types=["group"])
-        files = note_dao.merge_notes(files, files_by_short_desc)
+        files = note_dao.merge_notes(files, files_by_short_desc, words=words)
         files = note_dao.to_search_results(files, ctx.words)
 
     for item in files:

@@ -1,7 +1,8 @@
 
 import typing
+import time
 
-from typing import List
+from typing import List, Sequence, Tuple
 from .models import NoteIndexDO, OrderTypeEnum
 from xnote.core import xauth
 from .dao_index import NoteIndexDao, NoteIndexDO, NoteDO
@@ -16,13 +17,31 @@ from xnote.webui import RowPanel
 MAX_SEARCH_SIZE = 1000
 MAX_SEARCH_KEY_LENGTH = 20
 
-def search_name(words: typing.List[str], creator="", creator_id = 0, parent_id=0, orderby="hot_index", limit=1000, 
+class NoteSearchSorter:
+    def __init__(self, words: Sequence[str]):
+        self.search_key = " ".join(words).lower()
+    
+    def key(self, note: NoteIndexDO) -> Tuple[int,int,int]:
+        if note.name.lower() == self.search_key:
+            name_score = 0
+        else:
+            name_score = 1
+        
+        priority_score = 0
+        if note.is_pinned:
+            priority_score = 0
+        else:
+            priority_score = 1
+        
+        hot_index_score = -note.hot_index
+        return (priority_score, name_score, hot_index_score)
+
+def search_name(words: List[str], creator="", creator_id = 0, parent_id=0, limit=1000, 
                 exclude_types=[], type_list=[]):
     # TODO 搜索排序使用索引
     assert isinstance(words, list)
 
     words = [word.lower() for word in words]
-
     name_like = ""
     if len(words) > 0:
         name_like = "%" + "%".join(words) + "%"
@@ -37,8 +56,8 @@ def search_name(words: typing.List[str], creator="", creator_id = 0, parent_id=0
     build_note_list_info(result, order_type=OrderTypeEnum.hot.int_value)
 
     # 对笔记进行排序
-    sort_notes(result, orderby)
-    sort_by_priority(result)
+    sorter = NoteSearchSorter(words)
+    result.sort(key = sorter.key)
     return result
 
 def search_short_desc(words: typing.List[str], creator_id = 0, parent_id=0, orderby="hot_index", limit=1000, 
@@ -60,7 +79,7 @@ def search_short_desc(words: typing.List[str], creator_id = 0, parent_id=0, orde
     sort_by_priority(result)
     return result
 
-def search_content(words: typing.List[str], creator="", orderby="hot_index", limit=1000):
+def search_content(words: List[str], creator_id: int, limit=1000):
     # TODO 全文搜索排序使用索引
     assert isinstance(words, list)
     words = [word.lower() for word in words]
@@ -68,10 +87,9 @@ def search_content(words: typing.List[str], creator="", orderby="hot_index", lim
     def is_match(value: NoteDO):
         if value.content is None:
             return False
-        return (value.creator == creator or value.is_public) \
+        return (value.creator_id == creator_id or value.is_public) \
             and textutil.contains_all(value.content.lower(), words)
 
-    creator_id = xauth.UserDao.get_id_by_name(creator)
     result: List[NoteDO] = []
 
     for index_list in NoteIndexDao.iter_batch(creator_id=creator_id, batch_size=20):
@@ -89,8 +107,8 @@ def search_content(words: typing.List[str], creator="", orderby="hot_index", lim
     # 补全信息
     build_note_list_info(result)
 
-    # 对笔记进行排序
-    sort_notes(result, orderby)
+    sorter = NoteSearchSorter(words)
+    result.sort(key = sorter.key)
     return result
 
 
@@ -180,7 +198,7 @@ def expire_search_history(user_name, limit=1000, search_type=SearchHistoryType.d
         db.delete_items(obj_list)
         
 
-def merge_notes(a: List[NoteIndexDO], b: List[NoteIndexDO],  orderby="hot_index"):
+def merge_notes(a: List[NoteIndexDO], b: List[NoteIndexDO],  words=[], orderby="hot_index"):
     idset = set()
     result:List[NoteIndexDO] = []
     for item in a:
@@ -192,14 +210,18 @@ def merge_notes(a: List[NoteIndexDO], b: List[NoteIndexDO],  orderby="hot_index"
             continue
         result.append(item)
     
-    sort_notes(result, orderby)
-    sort_by_priority(result)
+    if len(words) > 0:
+        sorter = NoteSearchSorter(words)
+        result.sort(key = sorter.key)
+    else:
+        sort_notes(result, orderby)
+        sort_by_priority(result)
     return result
 
-def to_search_results(notes: List[NoteIndexDO], words: List[str]) -> typing.List[SearchResult]:
+def to_search_results(notes: Sequence[NoteIndexDO], words: List[str]) -> typing.List[SearchResult]:
     fill_parent_name(notes)
     
-    result = []
+    result:List[SearchResult] = []
     for note in notes:
         item = SearchResult()
         item.id = note.note_id

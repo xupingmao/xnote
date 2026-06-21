@@ -391,7 +391,7 @@ def byte2str(buf: bytes):
         except:
             pass
 
-def edit_distance0(a, b, la, lb, cache=None, replace_step=2):
+def _edit_distance(a, b, la, lb, cache=None, replace_step=2):
     # 典型的可以使用动态规划，为了可读性，依旧保持原来的递归求解结构
     # 对于这种纯粹的函数，提供装饰器或者在虚拟机进行优化更方便理解
     assert isinstance(cache, list)
@@ -402,28 +402,27 @@ def edit_distance0(a, b, la, lb, cache=None, replace_step=2):
     elif lb == 0:
         ret = la
     elif a[la-1] == b[lb-1]:
-        ret = edit_distance0(a, b, la-1, lb-1, cache, replace_step)
+        ret = _edit_distance(a, b, la-1, lb-1, cache, replace_step)
     else:
         # a删除一个字符a[la-1]
-        d1 = edit_distance0(a, b, la-1, lb, cache, replace_step) + 1
+        d1 = _edit_distance(a, b, la-1, lb, cache, replace_step) + 1
         # a插入一个字符b[lb-1]
-        d2 = edit_distance0(a, b, la, lb-1, cache, replace_step) + 1
+        d2 = _edit_distance(a, b, la, lb-1, cache, replace_step) + 1
         # 替换最后一个字符
-        d3 = edit_distance0(a, b, la-1, lb-1, cache, replace_step) + replace_step
+        d3 = _edit_distance(a, b, la-1, lb-1, cache, replace_step) + replace_step
         ret = min(d1, d2, d3)
     cache[la][lb]=ret
     return ret
 
-def edit_distance(a,b,replace_step=2):
+def edit_distance(a: str,b: str,replace_step=2):
     """最小编辑距离算法(Leven-shtein Distance)
-
-        >>> edit_distance('ab', 'a')
-        1
-        >>> edit_distance('abc', 'ac')
-        1
+    >>> edit_distance('ab', 'a')
+    1
+    >>> edit_distance('abc', 'ac')
+    1
     """
     cache = [[-1 for i in range(len(b)+1)] for i in range(len(a)+1)]
-    return edit_distance0(a,b,len(a),len(b),cache,replace_step)
+    return _edit_distance(a,b,len(a),len(b),cache,replace_step)
 
 def jaccard_similarity(str1, str2):
     """Jaccard/Tanimoto系数"""

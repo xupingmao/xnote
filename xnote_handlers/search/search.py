@@ -200,21 +200,14 @@ class SearchHandler:
         group_result = []
 
         if ctx.category == "content":
-            notes = note_dao.search_content(words, user_name)
+            notes = note_dao.search_content(words, user_id)
+            notes = note_dao.to_search_results(notes, words=ctx.words)
         else:
             group_result = note_dao.search_group(words, user_id, parent_id = parent_id)
             notes = note_dao.search_name(words, user_name, parent_id = parent_id, exclude_types=["group"])
             notes_by_short_desc = note_dao.search_short_desc(words, creator_id=user_id, parent_id=parent_id, exclude_types=["group"])
-            notes = note_dao.merge_notes(notes, notes_by_short_desc)
-            
-
-        def note_to_search_result(note: NoteIndexDO):
-            result = SearchResult(**note)
-            result.category = "note"
-            result.short_desc = note.manual_short_desc
-            return result
-        
-        notes = [note_to_search_result(item) for item in notes]
+            notes = note_dao.merge_notes(notes, notes_by_short_desc, words=words)
+            notes = note_dao.to_search_results(notes, words=ctx.words)
         
         if parent_id != "" and parent_id != None:
             ctx.parent_note = note_dao.get_by_id(parent_id, include_full=False)
