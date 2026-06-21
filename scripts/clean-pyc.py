@@ -5,7 +5,7 @@
 @Date         : 2023-05-06 23:25:15
 @LastEditors  : xupingmao
 @LastEditTime : 2023-05-06 23:26:33
-@FilePath     : /xnote/tools/clean-pyc.py
+@FilePath     : /xnote/scripts/clean-pyc.py
 @Description  : 描述
 """
 

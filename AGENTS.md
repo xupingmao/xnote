@@ -20,14 +20,14 @@ Open http://localhost:1234 ; admin/admin.
 
 ```sh
 # all tests (updates config/version.txt, cleans testdata/)
-python tools/run-test.py
+python scripts/run-test.py
 
-# focused targets (see tools/run-test.py for full list)
-python tools/run-test.py app      # handlers
-python tools/run-test.py xutils   # xutils lib
-python tools/run-test.py note     # note handlers
-python tools/run-test.py xutils_db  # kv db layer
-python tools/run-test.py xutils_sqldb  # sql db layer
+# focused targets (see scripts/run-test.py for full list)
+python scripts/run-test.py app      # handlers
+python scripts/run-test.py xutils   # xutils lib
+python scripts/run-test.py note     # note handlers
+python scripts/run-test.py xutils_db  # kv db layer
+python scripts/run-test.py xutils_sqldb  # sql db layer
 
 # bypass runner (pytest directly)
 python -m pytest tests/test_app.py --doctest-modules --cov xnote_handlers --capture no
@@ -113,4 +113,4 @@ debug.type = bool
 - **Version**: `config/version.txt` — auto-updated during test run (branch-date format).
 - **Sentinel**: `sentinel.py` wraps the server; exit code 205 or 52480 triggers restart. Also respects `xnote-reboot.txt` file.
 - **Migrations**: `xnote_migrate/` has numbered `upgrade_xxx.py` files for schema/data migration during version upgrades.
-- **Build step**: Run `tools/build.py` to build CSS/JS bundles before production (referenced in code, file may not exist at root).
+- **Build step**: Run `scripts/build.py` to build CSS/JS bundles before production (referenced in code, file may not exist at root).

@@ -17,7 +17,7 @@ setuptools.setup(
     description = "xnote-web框架",
     long_description = long_description,
     long_description_content_type = "text/markdown",
-    # packages = ["config", "core", "docs", "handlers", "lib", "static", "tools", "xnote", "xutils"],
+    # packages = ["config", "core", "docs", "handlers", "lib", "static", "scripts", "xnote", "xutils"],
     packages=setuptools.find_packages(),
     include_package_data=True, # 包含资源文件
     # package_dir={"": "."},

@@ -63,7 +63,7 @@ def do_create_thumbnail(path: str, version="v1", debug=False):
     else:
         logging.info("path=%s", path)
         # multiprocessing在Windows和Mac的性能比较差，因为他们默认使用新线程而不是fork的方式创建线程，
-        script_path = os.path.join(xconfig.FileConfig.source_root_dir, "tools/image-thumbnail.py")
+        script_path = os.path.join(xconfig.FileConfig.source_root_dir, "scripts/image-thumbnail.py")
         args = [sys.executable, script_path, path, version]
         with subprocess.Popen(args, stdout=subprocess.PIPE) as proc:
             assert proc.stdout != None

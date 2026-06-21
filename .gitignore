@@ -65,7 +65,7 @@ id_rsa*
 run-local*.bat
 run-local*.sh
 run-follower*
-tools/git-push.sh
+scripts/git-push.sh
 config/boot/boot.local.*
 config/boot/boot.winxp.properties
 config/boot/*.local.properties

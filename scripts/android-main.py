@@ -5,7 +5,7 @@
 @Date         : 2022-08-07 16:39:30
 @LastEditors  : xupingmao
 @LastEditTime : 2022-08-07 17:26:13
-@FilePath     : /xnote/tools/android-main.py
+@FilePath     : /xnote/scripts/android-main.py
 @Description  : 安卓入口，可以运行在qpython的环境中
 """
 import os

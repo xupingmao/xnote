@@ -5,7 +5,7 @@
 @Date         : 2024-05-01 20:48:16
 @LastEditors  : xupingmao
 @LastEditTime : 2024-05-02 20:59:13
-@FilePath     : /xnote/tools/upload-to-server.py
+@FilePath     : /xnote/scripts/upload-to-server.py
 @Description  : 上传文件到服务器
 """
 

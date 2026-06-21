@@ -5,7 +5,7 @@
 @Date         : 2024-02-07 11:05:46
 @LastEditors  : xupingmao
 @LastEditTime : 2024-02-07 11:11:17
-@FilePath     : /xnote/tools/upload-converalls.py
+@FilePath     : /xnote/scripts/upload-converalls.py
 @Description  : 描述
 """
 

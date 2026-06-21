@@ -5,7 +5,7 @@
 @Date         : 2022-08-07 15:58:30
 @LastEditors  : xupingmao
 @LastEditTime : 2022-08-07 17:15:46
-@FilePath     : /xnote/tools/package-dist.py
+@FilePath     : /xnote/scripts/package-dist.py
 @Description  : 打包成压缩文件
 """
 
@@ -49,12 +49,12 @@ def main(target = "xnote.zip"):
     zip_append(zip, "handlers")
     zip_append(zip, "lib")
     zip_append(zip, "static")
-    zip_append(zip, "tools")
+    zip_append(zip, "scripts")
     zip_append(zip, "xutils")
     zip_append(zip, "app.py")
     zip_append(zip, "README.md")
     zip_append(zip, "COPYING")
-    zip.write("tools/android-main.py", "main.py")
+    zip.write("scripts/android-main.py", "main.py")
     zip.close()
 
 if __name__ == "__main__":
