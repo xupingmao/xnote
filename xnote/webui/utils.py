@@ -7,10 +7,14 @@ def build_data_attrs(dict_: Optional[dict]):
     items = [f'data-{key}="{escape_html(value)}"' for key, value in dict_.items()]
     return " ".join(items)
 
-def build_attrs(dict_: Optional[dict]):
+def build_attrs(dict_: Optional[dict], ignore_empty = True):
     if dict_ is None:
         return ""
-    items = [f'{key}="{escape_html(value)}"' for key, value in dict_.items()]
+    
+    if ignore_empty:
+        items = [f'{key}="{escape_html(value)}"' for key, value in dict_.items() if value]
+    else:
+        items = [f'{key}="{escape_html(value)}"' for key, value in dict_.items()]
     return " ".join(items)
 
 def get_first_valid_arg(*args):

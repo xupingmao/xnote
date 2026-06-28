@@ -24,7 +24,7 @@ class PluginManageHandler(BaseTablePlugin):
 """
 
     def handle_page(self):
-        self.update_aside(AsideConfig.get_default_aside_html())
+        self.update_aside(AsideConfig.default_aside_html)
         
         filter_tab = TabBox(tab_key="category", tab_default="all")
 

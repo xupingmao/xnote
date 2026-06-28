@@ -28,8 +28,24 @@ class Panel(BaseContainer):
     def __init__(self, css_class=""):
         super().__init__(css_class=f"row x-plugin-panel {css_class}")
 
-
 class Input(BaseComponent):
+    def __init__(self, type = "text", name = "", css_class="", value="") -> None:
+        self.name = name
+        self.type = type
+        self.css_class = css_class
+        self.value = value
+        
+    def render(self) -> str:
+        attr_dict = {
+            "name": self.name,
+            "class": self.css_class,
+            "type": self.type,
+            "value": self.value,
+        }
+        attr_list = build_attrs(attr_dict)
+        return f"<input {attr_list}>"
+
+class InputGroup(BaseComponent):
     """输入文本框"""
 
     _template = xtemplate.compile_template("""
@@ -76,7 +92,23 @@ class Textarea(BaseComponent):
         value = escape_html(self.value, escape_blank=False)
         return f"""<textarea {attrs}>{value}</textarea>"""
     
-
+class Checkbox(BaseComponent):
+    def __init__(self, name = "", text="", checked = "", id="") -> None:
+        self.checked = checked
+        self.name = name
+        self.text = text
+        self.id = id
+        
+    def render(self):
+        text_span = ""
+        if self.text:
+            text_span = f"<span>{escape_html(self.text)}</span>"
+        return f"""
+<label class="checkbox-item">
+    <input type="checkbox" name="{self.name}" {self.checked}>
+    {text_span}
+</label>
+"""
 
 class TabLink:
     """tab页链接"""
@@ -95,19 +127,30 @@ class SubmitButton:
 class ActionButton(BaseComponent):
     """查询后的操作行为按钮，不需要确认就能安全执行的, 比如刷新等"""
 
-    _code = """
-<button class="{{item.css_class}}" onclick="{{item.onclick}}">{{item.text}}</button>
-"""
-
-    _template = xtemplate.compile_template(_code, "xnote.plugin.action_button")
-
-    def __init__(self, text="", onclick="", css_class=""):
+    def __init__(self, text="", onclick="xnote.plugin.onClick(this)", css_class="btn", id="", name="", data_names = ""):
+        """
+        :param id: 按钮本身的id
+        :param name: 按钮本身的name
+        :param data_names: 需要提交数据的names列表
+        """
         self.text = text
         self.onclick = onclick
         self.css_class = css_class
+        self.id = id
+        self.name = name
+        self.data_names = data_names
     
     def render(self):
-        return self._template.generate(item = self)
+        attr_dict = {
+            "id": self.id,
+            "name": self.name,
+            "class": self.css_class,
+            "onclick": self.onclick,
+            "data-names": self.data_names,
+        }
+        attr_list = build_attrs(attr_dict)
+        text = escape_html(self.text)
+        return f"<button {attr_list}>{text}</button>\n"
 
 
 class ConfirmButton(ActionButton):
@@ -166,15 +209,13 @@ class TextSpan(BaseComponent):
 
     def render(self):
         text = escape_html(self.text)
-        
-        id_attr = ""
-        if self.id:
-            id_attr = f'id="{self.id}"'
-        style_attr = ""
-        if self.css_style:
-            style_attr = f'style="{self.css_style}"'
-                   
-        return f"""<span {id_attr} class="{self.css_class}" {style_attr}>{text}</span>"""
+        attr_dict = {
+            "id": self.id,
+            "style": self.css_style,
+            "class": self.css_class,
+        }
+        attr_list = build_attrs(attr_dict)
+        return f"""<span {attr_list}>{text}</span>"""
 
 class TagSpan(BaseComponent):
     def __init__(self, text="", href="", css_class="", badge_info="", icon_class="", text_html=""):

@@ -389,7 +389,7 @@ class PluginOptionLink:
         self.href = href
 
 class BasePlugin:
-    """插件的基类"""
+    """插件的基类, 请使用 xnote.plugin.BasePluginV2 """
 
     api_level = 0.0  # 插件的API版本 用于处理各种兼容性问题
 

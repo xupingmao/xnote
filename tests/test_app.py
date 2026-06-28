@@ -9,6 +9,7 @@
 @Description  : 描述
 """
 
+import io
 import os
 import xutils
 from xnote.core import xtemplate, xconfig, xtables, xauth, xmanager
@@ -471,4 +472,43 @@ class Main(BasePlugin):
 
     def test_xnote_code_builder(self):
         xnote_code_builder.main()
+
+    def test_do_append_file(self):
+        from xnote.core.xnote_code_builder import FileBuilder
+        builder = FileBuilder(fpath="./testdata/test_build_output.txt")
+
+        def do_append(input_bytes:bytes):
+            read_fp = io.BytesIO(input_bytes)
+            target_fp = io.BytesIO()
+            builder._do_append_file(read_fp, target_fp)
+            return target_fp.getvalue().strip()
+        
+        input_bytes = b"""
+.test {
+    margin-top: 10px;
+}
+
+// inline style 1
+x = 20 // inline style 2
+y = 10 /* block style tail */
+y = /* middle comment */ 20
+/* multi line comments
+1. test
+2. test
+*/ 
+"""
+        expected_result = b"""
+.test {
+margin-top: 10px;
+}
+x = 20
+y = 10
+y =20
+"""
+        
+        result = do_append(input_bytes)
+        print("===== result =====")
+        print(result.decode("utf-8"))
+        print("===== end    =====")
+        assert result.strip() == expected_result.strip()
         

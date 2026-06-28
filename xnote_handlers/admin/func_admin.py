@@ -4,6 +4,7 @@ from xnote.core.xtemplate import BasePlugin
 from xutils import Storage
 from xutils import func_util
 from xnote.plugin import DataTable
+from xnote_handlers.config import AsideConfig
 
 HTML = r"""
 <style>
@@ -21,10 +22,6 @@ HTML = r"""
 <div class="card">
     {% include common/table/table.html %}
 </div>
-"""
-
-ASIDE_HTML = """
-{% include system/component/admin_nav.html %}
 """
 
 
@@ -54,7 +51,7 @@ class FunctionsHandler(BasePlugin):
         kw.table = table
         
         self.writehtml(HTML, **kw)
-        self.write_aside(ASIDE_HTML)
+        self.write_aside(AsideConfig.admin_aside_html)
     
 xurls = (
     r"/admin/functions", FunctionsHandler

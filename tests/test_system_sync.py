@@ -159,12 +159,17 @@ class TestSystemSync(BaseTestCase):
             netutil.set_net_mock(None)
 
     def fast_backup(self):
+        if TestEnv.has_backup:
+            return
+        
         TestEnv.is_test = True
         TestEnv.skip_backup = False
         self.check_OK("/system/backup")
         TestEnv.skip_backup = True
+        TestEnv.has_backup = True
 
     def test_system_sync_db_full(self):
+        self.fast_backup()
         from xnote_handlers.system.system_sync.system_sync_controller import FollowerInstance
         netutil.set_net_mock(LeaderNetMock())
         binlog_obj = BinLog.get_instance()
@@ -236,6 +241,7 @@ class TestSystemSync(BaseTestCase):
 
 
     def test_system_sync_db_broken(self):
+        self.fast_backup()
         from xnote_handlers.system.system_sync.system_sync_controller import FollowerInstance
 
         binlog = BinLog.get_instance()

@@ -83,6 +83,8 @@ if (window.xnote === undefined) {
     xnote.view = {};
     // 自定义模块-文件
     xnote.file = {};
+    // 自定义模块-插件
+    xnote.plugin = {};
 }
 
 xnote.registerApiModule = function (name) {
@@ -458,4 +460,89 @@ xnote.parseBoolean = function (text) {
         return true;
     }
     return false;
+}
+
+/**
+ * 插件点击事件处理
+ * @param {Element} target 
+ */
+xnote.plugin.onClick = function (target) {
+    var params = {};
+    params.event_type = "click";
+    params.btn_id = $(target).attr("id");
+    params.btn_name = $(target).attr("name");
+    var dataNames = $(target).attr("data-names");
+
+    var getValue = function (jq) {
+        if (jq.attr("type") === "checkbox") {
+            return jq.prop("checked");
+        }
+        return jq.val();
+    }
+
+    if (dataNames === "*" || dataNames === undefined) {
+        // 提交所有表单字段
+        $("[name]").each(function (index, element) {
+            var name = $(element).attr("name");
+            params[name] = getValue($(element));
+        });
+    } else {
+        // 提交指定的表单字段
+        var nameList = dataNames.split(",");
+        for (var i = 0; i < nameList.length; i++) {
+            var name = nameList[i];
+            params[name] = getValue($("[name=" + name + "]"));
+        }
+    }
+    xnote.http.post("?", params, function (resp) {
+        if (resp.success) {
+            xnote.executeCommands(resp.data);
+        } else {
+            xnote.alert(resp.message);
+        }
+    });
+}
+
+/**
+ * 执行命令
+ * @typedef {Object} CommandItem 渲染命令结构
+ * @property {string} command
+ * @property {string} id 元素的id
+ * @property {string} name 元素的name
+ * @property {string} value
+ * 
+ * @param {Array<CommandItem>} commands 
+ */
+xnote.executeCommands = function (commands) {
+    var findElement = function (command) {
+        var name = command.name;
+        var id = command.id;
+        if (id) {
+            return $("[id=" + id + "]");
+        } else {
+            return $("[name=" + name + "]");
+        }
+    }
+    for (var i = 0; i < commands.length; i++) {
+        var command = commands[i];
+        var value = command.value;
+        var command_type = command.command;
+        
+        if (command_type == "update_value") {
+            findElement(command).val(value);
+            continue;
+        }
+        
+        if (command_type == "update_text") {
+            findElement(command).text(value);
+            continue;
+        } 
+        
+        if (command_type === "update_html") {
+            findElement(command).html(value);
+            continue;
+        }
+
+        xnote.alert("unknown command: " + command.command);
+    }
 }

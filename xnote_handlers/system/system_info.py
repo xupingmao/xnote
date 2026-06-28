@@ -137,7 +137,7 @@ class InfoHandler(BaseListPlugin):
     def handle_page(self):
         p = xutils.get_argument_str("p")
         
-        self.update_aside(AsideConfig.get_admin_aside_html())
+        self.update_aside(AsideConfig.admin_aside_html)
         
         if p == "sys_info_detail":
             return self.render_sys_info_detail()

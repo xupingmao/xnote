@@ -8,7 +8,7 @@ import os
 import shutil
 import threading
 import typing
-
+from typing import List, BinaryIO
 from . import xconfig
 
 try:
@@ -29,6 +29,7 @@ def green_text(text):
 def red_text(text):
     return termcolor.colored(text, "red")
 
+
 class FileBuilder:
 
     def __init__(self, fpath):
@@ -47,19 +48,54 @@ class FileBuilder:
     
     def append_file_to(self, fpath, target_fp: typing.BinaryIO):
         with open(fpath, "rb") as read_fp:
-            for line in read_fp.readlines():
+            self._do_append_file(read_fp, target_fp)
+    
+    def _do_append_file(self, read_fp: BinaryIO, target_fp: BinaryIO):
+        def _write_line(line: bytes):
+            line = line.strip()
+            target_fp.write(line)
+            target_fp.write(b"\n")
+        
+        is_in_comment_block = False
+        for line in read_fp.readlines():
+            if is_in_comment_block:
+                comment_end = line.find(b"*/")
+                if comment_end >= 0:
+                    is_in_comment_block = False
+                    # 写入注释后面内容
+                    _write_line(line[comment_end+2:])
+                else:
+                    pass # still in comment block
+            else:
                 line = line.strip()
                 if len(line) == 0:
                     continue
+                
                 if line.startswith(b"//"):
                     # 快速判断,不准确
                     continue
-                if line.startswith(b"/*") and line.endswith(b"*/"):
+                
+                p1 = line.find(b"//")
+                if p1 >= 0:
+                    # 行尾注释
+                    target_fp.write(line[:p1].strip())
+                    target_fp.write(b"\n")
+                    continue
+                
+                comment_start = line.find(b"/*")
+                if comment_start >= 0:
+                    # 写入注释前面内容
+                    target_fp.write(line[:comment_start].strip())
+                    comment_end = line.find(b"*/", comment_start)
+                    if comment_end >= 0:
+                        # 同一行注释
+                        _write_line(line[comment_end+2:])
+                    else:
+                        # 多行注释
+                        is_in_comment_block = True
                     continue
 
-                target_fp.write(line)
-                target_fp.write(b"\n")
-            # shutil.copyfileobj(read_fp, target_fp, BLOCKSIZE)
+                _write_line(line)
     
     def do_build(self):
         with open(self.target_path, "wb+") as fp:

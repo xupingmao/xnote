@@ -828,6 +828,7 @@ li.menu-item:hover {
 }
 
 /* 高优先级样式 */
+/* 相邻的margin会合并, padding不会合并 */
 .col-md-1{float:left;width:8.3%;}
 .col-md-2{float:left;width:16.7%;}
 .col-md-3{float:left;width:25%;}
@@ -887,15 +888,15 @@ li.menu-item:hover {
 .padding-bottom-10, .padding-bottom-md {
     padding-bottom: 10px
 }
-.margin-top-5, .margin-top-sm {
+.margin-top-5, .margin-top-sm, .margin-top-small {
     margin-top: 5px;
 }
-.margin-top-10, .margin-top-md {
+.margin-top-10, .margin-top-md, .margin-top-medium {
     margin-top: 10px;
 }
-.margin-bottom-5, .margin-bottom-sm {
+.margin-bottom-5, .margin-bottom-sm, .margin-bottom-small {
     margin-bottom: 5px;
 }
-.margin-bottom-10, .margin-bottom-md {
+.margin-bottom-10, .margin-bottom-md, .margin-bottom-medium {
     margin-bottom: 10px;
 }

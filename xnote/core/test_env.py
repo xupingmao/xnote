@@ -6,6 +6,7 @@ class TestEnv:
     has_login = False
     login_user_name = "test"
     skip_backup = False
+    has_backup = False
     
     @classmethod
     def login_admin(cls):

@@ -13,7 +13,7 @@ import re
 import sys
 import time
 from datetime import datetime
-
+from xutils import fsutil
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HANDLERS_DIR = os.path.join(PROJECT_ROOT, "xnote_handlers")
@@ -81,7 +81,7 @@ def is_in_test_or_virtual(path):
     return "tests" in path.split(os.sep)
 
 
-def collect_html_files(root_dir):
+def collect_html_files(root_dir: str):
     """收集所有 .html 文件（含 .mobile.html）"""
     files = {}
     for dirpath, _, filenames in os.walk(root_dir):
@@ -132,7 +132,7 @@ def collect_python_references(scan_dirs):
     return refs
 
 
-def collect_html_references(root_dir):
+def collect_html_references(root_dir: str):
     """从 HTML 模板文件中收集 {% extends %} / {% include %} 引用"""
     patterns = [RE_EXTENDS, RE_INCLUDE]
     refs = set()
@@ -150,7 +150,7 @@ def collect_html_references(root_dir):
     return refs
 
 
-def resolve_reference(ref):
+def resolve_reference(ref: str):
     """将引用名称转换为相对于 HANDLERS_DIR 的路径"""
     # 别名
     if ref in SHORTCUT_MAP:
@@ -213,6 +213,9 @@ def main():
     # 6. 找孤立文件
     orphans = []
     for rel_path in sorted(all_files.keys()):
+        if rel_path.startswith("tools/"):
+            continue
+        
         if rel_path not in resolved_refs:
             info = all_files[rel_path]
             orphans.append((rel_path, info["size"], info["mtime"]))

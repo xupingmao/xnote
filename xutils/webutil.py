@@ -8,7 +8,7 @@ import time
 import web
 import math
 
-from typing import Optional
+from typing import Optional, List
 from http.server import BaseHTTPRequestHandler
 from io import BytesIO
 from web import utils
@@ -310,8 +310,22 @@ class WebException(Exception):
         super().__init__(message)
         self.code = code
         self.message = message
+        
+class CommandItem(web.Storage):
+    def __init__(self, command = "", id = "", name = "", value = ""):
+        self.command = command
+        self.id = id
+        self.name = name
+        self.value = value
 
-
+class CommandsResult(WebResult):
+    def __init__(self):
+        self.success = True
+        self.data:List[CommandItem] = []
+    
+    def add_command(self, command = "", id = "", name = "", value = ""):
+        item = CommandItem(command=command, id=id, name=name, value=value)
+        self.data.append(item)
 
 class WebPageInfo:
     def __init__(self, page=1, total=0, page_size=20):
