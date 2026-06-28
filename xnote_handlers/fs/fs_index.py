@@ -22,6 +22,7 @@ from xutils import fsutil, webutil
 from .fs_helper import get_index_dirs, get_index_db, FileInfoDao, FileInfo
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import sidebar
+from xnote_handlers.config import AsideConfig, LinkConfig
 
 class IndexBuilder:
 
@@ -135,11 +136,10 @@ class IndexHandler(BaseTablePlugin):
     require_admin = True
     show_aside = True
     NAV_HTML = ""
-
-    def get_aside_html(self):
-        return sidebar.get_fs_sidebar_html()
+    parent_link = LinkConfig.app_index
 
     def handle_page(self):
+        self.update_aside(AsideConfig.fs_aside_html)
         table = self.create_table()
         table.default_head_style.min_width = "100px"
         table.add_head("文件编号", "id")

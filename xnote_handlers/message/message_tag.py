@@ -300,6 +300,7 @@ class ListAjaxHandler:
 class FilterEditHandler(BaseTablePlugin):
     """标签过滤器编辑器"""
     require_login = True
+    require_admin = False
     
     def handle_edit(self):
         user_id = xauth.current_user_id()
@@ -357,10 +358,10 @@ class FilterEditHandler(BaseTablePlugin):
         # 1. 前端通过 JSON data 参数提交（BaseTablePlugin 标准方式）
         # 2. 直接通过表单字段提交（兼容测试）
         param_dict = self.get_data_dict()
-        tag1 = param_dict.get("tag1", "")
-        tag2 = param_dict.get("tag2", "")
-        tag3 = param_dict.get("tag3", "")
-        filter_config_key = param_dict.get("filter_config_key")
+        tag1 = param_dict.get_str("tag1", "")
+        tag2 = param_dict.get_str("tag2", "")
+        tag3 = param_dict.get_str("tag3", "")
+        filter_config_key = param_dict.get_str("filter_config_key")
         if filter_config_key == "":
             return webutil.FailedResult(message="filter_config_key 不能为空")
     

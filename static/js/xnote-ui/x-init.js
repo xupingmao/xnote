@@ -516,6 +516,21 @@ xnote.plugin.onClick = function (target) {
  * @param {Array<CommandItem>} commands 
  */
 xnote.executeCommands = function (commands) {
+    for (var i = 0; i < commands.length; i++) {
+        var command = commands[i];
+        xnote._executeSingleCommand(command);
+    }
+};
+
+/**
+ * 执行单条命令
+ * @param {CommandItem} command 
+ */
+xnote._executeSingleCommand = function (command) {
+    var value = command.value;
+    var command_type = command.command;
+    var delay = command.delay;
+
     var findElement = function (command) {
         var name = command.name;
         var id = command.id;
@@ -525,43 +540,37 @@ xnote.executeCommands = function (commands) {
             return $("[name=" + name + "]");
         }
     }
-    for (var i = 0; i < commands.length; i++) {
-        var command = commands[i];
-        var value = command.value;
-        var command_type = command.command;
-        var delay = command.delay;
-        
-        if (command_type === "update_value") {
-            findElement(command).val(value);
-            continue;
-        }
-        
-        if (command_type === "update_text") {
-            findElement(command).text(value);
-            continue;
-        } 
-        
-        if (command_type === "update_html") {
-            findElement(command).html(value);
-            continue;
-        }
-
-        if (command_type === "toast") {
-            xnote.toast(value);
-            continue;
-        }
-
-        if (command_type === "reload") {
-            if (delay) {
-                setTimeout(() => {
-                    location.reload();
-                }, delay);
-            } else {
-                location.reload();
-            }
-            continue;
-        }
-
-        xnote.alert("unknown command: " + command.command);
+    
+    if (command_type === "update_value") {
+        findElement(command).val(value);
+        return;
     }
-}
+    
+    if (command_type === "update_text") {
+        findElement(command).text(value);
+        return;
+    } 
+    
+    if (command_type === "update_html") {
+        findElement(command).html(value);
+        return;
+    }
+
+    if (command_type === "toast") {
+        xnote.toast(value);
+        return;
+    }
+
+    if (command_type === "reload") {
+        if (delay) {
+            setTimeout(() => {
+                location.reload();
+            }, delay);
+        } else {
+            location.reload();
+        }
+        return;
+    }
+
+    xnote.alert("unknown command: " + command.command);
+};

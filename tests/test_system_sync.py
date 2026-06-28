@@ -173,6 +173,7 @@ class TestSystemSync(BaseTestCase):
         from xnote_handlers.system.system_sync.system_sync_controller import FollowerInstance
         netutil.set_net_mock(LeaderNetMock())
         binlog_obj = BinLog.get_instance()
+        self.fast_backup()
 
         try:
             self.get_access_token()
@@ -183,7 +184,6 @@ class TestSystemSync(BaseTestCase):
             db_syncer.debug = True
             db_syncer.put_db_sync_state("full")
 
-            self.fast_backup()
             max_id = binlog_obj.get_max_id()
             assert isinstance(max_id, int)
             
