@@ -688,7 +688,7 @@ def html_escape(s: str, quote=True):
         s = s.replace('\'', "&#x27;")
     return s
 
-def escape_html(text: str, escape_blank = True):
+def escape_html(text: str, escape_blank = False):
     """html转义, 参考`lib/tornado/escape.py`"""
     # 必须先处理&
     text = text.replace("&", "&amp;")
