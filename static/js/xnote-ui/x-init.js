@@ -482,7 +482,8 @@ xnote.plugin.onClick = function (target) {
 
     if (dataNames === "*" || dataNames === undefined) {
         // 提交所有表单字段
-        $("[name]").each(function (index, element) {
+        // :input 伪类会自动匹配所有表单控件，包括input/textarea/select等
+        $(":input[name]").each(function (index, element) {
             var name = $(element).attr("name");
             params[name] = getValue($(element));
         });
