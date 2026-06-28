@@ -130,9 +130,9 @@ class EncodeHandler(BasePluginV2):
         result.add_command("update_text", id="encode-error", value = error_msg)
         return result
     
-    def handle_encode(self):
+    def handle_encode(self) -> str:
         input = xutils.get_argument_str("input")
-        encode_type = xutils.get_argument_str("encode_type")
+        encode_type = xutils.get_argument_str("encode_type", default_value="base64")
         urlsafe = xutils.get_argument_bool("urlsafe")
         encoding = "utf-8"
                 
@@ -153,7 +153,7 @@ class EncodeHandler(BasePluginV2):
     
     def handle_decode(self):
         input = xutils.get_argument_str("input")
-        encode_type = xutils.get_argument_str("encode_type")
+        encode_type = xutils.get_argument_str("encode_type", default_value="base64")
         urlsafe = xutils.get_argument_bool("urlsafe")
         encoding = "utf-8"
         
@@ -167,7 +167,7 @@ class EncodeHandler(BasePluginV2):
             return textutil.decode_base32(input)
         
         if encode_type == "base62":
-            return base62.decode(input)
+            return str(base62.decode(input))
             
         raise Exception("not implemented")
 
