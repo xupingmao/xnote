@@ -528,12 +528,12 @@ xnote.executeCommands = function (commands) {
         var value = command.value;
         var command_type = command.command;
         
-        if (command_type == "update_value") {
+        if (command_type === "update_value") {
             findElement(command).val(value);
             continue;
         }
         
-        if (command_type == "update_text") {
+        if (command_type === "update_text") {
             findElement(command).text(value);
             continue;
         } 
