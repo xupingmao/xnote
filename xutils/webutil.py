@@ -312,20 +312,27 @@ class WebException(Exception):
         self.message = message
         
 class CommandItem(web.Storage):
-    def __init__(self, command = "", id = "", name = "", value = ""):
+    def __init__(self, command = "", id = "", name = "", value = "", delay = 0):
         self.command = command
         self.id = id
         self.name = name
         self.value = value
+        self.delay = delay
 
 class CommandsResult(WebResult):
     def __init__(self):
         self.success = True
         self.data:List[CommandItem] = []
     
-    def add_command(self, command = "", id = "", name = "", value = ""):
-        item = CommandItem(command=command, id=id, name=name, value=value)
+    def add_command(self, command = "", id = "", name = "", value = "", delay=0):
+        item = CommandItem(command=command, id=id, name=name, value=value, delay=0)
         self.data.append(item)
+        
+    def add_reload_command(self, delay = 500):
+        self.data.append(CommandItem(command="reload", delay=delay))
+        
+    def add_toast_command(self, value = ""):
+        self.data.append(CommandItem(command="toast", value=value))
 
 class WebPageInfo:
     def __init__(self, page=1, total=0, page_size=20):

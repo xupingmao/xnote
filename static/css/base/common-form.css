@@ -33,9 +33,14 @@
     margin-top: 10px;
 }
 
-.input-group-row input, .input-group-row select, .input-group-value {
+.input-group-row input, .input-group-row select, .input-group-value, 
+.input-group.row input, .input-group.row select {
     width: 200px;
     float: left;
+}
+
+input[readonly] {
+    background-color: #eee;
 }
 
 /** 默认表单(编辑表单) **/

@@ -5,7 +5,7 @@ from xutils import webutil, Storage
 from xutils import dateutil
 from xnote.plugin.list_plugin import BaseListPlugin, BasePlugin
 from xnote.webui import ListView, ListViewItem, ListItem, TextTag
-from xnote.plugin.component import ConfirmButton, BaseContainer, ActionButton
+from xnote.webui import ConfirmButton, BaseContainer, ActionButton
 from xnote.plugin import TabBox
 from xnote_handlers.config import LinkConfig
 from .example_handler import get_example_tab

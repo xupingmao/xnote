@@ -510,6 +510,7 @@ xnote.plugin.onClick = function (target) {
  * @property {string} id 元素的id
  * @property {string} name 元素的name
  * @property {string} value
+ * @property {number} delay 延迟执行时间（单位是毫秒）
  * 
  * @param {Array<CommandItem>} commands 
  */
@@ -527,6 +528,7 @@ xnote.executeCommands = function (commands) {
         var command = commands[i];
         var value = command.value;
         var command_type = command.command;
+        var delay = command.delay;
         
         if (command_type === "update_value") {
             findElement(command).val(value);
@@ -540,6 +542,22 @@ xnote.executeCommands = function (commands) {
         
         if (command_type === "update_html") {
             findElement(command).html(value);
+            continue;
+        }
+
+        if (command_type === "toast") {
+            xnote.toast(value);
+            continue;
+        }
+
+        if (command_type === "reload") {
+            if (delay) {
+                setTimeout(() => {
+                    location.reload();
+                }, delay);
+            } else {
+                location.reload();
+            }
             continue;
         }
 

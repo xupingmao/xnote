@@ -26,7 +26,9 @@ from xnote.plugin import DataForm
 from xnote.plugin.form import FormRowType
 from xnote.plugin import sidebar
 from xnote.webui import ItemList, ListItem, ConfirmButton
+from xnote.webui import Input, RowDiv, Card, InputGroup, ActionButton
 from xnote_handlers.config import LinkConfig, AsideConfig
+from xnote.plugin import BasePluginV2
 
 OP_LOG_TABLE = xauth.UserOpLogDao
 
@@ -277,22 +279,39 @@ class SessionInfoAjaxHandler:
         return xauth.list_user_session_detail(user_name)
 
 
-class ChangePasswordHandler:
+class ChangePasswordHandler(BasePluginV2):
+    
+    parent_link = LinkConfig.user_settings
+    require_admin = False
+    require_login = True
+    title = "修改密码"
+    
+    def handle(self, input=""):
+        event_type = xutils.get_argument_str("event_type")
+        
+        if event_type == "click":
+            return self.handle_click()
+        
+        self.update_aside(AsideConfig.settings_aside_html)
+        user_info = xauth.current_user()
+        assert user_info != None
+        
+        card = Card()
+        card.add(InputGroup(label="用户名", name="user_name", value = user_info.name, css_class="row", readonly=True))
+        card.add(InputGroup(label="旧的密码", name="old_password", value="", type="password", css_class="row"))
+        card.add(InputGroup(label="新的密码", name="new_password", value="", type="password", css_class="row"))
+        card.add(InputGroup(label="再次确认新密码", name="confirmed_password", value="", type="password", css_class="row"))
+        
+        row = RowDiv()
+        row.add(ActionButton(text="确认修改"))
+        
+        error_row = RowDiv(css_class="red", id="error_info")
+        card.add(row)
+        card.add(error_row)
 
-    def GET(self, error=""):
-        """获取页面, 修改密码后也需要跳转到这里，所以不能校验登录态"""
-        old_password = xutils.get_argument_str("old_password", "")
-        new_password = xutils.get_argument_str("new_password", "")
-        kw = Storage()
-        kw.old_password = old_password
-        kw.new_password = new_password
-        kw.error = error
-        kw.parent_link = LinkConfig.user_settings
-        kw.title = "修改密码"
-        return xtemplate.render("user/page/change_password.html", **kw)
+        self.add_component(card)
 
-    @xauth.login_required()
-    def POST(self):
+    def handle_click(self):
         user_name = xauth.current_name_str()
         old_password = xutils.get_argument_str("old_password", "")
         new_password = xutils.get_argument_str("new_password", "")
@@ -304,12 +323,17 @@ class ChangePasswordHandler:
             return webutil.FailedResult(message="新的密码为空")
         if new_password != confirmed_password:
             return webutil.FailedResult(message="两次输入的密码不一致")
+        if old_password == new_password:
+            return webutil.FailedResult(message="密码没有变化")
 
         try:
             xauth.check_old_password(user_name, old_password)
             xauth.update_user(user_name, Storage(password=new_password))
             create_op_log(user_name, "change_password", "修改密码")
-            return webutil.SuccessResult()
+            result = webutil.CommandsResult()
+            result.add_toast_command(value="密码修改成功")
+            result.add_reload_command()
+            return result
         except Exception as e:
             return webutil.FailedResult(message=str(e))
 

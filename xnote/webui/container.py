@@ -88,8 +88,8 @@ class Card(BaseContainer):
 
 class RowPanel(TextContainer):
     """行面板容器"""
-    def __init__(self, css_class="") -> None:
-        super().__init__(css_class="row " + css_class)
+    def __init__(self, css_class="", id = "") -> None:
+        super().__init__(css_class="row " + css_class, id = id)
         self.extra = TextContainer("row-extra")
         self.add(self.extra)
 

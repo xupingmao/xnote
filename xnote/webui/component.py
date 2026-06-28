@@ -48,20 +48,30 @@ class Input(BaseComponent):
 class InputGroup(BaseComponent):
     """输入文本框"""
 
-    _template = xtemplate.compile_template("""
-<div class="x-plugin-input">
-    <label class="x-plugin-input-label">{{info.label}}</label>
-    <input class="x-plugin-input-text" name="{{info.name}}" value="{{info.value}}">
-</div>
-""", name="xnote.plugin.input")
-
-    def __init__(self, label, name, value):
+    def __init__(self, label: str, name: str, value: str, css_class="", readonly=False, type="text"):
         self.label = label
         self.name = name
         self.value = value
+        self.css_class = css_class
+        self.readonly = readonly
+        self.type = type
 
     def render(self):
-        return self._template.generate(info = self)
+        label = escape_html(self.label)
+        name = escape_html(self.name)
+        value = escape_html(self.value)
+        input_attr_list = ""
+        if self.readonly:
+            input_attr_list += " readonly"
+            
+        return f"""
+<div class="input-group {self.css_class}">
+    <label>{label}</label>
+    <input name="{name}" type="{self.type}" value="{value}" {input_attr_list}>
+</div>
+"""
+    
+    
 
 
 class Textarea(BaseComponent):
