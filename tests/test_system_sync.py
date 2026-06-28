@@ -158,8 +158,8 @@ class TestSystemSync(BaseTestCase):
         finally:
             netutil.set_net_mock(None)
 
-    def fast_backup(self):
-        if TestEnv.has_backup:
+    def fast_backup(self, force=False):
+        if TestEnv.has_backup and not force:
             return
         
         TestEnv.is_test = True
@@ -173,8 +173,7 @@ class TestSystemSync(BaseTestCase):
         from xnote_handlers.system.system_sync.system_sync_controller import FollowerInstance
         netutil.set_net_mock(LeaderNetMock())
         binlog_obj = BinLog.get_instance()
-        self.fast_backup()
-
+        
         try:
             self.get_access_token()
             self.init_leader_config()
@@ -183,6 +182,9 @@ class TestSystemSync(BaseTestCase):
             db_syncer = FollowerInstance.db_syncer
             db_syncer.debug = True
             db_syncer.put_db_sync_state("full")
+            
+            # backup before sync
+            self.fast_backup(force=True)
 
             max_id = binlog_obj.get_max_id()
             assert isinstance(max_id, int)
