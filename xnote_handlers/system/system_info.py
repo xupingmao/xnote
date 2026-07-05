@@ -24,7 +24,7 @@ from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin.sidebar import get_admin_sidebar_html
 from xnote.service.lock_service import DatabaseLockService
 from xnote.plugin.list_plugin import BaseListPlugin
-from xnote_handlers.config.aside_config import AsideConfig
+from xnote_handlers.config import AsideConfig
 from xnote.webui import ListView, ListViewItem, Card, ActionButton, Textarea, Div
 
 try:

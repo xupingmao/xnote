@@ -368,7 +368,7 @@ class UserOpLogHandler(BaseTablePlugin):
         assert user_info != None
         UserHandler().handle_user_log(kw, user_info=user_info)
 
-        self.write_aside(AsideConfig.get_settings_aside_html())
+        self.update_aside(AsideConfig.settings_aside_html)
 
         return self.response_page(**kw)
 

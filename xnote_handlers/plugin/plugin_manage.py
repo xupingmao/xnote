@@ -8,7 +8,7 @@ from xnote.plugin.table import TableActionType
 from xnote.plugin import iter_plugins, TabBox
 from .plugin_page import list_all_plugins, list_plugins
 from .plugin_config import CategoryService
-from xnote_handlers.config.aside_config import AsideConfig
+from xnote_handlers.config import AsideConfig
 
 class PluginManageHandler(BaseTablePlugin):
     title = "插件管理"
