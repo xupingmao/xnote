@@ -425,9 +425,10 @@ class SwitchAccountHandler(BasePluginV2):
 
     def handle_switch_event(self):
         selected_sid = xutils.get_argument_str("selected_sid")
-        if selected_sid:
-            xauth._setcookie(xauth.CookieKeys.sid, selected_sid)
+        if not selected_sid:
+            return webutil.FailedResult(message="selected_sid is empty")
         
+        xauth._setcookie(xauth.CookieKeys.sid, selected_sid)
         resp = webutil.CommandsResult()
         resp.add_toast_command("账号切换成功")
         resp.add_reload_command()

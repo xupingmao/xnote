@@ -61,3 +61,4 @@ class TestUser(BaseTestCase):
 
     def test_user_switch_account(self):
         self.check_OK("/user/switch_account")
+        self.check_OK("/user/switch_account?event_type=click&selected_sid=1234")
