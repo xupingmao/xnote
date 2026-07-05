@@ -107,10 +107,8 @@ def is_parent_dir(parent: str, child: str):
     """
     child_path = os.path.abspath(child)
     parent_path = os.path.abspath(parent)
-
-    if parent_path[-1] != os.path.sep:
-        parent_path += os.path.sep
-    return child_path.startswith(parent_path)
+    child_parent_new = os.path.dirname(child_path)
+    return parent_path == child_parent_new
 
 
 def get_relative_path(path:str, parent:str):

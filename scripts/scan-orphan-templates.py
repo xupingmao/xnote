@@ -12,6 +12,7 @@ import os
 import re
 import sys
 import time
+from typing import List
 from datetime import datetime
 from xutils import fsutil
 
@@ -98,7 +99,7 @@ def collect_html_files(root_dir: str):
     return files
 
 
-def _extract_from_patterns(content, patterns):
+def _extract_from_patterns(content: str, patterns: List[re.Pattern]):
     """用多个 regex 从内容中提取模板路径"""
     refs = set()
     for pattern in patterns:
@@ -113,7 +114,7 @@ def _extract_from_patterns(content, patterns):
 
 def collect_python_references(scan_dirs):
     """从 Python 文件中收集模板引用"""
-    patterns = [RE_PYTHON_RENDER, RE_PYTHON_TEMPLATE_ASSIGN, RE_PYTHON_RETURN_HTML]
+    patterns = [RE_PYTHON_RENDER, RE_PYTHON_TEMPLATE_ASSIGN, RE_PYTHON_RETURN_HTML, RE_INCLUDE, RE_EXTENDS]
     refs = set()
     for root_dir in scan_dirs:
         if not os.path.isdir(root_dir):

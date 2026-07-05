@@ -27,6 +27,7 @@ from xnote.core import xtables
 from xnote.service import JobService, SysJob, JobStatusEnum, DatabaseLockService
 from xnote_handlers.config import LinkConfig
 from xnote.service.system_meta_service import SystemMetaEnum
+from xnote.service import SystemLogService, SystemLogLevel, SystemLogType
 from xnote.webui import ListView, ListViewItem, ActionButton
 from xutils.db.binlog import BinLog
 from xutils import jsonutil
@@ -242,8 +243,6 @@ class DBBackup:
                     logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
 
             db2.Write(batch)
-            db2.Close()
-
             logger.log("backup done, total:(%d), cost_time:(%.2fs)", count, time.time()-start_time)
             SystemMetaEnum.db_backup_count.save_meta(str(total_count))
         except Exception as e:            
@@ -251,6 +250,7 @@ class DBBackup:
             logger.log("backup failed, err:%s", stack_info)
             raise e
         finally:
+            db2.Close()
             db2 = None
             DBBackup._start_time = -1
             DBBackup._count = -1
@@ -261,15 +261,20 @@ class DBBackup:
     def execute(self, backup_kv=True):
         logger = self.get_backup_logger()
         try:
-            with DatabaseLockService.lock(self.lock_key, self.expire_seconds):
+            with DatabaseLockService.lock(self.lock_key, self.expire_seconds, remark="backup kv"):
                 self.do_execute(backup_kv=backup_kv)
-            return "backup success"
-        except:
-            logger.log("backup is busy")
-            return "backup is busy"
+            return "success"
+        except Exception as e:
+            logger.log("db backup failed, err = %s", e)
+            SystemLogService.save_log(
+                SystemLogLevel.ERROR,
+                SystemLogType.backup,
+                f"backup failed: {e}"
+            )
+            return f"backup failed: {e}"
 
     def do_execute(self, backup_kv=True):
-        
+        logging.info("start to backup, backup_kv=%s", backup_kv)
         job_info = SysJob()
         job_info.job_type = "db_backup"
         
@@ -285,7 +290,7 @@ class DBBackup:
             logging.info("数据库记录总数:%s", count)
 
             # 保存为压缩文件
-            dirname = os.path.join(xconfig.BACKUP_DIR, "db")
+            dirname = xconfig.FileConfig.backup_db_dir
             xutils.makedirs(dirname)
             
             destfile = os.path.join(dirname, time.strftime("%Y-%m-%d.db"))
@@ -311,9 +316,9 @@ class DBBackup:
 
             return dict(count = count, cost_time = "%sms" % cost_time)
 
-def chk_db_backup():
+def chk_db_backup() -> str:
     if not xconfig.get_system_config("db_backup"):
-        return
+        return "skip"
     backup = DBBackup()
     return backup.execute()
 
@@ -491,9 +496,12 @@ class BackupHandler:
             return webutil.SuccessResult(data="backup scripts success")
 
         # 备份所有的
-        chk_db_backup()
-        chk_scripts_backup()
-        return webutil.SuccessResult(data="OK")
+        db_backup_result = chk_db_backup()
+        scripts_backup_result = chk_scripts_backup()
+        return webutil.SuccessResult(data={
+            "db_backup_result": db_backup_result,
+            "scripts_backup_result": scripts_backup_result,
+        })
     
 # chk_backup()
 

@@ -19,6 +19,7 @@ def invoke_remote_api(request: BaseRequest) -> BaseResponse:
     http_data = jsonutil.tojson(request)
     leader_base_url = SystemMetaEnum.leader_base_url.meta_value
     if xconfig.IS_TEST:
+        # 测试环境本地调用
         resp = xmanager.request("/open_api/server", method="POST", data=http_data)
         resp_dict = json.loads(str(resp.data, encoding="utf-8"))
     else:

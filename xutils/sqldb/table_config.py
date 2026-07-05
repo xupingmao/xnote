@@ -31,6 +31,10 @@ class TableConfig:
     @classmethod
     def skip_backup(cls, table_name: str):
         cls._skip_backup_tables.add(table_name)
+        
+    @classmethod
+    def disable_backup(cls, table_name: str):
+        cls._skip_backup_tables.add(table_name)
 
     @classmethod
     def is_skip_backup_table(cls, table_name: str) -> bool:

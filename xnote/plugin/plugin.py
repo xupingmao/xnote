@@ -18,7 +18,7 @@ from xnote.core import xconfig
 from xutils import mem_util, fsutil, Storage, ScriptMeta
 from xnote.core.xtemplate import BasePlugin
 from xnote.core import xtables
-from xnote.service.system_log_service import SystemLogService, SystemLogLevel, SystemLogType
+from xnote.service import SystemLogService, SystemLogLevel, SystemLogType
 
 DEFAULT_PLUGIN_ICON_CLASS = "fa fa-cube"
 

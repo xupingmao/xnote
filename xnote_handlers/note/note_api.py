@@ -7,6 +7,8 @@ import xnote_handlers.note.dao_log as dao_log
 import xnote_handlers.message.dao as msg_dao
 import xnote_handlers.note.dao_book as book_dao
 
+from typing import List
+from xutils import Storage
 from xnote.core import xauth
 from xnote.core import xconfig
 from xnote.core.xtemplate import T
@@ -75,6 +77,15 @@ class StatApiHandler:
         user_name = xauth.current_name_str()
         return dict(code="success", data=dao.get_note_stat(user_name=user_name))
 
+class Select2ResultItem(dict):
+    def __init__(self, id=0, text=""):
+        self["id"] = id
+        self["text"] = text
+
+class Select2Result(Storage):
+    def __init__(self, results: List[Select2ResultItem]=[]):
+        self.results = results
+
 
 class SelectNameHandler:
 
@@ -84,7 +95,7 @@ class SelectNameHandler:
         show_type = xutils.get_argument_bool("show_type", True)
         words = textutil.split_words(name)
         creator = xauth.current_name_str()
-        results = []
+        results:List[Select2ResultItem] = []
 
         for note_index in dao.search_name(words=words, creator=creator, limit=100):
             text = note_index.name
@@ -93,9 +104,9 @@ class SelectNameHandler:
                     text = "[笔记本]" + text
                 if note_index.is_alias:
                     text = "[别名]" + text
-            results.append(dict(id=note_index.note_id, text=text))
+            results.append(Select2ResultItem(id=note_index.note_id, text=text))
 
-        return dict(results=results)
+        return Select2Result(results=results)
 
 xutils.register_func("page.list_recent_groups", list_recent_groups)
 xutils.register_func("page.list_recent_notes", list_recent_notes)

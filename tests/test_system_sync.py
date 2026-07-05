@@ -162,9 +162,17 @@ class TestSystemSync(BaseTestCase):
         if TestEnv.has_backup and not force:
             return
         
+        if force and os.path.exists(SystemMetaEnum.db_backup_file.value):
+            fsutil.rmfile(SystemMetaEnum.db_backup_file.value)
+        
         TestEnv.is_test = True
         TestEnv.skip_backup = False
-        self.check_OK("/system/backup")
+        xconfig.set_global_config("db_backup", True)
+        backup_result = self.json_request_return_dict("/system/backup")
+        success = backup_result.get_bool("success")
+        assert success
+        db_backup_result = backup_result.get_dict("data").get_str("db_backup_result")
+        assert db_backup_result == "success"
         TestEnv.skip_backup = True
         TestEnv.has_backup = True
 
@@ -204,7 +212,7 @@ class TestSystemSync(BaseTestCase):
         netutil.set_net_mock(LeaderNetMock())
 
         binlog_instance = BinLog.get_instance()
-
+        
         self.fast_backup()
 
         try:

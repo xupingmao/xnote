@@ -562,8 +562,11 @@ def init_lock_table():
         manager.add_column("lock_key", "varchar(128)", default_value="")
         manager.add_column("lock_token", "varchar(36)", default_value="", comment="锁的token")
         manager.add_column("timeout_time", "bigint", default_value=0, comment="锁超时时间,毫秒时间戳")
+        manager.add_column("remark", "text", default_value="", comment="锁的备注信息")
         manager.add_index("lock_key", is_unique=True)
+    
     TableConfig.disable_binlog(table_name)
+    TableConfig.disable_backup(table_name)
 
 
 def init_system_sync_token_table():

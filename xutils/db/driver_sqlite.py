@@ -317,6 +317,10 @@ class SqliteKV(interfaces.DBInterface):
                 self.sql_logger.append(f"[Count {cost_time*100:.2f}ms] {sql_query}")
                 
     def Close(self):
-        self.db.ctx.db.close()
+        if not hasattr(self, "db"):
+            return
+        db_ctx = self.db._ctx
+        if "db" in db_ctx:
+            db_ctx.db.close()
         del self.db
 

@@ -18,6 +18,7 @@ from xnote.service.system_meta_service import SystemMetaEnum
 from .test_base import json_request_return_dict
 from xutils.sqldb.utils import get_sqlite_table_struct
 from xnote_handlers.admin.repair_admin import RepairHandler
+from xnote.core.test_env import TestEnv
 
 app = test_base.init()
 
@@ -137,6 +138,9 @@ class TestMain(test_base.BaseTestCase):
         assert result["success"] == False
 
     def test_backup(self):
+        TestEnv.is_test = True
+        TestEnv.skip_backup = False
+        
         resp = self.json_request_return_dict("/system/backup")
         assert resp["success"] == True
 

@@ -14,6 +14,7 @@ import web.db
 import typing
 
 from web.db import SQLQuery, sqlparam
+from xutils.base import BaseDataRecord
 from xutils.sqldb import table_manager
 from xutils.sqldb.table_config import TableConfig
 from xutils.interfaces import ProfileLog, ProfileLogger, SQLDBInterface
@@ -71,6 +72,9 @@ class TableProxy(SQLDBInterface):
     def check_write_state(self):
         if not self.writable:
             raise Exception("当前状态不能写入")
+
+    def insert_record(self, record: BaseDataRecord):
+        return self.insert(**record.to_save_dict())
 
     def insert(self, seqname=None, _test=False, **values):
         assert len(values) > 0

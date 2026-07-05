@@ -523,21 +523,6 @@ class HistoryViewHandler:
         return webutil.SuccessResult(data=content)
 
 
-class QueryHandler:
-
-    @xauth.login_required("admin")
-    def GET(self, action=""):
-        if action == "get_by_id":
-            id = xutils.get_argument_int("id")
-            return webutil.SuccessResult(data=note_dao.get_by_id(id))
-        
-        if action == "get_by_name":
-            name = xutils.get_argument_str("name")
-            return webutil.SuccessResult(data=note_dao.get_by_name(xauth.current_name_str(), name))
-        
-        return webutil.SuccessResult(message="unknown action")
-
-
 class GetDialogHandler:
 
     def get_group_option_dialog(self, kw):
@@ -559,7 +544,6 @@ class GetDialogHandler:
     @xauth.login_required()
     def GET(self, name=""):
         kw = Storage()
-
         if name == "group_option_dialog":
             self.get_group_option_dialog(kw)
 
@@ -613,7 +597,6 @@ xurls = (
     r"/note/view/([\w\-]+)", ViewByIdHandler,
     r"/note/history", NoteHistoryHandler,
     r"/note/history_view", HistoryViewHandler,
-    r"/note/query/(\w+)", QueryHandler,
     r"/note/ajax/(.+)", GetDialogHandler,
     r"/file/mark", MarkHandler,
     r"/file/unmark", UnmarkHandler,

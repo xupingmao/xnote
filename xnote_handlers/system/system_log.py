@@ -26,7 +26,7 @@ from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable
 from xnote.plugin import TableActionType
 from xnote_handlers.config import LinkConfig
-from xnote.service.system_log_service import SystemLogService, SystemLogLevel, SystemLogType
+from xnote.service import SystemLogService, SystemLogLevel, SystemLogType
 from xnote_handlers.config import AsideConfig
 
 uv_db = dbutil.get_table("uv")

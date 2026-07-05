@@ -21,6 +21,7 @@ class SystemLogLevel:
 class SystemLogType:
     plugin = "plugin"
     note = "note"
+    backup = "backup"
 
 class SystemLogService:
 
@@ -34,7 +35,7 @@ class SystemLogService:
         record.log_type = log_type
         record.log_content = log_content
         record.cost_time = cost_time
-        cls.db.insert(**record.to_save_dict())
+        cls.db.insert_record(record)
 
     @classmethod
     def get_logs(cls, offset = 0, limit: int = 100):

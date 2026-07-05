@@ -253,6 +253,7 @@ class FileConfig:
     @classmethod
     def init_system_dir(cls, dirname: str):
         result = os.path.join(cls.data_dir, dirname)
+        result = os.path.abspath(result)
         makedirs(result)
         return result
 

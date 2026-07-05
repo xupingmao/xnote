@@ -18,7 +18,7 @@ from xnote.core import xtables, xconfig
 
 DEFAULT_LOCK_TIMEOUT_SECONDS = 60.0
 
-def release_func(lock_key="", lock_token=""):
+def release_func():
     pass
 
 class LockObject:
@@ -32,7 +32,7 @@ class LockObject:
 
     def release(self):
         if self.got_lock:
-            self._release_func(self.lock_key, self.lock_token)
+            self._release_func()
             self.got_lock = False
 
     def __enter__(self):
@@ -54,6 +54,7 @@ class LockRecord(BaseDataRecord):
         self.lock_key = ""
         self.lock_token = ""
         self.timeout_time = 0
+        self.remark = ""
 
 class DatabaseLockService:
     """数据库锁服务"""
@@ -67,9 +68,13 @@ class DatabaseLockService:
         if isinstance(value, datetime.datetime):
             return value
         raise Exception(f"unknown type {type(value)}")
+    
+    @classmethod
+    def get_by_lock_key(cls, lock_key:str):
+        return LockRecord.from_dict_or_None(cls.db.select_first(where=dict(lock_key=lock_key)))
 
     @classmethod
-    def lock(cls, lock_key="", timeout_seconds=DEFAULT_LOCK_TIMEOUT_SECONDS):
+    def lock(cls, lock_key="", timeout_seconds=DEFAULT_LOCK_TIMEOUT_SECONDS, remark=""):
         now_time = xutils.format_datetime()
         now_time_ms = time.time() * 1000
         timeout_time = int(now_time_ms + timeout_seconds* 1000)
@@ -86,21 +91,27 @@ class DatabaseLockService:
         
         if old_lock != None and old_lock.timeout_time >= now_time_ms:
             # lock is valid
-            raise Exception(f"acquire lock failed, lock_key={lock_key}")
+            raise Exception(f"acquire lock failed, lock_key={lock_key}, lock_remark={old_lock.remark}")
         
         lock_token = xutils.create_uuid()
         try:
             cls.db.insert(ctime=now_time, mtime=now_time, lock_key=lock_key, lock_token=lock_token, 
-                          timeout_time=timeout_time)
+                          timeout_time=timeout_time, remark=remark)
         except:
+            lock_info = cls.get_by_lock_key(lock_key)
+            if lock_info is None:
+                lock_info = LockRecord()
+                lock_info.remark = "holder not found"
             # create lock failed
-            raise Exception(f"acquire lock failed, lock_key={lock_key}")
+            raise Exception(f"acquire lock failed, lock_key={lock_key}, lock_remark={lock_info.remark}")
         
+        def _release():
+            cls.release(lock_key, lock_token)
         lock = LockObject()
         lock.lock_key = lock_key
         lock.timeout_time = timeout_time
         lock.lock_token = lock_token
-        lock._release_func = cls.release
+        lock._release_func = _release
         lock.got_lock = True
         return lock
     
