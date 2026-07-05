@@ -15,6 +15,7 @@ from xnote.core import xtemplate
 from xutils import escape_html
 from .link import TextLink, EditFormActionLink
 from .utils import build_attrs
+from xutils import jsonutil
 
 class RawHtml(BaseComponent):
     def __init__(self, html: str) -> None:
@@ -137,11 +138,12 @@ class SubmitButton:
 class ActionButton(BaseComponent):
     """查询后的操作行为按钮，不需要确认就能安全执行的, 比如刷新等"""
 
-    def __init__(self, text="", onclick="xnote.plugin.onClick(this)", css_class="btn", id="", name="", data_names = ""):
+    def __init__(self, text="", onclick="xnote.plugin.onClick(this)", css_class="btn", id="", name="",
+                 data_names = "", data_params:Optional[dict] = None):
         """
         :param id: 按钮本身的id
         :param name: 按钮本身的name
-        :param data_names: 需要提交数据的names列表
+        :param data_names: 需要提交数据的names列表, {*}或者为空表示所有参数, {_}表示无参数, {arg1,arg2} 指定参数
         """
         self.text = text
         self.onclick = onclick
@@ -149,14 +151,20 @@ class ActionButton(BaseComponent):
         self.id = id
         self.name = name
         self.data_names = data_names
+        self.data_params = data_params
     
     def render(self):
+        data_params_json = ""
+        if self.data_params:
+            data_params_json = jsonutil.tojson(self.data_params)
+            
         attr_dict = {
             "id": self.id,
             "name": self.name,
             "class": self.css_class,
             "onclick": self.onclick,
             "data-names": self.data_names,
+            "data-params": data_params_json,
         }
         attr_list = build_attrs(attr_dict)
         text = escape_html(self.text)

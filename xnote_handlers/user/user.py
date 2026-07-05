@@ -6,6 +6,7 @@ import typing
 import xutils
 import math
 
+from typing import List, Sequence
 from xnote.core import xauth
 from xnote.core import xtemplate
 from xnote.core import xmanager
@@ -26,9 +27,11 @@ from xnote.plugin import DataForm
 from xnote.plugin.form import FormRowType
 from xnote.plugin import sidebar
 from xnote.webui import ItemList, ListItem, ConfirmButton
+from xnote.webui import ListView, ListViewItem
 from xnote.webui import Input, RowDiv, Card, InputGroup, ActionButton
 from xnote_handlers.config import LinkConfig, AsideConfig
 from xnote.plugin import BasePluginV2
+from xutils import functions
 
 OP_LOG_TABLE = xauth.UserOpLogDao
 
@@ -246,6 +249,9 @@ class UserInfoHandler(BasePlugin):
         item_list.add_item(ListItem(text="修改密码", css_class="list-item-black", href="/user/change_password", show_chevron_right=True))
         item_list.add_item(ListItem(text="用户日志", css_class="list-item-black", href="/user/op_log", show_chevron_right=True))
 
+        switch_account = ListItem(text="切换账号", css_class="list-item-black", href="/user/switch_account", show_chevron_right=True)
+        item_list.add_item(switch_account)
+        
         logout = ListItem(text="登出账号", css_class="list-item-black", show_chevron_right=False)
         logout.action_btn = ConfirmButton("登出", url="/logout?_format=json", message="确认登出吗?", css_class="danger")
         item_list.add_item(logout)
@@ -366,6 +372,68 @@ class UserOpLogHandler(BaseTablePlugin):
 
         return self.response_page(**kw)
 
+class SwitchAccountHandler(BasePluginV2):
+    require_admin = False
+    require_login = True
+    title = "切换账号"
+    parent_link = LinkConfig.user_settings
+    
+    def handle(self, input=""):
+        self.update_aside(AsideConfig.settings_aside_html)
+        
+        event_type = xutils.get_argument_str("event_type")
+        if event_type == "click":
+            return self.handle_switch_event()
+        
+        user_list_card = Card()
+        list_view = ListView()
+        cookies = web.cookies()
+        session_id: str = cookies.get("sid") # type: ignore
+        
+        user_info = xauth.get_user_by_sid(session_id)
+        if user_info:
+            current = ListViewItem()
+            current.add_span(f"用户名: {user_info.name}")
+            current.add_br()
+            current.add_span(f"SID: {session_id}", css_class="gray")
+            
+            current.extra.add_span("当前账号", css_class="green")
+            list_view.add_item(current)
+        
+        sid_list_str:str = cookies.get("sid_list", "") # type: ignore
+        sid_list = sid_list_str.split(",")
+        functions.listremove(sid_list, session_id)
+        self.handle_other_accounts(sid_list, list_view)
+        
+        new = ListViewItem()
+        new.add_link(text="登录新账号", href="/login")
+        list_view.add(new)
+        
+        user_list_card.add(list_view)
+        self.add_component(user_list_card)
+    
+    def handle_other_accounts(self, sid_list: List[str], list_view: ListView):
+        for sid in sid_list:
+            user_info = xauth.get_user_by_sid(sid)
+            if user_info:
+                current = ListViewItem()
+                current.add_span(f"用户名: {user_info.name}")
+                current.add_br()
+                current.add_span(f"SID: {sid}", css_class="gray")
+                current.extra.add(ActionButton(text="切换账号", data_names="_", data_params=dict(selected_sid = sid)))
+                list_view.add_item(current)
+
+    def handle_switch_event(self):
+        selected_sid = xutils.get_argument_str("selected_sid")
+        if selected_sid:
+            xauth._setcookie(xauth.CookieKeys.sid, selected_sid)
+        
+        resp = webutil.CommandsResult()
+        resp.add_toast_command("账号切换成功")
+        resp.add_reload_command()
+        
+        return resp
+
 xurls = (
     r"/user/add",  AddHandler,
     r"/user/list",  UserListHandler,
@@ -374,6 +442,7 @@ xurls = (
     r"/user/session", SessionInfoAjaxHandler,
     r"/user/change_password", ChangePasswordHandler,
     r"/user/op_log", UserOpLogHandler,
+    r"/user/switch_account", SwitchAccountHandler,
 
     r"/system/user", UserHandler,
     r"/system/user/list", UserListHandler,

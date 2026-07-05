@@ -8,7 +8,7 @@ import time
 import unittest
 from xnote.core import xauth
 from xnote.core.xnote_user_config import UserConfig
-
+from xnote.core.test_env import TestEnv
 # cannot perform relative import
 try:
     import test_base
@@ -21,6 +21,8 @@ json_request_return_dict = test_base.json_request_return_dict
 BaseTestCase = test_base.BaseTestCase
 
 app = test_base.init()
+
+TestEnv.is_test = True
 
 class TestUser(BaseTestCase):
 
@@ -56,3 +58,6 @@ class TestUser(BaseTestCase):
         data["config_key"] = config_key
         data["content"] = "test #tag1# #tag2#"
         json_request_return_dict("/code/edit/user_config", method="POST", data=data)
+
+    def test_user_switch_account(self):
+        self.check_OK("/user/switch_account")

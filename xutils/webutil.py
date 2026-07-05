@@ -325,7 +325,7 @@ class CommandsResult(WebResult):
         self.data:List[CommandItem] = []
     
     def add_command(self, command = "", id = "", name = "", value = "", delay=0):
-        item = CommandItem(command=command, id=id, name=name, value=value, delay=0)
+        item = CommandItem(command=command, id=id, name=name, value=value, delay=delay)
         self.data.append(item)
         
     def add_reload_command(self, delay = 500):

@@ -472,6 +472,7 @@ xnote.plugin.onClick = function (target) {
     params.btn_id = $(target).attr("id");
     params.btn_name = $(target).attr("name");
     var dataNames = $(target).attr("data-names");
+    var dataParams = $(target).attr("data-params");
 
     var getValue = function (jq) {
         if (jq.attr("type") === "checkbox") {
@@ -480,6 +481,7 @@ xnote.plugin.onClick = function (target) {
         return jq.val();
     }
 
+    // 表单参数
     if (dataNames === "*" || dataNames === undefined) {
         // 提交所有表单字段
         // :input 伪类会自动匹配所有表单控件，包括input/textarea/select等
@@ -487,6 +489,8 @@ xnote.plugin.onClick = function (target) {
             var name = $(element).attr("name");
             params[name] = getValue($(element));
         });
+    } else if (dataNames == "_") {
+        // 不指定参数
     } else {
         // 提交指定的表单字段
         var nameList = dataNames.split(",");
@@ -495,6 +499,15 @@ xnote.plugin.onClick = function (target) {
             params[name] = getValue($("[name=" + name + "]"));
         }
     }
+
+    // 自定义参数
+    if (dataParams) {
+        var dataParamsObj = JSON.parse(dataParams);
+        for (var key in dataParamsObj) {
+            params[key] = dataParamsObj[key];
+        }
+    }
+
     xnote.http.post("?", params, function (resp) {
         if (resp.success) {
             xnote.executeCommands(resp.data);

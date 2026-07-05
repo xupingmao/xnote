@@ -61,6 +61,13 @@ PRINT_DEBUG_LOG = False
 def get_user_db():
     return UserDao._get_db()
 
+class AuthConfig:
+    sid_list_max_len = 10
+    
+class CookieKeys:
+    sid = "sid"
+    sid_list = "sid_list"
+
 class UserStatusEnum(enum.Enum):
     normal = 0
     deleted = -1
@@ -406,6 +413,21 @@ def _get_users(force_reload=False):
     warnings.warn("_get_users(查询所有用户)已经过时，请停止使用", DeprecationWarning)
     raise Exception("_get_users已经废弃")
 
+def _save_sid_list(sid: str):
+    if TestEnv.is_test:
+        # 测试环境直接跳过cookie逻辑
+        return
+    
+    sid_list_str: str = web.cookies().get(CookieKeys.sid_list, "")
+    sid_list = sid_list_str.split(",")
+    if sid in sid_list:
+        return
+    
+    if len(sid_list) > AuthConfig.sid_list_max_len:
+        del sid_list[0]
+    
+    sid_list.append(sid)
+    web.setcookie(CookieKeys.sid_list, ",".join(sid_list), expires=str(SESSION_EXPIRE))
 
 def _setcookie(key, value, expires=SESSION_EXPIRE):
     # 默认保留两天,但是只要保持登录会自动刷新
@@ -1000,6 +1022,8 @@ def login_user_by_name(user_name: str, login_ip="", write_cookie=True):
     session_id = session_info.sid
     if write_cookie:
         _setcookie("sid", session_id)
+        _save_sid_list(session_id)
+        
 
     # 更新最近的登录时间
     update_kw = dict(login_time=xutils.format_datetime())
