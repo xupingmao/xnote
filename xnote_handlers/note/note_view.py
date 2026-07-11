@@ -522,6 +522,12 @@ class HistoryViewHandler:
                 content = history.content
         return webutil.SuccessResult(data=content)
 
+dialog_mapping = {
+    "group_option_dialog": "note/ajax/group_option_dialog.html",
+    "share_group_dialog": "note/ajax/share_group_dialog.html",
+    "edit_symbol_dialog": "note/ajax/edit_symbol_dialog.html",
+    "option_dialog": "note/ajax/option_dialog.html",
+}
 
 class GetDialogHandler:
 
@@ -544,10 +550,14 @@ class GetDialogHandler:
     @xauth.login_required()
     def GET(self, name=""):
         kw = Storage()
+        dialog_template = dialog_mapping.get(name)
+        if dialog_template is None:
+            raise Exception(f"template not found: {name}")
+        
         if name == "group_option_dialog":
             self.get_group_option_dialog(kw)
 
-        return xtemplate.render("note/ajax/%s.html" % name, **kw)
+        return xtemplate.render(dialog_template, **kw)
 
 
 class ViewPublicHandler:

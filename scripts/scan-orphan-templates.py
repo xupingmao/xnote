@@ -12,7 +12,7 @@ import os
 import re
 import sys
 import time
-from typing import List
+from typing import List, Dict
 from datetime import datetime
 from xutils import fsutil
 
@@ -66,7 +66,9 @@ RE_EXTENDS = re.compile(
 RE_INCLUDE = re.compile(
     r'\{%\s+include\s+["\']?(?P<path>[^"\'\s%}]+)["\']?\s*%\}',
 )
-
+RE_HTML_PATH = re.compile(
+    r"(?P<path>[^\s\"\']+\.html)"
+)
 # 注意：{% extends base %} 里 "base" 不是字面路径，它是变量名，
 # 但模板引擎会将变量名作为字符串直接 resolve，所以我们一视同仁提取即可。
 
@@ -84,7 +86,7 @@ def is_in_test_or_virtual(path):
 
 def collect_html_files(root_dir: str):
     """收集所有 .html 文件（含 .mobile.html）"""
-    files = {}
+    files: Dict[str, dict] = {}
     for dirpath, _, filenames in os.walk(root_dir):
         for fn in filenames:
             if fn.endswith(".html"):
@@ -114,7 +116,8 @@ def _extract_from_patterns(content: str, patterns: List[re.Pattern]):
 
 def collect_python_references(scan_dirs):
     """从 Python 文件中收集模板引用"""
-    patterns = [RE_PYTHON_RENDER, RE_PYTHON_TEMPLATE_ASSIGN, RE_PYTHON_RETURN_HTML, RE_INCLUDE, RE_EXTENDS]
+    # patterns = [RE_PYTHON_RENDER, RE_PYTHON_TEMPLATE_ASSIGN, RE_PYTHON_RETURN_HTML, RE_INCLUDE, RE_EXTENDS]
+    patterns = [RE_HTML_PATH]
     refs = set()
     for root_dir in scan_dirs:
         if not os.path.isdir(root_dir):
@@ -135,7 +138,8 @@ def collect_python_references(scan_dirs):
 
 def collect_html_references(root_dir: str):
     """从 HTML 模板文件中收集 {% extends %} / {% include %} 引用"""
-    patterns = [RE_EXTENDS, RE_INCLUDE]
+    # patterns = [RE_EXTENDS, RE_INCLUDE, RE_HTML_PATH]
+    patterns = [RE_HTML_PATH]
     refs = set()
     for dirpath, _, filenames in os.walk(root_dir):
         for fn in filenames:
@@ -181,6 +185,16 @@ def resolve_reference_set(refs):
             resolved.add(r)
     return resolved
 
+def is_ignored_path(fpath: str):
+    if fpath.startswith("tools/"):
+        # 工具
+        return True
+    
+    if "example_" in fpath:
+        # 示例模板
+        return True
+    
+    return False
 
 def main():
     if not os.path.isdir(HANDLERS_DIR):
@@ -214,9 +228,9 @@ def main():
     # 6. 找孤立文件
     orphans = []
     for rel_path in sorted(all_files.keys()):
-        if rel_path.startswith("tools/"):
+        if is_ignored_path(rel_path):
             continue
-        
+                
         if rel_path not in resolved_refs:
             info = all_files[rel_path]
             orphans.append((rel_path, info["size"], info["mtime"]))

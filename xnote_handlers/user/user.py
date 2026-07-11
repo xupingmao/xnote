@@ -395,7 +395,7 @@ class SwitchAccountHandler(BasePluginV2):
             current = ListViewItem()
             current.add_span(f"用户名: {user_info.name}")
             current.add_br()
-            current.add_span(f"SID: {session_id}", css_class="gray")
+            current.add_span(f"登录时间: {user_info.login_time}", css_class="gray")
             
             current.extra.add_span("当前账号", css_class="green")
             list_view.add_item(current)
@@ -419,7 +419,7 @@ class SwitchAccountHandler(BasePluginV2):
                 current = ListViewItem()
                 current.add_span(f"用户名: {user_info.name}")
                 current.add_br()
-                current.add_span(f"SID: {sid}", css_class="gray")
+                current.add_span(f"登录时间: {user_info.login_time}", css_class="gray")
                 current.extra.add(ActionButton(text="切换账号", data_names="_", data_params=dict(selected_sid = sid)))
                 list_view.add_item(current)
 
