@@ -4,7 +4,6 @@
 # @modified 2022/03/19 10:20:23
 import sys
 import platform
-from turtle import onclick
 import xutils
 import os
 import logging

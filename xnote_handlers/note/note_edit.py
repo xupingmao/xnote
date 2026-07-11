@@ -39,6 +39,7 @@ from .dao import NoteIndexDao
 from xnote.plugin.table_plugin import BaseTablePlugin, TableActionType
 from xnote.plugin import sidebar
 from xnote.plugin import TabBox
+from xnote.webui import TextLink
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -162,9 +163,16 @@ class CreateHandler:
         note.tags = tags.split()
         note.level = 0
 
+        parent_link = None
         if note.parent_id < 0:
             note.priority = -1
             note.level = -1
+            
+        if parent_id > 0:
+            parent_note = note_dao.get_by_id_and_creator_id(note_id=parent_id, creator_id=creator_id)
+            if not parent_note:
+                raise Exception(f"parent note not found, parent_id = {parent_id}")
+            parent_link = TextLink(text=parent_note.name, href=parent_note.url)
 
         heading = T("创建笔记")
         code = "fail"
@@ -198,22 +206,25 @@ class CreateHandler:
         heading  = get_heading_by_type(type)
         group_list = note_dao.list_group_v2(creator, orderby = "name")
         converter = note_helper.NoteGroupConverter(group_list)
+        
+        kw = Storage()
+        kw.parent_link = parent_link
+        kw.create_type_tab = self.get_create_type_tab()
+        kw.back_url = xutils.get_argument_str("back_url", is_base64=True)
+        kw.show_search = False
+        kw.heading  = heading
+        kw.type     = type
+        kw.name     = name
+        kw.tags     = tags
+        kw.error    = error
+        kw.message  = error
+        kw.NOTE_TYPE_LIST = NOTE_TYPE_LIST
+        kw.groups   = converter.get_group_list_for_create()
+        kw.opt_groups = converter.get_opt_groups()
+        kw.code     = code
 
         return xtemplate.render(
-            "note/page/create.html", 
-            create_type_tab = self.get_create_type_tab(),
-            back_url = xutils.get_argument_str("back_url", is_base64=True),
-            show_search = False,
-            heading  = heading,
-            type     = type,
-            name     = name, 
-            tags     = tags, 
-            error    = error,
-            message  = error,
-            NOTE_TYPE_LIST = NOTE_TYPE_LIST,
-            groups   = converter.get_group_list_for_create(),
-            opt_groups = converter.get_opt_groups(),
-            code     = code)
+            "note/page/create.html", **kw)
 
     def GET(self):
         return self.POST('GET')

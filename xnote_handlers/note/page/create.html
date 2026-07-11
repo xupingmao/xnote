@@ -24,6 +24,8 @@ td.title {
 {% block body %}
 
 {% include common/script/load_select2.html %}
+{% include common/script/load_laydate.html %}
+
 {% init type = "md" %}
 {% init heading = T("创建笔记") %}
 {% init create_btn_text = T("创建") %}
@@ -81,7 +83,6 @@ td.title {
     </form>
 </div>
 
-<script type="text/javascript" src="{{_server_home}}/_static/lib/layDate-v5.0.9/laydate.js"></script>
 <script type="text/javascript">
     function getWeekDayFromLayDate(layDate) {
         var date = new Date(layDate.year, layDate.month-1, layDate.date);
