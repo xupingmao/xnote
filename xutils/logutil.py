@@ -19,6 +19,7 @@ except ImportError:
 # 非标准库
 import xutils
 from xutils.imports import u
+from typing import Sequence, Set
 
 
 _write_log_lock = threading.RLock()
@@ -348,7 +349,7 @@ def new_mem_logger(*args, **kw): # type: (...) -> MemLogger
 
 class MemLogger:
 
-    _instances = set()
+    _instances: Set["MemLogger"] = set()
     _lock = threading.RLock()
 
     def __init__(self, name, size = 200, ttl = 60*60):

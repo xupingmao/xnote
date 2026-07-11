@@ -85,6 +85,8 @@ class DBBackup:
     _total = 0
     lock_key = "backup_job"
     expire_seconds = 3600
+    fast_test = False
+    fast_test_count = 100
 
     def __init__(self):
         self.db_backup_file = os.path.join(xconfig.TMP_DIR, "temp.db")
@@ -125,7 +127,7 @@ class DBBackup:
         # TODO 删除多余的备份文件
     
     def get_backup_logger(self):
-        return logutil.get_mem_logger("backup_db", size = 20, ttl = -1)
+        return logutil.get_mem_logger("backup_db", size = 100, ttl = -1)
 
     def dump_db(self, backup_kv = True, backup_sql=True):
         count = 0
@@ -149,7 +151,7 @@ class DBBackup:
     
     def backup_sql_tables(self):
         logger = self.get_backup_logger()
-        db = xtables.MySqliteDB(db = self.db_backup_file)
+        db = xtables.MySqliteDB(dbpath = self.db_backup_file)
         # 备份可以关闭同步，加快速度
         db.query("PRAGMA synchronous = OFF")
         db.query("PRAGMA journal_mode = DELETE")
@@ -188,14 +190,18 @@ class DBBackup:
                     cost_time = time.time() - start_time
                     qps = calc_qps(count, cost_time)
                     logger.log("table:(%s), proceed:(%d/%d), qps:(%.2f)" % (backup_table.tablename, count, total_count, qps))
+                
+                    if self.fast_test and count >= self.fast_test_count:
+                        break
+
                 cost_time = time.time() - start_time
                 logger.info("backup table:(%s) done! cost_time:(%.2fs)", table.tablename, cost_time)
         except:
             err_info = xutils.print_exc()
             logger.info("backup failed: (%s)" % err_info)
         finally:
-            db.ctx.db.close()
-            del db
+            db.close()
+            self.get_backup_logger().info("close sql db")
 
     def multiple_insert(self, db: xtables.TableProxy, batch):
         with db.transaction():
@@ -241,6 +247,9 @@ class DBBackup:
                     progress = count/total_count*100.0
                     qps = calc_qps(count, cost_time)
                     logger.log("proceed:(%d), progress:(%.2f%%), qps:(%.2f)" % (count, progress, qps))
+                    
+                    if self.fast_test and count >= self.fast_test_count:
+                        break
 
             db2.Write(batch)
             logger.log("backup done, total:(%d), cost_time:(%.2fs)", count, time.time()-start_time)
@@ -255,6 +264,7 @@ class DBBackup:
             DBBackup._start_time = -1
             DBBackup._count = -1
             DBBackup._progress = 0.0
+            self.get_backup_logger().info("close kv db")
         return count
 
 
@@ -316,10 +326,11 @@ class DBBackup:
 
             return dict(count = count, cost_time = "%sms" % cost_time)
 
-def chk_db_backup() -> str:
+def chk_db_backup(fast_test=False) -> str:
     if not xconfig.get_system_config("db_backup"):
         return "skip"
     backup = DBBackup()
+    backup.fast_test = fast_test
     return backup.execute()
 
 def calc_key_size():
@@ -466,6 +477,7 @@ class BackupHandler:
     def GET(self):
         """触发备份事件"""
         p = xutils.get_argument_str("p", "")
+        fast_test = xutils.get_argument_bool("fast_test")
 
         if p == "db_backup_home":
             kw = Storage()
@@ -496,7 +508,7 @@ class BackupHandler:
             return webutil.SuccessResult(data="backup scripts success")
 
         # 备份所有的
-        db_backup_result = chk_db_backup()
+        db_backup_result = chk_db_backup(fast_test=fast_test)
         scripts_backup_result = chk_scripts_backup()
         return webutil.SuccessResult(data={
             "db_backup_result": db_backup_result,

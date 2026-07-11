@@ -1,5 +1,13 @@
 from xnote.webui import TabBox
 
+def get_system_log_tab(tab_default="db"):
+    log_tab = TabBox(tab_key="log_type", tab_default=tab_default)
+    log_tab.add_item(title="数据库日志", href="/system/log/db", value="db")
+    log_tab.add_item(title="剪贴板", href="/system/clipboard-monitor", value="clip")
+    log_tab.add_item(title="文件日志", href="/system/log?log_type=file", value="file")
+    log_tab.add_item(title="内存日志", href="/system/log?log_type=mem", value="mem")
+    return log_tab
+
 class TabConfig:
 
     # 编解码工具
@@ -29,4 +37,7 @@ class TabConfig:
     img_tab.add_item(title="图片合并", value="merge", href="/tools/img_merge?tab=merge")
     img_tab.add_item(title="图片拆分", value="split", href="/tools/img_split?tab=split")
     img_tab.add_item(title="图片灰度", value="gray", href="/tools/img_gray?tab=gray")
+    
+    # 系统日志
+    system_log_tab = get_system_log_tab("db")
     

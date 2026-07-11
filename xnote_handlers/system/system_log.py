@@ -25,9 +25,11 @@ from xutils.functions import iter_exists
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import DataTable
 from xnote.plugin import TableActionType
-from xnote_handlers.config import LinkConfig
+from xnote_handlers.config import LinkConfig, TabConfig
 from xnote.service import SystemLogService, SystemLogLevel, SystemLogType
 from xnote_handlers.config import AsideConfig
+from xnote.webui import TabBox, Card, RowPanel, Textarea
+from xnote.plugin import BasePluginV2
 
 uv_db = dbutil.get_table("uv")
 
@@ -35,44 +37,6 @@ OPTION_HTML = '''
 <div class="row">
     <script src="{{_server_home}}/_static/js/base/jq-ext.js"></script>
     
-    {% include system/component/system_log_tab.html %}
-
-    <div class="card">
-        {% if log_type == "file" %}
-            <div class="x-tab-box btn-style dark row" data-tab-key="type" data-tab-default="tail">
-                <a class="x-tab" data-tab-value="tail">最新</a>
-                <a class="x-tab" data-tab-value="head">最早</a>
-                <a class="x-tab" data-tab-value="all">全部</a>
-            </div>
-
-            <div class="row">
-                <span>直接查看文件</span>
-                <a href="{{_server_home}}/code/edit?path={{info_log_path}}">INFO日志</a>
-                <span>|</span>
-                <a href="{{_server_home}}/code/edit?path={{warn_log_path}}">WARN日志</a>
-                <span>|</span>
-                <a href="{{_server_home}}/code/edit?path={{error_log_path}}">ERROR日志</a>
-                <span>|</span>
-                <a href="{{_server_home}}/code/edit?path={{trace_log_path}}">TRACE日志</a>
-            </div>
-        {% end %}
-
-        {% if log_type == "mem" %}
-            {% init log_name = "" %}
-            {% init log_not_found = False %}
-
-            <span>日志名称</span>
-            <select value="{{log_name}}" class="logger-name-select">
-                {% for logger in mem_loggers %}
-                    <option value="{{logger.name}}">{{logger.name}}</option>
-                {% end %}
-
-                {% if log_not_found and log_name != "" %}
-                    <option value="{{log_name}}">{{log_name}}</option>
-                {% end %}
-            </select>
-        {% end %}
-    </div>
     <script>
     $(function () {
         $(".output-textarea").scrollBottom();
@@ -86,10 +50,10 @@ OPTION_HTML = '''
 </div>
 '''
 
-ASIDE_HTML = """
-{% include system/component/admin_nav.html %}
-"""
-
+def get_system_log_tab():
+    card = Card()
+    card.add(TabConfig.system_log_tab)
+    return card
 
 def readlines(fpath):
     if not os.path.exists(fpath):
@@ -123,9 +87,9 @@ def read_tail_lines(fpath, lines):
     return "".join(q)
 
 
-class LogHandler(BasePlugin):
-
+class LogHandler(BasePluginV2):
     title = '系统日志'
+    require_admin = True
     # description = "查看系统日志"
     show_aside = True
     editable = False
@@ -134,24 +98,12 @@ class LogHandler(BasePlugin):
     category = "admin"
 
     def get_arg_date(self):
-        date = xutils.get_argument("date")
+        date = xutils.get_argument_str("date")
 
         if not date:
             date = time.strftime("%Y-%m-%d")
 
         return date
-
-    def handle_mem_log(self):
-        log_name = xutils.get_argument("log_name", "")
-        loggers = logutil.MemLogger.list_loggers()
-        for logger in loggers:
-            if logger.name == log_name:
-                return logger.text()
-
-        if len(loggers) > 0 and log_name == "":
-            return loggers[0].text()
-
-        return "<empty>"
 
     def handle_file_log(self):
         type = xutils.get_argument("type", "tail")
@@ -175,13 +127,8 @@ class LogHandler(BasePlugin):
         date = self.get_arg_date()
 
         self.render_options(date)
+        self.update_aside(AsideConfig.admin_aside_html)
         
-        self.show_aside = True
-        self.write_aside(ASIDE_HTML)
-
-        if log_type == "mem":
-            return self.handle_mem_log()
-
         if log_type == "file":
             return self.handle_file_log()
 
@@ -190,19 +137,76 @@ class LogHandler(BasePlugin):
     def render_options(self, date):
         log_type = xutils.get_argument("log_type", "file")
         log_name = xutils.get_argument("log_name", "")
+        
+        kw = Storage()
+        kw.log_type=log_type
+        kw.log_name=log_name
+
+        first_tab = get_system_log_tab()
+        
+        self.add_component(first_tab)
+        
+        if log_type == "file":
+            self.render_file(date)
+            
+        if log_type == "mem":
+            self.render_mem()
+    
+    def render_file(self, date: str):
+        card = Card()
+        tab = TabBox(tab_key="type", tab_default="tail", css_class="btn-style")
+        tab.add_item("最新", value="tail")
+        tab.add_item("最早", value="head")
+        tab.add_item("全部", value="all")
+        
+        info_log_path=get_log_path(date)
+        warn_log_path=get_log_path(date, "WARN")
+        error_log_path=get_log_path(date, "ERROR")
+        trace_log_path=get_log_path(date, "TRACE")
+        
+        row = RowPanel()
+        row.add_span("直接查看文件")
+        row.add_link(text="INFO日志", href=f"/code/edit?path={info_log_path}")
+        row.add_item_sep()
+        row.add_link(text="WARN日志", href=f"/code/edit?path={warn_log_path}")
+        row.add_item_sep()
+        row.add_link(text="ERROR日志", href=f"/code/edit?path={error_log_path}")
+        row.add_item_sep()
+        row.add_link(text="TRACE日志", href=f"/code/edit?path={trace_log_path}")
+        
+        card.add(tab)
+        card.add(row)
+        
+        self.add_component(card)
+        
+    
+    def render_mem(self):
         loggers = logutil.MemLogger.list_loggers()
-        log_not_found = not iter_exists(lambda x: x.name == log_name, loggers)
+        card = Card()
+        tab_default = ""
+        if len(loggers) > 0:
+            tab_default = loggers[0].name
+        tab = TabBox(tab_key="log_name", tab_default=tab_default, css_class="btn-style")
+        for logger in loggers:
+            tab.add_item(title=logger.name, value=logger.name)
+        
+        card.add(tab)
 
-        self.writehtml(OPTION_HTML,
-                       log_type=log_type,
-                       mem_loggers=loggers,
-                       info_log_path=get_log_path(date),
-                       log_name=log_name,
-                       log_not_found=log_not_found,
-                       warn_log_path=get_log_path(date, "WARN"),
-                       error_log_path=get_log_path(date, "ERROR"),
-                       trace_log_path=get_log_path(date, "TRACE"))
+        
+        log_content = ""
+        log_name = xutils.get_argument("log_name", tab_default)
+        loggers = logutil.MemLogger.list_loggers()
+        for logger in loggers:
+            if logger.name == log_name:
+                log_content = logger.text()
 
+        if len(loggers) > 0 and log_name == "":
+            log_content = loggers[0].text()
+
+        textarea = Textarea(log_content, css_class="row", rows="20")
+        card.add(textarea)
+        
+        self.add_component(card)        
 
 class UvRecord(Storage):
 
@@ -248,34 +252,31 @@ class DatabaseLogHandler(BaseTablePlugin):
     title = "数据库日志"
     parent_link = LinkConfig.app_index
     
-    NAV_HTML = """
-    {% include system/component/system_log_tab.html %}
-    
-    <div class="card x-tab-box" data-tab-key="table_name" data-tab-default="system_log">
-        {% for table_name in table_name_list %}
-            <a class="x-tab" data-tab-value="{{table_name}}" href="{{_server_home}}/system/log/db?log_type=db&table_name={{table_name}}">{{table_name}}</a>
-        {% end %}
-    </div>
-    """
-        
-    page_html = NAV_HTML + BaseTablePlugin.TABLE_HTML
-    
     table_name_list = ["system_log", "user_op_log"]
     table_type_dict = {
         "sys_log": "kv",
         "user_op_log": "sql",
         "system_log": "sql",
     }
+    default_table_name = "system_log"
     
-    def get_page_html(self):
-        return self.page_html
+    def get_db_tab(self):
+        tab = TabBox(tab_key="table_name", tab_default=self.default_table_name, css_class="btn-style")
+        for name in self.table_name_list:
+            tab.add_item(title=name, value=name, href=f"/system/log/db?log_type=db&table_name={name}")
+        
+        card = Card()
+        card.add(tab)
+        return card
     
     def handle_page(self):
-        table_name = xutils.get_argument_str("table_name", "system_log")
+        table_name = xutils.get_argument_str("table_name", self.default_table_name)
         page = xutils.get_argument_int("page", 1)
         page_size = 20
         
-        self.update_aside(AsideConfig.get_admin_aside_html())
+        self.update_aside(AsideConfig.admin_aside_html)
+        self.add_component(get_system_log_tab())
+        self.add_component(self.get_db_tab())
 
         if table_name == "system_log":
             return self.handle_system_log_page(table_name)

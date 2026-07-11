@@ -11,8 +11,10 @@ import xutils
 import time
 import web.db
 import logging
+import sqlite3
 
-from typing import List, Dict
+from web.db import DB
+from typing import List, Dict, Any
 from xnote.core import xconfig
 from xutils import dbutil
 from xutils.dbutil import interfaces
@@ -28,15 +30,57 @@ class MySqliteDB(web.db.SqliteDB):
     _instances = set() # type: set[MySqliteDB]
     dbpath = ""
     
-    def __init__(self, db=""):
-        self.dbpath = db
-        super().__init__(db=db)
+    def __init__(self, dbpath=""):
+        self.dbpath = dbpath
+        db = sqlite3
+        db.paramstyle = "qmark"
+        
+        keywords: Dict[str, Any] = dict(db = dbpath)
+
+        # sqlite driver doesn't create datatime objects for timestamp columns
+        # unless `detect_types` option is passed.
+        # It seems to be supported in `sqlite3` and `pysqlite2` drivers, not
+        # surte about `sqlite`.
+        keywords.setdefault("detect_types", sqlite3.PARSE_DECLTYPES)
+
+        self.dbname = "sqlite"
+        self.paramstyle = db.paramstyle
+        keywords["database"] = keywords.pop("db")
+
+        # sqlite don't allows connections to be shared by threads
+        keywords["pooling"] = False
+
+        DB.__init__(self, db, keywords)
+        
         with self._lock:
             MySqliteDB._instances.add(self)
 
-    def __del__(self):
+    def close(self):
+        """显式关闭连接并从 _instances 移除。
+
+        `__del__` 依赖 GC 触发，而 `_instances` 持有强引用导致对象不会被回收，
+        因此必须由调用方主动调用本方法释放 sqlite3 连接，否则在 Windows 上
+        会因文件句柄未释放而无法移动/删除 db 文件（WinError 32）。
+        """
+        # 解释器关闭时 _ctx 可能已被回收，防御性处理
+        ctx = getattr(self, "_ctx", None)
+        if ctx is None:
+            with self._lock:
+                MySqliteDB._instances.discard(self)
+            return
         with self._lock:
-            MySqliteDB._instances.remove(self)
+            db = getattr(ctx, "db", None)
+            if db is not None:
+                db.close()
+                ctx.db = None
+                logging.info("close db %s", self.dbpath)
+            MySqliteDB._instances.discard(self)
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
 
     def __hash__(self):
         return id(self)
@@ -58,7 +102,7 @@ class DBPool:
         assert dbpath != ""
         db = cls._sqlite_pool.get(dbpath)
         if db is None:
-            db = MySqliteDB(db=dbpath)
+            db = MySqliteDB(dbpath=dbpath)
             db.init_pragma()
             cls._sqlite_pool[dbpath] = db
         return db
@@ -928,7 +972,7 @@ def init_clip_log_table():
 
     
 def DBWrapper(dbpath, tablename):
-    db = MySqliteDB(db=dbpath)
+    db = MySqliteDB(dbpath=dbpath)
     return TableProxy(db, tablename)
 
 

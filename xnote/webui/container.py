@@ -25,9 +25,7 @@ class TextContainer(BaseContainer):
     
     def add_item_sep(self):
         """增加换行符号"""
-        if not self._is_first_sep:
-            self.children.append(TextItemSep())
-        self._is_first_sep = False
+        self.children.append(TextItemSep())
 
 class ActionBar(TextContainer):
     """操作栏"""

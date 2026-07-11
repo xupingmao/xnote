@@ -3,7 +3,7 @@ from xnote.plugin import TextLink
 from xnote.plugin import TabBox
 from ._aside_config import AsideConfig
 from xnote.core.xtemplate import LOAD_TIME
-from ._tab_config import TabConfig
+from ._tab_config import TabConfig, get_system_log_tab
 
 class LinkConfig:
     app_index = TextLink(text="应用", href="/system/index")

@@ -14,6 +14,8 @@ from xutils import dateutil
 from xutils import dbutil, BaseDataRecord
 from xutils import textutil
 from xutils import webutil
+from xnote.webui import Card
+from xnote_handlers.config import get_system_log_tab
 
 ASIDE_HTML = """
 {% include system/component/admin_nav.html %}
@@ -116,9 +118,6 @@ class Main(BaseTablePlugin):
     editable = False
     show_aside = True
     
-    NAV_HTML = """
-{% include system/component/system_log_tab.html %}
-"""
 
     def get_aside_html(self):
         return sidebar.get_admin_sidebar_html()
@@ -130,6 +129,10 @@ class Main(BaseTablePlugin):
         page = xutils.get_argument_int("page", 1)
         page_size = 20
         offset = (page-1) * page_size
+        
+        card = Card()
+        card.add(get_system_log_tab("clip"))
+        self.add_component(card)
 
         if op == "detail":
             return self.handle_detail()

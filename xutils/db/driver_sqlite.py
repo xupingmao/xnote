@@ -52,7 +52,7 @@ class SqliteKV(interfaces.DBInterface):
 
     table_name = "kv_store"
 
-    def __init__(self, db_file, snapshot=None,
+    def __init__(self, db_file:str, snapshot=None,
                  config_dict={},
                  debug=True, **kw):
         """通过 sqlite 来实现leveldb的接口代理"""
@@ -322,5 +322,6 @@ class SqliteKV(interfaces.DBInterface):
         db_ctx = self.db._ctx
         if "db" in db_ctx:
             db_ctx.db.close()
+            logging.info("close db %s", self.db_file)
         del self.db
 
