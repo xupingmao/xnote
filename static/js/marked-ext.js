@@ -321,6 +321,7 @@ var markedConfig = {
             console.log(code);
             return highlightCsv(code, lang);
         } else {
+            // 实现逻辑在 editor.js 文件
             return xnote.editor.highlightCodeBlock(code, langUpper);
         }
     }

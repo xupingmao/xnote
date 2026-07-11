@@ -46,7 +46,7 @@ xnote.editor.highlightCodeBlock = function(code, lang) {
     for (var i = 0; i < lines.length; i++) {
         numberedCode += '<div class="code-line">' +
             '<span class="line-number">' + (i + 1) + '</span>' +
-            '<span class="line-content">' + lines[i] + '</span>' +
+            $("<span>").addClass("line-content").html(lines[i]).prop("outerHTML") +
             '</div>';
     }
     
