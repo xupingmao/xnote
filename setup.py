@@ -11,7 +11,7 @@ data_ext_list =  ["*.txt", "*.json", "*.properties", "*.js", "*.html", "*.css"]
 setuptools.setup(
     name = "xnote_web",
     # 年份 + 月份 + 小版本号
-    version = "2026.5.1",
+    version = "2026.7.0",
     author = "mark",
     author_email = "578749341@qq.com",
     description = "xnote-web框架",
@@ -20,6 +20,7 @@ setuptools.setup(
     # packages = ["config", "core", "docs", "handlers", "lib", "static", "scripts", "xnote", "xutils"],
     packages=setuptools.find_packages(),
     include_package_data=True, # 包含资源文件
+    # 资源文件配置请查看 MANIFEST.in 文件
     # package_dir={"": "."},
     # package_data={
     #     "": data_ext_list,

@@ -4,10 +4,16 @@ import os
 import sys
 import shutil
 import fire
+import dotenv
+import os
+
+dotenv.load_dotenv()
 
 def main():
-    with open("pypi_token.txt", "r+") as fp:
-        pypi_token = fp.read()
+    pypi_token = os.getenv("PYPI_TOKEN")
+    if pypi_token is None:
+        print("PYPI_TOKEN is empty")
+        sys.exit(1)
 
     if os.path.exists("xnote_web.egg-info"):
         shutil.rmtree("xnote_web.egg-info")
