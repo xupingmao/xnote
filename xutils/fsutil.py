@@ -100,15 +100,18 @@ def is_parent_dir(parent: str, child: str):
     True
     >>> is_parent_dir('/test', '/test/child.txt')
     True
+    >>> is_parent_dir('/test', '/test/child/grandchild.txt')
+    True
     >>> is_parent_dir('/test', '/test_1/child.txt')
     False
     >>> is_parent_dir('/test', '/a/test/child.txt')
     False
+    >>> is_parent_dir('/test', '/test')
+    True
     """
     child_path = os.path.abspath(child)
     parent_path = os.path.abspath(parent)
-    child_parent_new = os.path.dirname(child_path)
-    return parent_path == child_parent_new
+    return child_path == parent_path or child_path.startswith(parent_path + os.sep)
 
 
 def get_relative_path(path:str, parent:str):
