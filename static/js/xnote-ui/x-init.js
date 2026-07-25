@@ -540,9 +540,22 @@ xnote.executeCommands = function (commands) {
  * @param {CommandItem} command 
  */
 xnote._executeSingleCommand = function (command) {
+    var delay = command.delay || 0;
+    setTimeout(function() {
+        xnote._executeSingleCommandDo(command);
+    }, delay);
+}
+
+/**
+ * 执行单条命令
+ * @param {CommandItem} command 
+ */
+xnote._executeSingleCommandDo = function (command) {
     var value = command.value;
     var command_type = command.command;
     var delay = command.delay;
+
+    console.debug("execute command", command);
 
     var findElement = function (command) {
         var name = command.name;
@@ -574,14 +587,13 @@ xnote._executeSingleCommand = function (command) {
         return;
     }
 
+    if (command_type === "alert") {
+        xnote.alert(value);
+        return;
+    }
+
     if (command_type === "reload") {
-        if (delay) {
-            setTimeout(() => {
-                location.reload();
-            }, delay);
-        } else {
-            location.reload();
-        }
+        location.reload();
         return;
     }
 
