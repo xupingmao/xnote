@@ -28,7 +28,7 @@ xnote.execute(function() {
     $('#{{select_id}}').select2({
         dropdownParent: parent,
         ajax: {
-            url: '/note/api/select_name',
+            url: '/api/note/select_name',
             data: function (params) {
                 var query = {
                     search: params.term,

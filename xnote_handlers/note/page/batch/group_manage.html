@@ -169,7 +169,7 @@ function renderGroupTreeData(parent, data, level) {
 }
 
 function renderGroupTree() {
-    xnote.http.get("/note/api/group?list_type=all", function (resp) {
+    xnote.http.get("/api/note/group?list_type=all", function (resp) {
         if (resp.success) {
             // console.log(resp);
             var parent = $(".group-tree");

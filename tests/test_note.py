@@ -217,17 +217,17 @@ class TestMain(BaseTestCase):
 
     def test_timeline_api(self):
         default_group_id = get_default_group_id()
-        assert_json_request_success(self, "/note/api/timeline")
-        assert_json_request_success(self, "/note/api/timeline?type=public")
-        assert_json_request_success(self, "/note/api/timeline?type=sticky")
-        assert_json_request_success(self, "/note/api/timeline?type=removed")
-        assert_json_request_success(self, "/note/api/timeline?type=archived")
-        assert_json_request_success(self, "/note/api/timeline?type=all")
-        assert_json_request_success(self, "/note/api/timeline?type=plan")
-        assert_json_request_success(self, "/note/api/timeline?type=list")
-        assert_json_request_success(self, "/note/api/timeline?type=gallery")
-        assert_json_request_success(self, f"/note/api/timeline?type=default&parent_id={default_group_id}")
-        assert_json_request_success(self, u"/note/api/timeline?type=search&key=xnote中文")
+        assert_json_request_success(self, "/api/note/timeline")
+        assert_json_request_success(self, "/api/note/timeline?type=public")
+        assert_json_request_success(self, "/api/note/timeline?type=sticky")
+        assert_json_request_success(self, "/api/note/timeline?type=removed")
+        assert_json_request_success(self, "/api/note/timeline?type=archived")
+        assert_json_request_success(self, "/api/note/timeline?type=all")
+        assert_json_request_success(self, "/api/note/timeline?type=plan")
+        assert_json_request_success(self, "/api/note/timeline?type=list")
+        assert_json_request_success(self, "/api/note/timeline?type=gallery")
+        assert_json_request_success(self, f"/api/note/timeline?type=default&parent_id={default_group_id}")
+        assert_json_request_success(self, u"/api/note/timeline?type=search&key=xnote中文")
 
     def test_timeline_sort_func(self):
         from xnote_handlers.note.note_timeline import build_date_result
@@ -266,7 +266,7 @@ class TestMain(BaseTestCase):
         delete_note_for_test("xnote-copy-markdown-test")
 
         id = create_note_for_test("md", "xnote-copy-markdown-test", content="hello **markdown**")
-        resp = json_request_return_dict("/note/api/content?id=%s" % id)
+        resp = json_request_return_dict("/api/note/content?id=%s" % id)
         self.assertEqual(True, resp["success"])
         self.assertEqual("hello **markdown**", resp["data"])
 
@@ -400,11 +400,11 @@ class TestMain(BaseTestCase):
         try:
             login_test_user(target_user)
             assert xauth.current_name_str() == target_user
-            result = json_request_return_dict(f"/note/api/timeline?_type=json&type=default&parent_id={group_id}")
+            result = json_request_return_dict(f"/api/note/timeline?_type=json&type=default&parent_id={group_id}")
             data = result.get_list("data", [])
             assert len(data) == 1
             
-            no_auth_result = json_request_return_dict(f"/note/api/timeline?_type=json&type=default&parent_id={unauthorized_id}")
+            no_auth_result = json_request_return_dict(f"/api/note/timeline?_type=json&type=default&parent_id={unauthorized_id}")
             result_code = no_auth_result.get("code", "")
             assert result_code == "403"
         finally:
@@ -552,7 +552,7 @@ class TestMain(BaseTestCase):
     def test_note_search_name(self):
         delete_note_for_test("search-name-test")
         create_note_for_test(type = "md", name = "search-name-test", content = "hello,world")
-        result = json_request_return_dict("/note/api/timeline?type=search&key=name")
+        result = json_request_return_dict("/api/note/timeline?type=search&key=name")
         assert result["code"] == "success"
         assert len(result["data"]) > 0
 
@@ -587,7 +587,7 @@ class TestMain(BaseTestCase):
         print("files=%s" % len(files))
 
     def test_note_api_group(self):
-        json_data = json_request_return_dict("/note/api/group?list_type=all")
+        json_data = json_request_return_dict("/api/note/group?list_type=all")
         self.assertEqual("success", json_data["code"])
 
     def test_import_from_html(self):

@@ -214,8 +214,8 @@ xutils.register_func("page.list_system_types", list_system_types)
 xutils.register_func("page.list_special_groups", list_special_groups)
 
 xurls = (
-    r"/note/api/group", GroupApiHandler,
-    r"/note/api/stat", StatApiHandler,
-    r"/note/api/select_name", SelectNameHandler,
-    r"/note/api/content", NoteContentApiHandler,
+    r"/api/note/group", GroupApiHandler,
+    r"/api/note/stat", StatApiHandler,
+    r"/api/note/select_name", SelectNameHandler,
+    r"/api/note/content", NoteContentApiHandler,
 )

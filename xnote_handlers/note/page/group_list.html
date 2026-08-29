@@ -34,7 +34,7 @@
     {% include note/component/note_list_component.html %}
 
     <script>
-        xnote.http.get("/note/api/stat", function (resp) {
+        xnote.http.get("/api/note/stat", function (resp) {
             console.log("note stat:", resp);
         });
     </script>
