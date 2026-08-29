@@ -262,6 +262,16 @@ class TestMain(BaseTestCase):
         json_request("/note/history_view?id=%s&version=%s" % (file["id"], file["version"]))
         json_request("/note/remove?id=%s" % id)
 
+    def test_copy_markdown(self):
+        delete_note_for_test("xnote-copy-markdown-test")
+
+        id = create_note_for_test("md", "xnote-copy-markdown-test", content="hello **markdown**")
+        resp = json_request_return_dict("/note/api/content?id=%s" % id)
+        self.assertEqual(True, resp["success"])
+        self.assertEqual("hello **markdown**", resp["data"])
+
+        json_request("/note/remove?id=%s" % id)
+
     def test_note_editor_html(self):
         delete_note_for_test("xnote-html-test")
 

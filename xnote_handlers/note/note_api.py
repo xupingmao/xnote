@@ -16,6 +16,7 @@ from xutils import webutil
 from xutils import textutil
 from xnote_handlers.note import dao
 from xnote_handlers.note.note_helper import assemble_notes_by_date
+from xnote_handlers.note.note_service import NoteService
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -76,6 +77,19 @@ class StatApiHandler:
     def GET(self):
         user_name = xauth.current_name_str()
         return dict(code="success", data=dao.get_note_stat(user_name=user_name))
+
+class NoteContentApiHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        note_id = xutils.get_argument_int("id")
+        note = dao.get_by_id(note_id)
+        if note is None:
+            return webutil.FailedResult(code="404", message="笔记不存在")
+        user_id = xauth.current_user_id()
+        NoteService.check_auth(note, user_id)
+        return webutil.SuccessResult(data=note.content)
+
 
 class Select2ResultItem(dict):
     def __init__(self, id=0, text=""):
@@ -203,4 +217,5 @@ xurls = (
     r"/note/api/group", GroupApiHandler,
     r"/note/api/stat", StatApiHandler,
     r"/note/api/select_name", SelectNameHandler,
+    r"/note/api/content", NoteContentApiHandler,
 )

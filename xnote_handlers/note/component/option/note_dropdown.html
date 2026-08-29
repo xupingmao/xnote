@@ -30,6 +30,7 @@ xnote.state.note = {
 
         <a class="dropdown-option link" onclick="xnote.note.openDialogToMoveByElement(this)" data-id="{{file.id}}">移动</a>
         <a class="dropdown-option copy-btn link">复制</a>
+        <a class="dropdown-option copy-markdown-btn link">复制Markdown</a>
 
         {% if file.level > 0 %}
             <a class="dropdown-option link" href="{{_server_home}}/note/stick?id={{file.id}}&level=0">取消置顶</a>
@@ -91,6 +92,38 @@ $(function () {
             window.location.reload();
         });
     })
+
+    // 复制 Markdown 内容到粘贴板
+    function copyMarkdownText(text) {
+        var $btn = $("<button>").attr("data-clipboard-text", text).css("display", "none").appendTo("body");
+        var clipboard = new ClipboardJS($btn[0]);
+        clipboard.on("success", function (e) {
+            xnote.toast("Markdown 已复制");
+            clipboard.destroy();
+            $btn.remove();
+        });
+        clipboard.on("error", function (e) {
+            xnote.alert("复制失败");
+            clipboard.destroy();
+            $btn.remove();
+        });
+        $btn.trigger("click");
+    }
+
+    $(".copy-markdown-btn").click(function () {
+        var noteId = xnote.state.note.id;
+        var loadIndex = layer.load(2);
+        xnote.http.get("/note/api/content?id=" + noteId, function (resp) {
+            layer.close(loadIndex);
+            if (resp.success) {
+                copyMarkdownText(resp.data);
+            } else {
+                xnote.alert(resp.message);
+            }
+        }).fail(function (err) {
+            layer.close(loadIndex);
+        });
+    });
 })
 </script>
 

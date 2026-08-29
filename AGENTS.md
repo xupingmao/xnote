@@ -7,6 +7,11 @@
 - 分层原则：按照view/biz/dao三层分层，简单场景可以直接view/dao两层
 - 可自动化：开发完一个功能后，需要补充对应的自动化测试脚本并且测试通过
 
+## REST API 约定
+
+- **接口位置**：笔记相关的后端 REST 接口统一放在 `xnote_handlers/note/note_api.py` 中，URL 路径统一使用 `/note/api/xxx` 前缀（例如获取笔记内容用 `/note/api/content`），不要散落到 `note_view.py` 等页面 handler 里。
+- **成功判断**：前端（及测试）判断接口成功与否统一使用返回字段 `resp.success`（布尔值），不要使用 `resp.code == "success"`。`note_api.py` 中的接口统一通过 `webutil.SuccessResult` / `webutil.FailedResult` 返回，这两个方法已经同时设置 `success` 与 `code` 字段。
+
 ## Quick start
 
 ```sh
