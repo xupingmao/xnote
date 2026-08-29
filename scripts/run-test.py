@@ -88,6 +88,11 @@ def run_test(args: Namespace):
         py_exec("-m coverage html -i")
         return
 
+    if target == "markdown":
+        py_exec("-m pytest tests/test_markdown_util.py --doctest-modules --cov xutils.markdown_util --capture no")
+        py_exec("-m coverage html -i")
+        return
+
     if target == "fs":
         py_exec("-m pytest tests/test_fs.py --doctest-modules --cov xnote_handlers.fs --cov xnote_handlers.fs --capture no")
         py_exec("-m coverage html -i")

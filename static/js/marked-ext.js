@@ -539,25 +539,41 @@ var markedConfig = {
     }
 
     /**
-     * 重写html标签
+     * 重写html标签(原始HTML块的净化)
+     *
+     * 安全说明：markdown 里的原始 HTML 可能夹带 <script> 等危险标签，必须在渲染前净化
+     * (marked 默认不开启 sanitize，见 marked.setOptions，故这里是唯一的 HTML 净化点)。
+     *
+     * 净化策略：
+     *  1) 优先使用 DOMPurify(本地依赖 static/lib/dompurify/purify.min.js，当前 3.1.6) 做基于
+     *     白名单的严格净化，能可靠拦截「嵌套在其它标签内的危险标签」(如
+     *     <div><script>...</script></div>) 以及「自闭合/只有开标签的危险标签」(如 <script/>)，
+     *     而旧实现只看外层标签名(cap[1])，这两类都会漏过甚至导致 .toLowerCase() 抛错后放行；
+     *  2) 若 DOMPurify 依赖加载失败(window.DOMPurify 不存在)或执行异常，则降级为正则整段
+     *     丢弃策略——宁可丢掉整段原始 HTML，也不把疑似危险内容直接输出。
+     *
+     * 注意：必须保留 <latex> 自定义标签(ADD_TAGS: ["latex"])，供解析完成后的
+     * marked._updateLatex() 遍历真实 <latex> DOM 元素并逐个隔离渲染公式(见 marked._updateLatex)。
+     * 本函数【禁止】直接渲染 <latex>，否则会把多公式与文本合并成一个公式导致 KaTeX 报错。
+     *
      * @param {string} html 
      * @returns {string}
      */
     myRenderer.html = function (html) {
         try {
-            var cap = marked.Lexer.rules.html.exec(html);
-            console.log(cap, html);
-            var htmlTag = cap[1].toLowerCase();
-            if (htmlTag == "script" || htmlTag == "pre") {
-                // 过滤脚本
-                return "";
-            }
-            if (htmlTag == "latex") {
-                var content = $(html).text();
-                return katexRender(content);
+            // 依赖未加载(window 不存在或 DOMPurify 缺失)时安静降级，不报错
+            if (typeof window !== "undefined" && window.DOMPurify) {
+                return window.DOMPurify.sanitize(html, {
+                    ADD_TAGS: ["latex"],
+                    FORBID_TAGS: ["pre"]
+                });
             }
         } catch (e) {
-            console.error(e);
+            console.error("DOMPurify 净化失败，降级处理", e);
+        }
+        // 降级：DOMPurify 未加载或执行异常时，整段丢弃含危险标签的内容
+        if (/<(script|pre|style|iframe|object|embed|link|meta)(\s|\/|>)/i.test(html)) {
+            return "";
         }
         return html;
     }
@@ -696,7 +712,7 @@ var markedConfig = {
                 if (cap.index > 0) {
                     const textContent = src.substring(0, cap.index);
                     if (textContent.trim() !== '') {
-                        tokens.push({ type: 'text', text: textContent });
+                        tokens.push({ type: 'text', text: preHandleBlock(textContent) });
                     }
                 }
                 
@@ -711,7 +727,7 @@ var markedConfig = {
             
             // 剩余的普通文本
             if (src.trim() !== '') {
-                tokens.push({ type: 'text', text: src });
+                tokens.push({ type: 'text', text: preHandleBlock(src) });
             }
             break;
         }
@@ -742,23 +758,67 @@ var markedConfig = {
         });
     }
 
+    function stripLatexDelims(s) {
+        // 去掉 math 环境内部冗余的 LaTeX 定界符 \( \) \[ \]，
+        // 它们已经在 $...$ / $$...$$ 内部，属于重复定界，保留会令 KaTeX 解析失败
+        return s.replace(/\\\(|\\\)|\\\[|\\\]/g, "");
+    }
+
     function preHandleBlock(block) {
         // 预处理：把各类公式定界符统一替换为 <latex> 标签
-        // '\(' {公式内容} '\)'   行内公式
-        // '\[' {公式内容} '\]'   块级公式
-        // '$$' {公式内容} '$$'   块级公式
-        // '$'  {公式内容} '$'    行内公式(如 $y=f(g(x))$)
+        // 支持的定界符:
+        //   $$...$$   块级公式
+        //   $...$     行内公式(如 $y=f(g(x))$)
+        //   \[...\]   块级 LaTeX 定界符
+        //   \(...\)   行内 LaTeX 定界符
+        // 采用从左到右单次扫描，逐段消费定界符，避免全局正则跨边界误匹配
+        // (之前的实现会把整段文本误合并成一个巨型公式导致 KaTeX 报错)。
         try {
-            var replace_func = function(match, content) {
-                return "<latex>" + content + "</latex>";
+            var out = "";
+            var i = 0;
+            var n = block.length;
+            while (i < n) {
+                var two = block.substr(i, 2);
+                // 块级公式 $$...$$
+                if (two === "$$") {
+                    var e = block.indexOf("$$", i + 2);
+                    if (e !== -1) {
+                        out += "<latex>" + stripLatexDelims(block.substring(i + 2, e)) + "</latex>";
+                        i = e + 2;
+                        continue;
+                    }
+                }
+                // 行内公式 $...$ (排除 $$)
+                if (block.charAt(i) === "$" && two !== "$$") {
+                    var e2 = block.indexOf("$", i + 1);
+                    if (e2 !== -1 && block.charAt(e2 + 1) !== "$") {
+                        out += "<latex>" + stripLatexDelims(block.substring(i + 1, e2)) + "</latex>";
+                        i = e2 + 1;
+                        continue;
+                    }
+                }
+                // 块级 LaTeX 定界符 \[...\]
+                if (two === "\\[") {
+                    var e3 = block.indexOf("\\]", i + 2);
+                    if (e3 !== -1) {
+                        out += "<latex>" + block.substring(i + 2, e3) + "</latex>";
+                        i = e3 + 2;
+                        continue;
+                    }
+                }
+                // 行内 LaTeX 定界符 \(...\)
+                if (two === "\\(") {
+                    var e4 = block.indexOf("\\)", i + 2);
+                    if (e4 !== -1) {
+                        out += "<latex>" + block.substring(i + 2, e4) + "</latex>";
+                        i = e4 + 2;
+                        continue;
+                    }
+                }
+                out += block.charAt(i);
+                i++;
             }
-            // 块级公式优先处理，避免其中的 '$' 被行内公式规则误匹配
-            block = block.replace(/\$\$([\s\S]*?)\$\$/g, replace_func);
-            block = block.replace(/\\\(([\s\S]*?)\\\)/g, replace_func);
-            block = block.replace(/\\\[([\s\S]*?)\\\]/g, replace_func);
-            // 行内公式: 左右各一个 '$'，内容不含换行与 '$'
-            block = block.replace(/\$([^\n$]+?)\$/g, replace_func);
-            return block;
+            return out;
         } catch (e) {
             console.error("preHandleBlock failed:", e);
             return block;
@@ -777,11 +837,8 @@ var markedConfig = {
         var blocks = parseTextBlocks(text);
         for (var i = 0; i < blocks.length; i++) {
             var block = blocks[i];
-            if (block.type == 'code') {
-                result += block.text;
-            } else {
-                result += preHandleBlock(block.text);
-            }
+            // 公式定界符已在 parseTextBlocks 中替换为 <latex> 标签
+            result += block.text;
         }
         return result;
     }

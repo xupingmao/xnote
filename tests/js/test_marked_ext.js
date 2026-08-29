@@ -72,7 +72,49 @@ function loadFunction(name) {
 }
 
 const normalizeCodeFenceLang = loadFunction("normalizeCodeFenceLang");
+// preHandleBlock 依赖同作用域的 stripLatexDelims，注入为沙箱全局供其调用
+sandbox.stripLatexDelims = loadFunction("stripLatexDelims");
 const preHandleBlock = loadFunction("preHandleBlock");
+
+// 提取对象方法(如 myRenderer.html = function ...)，用于在沙箱中求值后测试
+function extractMethod(src, objName, methodName) {
+    const marker = objName + "." + methodName + " = function";
+    const start = src.indexOf(marker);
+    if (start < 0) throw new Error(marker + " not found");
+    const fnStart = src.indexOf("function", start);
+    let depth = 0, inRegex = false, inString = null;
+    for (let i = fnStart; i < src.length; i++) {
+        const ch = src[i];
+        if (inString) {
+            if (ch === "\\") { i++; continue; }
+            if (ch === inString) inString = null;
+            continue;
+        }
+        if (inRegex) {
+            if (ch === "\\") { i++; continue; }
+            if (ch === "/") { inRegex = false; }
+            continue;
+        }
+        if (ch === '"' || ch === "'" || ch === "`") { inString = ch; continue; }
+        if (ch === "/") {
+            if (src[i + 1] === "/") { while (i < src.length && src[i] !== "\n") i++; continue; }
+            if (src[i + 1] === "*") { while (i < src.length && !(src[i] === "*" && src[i + 1] === "/")) i++; i++; continue; }
+            let j = i - 1;
+            while (j >= fnStart && /\s/.test(src[j])) j--;
+            const prev = j >= fnStart ? src[j] : "";
+            if (prev === "" || !/[\w)\]'"`.]/.test(prev)) { inRegex = true; continue; }
+        }
+        if (ch === "{") depth++;
+        else if (ch === "}") { depth--; if (depth === 0) return src.slice(fnStart, i + 1); }
+    }
+    throw new Error("unbalanced braces for " + objName + "." + methodName);
+}
+function loadMethod(objName, methodName) {
+    const fnSrc = extractMethod(source, objName, methodName);
+    vm.runInContext("this.__fn = " + fnSrc + ";", sandbox);
+    return sandbox.__fn;
+}
+const myRenderer_html = loadMethod("myRenderer", "html");
 
 // ---- tiny test framework ----
 let passed = 0;
@@ -178,6 +220,76 @@ console.log("\npreHandleBlock:");
 {
     const out = preHandleBlock("$ok$");
     assertEqual(out, "<latex>ok</latex>", "基础行内公式");
+}
+
+console.log("\npreHandleBlock (复杂公式混排回归):");
+
+// 复现用户上报的多公式混排输入(含 $...$ / $$...$$ / \(...\) / \[...\] 以及 $$ 内嵌套 \(...\))
+const complexInput = [
+    '复合函数 $\\(y=f(g(x))\\)$',
+    '$$\\frac{\\partial y}{\\partial x}=\\frac{\\partial y}{\\partial g}\\cdot\\frac{\\partial g}{\\partial x}$$',
+    '多层神经网络就是一串复合函数，反向传播就是把链式法则从后往前算一遍。',
+    '',
+    '举个极简两层网络：',
+    '$$',
+    '\\\\(\\boldsymbol b\\)egin{aligned}',
+    'z_1 &= w_1 x + \\(\\boldsymbol b\\)_1 \\\\',
+    'a_1 &= \\text{ReLU}(z_1) \\\\',
+    'z_2 &= w_2 a_1 + \\(\\boldsymbol b\\)_2 \\\\',
+    '\\hat y &= z_2',
+    '\\end{aligned}',
+    '$$',
+    '损失用 MSE：$L=\\frac12(\\hat y - y)^2$',
+    '',
+    '我们想求：$\\dfrac{\\partial L}{\\partial w_2},\\dfrac{\\partial L}{\\partial \\(\\boldsymbol b\\)_2},\\dfrac{\\partial L}{\\partial w_1},\\dfrac{\\partial L}{\\partial \\(\\boldsymbol b\\)_1}$',
+    ''
+].join("\n");
+
+const complexOut = preHandleBlock(complexInput);
+
+// 1. 不再把整段合并成一个巨型公式导致 "解析失败"
+assertEqual(complexOut.indexOf("解析失败") >= 0, false, "复杂混排不再出现解析失败拼接");
+
+// 2. 反斜杠公式命令保留(如 \\frac \\boldsymbol \\text)
+assertEqual(complexOut.indexOf("\\frac") >= 0, true, "反斜杠公式命令(\\frac)被保留");
+assertEqual(complexOut.indexOf("\\boldsymbol") >= 0, true, "反斜杠公式命令(\\boldsymbol)被保留");
+assertEqual(complexOut.indexOf("\\text") >= 0, true, "\\text 被保留");
+
+// 3. 每个公式被独立包成 <latex>，且不跨边界合并
+{
+    const tags = (complexOut.match(/<latex>/g) || []).length;
+    assertEqual(tags >= 4, true, "多个公式各自独立包成 <latex> (count=" + tags + ")");
+}
+
+// 4. $$ 内部的 \(...\) 定界符被剥离(避免重复定界导致 KaTeX 失败)
+assertEqual(complexOut.indexOf("\\(\\boldsymbol") >= 0, false, "$$ 内部的 \\( 冗余定界符已剥离");
+
+console.log("\nmyRenderer.html (HTML 净化 / DOMPurify 降级):");
+
+// 沙箱默认没有 window -> 走正则降级分支
+assertEqual(myRenderer_html('<script>alert(1)</script>'), "", "降级: 去除 <script>");
+assertEqual(myRenderer_html('<div><script>x</script></div>'), "", "降级: 嵌套 <script> 整段丢弃");
+assertEqual(myRenderer_html('<script/>'), "", "降级: 自闭合 <script> 去除");
+assertEqual(myRenderer_html('<latex>a+b</latex>'), "<latex>a+b</latex>", "降级: 保留 <latex>");
+assertEqual(myRenderer_html('<div>hi</div>'), "<div>hi</div>", "降级: 普通标签保留");
+
+// 注入 window.DOMPurify -> 走 DOMPurify 分支
+{
+    let captured = null;
+    sandbox.window = {
+        DOMPurify: {
+            sanitize: function (html, cfg) {
+                captured = { html: html, cfg: cfg };
+                // mock: 去除 script，保留其余(含 latex)
+                return html.replace(/<script[\s\S]*?<\/script>/gi, "");
+            }
+        }
+    };
+    const out = myRenderer_html('<div><script>x</script></div>');
+    assertEqual(out, "<div></div>", "DOMPurify: 去除 script 保留外层");
+    assertEqual(captured.cfg.ADD_TAGS.indexOf("latex") >= 0, true, "DOMPurify: 配置保留 latex 标签");
+    assertEqual(captured.cfg.FORBID_TAGS.indexOf("pre") >= 0, true, "DOMPurify: 配置禁用 pre 标签");
+    delete sandbox.window;
 }
 
 console.log("\n结果: " + passed + " passed, " + failed + " failed");

@@ -16,6 +16,9 @@
 
     <!-- core markdown parser -->
     <script type="text/javascript" src="{{_server_home}}/_static/lib/marked/marked.js"></script>
+    <!-- HTML 净化(DOMPurify 3.1.6)：过滤 markdown 原始 HTML 中的危险标签；
+         本地依赖 static/lib/dompurify/3.1.6/purify.min.js，加载失败时 marked-ext 会自动降级为正则过滤 -->
+    <script type="text/javascript" src="{{_server_home}}/_static/lib/dompurify/3.1.6/purify.min.js"></script>
     <script type="text/javascript" src="{{_server_home}}/_static/js/marked-ext.js?ts={{_ts}}"></script>
 
     {% if markdown_util.has_latex(markdown_content) %}
