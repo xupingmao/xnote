@@ -41,6 +41,9 @@ def check_and_install_pkg(py_module, pip_version = ""):
 def py_exec(cmd_line):
     os.system("%s %s" % (sys.executable, cmd_line))
 
+def js_exec(cmd_line):
+    os.system("node %s" % cmd_line)
+
 def run_test(args: Namespace):
     target = args.target
     if args.test_mysql:
@@ -140,6 +143,10 @@ def run_test(args: Namespace):
         py_exec("-m coverage html -i")
         return
 
+    if target == "js":
+        js_exec("tests/js/test_marked_ext.js")
+        return
+
     if target != "all":
         print("未知的操作:", target)
         sys.exit(1)
@@ -156,6 +163,7 @@ def run_test(args: Namespace):
         check_and_install_pkg("leveldb", "leveldb==0.201")
     os.system("%s -m pytest tests --doctest-modules --cov xnote_handlers --cov xutils --cov core --cov xnote --ff" % executable)
     os.system(f"{executable} -m coverage html -i")
+    js_exec("tests/js/test_marked_ext.js")
 
 def set_mysql_config(args, props, prop_key):
     if prop_key in props:

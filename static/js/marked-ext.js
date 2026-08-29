@@ -330,7 +330,8 @@ var markedConfig = {
         if (window.katex) {
             try {
                 var result = katex.renderToString(content, { displayMode: false });
-            } catch {
+            } catch (err) {
+                console.error("katex解析失败", err, content);
                 var result = myRenderer.codespan("解析失败:" + content);
             }
             // console.debug("katex render", content, "result", result);
@@ -718,18 +719,45 @@ var markedConfig = {
         return tokens;
     }
 
+    /**
+     * 规整代码围栏的语言标识
+     *
+     * marked 的围栏正则只把空白前的第一个词当作语言，例如:
+     *   ```Plain Text
+     *   content ...
+     *   ```
+     * 会被解析成语语言 "Plain"，导致 "Text" 泄漏进代码正文。
+     * 这里把语言标识中的空格替换为下划线(如 "Plain Text" -> "Plain_Text")，
+     * 避免空格导致语言被截断、内容泄漏。
+     *
+     * @param {string} text
+     * @returns {string}
+     */
+    function normalizeCodeFenceLang(text) {
+        return text.replace(/^([ \t]*(`{3,}|~{3,})[ \.]*)([^\n]*?)\n/gm, function (match, prefix, fence, lang) {
+            if (lang && /\s/.test(lang)) {
+                return prefix + lang.replace(/\s+/g, "_") + "\n";
+            }
+            return match;
+        });
+    }
+
     function preHandleBlock(block) {
-        // 预处理：替换行内公式定界符
-        // '\(' {公式内容} '\)'
-        // '\[' {公式内容} '\]'
-        // '$$' {块级公式} '$$'
+        // 预处理：把各类公式定界符统一替换为 <latex> 标签
+        // '\(' {公式内容} '\)'   行内公式
+        // '\[' {公式内容} '\]'   块级公式
+        // '$$' {公式内容} '$$'   块级公式
+        // '$'  {公式内容} '$'    行内公式(如 $y=f(g(x))$)
         try {
             var replace_func = function(match, content) {
                 return "<latex>" + content + "</latex>";
             }
+            // 块级公式优先处理，避免其中的 '$' 被行内公式规则误匹配
+            block = block.replace(/\$\$([\s\S]*?)\$\$/g, replace_func);
             block = block.replace(/\\\(([\s\S]*?)\\\)/g, replace_func);
             block = block.replace(/\\\[([\s\S]*?)\\\]/g, replace_func);
-            block = block.replace(/\$\$([\s\S]*?)\$\$/g, replace_func);  
+            // 行内公式: 左右各一个 '$'，内容不含换行与 '$'
+            block = block.replace(/\$([^\n$]+?)\$/g, replace_func);
             return block;
         } catch (e) {
             console.error("preHandleBlock failed:", e);
@@ -743,6 +771,9 @@ var markedConfig = {
      */
     function preHandleText(text) {
         var result = "";
+        // 先把带空格的代码围栏语言(如 "Plain Text") 规整为 "Plain_Text"，
+        // 否则其中的空格会导致语言被截断、内容泄漏
+        text = normalizeCodeFenceLang(text);
         var blocks = parseTextBlocks(text);
         for (var i = 0; i < blocks.length; i++) {
             var block = blocks[i];
