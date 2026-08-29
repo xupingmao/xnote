@@ -9,19 +9,15 @@ import subprocess
 import logging
 
 from typing import List
-from . import system_config
 from xnote.core import xconfig
 from xnote.core import xtemplate
 from xnote.core import xauth
 from xnote.core import xmanager
 from xutils import Storage
 from xutils import webutil
-from .system_config import AppLink, MENU_LIST
 from xnote.plugin.grid import AppGrid, AppInfo
 from xnote.plugin import BasePlugin
-from xnote_handlers.config import LinkConfig, AsideConfig
-
-system_config.init()
+from xnote_handlers.config import LinkConfig, AsideConfig, AppLink, MENU_LIST
 
 class IndexHandler(BasePlugin):
     

@@ -115,8 +115,6 @@ PLUGIN_TEMPLATE = ""
 
 # 导航配置
 NAV_LIST = []
-# 笔记的扩展配置
-NOTE_OPTIONS = []
 # 文件管理器的扩展配置
 FS_OPTIONS = []
 

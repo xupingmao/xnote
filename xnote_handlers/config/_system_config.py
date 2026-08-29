@@ -1,9 +1,23 @@
+# -*- coding: utf-8 -*-
+"""系统配置（菜单、链接等），作为 config 包的私有模块"""
+from typing import List, Optional
 
 from xutils import Storage
 from xnote.core import xconfig
 
+
 class AppLink:
-    def __init__(self):
+    name: str
+    url: str
+    user: str
+    is_admin: bool
+    is_user: bool
+    is_guest: bool
+    is_public: bool
+    icon: Optional[str]
+    img_src: Optional[str]
+
+    def __init__(self) -> None:
         self.name = ""
         self.url = ""
         self.user = ""
@@ -11,16 +25,16 @@ class AppLink:
         self.is_user = False
         self.is_guest = False
         self.is_public = False
-        self.icon = None  # type: str|None
+        self.icon = None
         self.img_src = None
 
-    def build(self):
+    def build(self) -> None:
         self.url = xconfig.WebConfig.server_home + self.url
         if self.img_src != None:
             self.img_src = xconfig.WebConfig.server_home + self.img_src
 
 
-def link(name, url, user="", icon="cube"):
+def link(name: str, url: str, user: str = "", icon: str = "cube") -> AppLink:
     result = AppLink()
     result.name = name
     result.url = url
@@ -30,7 +44,7 @@ def link(name, url, user="", icon="cube"):
     return result
 
 
-def admin_link(name, url, icon="cube", img_src = None):
+def admin_link(name: str, url: str, icon: str = "cube", img_src: Optional[str] = None) -> AppLink:
     link = AppLink()
     link.name = name
     link.url = url
@@ -42,7 +56,7 @@ def admin_link(name, url, icon="cube", img_src = None):
     return link
 
 
-def user_link(name, url, icon="cube", img_src=None):
+def user_link(name: str, url: str, icon: str = "cube", img_src: Optional[str] = None) -> AppLink:
     link = AppLink()
     link.name = name
     link.url = url
@@ -53,7 +67,7 @@ def user_link(name, url, icon="cube", img_src=None):
     return link
 
 
-def guest_link(name, url, icon="cube"):
+def guest_link(name: str, url: str, icon: str = "cube") -> AppLink:
     link = AppLink()
     link.name = name
     link.url = url
@@ -63,7 +77,7 @@ def guest_link(name, url, icon="cube"):
     return link
 
 
-def public_link(name, url, icon="cube"):
+def public_link(name: str, url: str, icon: str = "cube") -> AppLink:
     link = AppLink()
     link.name = name
     link.url = url
@@ -72,7 +86,8 @@ def public_link(name, url, icon="cube"):
     link.build()
     return link
 
-def about_link():
+
+def about_link() -> AppLink:
     link = AppLink()
     link.name = "关于"
     link.url = xconfig.WebConfig.about_url
@@ -81,7 +96,7 @@ def about_link():
     return link
 
 
-SYS_TOOLS = [
+SYS_TOOLS: List[AppLink] = [
     user_link("设置",   "/system/settings", "cog"),
     guest_link("登录", "/login", "sign-in"),
 
@@ -102,7 +117,7 @@ SYS_TOOLS = [
     about_link(),
 ]
 
-NOTE_TOOLS = [
+NOTE_TOOLS: List[AppLink] = [
     user_link("笔记本", "/note/group", "book"),
     user_link("待办",  "/message/task", "calendar-check-o"),
     user_link("随手记",  "/message?tag=log", "pencil"),
@@ -119,36 +134,29 @@ NOTE_TOOLS = [
     user_link("日历", "/note/calendar", "calendar"),
 ]
 
-DATA_TOOLS = [
+DATA_TOOLS: List[AppLink] = [
     admin_link("数据库", "/system/sqldb_admin?p=sqldb", "database"),
     admin_link("缓存管理", "/system/cache", "database"),
-    admin_link("数据迁移", "/admin/repair", "wrench"),
+    admin_link("数据修复", "/admin/repair", "wrench"),
     # admin_link("消息队列", "/system/todo", "database"),
 ]
 
+
 class MenuGroup:
-    def __init__(self, name = "", children=[], need_login=True):
+    name: str
+    children: List[AppLink]
+    need_login: bool
+
+    def __init__(self, name: str = "", children: List[AppLink] = [], need_login: bool = True) -> None:
         self.name = name
         self.children = children
         self.need_login = need_login
 
+
 # 所有功能配置
-MENU_LIST = [
+MENU_LIST: List[MenuGroup] = [
     MenuGroup(name="Note", children=NOTE_TOOLS),
     MenuGroup(name="System", children=SYS_TOOLS),
     MenuGroup(name="数据管理", children=DATA_TOOLS),
     # TODO 增加一栏自定义的插件
 ]
-
-xconfig.NOTE_OPTIONS = [
-    link("New_Note", "/note/add"),
-    link("Recent Updated", "/note/recent_edit"),
-    link("Recent Created", "/note/recent_created"),
-    link("Recent View",  "/note/recent_viewed"),
-    link("Public",   "/note/public"),
-    link("Tag List", "/note/taglist"),
-]
-
-
-def init():
-    pass
