@@ -272,6 +272,7 @@ assertEqual(myRenderer_html('<div><script>x</script></div>'), "", "降级: 嵌�
 assertEqual(myRenderer_html('<script/>'), "", "降级: 自闭合 <script> 去除");
 assertEqual(myRenderer_html('<latex>a+b</latex>'), "<latex>a+b</latex>", "降级: 保留 <latex>");
 assertEqual(myRenderer_html('<div>hi</div>'), "<div>hi</div>", "降级: 普通标签保留");
+assertEqual(myRenderer_html('<pre>hi</pre>'), "<pre>hi</pre>", "降级: <pre> 非危险标签，放行");
 
 // 注入 window.DOMPurify -> 走 DOMPurify 分支
 {
@@ -280,7 +281,7 @@ assertEqual(myRenderer_html('<div>hi</div>'), "<div>hi</div>", "降级: 普通�
         DOMPurify: {
             sanitize: function (html, cfg) {
                 captured = { html: html, cfg: cfg };
-                // mock: 去除 script，保留其余(含 latex)
+                // mock: 去除 script，保留其余(含 latex 与 pre)
                 return html.replace(/<script[\s\S]*?<\/script>/gi, "");
             }
         }
@@ -288,7 +289,7 @@ assertEqual(myRenderer_html('<div>hi</div>'), "<div>hi</div>", "降级: 普通�
     const out = myRenderer_html('<div><script>x</script></div>');
     assertEqual(out, "<div></div>", "DOMPurify: 去除 script 保留外层");
     assertEqual(captured.cfg.ADD_TAGS.indexOf("latex") >= 0, true, "DOMPurify: 配置保留 latex 标签");
-    assertEqual(captured.cfg.FORBID_TAGS.indexOf("pre") >= 0, true, "DOMPurify: 配置禁用 pre 标签");
+    assertEqual(myRenderer_html('<pre>hi</pre>'), "<pre>hi</pre>", "DOMPurify: <pre> 非危险标签，放行");
     delete sandbox.window;
 }
 

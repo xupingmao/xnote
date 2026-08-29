@@ -564,15 +564,16 @@ var markedConfig = {
             // 依赖未加载(window 不存在或 DOMPurify 缺失)时安静降级，不报错
             if (typeof window !== "undefined" && window.DOMPurify) {
                 return window.DOMPurify.sanitize(html, {
-                    ADD_TAGS: ["latex"],
-                    FORBID_TAGS: ["pre"]
+                    ADD_TAGS: ["latex"]
                 });
             }
         } catch (e) {
             console.error("DOMPurify 净化失败，降级处理", e);
         }
         // 降级：DOMPurify 未加载或执行异常时，整段丢弃含危险标签的内容
-        if (/<(script|pre|style|iframe|object|embed|link|meta)(\s|\/|>)/i.test(html)) {
+        // 仅拦截真正有安全风险的标签(script/style/iframe/object/embed/link/meta)；
+        // <pre> 是惰性语义标签，不执行脚本也不加载资源，无安全问题，故放行
+        if (/<(script|style|iframe|object|embed|link|meta)(\s|\/|>)/i.test(html)) {
             return "";
         }
         return html;
