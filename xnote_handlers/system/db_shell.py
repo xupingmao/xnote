@@ -10,8 +10,10 @@ import web.db
 
 from urllib.parse import quote
 from xnote.core import xauth, xconfig, xtemplate, xtables
+from xnote.core.xtemplate import T
 from xnote.plugin import DataTable
 from collections import OrderedDict
+from xnote_handlers.config import LinkConfig
 
 config = xconfig
 
@@ -121,7 +123,7 @@ class handler:
         return self.result_to_table(result.names, result_list), ""
 
 
-    @xauth.login_required("admin")
+    @xauth.admin_required()
     def POST(self):
         sql = xutils.get_argument_str("sql")
         path = xutils.get_argument_str("path")
@@ -145,6 +147,8 @@ class handler:
         kw.cost_time = int((t_stop-t_start)*1000)
         kw.path = path
         kw.is_embed = is_embed
+        kw.parent_link = LinkConfig.sqldb_admin
+        kw.title = T("SQLite管理器")
         if is_embed:
             kw.show_nav = False
 

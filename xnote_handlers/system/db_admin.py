@@ -330,6 +330,7 @@ class SqlDBAdminHandler:
         kw.db_info_table = db_info_table
         kw.parent_link = LinkConfig.app_index
         kw.filter_tab = filter_tab
+        kw.db_nav_tab = "sqldb"
         return xtemplate.render("system/page/db/sqldb_list.html", **kw)
 
 class SqlResult:
@@ -726,6 +727,8 @@ class StructHandler:
         kw.error = ""
         kw.column_table = column_info.to_data_table()
         kw.index_info = index_info.to_list_view()
+        kw.title = f"表结构 - {table_name}"
+        kw.parent_link = LinkConfig.sqldb_admin
 
         return xtemplate.render("system/page/db/db_struct.html", **kw)
 

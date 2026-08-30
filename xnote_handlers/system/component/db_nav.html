@@ -8,12 +8,13 @@
 @Description  : 描述
 --> #}
 {% init title = "数据库工具" %}
+{% init db_nav_tab = "query" %}
 
 <div class="card">
     {% include common/title/base_title.html %}
 </div>
 <div class="card">
-    <div class="x-tab-box" data-tab-key="p" data-tab-default="query">
+    <div class="x-tab-box" data-tab-key="p" data-tab-default="{{db_nav_tab}}">
         <a class="x-tab" href="{{_server_home}}/system/sqldb_admin?p=sqldb" data-tab-value="sqldb">SQL-DB</a>
         <a class="x-tab" href="{{_server_home}}/system/db_admin?p=meta&p2=active" data-tab-value="meta">KV-DB</a>
         <a class="x-tab" href="{{_server_home}}/system/db_admin?p=query&reverse=true" data-tab-value="query">数据查询</a>

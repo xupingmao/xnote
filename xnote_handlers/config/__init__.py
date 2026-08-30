@@ -30,6 +30,7 @@ class LinkConfig:
     user_settings = TextLink(text="用户设置", href="/user/info")
     driver_info_sql = TextLink(text="数据库驱动", href="/system/db/driver_info?type=sql")
     driver_info_kv = TextLink(text="KV数据库驱动", href="/system/db/driver_info")
+    sqldb_admin = TextLink(text="数据库工具", href="/system/sqldb_admin")
 
 class ScriptConfig:
     
