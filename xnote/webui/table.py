@@ -306,7 +306,7 @@ class InfoItem:
         self.href = href
         self.index = index
 
-class InfoTable:
+class InfoTable(BaseComponent):
     """信息表格,用于展示一个对象的信息"""
 
     def __init__(self):

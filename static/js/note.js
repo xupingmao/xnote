@@ -733,3 +733,87 @@ NoteView.initBtnCopy = function (copyBtnSelector, text, toastMessage) {
         }
     });
 }
+
+// 复制 Markdown 内容到粘贴板
+// 注意：移动端必须在用户手势内同步完成复制，否则浏览器会拒绝剪贴板操作。
+// 因此这里优先使用 navigator.clipboard（仅安全上下文可用），失败或不可用时
+// 回退到 document.execCommand，并且内容需要提前缓存（prefetchMarkdown）。
+NoteView._markdownCache = {};
+
+NoteView.copyMarkdown = function (target) {
+    var noteId = xnote.state.note.id;
+    if (NoteView._markdownCache[noteId] != undefined) {
+        NoteView._copyText(NoteView._markdownCache[noteId]);
+        return;
+    }
+    var loadIndex = layer.load(2);
+    xnote.http.get("/api/note/content?id=" + noteId, function (resp) {
+        layer.close(loadIndex);
+        if (resp.success) {
+            NoteView._markdownCache[noteId] = resp.data;
+            NoteView._copyText(resp.data);
+        } else {
+            xnote.alert(resp.message);
+        }
+    }).fail(function (err) {
+        layer.close(loadIndex);
+        xnote.alert("复制失败: " + err);
+    });
+};
+
+// 预拉取 Markdown 内容，保证点击复制时内容已在本地（移动端可在手势内同步复制）
+NoteView.prefetchMarkdown = function () {
+    var noteId = xnote.state.note.id;
+    if (noteId == undefined || NoteView._markdownCache[noteId] != undefined) {
+        return;
+    }
+    xnote.http.get("/api/note/content?id=" + noteId, function (resp) {
+        if (resp.success) {
+            NoteView._markdownCache[noteId] = resp.data;
+        }
+    });
+};
+
+NoteView._copyText = function (text) {
+    if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function () {
+            xnote.toast("Markdown 已复制");
+        }).catch(function () {
+            NoteView._copyTextFallback(text);
+        });
+    } else {
+        NoteView._copyTextFallback(text);
+    }
+};
+
+NoteView._copyTextFallback = function (text) {
+    var $temp = $("<textarea>").val(text)
+        .css({ position: "fixed", left: "-9999px", top: "0", opacity: "0" })
+        .appendTo("body");
+    $temp.focus().select();
+    var ok = false;
+    try {
+        ok = document.execCommand("copy");
+    } catch (e) {
+        ok = false;
+    }
+    $temp.remove();
+    if (ok) {
+        xnote.toast("Markdown 已复制");
+    } else {
+        xnote.alert("复制失败");
+    }
+};
+
+// 绑定复制 Markdown 相关事件（仅当页面存在对应按钮时）
+$(function () {
+    var $copyMarkdownBtn = $(".copy-markdown-btn");
+    if ($copyMarkdownBtn.length > 0) {
+        $(".dropdown-btn").on("click", function () {
+            NoteView.prefetchMarkdown();
+        });
+        $copyMarkdownBtn.on("click", function () {
+            NoteView.copyMarkdown(this);
+        });
+    }
+});
