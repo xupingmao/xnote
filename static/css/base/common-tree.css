@@ -1,0 +1,81 @@
+/**
+ * description here
+ * @author xupingmao
+ * @since 2024/09/03 00:09:00
+ * @filename common-tree.css
+ */
+
+/** 树形容器 **/
+.x-tree, .x-tree-children {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/** 清除前面的浮动（如 .card-title 是 float:left; width:100%），
+    避免树节点的内容被推到浮动右侧并溢出卡片 */
+.x-tree {
+    clear: left;
+}
+
+.x-tree-children {
+    padding-left: 18px;
+    display: none;
+}
+
+/** 展开状态显示子节点 **/
+.x-tree-node.x-tree-open > .x-tree-children {
+    display: block;
+}
+
+.x-tree-node {
+    line-height: 28px;
+    white-space: nowrap;
+}
+
+/** 折叠/展开开关 **/
+.x-tree-toggle {
+    display: inline-block;
+    width: 14px;
+    cursor: pointer;
+    color: #888;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.x-tree-toggle:before {
+    content: "\25B8"; /* 右箭头 ▶ */
+}
+
+.x-tree-node.x-tree-open > .x-tree-toggle:before {
+    content: "\25BE"; /* 下箭头 ▼ */
+}
+
+/** 没有子节点时的占位 **/
+.x-tree-toggle-empty:before {
+    content: "";
+}
+
+.x-tree-link, .x-tree-label {
+    cursor: pointer;
+    color: #333;
+    text-decoration: none;
+}
+
+.x-tree-link:hover, .x-tree-label:hover {
+    color: #06f;
+    text-decoration: underline;
+}
+
+.x-tree-node .badge-info {
+    margin-left: 5px;
+    font-size: 12px;
+    color: #999;
+}
+
+/** Dark 模式 **/
+.x-tree-node.dark .x-tree-link,
+.x-tree-node.dark .x-tree-label {
+    color: #ccc;
+}
