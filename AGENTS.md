@@ -115,6 +115,8 @@ debug.type = bool
 - **Test env**: `tests/test_base.py` calls `xconfig.init()` with `boot.test.properties`, uses SqliteKV, auto-logs-in admin. Define test classes extending `test_base.BaseTestCase`.
 - **DB drivers**: sqlite (default, no deps), leveldbpy (Windows fallback), lmdb, mysql, ssdb. Minimal deps: `pip install -r config/requirements.min.txt` (just `six`).
 - **Code style**: PEP8 + `docs/code_style.md`. Handler naming: `XxxHandler`, DAO: `XxxDao`, models: `XxxRecord`.
+- **类型检查**：增量代码需要通过 mypy 检查。改动后运行 `python -m mypy <改动的文件>`（配置见 `mypy.ini`），确保被改动的文件本身无类型错误；新增/修改的代码应补充类型注解。
+- **Python 兼容性**：运行环境兼容 `Python >= 3.6`，新增代码请勿使用 3.7+ 语法（例如 `from __future__ import annotations`、内置泛型 `dict[str, Any]`/`list[int]` 等），请使用 `typing` 中的 `List`/`Dict`/`Optional`/`Union` 等；类属性注解（PEP 526）可用。
 - **Version**: `config/version.txt` — auto-updated during test run (branch-date format).
 - **Sentinel**: `sentinel.py` wraps the server; exit code 205 or 52480 triggers restart. Also respects `xnote-reboot.txt` file.
 - **Migrations**: `xnote_migrate/` has numbered `upgrade_xxx.py` files for schema/data migration during version upgrades.

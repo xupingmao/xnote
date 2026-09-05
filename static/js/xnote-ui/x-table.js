@@ -64,3 +64,19 @@ xnote.table.handleViewDetail = function (target) {
     var detail = $(target).attr("data-detail");
     xnote.showTextDialog("查看详情", detail);
 }
+
+xnote.table.handleViewImage = function (target) {
+    // 点击缩略图查看原图
+    var origin = $(target).attr("data-origin") || $(target).attr("src");
+    var html = '<div style="text-align:center;padding:10px;">'
+        + '<img class="xnote-image-preview" src="' + origin + '"/></div>';
+    var options = {};
+    options.title = "查看原图";
+    options.html = html;
+    options.area = xnote.getDialogAreaLarge();
+    options.buttons = "关闭";
+    options.functions = [function (index) {
+        layer.close(index);
+    }];
+    xnote.showDialogEx(options);
+}

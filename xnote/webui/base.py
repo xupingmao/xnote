@@ -1,6 +1,6 @@
 import typing
 
-from typing import List
+from typing import List, Union
 from xutils.textutil import safe_str
 
 MAX_DEPTH = 50
@@ -8,8 +8,8 @@ MAX_DEPTH = 50
 class BaseComponent:
     """UI组件的基类"""
     _depth = 0
-    
-    def render(self) -> str:
+
+    def render(self) -> Union[str, bytes]:
         return ""
 
 class BaseContainer(BaseComponent):

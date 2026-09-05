@@ -7,54 +7,8 @@
 
 <div class="overflow-table-container">
 <table class="table">
-    <tr>
-        {% for head in _xnote_table.heads %}
-            <th style="{{head.get_style()}}">{{head.title}}</th>
-        {% end %}
-
-        {% if len(_xnote_table.actions) > 0 %}
-            <th style="{{_xnote_table.action_head.get_style()}}">操作</th>
-        {% end %}
-    </tr>
-
-    {% for row in _xnote_table.rows %}
-        <tr class="hover-tr">
-            {% for head in _xnote_table.heads %}
-                <td class="{{head.get_css_class(row)}}">
-                {% if head.has_link(row) %}
-                    <a href="{{head.get_link(row)}}" target="{{head.link_target}}">{{row.get(head.field)}}</a></td>
-                {% else %}
-                    {{row.get(head.field)}}
-                {% end %}
-                {% if head.has_detail(row) %}
-                    <a data-detail="{{head.get_detail(row)}}" onclick="xnote.table.handleViewDetail(this);">查看详情</a>
-                {% end %}
-                </td>
-            {% end %} 
-
-            {% if len(_xnote_table.actions) > 0 %}
-                <td>
-                    {% for action in _xnote_table.actions %}
-                        {% if action.type == "link" and action.get_link(row) != None %}
-                            <a class="{{action.css_class}}" href="{{action.get_link(row)}}" target="{{action.link_target}}">{{action.title}}</a>
-                        {% end %}
-                        {% if action.type == "button" and action.get_link(row) != None %}
-                            <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleAction(this)" 
-                            data-url="{{action.get_link(row)}}" data-title="{{action.get_title(row)}}">{{action.get_title(row)}}</button>
-                        {% end %}
-                        {% if action.type == "confirm" and action.get_link(row) != None %}
-                            <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleConfirmAction(this)" 
-                            data-url="{{action.get_link(row)}}" data-msg="{{action.get_msg(row)}}">{{action.get_title(row)}}</button>
-                        {% end %}
-                        {% if action.type == "edit_form" and action.get_link(row) != None %}
-                            <button class="btn-default {{action.css_class}}" onclick="xnote.table.handleEditForm(this)"
-                            data-url="{{action.get_link(row)}}" data-title="{{action.get_title(row)}}">{{action.get_title(row)}}</button>
-                        {% end %}
-                    {% end %}
-                </td>
-            {% end %}
-        </tr>
-    {% end %}
+    {% raw _xnote_table.render_heads_html() %}
+    {% raw _xnote_table.render_rows_html() %}
 </table>
 </div>
 

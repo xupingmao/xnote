@@ -11,6 +11,7 @@ from xnote.core import xtables
 from xnote_handlers.plugin.dao import add_visit_log, delete_visit_log
 from xnote.webui import Div
 from xnote.webui import Tree, TreeNode
+from xnote.webui.table import DataTable, TableRowType
 
 import xutils
 
@@ -98,4 +99,90 @@ class TestTreeExamplePage(BaseTestCase):
         assert "x-tree" in html
         assert "我的笔记" in html
         assert "Tree树形组件" in html
+
+
+class TestDataTable(BaseTestCase):
+
+    def test_image_type_render_thumbnail(self):
+        table = DataTable()
+        table.add_head(title="封面", field="cover", type=TableRowType.image)
+        table.set_rows([{"cover": "/files/test.jpg"}])
+
+        html = table.render().decode("utf-8")
+        # 缩略图class
+        assert "table-thumbnail" in html
+        # 缩略图src
+        assert 'src="/files/test.jpg"' in html
+        # 点击查看原图
+        assert 'data-origin="/files/test.jpg"' in html
+        assert "xnote.table.handleViewImage(this)" in html
+
+    def test_image_type_empty_value(self):
+        table = DataTable()
+        table.add_head(title="封面", field="cover", type=TableRowType.image)
+        table.set_rows([{"cover": ""}])
+
+        html = table.render().decode("utf-8")
+        assert "table-thumbnail" not in html
+
+    def test_image_type_enum(self):
+        from xnote.webui.table import TableRowEnum
+        info = TableRowEnum.get_by_name(TableRowType.image)
+        assert info != None
+        assert info.min_width == "80px"
+
+    def test_add_image_head(self):
+        table = DataTable()
+        table.add_image_head("图标", "icon")
+        assert len(table.heads) == 1
+        head = table.heads[0]
+        assert head.title == "图标"
+        assert head.field == "icon"
+        assert head.type == TableRowType.image
+
+        table.set_rows([{"icon": "/files/test.jpg"}])
+        html = table.render().decode("utf-8")
+        assert "table-thumbnail" in html
+        assert 'src="/files/test.jpg"' in html
+
+    def test_link_cell_render(self):
+        table = DataTable()
+        table.add_head(title="名称", field="name", link_field="url")
+        table.set_rows([{"name": "百度", "url": "/open?q=1&t=2"}])
+
+        html = table.render().decode("utf-8")
+        # 链接被渲染且特殊字符被转义
+        assert 'href="/open?q=1&amp;t=2"' in html
+        assert ">百度</a>" in html
+
+    def test_detail_cell_render(self):
+        table = DataTable()
+        table.add_head(title="内容", field="content", detail_field="detail")
+        table.set_rows([{"content": "摘要", "detail": "完整内容"}])
+
+        html = table.render().decode("utf-8")
+        assert "查看详情" in html
+        assert 'data-detail="完整内容"' in html
+
+    def test_action_button_render(self):
+        from xnote.webui.table import TableActionType
+        table = DataTable()
+        table.add_head(title="名称", field="name")
+        table.add_action(title="编辑", type=TableActionType.button, link_field="edit_url")
+        table.set_rows([{"name": "x", "edit_url": "/api/edit/1"}])
+
+        html = table.render().decode("utf-8")
+        assert "操作" in html
+        assert 'onclick="xnote.table.handleAction(this)"' in html
+        assert 'data-url="/api/edit/1"' in html
+        assert ">编辑</button>" in html
+
+    def test_cell_escaping(self):
+        table = DataTable()
+        table.add_head(title="名称", field="name")
+        table.set_rows([{"name": '<script>alert(1)</script>'}])
+
+        html = table.render().decode("utf-8")
+        assert "&lt;script&gt;" in html
+        assert "<script>alert(1)</script>" not in html
         

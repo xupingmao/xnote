@@ -11,7 +11,7 @@ from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.plugin.table_plugin import BaseTablePlugin, BasePlugin
 from xnote.plugin import DataTable, TableActionType, TabBox, QueryForm, TabTable
-from xnote.plugin.table import InfoTable, InfoItem, ActionBar
+from xnote.plugin.table import InfoTable, InfoItem, ActionBar, TableRowType
 from xnote.webui.calendar import ContributionCalendar
 from xnote.webui import ListView, ListItem, ConfirmButton, TextTag
 from xutils import textutil
@@ -73,6 +73,10 @@ class TableExampleHandler(BaseTablePlugin):
 <div class="card">
     {% render empty_table %}
 </div>
+
+<div class="card">
+    {% render image_table %}
+</div>
 """
 
     tab_title_width = "120px"
@@ -114,6 +118,7 @@ class TableExampleHandler(BaseTablePlugin):
         kw.tab2 = self.get_tab2()
         kw.example_tab = get_example_tab(tab_default="table")
         kw.info_table = self.get_info_table()
+        kw.image_table = self.get_image_table()
 
         return self.response_page(**kw)
     
@@ -237,6 +242,31 @@ class TableExampleHandler(BaseTablePlugin):
         table.bottom_action_bar.add_edit_button("编辑1", "?action=edit&show_heading=true", css_class="btn-default")
         table.bottom_action_bar.add_edit_button("编辑2", "?action=edit&show_heading=false", css_class="btn-default")
         table.bottom_action_bar.add_confirm_button("删除", url="?action=delete", message="确认删除吗?", css_class="danger")
+        return table
+
+    def get_image_table(self):
+        server_home = xconfig.WebConfig.server_home
+
+        def image_url(path):
+            return server_home + "/_static/" + path
+
+        table = DataTable()
+        table.title = "表格-图片类型"
+        table.add_head("名称", "name")
+        table.add_image_head("图标", "icon")
+        table.add_head("说明", "desc")
+
+        rows = [
+            ("文件", "image/file.png", "普通文件图标"),
+            ("文件夹", "image/folder2.png", "文件夹图标"),
+            ("搜索", "image/icon_search.png", "搜索图标"),
+            ("词典", "image/icon_dict.png", "词典图标"),
+            ("游戏", "image/icons/icon_game.png", "游戏图标"),
+            ("XNote", "xnote.png", "XNote 图标"),
+            ("Favicon", "favicon.ico", "网站图标"),
+        ]
+        for name, path, desc in rows:
+            table.add_row({"name": name, "icon": image_url(path), "desc": desc})
         return table
 
 class ExampleHandler:
