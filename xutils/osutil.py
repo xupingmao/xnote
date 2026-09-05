@@ -8,34 +8,13 @@ import logging
 import time
 from xutils.base import print_exc
 from xutils.config import UtilityConfig
-from xutils import six
 from os import system
 
 """os适配工具
 """
 
 
-# 关于Py2的getstatusoutput，实际上是对os.popen的封装
-# 而Py3中的getstatusoutput则是对subprocess.Popen的封装
-# Py2的getstatusoutput, 注意原来的windows下不能正确运行，但是下面改进版的可以运行
-
-def py2_getstatusoutput(cmd):
-    """Return (status, output) of executing cmd in a shell."""
-    import os
-    # old
-    # pipe = os.popen('{ ' + cmd + '; } 2>&1', 'r')
-    # 这样修改有一个缺点就是执行多个命令的时候只能获取最后一个命令的输出
-    pipe = os.popen(cmd + ' 2>&1', 'r')
-    text = pipe.read()
-    sts = pipe.close()
-    if sts is None: sts = 0
-    if text[-1:] == '\n': text = text[:-1]
-    return sts, text
-
-if six.PY2:
-    getstatusoutput = py2_getstatusoutput
-else:
-    getstatusoutput = subprocess.getstatusoutput
+getstatusoutput = subprocess.getstatusoutput
 
 def is_windows():
     return os.name == "nt"

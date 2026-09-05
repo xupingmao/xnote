@@ -36,7 +36,6 @@
 
 """
 # 先加载标准库
-from __future__ import print_function, with_statement
 import re
 import time
 import logging

@@ -33,7 +33,6 @@ from xutils import textutil, dbutil, fsutil, dateutil
 from xutils import Storage
 from xutils import logutil
 from xutils import cacheutil
-from xutils import six
 from xutils.sqldb.utils import safe_str
 from xutils import webutil
 from xutils import interfaces
@@ -208,7 +207,7 @@ class UserDao:
     def create(cls, user: UserDO, fire_event=True):
         assert isinstance(user, UserDO)
         name = user.name
-        assert isinstance(name, six.string_types)
+        assert isinstance(name, str)
         assert name != ""
 
         user.login_time = "1970-01-01 00:00:00"

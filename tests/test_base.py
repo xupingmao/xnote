@@ -17,7 +17,6 @@ from xnote.core import xtables_kv
 from xnote.core import xauth
 from xutils import dbutil
 from xutils import cacheutil
-from xutils import six
 from xutils.db.driver_sqlite import SqliteKV
 from xutils.config import UtilityConfig
 from xutils.fsutil import FileUtilConfig
@@ -105,8 +104,6 @@ def json_request(localpart='/', method='GET', data=None, **kw):
         return
     assert ret.status == "200 OK"
     data = ret.data
-    if six.PY2:
-        return json.loads(data)
     return json.loads(data.decode("utf-8"))
 
 def json_request_return_dict(localpart='/', method='GET', data: Union[dict, str, None]=None, **kw):

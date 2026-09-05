@@ -10,7 +10,6 @@ from xnote.core import xtemplate
 from xnote.core import xauth
 from xnote.core import xmanager
 from xutils import textutil
-from xutils import six
 from xutils import Storage
 from xnote_handlers.config import LinkConfig
 
@@ -44,8 +43,8 @@ def list_modules():
             mod = ModuleInfo(module, modname)
             result.append(mod)
         else:
-            # Py2中出现这种情况
-            six.print_("%s is None" % modname)
+            # 模块加载失败
+            print("%s is None" % modname)
     return sorted(result)
 
 class DocInfo:

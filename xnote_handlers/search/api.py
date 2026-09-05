@@ -1,14 +1,12 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/06/18
 # @modified 2018/11/11 17:59:26
-from __future__ import print_function
 import os
 import xutils
 from xnote.core import xconfig
 from xnote.core import xauth
 from xnote.core import xmanager
 from xnote.core.models import SearchContext
-from xutils import six
 
 SearchResult = xutils.SearchResult
 ROOT_PATH = os.path.join(xconfig.HANDLERS_DIR, "api")

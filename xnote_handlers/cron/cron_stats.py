@@ -2,7 +2,6 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2020/07/05 17:35:53
 # @modified 2022/04/16 08:54:27
-from __future__ import print_function
 
 import xauth
 from xutils import dateutil

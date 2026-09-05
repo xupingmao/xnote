@@ -3,18 +3,12 @@
 # @since 2020/11/28 23:23:13
 # @modified 2022/04/16 22:47:23
 import copy
-import sys
 import os
 import traceback
 import codecs
 import json
 
-IS_PY2 = sys.version_info[0] == 2
-
-if IS_PY2:
-    string_types = (basestring,) # type: ignore
-else:
-    string_types = (str,)
+string_types = (str,)
 
 
 class MyStorage(dict):

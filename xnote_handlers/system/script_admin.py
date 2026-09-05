@@ -1,7 +1,6 @@
 # encoding=utf-8
 # Created by xupingmao on 2017/05/24
 # 系统脚本管理
-from __future__ import print_function
 import os
 import sys
 import gc

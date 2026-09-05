@@ -24,7 +24,6 @@ except ImportError:
 
 from typing import Optional
 from io import BufferedReader
-from xutils import six
 from xutils.imports import *
 from xutils.base import Storage
 from xutils import textutil
@@ -820,11 +819,8 @@ def load_ini_config(fpath):
     """加载ini文件，转换为Storage对象"""
     parser = ConfigParser()
 
-    if six.PY2:
-        parser.read(fpath)
-    else:
-        text = readfile(fpath, limit=CONFIG_FILE_MAX_SIZE)
-        parser.read_string(text)
+    text = readfile(fpath, limit=CONFIG_FILE_MAX_SIZE)
+    parser.read_string(text)
 
     result = IniConfigData()
     result.sections = parser.sections()

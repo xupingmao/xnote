@@ -15,7 +15,6 @@
 import os
 import re
 import codecs
-import xutils.six as six
 import socket
 import io
 import gzip

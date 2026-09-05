@@ -3,15 +3,12 @@
 # @author xupingmao <578749341@qq.com>
 # @since 2018/06/07 22:12:44
 # @modified 2022/04/16 09:05:41
-from __future__ import print_function
 
-from . import six
 from configparser import ConfigParser
 from urllib.parse import quote, unquote
 from urllib.request import urlopen
 from io import StringIO
 
-import sys
 import os
 import traceback
 import inspect
@@ -46,7 +43,6 @@ try:
 except ImportError:
     bs4 = None
 
-PY2 = sys.version_info[0] == 2
 # Py3 and later
 from subprocess import getstatusoutput
 from queue import Queue, PriorityQueue
@@ -74,12 +70,8 @@ def quote_unicode(url):
             return chr(c)
         return '%%%02X' % c
 
-    if six.PY2:
-        bytes = url
-        return ''.join([quote_char_by_code(ord(c)) for c in bytes])
-    else:
-        bytes = url.encode("utf-8")
-        return ''.join([quote_char_by_code(c) for c in bytes])
+    bytes = url.encode("utf-8")
+    return ''.join([quote_char_by_code(c) for c in bytes])
 
     # def urlencode(matched):
     #     text = matched.group()

@@ -1,6 +1,5 @@
 # encoding=utf-8
 # created by xupingmao on 2017/04/22
-from __future__ import print_function
 import logging
 import os
 import time

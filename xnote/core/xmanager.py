@@ -8,7 +8,6 @@
  * CronTaskManager 定时任务注册和执行
  * EventManager 事件管理器
 """
-from __future__ import print_function
 import os
 import sys
 import re
@@ -194,12 +193,10 @@ class WebModel:
 
 
 def log(msg: str):
-    # six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
     xutils.info("xmanager", msg)
 
 
 def warn(msg):
-    # six.print_(time.strftime("%Y-%m-%d %H:%M:%S"), msg)
     xutils.warn("xmanager", msg)
 
 
@@ -327,7 +324,6 @@ class HandlerManager:
                     # <code>has_from = PyObject_IsTrue(fromlist);</code>实际上是个Bool值
                     # level=0表示绝对路径，-1是默认的
                     # mod = __import__(modname, fromlist=1, level=0)
-                    # six的这种方式也不错
                     if load:
                         mod = import_module(modname)
                         self.resolve_module(mod, modname)

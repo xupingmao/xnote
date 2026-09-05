@@ -8,8 +8,6 @@
 @FilePath     : /xnote/xutils/__init__.py
 @Description  : 描述
 """
-from __future__ import print_function
-from __future__ import absolute_import
 
 
 """xnote工具类总入口

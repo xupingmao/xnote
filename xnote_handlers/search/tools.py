@@ -22,7 +22,6 @@ url_pattern = re.compile(r"(http|https)://[^ ]+")
 
 @xmanager.searchable(r"([^ ]+)")
 def search(ctx: SearchContext):
-    # six.print_(xconfig)
     # 查找`handlers/tools/`目录下的工具
     if not ctx.search_tool:
         return

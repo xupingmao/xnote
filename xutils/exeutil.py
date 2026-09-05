@@ -5,7 +5,6 @@
 
 
 """脚本执行相关的代码"""
-from __future__ import print_function
 
 import typing
 import gc
@@ -17,7 +16,7 @@ import logging
 from collections import deque
 
 import web
-from xutils import six, u
+from xutils import u
 
 def get_current_thread():
     return threading.current_thread()
@@ -110,7 +109,7 @@ def exec_python_code(
             if not isinstance(sys.stdout, MyStdout):
                 sys.stdout = MyStdout(sys.stdout)
             sys.stdout.record()
-        ret = six.exec_(code, vars)
+        ret = exec(code, vars)
         # 执行一次GC防止内存膨胀
         if do_gc:
             gc.collect()
@@ -130,11 +129,7 @@ def exec_python_code(
         return ret
 
 def fix_py2_code(code):
-    if not six.PY2:
-        return code
-    # remove encoding declaration, otherwise will cause
-    # SyntaxError: encoding declaration in Unicode string
-    return re.sub(r'^#[^\r\n]+', '', code)
+    return code
 
 def exec_script(name: str, new_window=True, record_stdout = True, vars = None):
     """执行script目录下的脚本"""
@@ -163,10 +158,6 @@ def exec_script(name: str, new_window=True, record_stdout = True, vars = None):
             cmd = u("start %s") % path
         else:
             cmd = u("start /b %s") % path
-        if six.PY2:
-            # Python2 import当前目录优先
-            encoding = sys.getfilesystemencoding()
-            cmd = cmd.encode(encoding)
         os.system(cmd)
     elif path.endswith(".sh"):
         # os.system("chmod +x " + path)

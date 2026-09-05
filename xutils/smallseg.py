@@ -3,7 +3,6 @@
 # @modified 2018/11/19 01:19:38
 # source https://github.com/iurisilvio
 # 基于最大匹配算法
-from __future__ import print_function
 import re
 import os
 import sys

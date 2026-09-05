@@ -6,13 +6,14 @@
 
 import re
 import xutils
+import urllib.request
 try:
     from bs4 import BeautifulSoup
 except ImportError:
     bs4 = None
 
 from xnote.core import xconfig, xtables, xauth
-from xutils import u, six
+from xutils import u
 
 """
 杭州 101210101
@@ -33,7 +34,7 @@ class handler:
             message = record.value
         else:
             url = "http://www.weather.com.cn/weather1d/%s.shtml" % city_code
-            html = six.moves.urllib.request.urlopen(url).read()
+            html = urllib.request.urlopen(url).read()
             if html == b"<!-- empty -->":
                 return dict(code="fail", message=u("city_code错误"))
             soup = BeautifulSoup(html, "html.parser")
@@ -56,7 +57,6 @@ class handler:
             message = u(message)
             if not xconfig.is_mute():
                 xutils.say("%s %s" % (city_name, message))
-            # six.print_(type(message), message)
             return dict(code="success", data=message)
         else:
             return dict(code="fail", message="结果为空")

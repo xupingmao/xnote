@@ -19,7 +19,7 @@ from xnote.core import xconfig
 from xnote.core import xtables
 from xutils import dbutil
 from xutils import format_size
-from xutils import fsutil, six, textutil
+from xutils import fsutil, textutil
 from xutils.dbutil import LdbTable
 from xutils.fsutil import FileItem
 from xutils.sqldb import TableProxy

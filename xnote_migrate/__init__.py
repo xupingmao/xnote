@@ -5,8 +5,8 @@
 # @filename __init__.py
 import logging
 import os
+import importlib
 import xutils
-from xutils import six
 from xnote.core import xconfig
 
 def migrate():
@@ -21,7 +21,7 @@ def migrate():
         basename, ext = os.path.splitext(fname)
         try:
             mod_name = "xnote_migrate." + basename
-            mod = six._import_module(mod_name)
+            mod = importlib.import_module(mod_name)
             logging.info("执行升级: %s", mod_name)
             mod.do_upgrade()
         except Exception as e:

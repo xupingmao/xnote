@@ -20,7 +20,7 @@ from xnote.core import xconfig, xtables
 
 from xutils import Storage
 from xutils import textutil, cacheutil
-from xutils import dbutil, six
+from xutils import dbutil
 from xnote.service import DatabaseLockService
 
 from xutils.db.binlog import BinLog, FileLog, BinLogOpType, BinLogRecord
