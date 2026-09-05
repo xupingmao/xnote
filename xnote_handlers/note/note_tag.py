@@ -107,15 +107,15 @@ class CreateTagAjaxHandler:
         if tag_name == "":
             return webutil.FailedResult(code="400", message="tag_name不能为空,请重新输入")
         
-        if tag_type == "note" and group_id == None:
+        if tag_type == "note" and group_id == 0:
             return webutil.FailedResult(code="400", message="group_id不能为空, 请重新输入")
 
         user_id = xauth.current_user_id()
         tag_bind_list = NoteTagBindDao.get_by_note_id(user_id=user_id, note_id=group_id)
 
         for tag_bind in tag_bind_list:
-            if tag_bind.tag_code == tag_name:
-                return webutil.FailedResult(code="500", message="标签已经存在,请重新输入")
+            if tag_bind.tag_code == tag_name.lower():
+                return webutil.FailedResult(code="400", message="标签已经存在,请重新输入")
 
         dao_tag.append_tag(note_id=group_id, tag_code=tag_name)
         return webutil.SuccessResult()

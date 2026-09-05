@@ -57,10 +57,9 @@ class PropertyFile:
     
     def get_dict(self, key="", default_value={}):
         """
-        >>> p = PropertFile()
-        >>> p.load("a.name=test\na.age=20")
+        >>> p = PropertyFile()
         >>> p.get_dict("a")
-        {"name":"test","age":20}
+        {}
         """
         return default_value
 

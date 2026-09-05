@@ -55,11 +55,6 @@ def run_test(args: Namespace):
     os.environ["mysql_user"] = str(args.mysql_user)
     os.environ["mysql_port"] = str(args.mysql_port)
 
-    if os.path.exists(target):
-        py_exec(f"-m pytest {target} --doctest-modules --cov xutils --capture no")
-        py_exec("-m coverage html -i")
-        return
-
     if target == "xutils":
         py_exec("-m pytest tests/test_xutils.py --doctest-modules --cov xutils --capture no")
         py_exec("-m coverage html -i")
@@ -150,6 +145,12 @@ def run_test(args: Namespace):
 
     if target == "js":
         js_exec("tests/js/test_marked_ext.js")
+        return
+
+    if os.path.exists(target):
+        # 放在命名 target 之后，避免 xutils 等目录名与命名 target 冲突
+        py_exec(f"-m pytest {target} --doctest-modules --cov xutils --capture no")
+        py_exec("-m coverage html -i")
         return
 
     if target != "all":
