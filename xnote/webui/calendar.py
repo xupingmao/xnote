@@ -2,6 +2,7 @@ import typing
 from xnote.core import xtemplate
 from datetime import date, timedelta
 from xutils import textutil
+from xnote.webui.base import BaseComponent
 
 class CalendarItem:
     def __init__(self, date: date, count = 0):
@@ -57,7 +58,7 @@ class MonthList:
 class ContributionStats:
     pass
 
-class ContributionCalendar:
+class ContributionCalendar(BaseComponent):
 
     show_stats = False
     stats = ContributionStats()

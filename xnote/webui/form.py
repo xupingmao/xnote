@@ -11,6 +11,7 @@
 
 import typing
 from xnote.core import xtemplate
+from xnote.webui.base import BaseComponent
 
 FormValueType = typing.Union[int, str, list]
 
@@ -57,7 +58,7 @@ class FormRowDateType:
     datetime = "datetime"
     default = date
 
-class FormRow:
+class FormRow(BaseComponent):
 
     date_type = FormRowDateType.date # 用于日期组件
     readonly = False
@@ -130,7 +131,7 @@ class FormRow:
         return self._select_template.generate(row = self)
 
     
-class DataForm:
+class DataForm(BaseComponent):
     """数据表格"""
 
     form_type = FormType.edit
