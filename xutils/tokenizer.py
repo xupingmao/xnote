@@ -1,284 +1,391 @@
 # -*- coding:utf-8 -*-
 # @author xupingmao <578749341@qq.com>
 # @since 2018/11/19 00:05:56
-# @modified 2018/12/09 15:40:36
+# @modified 2026/09/06 00:00:00
+
+"""A small Python-source tokenizer (lexical analyzer).
+
+It is good enough to consume every character of real Python source code
+without raising, which makes it usable as a lightweight "syntax parsing"
+check. It is NOT a full Python parser: it does not build an AST and some
+tokens (e.g. multi-character operators) are emitted as separate single
+character tokens.
+"""
+
+import typing
+from typing import Any
+from typing import List
+from typing import Optional
+
 
 class TokenTypeEnum:
     symbol = "symbol"
 
+
 class Token:
+    """A single lexical token."""
 
-    def __init__(self,type='symbol',val=None,pos=None):
-        self.pos=pos
-        self.type=type
-        self.val=val
+    def __init__(self, type: Optional[str] = "symbol", val: Any = None,
+                 line: Optional[int] = None, col: Optional[int] = None) -> None:
+        self.line = line
+        self.col = col
+        self.type = type
+        self.val = val
 
-    def before(self):
-        if self.type == None:
+    def before(self) -> Optional["Token"]:
+        if self.type is None:
             return _empty_token
+        return None
 
-    def after(self):
-        if self.type == None:
+    def after(self) -> Optional["Token"]:
+        if self.type is None:
             return _empty_token
+        return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.__dict__)
 
-_empty_token = Token(None, None, [-1,-1])
 
-def findpos(token):
-    if not hasattr(token, 'pos'):
+# sentinel token returned by Token.before()/after() for empty tokens
+_empty_token = Token(None, None, -1, -1)
+
+
+def findpos(token: Any) -> List[int]:
+    """Find the [line, col] source position of a token.
+
+    Falls back to the ``first`` attribute (for tree nodes) or [0, 0].
+    """
+    if not hasattr(token, 'line'):
         if hasattr(token, "first"):
             return findpos(token.first)
         print(token)
-        return [0,0]
-    return token.pos
+        return [0, 0]
+    return [token.line, token.col]
 
 
-def find_error_line(s, pos):
-    """找到错误行
-    @param {string} s 源代码
-    @param {list} pos 位置
-        print("****************")
-        print(pos, pos.type, pos.val, pos.pos)
-    """
+def find_error_line(s: str, pos: List[int]) -> str:
+    """Build a readable error line pointing at `pos`."""
     y = pos[0]
     x = pos[1]
     s = s.replace('\t', ' ')
-    line = s.split('\n')[y-1]
+    line = s.split('\n')[y - 1]
     p = ''
-    if y < 10: p += ' '
-    if y < 100: p += '  '
+    if y < 10:
+        p += ' '
+    if y < 100:
+        p += '  '
     r = p + str(y) + ": " + line + "\n"
-    r += "     "+" "*x+"^" +'\n'
+    r += "     " + " " * x + "^" + '\n'
     return r
 
-def print_token(token):
-    for key in token:
-        print(key, token[key])
-        if gettype(token[key]) == "dict":
-            print_token(token[key])
-    
-def report_error(ctx, s, token, e_msg = ""):
-    if token != None:
-        # print_token(token)
+
+def report_error(ctx: str, s: str, token: Any, e_msg: str = "") -> None:
+    """Raise an Exception with source location information."""
+    if token is not None:
         pos = findpos(token)
         r = find_error_line(s, pos)
-        raise Exception('Error at '+ctx+':\n'+r + e_msg)
+        raise Exception('Error at ' + ctx + ':\n' + r + e_msg)
     else:
         raise Exception(e_msg)
-    #raise
 
-_ISYMBOLS = '-=[];,./!%*()+{}:<>@^'
+
+# characters that start a symbol token
+_ISYMBOLS = '-=[];,./!%*()+{}:<>@^&|~'
+
 KEYWORDS = [
-    'as','def','class', 'return','pass','and','or','not','in','import',
-    'is','while','break','for','continue','if','else','elif','try',
-    'except','raise','global','del','from','None', "assert"]
-
-SYMBOLS = [
-    '-=','+=','*=','/=','==','!=','<=','>=',
-    '=','-','+','*', '/', '%',
-    '<','>',
-    '[',']','{','}','(',')','.',':',',',';',
+    'as', 'def', 'class', 'return', 'pass', 'and', 'or', 'not', 'in', 'import',
+    'is', 'while', 'break', 'for', 'continue', 'if', 'else', 'elif', 'try',
+    'except', 'raise', 'global', 'del', 'from', 'None', "assert",
 ]
-_B_BEGIN = ['[','(','{']
-_END = [']',')','}']
 
-class TData:
-    def __init__(self):
-        self.y=1
-        self.yi=0
-        self.nl=True
-        self.res=[]
-        self.indent=[0]
-        self.braces=0
+# ordered longest-first so multi-char operators match before single chars
+SYMBOLS = [
+    '-=', '+=', '*=', '/=', '==', '!=', '<=', '>=',
+    '=', '-', '+', '*', '/', '%',
+    '<', '>',
+    '[', ']', '{', '}', '(', ')', '.', ':', ',', ';',
+    '^', '&', '|', '~', '@',
+]
 
-    def add(self,t,v): 
+_B_BEGIN = ['[', '(', '{']
+_END = [']', ')', '}']
+
+
+class TokenizeContext:
+    """Mutable state of the tokenizer while scanning one source string."""
+
+    def __init__(self) -> None:
+        self.text = ""         # source string being tokenized
+        self.length = 0        # len(self.text)
+        self.line = 1          # current line number (1-based)
+        self.line_start = 0    # index of the start of the current line
+        self.col = 1           # current column number (1-based)
+        self.nl = True         # True when the scanner is at the start of a line
+        self.res = []  # type: List[Token]  # list of Token produced so far
+        self.indent = [0]      # indent width stack
+        self.braces = 0        # current brace depth
+
+    def add(self, t: str, v: Any) -> None:
+        """Append a token, merging `not in` -> `notin` and `is not` -> `isnot`."""
         if t == 'in':
             last = self.res.pop()
             if last.type == 'not':
-                self.res.append(Token('notin', v, self.f))
+                self.res.append(Token('notin', v, self.line, self.col))
             else:
                 self.res.append(last)
-                self.res.append(Token(t,v,self.f))
+                self.res.append(Token(t, v, self.line, self.col))
         elif t == 'not':
             # is not
             last = self.res.pop()
             if last.type == 'is':
-                self.res.append(Token("isnot", v, self.f))
+                self.res.append(Token("isnot", v, self.line, self.col))
             else:
                 self.res.append(last)
-                self.res.append(Token(t,v,self.f))
+                self.res.append(Token(t, v, self.line, self.col))
         else:
-            self.res.append(Token(t,v,self.f))
+            self.res.append(Token(t, v, self.line, self.col))
 
-def clean(s):
-    s = s.replace('\r','')
+
+def clean(s: str) -> str:
+    # strip UTF-8 BOM so files saved with a BOM still tokenize
+    s = s.replace('\ufeff', '')
+    s = s.replace('\r', '')
     return s
 
-def tokenize(s):
-    global T
+
+def tokenize(s: str) -> List[Token]:
     s = clean(s)
-    return do_tokenize(s)
-        
-def do_tokenize(s):
-    global T
-    T = TData()
+    ctx = TokenizeContext()
+    ctx.text = s
+    ctx.length = len(s)
+    return do_tokenize(ctx)
+
+
+def do_tokenize(ctx: TokenizeContext) -> List[Token]:
     i = 0
-    l = len(s)
+    s = ctx.text
+    l = ctx.length
     while i < l:
         c = s[i]
-        T.f = [T.y,i-T.yi+1]
-        if T.nl: 
-            T.nl = False
-            i = do_indent(s,i,l)
-        elif c == '\n': i = do_nl(s,i,l)
-        elif c in _ISYMBOLS: i = do_symbol(s,i,l)
-        elif c >= '0' and c <= '9': i = do_number(s,i,l)
-        elif is_name_begin(c):  i = do_name(s,i,l)
-        elif c=='"' or c=="'": i = do_string(s,i,l)
-        elif c=='#': i = do_comment(s,i,l)
-        elif c == '\\' and s[i+1] == '\n':
-            i += 2; T.y+=1; T.yi = i
-        elif c == ' ' or c == '\t': i += 1
-        else: report_error('do_tokenize',s,Token('', '', T.f), "unknown token")
-    indent(0)
-    r = T.res
-    T = None
-    return r
+        ctx.col = i - ctx.line_start + 1
+        if ctx.nl:
+            ctx.nl = False
+            i = do_indent(ctx, i)
+        elif c == '\n':
+            i = do_nl(ctx, i)
+        elif c in _ISYMBOLS:
+            i = do_symbol(ctx, i)
+        elif c >= '0' and c <= '9':
+            i = do_number(ctx, i)
+        elif is_name_begin(c):
+            i = do_name(ctx, i)
+        elif c == '"' or c == "'":
+            i = do_string(ctx, i)
+        elif c == '#':
+            i = do_comment(ctx, i)
+        elif c == '\\' and s[i + 1] == '\n':
+            i += 2
+            ctx.line += 1
+            ctx.line_start = i
+        elif c == ' ' or c == '\t':
+            i += 1
+        else:
+            report_error('do_tokenize', s, Token('', '', ctx.line, ctx.col), "unknown token")
+    indent(ctx, 0)
+    return ctx.res
 
-def do_nl(s,i,l):
-    if not T.braces:
-        T.add('nl','nl')
-    i+=1
-    T.nl=True
-    T.y+=1
-    T.yi=i
+
+def do_nl(ctx: TokenizeContext, i: int) -> int:
+    if not ctx.braces:
+        ctx.add('nl', 'nl')
+    i += 1
+    ctx.nl = True
+    ctx.line += 1
+    ctx.line_start = i
     return i
 
-def do_indent(s,i,l):
+
+def do_indent(ctx: TokenizeContext, i: int) -> int:
+    s = ctx.text
+    l = ctx.length
     v = 0
-    while i<l:
+    c = ''  # type: str
+    while i < l:
         c = s[i]
-        if c != ' ' and c != '\t': 
+        if c != ' ' and c != '\t':
             break
-        i+=1
-        v+=1
+        i += 1
+        v += 1
     # skip blank line or comment line.
-    # i >= l means reaching EOF, which do not need to indent or dedent
-    if not T.braces and c != '\n' and c != '#' and i < l:
-        indent(v)
+    # i >= l means reaching EOF, which does not need to indent or dedent
+    if not ctx.braces and c != '\n' and c != '#' and i < l:
+        indent(ctx, v)
     return i
 
-def indent(v):
-    if v == T.indent[-1]: pass
-    elif v > T.indent[-1]:
-        T.indent.append(v)
-        T.add('indent',v)
-    elif v < T.indent[-1]:
-        n = T.indent.index(v)
-        while len(T.indent) > n+1:
-            v = T.indent.pop()
-            T.add('dedent',v)
+
+def indent(ctx: TokenizeContext, v: int) -> None:
+    if v == ctx.indent[-1]:
+        pass
+    elif v > ctx.indent[-1]:
+        ctx.indent.append(v)
+        ctx.add('indent', v)
+    elif v < ctx.indent[-1]:
+        n = ctx.indent.index(v)
+        while len(ctx.indent) > n + 1:
+            v = ctx.indent.pop()
+            ctx.add('dedent', v)
 
 
-def str_match(s, target, start = 0):
-    return s[start:start+len(target)] == target
-            
-def do_symbol(s,i,l):
-    v = None
+def do_symbol(ctx: TokenizeContext, i: int) -> int:
+    s = ctx.text
+    v = None  # type: Optional[str]
     for sb in SYMBOLS:
-        if str_match(s, sb, i):
+        if s.startswith(sb, i):
             i += len(sb)
             v = sb
             break
-    if v == None:
-        raise "invalid symbol"
-    T.add(v,v)
-    if v in _B_BEGIN: T.braces += 1
-    if v in _END: T.braces -= 1
+    if v is None:
+        raise Exception("invalid symbol")
+    ctx.add(v, v)
+    if v in _B_BEGIN:
+        ctx.braces += 1
+    if v in _END:
+        ctx.braces -= 1
     return i
 
-def do_number(s,i,l):
-    v=s[i];i+=1;c=None
-    while i<l:
+
+def do_number(ctx: TokenizeContext, i: int) -> int:
+    s = ctx.text
+    l = ctx.length
+    v = s[i]
+    i += 1
+    c = None  # type: Optional[str]
+    while i < l:
         c = s[i]
-        if (c < '0' or c > '9') and (c < 'a' or c > 'f') and c != 'x': break
-        v+=c;i+=1
+        if (c < '0' or c > '9') and (c < 'a' or c > 'f') and c != 'x':
+            break
+        v += c
+        i += 1
     if c == '.':
-        v+=c;i+=1
-        while i<l:
+        v += c
+        i += 1
+        while i < l:
             c = s[i]
-            if c < '0' or c > '9': break
-            v+=c;i+=1
-    T.add('number',float(v))
+            if c < '0' or c > '9':
+                break
+            v += c
+            i += 1
+    # accept decimal floats, plus hex/bin/oct literals when present
+    value = _parse_number_literal(v)
+    ctx.add('number', value)
     return i
 
-def is_name_begin(c):
-    return (c>='a' and c<='z') or (c>='A' and c<='Z') or (c in '_$')
-    
-def is_name(c):
-    return (c>='a' and c<='z') or (c>='A' and c<='Z') or (c in '_$') or (c>='0' and c<='9')
-    
-def do_name(s,i,l):
-    v=s[i];i+=1
-    while i<l:
+
+def _parse_number_literal(v: str) -> Any:
+    try:
+        return float(v)
+    except ValueError:
+        try:
+            return int(v, 0)
+        except ValueError:
+            return v
+
+
+def is_name_begin(c: str) -> bool:
+    return (c >= 'a' and c <= 'z') or (c >= 'A' and c <= 'Z') or (c in '_$')
+
+
+def is_name(c: str) -> bool:
+    return (c >= 'a' and c <= 'z') or (c >= 'A' and c <= 'Z') \
+        or (c in '_$') or (c >= '0' and c <= '9')
+
+
+def do_name(ctx: TokenizeContext, i: int) -> int:
+    s = ctx.text
+    l = ctx.length
+    v = s[i]
+    i += 1
+    while i < l:
         c = s[i]
-        if not is_name(c): break
-        v+=c
-        i+=1
-    if v in KEYWORDS: T.add(v,v)
-    else: T.add('name',v)
+        if not is_name(c):
+            break
+        v += c
+        i += 1
+    if v in KEYWORDS:
+        ctx.add(v, v)
+    else:
+        ctx.add('name', v)
     return i
 
-def do_string(s,i,l):
-    v = ''; q=s[i]; i+=1
-    if (l-i) >= 5 and s[i] == q and s[i+1] == q: # """
+
+def do_string(ctx: TokenizeContext, i: int) -> int:
+    s = ctx.text
+    l = ctx.length
+    v = ''
+    q = s[i]
+    i += 1
+    if (l - i) >= 5 and s[i] == q and s[i + 1] == q:  # """
         i += 2
-        while i<l-2:
+        while i < l - 2:
             c = s[i]
-            if c == q and s[i+1] == q and s[i+2] == q:
+            if c == q and s[i + 1] == q and s[i + 2] == q:
                 i += 3
-                T.add('string',v)
+                ctx.add('string', v)
                 break
             else:
-                v+=c; i+=1
-                if c == '\n': T.y += 1;T.x = i
+                v += c
+                i += 1
+                if c == '\n':
+                    ctx.line += 1
     else:
-        while i<l:
+        while i < l:
             c = s[i]
             if c == "\\":
-                i = i+1; c = s[i]
-                if c == "n": c = '\n'
-                elif c == "r": c = chr(13)
-                elif c == "t": c = "\t"
-                elif c == "0": c = "\0"
-                elif c == 'b': c = '\b'
-                v+=c;i+=1
+                i = i + 1
+                c = s[i]
+                if c == "n":
+                    c = '\n'
+                elif c == "r":
+                    c = chr(13)
+                elif c == "t":
+                    c = "\t"
+                elif c == "0":
+                    c = "\0"
+                elif c == 'b':
+                    c = '\b'
+                v += c
+                i += 1
             elif c == q:
                 i += 1
-                T.add('string',v)
+                ctx.add('string', v)
                 break
             else:
-                v+=c;i+=1
+                v += c
+                i += 1
     return i
 
-def do_comment(s,i,l):
+
+def do_comment(ctx: TokenizeContext, i: int) -> int:
+    s = ctx.text
+    l = ctx.length
     i += 1
     value = ""
-    while i<l:
-        if s[i] == '\n': break
+    while i < l:
+        if s[i] == '\n':
+            break
         value += s[i]
         i += 1
     if value.startswith("@debugger"):
-        T.add("@", "debugger")
+        ctx.add("@", "debugger")
     return i
 
-def loadfile(fname):
-    with open(fname) as fp:
+
+def loadfile(fname: str) -> str:
+    with open(fname, encoding="utf-8") as fp:
         return fp.read()
 
-def main_test():
+
+def main_test() -> None:
     import sys
     ARGV = sys.argv
     if len(ARGV) == 1:
@@ -295,15 +402,14 @@ def main_test():
     else:
         print("Usage: %s [filename]" % sys.argv[0])
         return
-        
+
     tokens = tokenize(content)
-    fmt = "%-6s%-8s%-12s%s"
+    fmt = "%-6s %-8s %-12s %s"
     print(fmt % ("index", "type", "pos", "val"))
-    print("-" * 30)
+    print(fmt % ("-"*6, "-"*8, "-"*12, "-" * 6))
     for index, token in enumerate(tokens):
-        print(fmt % (index+1, token.type, token.pos, token.val))
+        print(fmt % (index + 1, token.type, [token.line, token.col], repr(token.val)))
+
 
 if __name__ == "__main__":
     main_test()
-
-

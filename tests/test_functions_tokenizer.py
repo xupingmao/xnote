@@ -409,11 +409,14 @@ class TestTimer:
 # ---------------------------------------------------------------------------
 
 
-def setup_T():
-    """Build a fresh global TData so internal do_* functions can run."""
-    tokenizer.T = tokenizer.TData()
-    tokenizer.T.f = [1, 1]
-    return tokenizer.T
+def setup_ctx(text=""):
+    """Build a fresh TokenizeContext so internal do_* functions can run."""
+    ctx = tokenizer.TokenizeContext()
+    ctx.line = 1
+    ctx.col = 1
+    ctx.text = text
+    ctx.length = len(text)
+    return ctx
 
 
 class TestTokenAndHelpers:
@@ -424,22 +427,22 @@ class TestTokenAndHelpers:
         assert tok.val is None
 
     def test_token_before_after(self):
-        empty = tokenizer.Token(None, None, [-1, -1])
+        empty = tokenizer.Token(None, None, -1, -1)
         assert tokenizer._empty_token is not None
         assert empty.before() is tokenizer._empty_token
         assert empty.after() is tokenizer._empty_token
 
     def test_token_before_after_nonempty(self):
-        tok = tokenizer.Token("symbol", "x", [1, 1])
+        tok = tokenizer.Token("symbol", "x", 1, 1)
         assert tok.before() is None
         assert tok.after() is None
 
     def test_token_str(self):
-        tok = tokenizer.Token("symbol", "x", [1, 1])
+        tok = tokenizer.Token("symbol", "x", 1, 1)
         assert "val" in str(tok)
 
     def test_findpos_with_pos(self):
-        tok = tokenizer.Token("symbol", "x", [2, 3])
+        tok = tokenizer.Token("symbol", "x", 2, 3)
         assert tokenizer.findpos(tok) == [2, 3]
 
     def test_findpos_without_pos(self):
@@ -448,7 +451,7 @@ class TestTokenAndHelpers:
         assert tokenizer.findpos(NoPos()) == [0, 0]
 
     def test_findpos_with_first(self):
-        child = tokenizer.Token("symbol", "x", [5, 5])
+        child = tokenizer.Token("symbol", "x", 5, 5)
         parent = type("P", (), {"first": child})()
         assert tokenizer.findpos(parent) == [5, 5]
 
@@ -459,7 +462,7 @@ class TestTokenAndHelpers:
         assert "^" in r
 
     def test_report_error_with_token(self):
-        tok = tokenizer.Token("symbol", "x", [1, 1])
+        tok = tokenizer.Token("symbol", "x", 1, 1)
         try:
             tokenizer.report_error("ctx", "src", tok, "msg")
             assert False
@@ -473,22 +476,8 @@ class TestTokenAndHelpers:
         except Exception as e:
             assert "boom" in str(e)
 
-    def test_print_token_raises(self):
-        # Token is not iterable; print_token will raise TypeError
-        tok = tokenizer.Token("symbol", "x", [1, 1])
-        try:
-            tokenizer.print_token(tok)
-            assert False
-        except TypeError:
-            pass
-
     def test_clean(self):
         assert tokenizer.clean("a\r\nb") == "a\nb"
-
-    def test_str_match(self):
-        assert tokenizer.str_match("abc", "ab", 0) is True
-        assert tokenizer.str_match("abc", "xy", 0) is False
-        assert tokenizer.str_match("abc", "bc", 1) is True
 
     def test_is_name_begin(self):
         assert tokenizer.is_name_begin("a") is True
@@ -513,119 +502,114 @@ class TestTokenAndHelpers:
 class TestTokenizerInternals:
 
     def test_do_symbol(self):
-        setup_T()
-        i = tokenizer.do_symbol("==", 0, 2)
+        ctx = setup_ctx("==")
+        i = tokenizer.do_symbol(ctx, 0)
         assert i == 2
-        assert tokenizer.T.res[-1].type == "=="
+        assert ctx.res[-1].type == "=="
 
     def test_do_symbol_single(self):
-        setup_T()
-        i = tokenizer.do_symbol("+", 0, 1)
+        ctx = setup_ctx("+")
+        i = tokenizer.do_symbol(ctx, 0)
         assert i == 1
-        assert tokenizer.T.res[-1].val == "+"
+        assert ctx.res[-1].val == "+"
 
     def test_do_symbol_invalid_raises(self):
-        setup_T()
+        ctx = setup_ctx("!")
+        # '!' is in _ISYMBOLS but not in SYMBOLS, so do_symbol raises
         try:
-            tokenizer.do_symbol("@", 0, 1)
+            tokenizer.do_symbol(ctx, 0)
             assert False
         except Exception:
             pass
 
     def test_do_number(self):
-        setup_T()
-        i = tokenizer.do_number("123", 0, 3)
+        ctx = setup_ctx("123")
+        i = tokenizer.do_number(ctx, 0)
         assert i == 3
-        assert tokenizer.T.res[-1].val == 123.0
+        assert ctx.res[-1].val == 123.0
 
     def test_do_number_decimal(self):
-        setup_T()
-        i = tokenizer.do_number("1.5", 0, 3)
+        ctx = setup_ctx("1.5")
+        i = tokenizer.do_number(ctx, 0)
         assert i == 3
-        assert tokenizer.T.res[-1].val == 1.5
+        assert ctx.res[-1].val == 1.5
 
     def test_do_name_keyword(self):
-        setup_T()
-        i = tokenizer.do_name("def", 0, 3)
+        ctx = setup_ctx("def")
+        i = tokenizer.do_name(ctx, 0)
         assert i == 3
-        assert tokenizer.T.res[-1].type == "def"
+        assert ctx.res[-1].type == "def"
 
     def test_do_name_identifier(self):
-        setup_T()
-        i = tokenizer.do_name("my_var1", 0, 7)
+        ctx = setup_ctx("my_var1")
+        i = tokenizer.do_name(ctx, 0)
         assert i == 7
-        assert tokenizer.T.res[-1].type == "name"
-        assert tokenizer.T.res[-1].val == "my_var1"
+        assert ctx.res[-1].type == "name"
+        assert ctx.res[-1].val == "my_var1"
 
     def test_do_string_double(self):
-        setup_T()
-        i = tokenizer.do_string('"hello"', 0, 7)
+        ctx = setup_ctx('"hello"')
+        i = tokenizer.do_string(ctx, 0)
         assert i == 7
-        assert tokenizer.T.res[-1].val == "hello"
+        assert ctx.res[-1].val == "hello"
 
     def test_do_string_single(self):
-        setup_T()
-        i = tokenizer.do_string("'world'", 0, 7)
+        ctx = setup_ctx("'world'")
+        i = tokenizer.do_string(ctx, 0)
         assert i == 7
-        assert tokenizer.T.res[-1].val == "world"
+        assert ctx.res[-1].val == "world"
 
     def test_do_string_escapes(self):
-        setup_T()
-        # "a\nb" -> a newline b
-        src = '"a\\nb"'
-        i = tokenizer.do_string(src, 0, len(src))
-        assert i == len(src)
-        assert tokenizer.T.res[-1].val == "a\nb"
+        ctx = setup_ctx('"a\\nb"')
+        i = tokenizer.do_string(ctx, 0)
+        assert i == len(ctx.text)
+        assert ctx.res[-1].val == "a\nb"
 
     def test_do_string_other_escapes(self):
-        setup_T()
-        # "\\r \\0 \\b" -> carriage return, null, backspace
-        src = '"a\\rb\\0c\\bd"'
-        i = tokenizer.do_string(src, 0, len(src))
-        assert i == len(src)
-        val = tokenizer.T.res[-1].val
+        ctx = setup_ctx('"a\\rb\\0c\\bd"')
+        i = tokenizer.do_string(ctx, 0)
+        assert i == len(ctx.text)
+        val = ctx.res[-1].val
         assert val == "a" + chr(13) + "b" + "\0" + "c" + "\b" + "d"
 
     def test_do_string_triple(self):
-        setup_T()
-        src = '"""docstring"""'
-        i = tokenizer.do_string(src, 0, len(src))
-        assert i == len(src)
-        assert tokenizer.T.res[-1].val == "docstring"
+        ctx = setup_ctx('"""docstring"""')
+        i = tokenizer.do_string(ctx, 0)
+        assert i == len(ctx.text)
+        assert ctx.res[-1].val == "docstring"
 
     def test_do_comment(self):
-        setup_T()
-        i = tokenizer.do_comment("# simple", 0, len("# simple"))
-        assert i == len("# simple")
+        ctx = setup_ctx("# simple")
+        i = tokenizer.do_comment(ctx, 0)
+        assert i == len(ctx.text)
         # no token added for plain comment
-        assert len(tokenizer.T.res) == 0
+        assert len(ctx.res) == 0
 
     def test_do_comment_debugger(self):
-        setup_T()
-        text = "#@debugger foo"
-        i = tokenizer.do_comment(text, 0, len(text))
-        assert i == len(text)
-        assert tokenizer.T.res[-1].val == "debugger"
+        ctx = setup_ctx("#@debugger foo")
+        i = tokenizer.do_comment(ctx, 0)
+        assert i == len(ctx.text)
+        assert ctx.res[-1].val == "debugger"
 
     def test_do_nl(self):
-        setup_T()
-        i = tokenizer.do_nl("a\nb", 1, 3)
+        ctx = setup_ctx("a\nb")
+        i = tokenizer.do_nl(ctx, 1)
         assert i == 2
-        assert tokenizer.T.res[-1].type == "nl"
+        assert ctx.res[-1].type == "nl"
 
     def test_do_indent(self):
-        setup_T()
-        i = tokenizer.do_indent("    x", 0, 5)
+        ctx = setup_ctx("    x")
+        i = tokenizer.do_indent(ctx, 0)
         # 4 spaces consumed
         assert i == 4
-        assert "indent" in [t.type for t in tokenizer.T.res]
+        assert "indent" in [t.type for t in ctx.res]
 
     def test_indent_dedent(self):
-        setup_T()
-        tokenizer.indent(4)
-        assert "indent" in [t.type for t in tokenizer.T.res]
-        tokenizer.indent(0)
-        assert "dedent" in [t.type for t in tokenizer.T.res]
+        ctx = setup_ctx()
+        tokenizer.indent(ctx, 4)
+        assert "indent" in [t.type for t in ctx.res]
+        tokenizer.indent(ctx, 0)
+        assert "dedent" in [t.type for t in ctx.res]
 
 
 class TestTokenize:
@@ -687,7 +671,7 @@ class TestTokenize:
         assert "isnot" in types
 
     def test_tokenize_in_without_not(self):
-        # 'in' not preceded by 'not' hits the else branch of TData.add
+        # 'in' not preceded by 'not' hits the else branch of TokenizeContext.add
         tokens = tokenizer.tokenize("x in y")
         types = [t.type for t in tokens]
         assert "in" in types
