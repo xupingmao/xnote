@@ -17,6 +17,7 @@ import re
 import json
 import argparse
 import socket
+import unicodedata
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -248,28 +249,54 @@ def _parse_response(code, resp_headers, raw):
 _TABLE_COMMANDS = frozenset(["note-list", "note-search"])
 
 
+def _display_width(text):
+    # type: (Any) -> int
+    """计算文本在等宽终端下的显示宽度
+
+    中英文混排时，英文等窄字符宽度为 1，CJK 等宽字符（全角/宽字符）宽度为 2，
+    否则表格列无法对齐。依据 unicode 的 East Asian Width 属性判断。
+    """
+    width = 0
+    for ch in str(text):
+        if unicodedata.east_asian_width(ch) in ("W", "F"):
+            width += 2
+        else:
+            width += 1
+    return width
+
+
+def _ljust_display(text, width):
+    # type: (Any, int) -> str
+    """按显示宽度左对齐（不足处补空格），保证中英文混排列对齐"""
+    text = str(text)
+    gap = width - _display_width(text)
+    if gap > 0:
+        return text + " " * gap
+    return text
+
+
 def _render_table(rows):
     # type: (Any) -> str
     """把远程命令返回的列表数据渲染为简单的文本表格（默认输出格式）
 
-    列顺序以首行字段顺序为准；各列按内容最大宽度对齐。空数据返回提示文案。
+    列顺序以首行字段顺序为准；各列按显示宽度（中英文混排）对齐。空数据返回提示文案。
     """
     if not isinstance(rows, list) or len(rows) == 0:
         return "(无数据)"
     headers = list(rows[0].keys())
     widths = {}  # type: dict
     for col in headers:
-        width = len(str(col))
+        width = _display_width(col)
         for row in rows:
-            width = max(width, len(str(row.get(col, ""))))
+            width = max(width, _display_width(row.get(col, "")))
         widths[col] = width
     lines = [
-        "  ".join(str(col).ljust(widths[col]) for col in headers),
+        "  ".join(_ljust_display(col, widths[col]) for col in headers),
         "  ".join("-" * widths[col] for col in headers),
     ]
     for row in rows:
         lines.append(
-            "  ".join(str(row.get(col, "")).ljust(widths[col]) for col in headers))
+            "  ".join(_ljust_display(row.get(col, ""), widths[col]) for col in headers))
     return "\n".join(lines)
 
 

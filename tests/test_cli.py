@@ -320,6 +320,24 @@ class CliCoreTestCase(BaseTestCase):
     def test_render_table_empty(self):
         self.assertEqual(xnote_cli._render_table([]), "(无数据)")
 
+    def test_display_width_counts_cjk_as_two(self):
+        # 中文等宽字符在终端占 2 个单元格，英文字符占 1 个
+        self.assertEqual(xnote_cli._display_width("ab"), 2)
+        self.assertEqual(xnote_cli._display_width("中文"), 4)
+        self.assertEqual(xnote_cli._display_width("a中b文"), 6)
+
+    def test_render_table_cjk_alignment(self):
+        # 中英文混排时，各列按显示宽度对齐（中文占 2 格），各行总宽度应一致
+        rows = [
+            {"id": 1, "name": "笔记本", "type": "group"},
+            {"id": 22, "name": "hello world", "type": "md"},
+        ]
+        out = xnote_cli._render_table(rows)
+        lines = out.split("\n")
+        # 两条数据行按显示宽度对齐，因此总宽度相等
+        self.assertEqual(xnote_cli._display_width(lines[2]),
+                         xnote_cli._display_width(lines[3]))
+
     def test_forward_note_list_defaults_to_table(self):
         # 默认（无 --json）note-list/note-search 以表格形式输出
         import io
