@@ -120,7 +120,7 @@ def note_list_handler(ctx):
 
 
 xnote_cli.register_cmd("note-view", note_view_handler, "查看笔记内容")
-xnote_cli.register_cmd("note-search", note_search_handler, "搜索笔记")
+xnote_cli.register_cmd("note-search", note_search_handler, "搜索笔记（--json 以 JSON 格式输出）")
 xnote_cli.register_cmd("note-edit", note_edit_handler, "编辑笔记内容")
 xnote_cli.register_cmd("note-delete", note_delete_handler, "删除笔记")
-xnote_cli.register_cmd("note-list", note_list_handler, "按父文档id列出子文档列表")
+xnote_cli.register_cmd("note-list", note_list_handler, "按父文档id列出子文档列表（--json 以 JSON 格式输出）")

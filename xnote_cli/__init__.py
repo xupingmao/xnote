@@ -244,6 +244,35 @@ def _parse_response(code, resp_headers, raw):
 # 结果展示
 # ---------------------------------------------------------------------------
 
+# 默认以表格展示的远程命令（其余远程命令按其原有格式输出）
+_TABLE_COMMANDS = frozenset(["note-list", "note-search"])
+
+
+def _render_table(rows):
+    # type: (Any) -> str
+    """把远程命令返回的列表数据渲染为简单的文本表格（默认输出格式）
+
+    列顺序以首行字段顺序为准；各列按内容最大宽度对齐。空数据返回提示文案。
+    """
+    if not isinstance(rows, list) or len(rows) == 0:
+        return "(无数据)"
+    headers = list(rows[0].keys())
+    widths = {}  # type: dict
+    for col in headers:
+        width = len(str(col))
+        for row in rows:
+            width = max(width, len(str(row.get(col, ""))))
+        widths[col] = width
+    lines = [
+        "  ".join(str(col).ljust(widths[col]) for col in headers),
+        "  ".join("-" * widths[col] for col in headers),
+    ]
+    for row in rows:
+        lines.append(
+            "  ".join(str(row.get(col, "")).ljust(widths[col]) for col in headers))
+    return "\n".join(lines)
+
+
 def print_result(resp):
     # type: (ApiResult) -> int
     if not isinstance(resp, ApiResult):
@@ -335,16 +364,19 @@ def _load_remote_commands(ctx):
     return _get_server_commands(ctx)
 
 
-def _forward_to_server(ctx, name, args):
-    # type: (XnoteCliContext, str, List[str]) -> int
+def _forward_to_server(ctx, name, args, use_json=False):
+    # type: (XnoteCliContext, str, List[str], bool) -> int
     """把命令转发给服务端执行（插件命令在服务端运行）"""
     resp = request(ctx, "POST", "/api/cli/run",
                    data={"cmd": name, "args": "\n".join(args)})
     if resp.success:
         data = resp.data
-        if data:
+        if data is not None:
             if isinstance(data, (dict, list)):
-                print(json.dumps(data, ensure_ascii=False, indent=2))
+                if use_json or name not in _TABLE_COMMANDS:
+                    print(json.dumps(data, ensure_ascii=False, indent=2))
+                else:
+                    print(_render_table(data))
             else:
                 print(data)
         return 0
@@ -373,6 +405,9 @@ def _build_parser(ctx):
         p = sub.add_parser(entry.name, help=entry.help or "")
         # 所有子命令都能接收剩余参数，透传给命令处理函数（ctx.args）
         p.add_argument("args", nargs="*", help="命令参数")
+        # --json 控制远程命令（note-list/note-search）以 JSON 而非表格输出
+        p.add_argument("--json", action="store_true",
+                       help="以 JSON 格式输出（仅部分命令支持，如 note-list/note-search）")
         if entry.name == "login":
             p.add_argument("--url", default=None,
                            help="服务端地址，覆盖会话/环境变量配置")
@@ -386,6 +421,8 @@ def _build_parser(ctx):
                 continue
             rp = sub.add_parser(name, help=remote_cmds.get(name, ""))
             rp.add_argument("args", nargs="*", help="传递给服务端命令的参数")
+            rp.add_argument("--json", action="store_true",
+                           help="以 JSON 格式输出（而非表格）")
 
     return parser
 
@@ -434,7 +471,8 @@ def main(argv=None):    # type: (Optional[List[str]]) -> int
         ctx = XnoteCliContext(command=name, args=list(getattr(args, "args", [])))
         ctx.session = help_ctx.session
         ctx.server_url = get_server_url(ctx)
-        return _forward_to_server(ctx, name, ctx.args)
+        use_json = bool(getattr(args, "json", False))
+        return _forward_to_server(ctx, name, ctx.args, use_json=use_json)
 
     # 兜底：理论上 argparse 已对未知子命令报错退出，这里仅作为安全网
     print("未知命令: %s" % name)

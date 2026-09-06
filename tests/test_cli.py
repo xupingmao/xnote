@@ -207,9 +207,10 @@ class CliCoreTestCase(BaseTestCase):
         def fake_load_remote(ctx):
             return {"note-view": "查看笔记内容"}
 
-        def fake_forward(ctx, name, args):
+        def fake_forward(ctx, name, args, use_json=False):
             forwarded["name"] = name
             forwarded["args"] = args
+            forwarded["use_json"] = use_json
             return 0
 
         local_cmds = {}
@@ -306,6 +307,73 @@ class CliCoreTestCase(BaseTestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(session.commands, {"note-view": "查看", "backup": "备份"})
         sp.assert_called_once_with(session)
+
+    def test_render_table(self):
+        # _render_table 把列表数据渲染为带表头的文本表格
+        rows = [{"id": 1, "name": "笔记本", "type": "group", "url": "/note/group/1"}]
+        out = xnote_cli._render_table(rows)
+        self.assertIsInstance(out, str)
+        self.assertIn("name", out)
+        self.assertIn("笔记本", out)
+        self.assertIn("id", out)
+
+    def test_render_table_empty(self):
+        self.assertEqual(xnote_cli._render_table([]), "(无数据)")
+
+    def test_forward_note_list_defaults_to_table(self):
+        # 默认（无 --json）note-list/note-search 以表格形式输出
+        import io
+        import contextlib
+        import unittest.mock as mock
+        fake = xnote_cli.ApiResult(success=True, data=[
+            {"id": 1, "name": "笔记本", "type": "group", "url": "/note/group/1"}])
+        with mock.patch.object(xnote_cli, "request", return_value=fake), \
+             contextlib.redirect_stdout(io.StringIO()) as buf:
+            rc = xnote_cli._forward_to_server(XnoteCliContext(), "note-list", [], use_json=False)
+        self.assertEqual(rc, 0)
+        out = buf.getvalue()
+        self.assertIn("笔记本", out)
+        # 表格输出不应是 JSON（没有键名引号包裹）
+        self.assertNotIn('"id"', out)
+
+    def test_forward_note_search_json_with_flag(self):
+        # 设置 --json 时以 JSON 格式输出
+        import io
+        import contextlib
+        import unittest.mock as mock
+        fake = xnote_cli.ApiResult(success=True, data=[
+            {"id": 1, "name": "笔记本", "type": "group", "url": "/note/group/1"}])
+        with mock.patch.object(xnote_cli, "request", return_value=fake), \
+             contextlib.redirect_stdout(io.StringIO()) as buf:
+            rc = xnote_cli._forward_to_server(XnoteCliContext(),
+                                             "note-search", [], use_json=True)
+        self.assertEqual(rc, 0)
+        out = buf.getvalue()
+        # JSON 输出包含键名引号
+        self.assertIn('"id"', out)
+
+    def test_main_forwards_json_flag_for_remote_command(self):
+        # main 解析 --json 后，应透传给 _forward_to_server（端到端校验 argparse 接线）
+        import unittest.mock as mock
+        from xnote_cli.session import SessionInfo
+        captured = {}
+        def fake_forward(ctx, name, args, use_json=False):
+            captured["name"] = name
+            captured["use_json"] = use_json
+            return 0
+        with mock.patch.object(xnote_cli, "COMMANDS", {}), \
+             mock.patch.object(xnote_cli, "load_session",
+                              return_value=SessionInfo(username="admin",
+                                                       commands={"note-search": "搜索"})), \
+             mock.patch.object(xnote_cli, "_load_remote_commands",
+                              return_value={"note-search": "搜索"}), \
+             mock.patch.object(xnote_cli, "_forward_to_server", fake_forward):
+            xnote_cli._registered = False
+            xnote_cli._ensure_registered()
+            rc = xnote_cli.main(["note-search", "关键词", "--json"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(captured["name"], "note-search")
+        self.assertTrue(captured["use_json"])
 
 
 class CliApiTestCase(BaseTestCase):

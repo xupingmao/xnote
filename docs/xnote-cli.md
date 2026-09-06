@@ -62,6 +62,10 @@ xnote-cli 的命令分为两类：
 | `sync`         | 触发数据同步（暂未实现） | `ops_plugin.py`     |
 | `hello`        | 示例插件命令     | `sample_plugin.py`  |
 
+> 注：`note-list` / `note-search` 默认以**表格**形式输出结果；加上 `--json`
+> 参数（如 `xnote-cli note-list --json`、`xnote-cli note-search 关键词 --json`）
+> 则改为以 **JSON** 格式输出。
+
 远程命令采用**一级（扁平）子命令**风格，例如 `note-view`、`note-search`，
 不使用 `note view` 这种带空格的多级写法。
 
