@@ -11,6 +11,7 @@ from xnote.core import xtables
 from xnote_handlers.plugin.dao import add_visit_log, delete_visit_log
 from xnote.webui import Div
 from xnote.webui import Tree, TreeNode
+from xnote.webui import Dropdown, DropdownOption
 from xnote.webui.table import DataTable, TableRowType
 
 import xutils
@@ -185,4 +186,26 @@ class TestDataTable(BaseTestCase):
         html = table.render().decode("utf-8")
         assert "&lt;script&gt;" in html
         assert "<script>alert(1)</script>" not in html
+
+
+class TestDropdown(BaseTestCase):
+
+    def test_dropdown_option_render(self):
+        option = DropdownOption(name="选项A", value="a")
+        html = option.render()
+        assert '<option value="a">选项A</option>' == html
+
+    def test_dropdown_render(self):
+        dropdown = Dropdown()
+        dropdown.add_option(name="选项A", value="a")
+        dropdown.add_option(name="选项B", value="b")
+        html = dropdown.render().decode("utf-8")
+        assert "<select>" in html
+        assert '<option value="a">选项A</option>' in html
+        assert '<option value="b">选项B</option>' in html
+
+    def test_dropdown_empty_render(self):
+        dropdown = Dropdown()
+        html = dropdown.render().decode("utf-8")
+        assert "<select></select>" == html.replace("\n", "").replace(" ", "")
         

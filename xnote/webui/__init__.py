@@ -6,6 +6,7 @@ from .component import Textarea, Input, Checkbox, InputGroup
 from .component import EditFormButton, ActionButton, ConfirmButton
 from .component import RawHtml
 from .component import TextSpan
+from .component import Dropdown, DropdownOption
 from .tab import TabBox, TabTable
 from .container import Card, CardRow, RowDiv, RowPanel
 from .link import TextLink, ActionLink, EditFormActionLink, ConfirmActionLink

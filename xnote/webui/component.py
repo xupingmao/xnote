@@ -276,25 +276,28 @@ class DropdownOption(BaseComponent):
     def __init__(self, name="", value=""):
         self.name = name
         self.value = value
+
+    def render(self):
+        return f'<option value="{self.value}">{self.name}</option>'
     
 class Dropdown(BaseContainer):
     _template = xtemplate.compile_template("""
 <select>
-    {% for item in self.chidren %}
-        {% render item %}
+    {% for option in item.children %}
+        {% render option %}
     {% end %}
 </select>
 """, name="xnote.plugin.dropdown")
     
 
     def __init__(self):
-        pass
+        super().__init__()
 
     def add_option(self, name="", value=""):
         self.children.append(DropdownOption(name=name, value=value))
 
     def render(self):
-        return self._template.generate(children = self.children)
+        return self._template.generate(item=self)
 
 
 class BlockTitle(BaseComponent):
