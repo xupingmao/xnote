@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-# @filename test_cov_note_edit_view_timeline.py
+# @filename test_note_edit_view_timeline.py
 # Coverage tests for note_edit.py / note_view.py / note_timeline.py
 # App-dependent: requires tests.test_base (full app on temp sqlite).
 

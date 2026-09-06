@@ -432,7 +432,10 @@ def _setcookie(key, value, expires=SESSION_EXPIRE):
     # 默认保留两天,但是只要保持登录会自动刷新
     assert isinstance(key, str)
     assert isinstance(value, str)
-    if xconfig.IS_TEST:
+    # 仅在请求上下文内下发 cookie：登录接口（如 /api/cli/login）据此向客户端下发 sid，
+    # 以便复用与真实客户端一致的会话提取逻辑；直接调用 login_user_by_name（如单测）
+    # 时不存在 web.ctx.env，跳过下发，避免 setcookie 访问 web.ctx.homepath 报错。
+    if not hasattr(web.ctx, "env"):
         return
     web.setcookie(key, value, expires) # type: ignore
 

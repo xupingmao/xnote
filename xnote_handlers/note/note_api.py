@@ -17,6 +17,7 @@ from xutils import textutil
 from xnote_handlers.note import dao
 from xnote_handlers.note.note_helper import assemble_notes_by_date
 from xnote_handlers.note.note_service import NoteService
+from xnote_handlers.note.note_edit import SaveAjaxHandler, RemoveAjaxHandler, update_and_notify
 
 NOTE_DAO = xutils.DAO("note")
 
@@ -89,6 +90,58 @@ class NoteContentApiHandler:
         user_id = xauth.current_user_id()
         NoteService.check_auth(note, user_id)
         return webutil.SuccessResult(data=note.content)
+
+
+class NoteSearchApiHandler:
+
+    @xauth.login_required()
+    def GET(self):
+        key = xutils.get_argument_str("key", "")
+        limit = xutils.get_argument_int("limit", 20)
+        user_name = xauth.current_name_str()
+        user_id = xauth.current_user_id()
+        words = textutil.split_words(key)
+
+        result = []
+        if len(words) == 0:
+            return webutil.SuccessResult(data=result)
+
+        for item in dao.search_name(words=words, creator=user_name, limit=limit):
+            result.append(Storage(id=item.note_id, name=item.name,
+                                  type="group" if item.is_group else "note",
+                                  url=item.url))
+
+        for item in dao.search_content(words=words, creator_id=user_id, limit=limit):
+            result.append(Storage(id=item.id, name=item.name,
+                                  type=item.type, url=item.url))
+        return webutil.SuccessResult(data=result)
+
+
+class NoteSaveApiHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        note_id = xutils.get_argument_str("id")
+        content = xutils.get_argument_str("content", "")
+        old = dao.get_by_id(note_id)
+        if old is None:
+            return webutil.FailedResult(code="404", message="笔记不存在")
+
+        new_file = Storage(**old)
+        new_file.content = content
+        new_file.data = ""
+        new_file.size = len(content)
+        new_file.mtime = xutils.format_datetime()
+        new_file.version = old.version + 1
+        update_and_notify(old, new_file)
+        return webutil.SuccessResult(data=old.get_url())
+
+
+class NoteDeleteApiHandler:
+
+    @xauth.login_required()
+    def POST(self):
+        return RemoveAjaxHandler().GET()
 
 
 class Select2ResultItem(dict):
@@ -218,4 +271,7 @@ xurls = (
     r"/api/note/stat", StatApiHandler,
     r"/api/note/select_name", SelectNameHandler,
     r"/api/note/content", NoteContentApiHandler,
+    r"/api/note/search", NoteSearchApiHandler,
+    r"/api/note/save", NoteSaveApiHandler,
+    r"/api/note/delete", NoteDeleteApiHandler,
 )
