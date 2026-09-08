@@ -19,6 +19,7 @@ from xnote.core import xtables
 def init():
     dbutil.TableConfig.add_skip_sync_table("test")
     dbutil.TableConfig.add_skip_sync_table("_cache")
+    dbutil.TableConfig.add_skip_sync_table("kv_cache")
 
     # 使用NoSQL风格的数据库接口
     # NoSQL适合的场景：大文档、配置、缓存、计数器、时序日志

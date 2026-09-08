@@ -997,6 +997,80 @@ class TestMain(BaseTestCase):
         count = cache.clear_expired()
         assert count > 0
 
+    def test_db_cache_long_key(self):
+        from xutils.db.dbutil_cache import DatabaseCache, KvCacheDao, CacheRecord
+        import hashlib
+        # key 长度超过哈希摘要长度(sha256 为 64) 时, 自动转换为哈希存储, 且读写一致
+        cache = DatabaseCache()
+        long_key = "x" * 200
+        cache.delete(long_key)
+        self.assertIsNone(cache.get(long_key))
+
+        cache.put(long_key, {"value": 123}, expire=100)
+        self.assertEqual(cache.get(long_key), {"value": 123})
+
+        # 不超过阈值的 key 保持原样, 超过阈值的 key 默认使用 sha256
+        self.assertEqual(cache._normalize_key("a" * 64), "a" * 64)
+        self.assertEqual(cache._normalize_key(long_key),
+                         hashlib.sha256(long_key.encode("utf-8")).hexdigest())
+
+        # 验证底层存储的 cache_key 是 sha256 哈希
+        from xnote.core import xtables
+        table = xtables.get_table_by_name("kv_cache")
+        expect_key = hashlib.sha256(long_key.encode("utf-8")).hexdigest()
+        row = table.select_first(where=dict(cache_key=expect_key))
+        self.assertIsNotNone(row)
+
+        # DAO 的 get_by_key 返回 CacheRecord 对象
+        record = KvCacheDao().get_by_key(expect_key)
+        self.assertIsInstance(record, CacheRecord)
+        self.assertEqual(record.cache_key, expect_key)
+        self.assertEqual(record.user_id, 0)
+        self.assertTrue(record.expire_time > 0)
+
+        # 不存在的 key 返回 None
+        self.assertIsNone(KvCacheDao().get_by_key("no_such_key_for_test"))
+
+        cache.delete(long_key)
+        self.assertIsNone(cache.get(long_key))
+
+    def test_db_cache_hash_method(self):
+        from xutils.db.dbutil_cache import DatabaseCache
+        from xnote.core import xtables
+        import hashlib
+        # 哈希算法可配置, 支持 md5/sha1/sha256, 默认 sha256
+        table = xtables.get_table_by_name("kv_cache")
+        long_key = "x" * 200
+
+        for method in ("md5", "sha1", "sha256"):
+            cache = DatabaseCache(hash_method=method)
+            cache.delete(long_key)
+            cache.put(long_key, method, expire=100)
+            # 读写一致
+            self.assertEqual(cache.get(long_key), method)
+
+            # 底层存储的 cache_key 为对应算法的哈希值
+            expect_key = hashlib.new(method, long_key.encode("utf-8")).hexdigest()
+            row = table.select_first(where=dict(cache_key=expect_key))
+            self.assertIsNotNone(row, "hash method: %s" % method)
+
+            cache.delete(long_key)
+            self.assertIsNone(cache.get(long_key))
+
+    def test_db_cache_hash_method_check(self):
+        from xutils.db.dbutil_cache import DatabaseCache
+        # max_key_len 由 hash_method 推导(摘要长度)
+        self.assertEqual(DatabaseCache().max_key_len, 64)
+        self.assertEqual(DatabaseCache(hash_method="sha256").max_key_len, 64)
+        self.assertEqual(DatabaseCache(hash_method="sha1").max_key_len, 40)
+        self.assertEqual(DatabaseCache(hash_method="md5").max_key_len, 32)
+        self.assertEqual(DatabaseCache(hash_method="sha384").max_key_len, 96)
+
+        # hashlib 不支持的算法
+        self.assertRaises(ValueError, lambda: DatabaseCache(hash_method="no_such_hash"))
+        # 摘要长度超过 cache_key 列宽(100) 的算法, 如 sha512 为 128
+        self.assertRaises(ValueError, lambda: DatabaseCache(hash_method="sha512"))
+
     def test_kv_set(self):
         from xutils.db.dbutil_set import KvSetTable
         dbutil.register_table("set_test", "set test")
