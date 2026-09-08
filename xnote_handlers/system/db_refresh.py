@@ -8,6 +8,7 @@
 @FilePath     : /xnote/handlers/system/db_refresh.py
 @Description  : 数据库定时任务
 """
+import time
 from xnote.core import xauth
 from xnote.core import xconfig
 from xutils import dbutil
@@ -15,7 +16,7 @@ from xutils import cacheutil
 from xutils.db import dbutil_cache
 from xutils.db.binlog import BinLog
 from xnote.service import DatabaseLockService
-
+from xutils import dateutil
 
 class RefreshHandler:
 
@@ -26,6 +27,9 @@ class RefreshHandler:
     def GET(self):
         db_cache = dbutil_cache.DatabaseCache()
         db_cache.clear_expired()
+        cache_expire = 24*3600
+        db_cache.put("sys:clear_time", value=dateutil.format_datetime(), expire=cache_expire)
+        db_cache.put("sys:clear_time_unix", value=time.time(), expire=cache_expire)
 
         # 清理失效的缓存
         cacheutil._global_cache.clear_expired()
