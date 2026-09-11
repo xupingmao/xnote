@@ -175,7 +175,7 @@
     flex: 1;
     font-size: 15px;
     font-weight: bold;
-    text-align: center;
+    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -234,6 +234,7 @@
     flex: 1;
     max-height: none;
     overflow-y: auto;
+    padding: 10px 12px;
 }
 
 .chat-input-box-fixed {

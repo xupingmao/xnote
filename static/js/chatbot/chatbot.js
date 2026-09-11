@@ -101,8 +101,13 @@
         });
 
         $("#chat-input").keydown(function (event) {
-            // Ctrl+Enter 发送
-            if (event.ctrlKey && event.keyCode === 13) {
+            if (event.keyCode === 13) {
+                if (event.ctrlKey) {
+                    // Ctrl+Enter 换行, 不拦截
+                    return;
+                }
+                // Enter 发送, 阻止默认的换行
+                event.preventDefault();
                 sendMessage();
             }
         });
