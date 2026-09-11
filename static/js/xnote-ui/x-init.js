@@ -582,6 +582,11 @@ xnote._executeSingleCommandDo = function (command) {
         return;
     }
 
+    if (command_type === "append_html") {
+        findElement(command).append(value);
+        return;
+    }
+
     if (command_type === "toast") {
         xnote.toast(value);
         return;

@@ -132,6 +132,7 @@ NOTE_TOOLS: List[AppLink] = [
     user_link("上传管理", "/fs_upload/manage", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
     user_link("日历", "/note/calendar", "calendar"),
+    user_link("聊天助手", "/chatbot", "comments"),
 ]
 
 DATA_TOOLS: List[AppLink] = [

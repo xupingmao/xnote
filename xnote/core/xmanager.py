@@ -20,7 +20,7 @@ import threading
 import logging
 import xnote_migrate
 
-from typing import Optional
+from typing import Optional, List
 from xnote.core import xconfig, xauth, xnote_trace, xnote_hooks, xtemplate
 from collections import deque
 from threading import Thread
@@ -341,19 +341,30 @@ class HandlerManager:
     def report_failed(self):
         for info in self.failed_mods:
             log("Failed info: %s" % info)
-
-    def resolve_module(self, module, modname: str):
+            
+    def format_modpath(self, modname: str):
         modpath = "/".join(modname.split(".")[1:-1])
         if not modpath.startswith("/"):
             modpath = "/" + modpath
+        return modpath
+    
+    def is_url_valid(self, url: str, modpath: str):
+        if url.startswith(modpath):
+            return True
+        if url.startswith("/api" + modpath):
+            return True
+        return False
+
+    def resolve_module(self, module, modname: str):
+        modpath = self.format_modpath(modname)
         if hasattr(module, "xurls"):
-            xurls = module.xurls
+            xurls: List[str] = module.xurls
             for i in range(0, len(xurls), 2):
                 url = xurls[i]
                 handler = xurls[i+1]
-                if not url.startswith(modpath):
-                    log("WARN: pattern %r is invalid, should starts with %r" %
-                        (url, modpath))
+                if not self.is_url_valid(url, modpath):
+                    api_modpath = "/api" + modpath
+                    log(f"WARN: pattern {url!r} is invalid, should starts with {modpath!r} or {api_modpath!r}")
                 self.add_mapping(url, handler)
         # xurls拥有最高优先级，下面代码兼容旧逻辑
         elif hasattr(module, "handler"):

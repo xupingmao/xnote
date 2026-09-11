@@ -323,6 +323,54 @@ def init_note_fragment_table():
         manager.add_index(["user_id", "create_time"], index_name="idx_noteFragment_userId_createTime")
         
 
+def init_chat_session_table():
+    """聊天会话表(通用, 机器人会话与用户间会话共用)"""
+    table_name = "chat_session"
+    comment = "聊天会话"
+    pk_name = "session_id"
+    with create_default_table_manager(table_name, comment=comment, pk_name=pk_name) as manager:
+        manager.add_column("create_time", "bigint", default_value=0, comment="创建时间(毫秒时间戳)")
+        manager.add_column("update_time", "bigint", default_value=0, comment="更新时间(毫秒时间戳)")
+
+        # chat_type: bot-机器人会话, user-用户间会话
+        manager.add_column("chat_type", "varchar(16)", default_value="", comment="会话类型")
+        manager.add_column("title", "varchar(100)", default_value="", comment="会话标题")
+        manager.add_column("status", "tinyint", default_value=0, comment="状态: 0-正常, 1-已删除")
+
+        manager.add_column("user_id", "bigint", default_value=0, comment="所属用户ID")
+
+        manager.add_column("last_message", "text", default_value="", comment="最后一条消息摘要")
+
+        # 注: 不设"对端"字段(peer_id/target_id), 未来用户间会话用 chat_member 成员表表达
+        manager.add_index(["user_id", "update_time"], index_name="idx_chatSession_userId_updateTime")
+        manager.add_index(["chat_type", "user_id"], index_name="idx_chatSession_chatType_userId")
+
+
+def init_chat_message_table():
+    """聊天消息表(通用, 机器人会话与用户间会话共用)"""
+    table_name = "chat_message"
+    comment = "聊天消息"
+    pk_name = "message_id"
+    with create_default_table_manager(table_name, comment=comment, pk_name=pk_name) as manager:
+        manager.add_column("create_time", "bigint", default_value=0, comment="创建时间(毫秒时间戳)")
+        manager.add_column("update_time", "bigint", default_value=0, comment="更新时间(毫秒时间戳)")
+
+        manager.add_column("session_id", "bigint", default_value=0, comment="会话ID")
+
+        # sender_type: user-用户, bot-机器人, system-系统
+        manager.add_column("sender_type", "varchar(16)", default_value="", comment="发送者类型")
+        manager.add_column("sender_id", "bigint", default_value=0, comment="发送者ID, bot为0")
+
+        manager.add_column("msg_type", "varchar(16)", default_value="text", comment="消息类型: text-文本")
+        manager.add_column("content", "text", default_value="", comment="消息内容")
+        manager.add_column("status", "tinyint", default_value=0, comment="状态: 0-正常, 1-已删除")
+
+        manager.add_index(["session_id", "message_id"], index_name="idx_chatMessage_sessionId_messageId")
+        manager.add_index(["sender_type", "create_time"], index_name="idx_chatMessage_senderType_createTime")
+
+    # 聊天消息量大, 不进入binlog/同步
+    TableConfig.disable_binlog(table_name)
+
 
 def init_share_info_table():
     comment = "分享记录"
@@ -1122,6 +1170,10 @@ def init():
     init_note_meta_table()
     init_note_fragment_table()
 
+    # 聊天相关(通用会话/消息存储, chatbot与未来的用户聊天共用)
+    init_chat_session_table()
+    init_chat_message_table()
+
     init_month_plan_index()
     init_txt_info_index()
 
@@ -1136,4 +1188,4 @@ def init():
     BinLog.init(get_table_by_name("system_sync_binlog"))
     
     # 更新schema版本, 年份.子版本号
-    xconfig.DatabaseConfig.db_schema_version = 2026.0
+    xconfig.DatabaseConfig.db_schema_version = 2026.1

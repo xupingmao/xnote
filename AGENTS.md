@@ -99,6 +99,41 @@ Python-side UI components extend `BaseComponent` (`xnote/webui/base.py`), provid
 
 Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `TextLink`, `ActionLink`, `Input`, `Textarea`, `Panel`, etc.
 
+## 前端命令机制 (`xnote.executeCommands`)
+
+**偏好**：新增带 DOM 更新的交互时，尽量由**后端用模板渲染好 HTML 片段**，再通过命令列表交给前端更新 DOM，**不要在前端手写字符串拼 HTML**（既能减少前端代码，也能借模板自动转义避免 XSS）。
+
+- 命令是一个数组，每项形如 `{command, id|name, value, delay}`：
+  - `command`：命令类型，见下
+  - `id`：目标元素 id（优先用 id，`findElement` 生成 `$("[id=xxx]")`）;不传则按 `name` 查找 `$("[name=xxx]")`
+  - `value`：命令参数（文本/HTML/提示语等）
+  - `delay`：延迟执行毫秒数（可选，默认 0）
+- 支持的类型：`update_value`(设置输入框值) / `update_text`(设置 text) / `update_html`(整体替换 innerHTML) / `append_html`(追加 HTML 片段) / `toast` / `alert` / `reload`。
+- 前端调用：`xnote.executeCommands(resp.data.commands)`（命令内部用 `setTimeout` 异步执行，前端若要在 DOM 更新后操作，需同样延后一拍）。
+
+后端组装方式（参考 `xnote_handlers/chatbot/chatbot_render.py`）：
+
+```python
+from typing import Any, Dict, List
+import xtemplate
+
+def render_message_rows(message_list):
+    # type: (list) -> str
+    # 注意 xtemplate.render 返回 bytes, 命令的 value 必须是 str
+    html = xtemplate.render("chatbot/component/message_rows.html",
+                            message_list=message_list)
+    return html.decode("utf-8") if isinstance(html, bytes) else html
+
+def build_send_commands(result):
+    # type: (...) -> List[Dict[str, Any]]
+    rows = render_message_rows([result.message, result.reply])
+    return [{"command": "append_html", "id": "message-list", "value": rows}]
+```
+
+把 `commands` 作为字段放进返回的 `XxxResult`（`BaseDataRecord` 子类，随 JSON 自动序列化），前端 `onSendSuccess` 里 `xnote.executeCommands(data.commands)` 即可。
+
+**JS 源文件注意**：`static/js/xnote-ui/x-init.js` 是带 JSDoc 的源码，`static/js/app.build.js` 是页面 `common/base_head.html` 实际加载的打包文件（已被 gitignore）。新增命令类型时需要**两处同步修改**。
+
 ## Properties config
 
 Custom `.properties` parser (`xutils.text_parser_properties.py`). Types declared as `key.type = bool|int`. Example:

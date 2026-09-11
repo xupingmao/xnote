@@ -1,0 +1,7 @@
+{% for item in session_list %}
+<a class="chat-session-item{% if current_session_id and item.session_id == current_session_id %} active{% end %}"
+   href="{{_server_home}}/chatbot?session_id={{item.session_id}}">
+  <div class="chat-session-title">{{item.title or "新会话"}}</div>
+  <div class="chat-session-desc">{{item.last_message}}</div>
+</a>
+{% end %}

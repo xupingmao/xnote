@@ -1,0 +1,125 @@
+/* 聊天机器人 */
+
+.chat-container {
+    display: flex;
+    min-height: 420px;
+}
+
+/* 左侧会话列表 */
+.chat-session-list {
+    width: 200px;
+    flex-shrink: 0;
+    border-right: 1px solid #eee;
+    overflow-y: auto;
+    max-height: 520px;
+}
+
+.chat-session-item {
+    display: block;
+    padding: 8px 10px;
+    border-bottom: 1px solid #f4f4f4;
+    color: #333;
+    text-decoration: none;
+}
+
+.chat-session-item:hover {
+    background-color: #f6f6f6;
+    text-decoration: none;
+}
+
+.chat-session-item.active {
+    background-color: #eaf4ff;
+}
+
+.chat-session-new {
+    color: #337ab7;
+    font-weight: bold;
+}
+
+.chat-session-title {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-session-desc {
+    font-size: 12px;
+    color: #999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 右侧消息区 */
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 10px;
+    min-width: 0;
+}
+
+.chat-message-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+    padding: 10px 0;
+}
+
+.chat-message-row {
+    margin-bottom: 12px;
+}
+
+.chat-message-bubble {
+    display: inline-block;
+    max-width: 75%;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #f2f2f2;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+.chat-message-bot .chat-message-bubble {
+    background-color: #eaf4ff;
+}
+
+.chat-message-user {
+    text-align: right;
+}
+
+.chat-message-user .chat-message-bubble {
+    background-color: #d9edf7;
+    text-align: left;
+}
+
+.chat-message-time {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 2px;
+}
+
+.chat-empty-tip {
+    padding: 20px 0;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+}
+
+/* 输入区 */
+.chat-input-box {
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+}
+
+.chat-input {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.chat-input-actions {
+    text-align: right;
+    padding: 6px 0;
+}

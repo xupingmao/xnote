@@ -102,6 +102,11 @@ def run_test(args: Namespace):
         py_exec(f"-m pytest tests/test_note.py --doctest-modules --cov xnote_handlers --capture {args.capture}")
         py_exec("-m coverage html -i")
         return
+
+    if target == "chatbot":
+        py_exec(f"-m pytest tests/test_chatbot.py --doctest-modules --cov xnote_handlers.chatbot --capture {args.capture}")
+        py_exec("-m coverage html -i")
+        return
     
     if target == "system_sync":
         py_exec(f"-m pytest tests/test_system_sync.py --doctest-modules --cov xnote_handlers.system.system_sync --capture {args.capture}")
