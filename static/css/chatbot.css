@@ -15,14 +15,21 @@
 }
 
 .chat-session-item {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid #f4f4f4;
+}
+
+.chat-session-link {
+    flex: 1;
+    min-width: 0;
     display: block;
     padding: 8px 10px;
-    border-bottom: 1px solid #f4f4f4;
     color: #333;
     text-decoration: none;
 }
 
-.chat-session-item:hover {
+.chat-session-link:hover {
     background-color: #f6f6f6;
     text-decoration: none;
 }
@@ -31,9 +38,28 @@
     background-color: #eaf4ff;
 }
 
+.chat-session-delete {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: #bbb;
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
+}
+
+.chat-session-delete:hover {
+    color: #d9534f;
+}
+
+/* "新建会话"入口(仍是纯链接) */
 .chat-session-new {
+    display: block;
+    padding: 8px 10px;
     color: #337ab7;
     font-weight: bold;
+    text-decoration: none;
 }
 
 .chat-session-title {
@@ -122,4 +148,96 @@
 .chat-input-actions {
     text-align: right;
     padding: 6px 0;
+}
+
+/* ===== 移动端布局 ===== */
+.chat-mobile {
+    display: flex;
+    flex-direction: column;
+    height: 78vh;
+    padding: 0;
+    overflow: hidden;
+}
+
+.chat-mobile-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.chat-mobile-toggle {
+    margin-right: 8px;
+}
+
+.chat-mobile-title {
+    flex: 1;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-session-mask {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 50;
+}
+
+.chat-session-mask.open {
+    display: block;
+}
+
+.chat-session-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 75%;
+    max-width: 320px;
+    background: #fff;
+    z-index: 51;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+}
+
+.chat-session-drawer.open {
+    transform: translateX(0);
+}
+
+.chat-session-drawer-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.chat-session-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.chat-mobile .chat-message-list {
+    flex: 1;
+    max-height: none;
+    overflow-y: auto;
+}
+
+.chat-input-box-fixed {
+    border-top: 1px solid #eee;
+    padding: 8px 10px;
+    flex-shrink: 0;
 }

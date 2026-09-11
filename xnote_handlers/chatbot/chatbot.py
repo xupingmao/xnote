@@ -39,14 +39,14 @@ class ChatBotHandler:
                 current.session_id, limit=MESSAGE_LIMIT).messages
 
         kw = Storage()
-        kw.title = "聊天机器人"
+        kw.title = "聊天助手"
         kw.parent_link = LinkConfig.app_index
         kw.session_list = session_result.sessions
         kw.current_session = current
         kw.current_session_id = current.session_id if current else 0
         kw.message_list = message_list
         kw.aside_html = AsideConfig.default_aside_html
-        return xtemplate.render("chatbot/page/chatbot.html", **kw)
+        return xtemplate.render_by_ua("chatbot/page/chatbot.html", **kw)
 
     def get_current_session(self, action: str, session_id: int, user_id: int,
                             session_list: List[ChatSessionRecord]

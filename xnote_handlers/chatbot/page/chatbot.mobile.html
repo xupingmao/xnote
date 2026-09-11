@@ -1,0 +1,53 @@
+{% extends base.html %}
+
+{% block head %}
+<link rel="stylesheet" href="{{_server_home}}/_static/css/chatbot.css?ts={{_ts}}"/>
+{% end %}
+
+{% block body %}
+
+<div class="card chat-mobile">
+  <div class="chat-mobile-bar">
+    <button type="button" id="chat-session-toggle" class="btn btn-default chat-mobile-toggle">☰ 会话</button>
+    <div class="chat-mobile-title" id="chat-mobile-title">{% if current_session %}{{current_session.title}}{% else %}聊天助手{% end %}</div>
+  </div>
+
+  <div class="chat-session-mask" id="chat-session-mask"></div>
+  <div class="chat-session-drawer" id="chat-session-drawer">
+    <div class="chat-session-drawer-head">
+      <span>会话列表</span>
+      <a class="chat-session-new" href="?action=new">+ 新建</a>
+    </div>
+    <div id="session-list-inner" class="chat-session-drawer-body">
+      {% include chatbot/component/session_list.html %}
+    </div>
+  </div>
+
+  <div class="chat-message-list" id="message-list">
+    {% if not current_session %}
+    <div class="chat-empty-tip" id="chat-empty-tip">新会话, 发送第一条消息后自动创建</div>
+    {% end %}
+    {% for msg in message_list %}
+    <div class="chat-message-row{% if msg.is_bot %} chat-message-bot{% else %} chat-message-user{% end %}">
+      <div class="chat-message-bubble">{{msg.content}}</div>
+      <div class="chat-message-time">{{msg.time_str}}</div>
+    </div>
+    {% end %}
+  </div>
+
+  <div class="chat-input-box chat-input-box-fixed">
+    <textarea id="chat-input" class="chat-input" rows="1"
+              placeholder="输入消息, Ctrl+Enter 发送"></textarea>
+    <div class="chat-input-actions">
+      <button id="chat-send-btn" class="btn btn-default">发送</button>
+    </div>
+  </div>
+</div>
+
+<input type="hidden" id="current-session-id" value="{{current_session_id}}"/>
+
+<script type="text/javascript" src="{{_server_home}}/_static/js/chatbot/chatbot.js?ts={{_ts}}"></script>
+
+{% end %}
+
+{% block body_right %}{% end %}

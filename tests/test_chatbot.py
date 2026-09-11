@@ -3,7 +3,7 @@
 
 from .test_base import json_request_return_dict, request_html, BaseTestCase
 from .test_base import init as init_app
-from xnote.core import xauth
+from xnote.core import xauth, xtemplate
 from xnote_handlers.chatbot import dao, reply_engine
 from xnote_handlers.chatbot.chat_service import ChatService
 from xnote_handlers.chatbot.chatbot_service import ChatBotService
@@ -505,3 +505,40 @@ class TestChatBotPage(BaseTestCase):
     def test_new_session_link_points_to_action_new(self):
         html = self.get_html("/chatbot")
         assert "/chatbot?action=new" in html
+
+    def test_page_has_delete_button(self):
+        # 桌面端会话列表项带删除按钮
+        assert "chat-session-delete" in self.get_html("/chatbot")
+
+    def test_mobile_template_is_wired(self):
+        # render_by_ua 在移动端 UA 下应自动选中 .mobile.html
+        mobile = xtemplate.get_mobile_template("chatbot/page/chatbot.html")
+        assert mobile == "chatbot/page/chatbot.mobile.html"
+
+    def test_mobile_page_renders(self):
+        session = ChatSessionRecord()
+        session.session_id = 1
+        session.title = "移动端会话"
+        session.last_message = "摘要"
+        msg = ChatMessageRecord()
+        msg.content = "你好"
+        msg.create_time = 0
+        msg.sender_type = SenderType.user
+
+        html = xtemplate.render(
+            "chatbot/page/chatbot.mobile.html",
+            title="聊天助手",
+            parent_link=None,
+            session_list=[session],
+            current_session=session,
+            current_session_id=1,
+            message_list=[msg],
+            aside_html="",
+        ).decode("utf-8")
+
+        assert "chat-mobile" in html
+        assert "chat-session-drawer" in html
+        # 移动端同样通过 include 渲染删除按钮
+        assert "chat-session-delete" in html
+        # 当前会话标题应渲染出来
+        assert "移动端会话" in html
