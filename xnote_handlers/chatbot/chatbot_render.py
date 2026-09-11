@@ -8,7 +8,7 @@ update_html / update_value 等), 从而减少前端渲染代码、避免 XSS。
 
 from typing import Any, Dict, List, Optional
 
-import xtemplate
+from xnote.core import xtemplate
 
 from .models import ChatMessageRecord, ChatSessionRecord, SendMessageResult
 
