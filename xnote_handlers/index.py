@@ -56,7 +56,7 @@ class Unauthorized():
 class FaviconHandler:
 
     def GET(self):
-        raise web.found("/static/favicon.ico")
+        raise web.found("/_static/favicon.ico")
 
 xurls = (
     r"/", IndexHandler,

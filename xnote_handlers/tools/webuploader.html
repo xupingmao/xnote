@@ -2,8 +2,8 @@
 
 {% block head %}
 
-    <link rel="stylesheet" type="text/css" href="{{_server_home}}/static/lib/webuploader/webuploader.css">
-    <script type="text/javascript" src="/static/lib/webuploader/webuploader.nolog.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/webuploader/webuploader.css">
+    <script type="text/javascript" src="/_static/lib/webuploader/webuploader.nolog.min.js"></script>
 <style type="text/css">
     .progress {
         background-color: #ffcccc;
@@ -50,7 +50,7 @@
 </div>
 
 <script type="text/javascript">
-var BASE_URL = "/static/lib/webuploader"
+var BASE_URL = "/_static/lib/webuploader"
 $("#target-path").text(location.hash.substr(1)).attr("href", "/fs/" + location.hash.substr(1));
 // 初始化Web Uploader
 var uploader = WebUploader.create({

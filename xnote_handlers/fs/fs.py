@@ -452,7 +452,7 @@ def check_token_or_admin():
         
 
 class StaticFileHandler(FileSystemHandler):
-    allowed_prefix = ["static", "img", "app", "files", "tmp", "scripts"]
+    allowed_prefix = ["static", "_static", "img", "app", "files", "tmp", "scripts"]
 
     def is_path_allowed(self, path):
         if ".." in path:
@@ -470,15 +470,15 @@ class StaticFileHandler(FileSystemHandler):
             check_token_or_admin()
 
         data_prefix = u(xconfig.DATA_DIR)
-        if not path.startswith("static"):
+        if not (path.startswith("static") or path.startswith("_static")):
             newpath = os.path.join(data_prefix, path)
         else:
-            # /static/xxx 文件
+            # /_static/xxx 文件（static 目录已重命名为 _static）
             newpath = xconfig.resolve_config_path(path)
             # 兼容static目录数据
             if not os.path.exists(newpath):
-                static_prefix_len = len("static/")
-                newpath = os.path.join(data_prefix, path[static_prefix_len:])
+                prefix_len = len("static/") if path.startswith("static") else len("_static/")
+                newpath = os.path.join(data_prefix, path[prefix_len:])
 
         path = xutils.get_real_path(newpath)
         if not os.path.isfile(path):
@@ -790,9 +790,8 @@ xurls = (
     r"/fs/~(.*)", FileSystemHandler,
     r"/fs_download", DownloadHandler,
     r"/fs_get"     , GetFileHandler,
-    r"/(static/.*)", StaticFileHandler,
-    # `/static/.*` 路径是`web.py`自带的中间件处理的，优先级更高，所以这里加了一个前缀用以区分
-    r"/_(static/.*)", StaticFileHandler,
+    # `/_static/.*` 路径由自定义 handler 处理（绕过 web.py 自带的 static 中间件）
+    r"/(_static/.*)", StaticFileHandler,
     r"/data/(.*)", StaticFileHandler,
     r"/(app/.*)", StaticFileHandler,
     r"/(tmp/.*)", StaticFileHandler,

@@ -74,7 +74,7 @@ def get_server_ip():
 @xmanager.searchable('addr')
 def show_addr_qrcode(ctx: SearchContext):
     index = 0
-    ctx.init_html += """<script type="text/javascript" src="/static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>"""
+    ctx.init_html += """<script type="text/javascript" src="/_static/lib/jquery.qrcode/jquery.qrcode.min.js"></script>"""
     
     for server_ip in get_ip_list():
         index += 1

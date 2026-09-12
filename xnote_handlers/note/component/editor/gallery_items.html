@@ -57,14 +57,14 @@ xnote.execute(function () {
                 <div class="gallery-item context-menu-one">
                     <div class="icon-box">
                         {% if item.type == "dir" %}
-                            <img class="fs-icon" src="/static/image/folder2.png">
+                            <img class="fs-icon" src="/_static/image/folder2.png">
                         {% elif xutils.is_img_file(item.path) %}
                             <img class="x-photo" src="{{_server_home}}/data/files/{{quote(item.path)}}?mode=thumbnail" 
                                 data-src="/data/files/{{quote(item.path)}}" loading="lazy">
                         {% elif xutils.is_text_file(item.path) %}
-                            <img class="fs-icon" src="/static/image/icon_txt.png">
+                            <img class="fs-icon" src="/_static/image/icon_txt.png">
                         {% else %}
-                            <img class="fs-icon" src="/static/image/file2.png">
+                            <img class="fs-icon" src="/_static/image/file2.png">
                         {% end %}
                     </div>
                 </div>

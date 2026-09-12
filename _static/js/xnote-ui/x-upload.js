@@ -2,7 +2,7 @@
  * xnote的公有方法
  */
 
-var BASE_URL = "/static/lib/webuploader";
+var BASE_URL = "/_static/lib/webuploader";
 
 function createXnoteLoading() {
     return loadingIndex = layer.load(2);

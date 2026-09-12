@@ -22,7 +22,7 @@
 
 .icon-next, .icon-right {
     display: block;
-    background-image: url(/static/image/icon_right.png);
+    background-image: url(/_static/image/icon_right.png);
     background-size: cover;
     width: 16px;
     height: 16px;
@@ -30,7 +30,7 @@
 
 .icon-folder-system {
     display: inline-block;
-    background-image: url(/static/image/icon_folder_settings.png);
+    background-image: url(/_static/image/icon_folder_settings.png);
     background-size: cover;
     width: 16px;
     height: 16px;
@@ -47,7 +47,7 @@
     width: 16px;
     height: 16px;
     background-size: cover;
-    background-image: url(/static/image/icon_script.svg);
+    background-image: url(/_static/image/icon_script.svg);
 }
 
 .icon-dict {
@@ -58,7 +58,7 @@
     width: 16px;
     height: 16px;
     background-size: cover;
-    background-image: url(/static/image/icon_dict.svg);
+    background-image: url(/_static/image/icon_dict.svg);
 }
 
 .icon-barcode {
@@ -69,7 +69,7 @@
     width: 16px;
     height: 16px;
     background-size: cover;
-    background-image: url(/static/image/icons/icon_barcode.png);
+    background-image: url(/_static/image/icons/icon_barcode.png);
 }
 
 .icon-network {
@@ -80,7 +80,7 @@
     width: 16px;
     height: 16px;
     background-size: cover;
-    background-image: url(/static/image/icons/icon_network.png);
+    background-image: url(/_static/image/icons/icon_network.png);
 }
 
 .icon-network-14px {
@@ -91,7 +91,7 @@
     width: 14px;
     height: 14px;
     background-size: cover;
-    background-image: url(/static/image/icons/icon_network.png);
+    background-image: url(/_static/image/icons/icon_network.png);
 }
 
 
@@ -103,13 +103,13 @@
     width: 16px;
     height: 16px;
     background-size: cover;
-    background-image: url(/static/image/icons/icon_work.png);
+    background-image: url(/_static/image/icons/icon_work.png);
 }
 
 .icon-terminal {
-    background-image: url(/static/image/icons/icon_terminal.png);
+    background-image: url(/_static/image/icons/icon_terminal.png);
 }
 
 .icon-shell {
-    background-image: url(/static/image/icons/icon_shell.png);
+    background-image: url(/_static/image/icons/icon_shell.png);
 }

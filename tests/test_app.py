@@ -75,7 +75,7 @@ class TestMain(BaseTestCase):
             self.assertEqual("C:/data/name/", item2.path)
 
     def test_static_files(self):
-        self.check_200("/static/lib/jquery/jquery-1.12.4.min.js")
+        self.check_200("/_static/lib/jquery/jquery-1.12.4.min.js")
         # 禁止直接访问目录
         self.check_404("/static/")
 

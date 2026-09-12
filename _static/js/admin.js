@@ -4,7 +4,7 @@
  * @Date         : 2023-11-18 22:14:37
  * @LastEditors  : xupingmao
  * @LastEditTime : 2024-05-03 14:55:44
- * @FilePath     : /xnote/static/js/admin.js
+ * @FilePath     : /xnote/_static/js/admin.js
  * @Description  : 后台管理脚本
  */
 

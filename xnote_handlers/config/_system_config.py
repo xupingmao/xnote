@@ -108,7 +108,7 @@ SYS_TOOLS: List[AppLink] = [
     admin_link("事件注册", "/system/event"),
     admin_link("线程管理", "/system/thread_info"),
     admin_link("Menu_Log",    "/system/log/db"),
-    admin_link("Shell",    "/tools/shell", img_src="/static/image/icons/icon_terminal.png"),
+    admin_link("Shell",    "/tools/shell", img_src="/_static/image/icons/icon_terminal.png"),
     admin_link("集群管理", "/system/sync?p=home", "server"),
     admin_link("开发者", "/plugin_list?category=develop", icon="fa-code"),
 
@@ -127,7 +127,7 @@ NOTE_TOOLS: List[AppLink] = [
     user_link("我的动态", "/note/recent?orderby=update", icon="paper-plane"),
     user_link("时光轴", "/note/timeline?type=all", icon="hourglass-start"),
     # 词典可以用 language 图标
-    user_link("词典", "/note/dict", img_src="/static/image/icon_dict.svg"),
+    user_link("词典", "/note/dict", img_src="/_static/image/icon_dict.svg"),
     user_link("搜索历史", "/search", "search"),
     user_link("上传管理", "/fs_upload/manage", "upload"),
     user_link("数据统计", "/note/stat", "bar-chart"),
