@@ -8,7 +8,7 @@ import time
 import web
 import math
 
-from typing import Optional, List
+from typing import Optional, List, Union
 from http.server import BaseHTTPRequestHandler
 from io import BytesIO
 from web import utils
@@ -311,8 +311,8 @@ class WebException(Exception):
         self.code = code
         self.message = message
         
-class CommandItem(web.Storage):
-    def __init__(self, command = "", id = "", name = "", value = "", delay = 0):
+class CommandItem(web.Storage):    
+    def __init__(self, command = "", id = "", name = "", value: Union[str, int] = "", delay = 0):
         self.command = command
         self.id = id
         self.name = name

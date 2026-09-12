@@ -53,6 +53,36 @@
     color: #d9534f;
 }
 
+.chat-session-rename {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    color: #bbb;
+    cursor: pointer;
+    font-size: 16px;
+    user-select: none;
+}
+
+.chat-session-rename:hover {
+    color: #337ab7;
+}
+
+.chat-session-top {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    color: #bbb;
+    cursor: pointer;
+    font-size: 15px;
+    user-select: none;
+}
+
+.chat-session-top.on {
+    color: #f0ad4e;
+}
+
 /* "新建会话"入口(仍是纯链接) */
 .chat-session-new {
     display: block;

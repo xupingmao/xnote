@@ -7,6 +7,7 @@ from xnote.core import xauth, xtemplate
 from xnote_handlers.chatbot import dao, reply_engine
 from xnote_handlers.chatbot.chat_service import ChatService
 from xnote_handlers.chatbot.chatbot_service import ChatBotService
+from xnote_handlers.chatbot import chatbot_render
 from xnote_handlers.chatbot.models import (
     ChatMessageRecord,
     ChatSessionRecord,
@@ -233,6 +234,35 @@ class TestChatService(BaseTestCase):
         session = ChatService.create_session(25, ChatType.bot)
         assert ChatService.delete_session(session.session_id, 999) is False
         assert dao.ChatSessionDao.get_by_id(session.session_id) is not None
+
+    def test_rename_session(self):
+        session = ChatService.create_session(26, ChatType.bot, "旧标题")
+        updated = ChatService.rename_session(session.session_id, 26, "新标题")
+        assert updated is not None
+        assert updated.title == "新标题"
+        assert dao.ChatSessionDao.get_by_id(session.session_id).title == "新标题"
+
+    def test_rename_session_of_other_user_fails(self):
+        session = ChatService.create_session(27, ChatType.bot)
+        # 其他用户重命名返回 None
+        assert ChatService.rename_session(session.session_id, 999, "x") is None
+
+    def test_top_session_toggle(self):
+        session = ChatService.create_session(28, ChatType.bot)
+        assert session.is_top == 0
+
+        updated = ChatService.top_session(session.session_id, 28)
+        assert updated is not None
+        assert updated.is_top == 1
+        assert dao.ChatSessionDao.get_by_id(session.session_id).is_top == 1
+
+        # 再次切换取消置顶
+        updated2 = ChatService.top_session(session.session_id, 28)
+        assert updated2.is_top == 0
+
+    def test_top_session_of_other_user_fails(self):
+        session = ChatService.create_session(29, ChatType.bot)
+        assert ChatService.top_session(session.session_id, 999) is None
 
 
 class TestReplyEngine(BaseTestCase):
@@ -467,6 +497,111 @@ class TestChatBotApi(BaseTestCase):
         assert resp["success"] == False
         assert resp["code"] == "400"
 
+    def test_session_rename(self):
+        create_resp = json_request_return_dict(
+            "/api/chatbot/session/create", method="POST",
+            data=dict(title="待重命名"))
+        assert create_resp["success"] == True
+        session_id = create_resp["data"]["session_id"]
+
+        resp = json_request_return_dict(
+            "/api/chatbot/session/rename", method="POST",
+            data=dict(session_id=session_id, title="已重命名"))
+        assert resp["success"] == True
+        assert dao.ChatSessionDao.get_by_id(session_id).title == "已重命名"
+
+    def test_session_rename_empty_title(self):
+        create_resp = json_request_return_dict(
+            "/api/chatbot/session/create", method="POST",
+            data=dict(title="t"))
+        session_id = create_resp["data"]["session_id"]
+        resp = json_request_return_dict(
+            "/api/chatbot/session/rename", method="POST",
+            data=dict(session_id=session_id, title="  "))
+        assert resp["success"] == False
+        assert resp["code"] == "400"
+
+    def test_session_rename_invalid_session(self):
+        resp = json_request_return_dict(
+            "/api/chatbot/session/rename", method="POST",
+            data=dict(session_id=999999, title="x"))
+        assert resp["success"] == False
+        assert resp["code"] == "404"
+
+    def test_session_rename_returns_commands(self):
+        create_resp = json_request_return_dict(
+            "/api/chatbot/session/create", method="POST",
+            data=dict(title="待重命名"))
+        session_id = create_resp["data"]["session_id"]
+
+        resp = json_request_return_dict(
+            "/api/chatbot/session/rename", method="POST",
+            data=dict(session_id=session_id, title="已重命名",
+                      current_session_id=session_id))
+        assert resp["success"] == True
+        # 后端通过命令刷新会话列表, 不再由前端手写 DOM
+        commands = resp["data"]["commands"]
+        assert any(c["command"] == "update_html" and c["id"] == "session-list-inner"
+                   for c in commands)
+        # 当前会话同步移动端标题
+        assert any(c["command"] == "update_text" and c["id"] == "chat-mobile-title"
+                   for c in commands)
+
+    def test_session_delete_returns_commands(self):
+        create_resp = json_request_return_dict(
+            "/api/chatbot/session/create", method="POST",
+            data=dict(title="待删除的会话"))
+        session_id = create_resp["data"]["session_id"]
+
+        resp = json_request_return_dict(
+            "/api/chatbot/session/delete", method="POST",
+            data=dict(session_id=session_id, current_session_id=session_id))
+        assert resp["success"] == True
+        commands = resp["data"]["commands"]
+        # 刷新左侧会话列表
+        assert any(c["command"] == "update_html" and c["id"] == "session-list-inner"
+                   for c in commands)
+        # 删除的是当前会话, 右侧重置为空状态
+        assert any(c["command"] == "update_html" and c["id"] == "message-list"
+                   for c in commands)
+        assert any(c["command"] == "update_value" and c["id"] == "current-session-id"
+                   for c in commands)
+        assert any(c["command"] == "update_text" and c["id"] == "chat-mobile-title"
+                   for c in commands)
+
+    def test_session_top(self):
+        create_resp = json_request_return_dict(
+            "/api/chatbot/session/create", method="POST",
+            data=dict(title="待置顶"))
+        session_id = create_resp["data"]["session_id"]
+
+        resp = json_request_return_dict(
+            "/api/chatbot/session/top", method="POST",
+            data=dict(session_id=session_id))
+        assert resp["success"] == True
+        assert resp["data"]["is_top"] == 1
+        # 后端刷新了会话列表
+        assert any(c["command"] == "update_html" for c in resp["data"]["commands"])
+
+        resp2 = json_request_return_dict(
+            "/api/chatbot/session/top", method="POST",
+            data=dict(session_id=session_id))
+        assert resp2["data"]["is_top"] == 0
+
+    def test_session_top_invalid_id(self):
+        resp = json_request_return_dict(
+            "/api/chatbot/session/top", method="POST",
+            data=dict(session_id=0))
+        assert resp["success"] == False
+        assert resp["code"] == "400"
+
+    def test_session_top_invalid_session(self):
+        resp = json_request_return_dict(
+            "/api/chatbot/session/top", method="POST",
+            data=dict(session_id=999999))
+        assert resp["success"] == False
+        assert resp["code"] == "404"
+
 
 class TestChatBotPage(BaseTestCase):
 
@@ -510,6 +645,14 @@ class TestChatBotPage(BaseTestCase):
         # 桌面端会话列表项带删除按钮
         assert "chat-session-delete" in self.get_html("/chatbot")
 
+    def test_page_has_rename_button(self):
+        # 桌面端会话列表项带重命名按钮
+        assert "chat-session-rename" in self.get_html("/chatbot")
+
+    def test_page_has_top_button(self):
+        # 桌面端会话列表项带置顶按钮
+        assert "chat-session-top" in self.get_html("/chatbot")
+
     def test_mobile_template_is_wired(self):
         # render_by_ua 在移动端 UA 下应自动选中 .mobile.html
         mobile = xtemplate.get_mobile_template("chatbot/page/chatbot.html")
@@ -529,7 +672,7 @@ class TestChatBotPage(BaseTestCase):
             "chatbot/page/chatbot.mobile.html",
             title="聊天助手",
             parent_link=None,
-            session_list=[session],
+            session_list_html=chatbot_render.render_session_list([session], 1),
             current_session=session,
             current_session_id=1,
             message_list=[msg],
@@ -538,7 +681,7 @@ class TestChatBotPage(BaseTestCase):
 
         assert "chat-mobile" in html
         assert "chat-session-drawer" in html
-        # 移动端同样通过 include 渲染删除按钮
+        # 移动端同样通过后端渲染的 session_list_html 渲染操作按钮
         assert "chat-session-delete" in html
         # 当前会话标题应渲染出来
         assert "移动端会话" in html

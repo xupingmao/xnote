@@ -55,7 +55,7 @@ class ChatSessionDao:
 
         results = cls.db.select(where=where, offset=check_offset(offset),
                                 limit=check_limit(limit),
-                                order="update_time desc")
+                                order="is_top desc, update_time desc")
         return ChatSessionRecord.from_dict_list(results)
 
     @classmethod

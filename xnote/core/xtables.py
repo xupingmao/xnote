@@ -341,8 +341,12 @@ def init_chat_session_table():
 
         manager.add_column("last_message", "text", default_value="", comment="最后一条消息摘要")
 
+        # is_top: 0-否, 1-是; 置顶会话排在列表最前
+        manager.add_column("is_top", "tinyint", default_value=0, comment="是否置顶: 0-否, 1-是")
+
         # 注: 不设"对端"字段(peer_id/target_id), 未来用户间会话用 chat_member 成员表表达
         manager.add_index(["user_id", "update_time"], index_name="idx_chatSession_userId_updateTime")
+        manager.add_index(["user_id", "is_top", "update_time"], index_name="idx_chatSession_userId_isTop_updateTime")
         manager.add_index(["chat_type", "user_id"], index_name="idx_chatSession_chatType_userId")
 
 

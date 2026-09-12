@@ -1,6 +1,0 @@
-{% for msg in message_list %}
-<div class="chat-message-row{% if msg.is_bot %} chat-message-bot{% else %} chat-message-user{% end %}">
-  <div class="chat-message-bubble">{{msg.content}}</div>
-  <div class="chat-message-time">{{msg.time_str}}</div>
-</div>
-{% end %}

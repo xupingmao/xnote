@@ -1,6 +1,7 @@
 {% extends base.html %}
 
 {% block head %}
+<link rel="stylesheet" href="{{_server_home}}/_static/css/base/common-dropdown.css?ts={{_ts}}"/>
 <link rel="stylesheet" href="{{_server_home}}/_static/css/chatbot.css?ts={{_ts}}"/>
 {% end %}
 
@@ -19,7 +20,7 @@
       <a class="chat-session-new" href="?action=new">+ 新建</a>
     </div>
     <div id="session-list-inner" class="chat-session-drawer-body">
-      {% include chatbot/component/session_list.html %}
+      {% raw session_list_html %}
     </div>
   </div>
 

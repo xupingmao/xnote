@@ -7,6 +7,7 @@ from xutils import webutil
 
 from .chat_service import ChatService
 from .chatbot_service import ChatBotService
+from . import chatbot_render
 from .dao import DEFAULT_LIMIT
 from .models import ChatType
 
@@ -56,13 +57,77 @@ class SessionDeleteHandler:
     def POST(self):
         user_id = xauth.current_user_id()
         session_id = xutils.get_argument_int("session_id")
+        current_session_id = xutils.get_argument_int("current_session_id")
 
         if session_id <= 0:
             return webutil.FailedResult(code="400", message="会话ID不合法")
 
         if not ChatService.delete_session(session_id, user_id):
             return webutil.FailedResult(code="404", message="会话不存在")
-        return webutil.SuccessResult(message="删除成功")
+
+        # 后端重新渲染会话列表, 通过命令交给前端 executeCommands 更新 DOM
+        session_list = ChatService.list_sessions(user_id, ChatType.bot).sessions
+        commands = [chatbot_render.build_session_list_command(
+            session_list, current_session_id)]
+        if current_session_id == session_id:
+            # 删除的是当前会话, 右侧消息区重置为空状态
+            commands.extend(chatbot_render.build_empty_state_commands())
+        return webutil.SuccessResult(data={"commands": commands})
+
+
+class SessionRenameHandler:
+    """重命名会话"""
+
+    @xauth.login_required()
+    def POST(self):
+        user_id = xauth.current_user_id()
+        session_id = xutils.get_argument_int("session_id")
+        current_session_id = xutils.get_argument_int("current_session_id")
+        title = xutils.get_argument_str("title").strip()
+
+        if session_id <= 0:
+            return webutil.FailedResult(code="400", message="会话ID不合法")
+        if title == "":
+            return webutil.FailedResult(code="400", message="标题不能为空")
+
+        session = ChatService.rename_session(session_id, user_id, title)
+        if session is None:
+            return webutil.FailedResult(code="404", message="会话不存在")
+
+        # 后端重新渲染会话列表, 通过命令交给前端 executeCommands 更新 DOM
+        session_list = ChatService.list_sessions(user_id, ChatType.bot).sessions
+        commands = [chatbot_render.build_session_list_command(
+            session_list, current_session_id)]
+        if current_session_id == session_id:
+            # 当前会话同步移动端标题
+            commands.append(webutil.CommandItem(
+                command="update_text", id="chat-mobile-title", value=session.title))
+        return webutil.SuccessResult(data={"commands": commands})
+
+
+class SessionTopHandler:
+    """置顶/取消置顶会话"""
+
+    @xauth.login_required()
+    def POST(self):
+        user_id = xauth.current_user_id()
+        session_id = xutils.get_argument_int("session_id")
+
+        if session_id <= 0:
+            return webutil.FailedResult(code="400", message="会话ID不合法")
+
+        session = ChatService.top_session(session_id, user_id)
+        if session is None:
+            return webutil.FailedResult(code="404", message="会话不存在")
+
+        # 刷新左侧会话列表(置顶项自动排到最前), 高亮保持当前会话
+        current_session_id = xutils.get_argument_int("current_session_id")
+        session_list = ChatService.list_sessions(user_id, ChatType.bot).sessions
+        html = chatbot_render.render_session_list(session_list, current_session_id)
+        commands = [webutil.CommandItem(
+            command="update_html", id="session-list-inner", value=html)]
+        return webutil.SuccessResult(
+            data={"commands": commands, "is_top": session.is_top})
 
 
 class MessageListHandler:
@@ -106,6 +171,8 @@ xurls = (
     r"/api/chatbot/session/list", SessionListHandler,
     r"/api/chatbot/session/create", SessionCreateHandler,
     r"/api/chatbot/session/delete", SessionDeleteHandler,
+    r"/api/chatbot/session/rename", SessionRenameHandler,
+    r"/api/chatbot/session/top", SessionTopHandler,
     r"/api/chatbot/message/list", MessageListHandler,
     r"/api/chatbot/send", SendMessageHandler,
 )

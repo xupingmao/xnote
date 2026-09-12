@@ -56,6 +56,7 @@ class ChatSessionRecord(BaseDataRecord):
         self.status = MsgStatus.normal
         self.user_id = 0
         self.last_message = ""
+        self.is_top = 0
 
     @property
     def ctime_str(self) -> str:

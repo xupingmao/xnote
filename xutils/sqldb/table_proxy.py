@@ -147,7 +147,7 @@ class TableProxy(SQLDBInterface):
             cost_time = time.time() - start_time
             self._add_profile_log(cost_time, "update", _skip_profile=_skip_profile)
 
-    def delete(self, where, using=None, vars=None, _test=False):
+    def delete(self, where, using=None, vars=None, _test=False) -> int:
         self.check_write_state()
         if _test:
             # delete为了记录binlog会转换成按照主键删除的sql, 所以这里单独处理下_test场景
@@ -168,7 +168,7 @@ class TableProxy(SQLDBInterface):
             cost_time = time.time() - start_time
             self._add_profile_log(cost_time, "delete")
 
-    def _delete_with_binlog(self, where, vars):
+    def _delete_with_binlog(self, where, vars) -> int:
         pk_name = self.table_info.pk_name
         pk_list = []
 
@@ -182,6 +182,8 @@ class TableProxy(SQLDBInterface):
             result = self.db.delete(self.tablename, where=new_where, vars=new_vars)
             self._add_delete_binlog(pk_list)
             return result
+        
+        return 0
     
     def transaction(self):
         return self.db.transaction()

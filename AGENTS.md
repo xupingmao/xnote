@@ -8,6 +8,8 @@
 - 可自动化：开发完一个功能后，需要补充对应的自动化测试脚本并且测试通过
 - 前端弹窗：alert/confirm/prompt 统一使用 `xnote` 模块的函数（`xnote.alert` / `xnote.confirm` / `xnote.prompt` / `xnote.toast`，定义于 `static/js/xnote-ui/x-dialog.js`），**不要直接使用** `window.alert` / `window.confirm` / `window.prompt`。这些函数是回调式的（非返回值）：`xnote.confirm(msg, function (ok) { if (ok) {...} })`，其中 `ok === true` 表示确认；`xnote.prompt(title, defaultValue, callback)` 在 `callback(newValue)` 中拿结果；无 layer 时内部才会回退到原生实现。
 - 结构化对象优先：设计接口（函数/方法）的输入输出参数时，优先使用结构化的对象（自定义类，如 `XxxResult`/`XxxInfo`），而不是裸 `dict`。兼容 Python 3.6 不可用 `dataclass` 时，用普通类实现，并通过 `from_dict` / `to_dict` 与 JSON 互转；类的字段用类型注解明确标注。
+- 小模板内联：小于 20 行的 HTML 模板直接放在 Python 代码里，用 `xtemplate.render_text(text, template_name, **kw)` 渲染，不要单独建 `.html` 模板文件。大于 20 行的模板才放 `xnote_handlers/` 下单独的模板文件中。
+- webui 组件 CSS 放公共文件：`xnote/webui/` 下的组件是公共组件，其样式不要写在业务模块的 css 里，统一放到 `static/css/base/common-*.css`（例如下拉/更多操作菜单放 `common-dropdown.css`）。注意 `common-*.css` 经打包进入 `static/css/app.build.css`（全局加载），但若未重新执行构建脚本，本地开发可在使用组件的页面直接 `<link>` 该 `common-*.css` 使其立即生效。
 
 ## REST API 约定
 
@@ -110,25 +112,27 @@ Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `
   - `value`：命令参数（文本/HTML/提示语等）
   - `delay`：延迟执行毫秒数（可选，默认 0）
 - 支持的类型：`update_value`(设置输入框值) / `update_text`(设置 text) / `update_html`(整体替换 innerHTML) / `append_html`(追加 HTML 片段) / `toast` / `alert` / `reload`。
+- **命令项必须用 `webutil.CommandItem` 构造，不要直接拼 dict**（`webutil.CommandItem(command=..., id=..., value=..., delay=...)` 继承 `web.Storage`，随 JSON 自动序列化，字段更明确、不易拼错 key）。
 - 前端调用：`xnote.executeCommands(resp.data.commands)`（命令内部用 `setTimeout` 异步执行，前端若要在 DOM 更新后操作，需同样延后一拍）。
 
 后端组装方式（参考 `xnote_handlers/chatbot/chatbot_render.py`）：
 
 ```python
-from typing import Any, Dict, List
-import xtemplate
+from typing import List
+from xnote.core import xtemplate
+from xutils import webutil
 
 def render_message_rows(message_list):
     # type: (list) -> str
-    # 注意 xtemplate.render 返回 bytes, 命令的 value 必须是 str
-    html = xtemplate.render("chatbot/component/message_rows.html",
-                            message_list=message_list)
+    # 注意 xtemplate.render_text 返回 bytes, 命令的 value 必须是 str
+    html = xtemplate.render_text(_MESSAGE_ROWS_TEMPLATE, message_list=message_list)
     return html.decode("utf-8") if isinstance(html, bytes) else html
 
 def build_send_commands(result):
-    # type: (...) -> List[Dict[str, Any]]
+    # type: (...) -> List[webutil.CommandItem]
     rows = render_message_rows([result.message, result.reply])
-    return [{"command": "append_html", "id": "message-list", "value": rows}]
+    return [webutil.CommandItem(command="append_html",
+                                id="message-list", value=rows)]
 ```
 
 把 `commands` 作为字段放进返回的 `XxxResult`（`BaseDataRecord` 子类，随 JSON 自动序列化），前端 `onSendSuccess` 里 `xnote.executeCommands(data.commands)` 即可。

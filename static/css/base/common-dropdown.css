@@ -89,3 +89,70 @@
     background-color: #09f;
     color: red;
 }
+
+/* ===== 更多操作菜单(MoreActionsMenu, xnote/webui 公共组件) =====
+   竖排3点的 ⋮ 按钮, 点击展开操作列表。属于公共组件样式, 放在 common-*.css。 */
+.x-more-menu {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.x-more-menu-toggle {
+    cursor: pointer;
+    color: #999;
+    font-size: 18px;
+    line-height: 1;
+    user-select: none;
+}
+
+.x-more-menu-toggle:hover {
+    color: #333;
+}
+
+.x-more-menu-list {
+    display: none;
+    position: absolute;
+    right: 6px;
+    top: 100%;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    z-index: 20;
+    min-width: 84px;
+    overflow: hidden;
+}
+
+.x-more-menu.open .x-more-menu-list {
+    display: block;
+}
+
+.x-more-menu-item {
+    display: block;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.x-more-menu-item:hover {
+    background: #f6f6f6;
+}
+
+.x-more-menu-item.active {
+    color: #f0ad4e;
+}
+
+/* 危险操作(如删除)标红 */
+.x-more-menu-item.chat-session-delete {
+    color: #d9534f;
+}
+
+.x-more-menu-item.chat-session-delete:hover {
+    color: #d9534f;
+    background: #fdf0f0;
+}

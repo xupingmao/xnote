@@ -9,6 +9,7 @@ from xutils import Storage
 
 from xnote_handlers.config import AsideConfig, LinkConfig
 
+from . import chatbot_render
 from .chat_service import ChatService
 from .models import ChatMessageRecord, ChatSessionRecord, ChatType
 
@@ -41,7 +42,9 @@ class ChatBotHandler:
         kw = Storage()
         kw.title = "聊天助手"
         kw.parent_link = LinkConfig.app_index
-        kw.session_list = session_result.sessions
+        kw.session_list_html = chatbot_render.render_session_list(
+            session_result.sessions,
+            current.session_id if current else 0)
         kw.current_session = current
         kw.current_session_id = current.session_id if current else 0
         kw.message_list = message_list

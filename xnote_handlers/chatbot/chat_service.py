@@ -112,3 +112,25 @@ class ChatService:
         dao.ChatMessageDao.delete_by_session(session_id)
         dao.ChatSessionDao.delete_by_id(session_id, user_id)
         return True
+
+    @classmethod
+    def rename_session(cls, session_id: int, user_id: int,
+                      title: str) -> Optional[ChatSessionRecord]:
+        """重命名会话并校验归属, 不存在/无权限时返回 None"""
+        session = cls.get_session(session_id, user_id)
+        if session is None:
+            return None
+        session.title = title
+        dao.ChatSessionDao.update(session)
+        return session
+
+    @classmethod
+    def top_session(cls, session_id: int, user_id: int
+                    ) -> Optional[ChatSessionRecord]:
+        """置顶/取消置顶(切换 is_top), 不存在/无权限时返回 None"""
+        session = cls.get_session(session_id, user_id)
+        if session is None:
+            return None
+        session.is_top = 0 if session.is_top else 1
+        dao.ChatSessionDao.update(session)
+        return session
