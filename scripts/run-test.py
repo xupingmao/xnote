@@ -42,7 +42,7 @@ def py_exec(cmd_line):
     os.system("%s %s" % (sys.executable, cmd_line))
 
 def js_exec(cmd_line):
-    os.system("node %s" % cmd_line)
+    return os.system("node %s" % cmd_line)
 
 def run_test(args: Namespace):
     target = args.target
@@ -149,7 +149,14 @@ def run_test(args: Namespace):
         return
 
     if target == "js":
-        js_exec("tests/js/test_marked_ext.js")
+        js_dir = "tests/js"
+        for file_name in sorted([name for name in os.listdir(js_dir) if name.endswith(".js")]):
+            file_path = os.path.join(js_dir, file_name).replace("\\", "/")
+            print("运行JS测试:", file_path)
+            sys.stdout.flush()
+            if js_exec(file_path) != 0:
+                print("JS测试失败:", file_path)
+                sys.exit(1)
         return
 
     if os.path.exists(target):

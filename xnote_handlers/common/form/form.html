@@ -59,16 +59,8 @@
     $(function() {
         xnote.refresh();
     });
-    // 自动计算textarea的高度
-    $(".x-form textarea").each(function (index, elem) {
-        var rows = parseInt($(elem).attr("rows"));
-        if (rows > 0) {
-            return;
-        }
-        var height = xnote.layout.getTextareaTextHeight(elem);
-        height = Math.min(height + 100, 200);
-        $(elem).height(height);
-    });
+    // 自动调整textarea的高度（随输入内容变化）
+    xnote.layout.initAutoResizeTextarea("#xnoteForm{{_xnote_form.id}} textarea");
 
     xnote.submitFormSave = function(target) {
         var request = {};

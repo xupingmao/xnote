@@ -14,6 +14,25 @@
     flex-wrap: wrap;
 }
 
+/* 待办列表行：第一行内容、第二行标签、第三行操作 */
+.todo-task-content {
+    word-break: break-word;
+}
+
+/* 内容里的 markdown 标题内联展示，避免多占一行 */
+.todo-task-content .block-title {
+    display: inline;
+    float: none;
+    background: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+/* 第三行操作区与第二行标签留出间距 */
+.todo-task-actions {
+    margin-top: 3px;
+}
+
 .todo-task-meta-actions {
     flex: none;
     white-space: nowrap;

@@ -134,7 +134,7 @@ Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `
 **偏好**：列表、增删改查类页面优先用 `xnote/plugin/list_plugin.py` 的 `BaseListPlugin` + `xnote/webui` 的 `ListView`/`ListViewItem` 服务端渲染列表，不要手写 `.html` 模板 + 大量前端 JS 拼 DOM。参考 `xnote_handlers/todo/todo_view.py`（`ProjectListPlugin` / `TaskListPlugin`）。需要表格形态时才用 `BaseTablePlugin`（`xnote/plugin/table_plugin.py`）。
 
 - 继承 `BaseListPlugin`，重写 `handle_page()`：`list_view = self.create_list_view()` → `ListViewItem(...)` 逐条 `add_item`。
-- `ListViewItem` 继承 `TextContainer`，可用 `add_span(text, css_class)` / `add_link(text, href)` / `add_br()` / `add_item_sep()`；`item.tags` 放 `TextTag(text, css_class)`（样式类：`red`/`orange`/`gray`/`lightblue`/`lightgray`）；`item.extra`（右浮动）放操作组件。
+- `ListViewItem` 继承 `TextContainer`，可用 `add_span(text, css_class)` / `add_link(text, href)` / `add_br()` / `add_item_sep()`；`item.tags` 放 `TextTag(text, css_class)`（样式类：`red`/`orange`/`gray`/`lightblue`/`lightgray`/`lightred`/`lightpurple`，定义于 `static/css/base/common-tag.css`）；`item.extra`（右浮动）放操作组件。
 - 行操作用 `EditFormActionLink(text, url)`（GET `?action=edit` 弹表单）与 `ConfirmActionLink(text, url, msg)`（确认框 + AJAX 后自动 reload）；它们依赖 `xnote.table.handleEditForm` / `handleConfirmAction`（在全局 `app.build.js` 内）。
 - **整行链接 vs 两行布局**：给 `ListViewItem` 传 `href` 会渲染成"整行链接"（外层 `<a>`）；此时 `item.extra` 由组件渲染在 `<a>` **之外**，配合 `common-list.css` 的 `.list-item-outer` flex 规则固定在右侧（所以 href + 操作按钮是合法的，不会 `<a>` 嵌套）。如果希望操作区位于内容**下方**（两行布局），则不要传 `href`，改用 `add_link` 在内容里放链接，操作区放进第二个 `Div`（参考 `todo_view.py::TaskListPlugin`）。
 - **注意 `require_admin` 默认 True**：非管理员的业务页面要显式设 `require_admin = False`（`require_login` 默认 True）。

@@ -12,8 +12,8 @@ from xnote.core import xauth, xtemplate
 from xnote.core.xtemplate import T
 from xnote.plugin import (
     ListViewItem, EditFormActionLink, EditFormButton,
-    ConfirmActionLink, AjaxActionLink, TextTag, FormRowType, TabBox, Div,
-    TextLink)
+    ConfirmActionLink, AjaxActionLink, ActionLink, TextTag, FormRowType, TabBox,
+    Div, RawHtml, TextLink)
 from xnote.plugin.list_plugin import BaseListPlugin
 from xnote_handlers.config import AsideConfig, LinkConfig
 from xutils.textutil import mark_text
@@ -23,7 +23,6 @@ from .todo_model import (
     TodoRecord, TodoStatusEnum, TodoPriorityEnum,
     parse_time_ms, format_time_ms, format_date_ms)
 from .project_model import ProjectRecord, ProjectStatusEnum
-from .todo_comment import to_comment_target_id
 
 
 TODO_PAGE_PATH = "/todo"
@@ -38,7 +37,7 @@ PRIORITY_TAG_CLASS = {
 
 # 状态 -> tag 样式
 STATUS_TAG_CLASS = {
-    TodoStatusEnum.not_started.value: "lightgray",
+    TodoStatusEnum.not_started.value: "orange",
     TodoStatusEnum.in_progress.value: "lightblue",
     TodoStatusEnum.done.value: "gray",
     TodoStatusEnum.canceled.value: "gray",
@@ -126,12 +125,21 @@ class _TodoListPlugin(BaseListPlugin):
     {% include common/pagination.html %}
 </div>
 {% end %}
+
+<script type="text/javascript">
+// 打开待办评论弹窗（iframe 加载评论页面）
+xnote.todo = xnote.todo || {};
+xnote.todo.openCommentDialog = function (target) {
+    var url = $(target).attr("data-url");
+    xnote.showIframeDialog("{{T('评论')}}", url);
+};
+</script>
 """
 
 
 class ProjectListPlugin(_TodoListPlugin):
     """项目列表（待办首页）"""
-    title = T("项目")
+    title = T("待办项目")
     parent_link = LinkConfig.app_index
 
     def handle_page(self):
@@ -244,6 +252,11 @@ class TaskListPlugin(_TodoListPlugin):
         status = xutils.get_argument_str("status", STATUS_FILTER_PENDING)
         priority = xutils.get_argument_str("priority", "")
 
+        # 标题展示所属项目名称
+        project = ProjectDao.get_by_id(project_id, user_id=user_id) if project_id != 0 else None
+        if project is not None:
+            self.title = project.name
+
         status_labels = _enum_label_map(TodoStatusEnum)
         priority_labels = _enum_label_map(TodoPriorityEnum)
 
@@ -272,26 +285,32 @@ class TaskListPlugin(_TodoListPlugin):
 
         list_view = self.create_list_view()
         for task in tasks:
-            # 两行展示：第一行内容(可点进详情)，第二行左侧标签、右侧操作
-            item = ListViewItem(icon_class="fa fa-check-square-o")
-            item.add_link(text=task.content, href="/todo/detail?task_id=%s" % task.task_id,
-                          css_class="bold")
+            item = ListViewItem(css_class="todo-task-row")
+            item.extra.css_class = "list-item-extra todo-task-actions"
 
-            meta = Div(css_class="todo-task-meta")
-            tag_box = Div(css_class="todo-task-meta-tags")
-            tag_box.add(TextTag(
+            # 第一行：内容（mark_text 渲染，不再单独加链接样式）
+            content_box = Div(css_class="todo-task-content")
+            content_box.add(RawHtml(
+                '<i class="fa fa-check-square-o"></i> ' + mark_text(task.content)))
+            item.add(content_box)
+
+            # 第二行：标签
+            item.tags.append(TextTag(
                 text=status_labels.get(task.status, task.status),
                 css_class=STATUS_TAG_CLASS.get(task.status, "gray")))
-            tag_box.add(TextTag(
+            item.tags.append(TextTag(
                 text=priority_labels.get(task.priority, task.priority),
                 css_class=PRIORITY_TAG_CLASS.get(task.priority, "gray")))
             begin_time = format_time_ms(task.begin_time)
             if begin_time:
-                tag_box.add(TextTag(text=begin_time))
-            meta.add(tag_box)
+                item.tags.append(TextTag(text=begin_time))
 
+            # 第三行：操作
             action_box = Div(css_class="todo-task-meta-actions")
             base = "&model=task&project_id=%s&task_id=%s" % (project_id, task.task_id)
+            action_box.add(ActionLink(
+                text=T("评论"), onclick="xnote.todo.openCommentDialog(this)",
+                data_dict=dict(url="/todo/comment/dialog?task_id=%s" % task.task_id)))
             # 状态变更无需确认，直接执行后 toast 结果
             if task.status not in (TodoStatusEnum.done.value, TodoStatusEnum.canceled.value):
                 action_box.add(AjaxActionLink(text=T("完成"), url="?action=finish" + base))
@@ -303,9 +322,8 @@ class TaskListPlugin(_TodoListPlugin):
             action_box.add(EditFormActionLink(text=T("编辑"), url="?action=edit" + base))
             action_box.add(ConfirmActionLink(text=T("删除"), url="?action=delete" + base,
                                              msg=T("确定删除该待办吗?")))
-            meta.add(action_box)
+            item.extra.add(action_box)
 
-            item.add(meta)
             list_view.add_item(item)
 
         self.option_html = EditFormButton(
@@ -320,6 +338,10 @@ class TaskListPlugin(_TodoListPlugin):
         project_id = xutils.get_argument_int("project_id", 0)
         task_id = xutils.get_argument_int("task_id", 0)
         task = TodoDao.get_by_id(task_id, user_id=user_id) if task_id != 0 else None
+        
+        if task is None:
+            task = TodoRecord()
+            task.task_id = task_id
 
         form = self.create_form()
         form.path = TODO_PAGE_PATH
@@ -327,11 +349,16 @@ class TaskListPlugin(_TodoListPlugin):
         form.id = "task_edit"
         form.add_row(title="", field="task_id", value=str(task_id), css_class="hide")
         form.add_textarea(title=T("内容"), field="content", value=task.content if task else "",
-                          placeholder=T("待办内容"), rows=3)
+                          placeholder=T("待办内容"))
         row = form.add_row(title=T("优先级"), field="priority", type=FormRowType.select,
                            value=task.priority if task else TodoPriorityEnum.normal.value)
         for e in TodoPriorityEnum.enums():
             row.add_option(e.name, e.value)
+
+        status_row = form.add_row(title=T("状态"), field="status", type=FormRowType.select,
+                                  value=task.status)
+        for e in TodoStatusEnum.enums():
+            status_row.add_option(e.name, e.value)
 
         # 所属项目可修改
         current_project_id = task.project_id if task else project_id
@@ -348,6 +375,11 @@ class TaskListPlugin(_TodoListPlugin):
         # 完成时间只读展示（由状态变更自动维护）
         form.add_row(title=T("完成时间"), field="done_time",
                      value=format_time_ms(task.done_time) if task else "", readonly=True)
+        # 创建时间、更新时间只读展示
+        form.add_row(title=T("创建时间"), field="create_time",
+                     value=format_time_ms(task.create_time), readonly=True)
+        form.add_row(title=T("更新时间"), field="update_time",
+                     value=format_time_ms(task.update_time), readonly=True)
         return self.response_form(form=form)
 
     def handle_save(self):
@@ -367,6 +399,7 @@ class TaskListPlugin(_TodoListPlugin):
             task.project_id = project_id
             task.begin_time = parse_time_ms(data.get_str("begin_time", ""))
             task.end_time = parse_time_ms(data.get_str("end_time", ""))
+            TodoDao.apply_status(task, data.get_str("status", TodoStatusEnum.not_started.value))
             TodoDao.create(task)
         else:
             task = TodoDao.get_by_id(task_id, user_id=user_id)
@@ -377,6 +410,7 @@ class TaskListPlugin(_TodoListPlugin):
             task.project_id = project_id
             task.begin_time = parse_time_ms(data.get_str("begin_time", ""))
             task.end_time = parse_time_ms(data.get_str("end_time", ""))
+            TodoDao.apply_status(task, data.get_str("status", task.status))
             TodoDao.update(task)
         return webutil.SuccessResult()
 
@@ -452,7 +486,7 @@ def _build_task_info_tags(task: TodoRecord, project_name: str = "") -> Div:
 
 
 class TodoDetailHandler:
-    """待办详情页（基础信息 + 评论）"""
+    """待办详情页（基础信息，评论通过列表行【评论】弹窗查看）"""
 
     @xauth.login_required()
     def GET(self):
@@ -474,12 +508,4 @@ class TodoDetailHandler:
         kw.back_url = task_list_href
         kw.content_html = mark_text(task.content)
         kw.info_tags = _build_task_info_tags(task, project_name)
-        # 评论组件（复用，type=todo_task + 独立 target_id 空间隔离）
-        kw.file = Storage(id=to_comment_target_id(task_id))
-        kw.comment_list_url = "/todo/comment/list"
-        kw.comment_save_url = "/todo/comment/save"
-        kw.comment_create_type = "todo_task"
-        kw.comment_title = T("评论")
-        kw.show_comment = True
-        kw.show_comment_edit = True
         return xtemplate.render("todo/page/todo_detail.html", **kw)

@@ -3,9 +3,11 @@
 # @since 2026/09/12
 # 待办评论：复用 note 评论模块（type=todo_task + 独立 target_id 空间做隔离）
 import xutils
+import web
 
-from xnote.core import xauth, xconfig
-from xutils import webutil
+from xnote.core import xauth, xconfig, xtemplate
+from xnote.core.xtemplate import T
+from xutils import Storage, webutil
 from xutils import dateutil
 
 from xnote_handlers.note import dao_comment
@@ -103,3 +105,31 @@ class TodoCommentSaveHandler:
         TodoDao.update(task)
 
         return webutil.SuccessResult()
+
+
+class TodoCommentDialogHandler:
+    """待办评论弹窗页面（供 iframe 弹窗加载，复用 note 评论组件）"""
+
+    @xauth.login_required()
+    def GET(self):
+        user_id = xauth.current_user_id()
+        task_id = xutils.get_argument_int("task_id", 0)
+        task = TodoDao.get_by_id(task_id, user_id=user_id)
+        if task is None:
+            raise web.seeother("/todo")
+
+        kw = Storage()
+        kw.title = T("评论")
+        kw.html_title = T("评论")
+        # 弹窗页面：去掉导航和侧边栏
+        kw.show_nav = False
+        kw.show_menu = False
+        kw.show_aside = False
+        # 评论组件（复用，type=todo_task + 独立 target_id 空间隔离）
+        kw.file = Storage(id=to_comment_target_id(task_id))
+        kw.comment_list_url = "/todo/comment/list"
+        kw.comment_save_url = "/todo/comment/save"
+        kw.comment_create_type = COMMENT_TYPE
+        kw.comment_title = T("评论")
+        kw.show_comment_edit = True
+        return xtemplate.render("todo/page/todo_comment_dialog.html", **kw)

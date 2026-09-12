@@ -74,4 +74,32 @@ xnote.layout.getTextareaTextHeight = function(textarea) {
     $clone.remove();
     
     return height;
-}    
+}
+
+// 根据内容自动调整 textarea 的高度
+// 高度的上下限由 CSS 的 min-height / max-height 控制
+xnote.layout.autoResizeTextarea = function(elem) {
+    elem.style.height = 'auto';
+    elem.style.height = elem.scrollHeight + 'px';
+};
+
+// 初始化表单里的 textarea：按内容设置初始高度，并在输入时跟随内容变化
+// @param {string} selector textarea 的选择器，建议限定到具体的表单内
+xnote.layout.initAutoResizeTextarea = function(selector) {
+    $(selector).each(function(index, elem) {
+        var $elem = $(elem);
+        // rows（未设置 rows 时是浏览器默认行数）渲染出的高度作为最小高度，避免变矮
+        var minHeight = $elem.height();
+        if (minHeight > 0) {
+            $elem.css('min-height', minHeight + 'px');
+        }
+
+        // 初始高度按内容计算，内容为空时按 placeholder 计算
+        $elem.height(xnote.layout.getTextareaTextHeight(elem));
+
+        $elem.on('input', function() {
+            xnote.layout.autoResizeTextarea(elem);
+        });
+    });
+};
+    

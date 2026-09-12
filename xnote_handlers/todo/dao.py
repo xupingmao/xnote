@@ -63,14 +63,28 @@ class TodoDao:
                                update_time=dateutil.timestamp_ms())
 
     @classmethod
+    def _status_fields(cls, status: str, now: int) -> Dict[str, Any]:
+        """状态变更时需要同步维护的字段（状态 + 完成时间）"""
+        fields = dict(status=status)  # type: Dict[str, Any]
+        if status == TodoStatusEnum.done.value:
+            fields["done_time"] = now
+        elif status == TodoStatusEnum.not_started.value:
+            fields["done_time"] = 0
+        return fields
+
+    @classmethod
     def update_status(cls, task_id: int, status: str, user_id: int = 0) -> int:
         now = dateutil.timestamp_ms()
-        kw = dict(status=status, update_time=now)
-        if status == TodoStatusEnum.done.value:
-            kw["done_time"] = now
-        elif status == TodoStatusEnum.not_started.value:
-            kw["done_time"] = 0
-        return _todo_db.update(where=dict(task_id=task_id, user_id=user_id), **kw)
+        fields = cls._status_fields(status, now)
+        fields["update_time"] = now
+        return _todo_db.update(where=dict(task_id=task_id, user_id=user_id), **fields)
+
+    @classmethod
+    def apply_status(cls, task: TodoRecord, status: str) -> None:
+        """设置记录的状态，并同步维护完成时间（update_time 由 update 维护）"""
+        fields = cls._status_fields(status, dateutil.timestamp_ms())
+        task.status = status
+        task.done_time = fields.get("done_time", task.done_time)
 
     # ---------- 查询 ----------
 

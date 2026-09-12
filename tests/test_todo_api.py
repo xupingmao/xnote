@@ -91,9 +91,77 @@ class TestTodoPages(BaseTestCase):
         self.assertIn("x-tab-box", body)
         self.assertIn("list-item", body)
 
+    def test_todo_list_title_uses_project_name(self):
+        # 待办列表标题展示所属项目名称
+        pid = self.json_request_return_dict("/api/project/create", method="POST",
+                                            data=dict(name="标题项目"))["data"]
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="标题待办", project_id=str(pid)))
+        body = self.request_app("/todo?project_id=%s" % pid).data.decode("utf-8")
+        idx = body.find("card-title")
+        self.assertGreater(idx, 0)
+        self.assertIn("<span>标题项目</span>", body[idx:idx + 400])
+
     def test_todo_list_page_with_filter(self):
         resp = self.request_app("/todo?project_id=1&status=not_started&priority=high")
         self.assertEqual("200 OK", resp.status)
+
+    def test_todo_list_content_uses_mark_text(self):
+        # 列表行内容用 mark_text 渲染（markdown 语法生效），且不单独加链接样式
+        tid = self.json_request_return_dict("/api/todo/create", method="POST",
+                                            data=dict(content="# 标题待办", project_id="1"))["data"]
+        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        row = self._find_task_row(body)
+        self.assertIsNotNone(row)
+        # 内容按 markdown 渲染
+        self.assertIn('<h1 class="block-title">标题待办</h1>', row)
+        # 文本不单独加链接
+        self.assertNotIn('<a href="/todo/detail?task_id=%s"' % tid, body)
+
+    def _find_task_row(self, body):
+        idx = body.find('class="list-item todo-task-row"')
+        if idx < 0:
+            return None
+        return body[idx:idx + 900]
+
+    def test_todo_list_row_layout(self):
+        # 三行布局：第一行内容、第二行标签、第三行操作
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="三行布局待办", project_id="1"))
+        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        row = self._find_task_row(body)
+        self.assertIsNotNone(row)
+        pos_content = row.find('class="todo-task-content"')
+        pos_tag = row.find('class="tag ')
+        pos_actions = row.find("todo-task-actions")
+        self.assertTrue(0 <= pos_content < pos_tag < pos_actions,
+                        "期望顺序为 内容 -> 标签 -> 操作, got %s/%s/%s" % (
+                            pos_content, pos_tag, pos_actions))
+
+    def test_todo_not_started_tag_is_orange(self):
+        # 【未开始】状态标签使用 orange
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="橙色标签待办", project_id="1"))
+        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        self.assertIn('<span class="tag orange">未开始</span>', body)
+
+    def test_todo_list_comment_action(self):
+        # 列表行操作区提供【评论】，弹窗地址指向评论页面
+        tid = self.json_request_return_dict("/api/todo/create", method="POST",
+                                           data=dict(content="评论入口待办", project_id="1"))["data"]
+        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        self.assertIn("xnote.todo.openCommentDialog(this)", body)
+        self.assertIn('data-url="/todo/comment/dialog?task_id=%s"' % tid, body)
+
+    def test_todo_comment_dialog_page(self):
+        tid = self.json_request_return_dict("/api/todo/create", method="POST",
+                                           data=dict(content="弹窗评论待办", project_id="1"))["data"]
+        resp = self.request_app("/todo/comment/dialog?task_id=%s" % tid)
+        self.assertEqual("200 OK", resp.status)
+        body = resp.data.decode("utf-8")
+        self.assertIn("commentText", body)            # 评论输入框
+        self.assertIn("/todo/comment/list", body)
+        self.assertIn("/todo/comment/save", body)
 
     def test_todo_list_default_filter(self):
         # 默认【待办】Tab，且包含 待办/全部/未开始/进行中/完成/取消
@@ -128,11 +196,11 @@ class TestTodoPages(BaseTestCase):
                                           data=dict(content="分页%02d" % i, project_id=str(pid)))
         p1 = self.request_app("/todo?project_id=%s" % pid).data.decode("utf-8")
         self.assertIn("pagenation", p1)
-        self.assertEqual(p1.count('class="list-item "'), 50)
+        self.assertEqual(p1.count('class="list-item todo-task-row"'), 50)
         self.assertIn("page=2", p1)
 
         p2 = self.request_app("/todo?project_id=%s&page=2" % pid).data.decode("utf-8")
-        self.assertEqual(p2.count('class="list-item "'), 1)
+        self.assertEqual(p2.count('class="list-item todo-task-row"'), 1)
 
     def test_todo_edit_form(self):
         # 新建待办的编辑表单（ajax 局部渲染）
@@ -141,12 +209,22 @@ class TestTodoPages(BaseTestCase):
         body = resp.data.decode("utf-8")
         self.assertIn('name="content"', body)
         self.assertIn("<textarea", body)  # 内容使用 textarea
+        # textarea 高度按内容自动调整（初始化钩子限定在具体的 form 内）
+        self.assertRegex(body, r'initAutoResizeTextarea\("#xnoteForm\w+ textarea"\)')
         # 所属项目可选
         self.assertIn('name="project_id"', body)
         self.assertIn("<select", body)
-        # 完成时间只读展示
+        # 状态可选
+        self.assertIn('name="status"', body)
+        self.assertIn("未开始", body)
+        self.assertIn("进行中", body)
+        # 完成时间/创建时间/更新时间只读展示
         self.assertIn("完成时间", body)
         self.assertRegex(body, r'name="done_time"[^>]*readonly')
+        self.assertIn("创建时间", body)
+        self.assertRegex(body, r'name="create_time"[^>]*readonly')
+        self.assertIn("更新时间", body)
+        self.assertRegex(body, r'name="update_time"[^>]*readonly')
 
 
 class TestTodoForm(BaseTestCase):
@@ -165,6 +243,27 @@ class TestTodoForm(BaseTestCase):
         lst = self.json_request_return_dict("/api/todo/list?project_id=1")
         contents = [item["content"] for item in lst["data"]["items"]]
         self.assertIn("表单待办", contents)
+
+    def test_save_task_status_via_form(self):
+        # 通过编辑表单改状态：完成时间同步维护
+        self._post_form("/todo?action=save&model=task",
+                        project_id="1", content="表单状态待办", priority="normal",
+                        status="done", begin_time="", end_time="")
+        lst = self.json_request_return_dict("/api/todo/list?project_id=1")
+        task = [item for item in lst["data"]["items"]
+                if item["content"] == "表单状态待办"][0]
+        self.assertEqual(task["status"], "done")
+        self.assertTrue(task["done_time"] > 0)
+
+        # 改回【未开始】会清空完成时间
+        self._post_form("/todo?action=save&model=task", task_id=str(task["task_id"]),
+                        project_id="1", content="表单状态待办", priority="normal",
+                        status="not_started", begin_time="", end_time="")
+        lst2 = self.json_request_return_dict("/api/todo/list?project_id=1")
+        found = [item for item in lst2["data"]["items"]
+                 if item["task_id"] == task["task_id"]][0]
+        self.assertEqual(found["status"], "not_started")
+        self.assertEqual(found["done_time"], 0)
 
     def test_create_project_via_form(self):
         resp = self._post_form("/todo?action=save&model=project",
@@ -290,9 +389,9 @@ class TestTodoForm(BaseTestCase):
         # 内容使用 mark_text 处理（markdown -> h1）
         self.assertIn('<h1 class="block-title">详情页待办</h1>', body)
         self.assertIn("todo-detail-tags", body)  # 信息用标签展示
-        self.assertIn("commentText", body)   # 评论输入框
-        self.assertIn("/todo/comment/list", body)
-        self.assertIn("/todo/comment/save", body)
+        # 评论区改为列表行弹窗，详情页不再内嵌
+        self.assertNotIn("commentText", body)
+        self.assertNotIn("/todo/comment/list", body)
 
     def test_todo_comment_flow(self):
         task_id = self._create_task("评论待办")

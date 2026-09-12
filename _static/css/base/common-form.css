@@ -62,8 +62,10 @@ input[readonly] {
     width: 300px;
 }
 
+/* textarea 的高度由 JS 按内容自动调整，这里只声明高度区间 */
 .form-row textarea {
-    height: 50px;
+    min-height: 50px;
+    max-height: 200px;
 }
 
 .form-body {

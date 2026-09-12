@@ -33,6 +33,12 @@ class TestMain(BaseTestCase):
     def test_list_plugin(self):
         self.check_OK("/test/example/list_plugin")
 
+    def test_tag_example(self):
+        # Tag 示例页展示新增的浅红/浅紫标签
+        body = self.request_app("/test/example?name=tag").data.decode("utf-8")
+        self.assertIn("lightred标签", body)
+        self.assertIn("lightpurple标签", body)
+
     def test_plugin_visit(self):
         delete_visit_log(user_name="admin", url="/test")
         assert add_visit_log(user_name="admin", url="/test") == 1

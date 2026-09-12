@@ -137,6 +137,16 @@ a.tag:hover {
     background-color: #ddf4ff;
 }
 
+.tag.lightred {
+    color: #d32f2f;
+    background-color: #ffe0e0;
+}
+
+.tag.lightpurple {
+    color: #7b1fa2;
+    background-color: #f0e2fb;
+}
+
 .tag.pill {
     border-radius: 12px;
     padding-left: 12px;
