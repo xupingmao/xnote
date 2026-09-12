@@ -9,28 +9,28 @@ __pycache__
 *.jar
 .DS_Store
 .python-version
-/static/exe
-/static/logs
+/_static/exe
+/_static/logs
 /lib/bs4/
 /web/bs4/
-/static/upload/
-/static/lib/jsoneditor/
-/static/lib/My97DatePicker/
-/static/lib/wangEditor/wangEditor-10.0.13.js
-/static/lib/wangEditor/wangEditor-3.0.10.js
-/static/lib/wangEditor/wangEditor-3.1.1.js
-/static/lib/PhotoSwipe/
-/static/lib/*.zip
-/static/lib.old/
-/static/img/
-/static/deprecated/
-/static/wiki/
-/static/archive/
+/_static/upload/
+/_static/lib/jsoneditor/
+/_static/lib/My97DatePicker/
+/_static/lib/wangEditor/wangEditor-10.0.13.js
+/_static/lib/wangEditor/wangEditor-3.0.10.js
+/_static/lib/wangEditor/wangEditor-3.1.1.js
+/_static/lib/PhotoSwipe/
+/_static/lib/*.zip
+/_static/lib.old/
+/_static/img/
+/_static/deprecated/
+/_static/wiki/
+/_static/archive/
 
 # 生成的文件
-/static/css/app.build.css
-/static/js/app.build.js
-/static/js/utils.build.js
+/_static/css/app.build.css
+/_static/js/app.build.js
+/_static/js/utils.build.js
 
 /data/
 /data_follower/
@@ -78,7 +78,7 @@ pid.lock
 start-cmd.bat
 
 # npm模块
-/static/lib/node_modules/
+/_static/lib/node_modules/
 
 # pypi构建临时目录
 /build/
