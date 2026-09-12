@@ -130,29 +130,33 @@
     display: block;
 }
 
-.x-more-menu-item {
+/* 作用域限定在 .x-more-menu-list 下, 提高优先级(0,2,0),
+   盖过 chatbot.css 里同名的 .chat-session-delete/.chat-session-rename/.chat-session-top 规则
+   (那些类也会被加到菜单项上, 且因加载顺序靠后而拥有相同基础优先级) */
+.x-more-menu-list .x-more-menu-item {
     display: block;
     padding: 8px 12px;
     font-size: 13px;
     color: #333;
     cursor: pointer;
     white-space: nowrap;
+    text-align: left;
 }
 
-.x-more-menu-item:hover {
+.x-more-menu-list .x-more-menu-item:hover {
     background: #f6f6f6;
 }
 
-.x-more-menu-item.active {
+.x-more-menu-list .x-more-menu-item.active {
     color: #f0ad4e;
 }
 
 /* 危险操作(如删除)标红 */
-.x-more-menu-item.chat-session-delete {
+.x-more-menu-list .x-more-menu-item.chat-session-delete {
     color: #d9534f;
 }
 
-.x-more-menu-item.chat-session-delete:hover {
+.x-more-menu-list .x-more-menu-item.chat-session-delete:hover {
     color: #d9534f;
     background: #fdf0f0;
 }
