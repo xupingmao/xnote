@@ -932,6 +932,48 @@ def init_comment_data_table():
         manager.add_index("target_id")
 
 
+def init_todo_table():
+    """待办事项表(单表存储)"""
+    table_name = "todo_task"
+    comment = "待办事项"
+    with create_default_table_manager(table_name, pk_name="task_id", comment=comment) as manager:
+        manager.add_column("user", "varchar(64)", default_value="")
+        manager.add_column("user_id", "bigint", default_value=0)
+        manager.add_column("content", "text", default_value="")
+        manager.add_column("status", "varchar(16)", default_value="not_started", comment="状态: not_started/in_progress/done/canceled")
+        manager.add_column("priority", "varchar(16)", default_value="normal", comment="优先级: low/normal/high/urgent")
+        manager.add_column("project_id", "bigint", default_value=0, comment="项目ID, 0=未分类")
+        manager.add_column("begin_time", "bigint", default_value=0, comment="开始时间(毫秒时间戳)")
+        manager.add_column("end_time", "bigint", default_value=0, comment="结束时间(毫秒时间戳)")
+        manager.add_column("done_time", "bigint", default_value=0, comment="完成时间(毫秒时间戳)")
+        manager.add_column("tags", "text", default_value="[]", comment="标签, JSON数组")
+        manager.add_column("create_time", "bigint", default_value=0, comment="创建时间(毫秒时间戳)")
+        manager.add_column("update_time", "bigint", default_value=0, comment="更新时间(毫秒时间戳)")
+        manager.add_column("version", "int", default_value=0)
+        manager.add_column("is_deleted", "tinyint", default_value=0)
+
+        manager.add_index(["user_id", "project_id", "status"])
+        manager.add_index(["user_id", "status"])
+        manager.add_index(["user_id", "priority"])
+        manager.add_index(["user_id", "begin_time"])
+        manager.add_index(["user_id", "is_deleted"])
+
+
+def init_project_table():
+    """项目表(单表存储)"""
+    table_name = "todo_project"
+    comment = "项目"
+    with create_default_table_manager(table_name, pk_name="project_id", comment=comment) as manager:
+        manager.add_column("user_id", "bigint", default_value=0)
+        manager.add_column("name", "varchar(255)", default_value="")
+        manager.add_column("desc", "text", default_value="")
+        manager.add_column("status", "varchar(16)", default_value="active", comment="状态: active/archived")
+        manager.add_column("create_time", "bigint", default_value=0, comment="创建时间(毫秒时间戳)")
+        manager.add_column("update_time", "bigint", default_value=0, comment="更新时间(毫秒时间戳)")
+
+        manager.add_index(["user_id", "status"])
+
+
 def init_user_note_log():
     """用户笔记日志, 从kv数据迁移过来
     @since 2023/10/22
@@ -1161,6 +1203,10 @@ def init():
     # 评论相关
     init_comment_index_table()
     init_comment_data_table()
+
+    # 待办 / 项目（独立模块，从 message 解耦）
+    init_todo_table()
+    init_project_table()
 
     # 随手记
     init_msg_index_table()

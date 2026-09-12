@@ -119,7 +119,7 @@ SYS_TOOLS: List[AppLink] = [
 
 NOTE_TOOLS: List[AppLink] = [
     user_link("笔记本", "/note/group", "book"),
-    user_link("待办",  "/message/task", "calendar-check-o"),
+    user_link("待办",  "/todo", "calendar-check-o"),
     user_link("随手记",  "/message?tag=log", "pencil"),
     user_link("标签列表", "/note/taglist", "tags"),
 

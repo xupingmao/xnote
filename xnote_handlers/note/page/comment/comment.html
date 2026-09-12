@@ -13,6 +13,8 @@
 {% init comment_placeholder = "请输入评论, 支持粘贴图片..." %}
 {% init comment_empty_text = "暂无评论~" %}
 {% init comment_source_class = "" %}
+{% init comment_list_url = "/note/comments" %}
+{% init comment_save_url = "/note/comment/save" %}
 
 <style type="text/css">
     .chat-msg-img {
@@ -79,7 +81,7 @@
             list_param.comment_order = getUrlParam("comment_order", "latest");
             list_param.share_token = getUrlParam("share_token", "");
 
-            xnote.http.get("/note/comments", list_param, function (resp) {
+            xnote.http.get("{{comment_list_url}}", list_param, function (resp) {
                 $("#comments").html(resp);
             });
         }
@@ -102,7 +104,7 @@
             request.type = "{{comment_create_type}}";
             request.files = buildFiles();
 
-            xnote.http.post("/note/comment/save", request, function (resp) {
+            xnote.http.post("{{comment_save_url}}", request, function (resp) {
                 console.log(resp);
                 if (resp.success) {
                     $("#commentText").val("");

@@ -6,6 +6,20 @@
  * @filename todo.css
  */
 
+/* 待办项第二行：左侧标签，右侧操作 */
+.todo-task-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.todo-task-meta-actions {
+    flex: none;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
 .todo-time {
     display: inline-block;
     padding: 2px;

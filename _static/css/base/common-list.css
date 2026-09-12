@@ -20,6 +20,27 @@
     padding: 10px 5px;
 }
 
+/*
+ * 整行链接样式的列表项(外层是 <a class="list-item-link">)。
+ * 操作区(extra)渲染在 <a> 之外，避免 <a> 嵌套 <a> 的非法结构；
+ * 用 flex 让链接占据剩余空间、操作区固定在右侧。
+ */
+.list-item-outer {
+    display: flex;
+    align-items: center;
+}
+
+.list-item-outer .list-item-link {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+}
+
+.list-item-outer .list-item-extra {
+    flex: none;
+    padding-right: 5px;
+}
+
 .list-link, a.list-item {
     cursor: pointer;
 }

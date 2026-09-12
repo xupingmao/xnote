@@ -142,7 +142,7 @@ class TagHelper:
     def get_create_tag(cls, tag=""):
         return cls.create_tag_mapping.get(tag, tag)
 
-def mark_text(content, tag="log"):
+def mark_text(content:str, tag="log"):
     msg = MessageDO()
     msg.content = content
     msg.tag = tag

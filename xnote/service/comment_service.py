@@ -13,6 +13,7 @@ class CommentTypeEnum:
     empty = ""
     note = "note"
     list_item = "list_item"
+    todo_task = "todo_task"
 
 class CommentIndexRecord(BaseDataRecord):
     def __init__(self):
@@ -112,7 +113,7 @@ class CommentService:
             where += " AND user_id = $user_id"
         if target_id != 0:
             where += " AND target_id = $target_id"
-        if date != None and date != "":
+        if date is not None and date != "":
             where += " AND ctime LIKE $date_like"
             date_like = date + "%"
         if type != "":

@@ -61,7 +61,7 @@ class CommentVO(BaseDataRecord):
 
 class CommentDao:
 
-    valid_type_set = set(["", None, "list_item"])
+    valid_type_set = set(["", None, "list_item", "todo_task"])
     
     @classmethod
     def check(cls, comment: CommentVO):
@@ -231,30 +231,30 @@ def list_comments_by_user(user_id=0, date="", offset=0, limit=0, order=""):
 def count_comments_by_user(user_id: int=0, date: str=""):
     return comment_service.count(user_id=user_id, date=date)
 
-def list_replies(note_id: int=0, parent_comment_id: int=0, offset: int=0, limit: int=100):
+def list_replies(note_id: int=0, parent_comment_id: int=0, offset: int=0, limit: int=100, type: str=""):
     """获取某个评论的回复列表"""
     assert parent_comment_id > 0
     
     # 获取总数
-    total = comment_service.count(target_id=note_id, parent_comment_id=parent_comment_id)
+    total = comment_service.count(target_id=note_id, parent_comment_id=parent_comment_id, type=type)
     
     # 直接使用数据库分页
-    idx_list = comment_service.list(target_id=note_id, parent_comment_id=parent_comment_id, offset=offset, limit=limit, order="ctime asc")
+    idx_list = comment_service.list(target_id=note_id, parent_comment_id=parent_comment_id, offset=offset, limit=limit, order="ctime asc", type=type)
     replies = list_comments_by_idx_list(idx_list)
     
     return replies, total
 
-def count_replies(note_id: int=0, parent_comment_id: int=0):
+def count_replies(note_id: int=0, parent_comment_id: int=0, type: str=""):
     """获取某个评论的回复数量"""
-    return comment_service.count(target_id=note_id, parent_comment_id=parent_comment_id)
+    return comment_service.count(target_id=note_id, parent_comment_id=parent_comment_id, type=type)
 
-def list_parent_comments(note_id: int=0, offset: int=0, limit: int=100, user_name: str="", order: str="latest"):
+def list_parent_comments(note_id: int=0, offset: int=0, limit: int=100, user_name: str="", order: str="latest", type: str=""):
     """获取一级评论（不含回复）"""
     # 获取总数
-    total = comment_service.count(target_id=note_id, parent_comment_id=0)
+    total = comment_service.count(target_id=note_id, parent_comment_id=0, type=type)
     
     # 直接使用数据库分页
-    idx_list = comment_service.list(target_id=note_id, parent_comment_id=0, offset=offset, limit=limit, order=_get_order(order))
+    idx_list = comment_service.list(target_id=note_id, parent_comment_id=0, offset=offset, limit=limit, order=_get_order(order), type=type)
     
     # 使用 list_comments_by_idx_list 处理评论
     comments = list_comments_by_idx_list(idx_list, user_name=user_name)
@@ -262,7 +262,7 @@ def list_parent_comments(note_id: int=0, offset: int=0, limit: int=100, user_nam
     # 计算回复数量
     for comment in comments:
         if comment.parent_comment_id == 0:
-            comment.reply_count = count_replies(note_id, comment.id)
+            comment.reply_count = count_replies(note_id, comment.id, type=type)
     
     return comments, total
 
@@ -311,9 +311,9 @@ def count_comment(user_name):
     return comment_service.count(user_id=user_id)
 
 
-def count_comment_by_note(note_id):
+def count_comment_by_note(note_id, type: str=""):
     try:
-        return comment_service.count(target_id=int(note_id))
+        return comment_service.count(target_id=int(note_id), type=type)
     except:
         return 0
 

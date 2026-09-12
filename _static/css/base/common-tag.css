@@ -9,8 +9,8 @@
 /** .tag的优先级最低，要放在最前面 **/
 .tag {
     font-size: 12px;
-    background-color: green;
-    color: white;
+    background-color: #e8f8e8;
+    color: #2e7d32;
     border-radius: 3px;
     padding: 3px 5px;
     word-break: keep-all;
@@ -22,7 +22,7 @@
 
 a.tag {
     text-decoration: none;
-    color: white;
+    color: #666;
     word-break: keep-all;
     word-wrap: unset;
     display: inline-block;
@@ -38,6 +38,7 @@ a.tag:hover {
 
 .tag.pink {
     background-color: pink;
+    color: white;
 }
 
 .tag.red, .red-tag {

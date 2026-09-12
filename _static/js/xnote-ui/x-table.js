@@ -47,6 +47,26 @@ xnote.table.handleConfirmAction = function (target, event) {
     });
 }
 
+// 无需确认，直接执行动作(AJAX)，成功后 toast 并刷新
+xnote.table.handleAjaxAction = function (target, event) {
+    if (event instanceof Event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    var method = $(target).attr("data-method") || "GET";
+    var url = $(target).attr("data-url");
+    xnote.http.ajax(method, url, "", function (resp) {
+        if (resp.success) {
+            xnote.toast(resp.message || "操作成功");
+            setTimeout(function () {
+                window.location.reload();
+            }, 500);
+        } else {
+            xnote.toast(resp.message);
+        }
+    });
+}
+
 xnote.table.handleEditForm = function (target) {
     var url = $(target).attr("data-url");
     var title = $(target).attr("data-title");

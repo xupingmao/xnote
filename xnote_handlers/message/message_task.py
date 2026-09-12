@@ -1,6 +1,7 @@
 # encoding=utf-8
 
 import typing
+import web
 import xutils
 import xnote_handlers.message.dao as msg_dao
 
@@ -163,6 +164,15 @@ class TaskDoneHandler:
     def GET(self):
         return TaskListHandler.get_task_done_page()
 
+class TaskTodoRedirectHandler:
+    """把旧的死链 /message/todo 重定向到新的 /todo 页面（废弃但保留兼容）"""
+    def GET(self):
+        raise web.seeother("/todo")
+
+    def POST(self):
+        raise web.seeother("/todo")
+
+
 class TaskListAjaxHandler:
 
     @xauth.login_required()
@@ -199,6 +209,7 @@ class TaskListAjaxHandler:
             return msg_dao.list_task(user_name, offset, limit)
 
 xurls = (
+    r"/message/todo", TaskTodoRedirectHandler,
     r"/message/task", TaskHandler,
     r"/message/task/done", TaskDoneHandler,
     r"/message/task/list_ajax", TaskListAjaxHandler,

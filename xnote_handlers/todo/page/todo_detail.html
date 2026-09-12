@@ -1,0 +1,31 @@
+{% extends base %}
+
+{% block body_left %}
+
+    <div class="card">
+        {% include common/title/base_title.html %}
+    </div>
+
+    {% if content_html %}
+    <div class="card">
+        <div class="todo-detail-content">
+            {% raw content_html %}
+        </div>
+        <div class="margin-top-sm">
+            {% render info_tags %}
+        </div>
+    </div>
+    {% end %}
+
+    {% if show_comment %}
+        {% include note/page/comment/comment.html %}
+    {% end %}
+
+{% end %}
+
+
+{% block body_right %}
+    <div class="desktop-only">
+        {% include common/sidebar/app_index.html %}
+    </div>
+{% end %}

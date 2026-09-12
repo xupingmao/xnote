@@ -10,7 +10,6 @@ class BasePluginV2(BasePlugin):
     def add_component(self, component: BaseComponent):
         html = component.render()
         self.write_plain_html(html)
-
     
     def load_script(self, src: str):        
         src = xconfig.WebConfig.resolve_path(src)

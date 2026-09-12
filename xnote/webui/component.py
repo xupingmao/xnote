@@ -30,12 +30,14 @@ class Panel(BaseContainer):
         super().__init__(css_class=f"row x-plugin-panel {css_class}")
 
 class Input(BaseComponent):
-    def __init__(self, type = "text", name = "", css_class="", value="") -> None:
+    def __init__(self, type = "text", name = "", css_class="", value="", id="", placeholder="") -> None:
         self.name = name
         self.type = type
         self.css_class = css_class
         self.value = value
-        
+        self.id = id
+        self.placeholder = placeholder
+
     def render(self) -> str:
         attr_dict = {
             "name": self.name,
@@ -43,6 +45,10 @@ class Input(BaseComponent):
             "type": self.type,
             "value": self.value,
         }
+        if self.id:
+            attr_dict["id"] = self.id
+        if self.placeholder:
+            attr_dict["placeholder"] = self.placeholder
         attr_list = build_attrs(attr_dict)
         return f"<input {attr_list}>"
 

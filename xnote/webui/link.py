@@ -62,3 +62,10 @@ class ConfirmActionLink(ActionLink):
         msg = get_first_valid_arg(msg, message)
         data_dict = dict(url = url, msg=msg)
         super().__init__(text = text, css_class=css_class, onclick="xnote.table.handleConfirmAction(this)", data_dict=data_dict)
+
+
+class AjaxActionLink(ActionLink):
+    """无确认的异步操作链接：点击后直接执行，成功后 toast 结果并刷新"""
+    def __init__(self, text = "", url = "", css_class=""):
+        data_dict = dict(url = url)
+        super().__init__(text = text, css_class=css_class, onclick="xnote.table.handleAjaxAction(this)", data_dict=data_dict)

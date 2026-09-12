@@ -17,16 +17,15 @@ class ListViewItem(TextContainer):
     is_link_outside = True
 
     _outside_html = """
-<div class="list-item no-padding">
+<div class="list-item no-padding list-item-outer">
     <a class="list-item-link {{item.css_class}}" href="{{ item.href }}">
         {% if item.icon_class %}
             <i class="{{item.icon_class}}"></i>
         {% end %}
         {% raw item._children_html %}
         {% for tag in item.tags %} {% render tag %} {% end %}
-        
-        {% raw item._extra_html %}
     </a>
+    {% raw item._extra_html %}
 </div>
 """
 
@@ -58,7 +57,7 @@ class ListViewItem(TextContainer):
         self.show_chevron_right = show_chevron_right
         self.tags = []
         self.action_html = action_html
-        self.extra = TextContainer(css_class="float-right")
+        self.extra = TextContainer(css_class="float-right list-item-extra")
         self._extra_html = ""
 
         if text:

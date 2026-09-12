@@ -232,7 +232,7 @@ def list_msg_types(user_name = None):
     msg_stat  = msg_dao.get_message_stat(user_name)
 
     return [
-        NoteLink("待办任务", "/message/todo", "fa-calendar-check-o", size = msg_stat.task_count),
+        NoteLink("待办任务", "/todo", "fa-calendar-check-o", size = msg_stat.task_count),
         NoteLink("随手记", "/message?tag=log", "fa-file-text-o", size = msg_stat.log_count),
     ]
 
