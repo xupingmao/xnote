@@ -1,5 +1,5 @@
 /**
- * 单元测试: static/js/marked-ext.js 中的 normalizeCodeFenceLang
+ * 单元测试: _static/js/marked-ext.js 中的 normalizeCodeFenceLang
  *
  * 该函数定义在浏览器的 IIFE 闭包内，无法直接 require，
  * 这里从源文件中按括号配对提取函数定义，在 vm 沙箱中求值后测试。
@@ -10,7 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 
-const SRC = path.join(__dirname, "..", "..", "static", "js", "marked-ext.js");
+const SRC = path.join(__dirname, "..", "..", "_static", "js", "marked-ext.js");
 
 function extractFunction(source, name) {
     const start = source.indexOf("function " + name + "(");
