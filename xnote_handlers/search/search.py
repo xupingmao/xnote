@@ -343,8 +343,10 @@ class SearchHandler:
         kw = Storage()
         kw.show_aside = True
         kw.category = category
+        kw.search_category = category
         kw.html_title = "Search"
         kw.key = key
+        kw.search_key = key
         kw.files = files
         kw.title = title
         kw.page_max = int(math.ceil(count/pagesize))

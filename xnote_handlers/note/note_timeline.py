@@ -566,6 +566,7 @@ class BaseTimelineHandler:
         kw.search_type = self.search_type
         kw.search_ext_dict = dict(parent_id=parent_id)
         kw.key = key
+        kw.search_key = key
         kw.pathlist = pathlist
         kw.CREATE_BTN_TEXT_DICT = CREATE_BTN_TEXT_DICT
 

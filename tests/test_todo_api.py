@@ -67,13 +67,16 @@ class TestTodoApi(BaseTestCase):
         self.assertIn("项目X", names)
 
     def test_search_by_key(self):
+        # 用唯一项目名避免与种子/其他测试数据混淆（共享持久化测试库）
+        pid = self.json_request_return_dict(
+            "/api/project/create", method="POST", data=dict(name="搜索键唯一项目XYZ"))["data"]
         # 创建两条内容不同的待办，按关键词模糊搜索只命中匹配项
         self.json_request_return_dict(
-            "/api/todo/create", method="POST", data=dict(content="整理会议纪要", project_id="1"))
+            "/api/todo/create", method="POST", data=dict(content="整理会议纪要", project_id=str(pid)))
         self.json_request_return_dict(
-            "/api/todo/create", method="POST", data=dict(content="买水果", project_id="1"))
+            "/api/todo/create", method="POST", data=dict(content="买水果", project_id=str(pid)))
 
-        matched = self.json_request_return_dict("/api/todo/list?project_id=1&key=会议")
+        matched = self.json_request_return_dict("/api/todo/list?project_id=%s&key=会议" % pid)
         self.assertTrue(matched["success"])
         contents = [item["content"] for item in matched["data"]["items"]]
         self.assertIn("整理会议纪要", contents)

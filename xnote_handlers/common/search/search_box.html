@@ -2,16 +2,16 @@
 {% init search_ext_dict = dict() %}
 {% init search_type = "" %}
 {% init search_tag = "" %}
-{% init category = "" %}
-{% init key = "" %}
+{% init search_category = "" %}
+{% init search_key = "" %}
 
-<input name="key" class="nav-search-input" placeholder="{{search_placeholder}}" value="{{key}}" autocomplete="off" />
+<input name="key" class="nav-search-input" placeholder="{{search_placeholder}}" value="{{search_key}}" autocomplete="off" />
 <button class="nav-search-btn btn-default">
     <i class="fa fa-search">
     </i>
 </button>
 <input class="hide" name="type" value="search" />
-<input class="hide" name="category" value="{{category}}" />
+<input class="hide" name="category" value="{{search_category}}" />
 <input class="hide" name="search_type" value="{{search_type}}"/>
 <input class="hide" name="search_tag" value="{{search_tag}}"/>
 

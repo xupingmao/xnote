@@ -75,6 +75,7 @@ class SettingsHandler:
         kw.thread_cnt     = thread_cnt
         kw.xconfig        = xconfig
         kw.category       = category
+        kw.search_category = category
         kw.xnote_version  = get_xnote_version()
         kw.start_time     = xconfig.START_TIME
         kw.init_script_url = INIT_SCRIPT_URL

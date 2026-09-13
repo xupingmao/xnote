@@ -41,6 +41,7 @@ class ChecklistSearchHandler:
         kw.file = note_detail
         kw.show_checklist_search = True
         kw.key = xutils.get_argument_str("key")
+        kw.search_key = xutils.get_argument_str("key")
         kw.show_alias = False
         kw.show_relation = False
         kw.template_name = "note/page/detail/checklist_detail.html"

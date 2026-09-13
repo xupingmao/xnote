@@ -88,6 +88,7 @@ class SearchHandler:
         kw = Storage()
         kw.tag = tag
         kw.key = key
+        kw.search_key = key
         kw.keyword = key
         kw.default_content = message_utils.filter_key(key)
         kw.side_tags = self.list_side_tags(tag, user_name, 20)
