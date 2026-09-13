@@ -17,6 +17,12 @@
     </div>
     {% end %}
 
+    {% if show_comment %}
+    <div class="card">
+        {% include note/page/comment/comment.html %}
+    </div>
+    {% end %}
+
 {% end %}
 
 

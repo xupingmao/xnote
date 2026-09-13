@@ -107,7 +107,7 @@ class TestTodoPages(BaseTestCase):
         self.assertEqual("200 OK", resp.status)
 
     def test_todo_list_content_uses_mark_text(self):
-        # 列表行内容用 mark_text 渲染（markdown 语法生效），且不单独加链接样式
+        # 列表行内容用 mark_text 渲染（markdown 语法生效），且内容后附【详情】入口
         tid = self.json_request_return_dict("/api/todo/create", method="POST",
                                             data=dict(content="# 标题待办", project_id="1"))["data"]
         body = self.request_app("/todo?project_id=1").data.decode("utf-8")
@@ -115,8 +115,8 @@ class TestTodoPages(BaseTestCase):
         self.assertIsNotNone(row)
         # 内容按 markdown 渲染
         self.assertIn('<h1 class="block-title">标题待办</h1>', row)
-        # 文本不单独加链接
-        self.assertNotIn('<a href="/todo/detail?task_id=%s"' % tid, body)
+        # 内容后附【详情】链接（进入详情页）
+        self.assertIn('<a href="/todo/detail?task_id=%s" class="todo-detail-link">详情</a>' % tid, body)
 
     def _find_task_row(self, body):
         idx = body.find('class="list-item todo-task-row"')
@@ -414,9 +414,10 @@ class TestTodoForm(BaseTestCase):
         # 内容使用 mark_text 处理（markdown -> h1）
         self.assertIn('<h1 class="block-title">详情页待办</h1>', body)
         self.assertIn("todo-detail-tags", body)  # 信息用标签展示
-        # 评论区改为列表行弹窗，详情页不再内嵌
-        self.assertNotIn("commentText", body)
-        self.assertNotIn("/todo/comment/list", body)
+        # 详情页内嵌评论列表（复用 note 评论组件）
+        self.assertIn("commentText", body)
+        self.assertIn("/todo/comment/list", body)
+        self.assertIn("todo_task", body)
 
     def test_todo_comment_flow(self):
         task_id = self._create_task("评论待办")

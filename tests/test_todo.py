@@ -212,6 +212,20 @@ class TestTodoCommentCount(BaseTestCase):
         # 可见的来源文本是截断后的，而非完整长名称
         self.assertNotEqual(long_content, textutil.get_short_text(long_content, 20))
 
+    def test_list_row_has_detail_link(self):
+        todo_id = self._create()
+        body = self.request_app("/todo?project_id=0").data.decode("utf-8")
+        self.assertIn("/todo/detail?task_id=%s" % todo_id, body)
+        self.assertIn('class="todo-detail-link"', body)
+
+    def test_detail_page_has_comment_list(self):
+        todo_id = self._create()
+        body = self.request_app(
+            "/todo/detail?task_id=%s" % todo_id).data.decode("utf-8")
+        # 详情页复用了评论组件（列表/保存均走 todo 评论端点）
+        self.assertIn("/todo/comment/list", body)
+        self.assertIn("todo_task", body)
+
 
 if __name__ == "__main__":
     unittest.main()

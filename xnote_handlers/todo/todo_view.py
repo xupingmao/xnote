@@ -23,6 +23,7 @@ from .todo_model import (
     TodoRecord, TodoStatusEnum, TodoPriorityEnum,
     parse_time_ms, format_time_ms, format_date_ms)
 from .project_model import ProjectRecord, ProjectStatusEnum
+from .todo_comment import to_comment_target_id, COMMENT_TYPE
 
 
 TODO_PAGE_PATH = "/todo"
@@ -291,7 +292,11 @@ class TaskListPlugin(_TodoListPlugin):
             # 第一行：内容（mark_text 渲染，不再单独加链接样式）
             content_box = Div(css_class="todo-task-content")
             content_box.add(RawHtml(
-                '<i class="fa fa-check-square-o"></i> ' + mark_text(task.content)))
+                '<i class="fa fa-check-square-o"></i> ' + mark_text(task.content + " ")))
+            # 内容后附【详情】入口
+            content_box.add(TextLink(
+                text=T("详情"), href="/todo/detail?task_id=%s" % task.task_id,
+                css_class="todo-detail-link", is_bracketed=True))
             item.add(content_box)
 
             # 第二行：标签
@@ -512,4 +517,14 @@ class TodoDetailHandler:
         kw.back_url = task_list_href
         kw.content_html = mark_text(task.content)
         kw.info_tags = _build_task_info_tags(task, project_name)
+
+        # 评论列表（复用 note 评论组件，type=todo_task + 独立 target_id 空间隔离）
+        kw.show_comment = True
+        kw.file = Storage(id=to_comment_target_id(task.task_id))
+        kw.comment_list_url = "/todo/comment/list"
+        kw.comment_save_url = "/todo/comment/save"
+        kw.comment_delete_url = "/todo/comment/delete"
+        kw.comment_create_type = COMMENT_TYPE
+        kw.comment_title = T("评论")
+        kw.show_comment_edit = True
         return xtemplate.render("todo/page/todo_detail.html", **kw)
