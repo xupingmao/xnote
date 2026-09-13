@@ -67,26 +67,31 @@ class TestTodoApi(BaseTestCase):
         self.assertIn("项目X", names)
 
     def test_search_by_key(self):
-        # 用唯一项目名避免与种子/其他测试数据混淆（共享持久化测试库）
+        # 用唯一内容隔离共享持久化测试库（其它用例/种子数据可能已有同类内容）
+        import uuid
+        marker = uuid.uuid4().hex
+        meet = "会议%s" % marker
+        fruit = "水果%s" % marker
         pid = self.json_request_return_dict(
-            "/api/project/create", method="POST", data=dict(name="搜索键唯一项目XYZ"))["data"]
-        # 创建两条内容不同的待办，按关键词模糊搜索只命中匹配项
+            "/api/project/create", method="POST",
+            data=dict(name="搜索键项目%s" % marker))["data"]
         self.json_request_return_dict(
-            "/api/todo/create", method="POST", data=dict(content="整理会议纪要", project_id=str(pid)))
+            "/api/todo/create", method="POST",
+            data=dict(content=meet, project_id=str(pid)))
         self.json_request_return_dict(
-            "/api/todo/create", method="POST", data=dict(content="买水果", project_id=str(pid)))
+            "/api/todo/create", method="POST",
+            data=dict(content=fruit, project_id=str(pid)))
 
-        matched = self.json_request_return_dict("/api/todo/list?project_id=%s&key=会议" % pid)
+        # 按“会议”关键词搜索：只命中会议那条，不命中水果那条
+        matched = self.json_request_return_dict("/api/todo/list?key=会议%s" % marker)
         self.assertTrue(matched["success"])
         contents = [item["content"] for item in matched["data"]["items"]]
-        self.assertIn("整理会议纪要", contents)
-        self.assertNotIn("买水果", contents)
+        self.assertEqual(contents, [meet])
 
-        # 跨项目搜索（不带 project_id）同样按 content 命中
-        cross = self.json_request_return_dict("/api/todo/list?key=水果")
-        cross_contents = [item["content"] for item in cross["data"]["items"]]
-        self.assertIn("买水果", cross_contents)
-        self.assertNotIn("整理会议纪要", cross_contents)
+        # 换“水果”关键词：只命中水果那条
+        matched2 = self.json_request_return_dict("/api/todo/list?key=水果%s" % marker)
+        contents2 = [item["content"] for item in matched2["data"]["items"]]
+        self.assertEqual(contents2, [fruit])
 
 
 class TestTodoPages(BaseTestCase):
@@ -106,7 +111,7 @@ class TestTodoPages(BaseTestCase):
         # 指定项目时展示该项目的待办列表(ListView)
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="列表页待办", project_id="1"))
-        resp = self.request_app("/todo?project_id=1")
+        resp = self.request_app("/todo/task?project_id=1")
         self.assertEqual("200 OK", resp.status)
         body = resp.data.decode("utf-8")
         self.assertIn("新建待办", body)
@@ -119,20 +124,20 @@ class TestTodoPages(BaseTestCase):
                                             data=dict(name="标题项目"))["data"]
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="标题待办", project_id=str(pid)))
-        body = self.request_app("/todo?project_id=%s" % pid).data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=%s" % pid).data.decode("utf-8")
         idx = body.find("card-title")
         self.assertGreater(idx, 0)
         self.assertIn("<span>标题项目</span>", body[idx:idx + 400])
 
     def test_todo_list_page_with_filter(self):
-        resp = self.request_app("/todo?project_id=1&status=not_started&priority=high")
+        resp = self.request_app("/todo/task?project_id=1&status=not_started&priority=high")
         self.assertEqual("200 OK", resp.status)
 
     def test_todo_list_content_uses_mark_text(self):
         # 列表行内容用 mark_text 渲染（markdown 语法生效），且内容后附【详情】入口
         tid = self.json_request_return_dict("/api/todo/create", method="POST",
                                             data=dict(content="# 标题待办", project_id="1"))["data"]
-        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         row = self._find_task_row(body)
         self.assertIsNotNone(row)
         # 内容按 markdown 渲染
@@ -150,7 +155,7 @@ class TestTodoPages(BaseTestCase):
         # 三行布局：第一行内容、第二行标签、第三行操作
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="三行布局待办", project_id="1"))
-        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         row = self._find_task_row(body)
         self.assertIsNotNone(row)
         pos_content = row.find('class="todo-task-content"')
@@ -159,6 +164,22 @@ class TestTodoPages(BaseTestCase):
         self.assertTrue(0 <= pos_content < pos_tag < pos_actions,
                         "期望顺序为 内容 -> 标签 -> 操作, got %s/%s/%s" % (
                             pos_content, pos_tag, pos_actions))
+
+    def test_todo_list_row_shows_create_date(self):
+        # 列表行展示创建日期（YYYY-MM-DD）
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="创建日期待办", project_id="1"))
+        lst = self.json_request_return_dict("/api/todo/list?project_id=1")
+        task = [item for item in lst["data"]["items"]
+                if item["content"] == "创建日期待办"][0]
+        from xnote_handlers.todo.todo_model import format_date_ms
+        create_date = format_date_ms(task["create_time"])
+        self.assertTrue(create_date)  # 前置：create_time 有效
+
+        body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
+        row = self._find_task_row(body)
+        self.assertIsNotNone(row)
+        self.assertIn("创建 %s" % create_date, row)
 
     def test_archive_action_link_in_project(self):
         # 项目行的【归档】操作链接(action=archive)，且不再有删除(action=delete)
@@ -172,7 +193,7 @@ class TestTodoPages(BaseTestCase):
         # 待办行已移除【删除】按钮（保留取消），页面不存在删除入口
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="无删除待办", project_id="1"))
-        task_page = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        task_page = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         self.assertNotIn("action=delete", task_page)
         self.assertIn("action=cancel", task_page)
 
@@ -180,20 +201,20 @@ class TestTodoPages(BaseTestCase):
         # 待办行已移除【删除】按钮（保留取消），页面不存在删除入口
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="无删除待办", project_id="1"))
-        task_page = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        task_page = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         self.assertNotIn("action=delete", task_page)
         self.assertIn("action=cancel", task_page)
 
     def test_global_search_configured(self):
-        # 待办页面复用顶部全局搜索组件：搜索表单指向 /todo
+        # 待办页面复用顶部全局搜索组件：搜索表单指向 /todo/task
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="全局搜索待办", project_id="1"))
-        task_page = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        task_page = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         self.assertIn("nav-search-input", task_page)   # 顶部全局搜索输入框
-        self.assertIn('action="/todo"', task_page)     # 提交到待办搜索
-        # 项目首页(跨项目)同样指向 /todo
+        self.assertIn('action="/todo/task"', task_page)  # 提交到待办搜索
+        # 项目首页(跨项目)同样指向 /todo/task
         home = self.request_app("/todo").data.decode("utf-8")
-        self.assertIn('action="/todo"', home)
+        self.assertIn('action="/todo/task"', home)
 
     def test_global_search_default_includes_todo(self):
         # 全局【默认】综合搜索也应检索到新待办模块的内容（折叠为 tools 桶里的单条摘要，参考随手记）
@@ -211,13 +232,13 @@ class TestTodoPages(BaseTestCase):
         summaries = [f for f in ctx.tools
                      if getattr(f, "name", "").startswith("搜索到") and "个待办" in f.name]
         self.assertEqual(len(summaries), 1)
-        self.assertIn("/todo?model=task", summaries[0].url)
+        self.assertIn("/todo/task?model=task", summaries[0].url)
         self.assertIn("status=all", summaries[0].url)
         self.assertNotIn("/todo/detail?task_id=%s" % tid, [getattr(f, "url", "") for f in ctx.tools])
 
         # 分类搜索走 do_search_by_type，不触发 search 事件，不混入新待办(避免和旧 task 标签冲突)
         note_body = self.request_app("/search?search_type=note&key=综合搜索命中待办T").data.decode("utf-8")
-        self.assertNotIn("/todo?model=task", note_body)
+        self.assertNotIn("/todo/task?model=task", note_body)
 
     def test_global_search_filters_results(self):
         # 模拟全局搜索组件提交：跨项目搜索 model=task&key=...
@@ -225,13 +246,13 @@ class TestTodoPages(BaseTestCase):
                                       data=dict(content="searchable todo", project_id="1"))
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="irrelevant todo", project_id="1"))
-        body = self.request_app("/todo?model=task&key=searchable").data.decode("utf-8")
+        body = self.request_app("/todo/task?model=task&key=searchable").data.decode("utf-8")
         self.assertIn("searchable", body)
         self.assertNotIn("irrelevant", body)
 
         # 当前项目内搜索（header search_ext_dict 带 project_id + status=all）
         body2 = self.request_app(
-            "/todo?project_id=1&status=all&key=searchable").data.decode("utf-8")
+            "/todo/task?project_id=1&status=all&key=searchable").data.decode("utf-8")
         self.assertIn("searchable", body2)
         self.assertNotIn("irrelevant", body2)
 
@@ -243,21 +264,21 @@ class TestTodoPages(BaseTestCase):
             "/api/todo/status", method="POST",
             data=dict(task_id=done_id, action="finish"))
         done_body = self.request_app(
-            "/todo?project_id=1&status=all&key=finished").data.decode("utf-8")
+            "/todo/task?project_id=1&status=all&key=finished").data.decode("utf-8")
         self.assertIn("finished", done_body)
 
     def test_todo_not_started_tag_is_orange(self):
         # 【未开始】状态标签使用 orange
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="橙色标签待办", project_id="1"))
-        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         self.assertIn('<span class="tag orange">未开始</span>', body)
 
     def test_todo_list_comment_action(self):
         # 列表行操作区提供【评论】，弹窗地址指向评论页面
         tid = self.json_request_return_dict("/api/todo/create", method="POST",
                                            data=dict(content="评论入口待办", project_id="1"))["data"]
-        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         self.assertIn("xnote.todo.openCommentDialog(this)", body)
         self.assertIn('data-url="/todo/comment/dialog?task_id=%s"' % tid, body)
 
@@ -275,7 +296,7 @@ class TestTodoPages(BaseTestCase):
         # 默认【待办】Tab，且包含 待办/全部/未开始/进行中/完成/取消
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="默认筛选待办", project_id="1"))
-        body = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         self.assertIn('data-tab-default="pending"', body)
         self.assertIn('data-tab-value="pending"', body)
         self.assertIn('data-tab-value="all"', body)
@@ -305,17 +326,17 @@ class TestTodoPages(BaseTestCase):
         for i in range(51):
             self.json_request_return_dict("/api/todo/create", method="POST",
                                           data=dict(content="分页%02d" % i, project_id=str(pid)))
-        p1 = self.request_app("/todo?project_id=%s" % pid).data.decode("utf-8")
+        p1 = self.request_app("/todo/task?project_id=%s" % pid).data.decode("utf-8")
         self.assertIn("pagenation", p1)
         self.assertEqual(p1.count('class="list-item todo-task-row"'), 50)
         self.assertIn("page=2", p1)
 
-        p2 = self.request_app("/todo?project_id=%s&page=2" % pid).data.decode("utf-8")
+        p2 = self.request_app("/todo/task?project_id=%s&page=2" % pid).data.decode("utf-8")
         self.assertEqual(p2.count('class="list-item todo-task-row"'), 1)
 
     def test_todo_edit_form(self):
         # 新建待办的编辑表单（ajax 局部渲染）
-        resp = self.request_app("/todo?action=edit&model=task&project_id=1")
+        resp = self.request_app("/todo/task?action=edit&model=task&project_id=1")
         self.assertEqual("200 OK", resp.status)
         body = resp.data.decode("utf-8")
         self.assertIn('name="content"', body)
@@ -348,7 +369,7 @@ class TestTodoForm(BaseTestCase):
                                              data=dict(data=json.dumps(fields)))
 
     def test_create_task_via_form(self):
-        resp = self._post_form("/todo?action=save&model=task",
+        resp = self._post_form("/todo/task?action=save&model=task",
                                project_id="1", content="表单待办",
                                priority="high", begin_time="", end_time="")
         self.assertTrue(resp["success"])
@@ -359,7 +380,7 @@ class TestTodoForm(BaseTestCase):
 
     def test_save_task_status_via_form(self):
         # 通过编辑表单改状态：完成时间同步维护
-        self._post_form("/todo?action=save&model=task",
+        self._post_form("/todo/task?action=save&model=task",
                         project_id="1", content="表单状态待办", priority="normal",
                         status="done", begin_time="", end_time="")
         lst = self.json_request_return_dict("/api/todo/list?project_id=1")
@@ -369,7 +390,7 @@ class TestTodoForm(BaseTestCase):
         self.assertTrue(task["done_time"] > 0)
 
         # 改回【未开始】会清空完成时间
-        self._post_form("/todo?action=save&model=task", task_id=str(task["task_id"]),
+        self._post_form("/todo/task?action=save&model=task", task_id=str(task["task_id"]),
                         project_id="1", content="表单状态待办", priority="normal",
                         status="not_started", begin_time="", end_time="")
         lst2 = self.json_request_return_dict("/api/todo/list?project_id=1")
@@ -380,7 +401,7 @@ class TestTodoForm(BaseTestCase):
 
     def test_save_task_requires_project(self):
         # 保存待办必须有归属的项目
-        resp = self._post_form("/todo?action=save&model=task", project_id="0",
+        resp = self._post_form("/todo/task?action=save&model=task", project_id="0",
                                content="缺少项目待办", priority="normal",
                                status="not_started", begin_time="", end_time="")
         self.assertFalse(resp["success"])
@@ -417,7 +438,7 @@ class TestTodoForm(BaseTestCase):
         self.assertIn("归档项目", archived_names)
 
     def test_status_and_delete_via_form(self):
-        self._post_form("/todo?action=save&model=task",
+        self._post_form("/todo/task?action=save&model=task",
                         project_id="1", content="待完成", priority="normal",
                         begin_time="", end_time="")
         lst = self.json_request_return_dict("/api/todo/list?project_id=1")
@@ -426,7 +447,7 @@ class TestTodoForm(BaseTestCase):
 
         # 完成
         resp = self.json_request_return_dict(
-            "/todo?action=finish&model=task&project_id=1&task_id=%s" % task_id)
+            "/todo/task?action=finish&model=task&project_id=1&task_id=%s" % task_id)
         self.assertTrue(resp["success"])
         lst2 = self.json_request_return_dict("/api/todo/list?project_id=1")
         found = [item for item in lst2["data"]["items"] if item["task_id"] == task_id][0]
@@ -438,7 +459,7 @@ class TestTodoForm(BaseTestCase):
         self.assertTrue(resp["success"])
 
     def test_reopen_canceled_task(self):
-        self._post_form("/todo?action=save&model=task",
+        self._post_form("/todo/task?action=save&model=task",
                         project_id="1", content="取消后重开", priority="normal",
                         begin_time="", end_time="")
         lst = self.json_request_return_dict("/api/todo/list?project_id=1")
@@ -447,11 +468,11 @@ class TestTodoForm(BaseTestCase):
 
         # 取消
         resp = self.json_request_return_dict(
-            "/todo?action=cancel&model=task&project_id=1&task_id=%s" % task_id)
+            "/todo/task?action=cancel&model=task&project_id=1&task_id=%s" % task_id)
         self.assertTrue(resp["success"])
 
         # 已取消的任务在【全部】视图仍提供【重开】入口，且状态变更不需要确认
-        page = self.request_app("/todo?project_id=1&status=all").data.decode("utf-8")
+        page = self.request_app("/todo/task?project_id=1&status=all").data.decode("utf-8")
         self.assertIn(
             "action=reset&amp;model=task&amp;project_id=1&amp;task_id=%s" % task_id, page)
         self.assertIn("xnote.table.handleAjaxAction(this)", page)
@@ -460,7 +481,7 @@ class TestTodoForm(BaseTestCase):
 
         # 重开生效（回到未开始）
         resp = self.json_request_return_dict(
-            "/todo?action=reset&model=task&project_id=1&task_id=%s" % task_id)
+            "/todo/task?action=reset&model=task&project_id=1&task_id=%s" % task_id)
         self.assertTrue(resp["success"])
         lst2 = self.json_request_return_dict("/api/todo/list?project_id=1")
         found = [item for item in lst2["data"]["items"] if item["task_id"] == task_id][0]
@@ -474,7 +495,7 @@ class TestTodoForm(BaseTestCase):
             "/api/project/create", method="POST", data=dict(name="移动目标"))["data"]
 
         # 在 pid1 下建待办
-        self._post_form("/todo?action=save&model=task",
+        self._post_form("/todo/task?action=save&model=task",
                         project_id=str(pid1), content="移动待办",
                         priority="normal", begin_time="", end_time="")
         lst = self.json_request_return_dict("/api/todo/list?project_id=%s" % pid1)
@@ -482,7 +503,7 @@ class TestTodoForm(BaseTestCase):
                    if item["content"] == "移动待办"][0]["task_id"]
 
         # 通过编辑表单改到 pid2
-        resp = self._post_form("/todo?action=save&model=task",
+        resp = self._post_form("/todo/task?action=save&model=task",
                                task_id=str(task_id), project_id=str(pid2),
                                content="移动待办", priority="normal",
                                begin_time="", end_time="")
@@ -497,7 +518,7 @@ class TestTodoForm(BaseTestCase):
         self.assertNotIn(task_id, ids1)
 
     def _create_task(self, content, project_id="1"):
-        self._post_form("/todo?action=save&model=task", project_id=str(project_id),
+        self._post_form("/todo/task?action=save&model=task", project_id=str(project_id),
                         content=content, priority="normal", begin_time="2026-09-12", end_time="")
         lst = self.json_request_return_dict("/api/todo/list?project_id=%s" % project_id)
         return [item for item in lst["data"]["items"] if item["content"] == content][0]["task_id"]

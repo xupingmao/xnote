@@ -174,13 +174,13 @@ class TestTodoCommentCount(BaseTestCase):
             "/todo/comment/save", method="POST",
             data=dict(note_id=target_id, content="评论1"))
 
-        body = self.request_app("/todo?project_id=0").data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=0").data.decode("utf-8")
         self.assertIn("评论(1)", body)
 
         # 无评论时只显示「评论」
         self.assertEqual(TodoDao.get_by_id(todo_id).comment_count, 1)
         TodoDao.update_comment_count(todo_id, 0)
-        body2 = self.request_app("/todo?project_id=0").data.decode("utf-8")
+        body2 = self.request_app("/todo/task?project_id=0").data.decode("utf-8")
         self.assertIn(">评论</a>", body2)
 
     def test_mine_page_todo_source_truncated(self):
@@ -214,7 +214,7 @@ class TestTodoCommentCount(BaseTestCase):
 
     def test_list_row_has_detail_link(self):
         todo_id = self._create()
-        body = self.request_app("/todo?project_id=0").data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=0").data.decode("utf-8")
         self.assertIn("/todo/detail?task_id=%s" % todo_id, body)
         self.assertIn('class="todo-detail-link"', body)
 

@@ -8,8 +8,9 @@ from . import todo_comment
 
 
 xurls = (
-    # 页面（/todo 首页=项目列表，/todo?project_id=X=待办列表）
-    r"/todo", todo_view.TodoIndexHandler,
+    # 页面（/todo 首页=项目列表，/todo/task?project_id=X=该项目待办列表）
+    r"/todo", todo_view.TodoProjectHandler,
+    r"/todo/task", todo_view.TodoTaskHandler,
     r"/todo/detail", todo_view.TodoDetailHandler,
 
     # 待办评论（复用 note 评论模块）

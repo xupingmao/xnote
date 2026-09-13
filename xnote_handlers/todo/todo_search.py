@@ -31,7 +31,7 @@ def search_todo(ctx: SearchContext, expression=None):
 
     item = SearchResult()
     item.name = f"搜索到[{total}]个待办"
-    item.url = xconfig.WebConfig.server_home + "/todo?model=task&key=" + xutils.quote(key) + "&status=all"
+    item.url = xconfig.WebConfig.server_home + "/todo/task?model=task&key=" + xutils.quote(key) + "&status=all"
     item.icon = "fa fa-check-square-o"
     item.category = "task"
     item.show_more_link = True

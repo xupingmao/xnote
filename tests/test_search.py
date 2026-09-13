@@ -70,7 +70,7 @@ class TestMain(BaseTestCase):
         summaries = [f for f in ctx.tools
                      if getattr(f, "name", "").startswith("搜索到") and "个待办" in f.name]
         self.assertEqual(len(summaries), 1)
-        self.assertIn("/todo?model=task", summaries[0].url)
+        self.assertIn("/todo/task?model=task", summaries[0].url)
         self.assertIn("status=all", summaries[0].url)
         # 不应逐条展开待办详情
         self.assertFalse(any(getattr(f, "url", "").startswith("/todo/detail")
@@ -81,7 +81,7 @@ class TestMain(BaseTestCase):
 
         # 旧 message 标签的 task 分类搜索走 do_search_by_type，不触发 search 事件，不混入新待办
         note_body = self.request_app("/search?search_type=note&key=综合搜索命中待办S").data.decode("utf-8")
-        self.assertNotIn("/todo?model=task", note_body)
+        self.assertNotIn("/todo/task?model=task", note_body)
 
     def test_search_history(self):
         from xnote_handlers.note import dao

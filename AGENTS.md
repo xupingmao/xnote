@@ -11,6 +11,8 @@
 - 结构化对象优先：设计接口（函数/方法）的输入输出参数时，优先使用结构化的对象（自定义类，如 `XxxResult`/`XxxInfo`），而不是裸 `dict`。兼容 Python 3.6 不可用 `dataclass` 时，用普通类实现，并通过 `from_dict` / `to_dict` 与 JSON 互转；类的字段用类型注解明确标注。
 - 小模板内联：小于 20 行的 HTML 模板直接放在 Python 代码里，用 `xtemplate.render_text(text, template_name, **kw)` 渲染，不要单独建 `.html` 模板文件。大于 20 行的模板才放 `xnote_handlers/` 下单独的模板文件中。
 - webui 组件 CSS 放公共文件：`xnote/webui/` 下的组件是公共组件，其样式不要写在业务模块的 css 里，统一放到 `static/css/base/common-*.css`（例如下拉/更多操作菜单放 `common-dropdown.css`）。注意 `common-*.css` 经打包进入 `static/css/app.build.css`（全局加载），但若未重新执行构建脚本，本地开发可在使用组件的页面直接 `<link>` 该 `common-*.css` 使其立即生效。
+- **不要自行提交 git commit**：仅在用户明确要求提交时才执行 `git commit`（例如用户说"提交代码"）。其余情况下只修改工作区文件，不要主动 `git add` / `git commit`，把提交时机交给用户。
+- 浅灰标签慎用：`TextTag(css_class="lightgray")`（背景 `#eee`，见 `_static/css/base/common-tag.css`）与列表行的 hover 背景同色（`.list-item:hover` 也是 `#eee`，见 `common-list.css`），**不要在有 hover 效果的组件上使用**（例如列表行 `ListViewItem` 的标签），否则 hover 时标签会“消失”。列表内的日期等元信息改用无背景的 `TextSpan(css_class="todo-time")` 之类的纯文本样式。
 
 ## REST API 约定
 

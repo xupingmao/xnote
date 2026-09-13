@@ -13,7 +13,7 @@ from xnote.core.xtemplate import T
 from xnote.plugin import (
     ListViewItem, EditFormActionLink, EditFormButton,
     ConfirmActionLink, AjaxActionLink, ActionLink, TextTag, FormRowType, TabBox,
-    Div, RawHtml, TextLink)
+    Div, RawHtml, TextLink, TextSpan)
 from xnote.plugin.list_plugin import BaseListPlugin
 from xnote_handlers.config import AsideConfig, LinkConfig
 from xutils.textutil import mark_text
@@ -26,7 +26,8 @@ from .project_model import ProjectRecord, ProjectStatusEnum
 from .todo_comment import to_comment_target_id, COMMENT_TYPE
 
 
-TODO_PAGE_PATH = "/todo"
+PROJECT_PAGE_PATH = "/todo"
+TASK_PAGE_PATH = "/todo/task"
 
 # 优先级 -> tag 样式
 PRIORITY_TAG_CLASS = {
@@ -72,19 +73,19 @@ def _build_filter_html(project_id: str, status: str, priority: str) -> str:
     status_tab = TabBox(tab_key="status", title=T("状态"),
                         tab_default=STATUS_FILTER_PENDING, css_class="btn-style")
     status_tab.add_item(title=T("待办"), value=STATUS_FILTER_PENDING,
-                        href="/todo?project_id=%s&status=%s&priority=%s" % (project_id, STATUS_FILTER_PENDING, priority))
+                        href="/todo/task?project_id=%s&status=%s&priority=%s" % (project_id, STATUS_FILTER_PENDING, priority))
     status_tab.add_item(title=T("全部"), value=STATUS_FILTER_ALL,
-                        href="/todo?project_id=%s&status=%s&priority=%s" % (project_id, STATUS_FILTER_ALL, priority))
+                        href="/todo/task?project_id=%s&status=%s&priority=%s" % (project_id, STATUS_FILTER_ALL, priority))
     for e in TodoStatusEnum.enums():
         status_tab.add_item(title=e.name, value=e.value,
-                            href="/todo?project_id=%s&status=%s&priority=%s" % (project_id, e.value, priority))
+                            href="/todo/task?project_id=%s&status=%s&priority=%s" % (project_id, e.value, priority))
 
     priority_tab = TabBox(tab_key="priority", title=T("优先级"), css_class="btn-style")
     priority_tab.add_item(title=T("全部"), value="",
-                          href="/todo?project_id=%s&status=%s" % (project_id, status))
+                          href="/todo/task?project_id=%s&status=%s" % (project_id, status))
     for e in TodoPriorityEnum.enums():
         priority_tab.add_item(title=e.name, value=e.value,
-                              href="/todo?project_id=%s&status=%s&priority=%s" % (project_id, status, e.value))
+                              href="/todo/task?project_id=%s&status=%s&priority=%s" % (project_id, status, e.value))
 
     return _render_component(status_tab) + _render_component(priority_tab)
 
@@ -166,7 +167,7 @@ class ProjectListPlugin(_TodoListPlugin):
                 bucket.get(TodoStatusEnum.in_progress.value, 0)
             done_count = bucket.get(TodoStatusEnum.done.value, 0)
 
-            href = "/todo?project_id=%s" % project.project_id
+            href = "/todo/task?project_id=%s" % project.project_id
             # 整行可点击：外层 <a>；操作区(extra)由 ListViewItem 渲染在 <a> 之外并浮动到右侧
             item = ListViewItem(icon_class="fa fa-folder-o", href=href, show_chevron_right=True)
             item.add_span(text=project.name, css_class="bold")
@@ -184,8 +185,8 @@ class ProjectListPlugin(_TodoListPlugin):
 
         self.option_html = EditFormButton(text=T("新建项目"), url="?action=edit&model=project").render()
         self.update_aside(AsideConfig.default_aside_html)
-        # 顶部全局搜索组件：项目首页跨项目搜索全部待办（status=all 不过滤状态）
-        self.search_action = "/todo"
+        # 顶部全局搜索组件：项目首页跨项目搜索全部待办（status=all 不过滤状态），提交到待办列表页
+        self.search_action = TASK_PAGE_PATH
         self.search_placeholder = T("搜索待办")
         self.search_ext_dict = dict(model="task", status=STATUS_FILTER_ALL)
         filter_html = _build_project_filter_html(status)
@@ -198,7 +199,7 @@ class ProjectListPlugin(_TodoListPlugin):
         project = ProjectDao.get_by_id(project_id, user_id=user_id) if project_id != 0 else None
 
         form = self.create_form()
-        form.path = TODO_PAGE_PATH
+        form.path = PROJECT_PAGE_PATH
         form.model_name = "project"
         form.id = "project_edit"
         form.add_row(title="", field="project_id", value=str(project_id), css_class="hide")
@@ -316,6 +317,10 @@ class TaskListPlugin(_TodoListPlugin):
             begin_time = format_time_ms(task.begin_time)
             if begin_time:
                 item.tags.append(TextTag(text=begin_time))
+            # 创建日期（用无背景的元信息样式，避免浅灰标签与列表 hover 背景同色而“消失”）
+            create_date = format_date_ms(task.create_time)
+            if create_date:
+                item.tags.append(TextSpan(text=T("创建 %s") % create_date, css_class="todo-time"))
 
             # 第三行：操作
             action_box = Div(css_class="todo-task-meta-actions")
@@ -343,7 +348,7 @@ class TaskListPlugin(_TodoListPlugin):
             text=T("新建待办"), url="?action=edit&model=task&project_id=%s" % project_id).render()
         self.update_aside(AsideConfig.default_aside_html)
         # 顶部全局搜索组件：在当前项目内搜索全部状态的待办（project_id<=0 时跨项目）
-        self.search_action = "/todo"
+        self.search_action = TASK_PAGE_PATH
         self.search_placeholder = T("搜索待办")
         if project_id > 0:
             self.search_ext_dict = dict(project_id=str(project_id), status=STATUS_FILTER_ALL)
@@ -364,7 +369,7 @@ class TaskListPlugin(_TodoListPlugin):
             task.task_id = task_id
 
         form = self.create_form()
-        form.path = TODO_PAGE_PATH
+        form.path = TASK_PAGE_PATH
         form.model_name = "task"
         form.id = "task_edit"
         form.add_row(title="", field="task_id", value=str(task_id), css_class="hide")
@@ -454,23 +459,28 @@ class TaskListPlugin(_TodoListPlugin):
         return webutil.SuccessResult()
 
 
-class TodoIndexHandler:
-    """/todo 分发：无 project_id 展示项目列表，否则展示该项目待办列表"""
+class TodoProjectHandler:
+    """/todo 首页：项目列表"""
 
     @xauth.login_required()
     def GET(self):
-        return self._dispatch()
+        return ProjectListPlugin().GET()
 
     @xauth.login_required()
     def POST(self):
-        return self._dispatch()
+        return ProjectListPlugin().POST()
 
-    def _dispatch(self):
-        model = xutils.get_argument_str("model", "")
-        project_id = xutils.get_argument_str("project_id", "")
-        if model == "task" or (model == "" and project_id != ""):
-            return TaskListPlugin().GET()
-        return ProjectListPlugin().GET()
+
+class TodoTaskHandler:
+    """/todo/task：待办列表（按 project_id 过滤，不传为跨项目）"""
+
+    @xauth.login_required()
+    def GET(self):
+        return TaskListPlugin().GET()
+
+    @xauth.login_required()
+    def POST(self):
+        return TaskListPlugin().POST()
 
 
 def _build_task_info_tags(task: TodoRecord, project_name: str = "") -> Div:
@@ -509,11 +519,11 @@ class TodoDetailHandler:
         task_id = xutils.get_argument_int("task_id", 0)
         task = TodoDao.get_by_id(task_id, user_id=user_id)
         if task is None:
-            raise web.seeother("/todo")
+            raise web.seeother(TASK_PAGE_PATH)
 
         project = ProjectDao.get_by_id(task.project_id) if task.project_id else None
         project_name = project.name if project is not None else ""
-        task_list_href = "/todo?project_id=%s" % task.project_id
+        task_list_href = "/todo/task?project_id=%s" % task.project_id
 
         kw = Storage()
         kw.title = T("待办详情")
