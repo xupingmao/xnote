@@ -197,6 +197,113 @@ class CliCoreTestCase(BaseTestCase):
                 note_plugin.note_list_handler(
                     XnoteCliContext(command="note-list", args=["abc"]))
 
+    def test_restart_handler_requires_admin(self):
+        # restart 是管理员命令：非管理员应被拒绝，管理员会触发 xmanager.restart()
+        from xnote_handlers.cli.plugins import ops_plugin
+        import unittest.mock as mock
+
+        with mock.patch.object(ops_plugin.xauth, "is_admin", return_value=False):
+            with self.assertRaises(xnote_cli.XnoteCliError):
+                ops_plugin.restart_handler(XnoteCliContext(command="restart"))
+
+        with mock.patch.object(ops_plugin.xauth, "is_admin", return_value=True), \
+             mock.patch.object(ops_plugin.xmanager, "restart") as m_restart:
+            ops_plugin.restart_handler(XnoteCliContext(command="restart"))
+            m_restart.assert_called_once()
+
+    def test_load_remote_commands_prefers_live_when_logged_in(self):
+        # 已登录时优先使用实时拉取的列表，确保新增命令（如 restart）
+        # 无需手动 refresh 即可在帮助/自动补全中出现
+        import unittest.mock as mock
+        from xnote_cli.session import SessionInfo
+        session = SessionInfo(username="admin", server_url="http://x",
+                              cookie="sid=x", commands={"backup": "备份"})
+        with mock.patch.object(xnote_cli, "_get_server_commands",
+                               return_value={"backup": "备份", "restart": "重启"}):
+            ctx = XnoteCliContext()
+            ctx.session = session
+            result = xnote_cli._load_remote_commands(ctx)
+        self.assertEqual(result, {"backup": "备份", "restart": "重启"})
+
+    def test_load_remote_commands_falls_back_to_cache_offline(self):
+        # 实时拉取失败（离线/服务不可用）时回退到登录时缓存的列表
+        import unittest.mock as mock
+        from xnote_cli.session import SessionInfo
+        session = SessionInfo(username="admin", cookie="sid=x",
+                              commands={"backup": "备份"})
+        with mock.patch.object(xnote_cli, "_get_server_commands",
+                               return_value={}):
+            ctx = XnoteCliContext()
+            ctx.session = session
+            result = xnote_cli._load_remote_commands(ctx)
+        self.assertEqual(result, {"backup": "备份"})
+
+    def test_load_remote_commands_empty_when_not_logged_in(self):
+        # 未登录时不发起网络请求，直接返回空 dict
+        self.assertEqual(xnote_cli._load_remote_commands(XnoteCliContext()), {})
+
+    def test_wait_for_restart_polls_until_success(self):
+        # 轮询 command_list 直到返回成功即认为重启完成
+        import io
+        import contextlib
+        import time
+        import unittest.mock as mock
+        state = {"n": 0}
+        def fake_request(ctx, method, path, **kw):
+            state["n"] += 1
+            if state["n"] < 3:
+                raise xnote_cli.XnoteCliError("无法连接")
+            return xnote_cli.ApiResult(success=True, data=[])
+        with mock.patch.object(xnote_cli, "request", side_effect=fake_request), \
+             mock.patch.object(time, "time", side_effect=lambda: state["n"]), \
+             mock.patch.object(time, "sleep"):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = xnote_cli._wait_for_restart(XnoteCliContext(), timeout=30)
+        self.assertEqual(rc, 0)
+        self.assertIn("重启成功", buf.getvalue())
+
+    def test_wait_for_restart_timeout(self):
+        # 超过超时时间仍未恢复则返回失败
+        import io
+        import contextlib
+        import time
+        import unittest.mock as mock
+        def fake_request(ctx, method, path, **kw):
+            raise xnote_cli.XnoteCliError("无法连接")
+        t = {"v": 0}
+        def fake_time():
+            t["v"] += 1
+            return t["v"]
+        with mock.patch.object(xnote_cli, "request", side_effect=fake_request), \
+             mock.patch.object(time, "time", side_effect=fake_time), \
+             mock.patch.object(time, "sleep"):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = xnote_cli._wait_for_restart(XnoteCliContext(), timeout=10)
+        self.assertEqual(rc, 1)
+        self.assertIn("重启超时", buf.getvalue())
+
+    def test_forward_restart_waits_for_success(self):
+        # restart 触发连接断开后，应轮询等待服务恢复（而非直接成功退出）
+        import io
+        import contextlib
+        import time
+        import unittest.mock as mock
+        state = {"poll": 0}
+        def fake_request(ctx, method, path, **kw):
+            if path == "/api/cli/run":
+                raise xnote_cli.XnoteCliError("无法连接")
+            state["poll"] += 1
+            return xnote_cli.ApiResult(success=True, data=[])
+        with mock.patch.object(xnote_cli, "request", side_effect=fake_request), \
+             mock.patch.object(time, "time", side_effect=lambda: state["poll"]), \
+             mock.patch.object(time, "sleep"), \
+             contextlib.redirect_stdout(io.StringIO()):
+            rc = xnote_cli._forward_to_server(XnoteCliContext(), "restart", [],
+                                              timeout=300)
+        self.assertEqual(rc, 0)
+
     def test_remote_command_dispatch(self):
         # 本地未命中时，应把远程命令转发到 /api/cli/run
         import unittest.mock as mock
@@ -207,7 +314,7 @@ class CliCoreTestCase(BaseTestCase):
         def fake_load_remote(ctx):
             return {"note-view": "查看笔记内容"}
 
-        def fake_forward(ctx, name, args, use_json=False):
+        def fake_forward(ctx, name, args, use_json=False, **kwargs):
             forwarded["name"] = name
             forwarded["args"] = args
             forwarded["use_json"] = use_json
@@ -375,7 +482,7 @@ class CliCoreTestCase(BaseTestCase):
         import unittest.mock as mock
         from xnote_cli.session import SessionInfo
         captured = {}
-        def fake_forward(ctx, name, args, use_json=False):
+        def fake_forward(ctx, name, args, use_json=False, **kwargs):
             captured["name"] = name
             captured["use_json"] = use_json
             return 0
@@ -418,7 +525,7 @@ class CliApiTestCase(BaseTestCase):
         self.assertIn("hello", names)
         # 服务端插件提供的远程命令（note/ops 插件）
         for cmd in ("note-view", "note-search", "note-edit", "note-delete",
-                   "backup", "repair", "sync"):
+                   "backup", "repair", "sync", "restart"):
             self.assertIn(cmd, names)
 
     def test_run_plugin_api(self):

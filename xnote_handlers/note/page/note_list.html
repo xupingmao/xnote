@@ -35,7 +35,10 @@
     </div>
     {% end %}
 
-    {% include note/component/filter/type_filter.html %}
+    {% from xnote_handlers.note.type_filter_tab import build as build_type_filter_tab %}
+    {% init type_list = [] %}
+    {% init note_type = "unknown" %}
+    {% render build_type_filter_tab(type_list, note_type) %}
 
     {% set files = notes %}
     {% include note/component/note_list_component.html %}

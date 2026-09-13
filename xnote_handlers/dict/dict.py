@@ -80,7 +80,10 @@ class DictHandler(BaseListPlugin):
     permitted_role_list = ["user", "admin"]
 
     PAGE_HTML = """
-{% include note/component/filter/type_filter.html %}
+{% from xnote_handlers.note.type_filter_tab import build as build_type_filter_tab %}
+{% init type_list = [] %}
+{% init note_type = "unknown" %}
+{% render build_type_filter_tab(type_list, note_type) %}
 {% include dict/page/dict_type_tab.html %}
 """ + BaseListPlugin.page_html
     

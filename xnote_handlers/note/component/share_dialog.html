@@ -34,7 +34,7 @@ $(function () {
             // 当前日期的笔记列表
             item.children.forEach(function (value, index) {
                 if (value.is_public === 1) {
-                    value.shared = "<a class=\"tag orange-tag\">已分享</a>";
+                    value.shared = "<a class=\"tag orange\">已分享</a>";
                 }
                 var noteRow = $("<p>").addClass("card-row");
                 noteRow.append(renderTemplate(itemTemplateHtml, value));

@@ -60,6 +60,7 @@ xnote-cli 的命令分为两类：
 | `backup`       | 备份数据         | `ops_plugin.py`     |
 | `repair`       | 修复数据（暂未实现） | `ops_plugin.py` |
 | `sync`         | 触发数据同步（暂未实现） | `ops_plugin.py`     |
+| `restart`      | 重启 xnote 服务（需管理员，会等待服务重启完成） | `ops_plugin.py`  |
 | `hello`        | 示例插件命令     | `sample_plugin.py`  |
 
 > 注：`note-list` / `note-search` 默认以**表格**形式输出结果；加上 `--json`

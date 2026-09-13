@@ -1,12 +1,20 @@
 /**
- * 标签的样式
+ * 标签(badge)样式
  * @author xupingmao
  * @since 2021/05/22 12:56:05
- * @modified 2022/03/12 10:52:50
+ * @modified 2026/09/13 整理去重: 移除 -tag 后缀废弃别名, 仅保留 `tag <color>` 规范写法
  * @filename common-tag.css
+ *
+ * 使用约定(见 docs/code_style_css.md):
+ *   基础类 `.tag` + 修饰类组合, 例如 <span class="tag orange">置顶</span>
+ *   反例(已废弃, 不要再使用): red-tag / orange-tag / gray-tag / info-tag / tag-info ...
+ * 规范配色(canonical palette, 供 TextTag.css_class 使用):
+ *   red / orange / gray / lightblue / lightgray / lightred / lightpurple
+ *   额外: info / system
+ * 形状/尺寸修饰: pill / large
  */
 
-/** .tag的优先级最低，要放在最前面 **/
+/** 1. 基础 badge (.tag 优先级最低, 放最前面) **/
 .tag {
     font-size: 12px;
     background-color: #e8f8e8;
@@ -18,7 +26,6 @@
     line-height: 17px;
     margin: 2px;
 }
-
 
 a.tag {
     text-decoration: none;
@@ -36,34 +43,51 @@ a.tag:hover {
     display: inline-block;
 }
 
-.tag.pink {
-    background-color: pink;
-    color: white;
+
+/** 2. 尺寸/形状修饰 **/
+.tag.large {
+    font-size: 14px;
+    line-height: 19px;
 }
 
-.tag.red, .red-tag {
+.tag.pill {
+    border-radius: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.tag.pill.large {
+    border-radius: 14px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+
+/** 3. 颜色修饰 (canonical palette) **/
+.tag.red {
     background-color: red;
     color: white;
 }
 
-.tag.orange, .orange-tag {
+.tag.orange {
     background-color: orange;
     color: white;
 }
 
-.gray-tag, .tag.gray, .tag.grey {
+.tag.gray {
     color: white;
     background-color: #ccc;
 }
 
-
-.tag.lightgray {
-    background-color: #eee;
+.tag.lightblue {
     color: #08c;
+    background-color: #ddf4ff;
 }
 
-.tag.lightgray:hover {
+.tag.lightgray {
+    /* 浅灰底 + 中性深灰字, 与浅色系(同色系浅底+深字)保持一致 */
     background-color: #eee;
+    color: #666;
 }
 
 .tag.lightgray.active {
@@ -71,7 +95,34 @@ a.tag:hover {
     color: white;
 }
 
+.tag.lightred {
+    color: #d32f2f;
+    background-color: #ffe0e0;
+}
 
+.tag.lightpurple {
+    color: #7b1fa2;
+    background-color: #f0e2fb;
+}
+
+.tag.info {
+    padding: 3px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    background: rgb(13, 202, 240);
+    color: #fff;
+}
+
+.tag.system {
+    background-color: gray;
+    color: white;
+}
+
+
+/**
+ * 4. 筛选 chip 组件 (.tag-span, 由 TagSpan 渲染)
+ *    独立组件, 不在 `.tag` 徽章整理范围内; 保留外边框等原有样式。
+ */
 .tag-span, .tag-span-danger {
     display: block;
     float: left;
@@ -104,57 +155,4 @@ a.tag:hover {
 
 .tag-span-light a {
     color: #000;
-}
-
-.gray-tag-link, .gray-tag-span {
-    background-color: #ccc;
-    color: white;
-    padding: 3px;
-    border-radius: 3px;
-    word-break: keep-all;
-}
-
-.info-tag, .tag-info, .tag.info {
-    padding: 3px 5px;
-    border-radius: 3px;
-    font-size: 12px;
-    background: rgb(13, 202, 240);
-    color: #fff;
-}
-
-.tag.system {
-    background-color: gray;
-    color: white;
-}
-
-.tag.large {
-    font-size: 14px;
-    line-height: 19px;
-}
-
-.tag.lightblue {
-    color: #08c;
-    background-color: #ddf4ff;
-}
-
-.tag.lightred {
-    color: #d32f2f;
-    background-color: #ffe0e0;
-}
-
-.tag.lightpurple {
-    color: #7b1fa2;
-    background-color: #f0e2fb;
-}
-
-.tag.pill {
-    border-radius: 12px;
-    padding-left: 12px;
-    padding-right: 12px;
-}
-
-.tag.pill.large {
-    border-radius: 14px;
-    padding-left: 14px;
-    padding-right: 14px;
 }

@@ -381,21 +381,58 @@ def _load_remote_commands(ctx):
     # type: (XnoteCliContext) -> Dict[str, str]
     """返回服务端远程命令列表（name -> help）
 
-    优先使用登录时缓存到会话中的列表（见 do_login）；未登录或缓存为空时
-    再尝试实时拉取。未登录会导致拉取失败，此时返回空 dict。
+    已登录时优先尝试实时拉取（确保新增的远程命令，如 restart，无需手动
+    refresh 即可在帮助/自动补全中出现）；拉取失败（离线或服务不可用）时
+    回退到登录时缓存的列表。未登录时直接返回空 dict（不发起网络请求）。
     """
-    if ctx.session:
-        cached = ctx.session.commands
-        if isinstance(cached, dict) and len(cached) > 0:
-            return cached
-    return _get_server_commands(ctx)
+    if not ctx.session or not ctx.session.username:
+        return {}
+    cached = ctx.session.commands
+    live = _get_server_commands(ctx)
+    if live:
+        return live
+    if isinstance(cached, dict) and len(cached) > 0:
+        return cached
+    return {}
 
 
-def _forward_to_server(ctx, name, args, use_json=False):
-    # type: (XnoteCliContext, str, List[str], bool) -> int
+def _wait_for_restart(ctx, timeout=300):
+    # type: (XnoteCliContext, int) -> int
+    """重启命令触发后，轮询服务端直到其重新可用
+
+    服务端 restart 会以 exit(205) 主动断开连接，这里持续探测
+    /api/cli/command_list，直到返回成功（服务恢复、登录态有效）或超时。
+    默认超时 300 秒（5 分钟），可通过 --timeout 覆盖。与 Web 端「重载」
+    按钮重启后重新访问服务的逻辑保持一致。
+    """
+    import time
+    print("服务正在重启，请稍候（最多等待 %d 秒）..." % timeout)
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        time.sleep(1)
+        try:
+            resp = request(ctx, "GET", "/api/cli/command_list")
+        except XnoteCliError:
+            resp = None
+        if resp is not None and resp.success:
+            print("重启成功")
+            return 0
+    print("重启超时（%d 秒内服务未恢复），请手动检查服务状态" % timeout)
+    return 1
+
+
+def _forward_to_server(ctx, name, args, use_json=False, timeout=300):
+    # type: (XnoteCliContext, str, List[str], bool, int) -> int
     """把命令转发给服务端执行（插件命令在服务端运行）"""
-    resp = request(ctx, "POST", "/api/cli/run",
-                   data={"cmd": name, "args": "\n".join(args)})
+    try:
+        resp = request(ctx, "POST", "/api/cli/run",
+                       data={"cmd": name, "args": "\n".join(args)})
+    except XnoteCliError:
+        # restart 命令会让服务端主动断开连接（进程正在重启），
+        # 连接失败是预期信号，转而轮询等待服务恢复
+        if name == "restart":
+            return _wait_for_restart(ctx, timeout=timeout)
+        raise
     if resp.success:
         data = resp.data
         if data is not None:
@@ -450,6 +487,9 @@ def _build_parser(ctx):
             rp.add_argument("args", nargs="*", help="传递给服务端命令的参数")
             rp.add_argument("--json", action="store_true",
                            help="以 JSON 格式输出（而非表格）")
+            if name == "restart":
+                rp.add_argument("--timeout", type=int, default=300,
+                               help="等待服务重启完成的超时时间（秒），默认 300（5 分钟）")
 
     return parser
 
@@ -499,7 +539,9 @@ def main(argv=None):    # type: (Optional[List[str]]) -> int
         ctx.session = help_ctx.session
         ctx.server_url = get_server_url(ctx)
         use_json = bool(getattr(args, "json", False))
-        return _forward_to_server(ctx, name, ctx.args, use_json=use_json)
+        timeout = int(getattr(args, "timeout", 300) or 300)
+        return _forward_to_server(ctx, name, ctx.args,
+                                  use_json=use_json, timeout=timeout)
 
     # 兜底：理论上 argparse 已对未知子命令报错退出，这里仅作为安全网
     print("未知命令: %s" % name)

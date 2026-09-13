@@ -237,9 +237,9 @@ def to_search_results(notes: Sequence[NoteIndexDO], words: List[str]) -> typing.
 def build_note_extra_html(note: NoteIndexDO):
     result = RowPanel(css_class="margin-top-sm")
     if note.is_pinned:
-        result.add(TextTag(text="置顶", css_class="orange-tag"))
+        result.add(TextTag(text="置顶", css_class="orange"))
     if note.is_public:
-        result.add(TextTag(text="公开", css_class="green-tag"))
+        result.add(TextTag(text="公开", css_class=""))
     if note.creator:
         result.add(TextTag(text=note.creator, css_class="lightgray"))
     if note.parent_name:
