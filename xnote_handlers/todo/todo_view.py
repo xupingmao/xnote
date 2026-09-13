@@ -178,12 +178,16 @@ class ProjectListPlugin(_TodoListPlugin):
             item.extra.add(EditFormActionLink(
                 text=T("编辑"), url="?action=edit&model=project&project_id=%s" % project.project_id))
             item.extra.add(ConfirmActionLink(
-                text=T("删除"), url="?action=delete&model=project&project_id=%s" % project.project_id,
-                msg=T("确定删除项目【%s】吗?") % project.name, css_class="red"))
+                text=T("归档"), url="?action=archive&model=project&project_id=%s" % project.project_id,
+                msg=T("确定归档项目【%s】吗?") % project.name))
             list_view.add_item(item)
 
         self.option_html = EditFormButton(text=T("新建项目"), url="?action=edit&model=project").render()
         self.update_aside(AsideConfig.default_aside_html)
+        # 顶部全局搜索组件：项目首页跨项目搜索全部待办（status=all 不过滤状态）
+        self.search_action = "/todo"
+        self.search_placeholder = T("搜索待办")
+        self.search_ext_dict = dict(model="task", status=STATUS_FILTER_ALL)
         filter_html = _build_project_filter_html(status)
         return self.response_page(list_view=list_view, filter_html=filter_html,
                                   page=page, page_max=page_max, page_total=total, page_size=page_size)
@@ -235,10 +239,10 @@ class ProjectListPlugin(_TodoListPlugin):
             ProjectDao.update(project)
         return webutil.SuccessResult()
 
-    def handle_delete(self):
+    def handle_archive(self):
         user_id = xauth.current_user_id()
         project_id = xutils.get_argument_int("project_id", 0)
-        ProjectDao.delete(project_id, user_id=user_id)
+        ProjectDao.archive(project_id, user_id=user_id)
         return webutil.SuccessResult()
 
 
@@ -250,8 +254,11 @@ class TaskListPlugin(_TodoListPlugin):
     def handle_page(self):
         user_id = xauth.current_user_id()
         project_id = xutils.get_argument_int("project_id", 0)
+        # project_id<=0 表示跨项目（不限定项目），交由 DAO 的 project_id=None 实现
+        project_filter_id = project_id if project_id > 0 else None
         status = xutils.get_argument_str("status", STATUS_FILTER_PENDING)
         priority = xutils.get_argument_str("priority", "")
+        key = xutils.get_argument_str("key", "")
 
         # 标题展示所属项目名称
         project = ProjectDao.get_by_id(project_id, user_id=user_id) if project_id != 0 else None
@@ -277,11 +284,11 @@ class TaskListPlugin(_TodoListPlugin):
         offset = max(0, page - 1) * page_size
 
         tasks = TodoDao.list_with_filters(
-            user_id, project_id=project_id, status=status_filter, status_list=status_list,
-            priority=priority or None, sort="create_time_desc", offset=offset, limit=page_size)
+            user_id, project_id=project_filter_id, status=status_filter, status_list=status_list,
+            priority=priority or None, key=key, sort="create_time_desc", offset=offset, limit=page_size)
         total = TodoDao.count_with_filters(
-            user_id, project_id=project_id, status=status_filter, status_list=status_list,
-            priority=priority or None)
+            user_id, project_id=project_filter_id, status=status_filter, status_list=status_list,
+            priority=priority or None, key=key)
         page_max = max(1, int(math.ceil(total / page_size)))
 
         list_view = self.create_list_view()
@@ -328,8 +335,6 @@ class TaskListPlugin(_TodoListPlugin):
             if task.status != TodoStatusEnum.canceled.value:
                 action_box.add(AjaxActionLink(text=T("取消"), url="?action=cancel" + base))
             action_box.add(EditFormActionLink(text=T("编辑"), url="?action=edit" + base))
-            action_box.add(ConfirmActionLink(text=T("删除"), url="?action=delete" + base,
-                                             msg=T("确定删除该待办吗?"), css_class="red"))
             item.extra.add(action_box)
 
             list_view.add_item(item)
@@ -337,6 +342,13 @@ class TaskListPlugin(_TodoListPlugin):
         self.option_html = EditFormButton(
             text=T("新建待办"), url="?action=edit&model=task&project_id=%s" % project_id).render()
         self.update_aside(AsideConfig.default_aside_html)
+        # 顶部全局搜索组件：在当前项目内搜索全部状态的待办（project_id<=0 时跨项目）
+        self.search_action = "/todo"
+        self.search_placeholder = T("搜索待办")
+        if project_id > 0:
+            self.search_ext_dict = dict(project_id=str(project_id), status=STATUS_FILTER_ALL)
+        else:
+            self.search_ext_dict = dict(model="task", status=STATUS_FILTER_ALL)
         filter_html = _build_filter_html(str(project_id), status, priority)
         return self.response_page(list_view=list_view, filter_html=filter_html,
                                   page=page, page_max=page_max, page_total=total, page_size=page_size)
@@ -439,12 +451,6 @@ class TaskListPlugin(_TodoListPlugin):
         user_id = xauth.current_user_id()
         task_id = xutils.get_argument_int("task_id", 0)
         TodoDao.update_status(task_id, status, user_id=user_id)
-        return webutil.SuccessResult()
-
-    def handle_delete(self):
-        user_id = xauth.current_user_id()
-        task_id = xutils.get_argument_int("task_id", 0)
-        TodoDao.delete(task_id, user_id=user_id)
         return webutil.SuccessResult()
 
 

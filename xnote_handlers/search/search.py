@@ -119,13 +119,16 @@ class SearchHandler:
     def do_search(self, ctx: SearchContext, key, offset, limit):
         category    = xutils.get_argument_str("category", "")
         search_type = xutils.get_argument_str("search_type", "")
+        # 内容搜索复用默认搜索(全文检索笔记内容)，统一用 search_type=content 驱动 TabBox 高亮
+        if search_type == "content":
+            category = "content"
         user_name  = xauth.current_name_str()
         init_search_context(ctx, user_name, category, key)
         ctx.offset = offset
         ctx.limit = limit
 
-        # 优先使用 search_type
-        if search_type != None and search_type != "" and search_type != "default":
+        # 优先使用 search_type（default/content 走默认综合搜索，其余走按类型搜索）
+        if search_type != None and search_type != "" and search_type != "default" and search_type != "content":
             return self.do_search_by_type(ctx, key, search_type)
         
         return self.do_search_default(ctx)
@@ -319,6 +322,24 @@ class SearchHandler:
         for word in relevant_words:
             relevant_tab.add_item(title=word, value=word)
 
+        # 搜索类型切换 Tab（复用 TabBox 组件，客户端 x-tab.js 按 URL 参数 search_type 自动高亮）
+        qkey = xutils.quote(key)
+        search_tab = TabBox(tab_key="search_type", tab_default="default", css_class="btn-style")
+        search_tab.add_item(title=T("默认"), value="default",
+                            href="/search?key=%s&search_type=default" % qkey)
+        search_tab.add_item(title=T("笔记"), value="note",
+                            href="/search?key=%s&search_type=note" % qkey)
+        search_tab.add_item(title=T("内容"), value="content",
+                            href="/search?key=%s&search_type=content" % qkey)
+        search_tab.add_item(title=T("词典"), value="dict",
+                            href="/search?key=%s&search_type=dict" % qkey)
+        search_tab.add_item(title=T("待办"), value="task",
+                            href="/search?key=%s&search_type=task" % qkey)
+        search_tab.add_item(title=T("记事"), value="message",
+                            href="/search?key=%s&search_type=message" % qkey)
+        search_tab.add_item(title=T("评论"), value="comment",
+                            href="/search?key=%s&search_type=comment" % qkey, css_class="hide")
+
         kw = Storage()
         kw.show_aside = True
         kw.category = category
@@ -330,6 +351,7 @@ class SearchHandler:
         kw.page_url = page_url
         kw.relevant_words = relevant_words
         kw.relevant_tab = relevant_tab
+        kw.search_tab = search_tab
         kw.init_html = ctx.init_html
         return xtemplate.render("search/page/search_result.html", **kw)
 

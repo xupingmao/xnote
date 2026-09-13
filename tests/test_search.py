@@ -40,6 +40,49 @@ class TestMain(BaseTestCase):
     def test_search_comment(self):
         self.check_OK("/search?search_type=comment&key=test")
 
+    def test_search_tab_uses_tabbox(self):
+        """搜索类型切换 Tab 已重构为 TabBox 组件渲染（不再手写 <a class=link> + selected-link 高亮）"""
+        body = self.request_app("/search?key=test").data.decode("utf-8")
+        self.assertIn("x-tab-box", body)                       # TabBox 组件
+        self.assertIn('data-tab-key="search_type"', body)      # 按 URL 参数 search_type 高亮
+        self.assertIn('data-tab-default="default"', body)      # 默认高亮【默认】
+        self.assertIn('data-tab-value="content"', body)       # 内容
+        self.assertIn('data-tab-value="task"', body)           # 待办
+        # 旧实现应已移除
+        self.assertNotIn('class="search-tab"', body)
+        self.assertNotIn("selected-link", body)
+
+    def test_default_search_includes_todo(self):
+        """全局【默认】综合搜索也应检索到新待办模块的内容（折叠为摘要，参考随手记）"""
+        resp = self.json_request_return_dict(
+            "/api/todo/create", method="POST",
+            data=dict(content="综合搜索命中待办S", project_id="1"))
+        self.assertTrue(resp["success"])
+        task_id = resp["data"]
+
+        # 直接校验 search_todo 处理器：折叠为 tools 桶里的单条摘要，不逐条展开
+        from xnote_handlers.todo.todo_search import search_todo
+        from xnote.core.models import SearchContext
+        import xauth
+        ctx = SearchContext(key="综合搜索命中待办S")
+        ctx.user_id = xauth.current_user_id()
+        search_todo(ctx)
+        summaries = [f for f in ctx.tools
+                     if getattr(f, "name", "").startswith("搜索到") and "个待办" in f.name]
+        self.assertEqual(len(summaries), 1)
+        self.assertIn("/todo?model=task", summaries[0].url)
+        self.assertIn("status=all", summaries[0].url)
+        # 不应逐条展开待办详情
+        self.assertFalse(any(getattr(f, "url", "").startswith("/todo/detail")
+                              for f in ctx.tools))
+
+        # 搜索页可正常渲染（不 500）
+        self.check_OK("/search?key=综合搜索命中待办S")
+
+        # 旧 message 标签的 task 分类搜索走 do_search_by_type，不触发 search 事件，不混入新待办
+        note_body = self.request_app("/search?search_type=note&key=综合搜索命中待办S").data.decode("utf-8")
+        self.assertNotIn("/todo?model=task", note_body)
+
     def test_search_history(self):
         from xnote_handlers.note import dao
         dao.add_search_history(None, "test")

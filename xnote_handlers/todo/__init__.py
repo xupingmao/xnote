@@ -28,6 +28,6 @@ xurls = (
     # 项目 API
     r"/api/project/create", todo_api.ProjectCreateHandler,
     r"/api/project/update", todo_api.ProjectUpdateHandler,
-    r"/api/project/delete", todo_api.ProjectDeleteHandler,
+    r"/api/project/archive", todo_api.ProjectArchiveHandler,
     r"/api/project/list", todo_api.ProjectListHandler,
 )

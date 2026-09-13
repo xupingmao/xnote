@@ -97,6 +97,64 @@ Component rendering pattern:
 {% render Pagination(**globals()) %}
 ```
 
+## 全局搜索组件（顶部导航搜索框）
+
+顶部导航栏（`common/nav/base_nav_top.html`）内置一个全局搜索框（`common/search/search_box.html`）。页面 handler 只需设置 `xnote.core.xtemplate.BasePlugin` 的几个属性，就能让该搜索框定向搜索当前模块的数据，**不要自己再写页面级搜索输入框**：
+
+- `self.search_action`：搜索表单提交地址（默认 `/search`）。如待办模块设为 `/todo`。
+- `self.search_placeholder`：搜索框占位符。
+- `self.search_ext_dict`：追加到搜索表单的隐藏参数 dict（用于限定搜索范围，如 `project_id` / `status` 等）。
+- `self.search_type`：搜索类型（可选）；`self.show_search` 控制是否显示（默认 True）。
+
+这些属性经 `BasePlugin.convert_attr_to_kw()` 注入模板全局变量，顶部导航的搜索框据此渲染 `action` 与隐藏字段（`search_box.html` 会遍历 `search_ext_dict` 输出隐藏 input）。
+
+示例（待办模块 `TaskListPlugin`）：
+
+```python
+# 在当前项目内搜索全部状态的待办
+self.search_action = "/todo"
+self.search_placeholder = T("搜索待办")
+if project_id > 0:
+    self.search_ext_dict = dict(project_id=str(project_id), status=STATUS_FILTER_ALL)
+else:
+    # 跨项目搜索（project_id 不传，DAO 侧按 project_id=None 实现不过滤）
+    self.search_ext_dict = dict(model="task", status=STATUS_FILTER_ALL)
+```
+
+搜索框提交后经 `?key=关键词&...` 回到本模块页面，handler 用 `xutils.get_argument_str("key", "")` 读取并做 `content LIKE` 模糊匹配即可；分页组件会自动保留 `key` 参数。
+
+> 模板读取请求参数的写法：原 `{{?key}}` 是一种 try-catch 语法糖（取值失败回退为 `""`），现已统一改为 `{% init key = "" %}` 声明默认值后直接 `{{key}}`（搜索框组件 `search_box.html` 已采用）。**新代码不要再使用 `{{?x}}` 语法**，用 `{% init x = "" %}` + `{{x}}` 替代。
+
+## 默认综合搜索（search 事件）与聚合结果
+
+顶部全局搜索的【默认】（综合）搜索通过 `xmanager.fire("search", ctx)` 触发，所有用 `@xmanager.searchable(pattern, description=...)` 装饰的处理器都会收到 `SearchContext` 并各自往结果桶里追加 `SearchResult`。分类搜索（`search_type=note/dict/task/message/comment`）走 `SearchHandler.do_search_by_type`，**不会**触发 `search` 事件。
+
+`SearchContext` 的结果桶按优先级拼接（`join_as_files()`）：`commands` → `tools` → `dicts` → `messages` → `notes` → `files`。
+
+- **聚合（折叠）结果统一放在 `ctx.tools`**：当某类数据在综合搜索里不逐条展开、而是折叠成一条摘要时（例如【随手记】的 `搜索到[N]条随手记`、待办的 `搜索到[N]个待办`），结果 `SearchResult` 要 `append` 到 `ctx.tools`（放在靠前位置，降低被分页 20 条上限截断的概率），并设 `show_more_link=True`、链接指向该模块的列表/检索页。不要逐条 `append` 到 `ctx.notes`/`ctx.messages`。
+- 普通逐条结果按模块性质放入 `notes` / `messages` 等桶。
+
+示例（待办模块的折叠处理器 `xnote_handlers/todo/todo_search.py`）：
+
+```python
+@xmanager.searchable(".+", description="搜索待办")
+def search_todo(ctx: SearchContext, expression=None):
+    key = ctx.key
+    if not key or ctx.user_id == 0:
+        return
+    total = TodoDao.count_with_filters(ctx.user_id, key=key)
+    if total == 0:
+        return
+    item = SearchResult()
+    item.name = f"搜索到[{total}]个待办"
+    item.url = xconfig.WebConfig.server_home + "/todo?model=task&key=" + xutils.quote(key) + "&status=all"
+    item.icon = "fa fa-check-square-o"
+    item.category = "task"
+    item.show_more_link = True
+    item.show_move = False
+    ctx.tools.append(item)   # 聚合结果放 tools 桶
+```
+
 ## webui component framework (`xnote/webui/`)
 
 Python-side UI components extend `BaseComponent` (`xnote/webui/base.py`), provide a `render()` method returning HTML string. In templates, import via `{% from xnote.webui import %}` and render via `{% render %}`.

@@ -66,6 +66,25 @@ class TestTodoApi(BaseTestCase):
         names = [item["name"] for item in lst["data"]]
         self.assertIn("项目X", names)
 
+    def test_search_by_key(self):
+        # 创建两条内容不同的待办，按关键词模糊搜索只命中匹配项
+        self.json_request_return_dict(
+            "/api/todo/create", method="POST", data=dict(content="整理会议纪要", project_id="1"))
+        self.json_request_return_dict(
+            "/api/todo/create", method="POST", data=dict(content="买水果", project_id="1"))
+
+        matched = self.json_request_return_dict("/api/todo/list?project_id=1&key=会议")
+        self.assertTrue(matched["success"])
+        contents = [item["content"] for item in matched["data"]["items"]]
+        self.assertIn("整理会议纪要", contents)
+        self.assertNotIn("买水果", contents)
+
+        # 跨项目搜索（不带 project_id）同样按 content 命中
+        cross = self.json_request_return_dict("/api/todo/list?key=水果")
+        cross_contents = [item["content"] for item in cross["data"]["items"]]
+        self.assertIn("买水果", cross_contents)
+        self.assertNotIn("整理会议纪要", cross_contents)
+
 
 class TestTodoPages(BaseTestCase):
     """页面渲染冒烟测试(HTML 路径，API 测试未覆盖)"""
@@ -138,17 +157,91 @@ class TestTodoPages(BaseTestCase):
                         "期望顺序为 内容 -> 标签 -> 操作, got %s/%s/%s" % (
                             pos_content, pos_tag, pos_actions))
 
-    def test_delete_action_link_is_red(self):
-        # 【删除】操作链接统一用红色
+    def test_archive_action_link_in_project(self):
+        # 项目行的【归档】操作链接(action=archive)，且不再有删除(action=delete)
         self.json_request_return_dict("/api/project/create", method="POST",
-                                      data=dict(name="红色删除项目"))
+                                      data=dict(name="归档动作项目"))
         project_page = self.request_app("/todo").data.decode("utf-8")
-        self.assertRegex(project_page, r'<a class="red"[^>]*data-url="[^"]*action=delete')
+        self.assertRegex(project_page, r'data-url="[^"]*action=archive')
+        self.assertNotIn("action=delete", project_page)
 
+    def test_task_row_has_no_delete_button(self):
+        # 待办行已移除【删除】按钮（保留取消），页面不存在删除入口
         self.json_request_return_dict("/api/todo/create", method="POST",
-                                      data=dict(content="红色删除待办", project_id="1"))
+                                      data=dict(content="无删除待办", project_id="1"))
         task_page = self.request_app("/todo?project_id=1").data.decode("utf-8")
-        self.assertRegex(task_page, r'<a class="red"[^>]*data-url="[^"]*action=delete')
+        self.assertNotIn("action=delete", task_page)
+        self.assertIn("action=cancel", task_page)
+
+    def test_search_box_present(self):
+        # 待办行已移除【删除】按钮（保留取消），页面不存在删除入口
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="无删除待办", project_id="1"))
+        task_page = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        self.assertNotIn("action=delete", task_page)
+        self.assertIn("action=cancel", task_page)
+
+    def test_global_search_configured(self):
+        # 待办页面复用顶部全局搜索组件：搜索表单指向 /todo
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="全局搜索待办", project_id="1"))
+        task_page = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        self.assertIn("nav-search-input", task_page)   # 顶部全局搜索输入框
+        self.assertIn('action="/todo"', task_page)     # 提交到待办搜索
+        # 项目首页(跨项目)同样指向 /todo
+        home = self.request_app("/todo").data.decode("utf-8")
+        self.assertIn('action="/todo"', home)
+
+    def test_global_search_default_includes_todo(self):
+        # 全局【默认】综合搜索也应检索到新待办模块的内容（折叠为 tools 桶里的单条摘要，参考随手记）
+        tid = self.json_request_return_dict(
+            "/api/todo/create", method="POST",
+            data=dict(content="综合搜索命中待办T", project_id="1"))["data"]
+
+        # 直接校验 search_todo 处理器：折叠为单条摘要，不逐条展开待办详情
+        from xnote_handlers.todo.todo_search import search_todo
+        from xnote.core.models import SearchContext
+        import xauth
+        ctx = SearchContext(key="综合搜索命中待办T")
+        ctx.user_id = xauth.current_user_id()
+        search_todo(ctx)
+        summaries = [f for f in ctx.tools
+                     if getattr(f, "name", "").startswith("搜索到") and "个待办" in f.name]
+        self.assertEqual(len(summaries), 1)
+        self.assertIn("/todo?model=task", summaries[0].url)
+        self.assertIn("status=all", summaries[0].url)
+        self.assertNotIn("/todo/detail?task_id=%s" % tid, [getattr(f, "url", "") for f in ctx.tools])
+
+        # 分类搜索走 do_search_by_type，不触发 search 事件，不混入新待办(避免和旧 task 标签冲突)
+        note_body = self.request_app("/search?search_type=note&key=综合搜索命中待办T").data.decode("utf-8")
+        self.assertNotIn("/todo?model=task", note_body)
+
+    def test_global_search_filters_results(self):
+        # 模拟全局搜索组件提交：跨项目搜索 model=task&key=...
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="searchable todo", project_id="1"))
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="irrelevant todo", project_id="1"))
+        body = self.request_app("/todo?model=task&key=searchable").data.decode("utf-8")
+        self.assertIn("searchable", body)
+        self.assertNotIn("irrelevant", body)
+
+        # 当前项目内搜索（header search_ext_dict 带 project_id + status=all）
+        body2 = self.request_app(
+            "/todo?project_id=1&status=all&key=searchable").data.decode("utf-8")
+        self.assertIn("searchable", body2)
+        self.assertNotIn("irrelevant", body2)
+
+        # 已完成(非待办)的待办也能被命中（status=all 不过滤状态）
+        done_id = self.json_request_return_dict(
+            "/api/todo/create", method="POST",
+            data=dict(content="finished search todo", project_id="1"))["data"]
+        self.json_request_return_dict(
+            "/api/todo/status", method="POST",
+            data=dict(task_id=done_id, action="finish"))
+        done_body = self.request_app(
+            "/todo?project_id=1&status=all&key=finished").data.decode("utf-8")
+        self.assertIn("finished", done_body)
 
     def test_todo_not_started_tag_is_orange(self):
         # 【未开始】状态标签使用 orange
@@ -194,9 +287,12 @@ class TestTodoPages(BaseTestCase):
         self.json_request_return_dict("/api/todo/create", method="POST",
                                       data=dict(content="计数待办", project_id=str(pid)))
         body = self.request_app("/todo").data.decode("utf-8")
-        idx = body.find("计数页面项目")
+        # 通过本项目的 project_id 定位行（测试库中存在多个同名/种子项目，
+        # 直接用 body.find(名称) 会命中错误的行）
+        marker = "model=project&amp;project_id=%d" % pid
+        idx = body.find(marker)
         self.assertGreater(idx, 0)
-        row = body[idx:idx + 400]
+        row = body[idx - 400:idx]
         self.assertIn("待办 1", row)
         self.assertIn("完成 0", row)
 
@@ -333,9 +429,9 @@ class TestTodoForm(BaseTestCase):
         found = [item for item in lst2["data"]["items"] if item["task_id"] == task_id][0]
         self.assertEqual(found["status"], "done")
 
-        # 删除
+        # 删除（保留 REST 接口 /api/todo/delete）
         resp = self.json_request_return_dict(
-            "/todo?action=delete&model=task&project_id=1&task_id=%s" % task_id)
+            "/api/todo/delete", method="POST", data=dict(task_id=task_id))
         self.assertTrue(resp["success"])
 
     def test_reopen_canceled_task(self):
@@ -356,7 +452,8 @@ class TestTodoForm(BaseTestCase):
         self.assertIn(
             "action=reset&amp;model=task&amp;project_id=1&amp;task_id=%s" % task_id, page)
         self.assertIn("xnote.table.handleAjaxAction(this)", page)
-        self.assertIn("xnote.table.handleConfirmAction(this)", page)  # 删除仍然需要确认
+        # 待办行已移除删除按钮，不再有需确认的删除操作
+        self.assertNotIn("action=delete", page)
 
         # 重开生效（回到未开始）
         resp = self.json_request_return_dict(

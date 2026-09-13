@@ -38,6 +38,8 @@ class TaskListHandler:
         kw.tag = "task"
         kw.message_placeholder = T("添加待办任务")
         kw.message_tab = "task"
+        # 老待办已冻结为只读，创建输入框禁用
+        kw.readonly = True
         return kw
     
     @classmethod

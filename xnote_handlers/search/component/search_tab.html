@@ -1,36 +1,16 @@
 <!--
 @since 2018/05/27
-@modified 2021/05/16 23:44:33
+@modified 2026/09/13
+搜索类型切换 Tab，使用 TabBox 组件渲染（客户端 x-tab.js 按 URL 参数 search_type 自动高亮）
 -->
 
 {% init key = "" %}
 {% init parent_note = None %}
 
-{% if key != None and key != "" %}
-    <div class="card">
-        <div class="search-tab">
-            <a class="link" href="{{_server_home}}/search?key={{?key}}&category=default" 
-                data-option="default" data-value="{{?category}}">默认</a>
-            
-            <a class="link" href="{{_server_home}}/search?key={{?key}}&search_type=note" 
-                data-option="note" data-value="{{?category}}">笔记</a>
-
-            <a class="link" href="{{_server_home}}/search?key={{?key}}&category=content" 
-                data-option="content" data-value="{{?category}}">内容</a>
-
-            <a class="link" href="{{_server_home}}/search?key={{?key}}&search_type=dict" 
-                data-option="dict" data-value="{{?category}}">词典</a>
-            
-            <a class="link" href="{{_server_home}}/search?key={{?key}}&search_type=task"
-                data-option="task" data-value="{{?category}}">待办</a>
-
-            <a class="link" href="{{_server_home}}/search?key={{?key}}&search_type=message"
-                data-option="message" data-value="{{?category}}">记事</a>
-
-            <a class="link hide" href="{{_server_home}}/search?key={{?key}}&search_type=comment"
-                data-option="comment" data-value="{{?category}}">评论</a>
-        </div>
-    </div>
+{% if search_tab != None %}
+<div class="card">
+    {% raw search_tab.render() %}
+</div>
 {% end %}
 
 {% if parent_note != None %}
@@ -48,22 +28,3 @@
     {% raw relevant_tab.render() %}
 </div>
 {% end %}
-
-<script type="text/javascript">
-$(function () {
-    var searchType = getUrlParam("search_type");
-    var category   = getUrlParam("category");
-
-    function isEmpty(value) {
-        return value === "" || value === undefined || value === null
-    }
-
-    if (!isEmpty(searchType)) {
-        $("[data-option=" + searchType + "]").addClass("selected-link").removeClass("hide");
-    } else if (!isEmpty(category)) {
-        $("[data-option=" + category + "]").addClass("selected-link").removeClass("hide");
-    } else {
-        $("[data-option=default]").addClass("selected-link");
-    }
-})
-</script>

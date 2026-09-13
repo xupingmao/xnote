@@ -262,6 +262,7 @@ class CliCoreTestCase(BaseTestCase):
                 rc = xnote_cli._wait_for_restart(XnoteCliContext(), timeout=30)
         self.assertEqual(rc, 0)
         self.assertIn("重启成功", buf.getvalue())
+        self.assertIn("耗时", buf.getvalue())
 
     def test_wait_for_restart_timeout(self):
         # 超过超时时间仍未恢复则返回失败

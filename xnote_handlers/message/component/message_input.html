@@ -7,13 +7,14 @@
 {% init message_template_tab = None %}
 {% init create_date = "" %}
 {% init template_type = "log" %}
+{% init readonly = False %}
 
 <div class="message-input-box card">
     {% if message_template_tab %}
         {% render message_template_tab %}
     {% end %}
     <textarea class="col-md-12 input-box" rows=3 autoHeight=true 
-        placeholder="{{message_placeholder}}">{{filter_default_content(default_content)}}</textarea>
+        placeholder="{{message_placeholder}}" {% if readonly %}disabled{% end %}>{{filter_default_content(default_content)}}</textarea>
 
     <div id="messageImgRow" class="comment-img-row row"></div>
 
@@ -30,10 +31,10 @@
                 value="添加附件"/>
         {% end %}
         
-        <input type="button" name="" class="send-button btn create-btn" value="创建" 
+        <input type="button" name="" class="send-button btn create-btn{% if readonly %} disabled{% end %}" value="创建" 
             data-create-tag="{{create_tag}}"
             data-default-content="{{default_content}}"
-            onclick="xnote.action.message.createMessage(this);">
+            {% if readonly %}disabled onclick="xnote.toast('老待办已只读');return false;"{% else %}onclick="xnote.action.message.createMessage(this);"{% end %}>
     </div>
 
     {% if create_date %}

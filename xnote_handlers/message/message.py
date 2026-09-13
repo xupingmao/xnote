@@ -61,6 +61,10 @@ DEFAULT_TAG = "log"
 MAX_LIST_LIMIT = 1000
 LIST_VIEW_TPL = "message/page/message_list_view.html"
 
+# 老待办(基于 message 的 task/done)已冻结为只读，写操作统一拦截
+READONLY_TODO_TAGS = ("task", "done")
+READONLY_TODO_HINT = "老待办已只读，请在新的待办模块(/todo)管理"
+
 def get_current_message_stat():
     user_name = xauth.current_name()
     message_stat = MessageDao.get_message_stat(user_name)
@@ -294,6 +298,10 @@ def update_message_tag(id:int, tag):
     if data.user != user_name:
         return webutil.FailedResult(message="无权操作")
     
+    # 老待办(task/done)已冻结为只读，禁止状态变更(完成/重开)
+    if data.tag in READONLY_TODO_TAGS:
+        return webutil.FailedResult(message=READONLY_TODO_HINT)
+
     # 修复status数据，全部采用tag
     data.pop("status", None)
     data.tag = tag
@@ -386,6 +394,10 @@ class DeleteAjaxHandler:
     def delete_msg(self, msg: msg_dao.MessageDO):
         if msg.user_id != xauth.current_user_id():
             return webutil.FailedResult(code="fail", message="no permission")
+
+        # 老待办(task/done)已冻结为只读，禁止删除
+        if msg.tag in READONLY_TODO_TAGS:
+            return webutil.FailedResult(message=READONLY_TODO_HINT)
 
         # 先保存历史
         MessageDao.add_history(msg)
@@ -493,6 +505,10 @@ class SaveAjaxHandler:
         
         tag = TagHelper.get_create_tag(tag)
 
+        # 老待办(task/done)已冻结为只读，禁止新建/编辑
+        if tag in READONLY_TODO_TAGS:
+            return webutil.FailedResult(message=READONLY_TODO_HINT)
+
         # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
         self.apply_rules(user_name, id, tag, content)
 
@@ -500,6 +516,9 @@ class SaveAjaxHandler:
             message = create_message(user_name, tag, content, ip, files)
             return webutil.SuccessResult(data=message)
         else:
+            msg = MessageDao.get_by_int_id(msg_id)
+            if msg is not None and msg.tag in READONLY_TODO_TAGS:
+                return webutil.FailedResult(message=READONLY_TODO_HINT)
             update_message_content(msg_id, user_id, content, files, date = date)
         return webutil.SuccessResult(data=dict(id=msg_id))
 
@@ -696,6 +715,11 @@ class CreateCommentHandler:
         msg = dao.MessageDao.get_by_int_id(id, user_id=user_id)
         if msg == None:
             return webutil.FailedResult(message="随手记不存在")
+
+        # 老待办(task/done)已冻结为只读，禁止新增备注
+        if msg.tag in READONLY_TODO_TAGS:
+            return webutil.FailedResult(message=READONLY_TODO_HINT)
+
         comment = MessageComment()
         comment.content = content
         msg.comments.append(comment)
@@ -717,7 +741,11 @@ class DeleteCommentHandler:
         msg = dao.MessageDao.get_by_int_id(id, user_id = user_id)
         if msg == None:
             return webutil.FailedResult(message="随手记不存在")
-        
+
+        # 老待办(task/done)已冻结为只读，禁止删除备注
+        if msg.tag in READONLY_TODO_TAGS:
+            return webutil.FailedResult(message=READONLY_TODO_HINT)
+
         new_comments = []
         for comment in msg.comments:
             if comment.get("time") != time_str:

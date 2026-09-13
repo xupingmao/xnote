@@ -136,25 +136,12 @@ class TestMain(BaseTestCase):
         self.check_OK("/message/list?format=html")
 
     def test_message_finish(self):
+        # 老待办(task/done)已冻结为只读，新建/完成均被拦截
         response = json_request_return_dict(
             "/message/save", method="POST", data=dict(content="Xnote-Unit-Test", tag="task"))
 
-        self.assertEqual("success", response.get("code"))
-        data = response.get("data")
-        assert isinstance(data, dict)
-
-        msg_id = data['id']
-
-        json_request("/message/finish", method="POST", data=dict(id=msg_id))
-        done_result = json_request_return_dict("/message/list?tag=done")
-
-        self.assertEqual("success", done_result['code'])
-
-        done_list = done_result['data']
-        self.assertEqual(1, len(done_list))
-
-        for msg in done_list:
-            del_msg_by_id(int(msg["_id"]))
+        self.assertFalse(response.get("success"))
+        self.assertIn("只读", response.get("message", ""))
 
     def count_message_key(self):
         response = json_request("/api/message/tag/list")
@@ -225,32 +212,11 @@ class TestMain(BaseTestCase):
         self.check_OK("/message/task/tag_list")
 
     def test_task_create_and_done(self):
-        # Py2: webpy会自动把str对象转成unicode对象，data参数传unicode反而会有问题
+        # 老待办已只读，新建待办被拦截(保留查看能力)
         response = json_request_return_dict("/message/save", method="POST",
                                             data=dict(content="Xnote-Unit-Test-Task", tag="task"))
-        self.assertEqual("success", response.get("code"))
-        data = response.get("data")
-        assert isinstance(data, dict)
-
-        # Py2: 判断的时候必须使用unicode
-        self.assertEqual(u"Xnote-Unit-Test-Task", data.get("content"))
-
-        task_id = int(data["id"])
-
-        update_result = json_request_return_dict("/message/finish", method="POST",
-                                                 data=dict(id=task_id))
-        self.assertEqual("success", update_result.get("code"))
-
-        logutil.wait_task_done()
-
-        # 重新把任务开启
-        open_result = json_request_return_dict("/message/update_first_tag", method="POST",
-                                               data=dict(id=task_id, tag="task"))
-        assert open_result["success"] == True
-
-        data = msg_dao.MessageDao.get_by_int_id(task_id)
-        assert data != None
-        assert data.tag == "task"
+        self.assertFalse(response.get("success"))
+        self.assertIn("只读", response.get("message", ""))
 
     def test_message_diary(self):
         date = dateutil.format_date()
@@ -296,7 +262,11 @@ class TestMain(BaseTestCase):
         self.do_test_search("xnote-log-test", tag="log", tag_name="随手记")
 
     def test_search_task(self):
-        self.do_test_search("xnote-task-test", tag="task", tag_name="待办")
+        # 老待办已只读，task 类型不能再新建(搜索也就无新数据可查)，仅验证拦截
+        response = json_request_return_dict("/message/save", method="POST",
+                                            data=dict(content="xnote-task-test", tag="task"))
+        self.assertFalse(response.get("success"))
+        self.assertIn("只读", response.get("message", ""))
 
     def test_message_search_page(self):
         self.check_OK("/message?tag=search&key=123")

@@ -406,6 +406,7 @@ def _wait_for_restart(ctx, timeout=300):
     按钮重启后重新访问服务的逻辑保持一致。
     """
     import time
+    start = time.time()
     print("服务正在重启，请稍候（最多等待 %d 秒）..." % timeout)
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -415,9 +416,11 @@ def _wait_for_restart(ctx, timeout=300):
         except XnoteCliError:
             resp = None
         if resp is not None and resp.success:
-            print("重启成功")
+            cost = time.time() - start
+            print("重启成功，耗时 %.1f 秒" % cost)
             return 0
-    print("重启超时（%d 秒内服务未恢复），请手动检查服务状态" % timeout)
+    cost = time.time() - start
+    print("重启超时（已等待 %.1f 秒，服务未恢复），请手动检查服务状态" % cost)
     return 1
 
 

@@ -114,6 +114,7 @@ class TodoListHandler:
         project_id = xutils.get_argument_int("project_id", -1)
         status = xutils.get_argument_str("status", "")
         priority = xutils.get_argument_str("priority", "")
+        key = xutils.get_argument_str("key", "")
         begin_start = parse_time_ms(xutils.get_argument_str("begin_start", ""))
         begin_end = parse_time_ms(xutils.get_argument_str("begin_end", ""))
         sort = xutils.get_argument_str("sort", "create_time_desc")
@@ -127,6 +128,7 @@ class TodoListHandler:
             priority=priority or None,
             begin_start=begin_start,
             begin_end=begin_end,
+            key=key,
             sort=sort,
             offset=(page - 1) * size,
             limit=size)
@@ -137,7 +139,8 @@ class TodoListHandler:
             status=status or None,
             priority=priority or None,
             begin_start=begin_start,
-            begin_end=begin_end)
+            begin_end=begin_end,
+            key=key)
 
         return webutil.SuccessResult(data=dict(items=items, total=total))
 
@@ -183,13 +186,13 @@ class ProjectUpdateHandler:
         return webutil.SuccessResult(data=project_id)
 
 
-class ProjectDeleteHandler:
+class ProjectArchiveHandler:
 
     @xauth.login_required()
     def POST(self):
         user_id = xauth.current_user_id()
         project_id = xutils.get_argument_int("project_id", 0)
-        ProjectDao.delete(project_id, user_id=user_id)
+        ProjectDao.archive(project_id, user_id=user_id)
         return webutil.SuccessResult(data=project_id)
 
 

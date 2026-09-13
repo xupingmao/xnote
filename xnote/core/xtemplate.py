@@ -427,6 +427,7 @@ class BasePlugin:
     search_type = "default"
     search_action = "/search"
     search_placeholder = "综合搜索"
+    search_ext_dict = dict()  # 追加到搜索表单的隐藏参数（用于限定搜索范围）
 
     # {插件路径} 系统自动填充
     fname = ""
@@ -633,6 +634,7 @@ class BasePlugin:
         kw.search_action = self.search_action
         kw.search_placeholder = self.search_placeholder
         kw.search_type = self.search_type
+        kw.search_ext_dict = self.search_ext_dict
         kw.CONTENT_WIDTH = self.CONTENT_WIDTH
         return kw
 

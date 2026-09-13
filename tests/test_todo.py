@@ -108,7 +108,7 @@ class TestTodoDao(BaseTestCase):
         TodoDao.create(self._make(user_id, "in project", "not_started", "normal", pid))
         self.assertEqual(TodoDao.count_by_project(user_id, pid), 1)
 
-        ProjectDao.delete(pid, user_id=user_id)
+        ProjectDao.archive(pid, user_id=user_id)
         self.assertEqual(ProjectDao.get_by_id(pid).status, "archived")
 
     def _make(self, user_id, content, status, priority, project_id):

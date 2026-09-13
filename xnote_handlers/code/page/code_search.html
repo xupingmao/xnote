@@ -30,6 +30,7 @@
 </div>
 
 <div class="col-md-12 card">
+    {% init key = "" %}
     {% include mod_fs_path.html %}
     
     <form action="">
@@ -40,7 +41,7 @@
         </tr>
         <tr>
             <td>包含关键字<br/>(同一行)</td>
-            <td><textarea name="key" cols=60>{{?key}}</textarea></td>
+            <td><textarea name="key" cols=60>{{key}}</textarea></td>
         </tr>
         <tr>
             <td>排除关键字</td>

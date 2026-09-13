@@ -102,7 +102,7 @@ class TodoDao:
                      status_list: Optional[List[str]] = None,
                      priority: Optional[str] = None,
                      begin_start: int = 0, begin_end: int = 0,
-                     is_deleted: int = 0) -> "tuple":
+                     key: str = "", is_deleted: int = 0) -> "tuple":
         where = "user_id=$user_id AND is_deleted=$is_deleted"
         vars = dict(user_id=user_id, is_deleted=is_deleted)  # type: Dict[str, Any]
         if project_id is not None:
@@ -124,6 +124,9 @@ class TodoDao:
         if begin_end:
             where += " AND begin_time<$begin_end"
             vars["begin_end"] = begin_end
+        if key != "":
+            where += " AND content LIKE $key"
+            vars["key"] = "%" + key + "%"
         return where, vars
 
     @classmethod
@@ -171,6 +174,7 @@ class TodoDao:
                           status_list: Optional[List[str]] = None,
                           priority: Optional[str] = None,
                           begin_start: int = 0, begin_end: int = 0,
+                          key: str = "",
                           sort: str = "create_time_desc",
                           offset: int = 0, limit: int = 50) -> List[TodoRecord]:
         order_map = {
@@ -185,7 +189,8 @@ class TodoDao:
                                        status=status, status_list=status_list,
                                        priority=priority,
                                        begin_start=begin_start,
-                                       begin_end=begin_end)
+                                       begin_end=begin_end,
+                                       key=key)
         rows = _todo_db.select(where=where, vars=vars, offset=offset,
                                limit=limit, order=order)
         return TodoRecord.from_dict_list(rows)
@@ -211,12 +216,14 @@ class TodoDao:
                            status_list: Optional[List[str]] = None,
                            priority: Optional[str] = None,
                            begin_start: int = 0, begin_end: int = 0,
+                           key: str = "",
                            is_deleted: int = 0) -> int:
         where, vars = cls._build_where(user_id, project_id=project_id,
                                        status=status, status_list=status_list,
                                        priority=priority,
                                        begin_start=begin_start,
                                        begin_end=begin_end,
+                                       key=key,
                                        is_deleted=is_deleted)
         return _todo_db.count(where=where, vars=vars)
 
@@ -290,8 +297,8 @@ class ProjectDao:
         return _project_db.update(where=dict(project_id=project.project_id), **save)
 
     @classmethod
-    def delete(cls, project_id: int, user_id: int = 0) -> int:
-        """软删除：归档"""
+    def archive(cls, project_id: int, user_id: int = 0) -> int:
+        """归档项目（软删除）：设置状态为 archived"""
         return _project_db.update(where=dict(project_id=project_id, user_id=user_id),
                                   status=ProjectStatusEnum.archived.value,
                                   update_time=dateutil.timestamp_ms())
