@@ -73,8 +73,8 @@ class TableProxy(SQLDBInterface):
         if not self.writable:
             raise Exception("当前状态不能写入")
 
-    def insert_record(self, record: BaseDataRecord):
-        return self.insert(**record.to_save_dict())
+    def insert_record(self, record: BaseDataRecord) -> int:
+        return self.insert(**record.to_save_dict()) # type:ignore
 
     def insert(self, seqname=None, _test=False, **values):
         assert len(values) > 0
