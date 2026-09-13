@@ -946,6 +946,7 @@ def init_todo_table():
         manager.add_column("begin_time", "bigint", default_value=0, comment="开始时间(毫秒时间戳)")
         manager.add_column("end_time", "bigint", default_value=0, comment="结束时间(毫秒时间戳)")
         manager.add_column("done_time", "bigint", default_value=0, comment="完成时间(毫秒时间戳)")
+        manager.add_column("comment_count", "int", default_value=0, comment="评论数量")
         manager.add_column("tags", "text", default_value="[]", comment="标签, JSON数组")
         manager.add_column("create_time", "bigint", default_value=0, comment="创建时间(毫秒时间戳)")
         manager.add_column("update_time", "bigint", default_value=0, comment="更新时间(毫秒时间戳)")

@@ -30,6 +30,11 @@ class TestMain(BaseTestCase):
     def test_list(self):
         self.check_OK("/test/example/list?name=list")
 
+    def test_list_delete_link_is_red(self):
+        # ListPlugin 示例页的【删除】操作链接使用红色
+        body = self.request_app("/test/example/list_plugin").data.decode("utf-8")
+        self.assertRegex(body, r'<a class="red"[^>]*data-url="\?action=delete')
+
     def test_list_plugin(self):
         self.check_OK("/test/example/list_plugin")
 

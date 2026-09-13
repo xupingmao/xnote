@@ -78,6 +78,7 @@ class TodoRecord(BaseDataRecord):
         self.begin_time = 0
         self.end_time = 0
         self.done_time = 0
+        self.comment_count = 0  # 评论数量
         self.tags = "[]"  # JSON 数组字符串
         self.create_time = 0
         self.update_time = 0

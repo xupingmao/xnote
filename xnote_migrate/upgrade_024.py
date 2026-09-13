@@ -6,11 +6,17 @@ import logging
 
 from . import base
 
+from xnote.core import xauth, xtables
 from xnote_handlers.message.dao import MsgIndexDao, MessageDao
+from xnote_handlers.message.message_model import MsgIndex
 from xnote_handlers.todo.dao import TodoDao, ProjectDao
 from xnote_handlers.todo.todo_model import (
     TodoRecord, TodoStatusEnum, TodoPriorityEnum, parse_time_ms)
 from xnote_handlers.todo.project_model import DEFAULT_PROJECT_NAME
+
+
+# 迁移时每批处理的数量（数据量可能很大，分批遍历避免一次性加载）
+BATCH_SIZE = 1000
 
 
 def do_upgrade():
@@ -23,58 +29,60 @@ def do_upgrade():
 
 
 def migrate_default_project():
-    """为存在未分类待办(project_id=0)的用户创建默认项目，并把这些待办关联过去"""
-    user_id_list = TodoDao.list_user_ids_without_project()
+    """为存在未分类待办(project_id=0)的用户创建默认项目，并把这些待办关联过去
+
+    用户量可能很大，这里用 xauth.iter_user 分批遍历（只对有未分类待办的用户建默认项目）。
+    """
+    users = 0
     moved = 0
-    for user_id in user_id_list:
-        project = ProjectDao.get_or_create(user_id, DEFAULT_PROJECT_NAME)
-        moved += TodoDao.reassign_project(user_id, 0, project.project_id)
-    logging.info("migrate_default_project done, users=%d, moved=%d",
-                 len(user_id_list), moved)
+    for user_info in xauth.iter_user(limit=-1):
+        if TodoDao.count_by_project(user_info.id, 0) == 0:
+            continue
+        project = ProjectDao.get_or_create(user_info.id, DEFAULT_PROJECT_NAME)
+        moved += TodoDao.reassign_project(user_info.id, 0, project.project_id)
+        users += 1
+    logging.info("migrate_default_project done, users=%d, moved=%d", users, moved)
 
 
-def migrate_message_todo():
+def migrate_message_todo(batch_size: int = BATCH_SIZE):
     """把 msg_index 中 tag 为 task/done 的消息迁移为 todo 记录（增量复制，不改原数据）
 
     以消息ID(msg_id)作为待办的 task_id，迁移前先判断是否已存在，
     这样迁移中途失败后重试不会产生重复数据（幂等）。
+    消息量可能很大，这里用 table_proxy.iter 按主键分批遍历，避免 offset 翻页。
     """
-    page_size = 1000
-    offset = 0
     migrated = 0
+    index_db = xtables.get_table_by_name("msg_index")
+    where = " AND tag in $tag_list"
+    vars = dict(tag_list=["task", "done"])
 
-    while True:
-        index_list = MsgIndexDao.list(user_id=0, tag_list=["task", "done"],
-                                      offset=offset, limit=page_size,
-                                      order="id asc")
-        if len(index_list) == 0:
-            break
+    for item in index_db.iter(where=where, vars=vars, batch_size=batch_size):
+        index = MsgIndex.from_dict(item)
+        # 幂等：task_id 就是 msg_id，已迁移过则跳过
+        if TodoDao.get_by_id(index.id) is not None:
+            continue
 
-        for index in index_list:
-            # 幂等：task_id 就是 msg_id，已迁移过则跳过
-            if TodoDao.get_by_id(index.id) is not None:
-                continue
+        msg = MessageDao.get_by_int_id(index.id)
+        if msg is None:
+            continue
 
-            msg = MessageDao.get_by_int_id(index.id)
-            if msg is None:
-                continue
-
-            todo = TodoRecord()
-            todo.user = index.user_name
-            todo.user_id = index.user_id
-            todo.content = msg.content or ""
-            if index.tag == "done":
-                todo.status = TodoStatusEnum.done.value
-                todo.done_time = parse_time_ms(index.change_time)
-            else:
-                todo.status = TodoStatusEnum.not_started.value
-                todo.done_time = 0
-            todo.priority = TodoPriorityEnum.normal.value
-            todo.project_id = 0
-            TodoDao.create_with_id(todo, index.id)
-            migrated += 1
-
-        offset += page_size
+        todo = TodoRecord()
+        todo.user = index.user_name
+        todo.user_id = index.user_id
+        todo.content = msg.content or ""
+        if index.tag == "done":
+            todo.status = TodoStatusEnum.done.value
+            todo.done_time = parse_time_ms(index.change_time)
+        else:
+            todo.status = TodoStatusEnum.not_started.value
+            todo.done_time = 0
+        todo.priority = TodoPriorityEnum.normal.value
+        todo.project_id = 0
+        # 保留原消息的创建/更新时间（为空时由 create_with_id 补当前时间）
+        todo.create_time = parse_time_ms(index.ctime)
+        todo.update_time = parse_time_ms(index.mtime)
+        TodoDao.create_with_id(todo, index.id)
+        migrated += 1
 
     # 数量校验（不一致仅告警，不阻断启动）
     old_task = MsgIndexDao.count(user_id=0, tag="task")
@@ -87,6 +95,5 @@ def migrate_message_todo():
 
 
 def _todo_db_count():
-    from xnote.core import xtables as _xtables
-    db = _xtables.get_table_by_name("todo_task")
+    db = xtables.get_table_by_name("todo_task")
     return db.count(where="1=1")

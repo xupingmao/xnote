@@ -60,7 +60,8 @@ class TodoCommentListHandler:
 
         if resp_type == "html":
             return render_to_html(comments, page=page, page_max=page_max,
-                                  show_edit=True, note_user_id=0)
+                                  show_edit=True, note_user_id=0,
+                                  comment_delete_url="/todo/comment/delete")
         return webutil.SuccessResult(data=comments)
 
 
@@ -100,10 +101,41 @@ class TodoCommentSaveHandler:
         comment.ref_user_id = ref_user_id
         dao_comment.create_comment(comment)
 
-        # 刷新待办的更新时间（替代 note 的 touch_note）
+        # 刷新待办的更新时间（替代 note 的 touch_note），并同步评论数量
         task.update_time = dateutil.timestamp_ms()
+        task.comment_count = dao_comment.count_comment_by_note(
+            target_id, type=COMMENT_TYPE)
         TodoDao.update(task)
 
+        return webutil.SuccessResult()
+
+
+class TodoCommentDeleteHandler:
+    """删除待办评论，并同步待办的评论数量"""
+
+    @xauth.login_required()
+    def POST(self):
+        user = xauth.current_name()
+        comment_id = xutils.get_argument_int("comment_id")
+        comment = dao_comment.get_comment(comment_id)
+        if comment is None:
+            dao_comment.delete_index(comment_id)
+            return webutil.SuccessResult()
+        if comment.type != COMMENT_TYPE:
+            return webutil.FailedResult(message="unauthorized")
+        if user != comment.user:
+            return webutil.FailedResult(message="unauthorized")
+
+        target_id = int(comment.note_id)
+        task_id = to_task_id(target_id)
+        task = TodoDao.get_by_id(task_id, user_id=xauth.current_user_id())
+        if task is None:
+            return webutil.FailedResult(message="待办不存在")
+
+        dao_comment.delete_comment(comment_id)
+        # 重新统计评论数（含回复）写回 todo_task
+        new_count = dao_comment.count_comment_by_note(target_id, type=COMMENT_TYPE)
+        TodoDao.update_comment_count(task_id, new_count)
         return webutil.SuccessResult()
 
 

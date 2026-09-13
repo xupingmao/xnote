@@ -70,7 +70,7 @@ class ChatSessionDao:
         current_ms = dateutil.timestamp_ms()
         record.create_time = current_ms
         record.update_time = current_ms
-        return cls.db.insert(**record.to_save_dict())
+        return cls.db.insert_record(record)
 
     @classmethod
     def update(cls, record: ChatSessionRecord) -> int:
@@ -119,7 +119,7 @@ class ChatMessageDao:
         current_ms = dateutil.timestamp_ms()
         record.create_time = current_ms
         record.update_time = current_ms
-        return cls.db.insert(**record.to_save_dict())
+        return cls.db.insert_record(record)
 
     @classmethod
     def delete_by_id(cls, message_id: int) -> int:

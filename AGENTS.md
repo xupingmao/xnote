@@ -7,6 +7,7 @@
 - 分层原则：按照view/biz/dao三层分层，简单场景可以直接view/dao两层
 - 可自动化：开发完一个功能后，需要补充对应的自动化测试脚本并且测试通过
 - 前端弹窗：alert/confirm/prompt 统一使用 `xnote` 模块的函数（`xnote.alert` / `xnote.confirm` / `xnote.prompt` / `xnote.toast`，定义于 `static/js/xnote-ui/x-dialog.js`），**不要直接使用** `window.alert` / `window.confirm` / `window.prompt`。这些函数是回调式的（非返回值）：`xnote.confirm(msg, function (ok) { if (ok) {...} })`，其中 `ok === true` 表示确认；`xnote.prompt(title, defaultValue, callback)` 在 `callback(newValue)` 中拿结果；无 layer 时内部才会回退到原生实现。
+- 字符串格式化：优先使用 **f-string**（如 `f"hello {name}"`）；`%` 格式化与 `str.format()` 是旧用法，**新代码不推荐**。日志/异常中需要延迟格式化时才允许用 `%`（如 `logging.warning("count=%s", count)`）。
 - 结构化对象优先：设计接口（函数/方法）的输入输出参数时，优先使用结构化的对象（自定义类，如 `XxxResult`/`XxxInfo`），而不是裸 `dict`。兼容 Python 3.6 不可用 `dataclass` 时，用普通类实现，并通过 `from_dict` / `to_dict` 与 JSON 互转；类的字段用类型注解明确标注。
 - 小模板内联：小于 20 行的 HTML 模板直接放在 Python 代码里，用 `xtemplate.render_text(text, template_name, **kw)` 渲染，不要单独建 `.html` 模板文件。大于 20 行的模板才放 `xnote_handlers/` 下单独的模板文件中。
 - webui 组件 CSS 放公共文件：`xnote/webui/` 下的组件是公共组件，其样式不要写在业务模块的 css 里，统一放到 `static/css/base/common-*.css`（例如下拉/更多操作菜单放 `common-dropdown.css`）。注意 `common-*.css` 经打包进入 `static/css/app.build.css`（全局加载），但若未重新执行构建脚本，本地开发可在使用组件的页面直接 `<link>` 该 `common-*.css` 使其立即生效。
@@ -136,6 +137,7 @@ Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `
 - 继承 `BaseListPlugin`，重写 `handle_page()`：`list_view = self.create_list_view()` → `ListViewItem(...)` 逐条 `add_item`。
 - `ListViewItem` 继承 `TextContainer`，可用 `add_span(text, css_class)` / `add_link(text, href)` / `add_br()` / `add_item_sep()`；`item.tags` 放 `TextTag(text, css_class)`（样式类：`red`/`orange`/`gray`/`lightblue`/`lightgray`/`lightred`/`lightpurple`，定义于 `static/css/base/common-tag.css`）；`item.extra`（右浮动）放操作组件。
 - 行操作用 `EditFormActionLink(text, url)`（GET `?action=edit` 弹表单）与 `ConfirmActionLink(text, url, msg)`（确认框 + AJAX 后自动 reload）；它们依赖 `xnote.table.handleEditForm` / `handleConfirmAction`（在全局 `app.build.js` 内）。
+- **【删除】等破坏性操作链接用红色**：统一传 `css_class="red"`（`ConfirmActionLink(text="删除", url=..., msg=..., css_class="red")`，颜色规则见 `static/css/base/common.css` 的 `.red`）。不要用 `danger`——`.danger` 只对带 `btn` 类的按钮生效（`.btn.danger`），挂在操作链接上不会变红。
 - **整行链接 vs 两行布局**：给 `ListViewItem` 传 `href` 会渲染成"整行链接"（外层 `<a>`）；此时 `item.extra` 由组件渲染在 `<a>` **之外**，配合 `common-list.css` 的 `.list-item-outer` flex 规则固定在右侧（所以 href + 操作按钮是合法的，不会 `<a>` 嵌套）。如果希望操作区位于内容**下方**（两行布局），则不要传 `href`，改用 `add_link` 在内容里放链接，操作区放进第二个 `Div`（参考 `todo_view.py::TaskListPlugin`）。
 - **注意 `require_admin` 默认 True**：非管理员的业务页面要显式设 `require_admin = False`（`require_login` 默认 True）。
 - **增删改**：`handle_edit()` 用 `create_form()`(`DataForm`) 组装表单并 `response_form(form=form)`；表单提交回 `form.path?model=xxx&action=save`，在 `handle_save()` 里用 `self.get_data_dict()`(ParamDict) 取 `data` JSON。`handle_delete()` 返回 `webutil.SuccessResult()` 即可（前端 `confirm` 动作会 reload）。

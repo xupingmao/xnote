@@ -15,6 +15,7 @@ xurls = (
     # 待办评论（复用 note 评论模块）
     r"/todo/comment/list", todo_comment.TodoCommentListHandler,
     r"/todo/comment/save", todo_comment.TodoCommentSaveHandler,
+    r"/todo/comment/delete", todo_comment.TodoCommentDeleteHandler,
     r"/todo/comment/dialog", todo_comment.TodoCommentDialogHandler,
 
     # 待办 API

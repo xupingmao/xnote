@@ -11,7 +11,7 @@ from xnote_handlers.message import dao as msg_dao
 from xnote_migrate.upgrade_024 import migrate_message_todo, migrate_default_project
 from xnote_migrate.base import SystemUpgradeLogDao
 from xnote_handlers.todo.dao import TodoDao, ProjectDao
-from xnote_handlers.todo.todo_model import TodoRecord, TodoStatusEnum
+from xnote_handlers.todo.todo_model import TodoRecord, TodoStatusEnum, parse_time_ms
 from xnote_handlers.todo.project_model import DEFAULT_PROJECT_NAME
 
 
@@ -77,6 +77,24 @@ class TestTodoMigrate(BaseTestCase):
             if "migrate" in t.content:
                 self.assertTrue(t.done_time > 0)
 
+    def test_migrate_create_and_update_time(self):
+        """迁移时保留原消息的创建时间/更新时间"""
+        todo_table = xtables.get_table_by_name("todo_task")
+        for row in todo_table.iter():
+            todo_table.delete(where=dict(task_id=row["task_id"]))
+
+        # ctime 作为创建时间，mtime 作为更新时间
+        msg_id = self._seed_message("task", "时间迁移待办")
+        MsgIndexDao.update_tag(msg_id, tag="task", update_time="2026-09-02 11:22:33")
+
+        SystemUpgradeLogDao.delete("20260912_todo_task_from_message")
+        migrate_message_todo()
+
+        todo = TodoDao.get_by_id(msg_id)
+        self.assertIsNotNone(todo)
+        self.assertEqual(todo.create_time, parse_time_ms("2026-09-01 10:00:00"))
+        self.assertEqual(todo.update_time, parse_time_ms("2026-09-02 11:22:33"))
+
     def test_default_project_migration(self):
         user_id = xauth.UserDao.get_id_by_name("admin")
         todo_table = xtables.get_table_by_name("todo_task")
@@ -103,7 +121,26 @@ class TestTodoMigrate(BaseTestCase):
         self.assertIsNotNone(project)
         self.assertEqual(project.name, DEFAULT_PROJECT_NAME)
         # 没有残留的未分类待办
-        self.assertEqual(TodoDao.list_user_ids_without_project(), [])
+        self.assertEqual(TodoDao.count_by_project(user_id, 0), 0)
+
+    def test_migrate_multi_batch(self):
+        """数据量大时按主键分批遍历，跨批次的数据也要全部迁移"""
+        todo_table = xtables.get_table_by_name("todo_task")
+        for row in todo_table.iter():
+            todo_table.delete(where=dict(task_id=row["task_id"]))
+
+        msg_ids = []
+        for index in range(3):
+            msg_ids.append(self._seed_message("task", "分批待办%d-migrate" % index))
+
+        SystemUpgradeLogDao.delete("20260912_todo_task_from_message")
+        # 批次大小设为 1，强制走多批次
+        migrate_message_todo(batch_size=1)
+
+        for index, msg_id in enumerate(msg_ids):
+            todo = TodoDao.get_by_id(msg_id)
+            self.assertIsNotNone(todo)
+            self.assertEqual(todo.content, "分批待办%d-migrate" % index)
 
     def test_migrate_idempotent(self):
         """以 msg_id 作为 task_id，重复迁移不产生重复数据"""

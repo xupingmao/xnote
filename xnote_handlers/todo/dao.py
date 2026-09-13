@@ -30,10 +30,13 @@ class TodoDao:
         """指定主键 task_id 插入。
 
         迁移场景用它把消息ID直接作为 task_id，配合调用方的存在性检查即可保证重试幂等。
+        时间字段保留调用方设置的原始值，未设置(0)时才补当前时间。
         """
         now = dateutil.timestamp_ms()
-        todo.create_time = now
-        todo.update_time = now
+        if todo.create_time == 0:
+            todo.create_time = now
+        if todo.update_time == 0:
+            todo.update_time = now
         save_dict = todo.to_save_dict()
         save_dict["task_id"] = task_id
         return _todo_db.insert(**save_dict)
@@ -85,6 +88,11 @@ class TodoDao:
         fields = cls._status_fields(status, dateutil.timestamp_ms())
         task.status = status
         task.done_time = fields.get("done_time", task.done_time)
+
+    @classmethod
+    def update_comment_count(cls, task_id: int, comment_count: int) -> int:
+        """更新待办的评论数量（调用方需自行校验权限）"""
+        return _todo_db.update(where=dict(task_id=task_id), comment_count=comment_count)
 
     # ---------- 查询 ----------
 
@@ -228,23 +236,6 @@ class TodoDao:
         return result
 
     # ---------- 迁移辅助 ----------
-
-    @classmethod
-    def list_user_ids_without_project(cls) -> List[int]:
-        """返回存在未分类待办(project_id=0, 未删除)的用户ID列表"""
-        user_ids = set()  # type: set
-        offset = 0
-        page_size = 1000
-        while True:
-            rows = _todo_db.select(where="project_id=$project_id AND is_deleted=$is_deleted",
-                                   vars=dict(project_id=0, is_deleted=0),
-                                   offset=offset, limit=page_size, order="task_id asc")
-            if len(rows) == 0:
-                break
-            for row in rows:
-                user_ids.add(row["user_id"])
-            offset += page_size
-        return list(user_ids)
 
     @classmethod
     def reassign_project(cls, user_id: int, from_project_id: int, to_project_id: int) -> int:

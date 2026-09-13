@@ -45,7 +45,7 @@ class TreeExampleHandler(BasePlugin):
 
         # 给根节点添加右侧操作链接
         root.extra.add(TextLink(text="新建", href="?action=create"))
-        root.extra.add(ConfirmActionLink(text="删除", url="?action=delete", msg="确认删除笔记分组吗?"))
+        root.extra.add(ConfirmActionLink(text="删除", url="?action=delete", msg="确认删除笔记分组吗?", css_class="red"))
 
         # 2. 默认展开的树
         tree_expanded = Tree()

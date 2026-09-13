@@ -7,6 +7,8 @@ from xnote.core import xtables
 from xnote_handlers.todo.dao import TodoDao, ProjectDao
 from xnote_handlers.todo.todo_model import TodoRecord, TodoStatusEnum, TodoPriorityEnum
 from xnote_handlers.todo.project_model import ProjectRecord, ProjectStatusEnum
+from xnote_handlers.todo.todo_comment import to_comment_target_id
+from xnote_handlers.note import dao_comment
 
 
 def _clear_table(name):
@@ -118,6 +120,97 @@ class TestTodoDao(BaseTestCase):
         todo.priority = priority
         todo.project_id = project_id
         return todo
+
+
+class TestTodoCommentCount(BaseTestCase):
+    """评论数量维护到 todo_task.comment_count 并在列表行展示"""
+
+    def setUp(self):
+        _clear_table("todo_task")
+
+    def tearDown(self):
+        _clear_table("todo_task")
+
+    def _create(self):
+        todo = TodoRecord()
+        todo.user = "admin"
+        todo.user_id = 1
+        todo.content = "待办A"
+        todo.status = TodoStatusEnum.not_started.value
+        todo.priority = TodoPriorityEnum.normal.value
+        todo.project_id = 0
+        todo_id = TodoDao.create(todo)
+        return todo_id
+
+    def test_comment_count_on_save_and_delete(self):
+        todo_id = self._create()
+        target_id = to_comment_target_id(todo_id)
+
+        # 发表评论，comment_count 自增
+        self.json_request_return_dict(
+            "/todo/comment/save", method="POST",
+            data=dict(note_id=target_id, content="评论1"))
+        todo = TodoDao.get_by_id(todo_id)
+        self.assertEqual(todo.comment_count, 1)
+
+        # 再发一条，comment_count = 2
+        self.json_request_return_dict(
+            "/todo/comment/save", method="POST",
+            data=dict(note_id=target_id, content="评论2"))
+        self.assertEqual(TodoDao.get_by_id(todo_id).comment_count, 2)
+
+        # 删除一条，comment_count 回到 1
+        comments, _ = dao_comment.list_parent_comments(
+            target_id, limit=100, type="todo_task")
+        self.json_request_return_dict(
+            "/todo/comment/delete", method="POST",
+            data=dict(comment_id=comments[0].id))
+        self.assertEqual(TodoDao.get_by_id(todo_id).comment_count, 1)
+
+    def test_comment_link_shows_count_on_list(self):
+        todo_id = self._create()
+        target_id = to_comment_target_id(todo_id)
+        self.json_request_return_dict(
+            "/todo/comment/save", method="POST",
+            data=dict(note_id=target_id, content="评论1"))
+
+        body = self.request_app("/todo?project_id=0").data.decode("utf-8")
+        self.assertIn("评论(1)", body)
+
+        # 无评论时只显示「评论」
+        self.assertEqual(TodoDao.get_by_id(todo_id).comment_count, 1)
+        TodoDao.update_comment_count(todo_id, 0)
+        body2 = self.request_app("/todo?project_id=0").data.decode("utf-8")
+        self.assertIn(">评论</a>", body2)
+
+    def test_mine_page_todo_source_truncated(self):
+        from xutils import textutil
+        long_content = "这是一条非常非常非常非常非常非常非常非常长的待办任务标题需要被截断处理"
+        todo = TodoRecord()
+        todo.user = "admin"
+        todo.user_id = 1
+        todo.content = long_content
+        todo.status = TodoStatusEnum.not_started.value
+        todo.priority = TodoPriorityEnum.normal.value
+        todo.project_id = 0
+        todo_id = TodoDao.create(todo)
+
+        target_id = to_comment_target_id(todo_id)
+        self.json_request_return_dict(
+            "/todo/comment/save", method="POST",
+            data=dict(note_id=target_id, content="我的评论"))
+
+        # 我的评论页通过 /note/comments(list_type=user) 异步加载，来源应指向待办详情
+        body = self.request_app(
+            "/note/comments?list_type=user&show_note=true&resp_type=html"
+        ).data.decode("utf-8")
+
+        self.assertIn("/todo/detail?task_id=%s" % todo_id, body)
+        # 长名称被截断，完整内容放在 title 上供 hover 查看
+        self.assertIn("title=\"%s\"" % long_content, body)
+        self.assertIn(textutil.get_short_text(long_content, 20), body)
+        # 可见的来源文本是截断后的，而非完整长名称
+        self.assertNotEqual(long_content, textutil.get_short_text(long_content, 20))
 
 
 if __name__ == "__main__":

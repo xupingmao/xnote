@@ -98,9 +98,10 @@ xnote.comment.openEditDialog = function(element) {
 xnote.comment.deleteComment =function (element) {
     var id = $(element).attr("data-id");
     var content = $(element).attr("data-content");
+    var deleteUrl = $(element).attr("data-url") || "/note/comment/delete";
     xnote.confirm("确定删除`" + content + "`?", function (conf) {
         if (conf) {
-            xnote.http.post("/note/comment/delete", { comment_id: id }, function (resp) {
+            xnote.http.post(deleteUrl, { comment_id: id }, function (resp) {
                 refreshComments();
             });
         }

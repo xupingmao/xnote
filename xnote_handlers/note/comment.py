@@ -73,6 +73,16 @@ def process_comments(comments: typing.List[CommentVO], show_note = False):
             if note != None:
                 comment.note_name = note.name
                 comment.note_url  = note.url
+            elif comment.type == "todo_task":
+                # 待办评论：comment.note_id 是评论表 target_id（=偏移量+task_id）
+                # 来源为待办任务，名称可能较长需截断，完整内容放到 note_title 供 hover 查看
+                from xnote_handlers.todo.todo_comment import to_task_id
+                from xnote_handlers.todo.dao import TodoDao
+                task = TodoDao.get_by_id(to_task_id(comment.note_id))
+                if task != None:
+                    comment.note_title = task.content
+                    comment.note_name = textutil.get_short_text(task.content, 20)
+                    comment.note_url = "/todo/detail?task_id=%s" % task.task_id
         
         # 获取被回复的用户信息
         if comment.ref_user_id > 0:
@@ -121,14 +131,15 @@ def on_search_comments(ctx: SearchContext):
 
 def render_to_html(
     comments: List[CommentVO], show_note = False, page = 1, page_max = 1, show_edit = False, 
-    note_user_id=0):
+    note_user_id=0, comment_delete_url="/note/comment/delete"):
     return xtemplate.render("note/page/comment/comment_list_ajax.html", 
         show_comment_edit = show_edit,
         page = page,
         page_max = page_max,
         comments = comments, 
         show_note = show_note,
-        note_user_id=note_user_id)
+        note_user_id=note_user_id,
+        comment_delete_url=comment_delete_url)
 
 class CommentListAjaxHandler:
 

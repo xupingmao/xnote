@@ -217,6 +217,8 @@ def main():
     args.skip_mysql_test = (args.run_mysql_test.lower() == "false")
     print(f"option: run_mysql_test={args.run_mysql_test}")
 
+    start_time = time.time()
+
     do_clean()
 
     update_version()
@@ -224,6 +226,10 @@ def main():
     run_test(args)
 
     # do_clean()
+
+    cost_time = time.time() - start_time
+    print("")
+    print("运行结束: %s, 耗时: %.2fs" % (time.strftime("%Y-%m-%d %H:%M:%S"), cost_time))
 
 if __name__ == '__main__':
     main()

@@ -64,7 +64,7 @@ class ListPluginHandler(BaseListPlugin):
             
             quote_text = xutils.quote(text)
             list_item.extra.add(EditFormActionLink(text="编辑", url=f"?action=edit&value={quote_text}"))
-            list_item.extra.add(ConfirmActionLink(text="删除", url="?action=delete", msg=f"确认删除[{text}]吗?", css_class="danger"))
+            list_item.extra.add(ConfirmActionLink(text="删除", url="?action=delete", msg=f"确认删除[{text}]吗?", css_class="red"))
             
             list_view.add_item(list_item)
 

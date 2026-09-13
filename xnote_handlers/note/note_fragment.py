@@ -27,7 +27,7 @@ def render_note_fragment(ctx: NoteViewContext):
         
         list_item = ListViewItem(text = f"[{item.date_text}] {item.content}")
         list_item.extra.add(EditFormActionLink(text="编辑", url=edit_url))
-        list_item.extra.add(ConfirmActionLink(text="删除", url=delete_url, msg=delete_msg, css_class="danger"))
+        list_item.extra.add(ConfirmActionLink(text="删除", url=delete_url, msg=delete_msg, css_class="red"))
         list_view.add_item(list_item)
     
     card = Card()

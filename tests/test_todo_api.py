@@ -138,6 +138,18 @@ class TestTodoPages(BaseTestCase):
                         "期望顺序为 内容 -> 标签 -> 操作, got %s/%s/%s" % (
                             pos_content, pos_tag, pos_actions))
 
+    def test_delete_action_link_is_red(self):
+        # 【删除】操作链接统一用红色
+        self.json_request_return_dict("/api/project/create", method="POST",
+                                      data=dict(name="红色删除项目"))
+        project_page = self.request_app("/todo").data.decode("utf-8")
+        self.assertRegex(project_page, r'<a class="red"[^>]*data-url="[^"]*action=delete')
+
+        self.json_request_return_dict("/api/todo/create", method="POST",
+                                      data=dict(content="红色删除待办", project_id="1"))
+        task_page = self.request_app("/todo?project_id=1").data.decode("utf-8")
+        self.assertRegex(task_page, r'<a class="red"[^>]*data-url="[^"]*action=delete')
+
     def test_todo_not_started_tag_is_orange(self):
         # 【未开始】状态标签使用 orange
         self.json_request_return_dict("/api/todo/create", method="POST",
@@ -211,9 +223,11 @@ class TestTodoPages(BaseTestCase):
         self.assertIn("<textarea", body)  # 内容使用 textarea
         # textarea 高度按内容自动调整（初始化钩子限定在具体的 form 内）
         self.assertRegex(body, r'initAutoResizeTextarea\("#xnoteForm\w+ textarea"\)')
-        # 所属项目可选
+        # 所属项目可选（不提供【未分类】）
         self.assertIn('name="project_id"', body)
         self.assertIn("<select", body)
+        self.assertNotIn('<option value="0">', body)
+        self.assertNotIn("未分类", body)
         # 状态可选
         self.assertIn('name="status"', body)
         self.assertIn("未开始", body)
@@ -264,6 +278,17 @@ class TestTodoForm(BaseTestCase):
                  if item["task_id"] == task["task_id"]][0]
         self.assertEqual(found["status"], "not_started")
         self.assertEqual(found["done_time"], 0)
+
+    def test_save_task_requires_project(self):
+        # 保存待办必须有归属的项目
+        resp = self._post_form("/todo?action=save&model=task", project_id="0",
+                               content="缺少项目待办", priority="normal",
+                               status="not_started", begin_time="", end_time="")
+        self.assertFalse(resp["success"])
+
+        lst = self.json_request_return_dict("/api/todo/list?project_id=0")
+        contents = [item["content"] for item in lst["data"]["items"]]
+        self.assertNotIn("缺少项目待办", contents)
 
     def test_create_project_via_form(self):
         resp = self._post_form("/todo?action=save&model=project",

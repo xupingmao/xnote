@@ -37,7 +37,11 @@
             {% if show_note %}
                 <span class="comment-source-info btn-line-height">
                     <span>[来源]</span>
+                    {% if comment.note_title %}
+                    <a class="comment-foot-link" href="{{comment.note_url}}" title="{{comment.note_title}}">{{comment.note_name}}</a>
+                    {% else %}
                     <a class="comment-foot-link" href="{{comment.note_url}}">{{comment.note_name}}</a>
+                    {% end %}
                 </span>
             {% end %}
             
@@ -76,7 +80,8 @@
                 {% if _user_id == comment.user_id %}
                     <a class="btn danger" onclick="xnote.comment.deleteComment(this)" 
                         data-content="{{comment.content}}" 
-                        data-id="{{comment.id}}" >删除</a>
+                        data-id="{{comment.id}}"
+                        data-url="{{comment_delete_url}}" >删除</a>
                 {% end %}
             </div>
         </div>

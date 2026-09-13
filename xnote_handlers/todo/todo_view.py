@@ -178,7 +178,7 @@ class ProjectListPlugin(_TodoListPlugin):
                 text=T("编辑"), url="?action=edit&model=project&project_id=%s" % project.project_id))
             item.extra.add(ConfirmActionLink(
                 text=T("删除"), url="?action=delete&model=project&project_id=%s" % project.project_id,
-                msg=T("确定删除项目【%s】吗?") % project.name))
+                msg=T("确定删除项目【%s】吗?") % project.name, css_class="red"))
             list_view.add_item(item)
 
         self.option_html = EditFormButton(text=T("新建项目"), url="?action=edit&model=project").render()
@@ -308,8 +308,11 @@ class TaskListPlugin(_TodoListPlugin):
             # 第三行：操作
             action_box = Div(css_class="todo-task-meta-actions")
             base = "&model=task&project_id=%s&task_id=%s" % (project_id, task.task_id)
+            comment_text = T("评论")
+            if task.comment_count > 0:
+                comment_text = T("评论(%s)") % task.comment_count
             action_box.add(ActionLink(
-                text=T("评论"), onclick="xnote.todo.openCommentDialog(this)",
+                text=comment_text, onclick="xnote.todo.openCommentDialog(this)",
                 data_dict=dict(url="/todo/comment/dialog?task_id=%s" % task.task_id)))
             # 状态变更无需确认，直接执行后 toast 结果
             if task.status not in (TodoStatusEnum.done.value, TodoStatusEnum.canceled.value):
@@ -321,7 +324,7 @@ class TaskListPlugin(_TodoListPlugin):
                 action_box.add(AjaxActionLink(text=T("取消"), url="?action=cancel" + base))
             action_box.add(EditFormActionLink(text=T("编辑"), url="?action=edit" + base))
             action_box.add(ConfirmActionLink(text=T("删除"), url="?action=delete" + base,
-                                             msg=T("确定删除该待办吗?")))
+                                             msg=T("确定删除该待办吗?"), css_class="red"))
             item.extra.add(action_box)
 
             list_view.add_item(item)
@@ -360,11 +363,10 @@ class TaskListPlugin(_TodoListPlugin):
         for e in TodoStatusEnum.enums():
             status_row.add_option(e.name, e.value)
 
-        # 所属项目可修改
-        current_project_id = task.project_id if task else project_id
+        # 所属项目（待办必须归属到一个项目，新建时默认用当前列表所在的项目）
+        current_project_id = task.project_id or project_id
         project_row = form.add_row(title=T("所属项目"), field="project_id", type=FormRowType.select,
                                    value=str(current_project_id))
-        project_row.add_option(T("未分类"), "0")
         for project in ProjectDao.list_by_user(user_id):
             project_row.add_option(project.name, str(project.project_id))
 
@@ -390,6 +392,8 @@ class TaskListPlugin(_TodoListPlugin):
         content = data.get_str("content", "")
         if content == "":
             return webutil.FailedResult(message="内容不能为空")
+        if project_id <= 0:
+            return webutil.FailedResult(message="请选择所属项目")
 
         if task_id == 0:
             task = TodoRecord()
