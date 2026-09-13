@@ -250,7 +250,7 @@ class ProjectListPlugin(_TodoListPlugin):
 class TaskListPlugin(_TodoListPlugin):
     """某个项目下的待办列表"""
     title = T("待办")
-    parent_link = LinkConfig.task_list
+    parent_link = LinkConfig.todo_project
 
     def handle_page(self):
         user_id = xauth.current_user_id()

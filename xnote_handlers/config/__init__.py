@@ -22,6 +22,7 @@ class LinkConfig:
     message = TextLink(text="随手记", href="/message")
     admin_settings = TextLink(text="管理员设置", href="/system/settings?category=admin")
     system_sync = TextLink(text="集群管理", href="/system/sync")
+    todo_project = TextLink(text="待办项目", href="/todo")
     task_list = TextLink(text="待办任务", href="/todo/task")
     customized_css = TextLink(text="自定义CSS", href="/code/edit?type=script&path=user.css")
     customized_js = TextLink(text="自定义JavaScript", href="/code/edit?type=script&path=user.js")
