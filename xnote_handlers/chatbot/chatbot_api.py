@@ -168,11 +168,11 @@ class SendMessageHandler:
 
 
 xurls = (
-    r"/api/chatbot/session/list", SessionListHandler,
-    r"/api/chatbot/session/create", SessionCreateHandler,
-    r"/api/chatbot/session/delete", SessionDeleteHandler,
-    r"/api/chatbot/session/rename", SessionRenameHandler,
-    r"/api/chatbot/session/top", SessionTopHandler,
-    r"/api/chatbot/message/list", MessageListHandler,
-    r"/api/chatbot/send", SendMessageHandler,
+    r"/api/v1/chatbot/session/list", SessionListHandler,
+    r"/api/v1/chatbot/session/create", SessionCreateHandler,
+    r"/api/v1/chatbot/session/delete", SessionDeleteHandler,
+    r"/api/v1/chatbot/session/rename", SessionRenameHandler,
+    r"/api/v1/chatbot/session/top", SessionTopHandler,
+    r"/api/v1/chatbot/message/list", MessageListHandler,
+    r"/api/v1/chatbot/send", SendMessageHandler,
 )

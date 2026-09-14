@@ -13,7 +13,7 @@
 
 function readText() {
     var content = $("#content").val();
-    $.post("/api/tts", {content: content}, function (data, status) {
+    $.post("/api/v1/tts", {content: content}, function (data, status) {
         console.log(data);
     });
 }

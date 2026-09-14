@@ -4,8 +4,8 @@
 说明：
 - 本地命令在 CLI 客户端本地解析并执行，包括登录、退出、版本、帮助等。
 - 笔记查看/搜索/编辑/删除、备份、修复、同步等“远程命令”由服务端插件提供，
-  客户端登录后从 /api/cli/command_list 获取命令列表（并缓存到会话），
-  执行时通过 /api/cli/run 转发到服务端。详见 xnote_cli/__init__.py 的 main()。
+  客户端登录后从 /api/v1/cli/command_list 获取命令列表（并缓存到会话），
+  执行时通过 /api/v1/cli/run 转发到服务端。详见 xnote_cli/__init__.py 的 main()。
 """
 import sys
 import json
@@ -68,7 +68,7 @@ def do_login(ctx):
     pswd = get_password("密码: ").strip()
 
     server_url = get_server_url(ctx)
-    url = server_url + "/api/cli/login"
+    url = server_url + "/api/v1/cli/login"
     body = json.dumps({"username": name, "password": pswd}).encode("utf-8")
     req = urllib.request.Request(url, data=body, method="POST")
     req.add_header("Content-Type", "application/json")
@@ -105,7 +105,7 @@ def do_login(ctx):
 
 def do_logout(ctx):
     # type: (XnoteCliContext) -> int
-    resp = xnote_cli.request(ctx, "POST", "/api/cli/logout")
+    resp = xnote_cli.request(ctx, "POST", "/api/v1/cli/logout")
     xnote_cli.save_session(SessionInfo())  # 清空会话
     print("已退出登录")
     return print_result(resp)
@@ -157,7 +157,7 @@ def do_refresh(ctx):
 
 def register_builtin_commands():
     # type: () -> None
-    # 仅注册“本地命令”，远程命令由服务端提供（插件注册 + /api/cli/command_list）
+    # 仅注册“本地命令”，远程命令由服务端提供（插件注册 + /api/v1/cli/command_list）
     register_cmd("login", do_login, "登录到 xnote 服务端")
     register_cmd("logout", do_logout, "退出登录")
     register_cmd("version", do_version, "查看版本号")

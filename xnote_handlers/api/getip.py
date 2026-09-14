@@ -40,6 +40,6 @@ class JsonpHandler:
         return xtemplate.render_text(self.tpl, real_ip = real_ip, callback = callback)
 
 xurls = (
-    r"/api/getip", handler,
-    r"/api/getip.jsonp", JsonpHandler,
+    r"/api/v1/getip", handler,
+    r"/api/v1/getip.jsonp", JsonpHandler,
 )

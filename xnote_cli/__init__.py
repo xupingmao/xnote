@@ -368,7 +368,7 @@ def _get_server_commands(ctx):
     # type: (XnoteCliContext) -> Dict[str, str]
     """实时从服务端拉取远程命令列表（插件命令）"""
     try:
-        resp = request(ctx, "GET", "/api/cli/command_list")
+        resp = request(ctx, "GET", "/api/v1/cli/command_list")
         if resp.success:
             data = resp.data or []
             return {item.get("name"): item.get("help", "") for item in data}
@@ -401,7 +401,7 @@ def _wait_for_restart(ctx, timeout=300):
     """重启命令触发后，轮询服务端直到其重新可用
 
     服务端 restart 会以 exit(205) 主动断开连接，这里持续探测
-    /api/cli/command_list，直到返回成功（服务恢复、登录态有效）或超时。
+    /api/v1/cli/command_list，直到返回成功（服务恢复、登录态有效）或超时。
     默认超时 300 秒（5 分钟），可通过 --timeout 覆盖。与 Web 端「重载」
     按钮重启后重新访问服务的逻辑保持一致。
     """
@@ -412,7 +412,7 @@ def _wait_for_restart(ctx, timeout=300):
     while time.time() < deadline:
         time.sleep(1)
         try:
-            resp = request(ctx, "GET", "/api/cli/command_list")
+            resp = request(ctx, "GET", "/api/v1/cli/command_list")
         except XnoteCliError:
             resp = None
         if resp is not None and resp.success:
@@ -428,7 +428,7 @@ def _forward_to_server(ctx, name, args, use_json=False, timeout=300):
     # type: (XnoteCliContext, str, List[str], bool, int) -> int
     """把命令转发给服务端执行（插件命令在服务端运行）"""
     try:
-        resp = request(ctx, "POST", "/api/cli/run",
+        resp = request(ctx, "POST", "/api/v1/cli/run",
                        data={"cmd": name, "args": "\n".join(args)})
     except XnoteCliError:
         # restart 命令会让服务端主动断开连接（进程正在重启），
@@ -535,7 +535,7 @@ def main(argv=None):    # type: (Optional[List[str]]) -> int
             print("命令执行失败：%s" % e)
             return 1
 
-    # 远程命令（服务端插件提供，登录后从 /api/cli/command_list 获取）
+    # 远程命令（服务端插件提供，登录后从 /api/v1/cli/command_list 获取）
     remote_cmds = _load_remote_commands(help_ctx)
     if name in remote_cmds:
         ctx = XnoteCliContext(command=name, args=list(getattr(args, "args", [])))

@@ -34,7 +34,7 @@
     function encodeText() {
         var inputText = $("#input").val();
         var params = {type:"{{hash_type}}", input: inputText};
-        xnote.http.post("/api/encode", params, function (resp) {
+        xnote.http.post("/api/v1/encode", params, function (resp) {
             if (resp.success) {
                 $("#output").val(resp.data);
             } else {

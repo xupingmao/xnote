@@ -15,4 +15,6 @@ class handler:
     def POST(self):
         return self.GET()
 
-        
+xurls = (
+    r"/api/v1/http_headers", handler,
+)

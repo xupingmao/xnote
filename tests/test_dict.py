@@ -23,7 +23,7 @@ class TestMain(BaseTestCase):
             value="姓名",
             dict_type=dict_dao.DictTypeEnum.public.int_value,
         )        
-        resp = json_request_return_dict("/api/dict/create", method = "POST", data = params)
+        resp = json_request_return_dict("/api/v1/dict/create", method = "POST", data = params)
         assert resp["success"] == True
         
         self.check_OK("/note/dict")
@@ -35,7 +35,7 @@ class TestMain(BaseTestCase):
             value="test1 test2",
             dict_type=dict_dao.DictTypeEnum.relevant.int_value,
         )
-        resp1 = json_request_return_dict("/api/dict/create", method = "POST", data = params)
+        resp1 = json_request_return_dict("/api/v1/dict/create", method = "POST", data = params)
         self.assertEqual("success", resp1["code"])
 
         words = dict_dao.get_relevant_words("test")

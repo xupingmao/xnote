@@ -46,11 +46,11 @@ class TestTree(BaseTestCase):
 
     def test_simple_node(self):
         tree = Tree()
-        tree.add_node(text="根节点", href="/api/note/1")
+        tree.add_node(text="根节点", href="/api/v1/note/1")
         html = tree.render()
         assert "x-tree" in html
         assert "根节点" in html
-        assert 'href="/api/note/1"' in html
+        assert 'href="/api/v1/note/1"' in html
         assert "x-tree-children" not in html
 
     def test_nested_node(self):
@@ -170,12 +170,12 @@ class TestDataTable(BaseTestCase):
         table = DataTable()
         table.add_head(title="名称", field="name")
         table.add_action(title="编辑", type=TableActionType.button, link_field="edit_url")
-        table.set_rows([{"name": "x", "edit_url": "/api/edit/1"}])
+        table.set_rows([{"name": "x", "edit_url": "/api/v1/edit/1"}])
 
         html = table.render().decode("utf-8")
         assert "操作" in html
         assert 'onclick="xnote.table.handleAction(this)"' in html
-        assert 'data-url="/api/edit/1"' in html
+        assert 'data-url="/api/v1/edit/1"' in html
         assert ">编辑</button>" in html
 
     def test_cell_escaping(self):

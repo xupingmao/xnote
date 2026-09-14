@@ -27,3 +27,6 @@ class handler:
     def POST(self):
         return self.GET()
 
+xurls = (
+    r"/api/v1/tts", handler,
+)

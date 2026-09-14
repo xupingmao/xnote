@@ -111,7 +111,7 @@
     });
 
     app.isLoading = true;
-    xnote.http.get("/api/note/timeline?_type=json", param,
+    xnote.http.get("/api/v1/note/timeline?_type=json", param,
       function (resp, status) {
         app.isLoading = false;
         layer.close(loadingNoteIndex);

@@ -74,7 +74,7 @@ xnote.updateCategoryName = function (req) {
             name: newName
         };
 
-        xnote.http.post("/api/note/category/update", params, function (resp) {
+        xnote.http.post("/api/v1/note/category/update", params, function (resp) {
             if (resp.code == "success") {
                 window.location.reload();
             } else {
@@ -377,7 +377,7 @@ NoteView.selectGroupFlat = function (req) {
         $(".group-select-data").html(html);
     }
 
-    xnote.http.get("/api/note/group?list_type=all&orderby=name", function (resp) {
+    xnote.http.get("/api/v1/note/group?list_type=all&orderby=name", function (resp) {
         if (resp.code != "success") {
             xnote.alert(resp.message);
             return;
@@ -747,7 +747,7 @@ NoteView.copyMarkdown = function (target) {
         return;
     }
     var loadIndex = layer.load(2);
-    xnote.http.get("/api/note/content?id=" + noteId, function (resp) {
+    xnote.http.get("/api/v1/note/content?id=" + noteId, function (resp) {
         layer.close(loadIndex);
         if (resp.success) {
             NoteView._markdownCache[noteId] = resp.data;
@@ -767,7 +767,7 @@ NoteView.prefetchMarkdown = function () {
     if (noteId == undefined || NoteView._markdownCache[noteId] != undefined) {
         return;
     }
-    xnote.http.get("/api/note/content?id=" + noteId, function (resp) {
+    xnote.http.get("/api/v1/note/content?id=" + noteId, function (resp) {
         if (resp.success) {
             NoteView._markdownCache[noteId] = resp.data;
         }

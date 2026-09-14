@@ -108,8 +108,8 @@ def json_request(localpart='/', method='GET', data=None, **kw):
 
 def json_request_return_dict(localpart='/', method='GET', data: Union[dict, str, None]=None, **kw):
     """请求接口,返回json,实例如下
-    - json_request_return_dict("/api/test", method="POST", data=dict(name="test"))
-    - json_request_return_dict("/api/get_info?p1=1&p2=test")
+    - json_request_return_dict("/api/v1/test", method="POST", data=dict(name="test"))
+    - json_request_return_dict("/api/v1/get_info?p1=1&p2=test")
     """
     ret = json_request(localpart, method, data, **kw)
     assert isinstance(ret, dict)

@@ -3,10 +3,10 @@
 
 (function () {
 
-    var API_SEND = "/api/chatbot/send";
-    var API_SESSION_DELETE = "/api/chatbot/session/delete";
-    var API_SESSION_RENAME = "/api/chatbot/session/rename";
-    var API_SESSION_TOP = "/api/chatbot/session/top";
+    var API_SEND = "/api/v1/chatbot/send";
+    var API_SESSION_DELETE = "/api/v1/chatbot/session/delete";
+    var API_SESSION_RENAME = "/api/v1/chatbot/session/rename";
+    var API_SESSION_TOP = "/api/v1/chatbot/session/top";
 
     var sending = false;
 

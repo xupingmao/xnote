@@ -895,9 +895,9 @@ class NoteTimelineTest(BaseTestCase):
         note_timeline.insert_task_project(rows, xauth.current_name_str())
         self.assertTrue(len(rows) >= 1)
 
-    # ---------- TimelineAjaxHandler (/api/note/timeline) ----------
+    # ---------- TimelineAjaxHandler (/api/v1/note/timeline) ----------
     def _api_timeline(self, **kw):
-        return json_request_return_dict("/api/note/timeline", **kw)
+        return json_request_return_dict("/api/v1/note/timeline", **kw)
 
     def test_timeline_root(self):
         self._api_timeline(data=dict(type="root"))

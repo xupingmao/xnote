@@ -34,3 +34,6 @@ class handler:
         except Exception as e:
             return webutil.FailedResult(code="fail", message=str(e))
 
+xurls = (
+    r"/api/v1/report_time", handler,
+)

@@ -150,9 +150,9 @@ class TestMain(BaseTestCase):
         self.check_OK("/system/info")
 
     def test_api(self):
-        self.check_200("/api/check_network")
-        self.check_200("/api/getip")
-        self.check_200("/api/ipv6")
+        self.check_200("/api/v1/check_network")
+        self.check_200("/api/v1/getip")
+        self.check_200("/api/v1/ipv6")
 
     def test_settings(self):
         self.check_200("/system/settings")
@@ -232,13 +232,13 @@ class TestMain(BaseTestCase):
         self.assertEqual("success", ret["code"])
 
     def test_report_time(self):
-        self.check_200("/api/report_time")
+        self.check_200("/api/v1/report_time")
 
     def test_tts(self):
-        self.check_200("/api/tts?content=测试")
+        self.check_200("/api/v1/tts?content=测试")
 
     def test_alarm(self):
-        self.check_200("/api/alarm/test?repeat=1")
+        self.check_200("/api/v1/alarm/test?repeat=1")
 
     def test_search(self):
         self.check_200("/search?key=测试")
@@ -277,7 +277,7 @@ class TestMain(BaseTestCase):
         self.check_200(xutils.quote_unicode("/search?key=weather"))
 
     def test_http_headers(self):
-        data = app.request("/api/http_headers", headers=dict(X_TEST=True)).data
+        data = app.request("/api/v1/http_headers", headers=dict(X_TEST=True)).data
         self.assertEqual(True, b"HTTP_X_TEST" in data)
 
     def test_taginfo(self):
@@ -330,7 +330,7 @@ class Main(BasePlugin):
         self.assertEqual(b"hello,world", html)
 
     def test_readbook(self):
-        self.check_200("/api/readbook")
+        self.check_200("/api/v1/readbook")
 
     def test_plugin_list(self):
         self.check_200("/plugin_list")

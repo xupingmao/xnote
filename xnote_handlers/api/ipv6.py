@@ -55,3 +55,6 @@ class handler:
     def GET(self):
         return get_local_ipv6_address()
 
+xurls = (
+    r"/api/v1/ipv6", handler,
+)

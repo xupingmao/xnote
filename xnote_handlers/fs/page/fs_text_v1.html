@@ -139,7 +139,7 @@ $(function () {
     $("#backLink").attr("href", _from);
 
     function readbook(direction, read) {
-        $.get("/api/readbook", {path: path, read: "false", direction: direction, length: readLength}, function (resp) {
+        $.get("/api/v1/readbook", {path: path, read: "false", direction: direction, length: readLength}, function (resp) {
             var text = resp.data;
             // 显示阅读内容
             text = text.replace(/\</gi, "&lt;");
@@ -152,7 +152,7 @@ $(function () {
             // 先前进，再读这一章节
             if (read == "true") {
                 // read 永远是当前章节
-                $.get("/api/readbook", {path: path, read: "true", direction: "current", length: readLength}, function (resp) {
+                $.get("/api/v1/readbook", {path: path, read: "true", direction: "current", length: readLength}, function (resp) {
                     if (autoForward) {
                         setTimeout(function () {
                             readbook("forward", read);

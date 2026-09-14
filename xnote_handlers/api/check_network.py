@@ -28,3 +28,6 @@ class handler:
             time.sleep(1)
         return dict(code="fail", message="网络连接异常")
 
+xurls = (
+    r"/api/v1/check_network", handler,
+)

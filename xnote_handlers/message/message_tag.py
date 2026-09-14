@@ -385,6 +385,6 @@ xurls = (
     r"/message/tag/list_ajax", ListAjaxHandler,
     r"/message/tag/search_dialog", SearchDialogHandler,
     r"/message/tag/system_tag", SystemTagHandler,
-    r"/api/message/tag/list", ListTagAjaxHandler,
+    r"/api/v1/message/tag/list", ListTagAjaxHandler,
     r"/message/tag/filter", FilterEditHandler,
 )

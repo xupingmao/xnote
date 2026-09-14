@@ -29,7 +29,7 @@ def get_api_links():
         fpath = os.path.join(API_PATH, fname)
         name, ext = os.path.splitext(fname)
         if name != "__init__" and os.path.isfile(fpath) and ext == ".py":
-            api_links.append("/api/" + name)
+            api_links.append("/api/v1/" + name)
     api_links.sort()
     return api_links
 

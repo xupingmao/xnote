@@ -46,7 +46,7 @@ def search_api(ctx: SearchContext):
         if name in task_name:
             result = SearchResult()
             result.name = f"系统接口 - {name}"
-            result.command = f"/api/{task_command}"
+            result.command = f"/api/v1/{task_command}"
             result.url = result.command
             results.append(result)
     if results:

@@ -133,11 +133,11 @@ class RunApiHandler:
 
 
 xurls = (
-    r"/api/cli/login", LoginApiHandler,
-    r"/api/cli/logout", LogoutApiHandler,
-    r"/api/cli/backup", BackupApiHandler,
-    r"/api/cli/repair", RepairApiHandler,
-    r"/api/cli/sync", SyncApiHandler,
-    r"/api/cli/command_list", CommandListApiHandler,
-    r"/api/cli/run", RunApiHandler,
+    r"/api/v1/cli/login", LoginApiHandler,
+    r"/api/v1/cli/logout", LogoutApiHandler,
+    r"/api/v1/cli/backup", BackupApiHandler,
+    r"/api/v1/cli/repair", RepairApiHandler,
+    r"/api/v1/cli/sync", SyncApiHandler,
+    r"/api/v1/cli/command_list", CommandListApiHandler,
+    r"/api/v1/cli/run", RunApiHandler,
 )

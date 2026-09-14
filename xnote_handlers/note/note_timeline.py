@@ -771,7 +771,7 @@ class TimelineSearchDialogHandler:
 xutils.register_func("note.build_date_result", build_date_result)
 
 xurls = (
-    r"/api/note/timeline", TimelineAjaxHandler,
+    r"/api/v1/note/timeline", TimelineAjaxHandler,
 
     # 时光轴视图
     r"/note/timeline", TimelineHandler,

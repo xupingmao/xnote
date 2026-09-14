@@ -76,5 +76,5 @@ class CategoryUpdateAjaxHandler:
 
 xurls = (
     r"/note/category", CategoryHandler,
-    r"/api/note/category/update", CategoryUpdateAjaxHandler,
+    r"/api/v1/note/category/update", CategoryUpdateAjaxHandler,
 )

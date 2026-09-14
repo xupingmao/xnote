@@ -358,7 +358,7 @@ xurls = (
     r"/dict/list",      DictHandler,
     r"/note/dict",      DictHandler,
 
-    r"/api/dict/create", CreateAjaxHandler,
-    r"/api/dict/update", UpdateAjaxHandler,
-    r"/api/dict/delete", DeleteAjaxHandler,
+    r"/api/v1/dict/create", CreateAjaxHandler,
+    r"/api/v1/dict/update", UpdateAjaxHandler,
+    r"/api/v1/dict/delete", DeleteAjaxHandler,
 )

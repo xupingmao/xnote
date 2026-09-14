@@ -60,3 +60,7 @@ class handler:
             return dict(code="success", data=message)
         else:
             return dict(code="fail", message="结果为空")
+
+xurls = (
+    r"/api/v1/report_weather", handler,
+)

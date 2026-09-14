@@ -55,7 +55,7 @@ class TestMain(BaseTestCase):
     def test_default_search_includes_todo(self):
         """全局【默认】综合搜索也应检索到新待办模块的内容（折叠为摘要，参考随手记）"""
         resp = self.json_request_return_dict(
-            "/api/todo/create", method="POST",
+            "/api/v1/todo/create", method="POST",
             data=dict(content="综合搜索命中待办S", project_id="1"))
         self.assertTrue(resp["success"])
         task_id = resp["data"]

@@ -410,7 +410,7 @@ class TestChatBotApi(BaseTestCase):
 
     def test_send_api(self):
         resp = json_request_return_dict(
-            "/api/chatbot/send", method="POST",
+            "/api/v1/chatbot/send", method="POST",
             data=dict(session_id=0, content="你好"))
         assert resp["success"] == True
 
@@ -428,26 +428,26 @@ class TestChatBotApi(BaseTestCase):
 
     def test_send_empty_content(self):
         resp = json_request_return_dict(
-            "/api/chatbot/send", method="POST",
+            "/api/v1/chatbot/send", method="POST",
             data=dict(session_id=0, content=""))
         assert resp["success"] == False
         assert resp["code"] == "400"
 
     def test_send_with_invalid_session(self):
         resp = json_request_return_dict(
-            "/api/chatbot/send", method="POST",
+            "/api/v1/chatbot/send", method="POST",
             data=dict(session_id=999999, content="hello"))
         assert resp["success"] == False
         assert resp["code"] == "404"
 
     def test_message_list_api(self):
         send_resp = json_request_return_dict(
-            "/api/chatbot/send", method="POST",
+            "/api/v1/chatbot/send", method="POST",
             data=dict(session_id=0, content="复读 测试内容"))
         session_id = send_resp["data"]["session"]["session_id"]
 
         resp = json_request_return_dict(
-            "/api/chatbot/message/list?session_id=%s" % session_id)
+            "/api/v1/chatbot/message/list?session_id=%s" % session_id)
         assert resp["success"] == True
         assert resp["data"]["total"] == 2
 
@@ -457,16 +457,16 @@ class TestChatBotApi(BaseTestCase):
         assert contents == ["复读 测试内容", "测试内容"]
 
     def test_message_list_invalid_session(self):
-        resp = json_request_return_dict("/api/chatbot/message/list?session_id=999999")
+        resp = json_request_return_dict("/api/v1/chatbot/message/list?session_id=999999")
         assert resp["success"] == False
         assert resp["code"] == "404"
 
     def test_session_list_api(self):
         json_request_return_dict(
-            "/api/chatbot/session/create", method="POST",
+            "/api/v1/chatbot/session/create", method="POST",
             data=dict(title="会话列表测试"))
 
-        resp = json_request_return_dict("/api/chatbot/session/list")
+        resp = json_request_return_dict("/api/v1/chatbot/session/list")
         assert resp["success"] == True
         assert resp["data"]["total"] > 0
 
@@ -479,63 +479,63 @@ class TestChatBotApi(BaseTestCase):
 
     def test_session_create_and_delete(self):
         create_resp = json_request_return_dict(
-            "/api/chatbot/session/create", method="POST",
+            "/api/v1/chatbot/session/create", method="POST",
             data=dict(title="待删除的会话"))
         assert create_resp["success"] == True
         session_id = create_resp["data"]["session_id"]
 
         delete_resp = json_request_return_dict(
-            "/api/chatbot/session/delete", method="POST",
+            "/api/v1/chatbot/session/delete", method="POST",
             data=dict(session_id=session_id))
         assert delete_resp["success"] == True
         assert dao.ChatSessionDao.get_by_id(session_id) is None
 
     def test_session_delete_invalid_id(self):
         resp = json_request_return_dict(
-            "/api/chatbot/session/delete", method="POST",
+            "/api/v1/chatbot/session/delete", method="POST",
             data=dict(session_id=0))
         assert resp["success"] == False
         assert resp["code"] == "400"
 
     def test_session_rename(self):
         create_resp = json_request_return_dict(
-            "/api/chatbot/session/create", method="POST",
+            "/api/v1/chatbot/session/create", method="POST",
             data=dict(title="待重命名"))
         assert create_resp["success"] == True
         session_id = create_resp["data"]["session_id"]
 
         resp = json_request_return_dict(
-            "/api/chatbot/session/rename", method="POST",
+            "/api/v1/chatbot/session/rename", method="POST",
             data=dict(session_id=session_id, title="已重命名"))
         assert resp["success"] == True
         assert dao.ChatSessionDao.get_by_id(session_id).title == "已重命名"
 
     def test_session_rename_empty_title(self):
         create_resp = json_request_return_dict(
-            "/api/chatbot/session/create", method="POST",
+            "/api/v1/chatbot/session/create", method="POST",
             data=dict(title="t"))
         session_id = create_resp["data"]["session_id"]
         resp = json_request_return_dict(
-            "/api/chatbot/session/rename", method="POST",
+            "/api/v1/chatbot/session/rename", method="POST",
             data=dict(session_id=session_id, title="  "))
         assert resp["success"] == False
         assert resp["code"] == "400"
 
     def test_session_rename_invalid_session(self):
         resp = json_request_return_dict(
-            "/api/chatbot/session/rename", method="POST",
+            "/api/v1/chatbot/session/rename", method="POST",
             data=dict(session_id=999999, title="x"))
         assert resp["success"] == False
         assert resp["code"] == "404"
 
     def test_session_rename_returns_commands(self):
         create_resp = json_request_return_dict(
-            "/api/chatbot/session/create", method="POST",
+            "/api/v1/chatbot/session/create", method="POST",
             data=dict(title="待重命名"))
         session_id = create_resp["data"]["session_id"]
 
         resp = json_request_return_dict(
-            "/api/chatbot/session/rename", method="POST",
+            "/api/v1/chatbot/session/rename", method="POST",
             data=dict(session_id=session_id, title="已重命名",
                       current_session_id=session_id))
         assert resp["success"] == True
@@ -549,12 +549,12 @@ class TestChatBotApi(BaseTestCase):
 
     def test_session_delete_returns_commands(self):
         create_resp = json_request_return_dict(
-            "/api/chatbot/session/create", method="POST",
+            "/api/v1/chatbot/session/create", method="POST",
             data=dict(title="待删除的会话"))
         session_id = create_resp["data"]["session_id"]
 
         resp = json_request_return_dict(
-            "/api/chatbot/session/delete", method="POST",
+            "/api/v1/chatbot/session/delete", method="POST",
             data=dict(session_id=session_id, current_session_id=session_id))
         assert resp["success"] == True
         commands = resp["data"]["commands"]
@@ -571,12 +571,12 @@ class TestChatBotApi(BaseTestCase):
 
     def test_session_top(self):
         create_resp = json_request_return_dict(
-            "/api/chatbot/session/create", method="POST",
+            "/api/v1/chatbot/session/create", method="POST",
             data=dict(title="待置顶"))
         session_id = create_resp["data"]["session_id"]
 
         resp = json_request_return_dict(
-            "/api/chatbot/session/top", method="POST",
+            "/api/v1/chatbot/session/top", method="POST",
             data=dict(session_id=session_id))
         assert resp["success"] == True
         assert resp["data"]["is_top"] == 1
@@ -584,20 +584,20 @@ class TestChatBotApi(BaseTestCase):
         assert any(c["command"] == "update_html" for c in resp["data"]["commands"])
 
         resp2 = json_request_return_dict(
-            "/api/chatbot/session/top", method="POST",
+            "/api/v1/chatbot/session/top", method="POST",
             data=dict(session_id=session_id))
         assert resp2["data"]["is_top"] == 0
 
     def test_session_top_invalid_id(self):
         resp = json_request_return_dict(
-            "/api/chatbot/session/top", method="POST",
+            "/api/v1/chatbot/session/top", method="POST",
             data=dict(session_id=0))
         assert resp["success"] == False
         assert resp["code"] == "400"
 
     def test_session_top_invalid_session(self):
         resp = json_request_return_dict(
-            "/api/chatbot/session/top", method="POST",
+            "/api/v1/chatbot/session/top", method="POST",
             data=dict(session_id=999999))
         assert resp["success"] == False
         assert resp["code"] == "404"
@@ -613,7 +613,7 @@ class TestChatBotPage(BaseTestCase):
 
     def test_page_with_session(self):
         resp = json_request_return_dict(
-            "/api/chatbot/send", method="POST",
+            "/api/v1/chatbot/send", method="POST",
             data=dict(session_id=0, content="页面测试"))
         session_id = resp["data"]["session"]["session_id"]
 
@@ -626,7 +626,7 @@ class TestChatBotPage(BaseTestCase):
     def test_new_session_not_selected(self):
         # 先产生一个已有会话, 否则没有会话可选, 测不出差异
         json_request_return_dict(
-            "/api/chatbot/send", method="POST",
+            "/api/v1/chatbot/send", method="POST",
             data=dict(session_id=0, content="已有会话"))
 
         # 默认进入时自动选中最近的一个会话

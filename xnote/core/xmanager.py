@@ -28,6 +28,9 @@ from xutils import Storage
 from xutils import logutil
 from xutils import tojson, MyStdout, u, dbutil
 from xnote.core.models import CronJobRecord
+
+# REST API 当前版本号，URL 形如 /api/v1/{module}/{method}
+API_VERSION = "v1"
 from xnote.core.models import SearchContext
 
 __version__ = "1.0"
@@ -351,8 +354,13 @@ class HandlerManager:
     def is_url_valid(self, url: str, modpath: str):
         if url.startswith(modpath):
             return True
-        if url.startswith("/api" + modpath):
-            return True
+        # 版本化 REST API：/api/{version}/{module}/...
+        # 去掉 "/api/" 后首个 segment 为版本号，其后应以模块路径 modpath 开头
+        if url.startswith("/api/"):
+            rest = url[len("/api/"):]
+            idx = rest.find("/")
+            if idx >= 0 and rest[idx:].startswith(modpath):
+                return True
         return False
 
     def resolve_module(self, module, modname: str):
@@ -363,7 +371,7 @@ class HandlerManager:
                 url = xurls[i]
                 handler = xurls[i+1]
                 if not self.is_url_valid(url, modpath):
-                    api_modpath = "/api" + modpath
+                    api_modpath = "/api/" + API_VERSION + modpath
                     log(f"WARN: pattern {url!r} is invalid, should starts with {modpath!r} or {api_modpath!r}")
                 self.add_mapping(url, handler)
         # xurls拥有最高优先级，下面代码兼容旧逻辑

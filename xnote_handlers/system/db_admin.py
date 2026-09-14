@@ -601,7 +601,7 @@ class TableData:
             list_item = ListViewItem()
             for head in self.head:
                 value = item.get(head, "")
-                if value == "":
+                if value == "" or value is None:
                     continue
                 list_item.add_span(f"{head}: ", css_class="bold")
                 list_item.add_span(value)

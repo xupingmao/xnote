@@ -267,11 +267,11 @@ xutils.register_func("page.list_system_types", list_system_types)
 xutils.register_func("page.list_special_groups", list_special_groups)
 
 xurls = (
-    r"/api/note/group", GroupApiHandler,
-    r"/api/note/stat", StatApiHandler,
-    r"/api/note/select_name", SelectNameHandler,
-    r"/api/note/content", NoteContentApiHandler,
-    r"/api/note/search", NoteSearchApiHandler,
-    r"/api/note/save", NoteSaveApiHandler,
-    r"/api/note/delete", NoteDeleteApiHandler,
+    r"/api/v1/note/group", GroupApiHandler,
+    r"/api/v1/note/stat", StatApiHandler,
+    r"/api/v1/note/select_name", SelectNameHandler,
+    r"/api/v1/note/content", NoteContentApiHandler,
+    r"/api/v1/note/search", NoteSearchApiHandler,
+    r"/api/v1/note/save", NoteSaveApiHandler,
+    r"/api/v1/note/delete", NoteDeleteApiHandler,
 )

@@ -70,6 +70,6 @@ class DecodeHandler:
 
 
 xurls = (
-    r"/api/encode", EncodeHandler,
-    r"/api/decode", DecodeHandler,
+    r"/api/v1/encode", EncodeHandler,
+    r"/api/v1/decode", DecodeHandler,
 )

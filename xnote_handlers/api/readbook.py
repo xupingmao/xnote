@@ -121,3 +121,6 @@ class handler:
                 dbutil.put(key, bookmark)
         return dict(code="success", data=text, page=page, current=current, size=size)
 
+xurls = (
+    r"/api/v1/readbook", handler,
+)

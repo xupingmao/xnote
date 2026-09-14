@@ -2,7 +2,7 @@
 """运维相关的服务端 CLI 命令（远程命令）
 
 backup 为已实现的命令；repair / sync 暂未实现，仅占位注册，
-由 CLI 客户端在登录后从 /api/cli/command_list 获取并转发执行。
+由 CLI 客户端在登录后从 /api/v1/cli/command_list 获取并转发执行。
 """
 import xnote_cli
 from xnote_cli import XnoteCliContext, XnoteCliError

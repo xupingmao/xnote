@@ -10,6 +10,6 @@ class TestMain(BaseTestCase):
     def test_encode(self):
         input_text = "a"
         params = dict(type="sha1", input=input_text)
-        result = json_request_return_dict("/api/encode", method="POST", data=params)
+        result = json_request_return_dict("/api/v1/encode", method="POST", data=params)
         assert result["success"] == True
         assert result.get("data") == textutil.sha1_hex(input_text)

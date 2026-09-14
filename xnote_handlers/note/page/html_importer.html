@@ -119,7 +119,7 @@
 
 <script type="text/javascript">
 $("#readText").click(function () {
-    $.post("/api/tts", {content: $("#plainText").text()}, function (resp) {
+    $.post("/api/v1/tts", {content: $("#plainText").text()}, function (resp) {
 
     });
 });

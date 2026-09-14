@@ -293,7 +293,7 @@ class CliCoreTestCase(BaseTestCase):
         import unittest.mock as mock
         state = {"poll": 0}
         def fake_request(ctx, method, path, **kw):
-            if path == "/api/cli/run":
+            if path == "/api/v1/cli/run":
                 raise xnote_cli.XnoteCliError("无法连接")
             state["poll"] += 1
             return xnote_cli.ApiResult(success=True, data=[])
@@ -306,7 +306,7 @@ class CliCoreTestCase(BaseTestCase):
         self.assertEqual(rc, 0)
 
     def test_remote_command_dispatch(self):
-        # 本地未命中时，应把远程命令转发到 /api/cli/run
+        # 本地未命中时，应把远程命令转发到 /api/v1/cli/run
         import unittest.mock as mock
         from xnote_cli.session import SessionInfo
 
@@ -511,7 +511,7 @@ class CliApiTestCase(BaseTestCase):
         user_name = "clitest_%s" % uuid.uuid4().hex[:8]
         xauth.create_user(user_name, "123456")
 
-        resp = self.request_app("/api/cli/login", method="POST",
+        resp = self.request_app("/api/v1/cli/login", method="POST",
                                data=json.dumps(dict(username=user_name,
                                                     password="123456")))
         self.assertEqual(resp.status, "200 OK")
@@ -519,7 +519,7 @@ class CliApiTestCase(BaseTestCase):
         self.assertTrue(body.get("success"))
 
     def test_command_list_api(self):
-        resp = self.json_request("/api/cli/command_list", method="GET")
+        resp = self.json_request("/api/v1/cli/command_list", method="GET")
         self.assertTrue(resp["success"])
         names = [item["name"] for item in resp["data"]]
         # 内置示例插件命令
@@ -530,13 +530,13 @@ class CliApiTestCase(BaseTestCase):
             self.assertIn(cmd, names)
 
     def test_run_plugin_api(self):
-        resp = self.json_request("/api/cli/run", method="POST",
+        resp = self.json_request("/api/v1/cli/run", method="POST",
                                  data=dict(cmd="hello", args="world"))
         self.assertTrue(resp["success"])
         self.assertEqual(resp["data"], "hello world")
 
     def test_run_unknown_command(self):
-        resp = self.json_request("/api/cli/run", method="POST",
+        resp = self.json_request("/api/v1/cli/run", method="POST",
                                  data=dict(cmd="not_exist_cmd", args=""))
         self.assertFalse(resp["success"])
 
@@ -544,35 +544,35 @@ class CliApiTestCase(BaseTestCase):
         note_id = create_test_note("cli search content")
 
         # view
-        view_resp = self.json_request("/api/note/content?id=%s" % note_id,
+        view_resp = self.json_request("/api/v1/note/content?id=%s" % note_id,
                                       method="GET")
         self.assertTrue(view_resp["success"])
         self.assertEqual(view_resp["data"], "cli search content")
 
         # search
-        search_resp = self.json_request("/api/note/search?key=cli%20search",
+        search_resp = self.json_request("/api/v1/note/search?key=cli%20search",
                                         method="GET")
         self.assertTrue(search_resp["success"])
         ids = [item["id"] for item in search_resp["data"]]
         self.assertIn(note_id, ids)
 
         # save (update content)
-        save_resp = self.json_request("/api/note/save", method="POST",
+        save_resp = self.json_request("/api/v1/note/save", method="POST",
                                       data=dict(id=note_id, content="updated content"))
         self.assertTrue(save_resp["success"])
 
-        view_resp2 = self.json_request("/api/note/content?id=%s" % note_id,
+        view_resp2 = self.json_request("/api/v1/note/content?id=%s" % note_id,
                                        method="GET")
         self.assertEqual(view_resp2["data"], "updated content")
 
         # delete
-        del_resp = self.json_request("/api/note/delete", method="POST",
+        del_resp = self.json_request("/api/v1/note/delete", method="POST",
                                      data=dict(id=note_id))
         self.assertTrue(del_resp["success"])
 
     def test_backup_api(self):
         # 备份在测试环境可能未开启，这里只校验返回结构
-        resp = self.json_request("/api/cli/backup", method="POST")
+        resp = self.json_request("/api/v1/cli/backup", method="POST")
         self.assertIsInstance(resp, dict)
         self.assertIn("success", resp)
 
@@ -582,7 +582,7 @@ class CliApiTestCase(BaseTestCase):
         user_name = "clitest_%s" % uuid.uuid4().hex[:8]
         xauth.create_user(user_name, "123456")
 
-        login_resp = self.request_app("/api/cli/login", method="POST",
+        login_resp = self.request_app("/api/v1/cli/login", method="POST",
                                      data=json.dumps(dict(username=user_name,
                                                           password="123456")))
         self.assertEqual(login_resp.status, "200 OK")
@@ -596,7 +596,7 @@ class CliApiTestCase(BaseTestCase):
         cookie = "sid=%s" % sid
 
         # 携带登录 cookie 调用远程命令 note-search
-        search_resp = self.request_app("/api/cli/run", method="POST",
+        search_resp = self.request_app("/api/v1/cli/run", method="POST",
                                       data=dict(cmd="note-search", args="x"),
                                       headers={"Cookie": cookie})
         self.assertEqual(search_resp.status, "200 OK")

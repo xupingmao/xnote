@@ -11,7 +11,7 @@
         params.value = $("[name=value]").val();
         params.dict_type = "{{dict_type}}";
 
-        xnote.http.post("/api/dict/create", params, function (resp) {
+        xnote.http.post("/api/v1/dict/create", params, function (resp) {
             if (resp.success) {
                 xnote.toast("添加成功");
                 window.location.href = resp.data.url;

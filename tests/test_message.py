@@ -144,7 +144,7 @@ class TestMain(BaseTestCase):
         self.assertIn("只读", response.get("message", ""))
 
     def count_message_key(self):
-        response = json_request("/api/message/tag/list")
+        response = json_request("/api/v1/message/tag/list")
         assert isinstance(response, dict)
         assert response.get("code") == "success"
         data = response.get("data")
@@ -152,7 +152,7 @@ class TestMain(BaseTestCase):
         return len(data)
 
     def test_message_key(self):
-        key_result = json_request("/api/message/tag/list")
+        key_result = json_request("/api/v1/message/tag/list")
         assert isinstance(key_result, dict)
 
         for item in key_result["data"]:

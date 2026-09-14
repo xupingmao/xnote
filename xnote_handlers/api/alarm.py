@@ -24,7 +24,7 @@ class handler:
         return dict(code="success")
 
 xurls = (
-    r"/api/alarm/(.*)", handler,
-    r"/api/alert/(.*)", handler,
-    r"/api/alarm", handler,
+    r"/api/v1/alarm/(.*)", handler,
+    r"/api/v1/alert/(.*)", handler,
+    r"/api/v1/alarm", handler,
 )

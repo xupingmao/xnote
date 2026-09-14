@@ -20,15 +20,15 @@ xurls = (
     r"/todo/comment/dialog", todo_comment.TodoCommentDialogHandler,
 
     # 待办 API
-    r"/api/todo/create", todo_api.TodoCreateHandler,
-    r"/api/todo/update", todo_api.TodoUpdateHandler,
-    r"/api/todo/delete", todo_api.TodoDeleteHandler,
-    r"/api/todo/status", todo_api.TodoStatusHandler,
-    r"/api/todo/list", todo_api.TodoListHandler,
+    r"/api/v1/todo/create", todo_api.TodoCreateHandler,
+    r"/api/v1/todo/update", todo_api.TodoUpdateHandler,
+    r"/api/v1/todo/delete", todo_api.TodoDeleteHandler,
+    r"/api/v1/todo/status", todo_api.TodoStatusHandler,
+    r"/api/v1/todo/list", todo_api.TodoListHandler,
 
     # 项目 API
-    r"/api/project/create", todo_api.ProjectCreateHandler,
-    r"/api/project/update", todo_api.ProjectUpdateHandler,
-    r"/api/project/archive", todo_api.ProjectArchiveHandler,
-    r"/api/project/list", todo_api.ProjectListHandler,
+    r"/api/v1/project/create", todo_api.ProjectCreateHandler,
+    r"/api/v1/project/update", todo_api.ProjectUpdateHandler,
+    r"/api/v1/project/archive", todo_api.ProjectArchiveHandler,
+    r"/api/v1/project/list", todo_api.ProjectListHandler,
 )

@@ -37,7 +37,7 @@ num_dict = {
 
 
 def add_alarm(tm_hour, tm_min, message):
-    url = "/api/alarm"
+    url = "/api/v1/alarm"
     tm_wday = "no-repeat"
     name = "[提醒] %s" % message
 

@@ -2,7 +2,7 @@
 """示例插件：演示如何通过 register_cmd 在服务端动态注册 cli 命令
 
 该命令注册后，CLI 可以执行：xnote-cli hello <name>
-CLI 会把命令转发到服务端的 /api/cli/run 接口执行本处理函数。
+CLI 会把命令转发到服务端的 /api/v1/cli/run 接口执行本处理函数。
 """
 import xnote_cli
 from xnote_cli import XnoteCliContext

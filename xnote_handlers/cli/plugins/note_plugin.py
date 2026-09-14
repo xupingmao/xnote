@@ -2,10 +2,10 @@
 """笔记相关的服务端 CLI 命令（远程命令）
 
 这些命令在【服务端】执行，通过 xnote_cli.register_cmd 注册。CLI 客户端在登录后
-从 /api/cli/command_list 获取远程命令列表，并通过 /api/cli/run 转发执行。
+从 /api/v1/cli/command_list 获取远程命令列表，并通过 /api/v1/cli/run 转发执行。
 
 与页面 REST 接口不同，这里直接调用 note 模块内部的 dao / service 逻辑，避免
-服务端自己再发起一次 HTTP 请求。鉴权基于当前请求登录用户（/api/cli/run 本身
+服务端自己再发起一次 HTTP 请求。鉴权基于当前请求登录用户（/api/v1/cli/run 本身
 带 @xauth.login_required）。
 
 错误通过 xnote_cli.XnoteCliError 抛出，由 RunApiHandler 转换为失败响应。

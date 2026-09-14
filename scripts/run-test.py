@@ -103,6 +103,11 @@ def run_test(args: Namespace):
         py_exec("-m coverage html -i")
         return
 
+    if target == "todo":
+        py_exec(f"-m pytest tests/test_todo.py tests/test_todo_api.py tests/test_todo_migrate.py --doctest-modules --cov xnote_handlers --capture {args.capture}")
+        py_exec("-m coverage html -i")
+        return
+
     if target == "chatbot":
         py_exec(f"-m pytest tests/test_chatbot.py --doctest-modules --cov xnote_handlers.chatbot --capture {args.capture}")
         py_exec("-m coverage html -i")
