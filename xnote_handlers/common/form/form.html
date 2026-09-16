@@ -24,6 +24,30 @@
                 {% if row.type == "html" %}
                     {% raw row.html %}
                 {% end %}
+                {% if row.type == "image" or row.type == "file" %}
+                    <div class="form-upload-row" data-upload-kind="{{row.type}}" data-field="{{row.field}}" data-picker="#filePicker{{row.id}}">
+                        <input type="hidden" name="{{row.field}}" value="{{row.value}}" />
+                        <div class="form-upload-control">
+                            <input type="file" id="filePicker{{row.id}}" class="hide" {% if row.accept %}accept="{{row.accept}}"{% end %} {% if row.multiple %}multiple{% end %} />
+                            <button type="button" class="btn btn-default" onclick="xnote.formUpload.pick('#filePicker{{row.id}}')">{{ '添加图片' if row.type == 'image' else '添加附件' }}</button>
+                        </div>
+                        <div class="form-upload-preview">
+                            {% for item in row.value_list %}
+                                {% if row.type == "image" %}
+                                <div class="form-upload-thumb" data-src="{{item.webpath}}">
+                                    <img src="{{item.webpath}}?mode=thumbnail" data-src="{{item.webpath}}" />
+                                    <a class="form-upload-del" onclick="xnote.formUpload.removeItem(this)">删除</a>
+                                </div>
+                                {% else %}
+                                <div class="form-upload-file" data-src="{{item.webpath}}">
+                                    <a href="{{item.webpath}}" target="_blank">{{item.name}}</a>
+                                    <a class="form-upload-del" onclick="xnote.formUpload.removeItem(this)">删除</a>
+                                </div>
+                                {% end %}
+                                {% end %}
+                            </div>
+                    </div>
+                {% end %}
             </div>
         {% end %}
     </form>
@@ -55,9 +79,109 @@
 </div>
 
 <script>
+    // 表单图片/文件上传组件的前端逻辑（与评论、随手记上传交互一致）
+    if (!xnote.formUpload) {
+        xnote.formUpload = {
+            pick: function (pickerId) {
+                $(pickerId).click();
+            },
+            addItem: function (rowEl, webpath, kind) {
+                var name = webpath.split("/").pop();
+                var $row = $(rowEl);
+                var $list = $row.find(".form-upload-preview");
+                if (kind == "image") {
+                    var div = $("<div>").addClass("form-upload-thumb").attr("data-src", webpath);
+                    var img = $("<img>").attr("src", webpath + "?mode=thumbnail").attr("data-src", webpath);
+                    var del = $("<a>").addClass("form-upload-del")
+                        .attr("onclick", "xnote.formUpload.removeItem(this)").text("删除");
+                    div.append(img).append(del);
+                    $list.append(div);
+                } else {
+                    var div = $("<div>").addClass("form-upload-file").attr("data-src", webpath);
+                    var link = $("<a>").attr("href", webpath).attr("target", "_blank").text(name);
+                    var del = $("<a>").addClass("form-upload-del")
+                        .attr("onclick", "xnote.formUpload.removeItem(this)").text("删除");
+                    div.append(link).append(del);
+                    $list.append(div);
+                }
+                xnote.formUpload.syncValue($row);
+            },
+            removeItem: function (target) {
+                var $item = $(target).closest("[data-src]");
+                var $row = $item.closest(".form-upload-row");
+                $item.remove();
+                xnote.formUpload.syncValue($row);
+            },
+            syncValue: function ($row) {
+                var values = [];
+                $row.find("[data-src]").each(function (index, ele) {
+                    values.push($(ele).attr("data-src"));
+                });
+                $row.find("input[type=hidden][name]").val(values.join(","));
+            }
+        };
+    }
+
+    // 初始化表单内的图片/文件上传组件（依赖 WebUploader，按需动态加载）
+    function initFormUploaders() {
+        $("#xnoteForm{{_xnote_form.id}} .form-upload-row").each(function () {
+            var $row = $(this);
+            var kind = $row.attr("data-upload-kind");
+            var picker = $row.attr("data-picker");
+            xnote.createUploaderEx({
+                fileSelector: picker,
+                chunked: false,
+                successFn: function (resp) {
+                    xnote.formUpload.addItem($row, resp.webpath, kind);
+                },
+                fixOrientation: true,
+                fileName: "auto"
+            });
+        });
+    }
+
+    // WebUploader 未随全局打包加载时（如弹窗表单），动态引入后再初始化
+    function ensureWebUploader(callback) {
+        if (typeof WebUploader !== "undefined") {
+            callback();
+            return;
+        }
+        // 避免同一页面多个表单重复加载脚本
+        if (xnote._webuploader_loading) {
+            var timer = setInterval(function () {
+                if (typeof WebUploader !== "undefined") {
+                    clearInterval(timer);
+                    callback();
+                }
+            }, 50);
+            return;
+        }
+        xnote._webuploader_loading = true;
+
+        var serverHome = xnote.config.serverHome;
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.type = "text/css";
+        link.href = serverHome + "/_static/lib/webuploader/webuploader.css";
+        document.head.appendChild(link);
+
+        var script = document.createElement("script");
+        script.src = serverHome + "/_static/lib/webuploader/webuploader.nolog.min.js";
+        script.onload = function () {
+            xnote._webuploader_loading = false;
+            callback();
+        };
+        script.onerror = function () {
+            xnote._webuploader_loading = false;
+            xnote.alert("上传组件加载失败");
+        };
+        document.head.appendChild(script);
+    }
+
     // 刷新默认值
     $(function() {
         xnote.refresh();
+        ensureWebUploader(initFormUploaders);
     });
     // 自动调整textarea的高度（随输入内容变化）
     xnote.layout.initAutoResizeTextarea("#xnoteForm{{_xnote_form.id}} textarea");

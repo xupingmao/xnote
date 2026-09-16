@@ -291,7 +291,7 @@ class TagBindDialogHandler:
 
     <div class="row">
         {% for tag in tag_group.tag_list %}
-        <a class="tag lightgray for-dialog large bind {{get_active_class(tag)}}" 
+        <a class="tag grayblue for-dialog large bind {{get_active_class(tag)}}" 
             data-id="{{tag.tag_id}}" data-code="{{tag.tag_code}}" onclick="xnote.action.note.onTagClick(this);">
             {{ tag.tag_name }}({{tag.amount}})
         </a>

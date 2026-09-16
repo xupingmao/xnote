@@ -9,7 +9,7 @@
  *   基础类 `.tag` + 修饰类组合, 例如 <span class="tag orange">置顶</span>
  *   反例(已废弃, 不要再使用): red-tag / orange-tag / gray-tag / info-tag / tag-info ...
  * 规范配色(canonical palette, 供 TextTag.css_class 使用):
- *   red / orange / gray / lightblue / lightgray / lightred / lightpurple
+ *   red / orange / gray / lightblue / lightgray / lightred / lightpurple / grayblue
  *   额外: info / system
  * 形状/尺寸修饰: pill / large
  */
@@ -90,9 +90,10 @@ a.tag:hover {
     color: #666;
 }
 
-.tag.lightgray.active {
-    background-color: #08c;
-    color: white;
+.tag.grayblue {
+    /* 浅灰底 + 蓝色字(中性灰底 + 强调蓝字) */
+    background-color: #eee;
+    color: #08c;
 }
 
 .tag.lightred {
@@ -120,7 +121,57 @@ a.tag:hover {
 
 
 /**
- * 4. 筛选 chip 组件 (.tag-span, 由 TagSpan 渲染)
+ * 4. active(选中)模式: 与颜色修饰组合使用
+ *    普通模式: <span class="tag lightblue">普通</span>
+ *    选中模式: <span class="tag lightblue active">选中</span>
+ *  规则:
+ *    - light-* / grayblue 浅底系: 选中时变同色实心填充 + 白字
+ *    - 实心系(red/orange/gray/system/info): 已是实心, 选中时加白边环强调
+ *  切换(JS 用 toggleClass("active"))只对同一颜色生效, 不会跨色串味。
+ */
+.tag.active {
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* light 浅底系 / grayblue: 选中 -> 同色实心 + 白字 */
+.tag.lightgray.active {
+    background-color: #08c;
+    color: white;
+}
+
+.tag.lightblue.active {
+    background-color: #08c;
+    color: white;
+}
+
+.tag.grayblue.active {
+    background-color: #08c;
+    color: white;
+}
+
+.tag.lightred.active {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.tag.lightpurple.active {
+    background-color: #7b1fa2;
+    color: white;
+}
+
+/* 实心系: 选中时白边环强调 */
+.tag.red.active,
+.tag.orange.active,
+.tag.gray.active,
+.tag.system.active,
+.tag.info.active {
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+
+
+/**
+ * 5. 筛选 chip 组件 (.tag-span, 由 TagSpan 渲染)
  *    独立组件, 不在 `.tag` 徽章整理范围内; 保留外边框等原有样式。
  */
 .tag-span, .tag-span-danger {

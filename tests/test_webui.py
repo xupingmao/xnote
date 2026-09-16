@@ -12,7 +12,9 @@ from xnote_handlers.plugin.dao import add_visit_log, delete_visit_log
 from xnote.webui import Div
 from xnote.webui import Tree, TreeNode
 from xnote.webui import Dropdown, DropdownOption
+from xnote.webui import TextTag, DialogForm
 from xnote.webui.table import DataTable, TableRowType
+from xnote.plugin import DataForm
 
 import xutils
 
@@ -100,6 +102,47 @@ class TestTreeExamplePage(BaseTestCase):
         assert "x-tree" in html
         assert "我的笔记" in html
         assert "Tree树形组件" in html
+
+
+class TestTextTag(BaseTestCase):
+
+    def test_render_normal(self):
+        html = TextTag(text="标签", css_class="lightgray").render()
+        assert '<span class="tag lightgray">标签</span>' == html
+
+    def test_render_active(self):
+        html = TextTag(text="标签", css_class="lightblue", active=True).render()
+        assert '<span class="tag lightblue active">标签</span>' == html
+
+    def test_render_active_no_css_class(self):
+        html = TextTag(text="标签", active=True).render()
+        assert '<span class="tag active">标签</span>' == html
+
+    def test_render_with_href(self):
+        html = TextTag(text="标签", css_class="lightred", href="/x", active=True).render()
+        assert '<span class="tag lightred active"><a href="/x">标签</a></span>' == html
+
+
+class TestDialogForm(BaseTestCase):
+
+    def test_is_dataform_alias(self):
+        # DialogForm 是 DataForm 的语义化别名，专用于弹窗场景
+        form = DialogForm()
+        assert isinstance(form, DataForm)
+        assert form.form_type == "edit"
+
+    def test_render_form_only(self):
+        # 渲染表单片段（含自身的 保存/关闭 页脚按钮），但不包含弹窗触发按钮
+        form = DialogForm()
+        form.add_row("名称", "name", value="x")
+        html = form.render().decode("utf-8")
+        assert 'class="x-form"' in html
+        assert 'name="name"' in html
+        # 表单自身的页脚按钮
+        assert "xnote.submitFormSave(this)" in html
+        # 不应含有弹窗触发逻辑（那是 EditFormButton 的职责）
+        assert "xnote.table.handleEditForm" not in html
+        assert "打开弹窗表单" not in html
 
 
 class TestDataTable(BaseTestCase):
@@ -209,3 +252,62 @@ class TestDropdown(BaseTestCase):
         html = dropdown.render().decode("utf-8")
         assert "<select></select>" == html.replace("\n", "").replace(" ", "")
         
+
+class TestDataForm(BaseTestCase):
+
+    def test_add_image_render(self):
+        form = DataForm()
+        form.add_image("封面图片", "cover")
+        html = form.render().decode("utf-8")
+
+        assert 'data-upload-kind="image"' in html
+        assert 'name="cover"' in html
+        assert 'accept="image/*"' in html
+        assert "添加图片" in html
+        assert "添加附件" not in html
+
+    def test_add_file_render(self):
+        form = DataForm()
+        form.add_file("附件", "attachments")
+        html = form.render().decode("utf-8")
+
+        assert 'data-upload-kind="file"' in html
+        assert 'name="attachments"' in html
+        assert "添加附件" in html
+        # 文件类型不限制 accept
+        assert 'accept="image/*"' not in html
+
+    def test_upload_value_roundtrip(self):
+        # 编辑已有记录：传入已有 webpath 列表，应正确回显为预览项
+        form = DataForm()
+        webpaths = ["/data/files/admin/a.png", "/data/files/admin/b.jpg"]
+        form.add_image("封面图片", "cover", value=webpaths)
+        html = form.render().decode("utf-8")
+
+        # 隐藏 input 保存逗号分隔的 webpath
+        assert 'value="/data/files/admin/a.png,/data/files/admin/b.jpg"' in html
+        # 预览缩略图
+        assert 'data-src="/data/files/admin/a.png"' in html
+        assert 'src="/data/files/admin/a.png?mode=thumbnail"' in html
+        assert 'data-src="/data/files/admin/b.jpg"' in html
+
+        # value_list 正确
+        row = form.rows[-1]
+        assert row.value_list[0]["webpath"] == "/data/files/admin/a.png"
+        assert row.value_list[0]["name"] == "a.png"
+
+    def test_upload_value_from_comma_string(self):
+        form = DataForm()
+        form.add_file("附件", "attachments", value="/data/x.pdf,/data/y.zip")
+        row = form.rows[-1]
+        assert len(row.value_list) == 2
+        assert row.value == "/data/x.pdf,/data/y.zip"
+        assert row.value_list[1]["name"] == "y.zip"
+
+    def test_example_form_has_upload(self):
+        # 示例表单页（/test/example/table?action=edit）应渲染出上传组件
+        body = request_html("/test/example/table?action=edit").decode("utf-8")
+        assert 'data-upload-kind="image"' in body
+        assert 'data-upload-kind="file"' in body
+        assert "添加图片" in body
+        assert "添加附件" in body

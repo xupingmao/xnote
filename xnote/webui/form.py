@@ -10,6 +10,7 @@
 """
 
 import typing
+from xutils import Storage
 from xnote.core import xtemplate
 from xnote.webui.base import BaseComponent
 
@@ -31,6 +32,8 @@ class FormRowType:
     date = "date"
     heading = "heading"
     html = "html"
+    image = "image"   # 图片上传
+    file = "file"     # 文件上传
 
 class FormRowOption:
     """表单行的选项"""
@@ -65,6 +68,8 @@ class FormRow(BaseComponent):
     multiple = False
     html : typing.Union[str, bytes] = ""
     rows = 0 # textarea 行数
+    accept = "" # 文件选择器的 accept 属性（图片/文件上传用）
+    value_list = [] # type: typing.List[Storage]  # 图片/文件上传的已有值列表，元素为 {webpath, name}
 
     _select_html = """
 <select id="{{row.id}}" name="{{row.field}}" class="form-row-value" value="{{row.value}}" {% raw row.html_attr %}>
@@ -93,6 +98,8 @@ class FormRow(BaseComponent):
         self.css_class = ""
         self.options = []
         self.opt_groups = []
+        self.accept = ""
+        self.value_list = []
 
     def add_option(self, title="", value=""):
         option = FormRowOption()
@@ -243,6 +250,47 @@ class DataForm(BaseComponent):
         row.html = html
         row.type = FormRowType.html
         self.rows.append(row)
+
+    def add_image(self, title="", field="", value="", css_class="", multiple=True):
+        """添加图片上传行（交互参考评论/随手记的图片上传）"""
+        return self._add_upload_row(FormRowType.image, title, field, value, css_class, multiple, accept="image/*")
+
+    def add_file(self, title="", field="", value="", css_class="", multiple=True):
+        """添加文件上传行（交互参考评论/随手记的附件上传）"""
+        return self._add_upload_row(FormRowType.file, title, field, value, css_class, multiple, accept="")
+
+    def _normalize_upload_value(self, value):
+        # type: (typing.Union[str, list, None]) -> list
+        """把 value（逗号分隔字符串或列表）归一化为 webpath 列表"""
+        if value is None:
+            return []
+        if isinstance(value, str):
+            return [v.strip() for v in value.split(",") if v.strip()]
+        return [str(v) for v in value]
+
+    def _add_upload_row(self, row_type, title, field, value, css_class, multiple, accept):
+        row = FormRow()
+        row.id = self._create_row_id()
+        row.type = row_type
+        row.title = title
+        row.field = field
+        row.css_class = css_class
+        row.multiple = multiple
+        row.accept = accept
+
+        webpaths = self._normalize_upload_value(value)
+        items = []
+        for webpath in webpaths:
+            name = webpath.rsplit("/", 1)[-1]
+            item = Storage()
+            item.webpath = webpath
+            item.name = name
+            items.append(item)
+        row.value = ",".join(webpaths)
+        row.value_list = items
+
+        self.rows.append(row)
+        return row
     
 
     def count_type(self, type=""):
@@ -278,3 +326,13 @@ class PageEditForm(DataForm):
     form_type_css = "page-edit-form"
     footer_btn_group_css = ""
     delete_btn_css = "danger"
+
+class DialogForm(DataForm):
+    """弹窗表单：渲染在对话框中的编辑表单。
+
+    DataForm 的语义化别名（form_type 同为 edit），用于和 PageEditForm（页面内联表单）
+    区分，明确该表单是给弹窗场景用的。只定义表单本身，触发按钮（如 EditFormButton）
+    单独使用，不要塞进表单里。
+    """
+    form_type = FormType.edit
+    form_type_css = ""
