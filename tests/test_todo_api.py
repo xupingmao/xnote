@@ -94,7 +94,7 @@ class TestTodoApi(BaseTestCase):
         self.assertEqual(contents, [meet])
 
         # 换“水果”关键词：只命中水果那条
-        matched2 = self.json_request_return_dict("/api/v1/todo/list?key=水果%s" % marker)
+        matched2 = self.json_request_return_dict("/api/v1/todo/list?key=" + quote(fruit))
         contents2 = [item["content"] for item in matched2["data"]["items"]]
         self.assertEqual(contents2, [fruit])
 

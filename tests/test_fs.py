@@ -5,12 +5,15 @@
 import xutils
 from .a import *
 import os
+import io
+from contextlib import contextmanager
+from unittest import mock
 from xnote.core import xconfig
 from xnote.core import xauth
 from xutils import textutil, jsonutil, fsutil
 from zipfile import ZipFile
 from .test_base import json_request, BaseTestCase, request_html, json_request_return_dict
-from .test_base import init as init_app, get_test_file_path
+from .test_base import init as init_app, get_test_file_path, get_test_app
 from xnote_handlers.fs.fs_index import build_fs_index
 from xnote_handlers.fs.fs_helper import FileInfoDao, FileInfo
 
@@ -24,6 +27,35 @@ class TestMain(BaseTestCase):
         with open(fpath, "w+") as fp:
             fp.write(content)
         return fpath
+
+    @contextmanager
+    def mock_file(self, fpath, data):
+        """用内存数据 fake 掉指定路径的 open/os.stat/路径判断，避免大文件落盘。
+
+        这样大文件下载/Range 的回归测试可以默认运行，而不会在磁盘上写入数十 MB 的数据。
+        """
+        real_os_stat = os.stat
+        real_isdir = os.path.isdir
+        fake_stat = mock.Mock()
+        fake_stat.st_size = len(data)
+        fake_stat.st_mtime = 0.0
+
+        def stat_side(p, *args, **kw):
+            if p == fpath:
+                return fake_stat
+            return real_os_stat(p, *args, **kw)
+
+        orig_open = open
+        def open_side(p, *args, **kw):
+            if p == fpath:
+                return io.BytesIO(data)
+            return orig_open(p, *args, **kw)
+
+        with mock.patch("os.stat", side_effect=stat_side), \
+             mock.patch("os.path.isfile", side_effect=lambda p: p == fpath), \
+             mock.patch("os.path.isdir", side_effect=lambda p: False if p == fpath else real_isdir(p)), \
+             mock.patch("builtins.open", side_effect=open_side):
+            yield
 
     def test_fs_view_mode(self):
         cwd = os.getcwd()
@@ -147,6 +179,82 @@ class TestMain(BaseTestCase):
             self.check_OK(f"/fs_download?fpath={fpath_b64}&token={token_info.token}")
         finally:
             xauth.TestEnv.login_admin()
+
+    def test_fs_download_large_file(self):
+        # 回归测试：大文件（>10MB）下载时必须返回完整内容（200），
+        # 不能因强制 206 分段只返回首段（4MB）导致文件残损。
+        # 使用内存文件，避免向磁盘写入数十 MB 数据。
+        size = 11 * 1024 * 1024  # 11MB
+        fpath = "/__mem__/test_download_large.bin"
+        with self.mock_file(fpath, b"\x00" * size):
+            fpath_b64 = textutil.encode_base64(fpath)
+            response = get_test_app().request(f"/fs_download?fpath={fpath_b64}&type=blob")
+            self.assertEqual("200 OK", response.status, "大文件下载必须返回 200，而非 206 分段")
+            self.assertEqual(size, len(response.data), "下载文件大小必须与源文件一致，不能被截断")
+            self.assertNotIn("206", response.status)
+
+    def test_fs_download_large_file_inline(self):
+        # 客户端未发送 Range 时，无论内联还是下载都必须返回完整的 200 响应，
+        # 不允许返回 206（206 仅允许作为对 Range 请求的响应，见 RFC 7233）
+        size = 11 * 1024 * 1024  # 11MB
+        fpath = "/__mem__/test_inline_large.bin"
+        with self.mock_file(fpath, b"\x01" * size):
+            fpath_b64 = textutil.encode_base64(fpath)
+            response = get_test_app().request(f"/fs_download?fpath={fpath_b64}")
+            self.assertEqual("200 OK", response.status)
+            self.assertEqual(size, len(response.data))
+
+    def test_fs_download_range_exact(self):
+        size = 11 * 1024 * 1024  # 11MB
+        fpath = "/__mem__/test_range_exact.bin"
+        with self.mock_file(fpath, b"\x02" * size):
+            fpath_b64 = textutil.encode_base64(fpath)
+            url = f"/fs_download?fpath={fpath_b64}&type=blob"
+            # 请求头部的 1KB 范围，必须精确返回 1024 字节
+            response = get_test_app().request(url, headers={"Range": "bytes=0-1023"})
+            self.assertEqual("206 Partial Content", response.status)
+            self.assertEqual(1024, len(response.data))
+            self.assertEqual("bytes 0-1023/%d" % size, response.headers.get("Content-Range"))
+
+    def test_fs_download_range_no_4mb_cap(self):
+        # 回归测试：read_range 必须严格按照客户端请求的区间返回，不能自行截断，
+        # 否则拖动进度条/seek 时浏览器拿到的 Content-Range 比请求的小，无法播放
+        size = 20 * 1024 * 1024  # 20MB，确保 8MB 范围能完整落在文件内
+        fpath = "/__mem__/test_range_nocap.bin"
+        with self.mock_file(fpath, b"\x03" * size):
+            fpath_b64 = textutil.encode_base64(fpath)
+            url = f"/fs_download?fpath={fpath_b64}&type=blob"
+            # 请求 4MB 之后的 8MB 范围（跨越旧 4MB 上限）
+            start = 4 * 1024 * 1024
+            end = start + 8 * 1024 * 1024 - 1
+            response = get_test_app().request(url, headers={"Range": f"bytes={start}-{end}"})
+            self.assertEqual("206 Partial Content", response.status)
+            # 必须返回完整的 8MB，而不是被截断成 4MB
+            self.assertEqual(8 * 1024 * 1024, len(response.data))
+            self.assertEqual(f"bytes {start}-{end}/{size}", response.headers.get("Content-Range"))
+
+    def test_fs_download_range_open_ended(self):
+        size = 11 * 1024 * 1024  # 11MB
+        fpath = "/__mem__/test_range_open.bin"
+        with self.mock_file(fpath, b"\x04" * size):
+            fpath_b64 = textutil.encode_base64(fpath)
+            url = f"/fs_download?fpath={fpath_b64}&type=blob"
+            # 未指定结束位置，应返回到文件末尾
+            start = 4 * 1024 * 1024
+            response = get_test_app().request(url, headers={"Range": f"bytes={start}-"})
+            self.assertEqual("206 Partial Content", response.status)
+            self.assertEqual(size - start, len(response.data))
+            self.assertEqual(f"bytes {start}-{size-1}/{size}", response.headers.get("Content-Range"))
+
+    def test_fs_download_range_invalid(self):
+        size = 11 * 1024 * 1024  # 11MB
+        fpath = "/__mem__/test_range_invalid.bin"
+        with self.mock_file(fpath, b"\x05" * size):
+            fpath_b64 = textutil.encode_base64(fpath)
+            url = f"/fs_download?fpath={fpath_b64}&type=blob"
+            # 起始位置超出文件大小，应返回 416
+            response = get_test_app().request(url, headers={"Range": "bytes=999999999-"})
+            self.assertEqual("416 Range Not Satisfiable", response.status)
 
     def test_file_info(self):
         fpath = self.prepare_test_file("./test_info.txt", "test info")

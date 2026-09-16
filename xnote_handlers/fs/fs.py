@@ -47,12 +47,6 @@ from .fs_dao import FileInfoDao
 from xnote.plugin import ActionBar
 
 # 配置文件
-# 强制使用Range请求的文件大小阈值（超过此大小的文件首次请求时只返回部分内容）
-FORCE_RANGE_THRESHOLD = 10 * 1024 * 1024   # 10MB
-# 强制Range请求时返回的初始数据大小（必须足够大以包含moov盒子）
-# 4K视频moov盒子可能很大（包含大量样本表），建议设置3MB以上
-FORCE_RANGE_DATA_SIZE = 4 * 1024 * 1024  # 4MB
-
 READ_BUF_SIZE = 64 * 1024 # 64K
 
 def is_stared(path):
@@ -233,18 +227,29 @@ class FileSystemHandler:
         range_list = http_range.split("bytes=")
         if len(range_list) == 2:
             # 包含完整的范围
-            range_list = range_list[1]
+            range_value = range_list[1]
             try:
-                range_start, range_end = range_list.split('-')
-                range_start = int(range_start)
+                range_start_str, range_end_str = range_value.split('-')
+                range_start = int(range_start_str)
                 total_size = os.stat(path).st_size
-                if range_end != "":
-                    # 浏览器指定了结束位置
-                    range_end = min(int(range_end), total_size - 1, range_start + FORCE_RANGE_DATA_SIZE - 1)
+                if range_end_str != "":
+                    # 浏览器指定了结束位置，严格按照请求的范围返回，
+                    # 不能自行截断，否则拖动进度条/seek 时浏览器拿到的
+                    # Content-Range 比请求的小，会卡住无法播放
+                    range_end = int(range_end_str)
                 else:
-                    # 浏览器未指定结束位置，只返回一个数据块（1MB）
-                    # 避免一次性传输过多数据，让浏览器继续发送Range请求
-                    range_end = min(range_start + FORCE_RANGE_DATA_SIZE - 1, total_size - 1)
+                    # 浏览器未指定结束位置，返回到文件末尾（标准 Range 语义）
+                    range_end = total_size - 1
+
+                # 范围合法性校验，非法则返回 416
+                if range_start < 0 or range_end < range_start or range_start >= total_size:
+                    web.ctx.status = "416 Range Not Satisfiable"
+                    web.header("Content-Range", "bytes */%s" % total_size)
+                    yield b""
+                    return
+
+                # 结束位置不超过文件大小
+                range_end = min(range_end, total_size - 1)
                 content_length = range_end - range_start + 1
                 web.header("Content-Length", content_length)
                 content_range = "bytes %s-%s/%s" % (range_start, range_end, total_size)
@@ -288,25 +293,6 @@ class FileSystemHandler:
                 yield block
                 block = fp.read(blocksize)
 
-    def read_range_initial(self, path: str, total_size: int):
-        # 大文件首次请求时，返回初始数据并使用206状态码
-        # 这样浏览器会继续使用Range请求分段加载，避免一次性传输大文件
-        initial_size = min(FORCE_RANGE_DATA_SIZE, total_size)
-        range_end = initial_size - 1
-
-        content_range = "bytes %s-%s/%s" % (0, range_end, total_size)
-        web.ctx.status = "206 Partial Content"
-        web.header("Content-Length", initial_size)
-        web.header("Content-Range", content_range)
-        # 告诉浏览器支持断点续传（Range请求）
-        web.header("Accept-Ranges", "bytes")
-        
-        logging.debug("read_range_initial: %s, range: %s", path, content_range)
-
-        with open(path, "rb") as fp:
-            yield from self._read_block(fp, initial_size)
-            logging.debug("file %s sent %s bytes\n", path, fsutil.format_size(initial_size))
-            
     def _read_block(self, fp: BufferedReader, read_size:int):
         rest = read_size
         while rest > 0:
@@ -376,12 +362,10 @@ class FileSystemHandler:
             if mode == "thumbnail_v2":
                 # 等比例缩放
                 return self.read_thumbnail(path, blocksize, version="v2")
-            # 对于大文件，首次请求返回部分内容（206），让浏览器使用Range请求分段加载
-            # 如果moov盒子不完整，浏览器会发送新的Range请求继续获取
-            total_size = os.stat(path).st_size
-            if total_size > FORCE_RANGE_THRESHOLD:
-                return self.read_range_initial(path, total_size)
-            
+
+            # 客户端没有发送 Range 请求时，按 HTTP 标准必须返回完整的 200 响应，
+            # 不能返回 206 分段（206 仅允许作为对 Range 请求的响应，见 RFC 7233）。
+            # 大文件整段流式返回即可，媒体播放器自身会再发起 Range 请求（走 read_range）。
             self.set_cache_control(mtime, etag)
             return self.read_all(path, blocksize)            
 
