@@ -683,5 +683,11 @@ class TestChatBotPage(BaseTestCase):
         assert "chat-session-drawer" in html
         # 移动端同样通过后端渲染的 session_list_html 渲染操作按钮
         assert "chat-session-delete" in html
+        # 顶部新增的标准标题栏（base_title 组件）独立成 card, 位于原会话栏之上
+        assert "card-title" in html
+        # 原会话栏（☰ 会话切换 + 当前会话标题）保持原交互, 不被改动
+        assert "chat-session-toggle" in html
+        # 标题文本所在 span 的 id 固定为 chat-mobile-title, 后端可同步更新
+        assert 'id="chat-mobile-title"' in html
         # 当前会话标题应渲染出来
         assert "移动端会话" in html
