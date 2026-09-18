@@ -178,3 +178,27 @@ input[readonly] {
         width: 100%;
     }
 }
+
+/* 表单的 tag 风格选择器（tag 本体与选中态复用 common-tag.css 的 .tag / .tag.active） */
+.form-tag-select {
+    margin-left: 100px; /* 与 label（宽 100px）同行的第二列 */
+    line-height: 24px;
+    overflow: hidden;
+}
+.form-tag-select .tag {
+    cursor: pointer;
+    user-select: none;
+}
+.form-tag-select[data-readonly] .tag {
+    cursor: default;
+}
+.form-tag-select input[type=hidden] {
+    display: none;
+}
+@media screen and (max-width: 1000px) {
+    .form-tag-select {
+        margin-left: 0;
+        clear: both;
+        width: 100%;
+    }
+}

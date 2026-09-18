@@ -186,6 +186,7 @@ def build_app_js():
         builder.append("./_static/js/xnote-ui/x-upload.js")
         builder.append("./_static/js/xnote-ui/x-dialog.js")
         builder.append("./_static/js/xnote-ui/x-tab.js")
+        builder.append("./_static/js/xnote-ui/x-tag-select.js")
         builder.append("./_static/js/xnote-ui/x-layout.js")
         builder.append("./_static/js/xnote-ui/x-template.js")
         builder.append("./_static/js/xnote-ui/x-url.js")

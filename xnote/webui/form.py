@@ -10,6 +10,7 @@
 """
 
 import typing
+import itertools
 from xutils import Storage
 from xnote.core import xtemplate
 from xnote.webui.base import BaseComponent
@@ -28,6 +29,7 @@ class FormRowType:
     """表单行的类型"""
     input = "input"
     select = "select"
+    tag_select = "tag_select"  # tag 风格的选择器（点选标签）
     textarea = "textarea"
     date = "date"
     heading = "heading"
@@ -70,6 +72,7 @@ class FormRow(BaseComponent):
     rows = 0 # textarea 行数
     accept = "" # 文件选择器的 accept 属性（图片/文件上传用）
     value_list = [] # type: typing.List[Storage]  # 图片/文件上传的已有值列表，元素为 {webpath, name}
+    selected_values = [] # type: typing.List[str]  # tag_select 已选中的值列表（用于渲染选中态）
 
     _select_html = """
 <select id="{{row.id}}" name="{{row.field}}" class="form-row-value" value="{{row.value}}" {% raw row.html_attr %}>
@@ -86,6 +89,16 @@ class FormRow(BaseComponent):
 </select>
 """
     _select_template = xtemplate.compile_template(_select_html, name="plugin.form.row.select")
+
+    _tag_select_html = """
+<div class="form-tag-select" data-multiple="{{'true' if row.multiple else 'false'}}" {% if row.readonly %}data-readonly="1"{% end %}>
+    <input type="hidden" name="{{row.field}}" class="form-row-value" value="{{row.value}}" {% raw row.html_attr %}>
+    {% for option in row.options %}
+        <span class="tag lightblue {% if option.value in row.selected_values %}active{% end %}" data-value="{{option.value}}">{{option.title}}</span>
+    {% end %}
+</div>
+"""
+    _tag_select_template = xtemplate.compile_template(_tag_select_html, name="plugin.form.row.tag_select")
 
     """数据行"""
     def __init__(self):
@@ -132,10 +145,16 @@ class FormRow(BaseComponent):
         if self.type == FormRowType.select:
             return self.render_select()
         
+        if self.type == FormRowType.tag_select:
+            return self.render_tag_select()
+        
         return ""
             
     def render_select(self):
         return self._select_template.generate(row = self)
+
+    def render_tag_select(self):
+        return self._tag_select_template.generate(row = self)
 
     
 class DataForm(BaseComponent):
@@ -151,9 +170,12 @@ class DataForm(BaseComponent):
     delete_url = ""
     delete_reload_href = ""
     delete_btn_css = ""
+    # 表单id的自增序列，保证同一进程内每个表单实例的id唯一
+    # （同一个页面可能存在多个表单，id重复会导致 $("#id") 定位到错误的表单）
+    _id_seq = itertools.count(1)
     
     def __init__(self):
-        self.id = "0"
+        self.id = str(next(DataForm._id_seq))
         self.row_id = 0
         self.rows = [] # type: list[FormRow]
         self.save_btn_css = ""
@@ -220,6 +242,28 @@ class DataForm(BaseComponent):
         self.rows.append(row)
         return row
     
+    def add_tag_select(self, title = "", field = "", placeholder = "", value: FormValueType = "",
+                       css_class = "", readonly = False, multiple = False):
+        """添加 tag 风格的选择器（默认单选，点选标签，提交逗号分隔值）
+
+        选项通过 row.add_option(title, value) 添加，用法与 add_select 一致。
+        多选时传 multiple=True，提交值为逗号分隔的多个值。
+        """
+        row = FormRow()
+        row.id = self._create_row_id()
+        row.type = FormRowType.tag_select
+        row.title = title
+        row.field = field
+        row.placeholder = placeholder
+        row.value = self._format_value(value)
+        row.selected_values = self._normalize_upload_value(value)
+        row.css_class = css_class
+        row.readonly = readonly
+        row.multiple = multiple
+        
+        self.rows.append(row)
+        return row
+    
     def add_textarea(self, title="", field="", placeholder="", value="", 
                 css_class="", readonly=False, rows = 0):
         row = FormRow()
@@ -260,13 +304,15 @@ class DataForm(BaseComponent):
         return self._add_upload_row(FormRowType.file, title, field, value, css_class, multiple, accept="")
 
     def _normalize_upload_value(self, value):
-        # type: (typing.Union[str, list, None]) -> list
-        """把 value（逗号分隔字符串或列表）归一化为 webpath 列表"""
+        # type: (typing.Union[int, str, list, None]) -> list
+        """把 value（逗号分隔字符串或列表）归一化为值列表"""
         if value is None:
             return []
         if isinstance(value, str):
             return [v.strip() for v in value.split(",") if v.strip()]
-        return [str(v) for v in value]
+        if isinstance(value, list):
+            return [str(v) for v in value]
+        return [str(value)]
 
     def _add_upload_row(self, row_type, title, field, value, css_class, multiple, accept):
         row = FormRow()

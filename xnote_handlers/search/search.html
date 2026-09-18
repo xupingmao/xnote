@@ -2,7 +2,7 @@
 {% init key = "" %}
 
 <div class="col-md-12" id="searchBox">
-  <form id="searchForm" method="GET" action="{{_server_home}}{{?action,'/search/search'}}">
+  <form id="searchPageForm" method="GET" action="{{_server_home}}{{?action,'/search/search'}}">
     <input name="category" class="hide" value="{{?search_category}}">
       <div class="input-group">
           <input type="text" id="key" name="key" class="search-input" value="{{key}}" placeholder="输入指令或搜索关键字" />
@@ -35,7 +35,7 @@ $(function () {
         }
         // 没有再编辑
         if (keyValue == oldKey) {
-          $("#searchForm").submit();
+          $("#searchPageForm").submit();
         }
       }, 1000);
     }) (newKey);

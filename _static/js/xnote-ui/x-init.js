@@ -346,6 +346,10 @@ var XUI = function(window) {
             xnote.initSelect2();
         }
 
+        if (xnote.initTagSelect) {
+            xnote.initTagSelect();
+        }
+
         if (xnote.initLaydate) {
             xnote.initLaydate();
         }

@@ -17,6 +17,8 @@ from xnote.webui.table import DataTable, TableRowType
 from xnote.plugin import DataForm
 
 import xutils
+import json
+import re
 
 app = test_base.init()
 json_request = test_base.json_request
@@ -311,3 +313,85 @@ class TestDataForm(BaseTestCase):
         assert 'data-upload-kind="file"' in body
         assert "添加图片" in body
         assert "添加附件" in body
+
+    def test_add_tag_select_value_from_list(self):
+        form = DataForm()
+        row = form.add_tag_select("标签", field="tags", value=["1", "3"], multiple=True)
+        row.add_option("标签1", "1")
+        row.add_option("标签2", "2")
+        row.add_option("标签3", "3")
+
+        # value 用于提交，selected_values 用于渲染选中态
+        assert row.value == "1,3"
+        assert row.selected_values == ["1", "3"]
+        assert row.multiple is True
+
+    def test_add_tag_select_value_from_comma_string(self):
+        form = DataForm()
+        row = form.add_tag_select("标签", field="tags", value="1,3", multiple=True)
+        assert row.value == "1,3"
+        assert row.selected_values == ["1", "3"]
+
+    def test_add_tag_select_empty_value(self):
+        form = DataForm()
+        row = form.add_tag_select("标签", field="tags")
+        assert row.value == ""
+        assert row.selected_values == []
+
+    def test_add_tag_select_single_mode(self):
+        # 默认单选
+        form = DataForm()
+        row = form.add_tag_select("标签", field="tags", value="1")
+        assert row.multiple is False
+        assert row.value == "1"
+        assert row.selected_values == ["1"]
+
+    def test_add_tag_select_readonly(self):
+        form = DataForm()
+        row = form.add_tag_select("标签", field="tags", value="1", readonly=True)
+        assert row.readonly is True
+        assert row.value == "1"
+
+    def test_add_tag_select_render(self):
+        form = DataForm()
+        row = form.add_tag_select("标签", field="tags", value=["1", "3"], multiple=True)
+        row.add_option("标签1", "1")
+        row.add_option("标签2", "2")
+        row.add_option("标签3", "3")
+        html = form.render().decode("utf-8")
+
+        # 隐藏域携带提交值
+        assert 'type="hidden"' in html
+        assert 'name="tags"' in html
+        assert 'value="1,3"' in html
+        # 选项全部渲染为 tag，且带上对应的值
+        assert "标签1" in html
+        assert 'data-value="1"' in html
+        assert 'data-value="2"' in html
+        assert 'data-value="3"' in html
+
+    def test_example_form_has_tag_select(self):
+        body = request_html("/test/example/table?action=edit").decode("utf-8")
+        assert "form-tag-select" in body
+        assert 'name="tags2"' in body
+
+    def test_form_id_unique_per_instance(self):
+        # 每个 DataForm 实例应有独立的 id
+        # （曾经硬编码为 "0"，导致同页多个表单渲染出相同的 xnoteForm0，
+        #   $("#xnoteForm0") 会定位到第一个表单，save 时取到错误的表单数据）
+        form1 = DataForm()
+        form2 = DataForm()
+        assert form1.id != form2.id
+
+    def test_form_id_unique_in_page(self):
+        # 同一页面渲染出的表单 id 不能重复
+        body = request_html("/test/example/form").decode("utf-8")
+        form_ids = re.findall(r'<form id="([^"]*)"', body)
+        assert len(form_ids) == len(set(form_ids)), f"表单id重复: {form_ids}"
+
+    def test_tag_select_save_roundtrip(self):
+        # 前端 formData() 收集到的隐藏域值以 data=<json> 提交，后端应能原样解析
+        data = {"tags2": "2", "tags3": "1,3"}
+        resp = self.request_app("/test/example/form?action=save", "POST",
+                                {"data": json.dumps(data)})
+        self.assertEqual("200 OK", resp.status)

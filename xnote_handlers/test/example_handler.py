@@ -152,6 +152,16 @@ class TableExampleHandler(BaseTablePlugin):
         row.add_option("标签2", "2")
         row.add_option("标签3", "3")
 
+        row = form.add_tag_select("标签(tag风格-单选)", field="tags2", value="1")
+        row.add_option("标签1", "1")
+        row.add_option("标签2", "2")
+        row.add_option("标签3", "3")
+
+        row = form.add_tag_select("标签(tag风格-多选)", field="tags3", multiple=True, value=["1", "2"])
+        row.add_option("标签1", "1")
+        row.add_option("标签2", "2")
+        row.add_option("标签3", "3")
+
         form.add_row("备注信息")
 
         form.add_image("封面图片", "cover")

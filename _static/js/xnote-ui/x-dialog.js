@@ -150,7 +150,13 @@ xnoteDialogModule.openDialogExInner = function (options) {
     var template = options.template;
     var dialogId = options.dialogId;
     var defaultValues = options.defaultValues; // 模板的默认值
-    var successFunction = function(layero, index, that/*原型链的this对象*/) {};
+    var successFunction = function(layero, index, that/*原型链的this对象*/) {
+        // 渲染完成后刷新组件（select2/laydate/tag-select等）
+        // 注意: 通过 html 注入的 <script> 不会执行，只能在这里手动初始化
+        if (xnote.refresh) {
+            xnote.refresh();
+        }
+    };
 
     // 详细文档 https://www.layui.com/doc/modules/layer.html
     // @param {int} anim 动画的参数
