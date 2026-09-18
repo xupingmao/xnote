@@ -11,6 +11,9 @@ class BaseComponent:
 
     def render(self) -> Union[str, bytes]:
         return ""
+    
+    def render_str(self) -> str:
+        return safe_str(self.render())
 
 class BaseContainer(BaseComponent):
     def __init__(self, css_class="", css_style="", html = "", id = ""):

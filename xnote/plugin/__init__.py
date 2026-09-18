@@ -6,7 +6,7 @@ from xnote.webui.component import RawHtml, BlockTitle, Input, ActionButton, Pane
 from xnote.webui.tab import TabBox, TabTable
 from xnote.webui.container import Card, CardRow
 from xnote.webui.base import Div
-from xnote.webui import ListView, ListViewItem, ListViewLine, ListItem
+from xnote.webui import ListView, ListViewItem, ListItem
 from xnote.webui import TextTag, ConfirmActionLink, ActionLink, AjaxActionLink
 from xnote.webui.comment import CommentBox
 from xnote.plugin.base import BasePluginV2

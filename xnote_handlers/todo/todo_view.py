@@ -24,7 +24,7 @@ from .todo_model import (
     parse_time_ms, format_time_ms, format_date_ms)
 from .project_model import ProjectRecord, ProjectStatusEnum
 from xnote_handlers.comment import to_comment_target_id, COMMENT_TYPE
-from xnote.webui.comment import CommentBox
+from xnote.webui import CommentBox, TextContainer
 
 
 PROJECT_PAGE_PATH = "/todo"
@@ -168,23 +168,27 @@ class ProjectListPlugin(_TodoListPlugin):
                 bucket.get(TodoStatusEnum.in_progress.value, 0)
             done_count = bucket.get(TodoStatusEnum.done.value, 0)
 
+            # 第一行：图标 + 标题 + 操作栏（整行可点击进入项目，操作栏渲染在链接之外）
             href = "/todo/task?project_id=%s" % project.project_id
-            # 整行可点击：外层 <a>；操作区(extra)由 ListViewItem 渲染在 <a> 之外并浮动到右侧
-            item = ListViewItem(icon_class="fa fa-folder-o", href=href, show_chevron_right=True)
+            item = ListViewItem(icon_class="fa fa-folder-o", href=href,
+                                css_class="todo-project-row", show_chevron_right=True)
             item.add_span(text=project.name, css_class="bold")
-            item.tags.append(TextTag(
-                text=status_labels.get(project.status, project.status),
-                css_class=PROJECT_STATUS_TAG_CLASS.get(project.status, "gray")))
-            item.tags.append(TextTag(text=T("待办 %s") % pending_count, css_class="lightblue"))
-            item.tags.append(TextTag(text=T("完成 %s") % done_count, css_class="gray"))
-
             item.extra.add(EditFormActionLink(
                 text=T("编辑"), url="?action=edit&model=project&project_id=%s" % project.project_id))
             item.extra.add(ConfirmActionLink(
                 text=T("归档"), url="?action=archive&model=project&project_id=%s" % project.project_id,
                 msg=T("确定归档项目【%s】吗?") % project.name))
-            list_view.add_item(item)
 
+            # 第二行：辅助信息（项目状态 + 待办/完成数量），用 tags 渲染在主行下方
+            extra_line = item.add_line()
+            extra_line.add(TextTag(
+                text=status_labels.get(project.status, project.status),
+                css_class=PROJECT_STATUS_TAG_CLASS.get(project.status, "green")))
+            extra_line.add(TextTag(text=T("待办 %s") % pending_count, css_class="orange"))
+            extra_line.add(TextTag(text=T("完成 %s") % done_count, css_class="lightblue"))
+            
+            list_view.add(item)
+            
         self.option_html = EditFormButton(text=T("新建项目"), url="?action=edit&model=project").render()
         self.update_aside(AsideConfig.default_aside_html)
         # 顶部全局搜索组件：项目首页跨项目搜索全部待办（status=all 不过滤状态），提交到待办列表页
@@ -199,18 +203,19 @@ class ProjectListPlugin(_TodoListPlugin):
         user_id = xauth.current_user_id()
         project_id = xutils.get_argument_int("project_id", 0)
         project = ProjectDao.get_by_id(project_id, user_id=user_id) if project_id != 0 else None
+        if project is None:
+            project = ProjectRecord()
 
         form = self.create_form()
         form.path = PROJECT_PAGE_PATH
         form.model_name = "project"
         form.id = "project_edit"
         form.add_row(title="", field="project_id", value=str(project_id), css_class="hide")
-        form.add_row(title=T("名称"), field="name", value=project.name if project else "",
+        form.add_row(title=T("名称"), field="name", value=project.name,
                      placeholder=T("项目名称"))
-        form.add_row(title=T("描述"), field="desc", value=project.desc if project else "",
+        form.add_row(title=T("描述"), field="desc", value=project.desc,
                      type=FormRowType.textarea)
-        status_row = form.add_row(title=T("状态"), field="status", type=FormRowType.select,
-                                  value=project.status if project else ProjectStatusEnum.active.value)
+        status_row = form.add_select(title=T("状态"), field="status", value=project.status)
         for e in ProjectStatusEnum.enums():
             status_row.add_option(e.name, e.value)
         return self.response_form(form=form)
@@ -310,19 +315,22 @@ class TaskListPlugin(_TodoListPlugin):
             item.add(content_box)
 
             # 第二行：标签
-            item.tags.append(TextTag(
+            tags_div = TextContainer()
+            tags_div.add(TextTag(
                 text=status_labels.get(task.status, task.status),
                 css_class=STATUS_TAG_CLASS.get(task.status, "gray")))
-            item.tags.append(TextTag(
+            tags_div.add(TextTag(
                 text=priority_labels.get(task.priority, task.priority),
                 css_class=PRIORITY_TAG_CLASS.get(task.priority, "gray")))
             begin_time = format_time_ms(task.begin_time)
             if begin_time:
-                item.tags.append(TextTag(text=begin_time))
+                tags_div.add(TextTag(text=begin_time))
             # 创建日期（用无背景的元信息样式，避免浅灰标签与列表 hover 背景同色而“消失”）
             create_date = format_date_ms(task.create_time)
             if create_date:
-                item.tags.append(TextSpan(text=T("创建 %s") % create_date, css_class="todo-time"))
+                tags_div.add(TextSpan(text=T("创建 %s") % create_date, css_class="todo-time"))
+            
+            item.add(tags_div)
 
             # 第三行：操作
             action_box = Div(css_class="todo-task-meta-actions")

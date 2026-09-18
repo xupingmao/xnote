@@ -274,7 +274,7 @@ class SearchHandler:
         return result, amount
 
     def do_search_comment(self, ctx:SearchContext, key):
-        from xnote_handlers.note import comment
+        from xnote_handlers import comment
         comment.search_comment_detail(ctx)
         return ctx.messages, len(ctx.messages)
 

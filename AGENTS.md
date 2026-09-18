@@ -6,7 +6,6 @@
 - 职责单一原则：一个方法不要做多件事情
 - 分层原则：按照view/biz/dao三层分层，简单场景可以直接view/dao两层
 - 可自动化：开发完一个功能后，需要补充对应的自动化测试脚本并且测试通过
-- 测试接口时 HTTP 参数需 quote：测试调用 REST/页面接口构造 URL 时，查询参数（尤其是含中文/非 ASCII 字符）必须经过 URL 编码，使用 `xutils.quote`（即 `urllib.parse.quote`），否则服务端按字节解码会出错，导致查询/匹配失败。例如按关键词搜索 `GET /api/v1/todo/list?key=水果` 必须写成 `f"/api/v1/todo/list?key={quote('水果')}"`，不能直接把原始中文拼进 URL。
 - 页面默认带标题栏：每个页面（页面 handler / 模板）默认都应在页面顶部渲染标题栏，统一使用公共组件 `common/title/base_title.html`（`{% include common/title/base_title.html %}`），通过 `kw.title` / `kw.parent_link` / `kw.right_link` / `kw.back_url` 控制内容。不要在业务模板里自己手写页面级标题栏 DOM 替代它；若页面内另有业务相关的工具条（如 chatbot 移动端的「☰ 会话」切换 + 当前会话标题），保留在原位置即可，不要为了套用标题栏而改动原有交互。标题文本所在 `<span>` 的 `id` 固定为 `chat-mobile-title`，后端可通过 `update_text` 命令同步更新移动端标题。
 - 前端弹窗：alert/confirm/prompt 统一使用 `xnote` 模块的函数（`xnote.alert` / `xnote.confirm` / `xnote.prompt` / `xnote.toast`，定义于 `static/js/xnote-ui/x-dialog.js`），**不要直接使用** `window.alert` / `window.confirm` / `window.prompt`。这些函数是回调式的（非返回值）：`xnote.confirm(msg, function (ok) { if (ok) {...} })`，其中 `ok === true` 表示确认；`xnote.prompt(title, defaultValue, callback)` 在 `callback(newValue)` 中拿结果；无 layer 时内部才会回退到原生实现。
 - 字符串格式化：优先使用 **f-string**（如 `f"hello {name}"`）；`%` 格式化与 `str.format()` 是旧用法，**新代码不推荐**。日志/异常中需要延迟格式化时才允许用 `%`（如 `logging.warning("count=%s", count)`）。
@@ -16,6 +15,11 @@
 - **不要自行提交 git commit**：仅在用户明确要求提交时才执行 `git commit`（例如用户说"提交代码"）。其余情况下只修改工作区文件，不要主动 `git add` / `git commit`，把提交时机交给用户。
 - 浅灰标签慎用：`TextTag(css_class="lightgray")`（背景 `#eee`，见 `_static/css/base/common-tag.css`）与列表行的 hover 背景同色（`.list-item:hover` 也是 `#eee`，见 `common-list.css`），**不要在有 hover 效果的组件上使用**（例如列表行 `ListViewItem` 的标签），否则 hover 时标签会“消失”。列表内的日期等元信息改用无背景的 `TextSpan(css_class="todo-time")` 之类的纯文本样式。
 - 类型判断必须依赖显式标识：**不要根据 ID 数值范围（如 `id >= OFFSET`）来区分不同类型的数据**（例如笔记评论 vs 待办评论）。ID 一旦增长到超过预设区间就会误判，且区间偏移量只是存储换算手段、不代表真实类型。区分类型应依赖请求/记录上的**显式字段**（如评论的 `type`、列表的 `list_type` 等），由调用方在创建/查询时显式传入，后端据此路由。
+
+## 测试规范
+
+- **只测数据和逻辑，不测样式/DOM 结构**：测试的目标是验证数据与逻辑的正确性（DAO 增删改查、状态流转、计数、过滤/分页条件、接口返回字段、权限校验等），**不要为 CSS 样式、布局结构写测试**。例如不要断言 `class="list-item-line has-icon"`、元素渲染顺序、`align-items` 之类的样式细节 —— 这类断言与实现强耦合，改一次样式就要改一堆测试，且无法反映功能是否正确。测试应断言**内容与行为**：数据是否写入/更新、计数是否正确、返回的字段值是否符合预期、链接是否指向正确的业务地址（如 `href` 指向的 task_id/project_id 是否正确）等。
+- 测试接口时 HTTP 参数需 quote：测试调用 REST/页面接口构造 URL 时，查询参数（尤其是含中文/非 ASCII 字符）必须经过 URL 编码，使用 `xutils.quote`（即 `urllib.parse.quote`），否则服务端按字节解码会出错，导致查询/匹配失败。例如按关键词搜索 `GET /api/v1/todo/list?key=水果` 必须写成 `f"/api/v1/todo/list?key={quote('水果')}"`，不能直接把原始中文拼进 URL。
 
 ## REST API 约定
 

@@ -321,9 +321,39 @@ class TestTodoPages(BaseTestCase):
         marker = "model=project&amp;project_id=%d" % pid
         idx = body.find(marker)
         self.assertGreater(idx, 0)
-        row = body[idx - 400:idx]
+        row = self._find_project_row(body, pid)
+        self.assertIsNotNone(row)
         self.assertIn("待办 1", row)
         self.assertIn("完成 0", row)
+
+    def _find_project_row(self, body, project_id):
+        """截取一个项目列表行的 HTML（从外层 <a> 开始）"""
+        marker = 'class="list-item-link todo-project-row" href="/todo/task?project_id=%s"' % project_id
+        idx = body.find(marker)
+        if idx < 0:
+            return None
+        start = body.rfind("<", 0, idx)
+        return body[start:start + 1200]
+
+    def test_project_row_links_to_project_tasks(self):
+        # 项目行链接指向该项目自己的待办列表（project_id 正确），而非其它项目/固定地址
+        pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
+                                            data=dict(name="链接项目"))["data"]
+        body = self.request_app("/todo").data.decode("utf-8")
+        row = self._find_project_row(body, pid)
+        self.assertIsNotNone(row, "未找到 project_id=%s 的项目行" % pid)
+        self.assertIn("链接项目", row)
+
+    def test_project_row_has_edit_and_archive_actions(self):
+        # 项目行提供编辑/归档入口，且归档地址指向本项目（不是删除）
+        pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
+                                            data=dict(name="操作项目"))["data"]
+        body = self.request_app("/todo").data.decode("utf-8")
+        row = self._find_project_row(body, pid)
+        self.assertIsNotNone(row, "未找到 project_id=%s 的项目行" % pid)
+        self.assertIn("action=edit&amp;model=project&amp;project_id=%s" % pid, row)
+        self.assertIn("action=archive&amp;model=project&amp;project_id=%s" % pid, row)
+        self.assertNotIn("action=delete", row)
 
     def test_todo_pagination(self):
         pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
