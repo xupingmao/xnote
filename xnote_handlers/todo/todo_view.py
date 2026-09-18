@@ -184,8 +184,10 @@ class ProjectListPlugin(_TodoListPlugin):
             extra_line.add(TextTag(
                 text=status_labels.get(project.status, project.status),
                 css_class=PROJECT_STATUS_TAG_CLASS.get(project.status, "green")))
-            extra_line.add(TextTag(text=T("待办 %s") % pending_count, css_class="orange"))
-            extra_line.add(TextTag(text=T("完成 %s") % done_count, css_class="lightblue"))
+            extra_line.add_nbsp()
+            extra_line.add_span(text=T("待办 %s") % pending_count, css_class="gray")
+            extra_line.add_item_sep()
+            extra_line.add_span(text=T("完成 %s") % done_count, css_class="gray")
             
             list_view.add(item)
             
