@@ -217,7 +217,7 @@ class ProjectListPlugin(_TodoListPlugin):
                      placeholder=T("项目名称"))
         form.add_row(title=T("描述"), field="desc", value=project.desc,
                      type=FormRowType.textarea)
-        status_row = form.add_select(title=T("状态"), field="status", value=project.status)
+        status_row = form.add_tag_select(title=T("状态"), field="status", value=project.status)
         for e in ProjectStatusEnum.enums():
             status_row.add_option(e.name, e.value)
         return self.response_form(form=form)
@@ -387,13 +387,13 @@ class TaskListPlugin(_TodoListPlugin):
         form.add_row(title="", field="task_id", value=str(task_id), css_class="hide")
         form.add_textarea(title=T("内容"), field="content", value=task.content if task else "",
                           placeholder=T("待办内容"))
-        row = form.add_row(title=T("优先级"), field="priority", type=FormRowType.select,
-                           value=task.priority if task else TodoPriorityEnum.normal.value)
+        # 优先级、状态都是枚举（EnumItem 数量 <= 5），用 tag 风格选择器
+        priority_row = form.add_tag_select(title=T("优先级"), field="priority",
+                                           value=task.priority if task else TodoPriorityEnum.normal.value)
         for e in TodoPriorityEnum.enums():
-            row.add_option(e.name, e.value)
+            priority_row.add_option(e.name, e.value)
 
-        status_row = form.add_row(title=T("状态"), field="status", type=FormRowType.select,
-                                  value=task.status)
+        status_row = form.add_tag_select(title=T("状态"), field="status", value=task.status)
         for e in TodoStatusEnum.enums():
             status_row.add_option(e.name, e.value)
 

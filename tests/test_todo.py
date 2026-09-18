@@ -1,4 +1,5 @@
 # encoding=utf-8
+import re
 import unittest
 
 from tests.test_base import BaseTestCase
@@ -226,6 +227,30 @@ class TestTodoCommentCount(BaseTestCase):
         # 详情页复用了评论组件（列表服务端直接渲染 / 保存走 todo 评论端点）
         self.assertIn('id="comments"', body)
         self.assertIn("todo_task", body)
+
+
+class TestTodoFormTagSelect(BaseTestCase):
+    """编辑表单里的枚举字段（EnumItem <= 5）用 tag 风格选择器"""
+
+    def test_task_form_uses_tag_select_for_enums(self):
+        body = self.request_app("/todo/task?action=edit&task_id=0").data.decode("utf-8")
+        hidden_names = re.findall(r'<input type="hidden" name="([^"]*)"', body)
+        # 优先级、状态都是枚举 -> tag select（隐藏域提交值）
+        self.assertIn(TodoPriorityEnum.normal.value, body)
+        self.assertIn("priority", hidden_names)
+        self.assertIn("status", hidden_names)
+
+    def test_task_form_keeps_select_for_project_list(self):
+        # 所属项目来自动态项目列表（非枚举），仍用 select
+        body = self.request_app("/todo/task?action=edit&task_id=0").data.decode("utf-8")
+        self.assertIn('<select', body)
+        self.assertIn('name="project_id"', body)
+
+    def test_project_form_uses_tag_select_for_status(self):
+        body = self.request_app("/todo?action=edit&project_id=0").data.decode("utf-8")
+        hidden_names = re.findall(r'<input type="hidden" name="([^"]*)"', body)
+        self.assertIn("status", hidden_names)
+        self.assertIn(ProjectStatusEnum.active.value, body)
 
 
 if __name__ == "__main__":

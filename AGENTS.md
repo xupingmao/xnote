@@ -195,6 +195,12 @@ Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `
   {% render body_component %}
   ```
 - 筛选用 **TabBox**（不是 `<select>`/Dropdown）。`TabBox(tab_key=..., tab_default=...)` + `add_item(title, value, href)`，href 互相保留其余筛选参数；客户端 `x-tab.js` 按 URL 参数 `data-tab-key` 自动高亮（参考 `xnote_handlers/todo/todo_view.py` 的 `_build_filter_html`）。
+- **枚举型字段用 `add_tag_select`（EnumItem 数量 <= 5）**：编辑表单里取值来自 `BaseEnum.enums()` 的枚举字段（如状态、优先级），**枚举项数量 <= 5 时优先用 `DataForm.add_tag_select()`**（tag 点选），而不是 `add_select`/`FormRowType.select`。选项仍是 `row.add_option(e.name, e.value)`，用法与 `add_select` 一致；默认单选，多选传 `multiple=True`。数量 > 5 或选项来自动态数据（如项目列表、笔记本列表）时仍用 `add_select`。参考 `xnote_handlers/todo/todo_view.py`（待办的状态/优先级、项目的状态）。
+  ```python
+  status_row = form.add_tag_select(title=T("状态"), field="status", value=task.status)
+  for e in TodoStatusEnum.enums():
+      status_row.add_option(e.name, e.value)
+  ```
 - 组件样式统一放 `static/css/base/common-*.css`（见上文"webui 组件 CSS 放公共文件"）。
 
 ### 列表/CRUD 页面优先用 `ListView`（`BaseListPlugin`）
