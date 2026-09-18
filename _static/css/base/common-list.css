@@ -48,7 +48,6 @@
  */
 .list-item-line {
     flex-basis: 100%;
-    padding: 0 5px 8px 5px;
     line-height: 22px;
     color: #888;
     font-size: 12px;
