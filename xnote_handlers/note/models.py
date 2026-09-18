@@ -274,7 +274,7 @@ class NoteTypeInfo:
             NoteTypeInfo(url="/note/all?type=gallery", name="相册", tag_code="gallery"),
             NoteTypeInfo(url="/note/all?type=list", name="清单", tag_code="list"),
             NoteTypeInfo(url="/note/all?type=table", name="表格", tag_code="table"),
-            NoteTypeInfo(url="/note/comment/mine", name="评论", tag_code="comment"),
+            NoteTypeInfo(url="/comment/mine", name="评论", tag_code="comment"),
             NoteTypeInfo(url="/note/dict", name="词典",  tag_code="dict"),
             NoteTypeInfo(url="/fs_upload/manage", name="文件", tag_code="file"),
             NoteTypeInfo(url="/note/removed", name="回收站", tag_code="removed", css_class="hide"),

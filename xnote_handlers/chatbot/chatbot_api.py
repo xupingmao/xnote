@@ -72,7 +72,9 @@ class SessionDeleteHandler:
         if current_session_id == session_id:
             # 删除的是当前会话, 右侧消息区重置为空状态
             commands.extend(chatbot_render.build_empty_state_commands())
-        return webutil.SuccessResult(data={"commands": commands})
+        result = webutil.CommandsResult()
+        result.data = commands
+        return result
 
 
 class SessionRenameHandler:
@@ -102,7 +104,9 @@ class SessionRenameHandler:
             # 当前会话同步移动端标题
             commands.append(webutil.CommandItem(
                 command="update_text", id="chat-mobile-title", value=session.title))
-        return webutil.SuccessResult(data={"commands": commands})
+        result = webutil.CommandsResult()
+        result.data = commands
+        return result
 
 
 class SessionTopHandler:
@@ -126,8 +130,9 @@ class SessionTopHandler:
         html = chatbot_render.render_session_list(session_list, current_session_id)
         commands = [webutil.CommandItem(
             command="update_html", id="session-list-inner", value=html)]
-        return webutil.SuccessResult(
-            data={"commands": commands, "is_top": session.is_top})
+        result = webutil.CommandsResult()
+        result.data = commands
+        return result
 
 
 class MessageListHandler:

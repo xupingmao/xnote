@@ -13,10 +13,12 @@ import xutils
 from xutils.base import Storage
 from xnote.core import xauth
 from xnote.core import xtemplate
+from xnote.core.xtemplate import T
 from .dao import get_by_id as get_note_by_id
 from .dao import list_path
 from . import dao_tag
 from .models import NoteViewContext
+from xnote.webui.comment import CommentBox
 
 
 class ChecklistSearchHandler:
@@ -44,7 +46,21 @@ class ChecklistSearchHandler:
         kw.search_key = xutils.get_argument_str("key")
         kw.show_alias = False
         kw.show_relation = False
+        kw.show_comment = True
         kw.template_name = "note/page/detail/checklist_detail.html"
+
+        # 评论组件（清单底层复用评论能力），列表按关键词搜索当前笔记的清单项；
+        # 列表由前端初始化时通过独立接口异步加载，不再服务端静态输出
+        kw.comment_box = CommentBox(
+            target_id=note_detail.id,
+            list_type="search",
+            show_edit=True,
+            title=T("清单项"),
+            btn_text=T("添加清单项"),
+            placeholder=T("请输入清单项..."),
+            empty_text=T("暂无清单项~"),
+            create_type="list_item",
+        )
 
         return xtemplate.render(**kw)
 

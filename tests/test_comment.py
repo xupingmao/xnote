@@ -14,7 +14,7 @@ from .test_base import json_request, json_request_return_dict, BaseTestCase
 from .test_base import init as init_app
 from xnote_handlers.dict import dict_dao
 from xnote_handlers.note.dao import NoteIndexDao, NoteIndexDO
-from xnote_handlers.note.dao_comment import CommentDao, CommentVO
+from xnote_handlers.comment.dao_comment import delete_comment, CommentDao, CommentVO
 from xnote.core.models import SearchContext
 from xnote.core import xauth
 from tests.test_base_note import delete_note_for_test, create_note_for_test
@@ -25,7 +25,9 @@ from tests.test_base import login_test_user, logout_test_user
 app = init_app()
 
 def delete_comment_for_test(id):
-    json_request("/note/comment/delete", method = "POST", data = dict(comment_id = id))
+    # 测试清理直接走 DAO 删除(绕过 HTTP 接口归属校验, 测试构造的评论可能未填 user 字段),
+    # 避免清理失败造成用例间数据污染
+    delete_comment(id)
 
 def create_comment_for_test(note_id=0, user_id=0, content="hello"):
     assert note_id > 0
@@ -42,44 +44,45 @@ class TestMain(BaseTestCase):
         note_id = create_note_for_test(type="md", name="comment-test")
         
         # 清理该笔记下的评论
-        from xnote_handlers.note.dao_comment import list_comments
+        from xnote_handlers.comment.dao_comment import list_comments
         all_comments = list_comments(note_id, offset=0, limit=1000)
         for comment in all_comments:
             delete_comment_for_test(comment.id)
         
         # 清理用户 admin 的所有评论（避免用户维度列表受影响）
-        user_comments = json_request_return_list("/note/comment/list?list_type=user")
+        user_comments = json_request_return_list("/comment/list?list_type=user")
         for comment in user_comments:
             if comment.get("user_id") == 1:  # admin 的 user_id
                 delete_comment_for_test(comment['id'])
 
         # 创建一个评论
         request = dict(note_id = str(note_id), content = "hello")
-        json_request("/note/comment/save", method="POST", data = request)
+        json_request("/comment/save", method="POST", data = request)
 
         # 查询评论
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        data = json_request_return_list(f"/comment/list?note_id={note_id}")
         self.assertEqual(1, len(data))
         self.assertEqual("hello", data[0]['content'])
 
         comment_id = data[0]["id"]
 
         # 获取编辑对话框
-        self.check_OK("/note/comment?comment_id=%s&p=edit" % comment_id)
+        self.check_OK("/comment/edit?comment_id=%s" % comment_id)
 
         # 更新评论
-        data = json_request_return_dict("/note/comment?comment_id=%s&p=update&content=%s" % (comment_id, "#TOPIC# hello"))
+        data = json_request_return_dict("/comment/update", method="POST",
+            data=dict(comment_id=comment_id, content="#TOPIC# hello"))
         self.assertEqual("success", data["code"])
 
         # 置顶
-        resp = json_request_return_dict(f"/note/comment/update_pin_level", method="POST", data=dict(comment_id=comment_id, pin_level=1))
+        resp = json_request_return_dict(f"/comment/update_pin_level", method="POST", data=dict(comment_id=comment_id, pin_level=1))
         assert resp["success"] == True
         index = CommentDao.get_index_by_id(comment_id=comment_id)
         assert index is not None
         assert index.pin_level == 1
 
         # 取消置顶
-        resp = json_request_return_dict(f"/note/comment/update_pin_level", method="POST", data=dict(comment_id=comment_id, pin_level=0))
+        resp = json_request_return_dict(f"/comment/update_pin_level", method="POST", data=dict(comment_id=comment_id, pin_level=0))
         assert resp["success"] == True
         index = CommentDao.get_index_by_id(comment_id=comment_id)
         assert index is not None
@@ -88,24 +91,24 @@ class TestMain(BaseTestCase):
         # 置顶其他用户的评论
         test_user_id = xauth.UserDao.get_id_by_name("test")
         other_comment_id = create_comment_for_test(note_id=note_id, user_id=test_user_id, content="this is comment from user test")
-        resp = json_request_return_dict(f"/note/comment/update_pin_level", method="POST", data=dict(comment_id=other_comment_id, pin_level=1))
+        resp = json_request_return_dict(f"/comment/update_pin_level", method="POST", data=dict(comment_id=other_comment_id, pin_level=1))
         assert resp["success"] == True
 
         # 置顶其他笔记评论报错 TODO
         # other_note_id = create_note_for_test()
         # other_comment_id = create_comment_for_test(note_id=other_note_id, user_id=test_user_id, content="this is comment from user test")
-        # resp = json_request_return_dict(f"/note/comment/update_pin_level", method="POST", data=dict(comment_id=comment_id, pin_level=1))
+        # resp = json_request_return_dict(f"/comment/update_pin_level", method="POST", data=dict(comment_id=comment_id, pin_level=1))
         # assert resp["success"] == False
 
         # 查询用户维度评论列表
-        data = json_request_return_list("/note/comment/list?list_type=user")
+        data = json_request_return_list("/comment/list?list_type=user")
         self.assertEqual(1, len(data))
 
         # 我的所有评论
-        self.check_OK("/note/comment/mine")
+        self.check_OK("/comment/mine")
 
         # 搜索评论
-        from xnote_handlers.note.comment import search_comment_detail, search_comment_summary
+        from xnote_handlers.comment import search_comment_detail, search_comment_summary
         ctx = SearchContext(key = "hell")
         ctx.user_name = xauth.current_name_str()
         ctx.words = ["hello"]
@@ -115,18 +118,16 @@ class TestMain(BaseTestCase):
         self.assertEqual(1, len(ctx.messages))
 
         search_comment_summary(summary_ctx)
-        
-        print("搜索评论汇总结果:", summary_ctx)
 
         self.assertEqual(1, len(summary_ctx.messages))
 
 
         # 删除评论
-        result = json_request_return_dict("/note/comment/delete", method = "POST", 
+        result = json_request_return_dict("/comment/delete", method = "POST", 
             data = dict(comment_id = comment_id))
         self.assertEqual("success", result["code"])
 
-        data = json_request_return_list("/note/comment/list?list_type=user")
+        data = json_request_return_list("/comment/list?list_type=user")
         self.assertEqual(0, len(data))
 
 
@@ -138,11 +139,11 @@ class TestMain(BaseTestCase):
 
         try:
             logout_test_user()
-            self.check_303(f"/note/comments?note_id={note_id}")
+            self.check_303(f"/comment/list?note_id={note_id}")
             # 改成public
             note_index.is_public = True
             NoteIndexDO.update(note_index)
-            self.check_OK(f"/note/comments?note_id={note_id}")
+            self.check_OK(f"/comment/list?note_id={note_id}")
         finally:
             login_test_user()
 
@@ -152,16 +153,16 @@ class TestMain(BaseTestCase):
         note_id = create_note_for_test(type="md", name="comment-time-test")
         
         # 清理评论
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        data = json_request_return_list(f"/comment/list?note_id={note_id}")
         for comment in data:
             delete_comment_for_test(comment['id'])
         
         # 创建评论
         request = dict(note_id=str(note_id), content="test time fields")
-        json_request("/note/comment/save", method="POST", data=request)
+        json_request("/comment/save", method="POST", data=request)
         
         # 查询评论，验证 create_time/update_time 字段
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        data = json_request_return_list(f"/comment/list?note_id={note_id}")
         self.assertEqual(1, len(data))
         
         comment = data[0]
@@ -177,7 +178,7 @@ class TestMain(BaseTestCase):
         
         # 获取评论详情，验证 date 属性
         comment_id = comment["id"]
-        from xnote_handlers.note.dao_comment import get_comment
+        from xnote_handlers.comment.dao_comment import get_comment
         comment_record = get_comment(comment_id)
         self.assertIsNotNone(comment_record)
         self.assertEqual(comment_record.create_time, create_time)
@@ -188,7 +189,8 @@ class TestMain(BaseTestCase):
         # 更新评论，验证 update_time 变化
         import time
         time.sleep(0.01)  # 等待10毫秒确保时间戳有差异
-        data = json_request_return_dict(f"/note/comment?comment_id={comment_id}&p=update&content=updated content")
+        data = json_request_return_dict("/comment/update", method="POST",
+            data=dict(comment_id=comment_id, content="updated content"))
         self.assertEqual("success", data["code"])
         
         # 再次获取评论，验证 update_time 已更新
@@ -197,6 +199,75 @@ class TestMain(BaseTestCase):
         
         # 清理
         delete_comment_for_test(comment_id)
+
+    def test_comment_refresh_command(self):
+        """评论新增/编辑/删除后, 后端应返回 toast + 延迟 reload 命令(整页刷新, 不重建 HTML)"""
+        delete_note_for_test(name="comment-refresh-test")
+        note_id = create_note_for_test(type="md", name="comment-refresh-test")
+
+        # 清理该笔记下的评论
+        from xnote_handlers.comment.dao_comment import list_comments
+        for comment in list_comments(note_id, offset=0, limit=1000):
+            delete_comment_for_test(comment.id)
+
+        def assert_toast_reload(resp, message):
+            self.assertEqual("success", resp["code"])
+            commands = resp["data"]
+            self.assertEqual(2, len(commands))
+            self.assertEqual("toast", commands[0]["command"])
+            self.assertEqual(message, commands[0]["value"])
+            self.assertEqual("reload", commands[1]["command"])
+            self.assertTrue(commands[1]["delay"] > 0)
+
+        # 新增评论 -> toast + reload
+        resp = json_request_return_dict("/comment/save", method="POST",
+            data=dict(note_id=str(note_id), content="refresh-content"))
+        assert_toast_reload(resp, "评论成功")
+
+        # 取评论并编辑 -> toast + reload
+        data = json_request_return_list(f"/comment/list?note_id={note_id}")
+        comment_id = data[0]["id"]
+        resp = json_request_return_dict(
+            "/comment/update", method="POST",
+            data=dict(comment_id=comment_id, content="updated-content"))
+        assert_toast_reload(resp, "更新成功")
+
+        # 删除评论 -> toast + reload
+        resp = json_request_return_dict("/comment/delete", method="POST",
+            data=dict(comment_id=comment_id))
+        assert_toast_reload(resp, "删除成功")
+
+    def test_build_refresh_commands(self):
+        """build_refresh_commands 返回 toast + reload 命令, message 为空时只返回 reload"""
+        from xnote_handlers.comment import build_refresh_commands
+
+        result = build_refresh_commands(message="操作成功")
+        self.assertEqual(2, len(result.data))
+        self.assertEqual("toast", result.data[0].command)
+        self.assertEqual("操作成功", result.data[0].value)
+        self.assertEqual("reload", result.data[1].command)
+        self.assertTrue(result.data[1].delay > 0)
+
+        result2 = build_refresh_commands()
+        self.assertEqual(1, len(result2.data))
+        self.assertEqual("reload", result2.data[0].command)
+
+    def test_render_comment_component_html(self):
+        """评论列表组件应在服务端直接渲染(无需前端 AJAX), 含评论内容与删除地址"""
+        delete_note_for_test(name="comment-render-test")
+        note_id = create_note_for_test(type="md", name="comment-render-test")
+
+        from xnote_handlers.comment.dao_comment import list_comments
+        for comment in list_comments(note_id, offset=0, limit=1000):
+            delete_comment_for_test(comment.id)
+
+        request = dict(note_id=str(note_id), content="server-rendered-content")
+        json_request("/comment/save", method="POST", data=request)
+
+        from xnote_handlers.comment import render_comment_list_html
+        html = render_comment_list_html(note_id, list_type="note_id", show_edit=True)
+        self.assertIn("server-rendered-content", html)
+        self.assertIn("/comment/delete", html)
 
     def test_comment_replies(self):
         """测试评论回复功能"""
@@ -218,17 +289,17 @@ class TestMain(BaseTestCase):
                 note_id = 1  # default_group_id 这个已经存在了
         
         # 清理该笔记下的评论
-        from xnote_handlers.note.dao_comment import list_comments
+        from xnote_handlers.comment.dao_comment import list_comments
         all_comments = list_comments(note_id, offset=0, limit=1000)
         for comment in all_comments:
             delete_comment_for_test(comment.id)
         
         # 创建主评论
         request = dict(note_id=str(note_id), content="main comment")
-        json_request("/note/comment/save", method="POST", data=request)
+        json_request("/comment/save", method="POST", data=request)
         
         # 查询主评论
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        data = json_request_return_list(f"/comment/list?note_id={note_id}")
         self.assertEqual(1, len(data))
         main_comment_id = data[0]["id"]
         main_user_id = data[0]["user_id"]
@@ -245,18 +316,16 @@ class TestMain(BaseTestCase):
             ref_comment_id=str(main_comment_id),
             ref_user_id=str(main_user_id)
         )
-        json_request("/note/comment/save", method="POST", data=reply1_request)
+        json_request("/comment/save", method="POST", data=reply1_request)
         
         # 验证回复数量变为1
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
-        print("=== data ===")
-        print(data)
+        data = json_request_return_list(f"/comment/list?note_id={note_id}")
         self.assertEqual(1, len(data))
         self.assertEqual(1, data[0]["reply_count"])
         
         # 获取回复列表 - 测试JSON接口
         reply_data = json_request_return_dict(
-            f"/note/comment/replies?note_id={note_id}&parent_comment_id={main_comment_id}"
+            f"/comment/replies?note_id={note_id}&parent_comment_id={main_comment_id}"
         )
         self.assertTrue(reply_data["success"])
         replies = reply_data["data"]["replies"]
@@ -269,7 +338,7 @@ class TestMain(BaseTestCase):
         # 获取回复列表 - 测试HTML接口
         from tests.test_base import request_html
         html_resp = request_html(
-            f"/note/comment/reply_list?note_id={note_id}&parent_comment_id={main_comment_id}"
+            f"/comment/reply_list?note_id={note_id}&parent_comment_id={main_comment_id}"
         )
         html_str = html_resp.decode("utf-8")
         self.assertIn("first", html_str)
@@ -285,15 +354,15 @@ class TestMain(BaseTestCase):
             ref_comment_id=str(reply1_id),
             ref_user_id=str(reply1_user_id)
         )
-        json_request("/note/comment/save", method="POST", data=reply2_request)
+        json_request("/comment/save", method="POST", data=reply2_request)
         
         # 验证回复数量变为2
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        data = json_request_return_list(f"/comment/list?note_id={note_id}")
         self.assertEqual(2, data[0]["reply_count"])
         
         # 获取回复列表，验证第二条回复
         reply_data = json_request_return_dict(
-            f"/note/comment/replies?note_id={note_id}&parent_comment_id={main_comment_id}"
+            f"/comment/replies?note_id={note_id}&parent_comment_id={main_comment_id}"
         )
         replies = reply_data["data"]["replies"]
         self.assertEqual(2, len(replies))
@@ -302,8 +371,8 @@ class TestMain(BaseTestCase):
         self.assertEqual(reply1_user_id, replies[1]["ref_user_id"])
         
         # 直接查询评论验证 ref_user 字段是否被正确处理
-        from xnote_handlers.note.comment import process_comments
-        from xnote_handlers.note.dao_comment import list_replies
+        from xnote_handlers.comment import process_comments
+        from xnote_handlers.comment.dao_comment import list_replies
         reply_comments, _ = list_replies(note_id, main_comment_id, 0, 10)
         process_comments(reply_comments, show_note=False)
         
@@ -313,6 +382,6 @@ class TestMain(BaseTestCase):
         self.assertEqual(reply1_user, reply2_comment.ref_user)
         
         # 清理评论
-        data = json_request_return_list(f"/note/comments?note_id={note_id}")
+        data = json_request_return_list(f"/comment/list?note_id={note_id}")
         for comment in data:
             delete_comment_for_test(comment['id'])

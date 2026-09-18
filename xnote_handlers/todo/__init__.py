@@ -4,7 +4,6 @@
 # 待办 / 项目 模块
 from . import todo_api
 from . import todo_view
-from . import todo_comment
 
 
 xurls = (
@@ -13,11 +12,8 @@ xurls = (
     r"/todo/task", todo_view.TodoTaskHandler,
     r"/todo/detail", todo_view.TodoDetailHandler,
 
-    # 待办评论（复用 note 评论模块）
-    r"/todo/comment/list", todo_comment.TodoCommentListHandler,
-    r"/todo/comment/save", todo_comment.TodoCommentSaveHandler,
-    r"/todo/comment/delete", todo_comment.TodoCommentDeleteHandler,
-    r"/todo/comment/dialog", todo_comment.TodoCommentDialogHandler,
+    # 待办评论（与笔记共用 xnote_handlers/comment 模块，type=todo_task 区分）
+    # 路由在 xnote_handlers/comment/__init__.py 统一注册(/comment/*)
 
     # 待办 API
     r"/api/v1/todo/create", todo_api.TodoCreateHandler,

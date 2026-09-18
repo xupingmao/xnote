@@ -23,7 +23,8 @@ from .todo_model import (
     TodoRecord, TodoStatusEnum, TodoPriorityEnum,
     parse_time_ms, format_time_ms, format_date_ms)
 from .project_model import ProjectRecord, ProjectStatusEnum
-from .todo_comment import to_comment_target_id, COMMENT_TYPE
+from xnote_handlers.comment import to_comment_target_id, COMMENT_TYPE
+from xnote.webui.comment import CommentBox
 
 
 PROJECT_PAGE_PATH = "/todo"
@@ -171,8 +172,9 @@ class ProjectListPlugin(_TodoListPlugin):
             # 整行可点击：外层 <a>；操作区(extra)由 ListViewItem 渲染在 <a> 之外并浮动到右侧
             item = ListViewItem(icon_class="fa fa-folder-o", href=href, show_chevron_right=True)
             item.add_span(text=project.name, css_class="bold")
-            item.tags.append(TextTag(text=status_labels.get(project.status, project.status),
-                                     css_class=PROJECT_STATUS_TAG_CLASS.get(project.status, "gray")))
+            item.tags.append(TextTag(
+                text=status_labels.get(project.status, project.status),
+                css_class=PROJECT_STATUS_TAG_CLASS.get(project.status, "gray")))
             item.tags.append(TextTag(text=T("待办 %s") % pending_count, css_class="lightblue"))
             item.tags.append(TextTag(text=T("完成 %s") % done_count, css_class="gray"))
 
@@ -330,7 +332,7 @@ class TaskListPlugin(_TodoListPlugin):
                 comment_text = T("评论(%s)") % task.comment_count
             action_box.add(ActionLink(
                 text=comment_text, onclick="xnote.todo.openCommentDialog(this)",
-                data_dict=dict(url="/todo/comment/dialog?task_id=%s" % task.task_id)))
+                data_dict=dict(url="/comment/dialog?task_id=%s" % task.task_id)))
             # 状态变更无需确认，直接执行后 toast 结果
             if task.status not in (TodoStatusEnum.done.value, TodoStatusEnum.canceled.value):
                 action_box.add(AjaxActionLink(text=T("完成"), url="?action=finish" + base))
@@ -534,13 +536,16 @@ class TodoDetailHandler:
         kw.content_html = mark_text(task.content)
         kw.info_tags = _build_task_info_tags(task, project_name)
 
-        # 评论列表（复用 note 评论组件，type=todo_task + 独立 target_id 空间隔离）
+        # 评论列表（复用统一评论组件，type=todo_task + 独立 target_id 空间隔离；
+        # 列表由前端初始化时通过独立接口异步加载，不再服务端静态输出）
         kw.show_comment = True
-        kw.file = Storage(id=to_comment_target_id(task.task_id))
-        kw.comment_list_url = "/todo/comment/list"
-        kw.comment_save_url = "/todo/comment/save"
-        kw.comment_delete_url = "/todo/comment/delete"
-        kw.comment_create_type = COMMENT_TYPE
-        kw.comment_title = T("评论")
-        kw.show_comment_edit = True
+        kw.comment_box = CommentBox(
+            target_id=to_comment_target_id(task.task_id),
+            list_type="note_id",
+            show_edit=True,
+            title=T("评论"),
+            create_type=COMMENT_TYPE,
+            save_url="/comment/save",
+            list_url="/comment/list",
+        )
         return xtemplate.render("todo/page/todo_detail.html", **kw)

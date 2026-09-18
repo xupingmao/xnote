@@ -32,7 +32,7 @@
 
     {# 评论功能 #}
     {% if file_type != "group" and show_comment %}
-        {% include note/page/comment/comment.html %}
+        {% render comment_box %}
     {% end %}
 
     {# 分页 #}

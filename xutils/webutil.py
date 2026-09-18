@@ -321,6 +321,7 @@ class CommandItem(web.Storage):
 
 class CommandsResult(WebResult):
     def __init__(self):
+        super().__init__()
         self.success = True
         self.data:List[CommandItem] = []
     

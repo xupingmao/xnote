@@ -53,7 +53,7 @@ class NoteDao:
     def count_comment(user_name):
         # type: (str)->int
         """统计评论数量"""
-        from . import dao_comment
+        from xnote_handlers.comment import dao_comment
         return dao_comment.count_comment(user_name)
     
     @staticmethod

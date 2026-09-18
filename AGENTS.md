@@ -7,6 +7,7 @@
 - 分层原则：按照view/biz/dao三层分层，简单场景可以直接view/dao两层
 - 可自动化：开发完一个功能后，需要补充对应的自动化测试脚本并且测试通过
 - 测试接口时 HTTP 参数需 quote：测试调用 REST/页面接口构造 URL 时，查询参数（尤其是含中文/非 ASCII 字符）必须经过 URL 编码，使用 `xutils.quote`（即 `urllib.parse.quote`），否则服务端按字节解码会出错，导致查询/匹配失败。例如按关键词搜索 `GET /api/v1/todo/list?key=水果` 必须写成 `f"/api/v1/todo/list?key={quote('水果')}"`，不能直接把原始中文拼进 URL。
+- 页面默认带标题栏：每个页面（页面 handler / 模板）默认都应在页面顶部渲染标题栏，统一使用公共组件 `common/title/base_title.html`（`{% include common/title/base_title.html %}`），通过 `kw.title` / `kw.parent_link` / `kw.right_link` / `kw.back_url` 控制内容。不要在业务模板里自己手写页面级标题栏 DOM 替代它；若页面内另有业务相关的工具条（如 chatbot 移动端的「☰ 会话」切换 + 当前会话标题），保留在原位置即可，不要为了套用标题栏而改动原有交互。标题文本所在 `<span>` 的 `id` 固定为 `chat-mobile-title`，后端可通过 `update_text` 命令同步更新移动端标题。
 - 前端弹窗：alert/confirm/prompt 统一使用 `xnote` 模块的函数（`xnote.alert` / `xnote.confirm` / `xnote.prompt` / `xnote.toast`，定义于 `static/js/xnote-ui/x-dialog.js`），**不要直接使用** `window.alert` / `window.confirm` / `window.prompt`。这些函数是回调式的（非返回值）：`xnote.confirm(msg, function (ok) { if (ok) {...} })`，其中 `ok === true` 表示确认；`xnote.prompt(title, defaultValue, callback)` 在 `callback(newValue)` 中拿结果；无 layer 时内部才会回退到原生实现。
 - 字符串格式化：优先使用 **f-string**（如 `f"hello {name}"`）；`%` 格式化与 `str.format()` 是旧用法，**新代码不推荐**。日志/异常中需要延迟格式化时才允许用 `%`（如 `logging.warning("count=%s", count)`）。
 - 结构化对象优先：设计接口（函数/方法）的输入输出参数时，优先使用结构化的对象（自定义类，如 `XxxResult`/`XxxInfo`），而不是裸 `dict`。兼容 Python 3.6 不可用 `dataclass` 时，用普通类实现，并通过 `from_dict` / `to_dict` 与 JSON 互转；类的字段用类型注解明确标注。
@@ -14,6 +15,7 @@
 - webui 组件 CSS 放公共文件：`xnote/webui/` 下的组件是公共组件，其样式不要写在业务模块的 css 里，统一放到 `static/css/base/common-*.css`（例如下拉/更多操作菜单放 `common-dropdown.css`）。注意 `common-*.css` 经打包进入 `static/css/app.build.css`（全局加载），但若未重新执行构建脚本，本地开发可在使用组件的页面直接 `<link>` 该 `common-*.css` 使其立即生效。
 - **不要自行提交 git commit**：仅在用户明确要求提交时才执行 `git commit`（例如用户说"提交代码"）。其余情况下只修改工作区文件，不要主动 `git add` / `git commit`，把提交时机交给用户。
 - 浅灰标签慎用：`TextTag(css_class="lightgray")`（背景 `#eee`，见 `_static/css/base/common-tag.css`）与列表行的 hover 背景同色（`.list-item:hover` 也是 `#eee`，见 `common-list.css`），**不要在有 hover 效果的组件上使用**（例如列表行 `ListViewItem` 的标签），否则 hover 时标签会“消失”。列表内的日期等元信息改用无背景的 `TextSpan(css_class="todo-time")` 之类的纯文本样式。
+- 类型判断必须依赖显式标识：**不要根据 ID 数值范围（如 `id >= OFFSET`）来区分不同类型的数据**（例如笔记评论 vs 待办评论）。ID 一旦增长到超过预设区间就会误判，且区间偏移量只是存储换算手段、不代表真实类型。区分类型应依赖请求/记录上的**显式字段**（如评论的 `type`、列表的 `list_type` 等），由调用方在创建/查询时显式传入，后端据此路由。
 
 ## REST API 约定
 
@@ -226,7 +228,8 @@ Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `
   - `delay`：延迟执行毫秒数（可选，默认 0）
 - 支持的类型：`update_value`(设置输入框值) / `update_text`(设置 text) / `update_html`(整体替换 innerHTML) / `append_html`(追加 HTML 片段) / `toast` / `alert` / `reload`。
 - **命令项必须用 `webutil.CommandItem` 构造，不要直接拼 dict**（`webutil.CommandItem(command=..., id=..., value=..., delay=...)` 继承 `web.Storage`，随 JSON 自动序列化，字段更明确、不易拼错 key）。
-- 前端调用：`xnote.executeCommands(resp.data.commands)`（命令内部用 `setTimeout` 异步执行，前端若要在 DOM 更新后操作，需同样延后一拍）。
+- **命令接口的返回值必须用 `webutil.CommandsResult`，不要手拼 `webutil.SuccessResult(data={"commands": [...]})`**（`CommandsResult` 继承 `WebResult`，预设 `success=True` 且 `data` 即 `List[CommandItem]`；自带 `add_command` / `add_reload_command` / `add_toast_command` 辅助方法）。单条命令用 `result.data.append(cmd)`，多条命令直接 `result.data = commands`（或 `result.data.extend(commands)`）。不要为了附带额外字段而在 `data` 里塞 `commands` 子键——若业务确需回传额外数据，应改用结构化对象（`XxxResult`）而非 `CommandsResult`。
+- 前端调用：`xnote.executeCommands(resp.data)`（命令内部用 `setTimeout` 异步执行，前端若要在 DOM 更新后操作，需同样延后一拍）。注意：`CommandsResult` 的 `data` **就是命令数组本身**，不再有 `resp.data.commands` 这层嵌套。
 
 后端组装方式（参考 `xnote_handlers/chatbot/chatbot_render.py`）：
 
@@ -248,7 +251,7 @@ def build_send_commands(result):
                                 id="message-list", value=rows)]
 ```
 
-把 `commands` 作为字段放进返回的 `XxxResult`（`BaseDataRecord` 子类，随 JSON 自动序列化），前端 `onSendSuccess` 里 `xnote.executeCommands(data.commands)` 即可。
+把命令列表作为返回值直接交给前端：后端构造 `webutil.CommandsResult()`，用 `result.data.append(cmd)` / `result.data = commands` 填充命令，前端 `onSendSuccess` 里 `xnote.executeCommands(resp.data)` 即可（`resp.data` 即命令数组）。
 
 **JS 源文件注意**：`static/js/xnote-ui/x-init.js` 是带 JSDoc 的源码，`static/js/app.build.js` 是页面 `common/base_head.html` 实际加载的打包文件（已被 gitignore）。新增命令类型时需要**两处同步修改**。
 

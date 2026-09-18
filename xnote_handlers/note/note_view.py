@@ -40,6 +40,7 @@ from xnote_handlers.note.note_fragment import render_note_fragment
 from xnote.plugin.table import DataTable
 from xnote.plugin import TabBox
 from .note_meta import NoteMetaService
+from xnote.webui.comment import CommentBox
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 NOTE_DAO = xutils.DAO("note")
@@ -222,8 +223,13 @@ def view_checklist_func(note, kw: NoteViewContext):
     kw.show_pagination = False
     kw.show_comment_title = True
     kw.show_comment = True
+    kw.show_comment_edit = True
 
     kw.comment_title = T("清单项")
+    kw.comment_btn_text = T("添加清单项")
+    kw.comment_placeholder = T("请输入清单项...")
+    kw.comment_empty_text = T("暂无清单项~")
+    kw.comment_create_type = "list_item"
     kw.op = "view"
     kw.template_name = "note/page/detail/checklist_detail.html"
     kw.search_type = "checklist"
@@ -409,6 +415,31 @@ class ViewHandler:
         kw.note = file
         kw.can_edit = can_edit
         kw.get_tag_name_by_code = dao_tag.get_name_by_code
+
+        # 评论组件（列表不再服务端静态输出, 由前端初始化时通过独立接口异步加载;
+        # 编辑/删除/新增后由后端返回 update_html 命令刷新 #comments）
+        comment_list_type = kw.get("comment_list_type", "note_id")
+        comment_list_date = kw.get("comment_list_date", "")
+        comment_show_note = kw.get("show_comment_note", False)
+        comment_show_edit = kw.get("show_comment_edit", False)
+        kw.comment_box = CommentBox(
+            target_id=file.id,
+            list_type=comment_list_type,
+            list_date=comment_list_date,
+            show_note=comment_show_note,
+            show_edit=comment_show_edit,
+            title=kw.get("comment_title", "评论"),
+            create_type=kw.get("comment_create_type", ""),
+            save_url=kw.get("comment_save_url", "/comment/save"),
+            list_url=kw.get("comment_list_url", "/comment/list"),
+            placeholder=kw.get("comment_placeholder", "请输入评论, 支持粘贴图片..."),
+            empty_text=kw.get("comment_empty_text", "暂无评论~"),
+            btn_text=kw.get("comment_btn_text", "评论"),
+            show_title=kw.get("show_comment_title", True),
+            show_create=kw.get("show_comment_create", True),
+            source_class=kw.get("comment_source_class", ""),
+            comment_class=kw.get("comment_class", ""),
+        )
 
         # 处理目录按钮的展示
         self.handle_contents_btn(kw)

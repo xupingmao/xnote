@@ -1,0 +1,78 @@
+{% init comment_class = "" %}
+{% init target_id = 0 %}
+{% init show_comment_title = True %}
+{% init show_comment_create = True %}
+{% init show_comment_note = False %}
+{% init show_comment_edit = False %}
+{% init comment_title = "评论" %}
+{% init comment_create_type = "" %}
+{% init comment_list_type = "note_id" %}
+{% init comment_list_date = "" %}
+{% init comment_btn_text = "评论" %}
+{% init comment_placeholder = "请输入评论, 支持粘贴图片..." %}
+{% init comment_empty_text = "暂无评论~" %}
+{% init comment_source_class = "" %}
+{% init comment_save_url = "/comment/save" %}
+{% init comment_list_url = "/comment/list" %}
+{% init comment_order = "latest" %}
+{# 评论分页参数用 comment_page, 避免与页面自身分页(如笔记的 page)冲突 #}
+{% init comment_page = xutils.get_argument_int("comment_page", 1) %}
+
+<style type="text/css">
+    .chat-msg-img {
+        width: 180px;
+    }
+</style>
+
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/webuploader/webuploader.css">
+<script type="text/javascript" src="{{_server_home}}/_static/lib/webuploader/webuploader.nolog.min.js"></script>
+{% include common/script/load_laydate.html %}
+
+<div class="comment-box" id="comment-box"
+    data-target-id="{{target_id}}"
+    data-save-url="{{comment_save_url}}"
+    data-create-type="{{comment_create_type}}"
+    data-list-url="{{comment_list_url}}"
+    data-list-type="{{comment_list_type}}"
+    data-list-date="{{comment_list_date}}"
+    data-show-note="{% if show_comment_note %}true{% else %}false{% end %}"
+    data-show-edit="{% if show_comment_edit %}true{% else %}false{% end %}"
+    data-comment-order="{{comment_order}}"
+    data-comment-page="{% if comment_page %}{{comment_page}}{% else %}1{% end %}">
+
+{% if _has_login and show_comment_create %}
+<div class="card {{comment_class}}">
+    {% if show_comment_title %}
+    <div class="card-title" id="note-comments">
+        <span>{{comment_title}}</span>
+    </div>
+    {% end %}
+
+    <div class="col-md-12">
+        <textarea id="commentText" class="col-md-12 no-outline auto-height"
+            placeholder="{{comment_placeholder}}"></textarea>
+
+        <div id="commentImgRow" class="comment-img-row row">
+        </div>
+
+        <div class="row margin-top-sm">
+            <div id="commentFileUploader" class="hide"></div>
+            <input type="file" id="commentFilePicker" class="hide" multiple />
+            <input type="button" id="commentFilePickerBtn" class="btn btn-default" value="添加附件" />
+            <button class="btn" id="saveCommentBtn" onclick="xnote.comment.save(this);">{{comment_btn_text}}</button>
+        </div>
+    </div>
+</div>
+{% end %}
+
+<div class="card">
+    <div class="x-tab-box btn-style" data-tab-key="comment_order" data-tab-default="newest">
+        <a class="x-tab" data-tab-value="newest">最新</a>
+        <a class="x-tab" data-tab-value="oldest">最早</a>
+    </div>
+    <div class="col-md-12" id="comments">
+        <div class="x-center gray comment-loading">加载中...</div>
+    </div>
+</div>
+
+</div>

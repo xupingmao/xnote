@@ -12,7 +12,7 @@
 
 from xutils import dbutil
 from . import base
-from xnote_handlers.note import dao_comment
+from xnote_handlers.comment import dao_comment
 
 def do_upgrade():
     # 20220626

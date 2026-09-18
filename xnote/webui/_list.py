@@ -6,13 +6,22 @@ from .component import ConfirmButton, ActionButton, TextTag, escape_html, TextSp
 from xnote.core import xconfig
 from .container import TextContainer
         
+class ListViewLine(TextContainer):
+    """列表项内的一个子行（line），可承载标签、辅助文本等组件。
+    渲染为 <div class="list-item-line">...</div>；一个 ListViewItem 可包含多行。"""
+    def __init__(self, css_class="", css_style=""):
+        super().__init__(css_class="list-item-line " + css_class, css_style=css_style)
+
+
 class ListViewItem(TextContainer):
     # 是否展示右箭头
     show_chevron_right = False
     # 操作按钮
     action_btn : typing.Optional[ActionButton] = None
-    # 标签列表
+    # 标签列表（渲染在链接内，向后兼容已有列表）
     tags: typing.List[TextTag]
+    # 子行（line）列表：主行（图标 + 标题 + 操作）下方，可有多行，每行放标签/辅助信息等
+    lines: typing.List[ListViewLine]
     # 默认链接在外部
     is_link_outside = True
 
@@ -26,6 +35,9 @@ class ListViewItem(TextContainer):
         {% for tag in item.tags %} {% render tag %} {% end %}
     </a>
     {% raw item._extra_html %}
+    {% if item._lines_html %}
+    {% raw item._lines_html %}
+    {% end %}
 </div>
 """
 
@@ -38,6 +50,9 @@ class ListViewItem(TextContainer):
     {% for tag in item.tags %} {% render tag %} {% end %}
     
     {% raw item._extra_html %}
+    {% if item._lines_html %}
+    {% raw item._lines_html %}
+    {% end %}
 </div>
 """
 
@@ -59,6 +74,8 @@ class ListViewItem(TextContainer):
         self.action_html = action_html
         self.extra = TextContainer(css_class="float-right list-item-extra")
         self._extra_html = ""
+        self.lines = []
+        self._lines_html = ""
 
         if text:
             self.add_span(text=text)
@@ -71,9 +88,17 @@ class ListViewItem(TextContainer):
         # deprecated: 请使用 extra 替代
         return self.extra
 
+    def add_line(self, css_class="", css_style=""):
+        # type: (str, str) -> ListViewLine
+        """新增一个子行（line），返回 ListViewLine 以便继续添加内容。"""
+        line = ListViewLine(css_class=css_class, css_style=css_style)
+        self.lines.append(line)
+        return line
+
     def render(self):
         self._children_html = "".join([item.render() for item in self.children])
         self._extra_html = self._render_extra_html()
+        self._lines_html = "".join([line.render() for line in self.lines])
 
         if self.is_link_outside:
             return self._outside_code.generate(item = self)

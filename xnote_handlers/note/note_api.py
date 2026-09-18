@@ -221,7 +221,7 @@ def list_note_types(user_name = None):
         NoteLink("清单", "/note/list", "fa-list", size = note_stat.list_count),
         NoteLink("表格", "/note/table", "fa-table", size = note_stat.table_count),
         DictEntryLink(size = note_stat.dict_count),
-        NoteLink("评论", "/note/comment/mine", "fa-file-text", size = note_stat.comment_count),
+        NoteLink("评论", "/comment/mine", "fa-file-text", size = note_stat.comment_count),
         NoteLink("回收站", "/note/removed", "fa-trash", size = note_stat.removed_count),
     ]
 

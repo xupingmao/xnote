@@ -307,7 +307,11 @@ def render(template_name, **kw):
     # 处理上下文渲染
     nkw = _handle_kw(kw)
 
-    if hasattr(web.ctx, "env"):
+    # fragment=True 表示片段渲染(如评论列表片段), 始终返回 HTML,
+    # 不受请求 _format=json 影响(否则嵌套渲染会被误判为顶层 JSON 渲染)
+    fragment = kw.pop("fragment", False)
+
+    if hasattr(web.ctx, "env") and not fragment:
         # 非web请求（比如单元测试等）
         _input = web.input()
         if _input.get("_format") == "json":

@@ -7,8 +7,8 @@ from xnote.core import xtables
 from xnote_handlers.todo.dao import TodoDao, ProjectDao
 from xnote_handlers.todo.todo_model import TodoRecord, TodoStatusEnum, TodoPriorityEnum
 from xnote_handlers.todo.project_model import ProjectRecord, ProjectStatusEnum
-from xnote_handlers.todo.todo_comment import to_comment_target_id
-from xnote_handlers.note import dao_comment
+from xnote_handlers.comment import to_comment_target_id
+from xnote_handlers.comment import dao_comment
 
 
 def _clear_table(name):
@@ -131,6 +131,7 @@ class TestTodoCommentCount(BaseTestCase):
     def tearDown(self):
         _clear_table("todo_task")
 
+
     def _create(self):
         todo = TodoRecord()
         todo.user = "admin"
@@ -148,22 +149,22 @@ class TestTodoCommentCount(BaseTestCase):
 
         # 发表评论，comment_count 自增
         self.json_request_return_dict(
-            "/todo/comment/save", method="POST",
-            data=dict(note_id=target_id, content="评论1"))
+            "/comment/save", method="POST",
+            data=dict(note_id=target_id, content="评论1", type="todo_task"))
         todo = TodoDao.get_by_id(todo_id)
         self.assertEqual(todo.comment_count, 1)
 
         # 再发一条，comment_count = 2
         self.json_request_return_dict(
-            "/todo/comment/save", method="POST",
-            data=dict(note_id=target_id, content="评论2"))
+            "/comment/save", method="POST",
+            data=dict(note_id=target_id, content="评论2", type="todo_task"))
         self.assertEqual(TodoDao.get_by_id(todo_id).comment_count, 2)
 
         # 删除一条，comment_count 回到 1
         comments, _ = dao_comment.list_parent_comments(
             target_id, limit=100, type="todo_task")
         self.json_request_return_dict(
-            "/todo/comment/delete", method="POST",
+            "/comment/delete", method="POST",
             data=dict(comment_id=comments[0].id))
         self.assertEqual(TodoDao.get_by_id(todo_id).comment_count, 1)
 
@@ -171,8 +172,8 @@ class TestTodoCommentCount(BaseTestCase):
         todo_id = self._create()
         target_id = to_comment_target_id(todo_id)
         self.json_request_return_dict(
-            "/todo/comment/save", method="POST",
-            data=dict(note_id=target_id, content="评论1"))
+            "/comment/save", method="POST",
+            data=dict(note_id=target_id, content="评论1", type="todo_task"))
 
         body = self.request_app("/todo/task?project_id=0").data.decode("utf-8")
         self.assertIn("评论(1)", body)
@@ -197,12 +198,12 @@ class TestTodoCommentCount(BaseTestCase):
 
         target_id = to_comment_target_id(todo_id)
         self.json_request_return_dict(
-            "/todo/comment/save", method="POST",
-            data=dict(note_id=target_id, content="我的评论"))
+            "/comment/save", method="POST",
+            data=dict(note_id=target_id, content="我的评论", type="todo_task"))
 
-        # 我的评论页通过 /note/comments(list_type=user) 异步加载，来源应指向待办详情
+        # 我的评论页通过 /comment/list(list_type=user) 异步加载，来源应指向待办详情
         body = self.request_app(
-            "/note/comments?list_type=user&show_note=true&resp_type=html"
+            "/comment/list?list_type=user&show_note=true&resp_type=html"
         ).data.decode("utf-8")
 
         self.assertIn("/todo/detail?task_id=%s" % todo_id, body)
@@ -222,8 +223,8 @@ class TestTodoCommentCount(BaseTestCase):
         todo_id = self._create()
         body = self.request_app(
             "/todo/detail?task_id=%s" % todo_id).data.decode("utf-8")
-        # 详情页复用了评论组件（列表/保存均走 todo 评论端点）
-        self.assertIn("/todo/comment/list", body)
+        # 详情页复用了评论组件（列表服务端直接渲染 / 保存走 todo 评论端点）
+        self.assertIn('id="comments"', body)
         self.assertIn("todo_task", body)
 
 

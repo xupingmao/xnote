@@ -79,8 +79,8 @@
                         return;
                     }
                     // 后端已把"刷新会话列表/重置空状态"封装成命令, 直接执行
-                    if (resp.data && resp.data.commands) {
-                        xnote.executeCommands(resp.data.commands);
+                    if (resp.data && resp.data) {
+                        xnote.executeCommands(resp.data);
                     }
                 }, "json");
         });
@@ -118,8 +118,8 @@
                         return;
                     }
                     // 后端已把"刷新会话列表/同步标题"封装成命令, 直接执行
-                    if (resp.data && resp.data.commands) {
-                        xnote.executeCommands(resp.data.commands);
+                    if (resp.data && resp.data) {
+                        xnote.executeCommands(resp.data);
                     }
                 }, "json");
         });
@@ -139,8 +139,8 @@
                 return;
             }
             // 后端刷新会话列表, 置顶项自动排到最前
-            if (resp.data && resp.data.commands) {
-                xnote.executeCommands(resp.data.commands);
+            if (resp.data && resp.data) {
+                xnote.executeCommands(resp.data);
             }
         }, "json");
     }

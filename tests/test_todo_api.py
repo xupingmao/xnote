@@ -4,8 +4,8 @@ import unittest
 
 from xutils import quote
 from tests.test_base import BaseTestCase
-from xnote_handlers.todo.todo_comment import to_comment_target_id
-from xnote_handlers.note import dao_comment
+from xnote_handlers.comment import to_comment_target_id
+from xnote_handlers.comment import dao_comment
 
 
 class TestTodoApi(BaseTestCase):
@@ -285,17 +285,17 @@ class TestTodoPages(BaseTestCase):
                                            data=dict(content="评论入口待办", project_id="1"))["data"]
         body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
         self.assertIn("xnote.todo.openCommentDialog(this)", body)
-        self.assertIn('data-url="/todo/comment/dialog?task_id=%s"' % tid, body)
+        self.assertIn('data-url="/comment/dialog?task_id=%s"' % tid, body)
 
     def test_todo_comment_dialog_page(self):
         tid = self.json_request_return_dict("/api/v1/todo/create", method="POST",
                                            data=dict(content="弹窗评论待办", project_id="1"))["data"]
-        resp = self.request_app("/todo/comment/dialog?task_id=%s" % tid)
+        resp = self.request_app("/comment/dialog?task_id=%s" % tid)
         self.assertEqual("200 OK", resp.status)
         body = resp.data.decode("utf-8")
         self.assertIn("commentText", body)            # 评论输入框
-        self.assertIn("/todo/comment/list", body)
-        self.assertIn("/todo/comment/save", body)
+        self.assertIn('id="comments"', body)          # 评论列表服务端直接渲染（无需前端 AJAX）
+        self.assertIn("/comment/save", body)
 
     def test_todo_list_default_filter(self):
         # 默认【待办】Tab，且包含 待办/全部/未开始/进行中/完成/取消
@@ -540,9 +540,9 @@ class TestTodoForm(BaseTestCase):
         # 内容使用 mark_text 处理（markdown -> h1）
         self.assertIn('<h1 class="block-title">详情页待办</h1>', body)
         self.assertIn("todo-detail-tags", body)  # 信息用标签展示
-        # 详情页内嵌评论列表（复用 note 评论组件）
+        # 详情页内嵌评论列表（复用 note 评论组件，服务端直接渲染）
         self.assertIn("commentText", body)
-        self.assertIn("/todo/comment/list", body)
+        self.assertIn('id="comments"', body)
         self.assertIn("todo_task", body)
 
     def test_todo_comment_flow(self):
@@ -551,13 +551,13 @@ class TestTodoForm(BaseTestCase):
 
         # 发表评论
         resp = self.json_request_return_dict(
-            "/todo/comment/save", method="POST",
+            "/comment/save", method="POST",
             data=dict(note_id=str(target_id), content="待办评论内容", type="todo_task"))
         self.assertTrue(resp["success"])
 
         # 列表能查到
         html = self.request_app(
-            "/todo/comment/list?note_id=%s&resp_type=html" % target_id).data.decode("utf-8")
+            "/comment/list?note_id=%s&type=todo_task&resp_type=html" % target_id).data.decode("utf-8")
         self.assertIn("待办评论内容", html)
 
         # 隔离：同数字 id 的笔记视角查不到该评论（target_id 独立空间）

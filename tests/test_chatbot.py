@@ -540,7 +540,7 @@ class TestChatBotApi(BaseTestCase):
                       current_session_id=session_id))
         assert resp["success"] == True
         # 后端通过命令刷新会话列表, 不再由前端手写 DOM
-        commands = resp["data"]["commands"]
+        commands = resp["data"]
         assert any(c["command"] == "update_html" and c["id"] == "session-list-inner"
                    for c in commands)
         # 当前会话同步移动端标题
@@ -557,7 +557,7 @@ class TestChatBotApi(BaseTestCase):
             "/api/v1/chatbot/session/delete", method="POST",
             data=dict(session_id=session_id, current_session_id=session_id))
         assert resp["success"] == True
-        commands = resp["data"]["commands"]
+        commands = resp["data"]
         # 刷新左侧会话列表
         assert any(c["command"] == "update_html" and c["id"] == "session-list-inner"
                    for c in commands)
@@ -579,14 +579,14 @@ class TestChatBotApi(BaseTestCase):
             "/api/v1/chatbot/session/top", method="POST",
             data=dict(session_id=session_id))
         assert resp["success"] == True
-        assert resp["data"]["is_top"] == 1
-        # 后端刷新了会话列表
-        assert any(c["command"] == "update_html" for c in resp["data"]["commands"])
+        # 后端刷新了会话列表(update_html 命令)
+        assert any(c["command"] == "update_html" for c in resp["data"])
 
         resp2 = json_request_return_dict(
             "/api/v1/chatbot/session/top", method="POST",
             data=dict(session_id=session_id))
-        assert resp2["data"]["is_top"] == 0
+        assert resp2["success"] == True
+        assert any(c["command"] == "update_html" for c in resp2["data"])
 
     def test_session_top_invalid_id(self):
         resp = json_request_return_dict(

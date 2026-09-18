@@ -23,7 +23,7 @@ from xnote.core.xtemplate import T
 from xnote.core.models import SearchContext
 
 from xnote_handlers.note.dao import get_by_id, get_by_name, visit_note, get_by_user_skey
-from xnote_handlers.note import dao_comment
+from xnote_handlers.comment import dao_comment
 from xnote_handlers.note import dao_delete, dao_tag, dao_share
 from xnote_handlers.note import html_importer
 from xnote_handlers.note import dao as note_dao
@@ -716,7 +716,7 @@ A example image
 
 
     def test_comment_search(self):
-        from xnote_handlers.note.dao_comment import CommentVO
+        from xnote_handlers.comment.dao_comment import CommentVO
         note_id = create_note_for_test("list", "check-list-test")
 
         user_info = xauth.current_user()
@@ -730,9 +730,9 @@ A example image
         comment.content = "test comment search"
 
         dao_comment.create_comment(comment)
-        self.check_200("/note/comments?note_id=%s&list_type=search&key=test&resp_type=html&page=1" % note_id)
+        self.check_200("/comment/list?note_id=%s&list_type=search&key=test&resp_type=html&comment_page=1" % note_id)
 
-        comment_list = self.json_request("/note/comments?note_id=%s&list_type=search&key=test&page=1" % note_id)
+        comment_list = self.json_request("/comment/list?note_id=%s&list_type=search&key=test&comment_page=1" % note_id)
         assert isinstance(comment_list, list)
         assert len(comment_list) > 0
 
@@ -796,7 +796,7 @@ A example image
     def test_checklist_search(self):
         delete_note_for_test("checklist-test")
         note_id = create_note_for_test("list", "checklist-test")
-        from xnote_handlers.note.dao_comment import CommentDao, CommentVO
+        from xnote_handlers.comment.dao_comment import CommentDao, CommentVO
         comment = CommentVO()
         comment.type = "list_item"
         comment.content = "comment content"

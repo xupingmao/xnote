@@ -194,7 +194,7 @@ def build_app_js():
         # app.js
         builder.append("./_static/js/app.js")
         builder.append("./_static/js/note.js")
-        builder.append("./_static/js/note-comment.js")
+        builder.append("./_static/js/comment.js")
         builder.append("./_static/js/editor.js")
         builder.append("./_static/js/fs/fs.js")
 

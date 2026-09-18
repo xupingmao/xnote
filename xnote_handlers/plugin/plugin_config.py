@@ -124,7 +124,7 @@ INNER_TOOLS = [
     note_plugin("随手记", "/message?tag=log", "fa-file-text-o", visible_in_list=False),
     note_plugin("我的相册", "/note/gallery", "fa-photo", visible_in_list=False),
     note_plugin("我的清单", "/note/list", "fa-list", visible_in_list=False),
-    note_plugin("我的评论", "/note/comment/mine", "fa-comments", visible_in_list=False),
+    note_plugin("我的评论", "/comment/mine", "fa-comments", visible_in_list=False),
     note_plugin("标签列表", "/note/taglist", "fa-tags", visible_in_list=False),
     note_plugin("常用笔记", "/note/recent?orderby=hot", "fa-file-text-o", visible_in_list=False),
     note_plugin("词典", "/note/dict", "icon-dict", visible_in_list=False),

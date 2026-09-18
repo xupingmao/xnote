@@ -28,6 +28,7 @@
 .list-item-outer {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .list-item-outer .list-item-link {
@@ -39,6 +40,18 @@
 .list-item-outer .list-item-extra {
     flex: none;
     padding-right: 5px;
+}
+
+/*
+ * 子行（line）：渲染在「链接 + 操作区」主行下方，整行换行显示。
+ * 一个列表项可包含多行，用于展示标签/创建日期等辅助信息（如项目列表）。
+ */
+.list-item-line {
+    flex-basis: 100%;
+    padding: 0 5px 8px 5px;
+    line-height: 22px;
+    color: #888;
+    font-size: 12px;
 }
 
 .list-link, a.list-item {
