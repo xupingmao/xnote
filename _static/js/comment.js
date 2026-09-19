@@ -131,14 +131,16 @@ xnote.comment.initEditDialog = function () {
     });
 
     // 文件上传器
-    xnote.createUploaderEx({
-        fileSelector: "#commentFilePicker2",
-        chunked: false,
-        successFn: function (resp) {
-            xnote.comment.renderUploadedImg(resp.webpath, "#commentEditImgRow");
-        },
-        fixOrientation: true
-    });
+    if ($("#commentFilePicker2").length) {
+        xnote.createUploaderEx({
+            fileSelector: "#commentFilePicker2",
+            chunked: false,
+            successFn: function (resp) {
+                xnote.comment.renderUploadedImg(resp.webpath, "#commentEditImgRow");
+            },
+            fixOrientation: true
+        });
+    }
 
     // 通过剪切板上传
     $("#commentUpdateContent").on("paste", function (e) {
@@ -326,14 +328,16 @@ xnote.comment.initReplyDialog = function (context) {
         $("#commentReplyFilePicker").click();
     });
 
-    xnote.createUploaderEx({
-        fileSelector: "#commentReplyFilePicker",
-        chunked: false,
-        successFn: function (resp) {
-            xnote.comment.renderUploadedImg(resp.webpath, "#commentReplyImgRow");
-        },
-        fixOrientation: true
-    });
+    if ($("#commentReplyFilePicker").length) {
+        xnote.createUploaderEx({
+            fileSelector: "#commentReplyFilePicker",
+            chunked: false,
+            successFn: function (resp) {
+                xnote.comment.renderUploadedImg(resp.webpath, "#commentReplyImgRow");
+            },
+            fixOrientation: true
+        });
+    }
 
     // 初始化时加载回复列表
     xnote.comment.loadReplyList();
@@ -361,15 +365,17 @@ $(function () {
         $("#commentFilePicker").click();
     });
 
-    xnote.createUploaderEx({
-        fileSelector: "#commentFilePicker",
-        chunked: false,
-        successFn: function (resp) {
-            xnote.comment.renderUploadedImg(resp.webpath, "#commentImgRow");
-        },
-        fixOrientation: true,
-        fileName: "auto"
-    });
+    if ($("#commentFilePicker").length) {
+        xnote.createUploaderEx({
+            fileSelector: "#commentFilePicker",
+            chunked: false,
+            successFn: function (resp) {
+                xnote.comment.renderUploadedImg(resp.webpath, "#commentImgRow");
+            },
+            fixOrientation: true,
+            fileName: "auto"
+        });
+    }
 
     $("#commentText").on("paste", function (e) {
         xnote.requestUploadByClip(e, "msg", function (respJson) {
