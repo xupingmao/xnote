@@ -70,6 +70,15 @@
 </div>
 """ %}
 
+{% init html7 = """
+<div class="x-tab-box segment-style" 
+		data-tab-key="tab_test7" 
+		data-tab-default="all">
+	<a class="x-tab" data-tab-value="all">全部</a>
+	<a class="x-tab" data-tab-value="doing">进行中</a>
+	<a class="x-tab" data-tab-value="archived">归档</a>
+</div>""" %}
+
 <h3 class="card-title">
 	<span>默认tab样式</span>
 	<button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="html2">展示代码</button>
@@ -134,6 +143,16 @@
 <div class="card">
 	<pre id="html6" class="marked-code hide">{{html6}}</pre>
 	{% raw html6 %}
+</div>
+
+<h3 class="card-title">
+	<span>分段选择器 (segment-style)</span>
+	<button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="html7">展示代码</button>
+</h3>
+<div class="card">
+	<pre id="html7" class="marked-code hide">{{html7}}</pre>
+	{% raw html7 %}
+	<p class="tip">选中项紫色实心胶囊 + 白字，未选中为透明底深灰字；配合 data-tab-key 由 x-tab.js 按 URL 参数自动高亮。</p>
 </div>
 
 

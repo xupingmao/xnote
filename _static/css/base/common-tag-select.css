@@ -1,0 +1,51 @@
+/* 通用 tag 风格选择器（TagSelect 组件，可独立使用，不依赖 ListView/Form）
+ * 标签本体与选中态复用 common-tag.css 的 .tag / .tag.active
+ * 三种容器共享同一套 JS 交互（x-tag-select.js）:
+ *   .tag-select（通用） / .form-tag-select（表单） / .list-tag-select（列表行）
+ */
+.tag-select {
+    line-height: 24px;
+    overflow: hidden;
+}
+
+/* 选项渲染为胶囊 chip: 适当留白 + 圆角, 与徽章 .tag 区分
+ * 配色: 未选中=中性灰底(#f2f4f7 + 深灰字), 选中=品牌蓝实心(#08c + 白字),
+ * 形成清晰对比, 选中项一眼跳出。 */
+.tag-select .tag {
+    cursor: pointer;
+    user-select: none;
+    padding: 3px 12px;
+    border-radius: 14px;
+    margin: 3px 4px;
+    border: 1px solid #e1e5ea;
+    background-color: #f2f4f7;
+    color: #5a6472;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+/* 未选中项 hover: 提示可点选, 向品牌蓝过渡 */
+.tag-select:not([data-readonly]) .tag:hover {
+    background-color: #e9eef5;
+    border-color: #08c;
+    color: #08c;
+}
+
+/* 选中态: 品牌蓝实心 + 白字 */
+.tag-select .tag.active {
+    background-color: #08c;
+    color: #fff;
+    border-color: #08c;
+    font-weight: 500;
+}
+
+.tag-select:not([data-readonly]) .tag.active:hover {
+    background-color: #0077b3;
+}
+
+.tag-select[data-readonly] .tag {
+    cursor: default;
+}
+
+.tag-select-label {
+    margin-right: 8px;
+}

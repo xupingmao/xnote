@@ -321,22 +321,30 @@ class TestDataForm(BaseTestCase):
         row.add_option("标签2", "2")
         row.add_option("标签3", "3")
 
-        # value 用于提交，selected_values 用于渲染选中态
+        # value 用于提交；选中态由 TagSelect 在渲染时计算（值 1、3 高亮，2 不高亮）
         assert row.value == "1,3"
-        assert row.selected_values == ["1", "3"]
         assert row.multiple is True
+        html = form.render().decode("utf-8")
+        assert html.count('class="tag lightblue active"') == 2
+        assert html.count('class="tag lightblue "') == 1
 
     def test_add_tag_select_value_from_comma_string(self):
         form = DataForm()
         row = form.add_tag_select("标签", field="tags", value="1,3", multiple=True)
+        row.add_option("标签1", "1")
+        row.add_option("标签2", "2")
+        row.add_option("标签3", "3")
         assert row.value == "1,3"
-        assert row.selected_values == ["1", "3"]
+        html = form.render().decode("utf-8")
+        assert html.count('class="tag lightblue active"') == 2
 
     def test_add_tag_select_empty_value(self):
         form = DataForm()
         row = form.add_tag_select("标签", field="tags")
+        row.add_option("标签1", "1")
         assert row.value == ""
-        assert row.selected_values == []
+        html = form.render().decode("utf-8")
+        assert html.count('class="tag lightblue active"') == 0
 
     def test_add_tag_select_single_mode(self):
         # 默认单选
@@ -344,7 +352,6 @@ class TestDataForm(BaseTestCase):
         row = form.add_tag_select("标签", field="tags", value="1")
         assert row.multiple is False
         assert row.value == "1"
-        assert row.selected_values == ["1"]
 
     def test_add_tag_select_readonly(self):
         form = DataForm()

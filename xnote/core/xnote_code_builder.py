@@ -130,6 +130,7 @@ def build_app_css():
         builder.append("./_static/css/base/common-mobile.css")
         builder.append("./_static/css/base/common-icon.css")
         builder.append("./_static/css/base/common-tag.css")
+        builder.append("./_static/css/base/common-tag-select.css")
         builder.append("./_static/css/base/common-layout.css")
         builder.append("./_static/css/base/common-button.css")
         builder.append("./_static/css/base/common-markdown.css")

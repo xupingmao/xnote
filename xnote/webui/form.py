@@ -14,6 +14,7 @@ import itertools
 from xutils import Storage
 from xnote.core import xtemplate
 from xnote.webui.base import BaseComponent
+from xnote.webui._tag_select import TagSelect
 
 FormValueType = typing.Union[int, str, list]
 
@@ -72,7 +73,7 @@ class FormRow(BaseComponent):
     rows = 0 # textarea 行数
     accept = "" # 文件选择器的 accept 属性（图片/文件上传用）
     value_list = [] # type: typing.List[Storage]  # 图片/文件上传的已有值列表，元素为 {webpath, name}
-    selected_values = [] # type: typing.List[str]  # tag_select 已选中的值列表（用于渲染选中态）
+
 
     _select_html = """
 <select id="{{row.id}}" name="{{row.field}}" class="form-row-value" value="{{row.value}}" {% raw row.html_attr %}>
@@ -89,16 +90,6 @@ class FormRow(BaseComponent):
 </select>
 """
     _select_template = xtemplate.compile_template(_select_html, name="plugin.form.row.select")
-
-    _tag_select_html = """
-<div class="form-tag-select" data-multiple="{{'true' if row.multiple else 'false'}}" {% if row.readonly %}data-readonly="1"{% end %}>
-    <input type="hidden" name="{{row.field}}" class="form-row-value" value="{{row.value}}" {% raw row.html_attr %}>
-    {% for option in row.options %}
-        <span class="tag lightblue {% if option.value in row.selected_values %}active{% end %}" data-value="{{option.value}}">{{option.title}}</span>
-    {% end %}
-</div>
-"""
-    _tag_select_template = xtemplate.compile_template(_tag_select_html, name="plugin.form.row.tag_select")
 
     """数据行"""
     def __init__(self):
@@ -154,7 +145,20 @@ class FormRow(BaseComponent):
         return self._select_template.generate(row = self)
 
     def render_tag_select(self):
-        return self._tag_select_template.generate(row = self)
+        """渲染 tag 风格选择器，复用通用 TagSelect 组件。
+
+        容器保留 .form-tag-select 类，兼容原表单的样式与 x-tag-select.js 交互。
+        """
+        tag_select = TagSelect(
+            name=self.field,
+            value=self.value,
+            multiple=self.multiple,
+            readonly=self.readonly,
+            css_class=(self.css_class + " form-tag-select") if self.css_class else "form-tag-select",
+        )
+        for option in self.options:
+            tag_select.add_option(option.title, option.value)
+        return tag_select.render()
 
     
 class DataForm(BaseComponent):
@@ -256,7 +260,6 @@ class DataForm(BaseComponent):
         row.field = field
         row.placeholder = placeholder
         row.value = self._format_value(value)
-        row.selected_values = self._normalize_upload_value(value)
         row.css_class = css_class
         row.readonly = readonly
         row.multiple = multiple

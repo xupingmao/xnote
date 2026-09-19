@@ -12,6 +12,7 @@
 - 结构化对象优先：设计接口（函数/方法）的输入输出参数时，优先使用结构化的对象（自定义类，如 `XxxResult`/`XxxInfo`），而不是裸 `dict`。兼容 Python 3.6 不可用 `dataclass` 时，用普通类实现，并通过 `from_dict` / `to_dict` 与 JSON 互转；类的字段用类型注解明确标注。
 - 小模板内联：小于 20 行的 HTML 模板直接放在 Python 代码里，用 `xtemplate.render_text(text, template_name, **kw)` 渲染，不要单独建 `.html` 模板文件。大于 20 行的模板才放 `xnote_handlers/` 下单独的模板文件中。
 - webui 组件 CSS 放公共文件：`xnote/webui/` 下的组件是公共组件，其样式不要写在业务模块的 css 里，统一放到 `static/css/base/common-*.css`（例如下拉/更多操作菜单放 `common-dropdown.css`）。注意 `common-*.css` 经打包进入 `static/css/app.build.css`（全局加载），但若未重新执行构建脚本，本地开发可在使用组件的页面直接 `<link>` 该 `common-*.css` 使其立即生效。
+- webui 组件模块默认私有，统一由 `__init__.py` 对外暴露：`xnote/webui/` 下的组件模块**默认都是私有的**，新增/重构组件时，组件类必须在该包的 `xnote/webui/__init__.py` 里**显式导出**（如 `from ._tag_select import TagSelect`、`from ._list import ListView`），业务代码通过 `from xnote.webui import ...` 或更上层的 `xnote.plugin` 使用，**不要直接 import 内部模块路径**（如 `from xnote.webui._list import ListView`、`import xnote.webui._tag_select`）。模块名用下划线前缀（如 `_list.py` / `_pagination.py` / `_image.py` / `_tag_select.py`）表达私有模块；没有前缀的内部模块（如 `form.py` / `component.py`）同样视为内部模块，不对外直接 import。
 - **不要自行提交 git commit**：仅在用户明确要求提交时才执行 `git commit`（例如用户说"提交代码"）。其余情况下只修改工作区文件，不要主动 `git add` / `git commit`，把提交时机交给用户。
 - 浅灰标签慎用：`TextTag(css_class="lightgray")`（背景 `#eee`，见 `_static/css/base/common-tag.css`）与列表行的 hover 背景同色（`.list-item:hover` 也是 `#eee`，见 `common-list.css`），**不要在有 hover 效果的组件上使用**（例如列表行 `ListViewItem` 的标签），否则 hover 时标签会“消失”。列表内的日期等元信息改用无背景的 `TextSpan(css_class="todo-time")` 之类的纯文本样式。
 - 类型判断必须依赖显式标识：**不要根据 ID 数值范围（如 `id >= OFFSET`）来区分不同类型的数据**（例如笔记评论 vs 待办评论）。ID 一旦增长到超过预设区间就会误判，且区间偏移量只是存储换算手段、不代表真实类型。区分类型应依赖请求/记录上的**显式字段**（如评论的 `type`、列表的 `list_type` 等），由调用方在创建/查询时显式传入，后端据此路由。
@@ -169,6 +170,8 @@ def search_todo(ctx: SearchContext, expression=None):
 Python-side UI components extend `BaseComponent` (`xnote/webui/base.py`), provide a `render()` method returning HTML string. In templates, import via `{% from xnote.webui import %}` and render via `{% render %}`.
 
 Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `TextLink`, `ActionLink`, `Input`, `Textarea`, `Panel`, `BlockTitle`, `ActionButton`, `RawHtml`, `TextSpan`, `Checkbox`, etc.
+
+> 组件模块的可见性：上文"webui 组件模块默认私有，统一由 `__init__.py` 对外暴露"约定要求——新增组件类必须先在 `xnote/webui/__init__.py` 中 `from .xxx import Yyy` 导出，业务侧再 `from xnote.webui import Yyy`（或 `xnote.plugin`）使用，严禁直接 import 内部模块路径（见编码规范）。
 
 ### 优先用组件开发页面
 

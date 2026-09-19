@@ -5,6 +5,7 @@ from xnote.core import xtemplate
 from .component import ConfirmButton, ActionButton, TextTag, escape_html, TextSpan, TextLink, TextBr, RawHtml, TextNbsp, TextItemSep
 from xnote.core import xconfig
 from .container import TextContainer
+from ._tag_select import TagSelect
 
 
 class ListViewLine(TextContainer):
@@ -165,6 +166,83 @@ class ListViewDropdown(BaseComponent):
     def render(self):
         return self._code.generate(item = self)
 
+
+class ListViewTagSelect(BaseComponent):
+    """ListView 内的 tag 选择器行（列表行外壳 + 右对齐布局由本类负责）。
+
+    采用组合模式：内部持有一个通用 TagSelect 实例负责选项与选中值的管理，
+    本类只负责列表行特有的 .list-item 外壳与 .float-right 右对齐布局，
+    不再通过继承 TagSelect 与之耦合。
+    """
+
+    _code = xtemplate.compile_template("""
+<div class="{{item.css_class}} tag-select" data-multiple="{{'true' if item.multiple else 'false'}}" {% if item.readonly %}data-readonly="1"{% end %}{% if item.data_type %} data-type="{{item.data_type}}"{% end %}{% if item.data_p %} data-p="{{item.data_p}}"{% end %}>
+
+{% if item.icon_class %}
+    <i class="{{item.icon_class}}"></i>
+{% end %}
+
+{% if item.text %}
+    <span class="tag-select-label">{{ item.text }}</span>
+{% end %}
+
+    <input type="hidden" name="{{item.name}}" class="form-row-value" value="{{item.value}}">
+
+<div class="float-right">
+{% for option in item.options %}
+    <span class="tag lightblue {% if option.value in item.selected_values %}active{% end %}" data-value="{{option.value}}">{{option.title}}</span>
+{% end %}
+</div>
+
+</div>
+""")
+
+    def __init__(self, text="", name="", value="", multiple=False, readonly=False, css_class="list-item list-tag-select", data_type="", data_p=""):
+        super().__init__()
+        # 组合通用 TagSelect：选项与选中值的管理交给它，本类只负责列表行布局
+        self.selector = TagSelect(text=text, name=name, value=value,
+                                  multiple=multiple, readonly=readonly,
+                                  data_type=data_type, data_p=data_p)
+        self.css_class = css_class
+        self.multiple = multiple
+        self.readonly = readonly
+        self.data_type = data_type
+        self.data_p = data_p
+
+    # 渲染所需的属性统一委托给组合的 TagSelect，保证单一数据源
+    @property
+    def text(self):
+        return self.selector.text
+
+    @property
+    def name(self):
+        return self.selector.name
+
+    @property
+    def value(self):
+        return self.selector.value
+
+    @property
+    def selected_values(self):
+        return self.selector.selected_values
+
+    @property
+    def icon_class(self):
+        return self.selector.icon_class
+
+    @property
+    def options(self):
+        return self.selector.options
+
+    def add_option(self, title="", value=""):
+        """添加选项（委托给组合的 TagSelect）"""
+        self.selector.add_option(title, value)
+        return self
+
+    def render(self):
+        return self._code.generate(item=self)
+
+
 class ListView(BaseContainer):    
     _code = xtemplate.compile_template("""
 {% if len(item_list) == 0 %}
@@ -188,6 +266,21 @@ class ListView(BaseContainer):
         dropdown = ListViewDropdown(text=text, name=name, data_type=data_type, value=value)
         self.add(dropdown)
         return dropdown
+
+    def add_tag_select(self, text="", name="", value="", multiple=False, readonly=False, css_class="", data_type="", data_p=""):
+        """添加 tag 风格的选择器（默认单选，点选标签，提交逗号分隔值）。
+
+        选项通过返回的 ListViewTagSelect.add_option(title, value) 添加，用法与 DataForm.add_tag_select 一致。
+        多选传 multiple=True，提交值为逗号分隔的多个值。
+        data_type / data_p 透传到容器，供配置提交逻辑读取（如 settings 页的 updateSetting）。
+        """
+        tag_select = ListViewTagSelect(text=text, name=name, value=value,
+                                       multiple=multiple, readonly=readonly,
+                                       data_type=data_type, data_p=data_p)
+        if css_class:
+            tag_select.css_class = css_class
+        self.add(tag_select)
+        return tag_select
 
 ItemList = ListView
 ListItem = ListViewItem

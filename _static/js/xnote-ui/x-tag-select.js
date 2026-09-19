@@ -1,8 +1,13 @@
 /** x-tag-select.js
- * 表单的 tag 风格选择器（DataForm 的 tag_select 行），依赖jQuery
+ * 通用的 tag 风格选择器（点选标签），依赖jQuery
  *
- * DOM 结构（由 FormRow.render_tag_select 渲染）:
- *   <div class="form-tag-select" data-multiple="true|false">
+ * 同时支持三类容器（DOM 结构一致，仅最外层 class 不同）:
+ *   1. 通用: TagSelect 组件（可独立使用），渲染 `.tag-select`
+ *   2. 表单: DataForm 的 tag_select 行，由 FormRow.render_tag_select 渲染 `.form-tag-select`
+ *   3. 列表: ListView 的 tag_select 行，由 ListViewTagSelect.render 渲染 `.list-tag-select`
+ *
+ * DOM 结构:
+ *   <div class="tag-select | form-tag-select | list-tag-select" data-multiple="true|false">
  *       <input type="hidden" name="field" value="1,2">
  *       <span class="tag lightblue" data-value="1">标签1</span>
  *       ...
@@ -28,7 +33,7 @@ if (!xnote.initTagSelect) {
         if ($tag.length == 0) {
             return;
         }
-        var $box = $tag.closest(".form-tag-select");
+        var $box = $tag.closest(".tag-select, .form-tag-select, .list-tag-select");
 
         // 只读: 不响应点击
         if ($box.attr("data-readonly")) {
@@ -49,7 +54,7 @@ if (!xnote.initTagSelect) {
             root = document;
         }
         // 通过data-bind标记避免重复绑定
-        $(root).find(".form-tag-select").each(function (index, ele) {
+        $(root).find(".tag-select, .form-tag-select, .list-tag-select").each(function (index, ele) {
             var $box = $(ele);
             if ($box.attr("data-tag-select-bind")) {
                 return;

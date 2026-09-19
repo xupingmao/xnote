@@ -9,7 +9,7 @@ def handle_template_tab(kw: Storage, default_content: str, template_type="log"):
     user_id = xauth.current_user_id()
     template_id = xutils.get_argument_int("template_id")
     template_list = MessageTemplateDao.list_by_user(user_id=user_id, template_type=template_type)
-    template_tab = TabBox(tab_key = "template_id", tab_default="0", css_class="btn-style btn-line-height")
+    template_tab = TabBox(tab_key = "template_id", tab_default="0", css_class="btn-style")
     if len(template_list) == 0:
         template_tab.add_item(title="默认", value="0")
     else:

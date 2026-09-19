@@ -148,3 +148,44 @@
     padding: 0px;
     vertical-align: top;
 }
+
+/** 分段选择器模式 (segmented control)
+ *  浅灰圆角容器, 选中项为紫色实心胶囊 + 白字, 未选中透明底深色字
+ *  用法:
+ *  <div class="x-tab-box segment-style" data-tab-key="k" data-tab-default="v">
+ *      <a class="x-tab" data-tab-value="v">全部</a>
+ *      <a class="x-tab" data-tab-value="doing">进行中</a>
+ *      <a class="x-tab" data-tab-value="archived">归档</a>
+ *  </div>
+ */
+.x-tab-box.segment-style {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f0f1f5;
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.x-tab-box.segment-style .x-tab {
+    float: none;
+    display: inline-block;
+    background-color: transparent;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 16px;
+    margin: 0 2px;
+    line-height: 20px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.x-tab-box.segment-style .x-tab.active {
+    background-color: #7c5cf5;
+    color: #fff;
+    font-weight: 500;
+}
+
+.x-tab-box.segment-style .x-tab:hover:not(.active) {
+    color: #7c5cf5;
+}

@@ -11,6 +11,7 @@ from .tab import TabBox, TabTable
 from .container import Card, CardRow, RowDiv, RowPanel, TextContainer
 from .link import TextLink, ActionLink, EditFormActionLink, ConfirmActionLink, AjaxActionLink
 from ._list import ListView, ListViewItem, ListItem, ListViewDropdown, ItemList
+from ._tag_select import TagSelect
 from ._image import Image
 from ._pagination import Pagination
 from .tree import Tree, TreeNode
