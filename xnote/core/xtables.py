@@ -951,13 +951,11 @@ def init_todo_table():
         manager.add_column("create_time", "bigint", default_value=0, comment="创建时间(毫秒时间戳)")
         manager.add_column("update_time", "bigint", default_value=0, comment="更新时间(毫秒时间戳)")
         manager.add_column("version", "int", default_value=0)
-        manager.add_column("is_deleted", "tinyint", default_value=0)
 
         manager.add_index(["user_id", "project_id", "status"])
         manager.add_index(["user_id", "status"])
         manager.add_index(["user_id", "priority"])
         manager.add_index(["user_id", "begin_time"])
-        manager.add_index(["user_id", "is_deleted"])
 
 
 def init_project_table():

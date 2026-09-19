@@ -83,7 +83,6 @@ class TodoRecord(BaseDataRecord):
         self.create_time = 0
         self.update_time = 0
         self.version = 0
-        self.is_deleted = 0
 
     def get_tag_list(self) -> List[str]:
         if not self.tags:

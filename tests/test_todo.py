@@ -48,10 +48,11 @@ class TestTodoDao(BaseTestCase):
         self.assertEqual(TodoDao.get_by_id(tid).status, "done")
         self.assertTrue(TodoDao.get_by_id(tid).done_time > 0)
 
-        # 软删除
+        # 删除：直接物理删除记录，不再使用 is_deleted 逻辑删除字段
         TodoDao.delete(tid, user_id=1)
-        self.assertEqual(TodoDao.get_by_id(tid).is_deleted, 1)
-        self.assertEqual(TodoDao.count_by_status(1, "done", is_deleted=0), 0)
+        self.assertIsNone(TodoDao.get_by_id(tid))
+        self.assertEqual(TodoDao.count_by_status(1, "done"), 0)
+        self.assertEqual(len(TodoDao.list_with_filters(1)), 0)
 
     def test_queries(self):
         user_id = 1

@@ -60,10 +60,8 @@ class TodoDao:
 
     @classmethod
     def delete(cls, task_id: int, user_id: int = 0) -> int:
-        """软删除"""
-        return _todo_db.update(where=dict(task_id=task_id, user_id=user_id),
-                               is_deleted=1,
-                               update_time=dateutil.timestamp_ms())
+        """删除待办记录（不再使用 is_deleted 逻辑删除字段，直接物理删除）"""
+        return _todo_db.delete(where=dict(task_id=task_id, user_id=user_id))
 
     @classmethod
     def _status_fields(cls, status: str, now: int) -> Dict[str, Any]:
@@ -102,9 +100,9 @@ class TodoDao:
                      status_list: Optional[List[str]] = None,
                      priority: Optional[str] = None,
                      begin_start: int = 0, begin_end: int = 0,
-                     key: str = "", is_deleted: int = 0) -> "tuple":
-        where = "user_id=$user_id AND is_deleted=$is_deleted"
-        vars = dict(user_id=user_id, is_deleted=is_deleted)  # type: Dict[str, Any]
+                     key: str = "") -> "tuple":
+        where = "user_id=$user_id"
+        vars = dict(user_id=user_id)  # type: Dict[str, Any]
         if project_id is not None:
             where += " AND project_id=$project_id"
             vars["project_id"] = project_id
@@ -196,17 +194,13 @@ class TodoDao:
         return TodoRecord.from_dict_list(rows)
 
     @classmethod
-    def count_by_project(cls, user_id: int, project_id: int,
-                         is_deleted: int = 0) -> int:
-        where, vars = cls._build_where(user_id, project_id=project_id,
-                                       is_deleted=is_deleted)
+    def count_by_project(cls, user_id: int, project_id: int) -> int:
+        where, vars = cls._build_where(user_id, project_id=project_id)
         return _todo_db.count(where=where, vars=vars)
 
     @classmethod
-    def count_by_status(cls, user_id: int, status: str,
-                        is_deleted: int = 0) -> int:
-        where, vars = cls._build_where(user_id, status=status,
-                                       is_deleted=is_deleted)
+    def count_by_status(cls, user_id: int, status: str) -> int:
+        where, vars = cls._build_where(user_id, status=status)
         return _todo_db.count(where=where, vars=vars)
 
     @classmethod
@@ -216,25 +210,22 @@ class TodoDao:
                            status_list: Optional[List[str]] = None,
                            priority: Optional[str] = None,
                            begin_start: int = 0, begin_end: int = 0,
-                           key: str = "",
-                           is_deleted: int = 0) -> int:
+                           key: str = "") -> int:
         where, vars = cls._build_where(user_id, project_id=project_id,
                                        status=status, status_list=status_list,
                                        priority=priority,
                                        begin_start=begin_start,
                                        begin_end=begin_end,
-                                       key=key,
-                                       is_deleted=is_deleted)
+                                       key=key)
         return _todo_db.count(where=where, vars=vars)
 
     @classmethod
-    def count_group_by_project(cls, user_id: int,
-                               is_deleted: int = 0) -> Dict[int, Dict[str, int]]:
+    def count_group_by_project(cls, user_id: int) -> Dict[int, Dict[str, int]]:
         """按项目+状态分组统计，返回 {project_id: {status: count}}（一次查询）"""
         rows = _todo_db.select(
             what="project_id, status, COUNT(1) AS amount",
-            where="user_id=$user_id AND is_deleted=$is_deleted",
-            vars=dict(user_id=user_id, is_deleted=is_deleted),
+            where="user_id=$user_id",
+            vars=dict(user_id=user_id),
             group="project_id, status")
         result = {}  # type: Dict[int, Dict[str, int]]
         for row in rows:
@@ -246,9 +237,9 @@ class TodoDao:
 
     @classmethod
     def reassign_project(cls, user_id: int, from_project_id: int, to_project_id: int) -> int:
-        """把某用户未删除的待办从 from_project_id 批量改挂到 to_project_id"""
+        """把某用户的待办从 from_project_id 批量改挂到 to_project_id"""
         return _todo_db.update(
-            where="user_id=$user_id AND project_id=$project_id AND is_deleted=0",
+            where="user_id=$user_id AND project_id=$project_id",
             vars=dict(user_id=user_id, project_id=from_project_id),
             project_id=to_project_id)
 

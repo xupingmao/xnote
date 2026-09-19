@@ -150,7 +150,7 @@ class ProjectListPlugin(_TodoListPlugin):
         status = xutils.get_argument_str("status", "") or ProjectStatusEnum.active.value
         status_labels = _enum_label_map(ProjectStatusEnum)
         # 一次分组查询拿到每个项目的状态计数
-        count_map = TodoDao.count_group_by_project(user_id, is_deleted=0)
+        count_map = TodoDao.count_group_by_project(user_id)
 
         # 分页
         page = xutils.get_argument_int("page", 1)

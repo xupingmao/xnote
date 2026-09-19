@@ -203,7 +203,7 @@ class ProjectListHandler:
         user_id = xauth.current_user_id()
         status = xutils.get_argument_str("status", ProjectStatusEnum.active.value)
         projects = ProjectDao.list_by_user(user_id, status=status)
-        count_map = TodoDao.count_group_by_project(user_id, is_deleted=0)
+        count_map = TodoDao.count_group_by_project(user_id)
         result = []
         for project in projects:
             item = dict(**project)
