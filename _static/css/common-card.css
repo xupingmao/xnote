@@ -21,7 +21,7 @@ body {
 
 .main-content-bg {
     background-color: #eee;
-    padding: 10px;
+    padding: 8px;
     float: left;
     width: 100%;
     height: 100%;
@@ -29,27 +29,27 @@ body {
 
 /* 不能指定input[type=button]不然会覆盖其他class样式(选择器优先级过高) */
 .btn, .inline-btn, [type=submit], [type=button], button {
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 .tag-span {
-    border-radius: 2px;
+    border-radius: 4px;
 }
 
 .note {
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .x-page-link {
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 .bot-btn {
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .aside-item {
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 /** 消息 **/
@@ -57,9 +57,9 @@ body {
     float: left;
     width: 100%;
     background-color: #fff;
-    padding: 5px;
-    margin-bottom: 10px;
-    /*border-radius: 5px;*/
+    padding: 4px;
+    margin-bottom: 8px;
+    /*border-radius: 4px;*/
     /*box-shadow: 0 0 5px #ccc;*/
 }
 
@@ -67,7 +67,7 @@ body {
 .plugin-item {
     background-color: #fff;
     border: 1px solid #ccc;
-    /*border-radius: 5px;*/
+    /*border-radius: 4px;*/
 }
 
 .card-title, .grid-title, .card>h1,.card>h2,.card>h3,.card>h4 {
@@ -80,9 +80,9 @@ body {
     float: left;
     width: 100%;
     background-color: #fff;
-    margin-bottom: 10px;
-    padding: 5px;
-    border-radius: 5px;
+    margin-bottom: 8px;
+    padding: 4px;
+    border-radius: 4px;
     word-break: break-word;
     word-wrap: break-word;
     /*border: 1px solid #ccc;*/
@@ -95,7 +95,7 @@ body {
 }
 
 .card-text {
-    padding: 5px;
+    padding: 4px;
 }
 
 .aside-item {

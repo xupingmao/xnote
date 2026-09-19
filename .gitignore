@@ -42,6 +42,7 @@ __pycache__
 /static2/
 /scripts2/
 /backup/
+/.backup/
 /script/
 /config/users.ini
 /config/menu.ini
@@ -89,3 +90,4 @@ xnote-reboot.txt
 .env
 
 nohup.out
+.workbuddy/

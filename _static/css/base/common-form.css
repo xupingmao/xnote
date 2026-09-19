@@ -2,16 +2,16 @@
     float:left;
     width:170px;
     height: 65px;
-    padding-bottom:5px;
+    padding-bottom: 4px;
     max-width: 700px;
-    line-height: 29px;
+    line-height: 32px;
     overflow-y: hidden;
 }
 
 .input-group label {
     width: 100%;
     float: left;
-    line-height: 29px;
+    line-height: 32px;
     text-align: left;
 }
 
@@ -30,7 +30,7 @@
 .input-group-row {
     float: left;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .input-group-row input, .input-group-row select, .input-group-value, 
@@ -46,8 +46,8 @@ input[readonly] {
 /** 默认表单(编辑表单) **/
 .form-row {
     margin-top: 0px;
-    margin-bottom: 10px;
-    padding-left: 10px;
+    margin-bottom: 8px;
+    padding-left: 8px;
     width: 100%;
     float: left;
 }
@@ -55,7 +55,7 @@ input[readonly] {
     width: 100px;
     display: block;
     float: left;
-    line-height: 29px;
+    line-height: 32px;
 }
 
 .form-row input, .form-row select, .form-row textarea {
@@ -70,9 +70,9 @@ input[readonly] {
 
 .form-body {
     position: absolute;
-    padding: 10px;
+    padding: 8px;
     top: 0px;
-    bottom: 50px;
+    bottom: 48px;
     overflow-y: auto;
     right: 0px;
     left: 0px;
@@ -83,16 +83,16 @@ input[readonly] {
     left: 0px;
     right: 0px;
     height: 50px;
-    padding: 10px;
+    padding: 8px;
 }
 
 
 .form-heading {
     width: 100%;
     background-color: #eee;
-    padding: 5px;
+    padding: 4px;
     margin-top: 0px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-weight: bold;
     line-height: normal;
 }
@@ -115,7 +115,7 @@ input[readonly] {
     width: 170px;
     float: left;
     padding-left: 0px;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 .query-form .form-row-value {
     width: 160px;
@@ -138,35 +138,35 @@ input[readonly] {
 }
 /* 按钮列：始终位于 label（宽 100px）右侧，与 label 同一行（PC/移动一致） */
 .form-upload-control {
-    margin-left: 100px;
-    margin-bottom: 5px;
+    margin-left: 104px;
+    margin-bottom: 4px;
 }
 /* 预览列：PC 下位于第二列（label 右侧、按钮下方）；移动端落到 label 下方（整行） */
 .form-upload-preview {
-    margin-left: 100px;
+    margin-left: 104px;
     overflow: hidden;
     min-height: 5px;
 }
 .form-upload-thumb {
     width: 110px;
-    margin-top: 5px;
-    margin-right: 5px;
+    margin-top: 4px;
+    margin-right: 4px;
     float: left;
     position: relative;
 }
 .form-upload-thumb img {
     width: 100px;
     height: 100px;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 .form-upload-file {
-    margin-top: 5px;
-    margin-right: 10px;
+    margin-top: 4px;
+    margin-right: 8px;
     float: left;
     line-height: 24px;
 }
 .form-upload-del {
-    margin-left: 5px;
+    margin-left: 4px;
     color: red;
     cursor: pointer;
 }
@@ -181,7 +181,7 @@ input[readonly] {
 
 /* 表单的 tag 风格选择器（tag 本体与选中态复用 common-tag.css 的 .tag / .tag.active） */
 .form-tag-select {
-    margin-left: 100px; /* 与 label（宽 100px）同行的第二列 */
+    margin-left: 104px; /* 与 label（宽 100px）同行的第二列 */
     line-height: 24px;
     overflow: hidden;
 }

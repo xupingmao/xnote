@@ -3,11 +3,11 @@
 .comment-row {
     width: 100%;
     float: left;
-    padding: 5px;
+    padding: 4px;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    border-radius: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 .comment-user {
@@ -17,7 +17,7 @@
 .comment-foot {
     float: left;
     width: 100%;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 .comment-foot>.comment-foot-link {
@@ -33,13 +33,13 @@
 .comment-content {
     float: left;
     width: 100%;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 .comment-source-info {
     float: left;
     line-height: 32px;
-    margin-right: 10px;
+    margin-right: 8px;
 }
 
 .edit-comment-btn, .delete-comment-btn {
@@ -54,15 +54,15 @@
 
 .upload-img-div {
     width: 110px;
-    margin-top: 5px;
-    margin-right: 5px;
+    margin-top: 4px;
+    margin-right: 4px;
     float: left;
 }
 
 .upload-img {
     width: 100px;
     height: 100px;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .comment-img-row {
@@ -73,35 +73,35 @@
 .comment-img {
     width: 100px;
     height: 100px;
-    margin-top: 5px;
-    margin-right: 5px;
-    border-radius: 5px;
+    margin-top: 4px;
+    margin-right: 4px;
+    border-radius: 4px;
 }
 
 .comment-edit-textarea {
     /* position: absolute;
-    top: 45px;
-    left: 10px;
-    right: 10px; */
-    /* bottom: 50px; */
+    top: 48px;
+    left: 8px;
+    right: 8px; */
+    /* bottom: 48px; */
     /* width: inherit; */
     width: 100%;
     height: 150px;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .comment-edit-bottom {
     position: absolute;
-    left: 10px;
-    bottom: 10px;
-    right: 10px;
+    left: 8px;
+    bottom: 8px;
+    right: 8px;
 }
 
 .comment-edit-bottom button {
     width: 80px;
 }
 .comment-date {
-    padding-left: 5px;
+    padding-left: 4px;
 }
 
 .comment-edit-img-row {
@@ -110,9 +110,9 @@
 
 /** 评论回复 **/
 .comment-reply-header {
-    padding: 10px 0;
+    padding: 8px 0;
     border-bottom: 1px solid #eee;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 .comment-reply-to-user {
     color: #1e90ff;
@@ -121,36 +121,36 @@
 .comment-reply-list {
     max-height: 300px;
     overflow-y: auto;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 .comment-reply-textarea {
     width: 100%;
     min-height: 80px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 10px;
+    padding: 8px;
     resize: vertical;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 .comment-reply-form {
     border-top: 1px solid #eee;
-    padding-top: 10px;
+    padding-top: 8px;
 }
 .reply-row {
-    padding: 10px;
+    padding: 8px;
 }
 .comment-reply-at {
     color: #1e90ff;
-    margin-right: 5px;
+    margin-right: 4px;
 }
 .comment-empty {
     text-align: center;
     color: #999;
-    padding: 20px;
+    padding: 24px;
 }
 .comment-reply-info {
-    padding: 5px 0;
-    margin-top: 5px;
+    padding: 4px 0;
+    margin-top: 4px;
 }
 .comment-reply-info a {
     color: #1e90ff;

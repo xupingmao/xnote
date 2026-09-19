@@ -9,9 +9,9 @@
 .plugin-item {
     float: left;
     width: 100%;
-    padding: 5px;
+    padding: 4px;
     margin-top: 0px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     border: 1px solid #ccc;
     height: 32px;
 }
@@ -22,22 +22,22 @@
 }
 
 .plugin-info {
-    padding: 5px;
+    padding: 4px;
     background-color: #eee;
     color: #555;
 }
 
 .plugin-description {
-    padding: 5px;
+    padding: 4px;
     background-color: #eee;
     color: #555;
-    /*border-radius: 5px;*/
+    /*border-radius: 4px;*/
 }
 
 
 .plugin-right-box {
     float: right;
-    line-height: 25px;
+    line-height: 24px;
 }
 
 .plugin-right-span {

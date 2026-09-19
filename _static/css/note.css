@@ -1,11 +1,29 @@
+
 /**
  * 笔记的CSS样式
  * @author xupingmao
  * @since 2019/11/24
- * @modified 2022/03/16 18:52:34
 */
 
+/* 笔记侧边目录（从 app.css 拆分而来） */
+.menu-aside {
+    display: none;
+}
 
+/* 笔记分组选择（从 app.css 拆分而来） */
+.note-group-select {
+    padding: 4px;
+}
+
+@media screen and (max-width: 800px) {
+    .recent-note-date {
+        font-size: 12px;
+    }
+
+    .x-left {
+        display: none;
+    }
+}
 /** note-list样式 **/
 .note-list>a:last-child>.book-item {
     border-bottom: none;
@@ -30,7 +48,7 @@
 
 .tool-description {
     font-size: small;
-    padding-top: 3px;
+    padding-top: 4px;
 }
 
 .note {
@@ -38,12 +56,12 @@
     border: solid 1px;
     border-color: #ccc;
     background-color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     width: 100%;
 }
 
 .note-body {
-    padding: 5px;
+    padding: 4px;
     word-break: break-word;
 }
 
@@ -52,7 +70,7 @@
 }
 
 .note-head-info {
-    padding: 5px;
+    padding: 4px;
     background-color: #eee;
     color: #555;
     margin: 0px;
@@ -60,7 +78,7 @@
 
 .note-name {
     /*font-size: 20px;*/
-    line-height: 25px;
+    line-height: 24px;
 }
 
 .note-name a {
@@ -80,7 +98,7 @@
 
 .note-info span {
     display: inline-block;
-    padding-top: 2px;
+    padding-top: 4px;
 }
 
 .note-time {
@@ -95,15 +113,15 @@
 
 .note-last-modify-time,
 .note-last-visit-time {
-    padding-left: 2px;
-    padding-top: 2px;
+    padding-left: 4px;
+    padding-top: 4px;
     font-size: small;
     color: green;
 }
 
 .note-related {
     font-size: 6px;
-    padding-left: 5px;
+    padding-left: 4px;
     color: red;
     display: none;
 }
@@ -131,28 +149,28 @@
 .note-detail-head {
     float: left;
     width: 100%;
-    padding: 5px;
-    padding-bottom: 5px;
+    padding: 4px;
+    padding-bottom: 4px;
     border: 1px solid #ccc;
 }
 
 .note-detail-foot {
     float: left;
     width: 100%;
-    padding: 5px;
+    padding: 4px;
     border: 1px solid #ccc;
 }
 
 .note-last-visit-time {
-    padding-left: 2px;
-    padding-top: 2px;
+    padding-left: 4px;
+    padding-top: 4px;
     font-size: small;
     color: green;
 }
 
 .note-related {
     font-size: 6px;
-    padding-left: 5px;
+    padding-left: 4px;
     color: red;
     display: none;
 }
@@ -163,11 +181,11 @@
 
 .book-item {
     width: 100%;
-    padding: 10px 5px;
+    padding: 8px 4px;
     margin-top: 0px;
     margin-bottom: 0px;
     float: left;
-    line-height: 25px;
+    line-height: 24px;
     border-bottom: 1px solid #eee;
 }
 
@@ -187,15 +205,49 @@
 
 /** group select **/
 
+/* 分组选择弹窗的搜索框: 输入框占满, 按钮内嵌右侧(透明无边框), 一个完整圆角组件 */
 .group-select-search {
+    position: relative;
     float: left;
     width: 100%;
-    padding: 5px;
+    padding: 4px;
+}
+
+.group-select-search .nav-search-input {
+    float: none;
+    width: 100%;
+    padding-right: 30px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.group-select-search .nav-search-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 0px;
+    color: #888;
+    cursor: pointer;
+}
+
+.group-select-search .nav-search-btn:hover {
+    color: #333;
+    background: transparent;
 }
 
 .group-select-header {
     width: 100%;
-    padding: 5px;
+    padding: 4px;
     margin: 0px;
     background-color: #eee;
     /*float: left;*/
@@ -208,8 +260,8 @@
 }
 
 .group-select-row {
-    padding-left: 20px;
-    margin: 14px 0px 14px 0px;
+    padding-left: 24px;
+    margin: 16px 0px 16px 0px;
     padding-top: 0px;
     padding-right: 0px;
     /*float: left;*/
@@ -222,7 +274,7 @@
 }
 
 .share-dialog-row {
-    padding-left: 20px;
+    padding-left: 24px;
 }
 
 .share-dialog-row:hover {
@@ -233,7 +285,7 @@
     /*background-color: #eee;*/
     float: left;
     width: 100%;
-    padding: 5px;
+    padding: 4px;
     border: 1px solid #ccc;
 }
 
@@ -241,7 +293,7 @@
 .note-timeline-body {
     width: 100%;
     float: left;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 
@@ -265,24 +317,24 @@
 
 .sidebar-contents .list-item {
     border-bottom: none;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .list-item.level-1 {
-    padding-left: 5px;
+    padding-left: 4px;
 }
 
 .list-item.level-2 {
-    padding-left: 25px;
+    padding-left: 24px;
 }
 
 .list-item.level-3 {
-    padding-left: 45px;
+    padding-left: 48px;
 }
 
 .list-item.level-4, .list-item.level-5, .list-item.level-6, .list-item.level-7 {
-    padding-left: 65px;
+    padding-left: 64px;
 }
 
 .sidebar-contents {
@@ -294,7 +346,7 @@
 }
 
 .things {
-    padding-left: 20px;
+    padding-left: 24px;
 }
 
 #loadMore {
@@ -309,12 +361,12 @@
 
 .note-meta-name {
     width: 80px;
-    line-height: 29px;
+    line-height: 32px;
     float: left;
 }
 .note-meta-value {
     float: left;
-    line-height: 29px;
+    line-height: 32px;
     width: calc(100% - 80px);
 }
 

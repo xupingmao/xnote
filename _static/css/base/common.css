@@ -2,12 +2,36 @@
  * 通用的CSS样式
  * @author xupingmao
  * @since 2017/12/16
- * @modified 2022/03/16 18:57:15
- * @filename common.css
- * 命名规范（主要参考bootstrap）: 包含两部分，
- * 1：简单的、望文生义的样式，比如颜色 red, blue等等
- * 2：复杂样式，命名规则为：模块名(可选)-功能外观-子功能外观(可选)-实现方式(可选)-特征或状态(可选)，示例如下：
- *   1. marked-code (marked模块的code组件)
+*/
+
+/* 页脚 poweredBy（从 app.css 拆分而来） */
+#poweredBy {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    padding: 16px;
+    padding-left: 40px;
+    padding-right: 0px;
+    border-top: 1px solid #ccc;
+}
+
+#poweredBy,
+#poweredBy a {
+    color: white;
+}
+
+#poweredBy a {
+    text-decoration: underline;
+}
+
+@media screen and (max-width: 800px) {
+    .x-body {
+        position: static;
+        width: 100%;
+    }
+}
+(marked模块的code组件)
  *   2. marked-img (marked模块的图片组件)
  *   3. list-link（外观是list，通过link实现的）
  *   4. list-item（外观是list，通过div实现的）
@@ -23,8 +47,8 @@
 
 /** 标题样式 **/
 .heading {
-    margin: 0px 0px 10px 0px;
-    padding: 5px;
+    margin: 0px 0px 8px 0px;
+    padding: 4px;
     display: block;
     float: left;
     width: 100%;
@@ -42,7 +66,7 @@
 /* 菜单的链接样式 */
 .nav-item>a, .menu-link {
     color: white;
-    padding: 3px 5px;
+    padding: 4px 4px;
     text-decoration: none;
     font-size: 16px;
 }
@@ -92,7 +116,7 @@
 
 .tool-description {
     font-size: small;
-    padding-top: 3px;
+    padding-top: 4px;
 }
 
 .xnote-menu {
@@ -102,14 +126,14 @@
 li.menu-item {
     float: left;
     display: block;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 li.menu-active {
-    padding-bottom: 3px;
+    padding-bottom: 4px;
     border-style: solid;
     border-color: #99cc33;
     border-top: 0px;
@@ -144,7 +168,7 @@ li.menu-item:hover {
 
 .root {
     /*    
-    padding-bottom: 10px;
+    padding-bottom: 8px;
     width: 1000px;
     height: 100%;
     overflow: hidden;
@@ -162,8 +186,8 @@ li.menu-item:hover {
 .nav-container {
     float: left;
     width: 1000px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 .nav-left {
@@ -175,8 +199,8 @@ li.menu-item:hover {
 }
 
 .x-center.dev-info {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 .x-left {
@@ -187,7 +211,7 @@ li.menu-item:hover {
     float: left;
     width: 100%;
     margin: 0 auto;
-    margin-top: 10px;
+    margin-top: 8px;
     min-height: 400px;
     /*padding: 0px 10%;*/
 }
@@ -219,18 +243,18 @@ li.menu-item:hover {
 .nav-top ul {
   height: 30px;
   width: 100%;
-  padding-left: 10px;
+  padding-left: 8px;
 }
 
 .nav-top li {
   display: block;
   float: left;
-  padding: 5px;
+  padding: 4px;
 }
 
 .nav-left-search {
     float: left;
-    padding: 10px;
+    padding: 8px;
     display: none;
     padding-bottom: 0px;
 }
@@ -239,8 +263,8 @@ li.menu-item:hover {
     width: 100%;
     height: 30px;
     outline: none;
-    padding-left: 5px;
-    padding-right: 30px;
+    padding-left: 8px;
+    padding-right: 32px;
     float: left;
     display: block;
     border: 1px solid #ccc;
@@ -250,11 +274,57 @@ li.menu-item:hover {
 .nav-search {
     width: 345px;
     float: right;
-    padding: 10px 0px;
+    padding: 8px 0px;
+}
+
+/* 搜索框：输入框占满 100%，搜索按钮内嵌在输入框右侧（透明、无边框），
+   视觉上是一个完整圆角组件；输入框与按钮接触处只保留输入框 1 份边框 */
+.nav-search form,
+.nav-left-search form,
+.mobile-search form {
+    position: relative;
+}
+
+.nav-search form .nav-search-input,
+.nav-left-search form .nav-search-input,
+.mobile-search form .nav-search-input {
+    float: none;
+    width: 100%;
+    padding-right: 30px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.nav-search form .nav-search-btn,
+.nav-left-search form .nav-search-btn,
+.mobile-search form .nav-search-btn {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 0px;
+    color: #888;
+    cursor: pointer;
+}
+
+.nav-search form .nav-search-btn:hover,
+.nav-left-search form .nav-search-btn:hover,
+.mobile-search form .nav-search-btn:hover {
+    color: #333;
+    background: transparent;
 }
 
 .navMenu-top { 
-  padding: 10px; 
+  padding: 8px; 
   color: #fff; 
   border-bottom: 1px solid rgba(255,255,255,.1) 
 }
@@ -262,9 +332,9 @@ li.menu-item:hover {
 .notice {
     border: 1px solid #ccc;
     background-color: #cef2e0;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    padding-left: 3px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-left: 4px;
 }
 
 .form-control {
@@ -304,23 +374,23 @@ li.menu-item:hover {
 }
 
 .error {
-    padding: 5px;
+    padding: 4px;
     background-color: #f2dede;
     margin: 0px;
 }
 
 .alert {
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .warn {
     margin: 0px;
-    padding: 5px;
+    padding: 4px;
     background-color: #ffc;
 }
 
 .info {
-    padding: 5px;
+    padding: 4px;
     /* background-color: #C1FFC1; */
     margin: 0px;
     background-color: #cce5ff;
@@ -332,7 +402,7 @@ li.menu-item:hover {
 }
 
 .success {
-    padding: 5px;
+    padding: 4px;
     margin: 0px;
     background-color: #cf9;
 }
@@ -351,10 +421,10 @@ li.menu-item:hover {
     width: 100%;
     background-color: #214FA3;
     color: #fff;
-    padding: 5px;
+    padding: 4px;
     cursor: move;
     height: 36px;
-    line-height: 26px;
+    line-height: 24px;
 }
 
 .x-dialog-body {
@@ -403,11 +473,11 @@ li.menu-item:hover {
 
 .dialog-close-btn {
     float: right;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
     color: #fff;
     cursor: pointer;
-    line-height: 30px;
+    line-height: 32px;
 }
 
 .dialog-close-btn:hover {
@@ -416,11 +486,11 @@ li.menu-item:hover {
 
 .dialog-title-btn {
     float: left;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
     color: #fff;
     cursor: pointer;
-    line-height: 30px;
+    line-height: 32px;
 }
 
 .dialog-title-btn:hover {
@@ -449,13 +519,13 @@ li.menu-item:hover {
 
 
 #searchBox {
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .search-input {
     float: left;
     height:40px;
-    padding-left: 10px;
+    padding-left: 8px;
     padding-right: 40px;
     width: 100%;
     max-width: 500px;
@@ -465,7 +535,7 @@ li.menu-item:hover {
 
 .search-btn {
     float: left;
-    right: 10px;
+    right: 8px;
     background: #355380; 
     color: #fff; 
     border: none;
@@ -491,7 +561,7 @@ li.menu-item:hover {
 .fs-path {
     float: left;
     width: 100%;
-    padding: 5px;
+    padding: 4px;
     box-sizing: border-box;
     background-color: #eee;
 }
@@ -526,11 +596,11 @@ li.menu-item:hover {
     font-size: 14px;
     font-weight: normal;
     overflow: initial;
-    padding-left: 5px;
+    padding-left: 4px;
 }
 
 .card-title-2 {
-    padding: 5px;
+    padding: 4px;
     margin: 0px;
     background-color: #eee;
 }
@@ -544,11 +614,11 @@ li.menu-item:hover {
     display: block;
     float: left;
     width: 220px;
-    padding: 5px;
-    margin: 5px;
+    padding: 4px;
+    margin: 4px;
     margin-top: 0px;
     margin-bottom: 0px;
-    line-height: 25px;
+    line-height: 24px;
 }
 
 .grid-link:hover {
@@ -557,24 +627,24 @@ li.menu-item:hover {
 
 .grid-item {
     width: 20%;
-    padding: 5px;
-    /*margin: 5px;*/
+    padding: 4px;
+    /*margin: 4px;*/
     margin-top: 0px;
     margin-bottom: 0px;
     float: left;
-    line-height: 25px;
+    line-height: 24px;
 }
 
 .group-div {
     width: 220px;
-    padding: 5px;
-    margin: 5px;
+    padding: 4px;
+    margin: 4px;
     margin-top: 0px;
     margin-bottom: 0px;
     /*border: 1px solid #ccc;*/
     box-sizing: border-box;
     float: left;
-    line-height: 25px;
+    line-height: 24px;
 }
 
 .group-div:hover {
@@ -623,11 +693,11 @@ li.menu-item:hover {
     list-style: none;
     padding-left: 0px;
     margin: 0px;
-    line-height: 50px;
+    line-height: 48px;
 }
 
 .nav-item {
-    padding-right: 5px;
+    padding-right: 4px;
     display: block;
     float: left;
 }
@@ -639,8 +709,8 @@ li.menu-item:hover {
 .output-title {
     width: 100%;
     border: 1px solid #ccc;
-    padding-left: 5px;
-    margin-top: 5px;
+    padding-left: 4px;
+    margin-top: 4px;
 }
 
 .output-body {
@@ -656,15 +726,15 @@ li.menu-item:hover {
 
 .bot-btn {
     position: fixed;
-    bottom: 50px;
+    bottom: 48px;
     width: 50px;
     height: 40px;
     font-size: 14px;
     background-color: #00c1de;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 4px;
     color: #fff;
-    padding: 10px;
+    padding: 8px;
     z-index: 100;
     opacity: 0.8
 }
@@ -677,8 +747,8 @@ li.menu-item:hover {
     float: left;
     width: 1000px;
     min-height: 20px;
-    padding: 10px;
-    padding-left: 190px;
+    padding: 8px;
+    padding-left: 192px;
     background-color: #fff;
 }
 
@@ -689,7 +759,7 @@ li.menu-item:hover {
 .aside {
     float: left;
     width: 220px;
-    margin-left: -220px;
+    margin-left: -224px;
     display: none;
 }
 
@@ -698,22 +768,22 @@ li.menu-item:hover {
     border: 1px solid #ccc;
     width: 100%;
     float: left;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .aside-item li {
     list-style: none;
-    line-height: 20px;
+    line-height: 24px;
 }
 
 .aside-title {
     border-bottom: 1px solid #ccc;
     /*background-color: #efefef;*/
-    padding: 5px;
+    padding: 4px;
 }
 
 .aside-content {
-    margin: 5px;
+    margin: 4px;
 }
 
 .aside-content ul {
@@ -755,13 +825,13 @@ li.menu-item:hover {
     float: left;
     width: 100%;
     background-color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .transparent-card {
     float: left;
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .x-photo {
@@ -788,12 +858,12 @@ li.menu-item:hover {
 
 .scrollbar::-webkit-scrollbar-track { 
     /*滚动条里面轨道*/
-    /*border-radius: 10px; */
+    /*border-radius: 8px; */
     /*background: #eee; */
 } 
 
 .x-option-dialog div.layui-layer-content {
-    padding: 10px;
+    padding: 8px;
 }
 
 
@@ -805,9 +875,9 @@ li.menu-item:hover {
     width: 100%;
     float: left;
     background-color: #eee;
-    padding: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    padding: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
     font-weight: bold;
     line-height: normal;
     font-size: 14px;
@@ -816,7 +886,7 @@ li.menu-item:hover {
 .search-out-box {
     float: left;
     width: 100%;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
 }
 
 .bold {
@@ -854,10 +924,10 @@ li.menu-item:hover {
 .col-md-offset-2{margin-left:16.666666666666664%;}
 .col-md-offset-1{margin-left:8.333333333333332%;}
 .col-md-offset-0{margin-left:0;}
-.top-offset-1 {margin-top:5px;}
-.top-offset-2 {margin-top:10px;}
-.bottom-offset-1{margin-bottom:5px;}
-.bottom-offset-2{margin-bottom:10px;}
+.top-offset-1 {margin-top: 4px;}
+.top-offset-2 {margin-top: 8px;}
+.bottom-offset-1{margin-bottom: 4px;}
+.bottom-offset-2{margin-bottom: 8px;}
 
 .row{float: left;width: 100%;overflow: auto;}
 .row-extra {
@@ -865,38 +935,38 @@ li.menu-item:hover {
 }
 
 .padding-5, .padding-sm {
-    padding: 5px;
+    padding: 4px;
 }
 .padding-10, .padding-md {
-    padding: 10px;
+    padding: 8px;
 }
 .padding-lg {
-    padding: 20px;
+    padding: 24px;
 }
 .padding-top-5, .padding-top-sm {
-    padding-top: 5px;
+    padding-top: 4px;
 }
 .padding-top-10, .padding-top-md {
-    padding-top: 10px;
+    padding-top: 8px;
 }
 .padding-left-5, .padding-left-sm {
-    padding-left: 5px;
+    padding-left: 4px;
 }
 .padding-bottom-5, .padding-bottom-sm {
-    padding-bottom: 5px;
+    padding-bottom: 4px;
 }
 .padding-bottom-10, .padding-bottom-md {
-    padding-bottom: 10px
+    padding-bottom: 8px
 }
 .margin-top-5, .margin-top-sm, .margin-top-small {
-    margin-top: 5px;
+    margin-top: 4px;
 }
 .margin-top-10, .margin-top-md, .margin-top-medium {
-    margin-top: 10px;
+    margin-top: 8px;
 }
 .margin-bottom-5, .margin-bottom-sm, .margin-bottom-small {
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 .margin-bottom-10, .margin-bottom-md, .margin-bottom-medium {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }

@@ -10,8 +10,8 @@
     width: 16px;
     height: 16px;
     display: block;
-    margin-right: 5px;
-    margin-top: 5px; /* line-height是25px */
+    margin-right: 4px;
+    margin-top: 4px; /* line-height是25px */
     float: left;
     background-size: cover;
 }
@@ -34,7 +34,7 @@
     background-size: cover;
     width: 16px;
     height: 16px;
-    margin-left: -1px;
+    margin-left: -4px;
     float: left;
     margin-top: 4px;
     margin-right: 4px;
@@ -42,7 +42,7 @@
 
 .icon-script {
     display: block;
-    margin-right: 3px;
+    margin-right: 4px;
     float: left;
     width: 16px;
     height: 16px;
@@ -52,7 +52,7 @@
 
 .icon-dict {
     display: block;
-    margin-right: 3px;
+    margin-right: 4px;
     margin-top: 4px; /* line-height是25px */
     float: left;
     width: 16px;
@@ -63,7 +63,7 @@
 
 .icon-barcode {
     display: block;
-    margin-right: 3px;
+    margin-right: 4px;
     margin-top: 4px; /* line-height是25px */
     float: left;
     width: 16px;
@@ -74,7 +74,7 @@
 
 .icon-network {
     display: block;
-    margin-right: 3px;
+    margin-right: 4px;
     margin-top: 4px; /* line-height是25px */
     float: left;
     width: 16px;
@@ -85,8 +85,8 @@
 
 .icon-network-14px {
     display: block;
-    margin-right: 5px;
-    margin-top: 5px; /* line-height是25px */
+    margin-right: 4px;
+    margin-top: 4px; /* line-height是25px */
     float: left;
     width: 14px;
     height: 14px;
@@ -97,8 +97,8 @@
 
 .icon-work {
     display: block;
-    margin-right: 5px;
-    margin-top: 5px; /* line-height是25px */
+    margin-right: 4px;
+    margin-top: 4px; /* line-height是25px */
     float: left;
     width: 16px;
     height: 16px;

@@ -1,21 +1,31 @@
+
+/* 搜索按钮尺寸（从 app.css 拆分而来；颜色/定位见 base/common.css 的容器规则） */
+.nav-search-btn {
+    height: 30px;
+    width: 30px;
+}
+
+/* 搜索建议链接（从 app.css 拆分而来） */
+.suggest-link {
+    padding-right: 8px;
+}
+
 /**
  * 搜索的样式
  * @author xupingmao
- * @since 2021/04/24 17:35:43
- * @modified 2022/01/01 23:19:06
- * @filename search.css
- */
+ * @since 2021/04/24
+*/
 
- .search-tab {
-    padding: 5px;
- }
+.search-tab {
+    padding: 4px;
+}
 
- .search-badge-info {
-    padding:2px;
+.search-badge-info {
+    padding: 4px;
     font-size: 12px;
     color: green;
- }
+}
 
- .search-short-desc {
+.search-short-desc {
     color: #888;
  }

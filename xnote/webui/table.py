@@ -419,7 +419,7 @@ class DataTable(BaseComponent):
                 cells.append(head.render_cell(row))
             if len(self.actions) > 0:
                 action_html = "".join(action.render_cell(row) for action in self.actions)
-                cells.append("<td>%s</td>" % action_html)
+                cells.append('<td class="table-action-cell">%s</td>' % action_html)
             parts.append('<tr class="hover-tr">%s</tr>' % "".join(cells))
         return "\n".join(parts)
 

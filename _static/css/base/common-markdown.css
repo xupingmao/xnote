@@ -33,12 +33,12 @@ h3.marked-heading {
 .marked-contents {
     width: 100%;
     border: 1px solid #ccc;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .marked-contents-title {
     display: inline-block;
-    padding: 5px;
+    padding: 4px;
 }
 
 .marked-contents h1 {
@@ -60,10 +60,10 @@ h3.marked-heading {
     /* background-color: rgba(27,31,35,.05); */
     background-color: #eee;
     border-radius: 4px;
-    padding: 1px;
+    padding: 4px;
     font-size: 12px;
     border: 1px solid #ccc;
-    line-height: 23px;
+    line-height: 24px;
 }
 
 .marked-strong {
@@ -81,24 +81,24 @@ h3.marked-heading {
 
 .xnote-todo {
     background-color: #FFDEAD;
-    padding: 2px;
-    border-radius: 2px;
-    line-height: 26px;
+    padding: 4px;
+    border-radius: 4px;
+    line-height: 24px;
 }
 
 div.xnote-todo {
     display: inline-block;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 div.xnote-done {
     display: inline-block;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 .xnote-done {
     color: #aaa;
-    border-radius: 2px;
+    border-radius: 4px;
 }
 
 .xnote-todo.doing {
@@ -109,13 +109,13 @@ div.xnote-done {
 /* mermaid 图表容器 */
 .mermaid {
     text-align: center;
-    margin: 10px 0;
+    margin: 8px 0;
     overflow: auto;
 }
 
 .code-line {
     background-color: #eee;
-    padding: 0 10px;
+    padding: 0 8px;
     overflow: hidden;
 }
 
@@ -126,7 +126,7 @@ div.xnote-done {
     text-align: right;
     color: #999;
     user-select: none;
-    padding-right: 10px;
+    padding-right: 8px;
     vertical-align: top;
 }
 
@@ -154,7 +154,7 @@ pre code.hljs {
     justify-content: space-between;
     align-items: center;
     background-color: #f5f5f5;
-    padding: 8px 10px;
+    padding: 8px 8px;
     border-bottom: 1px solid #ddd;
 }
 

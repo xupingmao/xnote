@@ -144,10 +144,10 @@ def build_app_css():
         builder.append("./_static/css/base/common-select.css")
         builder.append("./_static/css/base/common-grid.css")
         builder.append("./_static/css/base/common-misc.css")
+        builder.append("./_static/css/base/common-upload.css")
 
         # 场景化的css
         builder.append("./_static/css/common-react.css")
-        builder.append("./_static/css/app.css")
         builder.append("./_static/css/message.css")
         builder.append("./_static/css/note.css")
         builder.append("./_static/css/note-comment.css")

@@ -17,13 +17,12 @@
 /* TAB页的链接样式 */
 .tab-link, .x-tab {
     float: left;
-    padding: 2px;
-    padding-left: 5px;
+    padding: 4px;
+    padding-left: 4px;
     cursor: pointer;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    margin-top: 5px;
-    line-height: 20px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    margin-top: 4px;
     color: #ccc;
     border: 1px solid transparent;
 }
@@ -48,10 +47,10 @@
     color: black;
     background-color: #eee;
     border: none;
-    border-radius: 5px;
-    margin-top: 5px;
+    border-radius: 4px;
+    margin-top: 4px;
     color: #08c;
-    padding: 2px 5px;
+    padding: 4px 4px;
 }
 
 /** 按钮hover **/
@@ -92,15 +91,15 @@
 .x-tab-box.dark-style .x-tab.active, .x-tab-box.dark-style .x-tab:hover {
     background-color: gray;
     color: #fff;
-    border-radius: 2px;
+    border-radius: 4px;
 }
 
 /** 下划线模式 **/
 .x-tab-box.underline-style .x-tab {
     border-left: none;
     border-right: none;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 .x-tab-box.underline-style .x-tab.active {
     border-bottom: 3px solid #06f;
@@ -131,13 +130,13 @@
 .x-tab-box.border-style .x-tab.active,.x-tab-box.border-style .x-tab:hover {
     border: 2px solid #06f;
     text-decoration: none;
-    border-radius: 2px;
+    border-radius: 4px;
 }
 
 .x-tab-box.border-style .x-tab {
     border: 2px solid transparent;
     text-decoration: none;
-    border-radius: 2px;
+    border-radius: 4px;
 }
 
 .x-tab-table {

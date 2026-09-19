@@ -34,7 +34,7 @@
 }
 
 .path-link, .default-path-link {
-    line-height: 28px;
+    line-height: 32px;
     color: #000;
     margin-right: 0;
 }
@@ -60,10 +60,10 @@
 .contract-link {
     display: block;
     color: #08c;
-    line-height: 20px;
+    line-height: 24px;
     float: left;
-    margin: 3px;
-    padding: 3px;
+    margin: 4px;
+    padding: 4px;
     text-decoration: none;
 }
 
@@ -77,8 +77,8 @@
 .link.active {
     color: white;
     background-color: #08c;
-    padding: 3px;
-    border-radius: 3px;
+    padding: 4px;
+    border-radius: 4px;
 }
 
 .action-link {

@@ -30,17 +30,17 @@
 .dropdown-content {
     display: none;
     position: absolute;
-    top: 35px;
+    top: 32px;
     left: 0px;
     background-color: #f9f9f9;
     min-width: 120px;
     border: 1px solid #ccc;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 10;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .dropdown-content.mobile {
@@ -61,7 +61,7 @@
 
 /* 右对齐 */
 .x-dropdown.align-right > .dropdown-content {
-    left: -67px;
+    left: -64px;
 }
 
 .dropdown-option {
@@ -97,7 +97,7 @@
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    padding: 0 10px;
+    padding: 0 8px;
 }
 
 .x-more-menu-toggle {
@@ -115,7 +115,7 @@
 .x-more-menu-list {
     display: none;
     position: absolute;
-    right: 6px;
+    right: 4px;
     top: 100%;
     background: #fff;
     border: 1px solid #e0e0e0;
@@ -135,8 +135,8 @@
    (那些类也会被加到菜单项上, 且因加载顺序靠后而拥有相同基础优先级) */
 .x-more-menu-list .x-more-menu-item {
     display: block;
-    padding: 8px 12px;
-    font-size: 13px;
+    padding: 8px 16px;
+    font-size: 12px;
     color: #333;
     cursor: pointer;
     white-space: nowrap;

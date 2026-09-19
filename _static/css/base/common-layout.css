@@ -13,7 +13,7 @@
 }
 
 .content-right {
-    padding-left: 10px;
+    padding-left: 8px;
     float: left;
     width: 300px;
 }
@@ -51,8 +51,8 @@
     width: 180px;
     height: 100%;
     position: fixed;
-    padding-top: 50px;
-    padding-bottom: 50px;
+    padding-top: 48px;
+    padding-bottom: 48px;
     background-color: #515865;
 }
 
@@ -68,7 +68,7 @@
 
 .nav-left li>a {
     color: white;
-    line-height: 25px;
+    line-height: 24px;
 }
 
 /** 移动端样式放在最后 **/

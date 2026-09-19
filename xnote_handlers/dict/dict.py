@@ -156,13 +156,16 @@ class DictHandler(BaseListPlugin):
 
         for item in items:
             list_item = ListViewItem()
-            list_item.add_link(text=item.key, href=item.url, css_class="bold")
-            list_item.add_br()
-            list_item.add_span(textutil.get_short_text(item.value, 100), css_class="gray")
-            edit_url = f"?action=edit&dict_type={item.dict_type}&dict_id={item.dict_id}"
-            
+            title = list_item.add_line()
+            title.add_link(text=item.key, href=item.url, css_class="bold")
+        
             if self.show_edit_action():
-                list_item.extra.add(EditFormActionLink(text="编辑", url=edit_url))
+                edit_url = f"?action=edit&dict_type={item.dict_type}&dict_id={item.dict_id}"
+                title.extra.add(EditFormActionLink(text="编辑", url=edit_url))
+            
+            content = list_item.add_line()
+            content.add_span(textutil.get_short_text(item.value, 100), css_class="gray")
+            
             
             list_view.add(list_item)
 

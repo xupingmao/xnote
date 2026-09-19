@@ -43,16 +43,16 @@ p {
     width: 100%;
     padding-top: 0px;
     padding-bottom: 0px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 h1,h2,h3,h4,h5,h6 {
     /* font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体"; */
     font-family: "微软雅黑", "Microsoft Yahei", -apple-system, BlinkMacSystemFont, 
         "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 input[type=checkbox] {
@@ -69,7 +69,7 @@ input[type=radio] {
 }
 
 input, textarea {
-    padding: 5px;
+    padding: 4px;
     outline: none;
 }
 
@@ -88,9 +88,9 @@ textarea:read-only, input[type=text]:read-only {
 }
 
 select {
-    padding: 5px;
+    padding: 4px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 /** 链接样式 **/
@@ -114,8 +114,8 @@ blockquote {
     display: block;
     width: 100%;
     border-left: 8px solid #d0e5f2;
-    padding: 5px 10px;
-    margin: 10px 0;
+    padding: 4px 8px;
+    margin: 8px 0;
     line-height: 1.4;
     font-size: 100%;
     background-color: #f1f1f1;
@@ -145,7 +145,7 @@ table th {
 }
 table td {
     border-width: 1px;
-    padding: 5px;
+    padding: 4px;
     border-style: solid;
     border-color: #ccc;
     background-color: #ffffff;

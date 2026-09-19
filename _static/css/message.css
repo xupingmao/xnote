@@ -10,8 +10,8 @@
 .message-row {
     float: left;
     width: 100%;
-    padding: 5px;
-    margin-bottom: 10px;
+    padding: 4px;
+    margin-bottom: 8px;
     border: 1px solid #ccc;
 }
 
@@ -24,9 +24,9 @@
     font-size: 12px;
     color: #000;
     border: 1px solid #ccc;
-    padding: 2px;
+    padding: 4px;
     background-color: #eee;
-    border-radius: 2px;
+    border-radius: 4px;
 }
 
 .msg-item-ip {
@@ -39,11 +39,11 @@
 }
 
 .msg-left-op-link {
-    margin-right: 20px;
+    margin-right: 24px;
 }
 
 .msg-right-op-link {
-    margin-left: 12px;
+    margin-left: 16px;
     float: right;
 }
 
@@ -78,14 +78,14 @@
     float: left;
     width: 100%;
     border-width: 5px;
-    border-radius: 5px;
+    border-radius: 4px;
     word-wrap: break-word;
     word-break: break-word;
-    padding: 5px 0px;
+    padding: 4px 0px;
 }
 
 .msg-item-option {
-    padding-top: 10px;
+    padding-top: 8px;
     float: left;
     width: 100%;
 }
@@ -101,7 +101,7 @@
 
 .chat-msg-time {
     display: inline-block;
-    padding: 2px;
+    padding: 4px;
     color: #888;
 }
 
@@ -114,8 +114,8 @@
 .send-button {
     float: left;
     width: 64px;
-    margin-top: 5px;
-    margin-right: 5px;
+    margin-top: 4px;
+    margin-right: 4px;
 }
 
 .right {
@@ -123,15 +123,15 @@
 }
 
 .msg-tag,.msg-tag-orange {
-    padding:3px;
-    border-radius: 3px;
+    padding: 4px;
+    border-radius: 4px;
     color: white;
     background-color: #ccc;
 }
 
 .msg-tag-orange {
-    padding: 3px;
-    border-radius: 3px;
+    padding: 4px;
+    border-radius: 4px;
     color: white;
     background-color: orange;
 }
@@ -145,9 +145,9 @@
 
 .msg-img-box.multi {
     float: left;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .img-list {
@@ -157,8 +157,8 @@
 .img-list .msg-img-box {
     float: left;
     width: auto;
-    margin-right: 10px;
-    margin-bottom: 10px;
+    margin-right: 8px;
+    margin-bottom: 8px;
 }
 
 /* 清除最后一个元素的右边距 */
@@ -170,7 +170,7 @@
     max-width: 100%;
     max-height: 100%;
     vertical-align: middle;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 
@@ -181,7 +181,7 @@
 
 .msg-amount-text {
     display: inline-block;
-    padding: 3px 8px;
+    padding: 4px 8px;
     color: #666;
 }
 
@@ -203,14 +203,14 @@
 .sidebar-btn-style>.x-tab-item {
     width: 50%;
     float: left;
-    padding: 5px;
+    padding: 4px;
 }
 
 .sidebar-btn-style .x-tab {
     width: 100%;
     color: black;
     background-color: #eee;
-    border-radius: 3px;
+    border-radius: 4px;
     margin: 0px;
 }
 
@@ -233,7 +233,7 @@
 .sidebar-list-style>.x-tab-item {
     width: 100%;
     float: left;
-    padding: 5px;
+    padding: 4px;
     color: #08c;
     border-bottom: 1px solid #eee;
 }
@@ -280,10 +280,10 @@
 
 .layui-layer-content .msg-edit-box textarea {
     position: absolute;
-    bottom: 185px;
-    top: 45px;
-    left: 10px;
-    right: 10px;
+    bottom: 184px;
+    top: 48px;
+    left: 8px;
+    right: 8px;
     width: unset;
 }
 
@@ -292,8 +292,8 @@
     bottom: 0px;
     right: 0px;
     position: absolute;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 .msg-dialog-bottom-bar {
@@ -301,15 +301,15 @@
     bottom: 0px;
     right: 0px;
     position: absolute;
-    padding: 10px;
-    padding-top: 5px;
+    padding: 8px;
+    padding-top: 4px;
     background-color: #fff;
 }
 
 .message-left {
     float: left;
     width: 30%;
-    padding-right: 10px;
+    padding-right: 8px;
     min-height: 100px;
 }
 
@@ -323,11 +323,11 @@
 }
 
 .hashtag-filter {
-    padding: 2px 5px;
+    padding: 4px 4px;
     background-color: #eee;
     display: inline-block;
-    border-radius: 5px;
-    margin-bottom: 5px;
+    border-radius: 4px;
+    margin-bottom: 4px;
 }
 
 .hashtag-filter.active {
@@ -338,14 +338,14 @@
 .message-edit-img-row {
     width: 100%;
     position: absolute;
-    bottom: 50px;
-    padding-left: 5px;
-    padding-right: 5px;
+    bottom: 48px;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .msg-date {
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 

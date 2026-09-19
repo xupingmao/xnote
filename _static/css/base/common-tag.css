@@ -19,12 +19,12 @@
     font-size: 12px;
     background-color: #e8f8e8;
     color: #2e7d32;
-    border-radius: 3px;
-    padding: 3px 5px;
+    border-radius: 4px;
+    padding: 4px 4px;
     word-break: keep-all;
     display: inline-block;
-    line-height: 17px;
-    margin: 2px;
+    line-height: 16px;
+    margin: 4px;
 }
 
 a.tag {
@@ -47,19 +47,19 @@ a.tag:hover {
 /** 2. 尺寸/形状修饰 **/
 .tag.large {
     font-size: 14px;
-    line-height: 19px;
+    line-height: 16px;
 }
 
 .tag.pill {
-    border-radius: 12px;
-    padding-left: 12px;
-    padding-right: 12px;
+    border-radius: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 .tag.pill.large {
-    border-radius: 14px;
-    padding-left: 14px;
-    padding-right: 14px;
+    border-radius: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 
@@ -107,8 +107,8 @@ a.tag:hover {
 }
 
 .tag.info {
-    padding: 3px 5px;
-    border-radius: 3px;
+    padding: 4px 4px;
+    border-radius: 4px;
     font-size: 12px;
     background: rgb(13, 202, 240);
     color: #fff;
@@ -177,10 +177,10 @@ a.tag:hover {
 .tag-span, .tag-span-danger {
     display: block;
     float: left;
-    line-height: 20px;
-    border-radius: 2px;
-    padding: 5px;
-    margin: 5px;
+    line-height: 24px;
+    border-radius: 4px;
+    padding: 4px;
+    margin: 4px;
     border: 1px solid #ccc;
     cursor: pointer;
 }
@@ -196,12 +196,12 @@ a.tag:hover {
 .tag-span-light {
     border: 1px solid #ccc;
     background-color: #cf9;
-    padding: 5px;
+    padding: 4px;
     color: #000;
-    margin: 2px;
+    margin: 4px;
     display: block;
     float: left;
-    line-height: 20px;
+    line-height: 24px;
 }
 
 .tag-span-light a {

@@ -1,4 +1,13 @@
 
+/* 表格选项列宽（系统设置/文件列表等，从 app.css 拆分而来） */
+.option-name {
+    width: 60%;
+}
+
+.option-td {
+    width: 20%;
+}
+
 /** 表格 **/
 .no-border-table td {
     border: none;
@@ -8,7 +17,7 @@
     width: 100%;
 }
 
-.table th{
+.table th {
     border-color: #ccc;
     text-align: left;
 }
@@ -43,7 +52,7 @@
 }
 
 .table-action-row, .table-action-bar, .action-bar {
-    padding-bottom: 5px;
+    padding-bottom: 4px;
     width: 100%;
     float: left;
 }
@@ -82,6 +91,19 @@
     min-width: 100px;
 }
 
+/* 表格操作列的按钮/链接间距 */
+.table-action-cell {
+    white-space: nowrap;
+}
+
+.table-action-cell > * {
+    margin-right: 8px;
+}
+
+.table-action-cell > *:last-child {
+    margin-right: 0;
+}
+
 /* 表格内的图片缩略图 */
 .table-thumbnail {
     max-width: 60px;
@@ -90,7 +112,7 @@
     height: auto;
     cursor: pointer;
     border: 1px solid #eee;
-    border-radius: 2px;
+    border-radius: 4px;
     vertical-align: middle;
 }
 

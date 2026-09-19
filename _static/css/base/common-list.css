@@ -2,12 +2,17 @@
 /** 列表样式 **/
 .list-item, .list-link {
     width: 100%;
-    padding: 10px 5px;
+    padding: 8px 4px;
     margin-top: 0px;
     margin-bottom: 0px;
     float: left;
-    line-height: 25px;
+    line-height: 24px;
     border-bottom: 1px solid #eee;
+}
+
+/* 列表项扩展信息（从 app.css 拆分而来） */
+.item-ext-info {
+    padding-top: 8px;
 }
 
 .list-item.no-padding {
@@ -17,7 +22,7 @@
 .list-item-link {
     display: block;
     width: 100%;
-    padding: 10px 5px;
+    padding: 8px 4px;
 }
 
 /*
@@ -39,7 +44,7 @@
 
 .list-item-outer .list-item-extra {
     flex: none;
-    padding-right: 5px;
+    padding-right: 4px;
 }
 
 /*
@@ -48,7 +53,7 @@
  */
 .list-item-line {
     flex-basis: 100%;
-    line-height: 22px;
+    line-height: 24px;
     color: #888;
     font-size: 12px;
 }

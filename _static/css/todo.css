@@ -30,7 +30,7 @@
 
 /* 第三行操作区与第二行标签留出间距 */
 .todo-task-actions {
-    margin-top: 3px;
+    margin-top: 4px;
 }
 
 .todo-task-meta-actions {
@@ -41,7 +41,7 @@
 
 .todo-time {
     display: inline-block;
-    padding: 2px;
+    padding: 4px;
     color: #888;
 }
 
@@ -55,8 +55,8 @@
 }
 
 .todo-content {
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-top: 4px;
+    margin-bottom: 4px;
     word-break: break-word;
     float: left;
     width: 100%;
@@ -69,7 +69,7 @@
 .todo-foot {
     float: left;
     width: 100%;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 .todo-foot .btn, .todo-foot .btn-default {
@@ -78,30 +78,30 @@
 
 .todo-tag {
     display: inline-block;
-    padding: 3px;
-    border-radius: 3px;
+    padding: 4px;
+    border-radius: 4px;
     background: #ccc;
     font-size: 12px;
     color: white;
 }
 
 .task-tag {
-    padding: 3px;
-    border-radius: 3px;
+    padding: 4px;
+    border-radius: 4px;
     background: orange;
     font-size: 12px;
     color: #fff;
 }
 
 .second-btn {
-    margin-left: 50px;
+    margin-left: 48px;
 }
 
 .todo-comment {
     width: 100%;
     float: left;
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid #eee;
 }
 
@@ -112,13 +112,13 @@
 }
 
 .comment-second a {
-    margin-left: 50px;
+    margin-left: 48px;
 } 
 
 
 .todo-comment-row {
     border-top: 1px solid #ccc;
-    padding: 10px;
+    padding: 8px;
 }
 
 .todo-comment-row .content {

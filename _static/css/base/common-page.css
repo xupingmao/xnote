@@ -15,9 +15,9 @@
 
 .x-page-link {
     border: 1px solid #ccc;
-    border-radius: 3px;
+    border-radius: 4px;
     text-decoration: none;
-    padding: 3px 10px;
+    padding: 4px 8px;
     color: #000;
     font-size: 12px;
 }
@@ -37,9 +37,9 @@
 
 .x-page-link.disabled {
     border: 1px solid #ccc;
-    border-radius: 3px;
+    border-radius: 4px;
     text-decoration: none;
-    padding: 3px 10px;
+    padding: 4px 8px;
     color: #dfdfdf;
     cursor: not-allowed;
 }

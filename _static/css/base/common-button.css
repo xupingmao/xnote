@@ -9,7 +9,7 @@
 
 .fixed-button-box {
     position: fixed;
-    right: 20px;
+    right: 24px;
     bottom: 20%;
 }
 
@@ -26,9 +26,9 @@
     width: 100%;
     text-align: center;
     background-color: black;
-    margin-top: 20px;
-    padding: 5px;
-    border-radius: 5px;
+    margin-top: 24px;
+    padding: 4px;
+    border-radius: 4px;
     opacity: 0.6;
     box-shadow: 2px 2px 2px #888;
 }
@@ -40,7 +40,7 @@
 .fixed-button-inner-box {
     float: left;
     width: 50%;
-    padding: 10px;
+    padding: 8px;
 }
 
 .fixed-button-2 {
@@ -50,8 +50,8 @@
     float: left;
     text-align: center;
     background-color: black;
-    padding: 5px;
-    border-radius: 5px;
+    padding: 4px;
+    border-radius: 4px;
     opacity: 0.6;
     box-shadow: 2px 2px 2px #888;
 }
@@ -70,14 +70,14 @@
     border: 1px solid transparent;
     color: #fff;
     text-decoration: none;
-    padding: 3px 7px;
+    padding: 4px 8px;
     font-size: 12px;
     font-weight: bold;
-    line-height: 18px;
-    border-radius: 5px;
+    line-height: 16px;
+    border-radius: 4px;
     font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
-    margin-top: 2px;
-    margin-bottom: 2px;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 .btn.hide, button.hide {
@@ -85,8 +85,8 @@
 }
 
 .btn.large, [type=button].large, button.large {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 24px;
+    padding-right: 24px;
 }
 
 button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover {
@@ -101,7 +101,7 @@ button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover {
     color: black;
     background-color: #eee;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .btn-default:hover, .btn-cancel:hover {
@@ -111,7 +111,7 @@ button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover {
 
 .btn-danger {
     background-color: #f00;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .btn-danger:hover {
@@ -124,7 +124,7 @@ button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover {
 
 .inline-btn {
     margin-top: 0px;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .prompt-btn:hover {
@@ -135,7 +135,7 @@ button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover {
     color: red;
     background-color: #eee;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .btn.danger:hover {
@@ -150,7 +150,7 @@ button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover {
 
 .toolbar.homepage {
     position: fixed;
-    right: 10px;
+    right: 8px;
     bottom: 20%;
 }
 
@@ -158,7 +158,7 @@ button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover {
     width: 50px;
     background-color: white;
     cursor: pointer;
-    padding: 10px;
+    padding: 8px;
     opacity: 0.5;
 }
 
@@ -178,7 +178,7 @@ button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover {
 
 /* 胶囊样式 */
 .btn.pill {
-    border-radius: 14px;
+    border-radius: 16px;
 }
 
 .btn.link-style {
