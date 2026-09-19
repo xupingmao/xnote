@@ -1,5 +1,5 @@
 # encoding=utf-8
-# Form 示例 tab，对应 /examples/example/form
+# Form 示例 tab，对应 /examples/form
 # Form 组件示例：静态展示表单 / 查询表单 / 弹窗表单
 import xutils
 
@@ -68,7 +68,7 @@ class FormExampleHandler(BaseTablePlugin):
 
         # 弹窗表单触发按钮（单独的组件，不塞进表单里）
         dialog_form = EditFormButton(text="打开弹窗表单",
-                                     url="/examples/example/form?action=edit")
+                                     url="/examples/form?action=edit")
 
         kw = Storage()
         kw.static_form = static_form
@@ -97,5 +97,5 @@ class FormExampleHandler(BaseTablePlugin):
 
 
 xurls = (
-    r"/examples/example/form", FormExampleHandler,
+    r"/examples/form", FormExampleHandler,
 )

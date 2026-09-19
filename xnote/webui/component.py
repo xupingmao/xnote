@@ -241,6 +241,23 @@ class TextSpan(BaseComponent):
         attr_list = build_attrs(attr_dict)
         return f"""<span {attr_list}>{text}</span>"""
 
+class Icon(BaseComponent):
+    """行内图标，渲染为 <i class="{icon_class}"></i>（如 font-awesome 的 fa fa-file-text-o）"""
+    def __init__(self, icon_class="", css_class="", css_style="", id=""):
+        self.icon_class = icon_class
+        self.css_class = css_class
+        self.css_style = css_style
+        self.id = id
+
+    def render(self):
+        attr_dict = {
+            "id": self.id,
+            "style": self.css_style,
+            "class": (self.icon_class + " " + self.css_class).strip(),
+        }
+        attr_list = build_attrs(attr_dict)
+        return f"""<i {attr_list}></i>"""
+
 class TagSpan(BaseComponent):
     def __init__(self, text="", href="", css_class="", badge_info="", icon_class="", text_html=""):
         self.text = text

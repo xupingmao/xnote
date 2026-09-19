@@ -17,7 +17,7 @@ DEVELOPER_APPS = [
     AppInfo(name="图片工具",   url="/tools/img_merge?tab=merge&nav=true", icon="image"),
     AppInfo(name="编解码工具", url="/tools/encode?tab=BASE64&nav=true",    icon="exchange"),
     AppInfo(name="文本工具",   url="/tools/text_convert?tab=convert&nav=true", icon="file-text-o"),
-    AppInfo(name="前端组件",   url="/examples/example",                    icon="cubes"),
+    AppInfo(name="前端组件",   url="/examples",                    icon="cubes"),
     AppInfo(name="系统模块",   url="/system/module_list",                 icon="sitemap"),
     AppInfo(name="性能分析",   url="/system/handler_profile",             icon="tachometer"),
 ]

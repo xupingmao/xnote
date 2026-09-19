@@ -1,5 +1,5 @@
 # encoding=utf-8
-# 日历组件示例 tab，对应 /examples/example/calendar
+# 日历组件示例 tab，对应 /examples/calendar
 import xutils
 
 from datetime import date
@@ -73,5 +73,5 @@ class CalendarExampleHandler(BasePlugin):
 
 
 xurls = (
-    r"/examples/example/calendar", CalendarExampleHandler,
+    r"/examples/calendar", CalendarExampleHandler,
 )

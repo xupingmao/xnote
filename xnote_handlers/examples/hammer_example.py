@@ -1,5 +1,5 @@
 # encoding=utf-8
-# Hammer(触控) 示例 tab，对应 /examples/example/hammer
+# Hammer(触控) 示例 tab，对应 /examples/hammer
 from xutils import Storage
 from xnote.core import xauth
 from xnote.core import xtemplate
@@ -12,7 +12,7 @@ class HammerExampleHandler:
 
     def GET(self):
         user_name = xauth.current_name_str()
-        xmanager.add_visit_log(user_name, "/examples/example/hammer")
+        xmanager.add_visit_log(user_name, "/examples/hammer")
 
         kw = Storage()
         kw.title = "组件示例"
@@ -25,5 +25,5 @@ class HammerExampleHandler:
 
 
 xurls = (
-    r"/examples/example/hammer", HammerExampleHandler,
+    r"/examples/hammer", HammerExampleHandler,
 )

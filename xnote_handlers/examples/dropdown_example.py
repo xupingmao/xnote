@@ -1,5 +1,5 @@
 # encoding=utf-8
-# Dropdown 示例 tab，对应 /examples/example/dropdown
+# Dropdown 示例 tab，对应 /examples/dropdown
 from xutils import Storage
 from xnote.core import xauth
 from xnote.core import xtemplate
@@ -12,7 +12,7 @@ class DropdownExampleHandler:
 
     def GET(self):
         user_name = xauth.current_name_str()
-        xmanager.add_visit_log(user_name, "/examples/example/dropdown")
+        xmanager.add_visit_log(user_name, "/examples/dropdown")
 
         kw = Storage()
         kw.title = "组件示例"
@@ -25,5 +25,5 @@ class DropdownExampleHandler:
 
 
 xurls = (
-    r"/examples/example/dropdown", DropdownExampleHandler,
+    r"/examples/dropdown", DropdownExampleHandler,
 )

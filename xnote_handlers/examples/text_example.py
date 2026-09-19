@@ -1,5 +1,5 @@
 # encoding=utf-8
-# 文本示例 tab，对应 /examples/example/text
+# 文本示例 tab，对应 /examples/text
 from xutils import Storage
 from xnote.core import xauth
 from xnote.core import xtemplate
@@ -12,7 +12,7 @@ class TextExampleHandler:
 
     def GET(self):
         user_name = xauth.current_name_str()
-        xmanager.add_visit_log(user_name, "/examples/example/text")
+        xmanager.add_visit_log(user_name, "/examples/text")
 
         kw = Storage()
         kw.title = "组件示例"
@@ -25,5 +25,5 @@ class TextExampleHandler:
 
 
 xurls = (
-    r"/examples/example/text", TextExampleHandler,
+    r"/examples/text", TextExampleHandler,
 )

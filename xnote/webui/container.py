@@ -1,6 +1,6 @@
 from xnote.webui.base import BaseComponent, BaseContainer, Div
 from xnote.webui.component import TextSpan, EditFormButton, ConfirmButton, TextLink
-from xnote.webui.component import TextItemSep, TextNbsp, TextBr
+from xnote.webui.component import TextItemSep, TextNbsp, TextBr, Icon
 from xnote.core import xtemplate
 from typing import Optional
 
@@ -12,6 +12,10 @@ class TextContainer(BaseContainer):
     
     def add_link(self, text="", href="", css_class="", is_bracketed=False):
         self.children.append(TextLink(text=text, href=href, css_class=css_class, is_bracketed=is_bracketed))
+
+    def add_icon(self, icon_class="", css_class="", css_style=""):
+        """增加行内图标，渲染为 <i class="{icon_class}"></i>（如 fa fa-file-text-o）"""
+        self.children.append(Icon(icon_class=icon_class, css_class=css_class, css_style=css_style))
     
     def add_br(self, count=1):
         for _ in range(count):

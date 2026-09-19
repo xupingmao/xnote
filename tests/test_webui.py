@@ -13,6 +13,8 @@ from xnote.webui import Div
 from xnote.webui import Tree, TreeNode
 from xnote.webui import Dropdown, DropdownOption
 from xnote.webui import TextTag, DialogForm
+from xnote.webui import TextContainer, Icon
+from xnote.webui import ListView, ListItem
 from xnote.webui.table import DataTable, TableRowType
 from xnote.plugin import DataForm, FormRowType
 
@@ -40,6 +42,34 @@ class TestMain(BaseTestCase):
         except Exception as e:
             xutils.print_exc()
             assert "too deep depth" in str(e)
+
+
+    def test_text_container_add_icon(self):
+        # TextContainer.add_icon 渲染行内图标 <i class="fa xxx"></i>
+        container = TextContainer()
+        container.add_icon("fa fa-file-text-o")
+        container.add_span("标题")
+        html = container.render()
+        assert '<i class="fa fa-file-text-o"></i>' in html
+        assert "标题" in html
+
+    def test_icon_with_css_class(self):
+        # icon_class 与 css_class 合并到 class 属性，支持额外的样式/颜色
+        icon = Icon(icon_class="fa fa-clock-o", css_class="gray", css_style="margin-right:4px;")
+        html = icon.render()
+        assert '<i ' in html
+        assert 'class="fa fa-clock-o gray"' in html
+        assert 'style="margin-right:4px;"' in html
+
+    def test_list_view_item_add_icon(self):
+        # ListViewItem 继承 TextContainer，子行内也可以放图标
+        item = ListItem(text="物品-1")
+        title_line = item.add_line()
+        title_line.add_icon("fa fa-tag")
+        title_line.add_span("带图标的标题")
+        html = item.render().decode("utf-8")
+        assert '<i class="fa fa-tag"></i>' in html
+        assert "带图标的标题" in html
 
 
 class TestTree(BaseTestCase):
@@ -99,7 +129,7 @@ class TestTree(BaseTestCase):
 class TestTreeExamplePage(BaseTestCase):
 
     def test_example_tree_page(self):
-        html = request_html("/examples/example/tree")
+        html = request_html("/examples/tree")
         html = html.decode("utf-8")
         assert "x-tree" in html
         assert "我的笔记" in html
@@ -307,8 +337,8 @@ class TestDataForm(BaseTestCase):
         assert row.value_list[1]["name"] == "y.zip"
 
     def test_example_form_has_upload(self):
-        # 示例表单页（/examples/example/table?action=edit）应渲染出上传组件
-        body = request_html("/examples/example/table?action=edit").decode("utf-8")
+        # 示例表单页（/examples/table?action=edit）应渲染出上传组件
+        body = request_html("/examples/table?action=edit").decode("utf-8")
         assert 'data-upload-kind="image"' in body
         assert 'data-upload-kind="file"' in body
         assert "添加图片" in body
@@ -378,7 +408,7 @@ class TestDataForm(BaseTestCase):
         assert 'data-value="3"' in html
 
     def test_example_form_has_tag_select(self):
-        body = request_html("/examples/example/table?action=edit").decode("utf-8")
+        body = request_html("/examples/table?action=edit").decode("utf-8")
         assert "form-tag-select" in body
         assert 'name="tags2"' in body
 
@@ -392,14 +422,14 @@ class TestDataForm(BaseTestCase):
 
     def test_form_id_unique_in_page(self):
         # 同一页面渲染出的表单 id 不能重复
-        body = request_html("/examples/example/form").decode("utf-8")
+        body = request_html("/examples/form").decode("utf-8")
         form_ids = re.findall(r'<form id="([^"]*)"', body)
         assert len(form_ids) == len(set(form_ids)), f"表单id重复: {form_ids}"
 
     def test_tag_select_save_roundtrip(self):
         # 前端 formData() 收集到的隐藏域值以 data=<json> 提交，后端应能原样解析
         data = {"tags2": "2", "tags3": "1,3"}
-        resp = self.request_app("/examples/example/form?action=save", "POST",
+        resp = self.request_app("/examples/form?action=save", "POST",
                                 {"data": json.dumps(data)})
         self.assertEqual("200 OK", resp.status)
 

@@ -100,7 +100,7 @@ class ListPluginHandler(BaseListPlugin):
     
 
 
-class ListExampleHandler(BasePlugin):
+class ListViewExampleHandler(BasePlugin):
     parent_link = LinkConfig.develop_index
     title = "ListView示例"
     rows = 0
@@ -115,6 +115,16 @@ class ListExampleHandler(BasePlugin):
 <div class="card">
     <span class="card-title">ListView: 内层链接</span>
     {% render item_list2 %}
+</div>
+
+<div class="card">
+    <span class="card-title">ListView: 2行item（标题 + 说明）</span>
+    {% render item_list_two_line %}
+</div>
+
+<div class="card">
+    <span class="card-title">ListView: 3行item（标题 + 说明 + 元信息）</span>
+    {% render item_list_three_line %}
 </div>
 """
     def handle(self, input=""):
@@ -147,14 +157,68 @@ class ListExampleHandler(BasePlugin):
         kw = Storage()
         kw.item_list = item_list
         kw.item_list2 = item_list2
-        kw.example_tab = get_example_tab()
+        kw.item_list_two_line = self.create_two_line_list()
+        kw.item_list_three_line = self.create_three_line_list()
+        kw.example_tab = get_example_tab(tab_default="list_view")
 
         self.writehtml(html=self.body_html, **kw)
+
+    def create_two_line_list(self):
+        """2行item：第一行是标题（加粗 + 标签），第二行是灰色说明文字。
+        注意：icon 是 inline 元素，第一行要用 add_span 等 inline 内容与 icon 同行，
+        不能先 add_line()（block），否则 icon 会单独占一行。"""
+        list_view = ListView()
+
+        for index in range(2):
+            item = ListItem(icon_class="fa fa-file-text-o", show_chevron_right=True,
+                            href=f"javascript:xnote.alert({index+1})")
+
+            # 第一行：icon + 标题 + 标签（inline 内容，与 icon 同行）
+            item.add_span(text=f"物品-{index+1}", css_class="bold")
+            item.add(TextTag(text="标签", css_class="lightblue"))
+
+            # 第二行：说明
+            desc_line = item.add_line()
+            desc_line.add_span(text="说明：这里是第二行内容", css_class="gray")
+
+            list_view.add_item(item)
+
+        return list_view
+
+    def create_three_line_list(self):
+        """3行item：标题 + 说明 + 元信息行（更新时间 | 来源）。
+        同 create_two_line_list：第一行用 inline 内容与 icon 同行，后续行用 add_line()。"""
+        list_view = ListView()
+        now = dateutil.format_date()
+
+        for index in range(2):
+            item = ListItem(icon_class="fa fa-list", show_chevron_right=True,
+                            badge_info=f"徽标{index+1}",
+                            href=f"javascript:xnote.alert({index+1})")
+
+            # 第一行：icon + 标题
+            item.add_span(text=f"物品-{index+1}", css_class="bold")
+
+            # 第二行：说明
+            desc_line = item.add_line()
+            desc_line.add_span(text="说明：这里是第二行内容", css_class="gray")
+
+            # 第三行：元信息（行内可用 add_icon 加图标）
+            meta_line = item.add_line()
+            meta_line.add_icon("fa fa-clock-o")
+            meta_line.add_nbsp()
+            meta_line.add_span(text=f"更新于 {now}", css_style="color:#999;")
+            meta_line.add_item_sep()
+            meta_line.add_span(text="来源：示例", css_style="color:#999;")
+
+            list_view.add_item(item)
+
+        return list_view
 
     def handle_delete(self):
         return webutil.FailedResult(code="500", message="mock删除失败")
 
 xurls = (
-    r"/examples/example/list", ListExampleHandler,
-    r"/examples/example/list_plugin", ListPluginHandler,
+    r"/examples/list_view", ListViewExampleHandler,
+    r"/examples/list_plugin", ListPluginHandler,
 )

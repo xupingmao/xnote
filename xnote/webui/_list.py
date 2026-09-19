@@ -83,7 +83,12 @@ class ListViewItem(TextContainer):
         return self.extra
 
     def add_line(self, css_class="", css_style=""):
-        """新增一个子行（line），返回 ListViewLine 以便继续添加内容。"""
+        """新增一个子行（line），返回 ListViewLine 以便继续添加内容。
+
+        注意：icon_class 是 inline 元素，会和第一个 inline 子内容（add_span/add_link 等）
+        排在同一行；如果先调 add_line()（block 元素），icon 会单独占一行。
+        多行 item 的第一行请用 add_span/add_link 等 inline 内容，后续行再用 add_line()。
+        """
         line = ListViewLine(css_class=css_class, css_style=css_style)
         self.add(line)
         return line

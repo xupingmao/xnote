@@ -80,5 +80,5 @@ class TreeExampleHandler(BasePlugin):
 
 
 xurls = (
-    r"/examples/example/tree", TreeExampleHandler,
+    r"/examples/tree", TreeExampleHandler,
 )

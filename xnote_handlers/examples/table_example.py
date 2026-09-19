@@ -1,5 +1,5 @@
 # encoding=utf-8
-# Table 示例 tab，对应 /examples/example/table
+# Table 示例 tab，对应 /examples/table
 import xutils
 import copy
 
@@ -271,5 +271,5 @@ class TableExampleHandler(BaseTablePlugin):
 
 
 xurls = (
-    r"/examples/example/table", TableExampleHandler,
+    r"/examples/table", TableExampleHandler,
 )
