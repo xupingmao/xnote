@@ -8,12 +8,15 @@
 
 * {
     box-sizing: border-box;
-    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+    /* Safari 等 WebKit 内核中，中英文若回退到不同字体(如 Helvetica + PingFang SC)，
+       各自内建行高不同会导致混排行高/文字高度不一致；把 -apple-system 等系统统一
+       字体放在最前，macOS/iOS 上中英文都走 SF + PingFang，行高一致 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Open Sans", "Microsoft YaHei", "微软雅黑", "PingFang SC", Arial, Helvetica, sans-serif;
 }
 
 body {
     background-color: #DEE2E6;
-    font-family: "微软雅黑", "Open Sans Light", Helvetica, "Arial Narrow", HELVETICA; 
+    font-family: -apple-system, BlinkMacSystemFont, "微软雅黑", "Microsoft YaHei", "PingFang SC", "Open Sans Light", Helvetica, Arial, sans-serif; 
     font-size: 14px;
     letter-spacing: 1px;
     -webkit-text-size-adjust: 100%; 
@@ -96,7 +99,7 @@ select {
 /** 链接样式 **/
 a {
     font-size: 14px;
-    font-family: "Open Sans",Arial,Helvetica,sans-senif,"Microsoft Yahei",SimSun,"宋体";
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Open Sans", "Microsoft YaHei", "微软雅黑", "PingFang SC", Arial, Helvetica, sans-serif;
     text-decoration: none;
     word-wrap: break-word;
     word-break: break-word;
@@ -128,7 +131,7 @@ blockquote p {
 
 /** 表格样式 **/
 table {
-    font-family: verdana,arial,sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "PingFang SC", verdana, arial, sans-serif;
     font-size:14px;
     color:#333333;
     border-width: 1px;
