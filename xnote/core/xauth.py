@@ -438,6 +438,11 @@ def _save_sid_list(sid: str):
         return
     
     sid_list_str: str = web.cookies().get(CookieKeys.sid_list, "")
+    sid_list = [x for x in sid_list_str.split(",") if x != ""]
+    if sid in sid_list:
+        # sid 已经在 sid_list 里，无需重复处理（避免无意义的 setcookie）
+        return
+
     new_sid_list = _merge_sid_list(sid_list_str, sid)
     web.setcookie(CookieKeys.sid_list, new_sid_list, expires=str(SESSION_EXPIRE))
 
