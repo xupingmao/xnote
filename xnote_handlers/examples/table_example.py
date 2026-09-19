@@ -1,9 +1,8 @@
 # encoding=utf-8
-# Created by xupingmao on 2024/09/15
+# Table 示例 tab，对应 /examples/example/table
 import xutils
 import copy
 
-from datetime import date
 from xutils import Storage
 from xnote.core import xauth
 from xnote.core import xtemplate
@@ -13,34 +12,20 @@ from xnote.plugin.table_plugin import BaseTablePlugin, BasePlugin
 from xnote.plugin import DataTable, TableActionType, TabBox, QueryForm, TabTable, DataForm, PageEditForm, DialogForm, EditFormButton
 from xnote.webui import FormRowType
 from xnote.plugin.table import InfoTable, InfoItem, ActionBar, TableRowType
-from xnote.webui.calendar import ContributionCalendar
 from xnote.webui import ListView, ListItem, ConfirmButton, TextTag
 from xutils import textutil
 from xutils import webutil
 from xutils.number_util import IntCounter
 from xnote_handlers.config import LinkConfig
+from .example_nav import get_example_tab
 
-def get_example_tab(tab_default=""):
-    tab = TabBox(tab_key="name", title="案例:", css_class="btn-style", tab_default=tab_default)
-    tab.add_tab("文本示例", value="text", href=f"/test/example?name=text")
-    tab.add_tab("按钮示例", value="btn", href=f"/test/example?name=btn")
-    tab.add_tab("Tab示例", value="tab", href=f"/test/example?name=tab")
-    tab.add_tab("Tag示例", value="tag", href=f"/test/example?name=tag")
-    tab.add_tab("Form示例", value="form", href=f"/test/example/form")
-    tab.add_tab("Dialog示例", value="dialog", href=f"/test/example?name=dialog")
-    tab.add_tab("Dropdown示例", value="dropdown", href=f"/test/example?name=dropdown")
-    tab.add_tab("Table示例", value="table", href=f"/test/example/table?name=table")
-    tab.add_tab("ListView示例", value="list", href=f"/test/example/list?name=list")
-    tab.add_tab("ListPlugin", value="list_plugin", href=f"/test/example/list_plugin")
-    tab.add_tab("Tree示例", value="tree", href=f"/test/example/tree?name=tree")
-    tab.add_tab("日历组件", value="calendar", href="/test/example/calendar?name=calendar")
-    tab.add_tab("Hammer示例", value="hammer", href=f"/test/example?name=hammer")
-    return tab
+# 注意：from .example_handler import get_example_tab 已迁移到 example_nav.py
+
 
 class TableExampleHandler(BaseTablePlugin):
 
     parent_link = LinkConfig.develop_index
-    
+
     title = "表格测试"
 
     show_aside = False
@@ -48,7 +33,7 @@ class TableExampleHandler(BaseTablePlugin):
     heading_count = IntCounter()
 
     PAGE_HTML = """
-{% include test/component/example_nav_tab.html %}
+{% include examples/component/example_nav_tab.html %}
 
 <div class="card">
     {% render tab %}
@@ -92,7 +77,7 @@ class TableExampleHandler(BaseTablePlugin):
         table.add_head("内容", "content")
 
         table.add_action("编辑", link_field="edit_url", type=TableActionType.edit_form)
-        table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, 
+        table.add_action("删除", link_field="delete_url", type=TableActionType.confirm,
                          msg_field="delete_msg", css_class="btn danger")
 
         row = {}
@@ -123,7 +108,7 @@ class TableExampleHandler(BaseTablePlugin):
         kw.image_table = self.get_image_table()
 
         return self.response_page(**kw)
-    
+
     def handle_edit(self):
         self.heading_count.add(1)
         show_heading = xutils.get_argument_bool("show_heading", True)
@@ -135,11 +120,11 @@ class TableExampleHandler(BaseTablePlugin):
 
         form.add_row("id", "id", css_class="hide")
         form.add_row("只读属性", "readonly_attr", value="test", readonly=True)
-        
+
         row = form.add_row("类型", "type", type=self.FormRowType.select)
         row.add_option("类型1", "1")
         row.add_option("类型2", "2")
-        
+
         form.add_row("标题", "title")
         form.add_row("日期", "date", type=self.FormRowType.date)
         form.add_row("内容", "content", type=self.FormRowType.textarea)
@@ -166,33 +151,33 @@ class TableExampleHandler(BaseTablePlugin):
 
         form.add_image("封面图片", "cover")
         form.add_file("附件", "attachments", multiple=True)
-            
+
         kw = Storage()
         kw.form = form
         return self.response_form(**kw)
-    
+
     def handle_save(self):
         data_dict = self.get_param_dict()
         return webutil.FailedResult(code="500", message=f"data_dict={data_dict}")
-    
+
     def get_tab_component(self):
         tab = TabBox(
-            tab_key="tab", tab_default="2", css_class="btn-style", 
+            tab_key="tab", tab_default="2", css_class="btn-style",
             title="后端tab组件", title_width=self.tab_title_width)
         tab.add_tab(title="选项1", value="1", href="?tab=1")
         tab.add_tab(title="选项2", value="2")
         tab.add_tab(title="选项3", value="3", css_class="hide")
         tab.add_tab(title="onclick", href="#", onclick="javascript:alert('onclick!')")
         return tab
-    
+
     def get_tab2(self):
         tab = TabBox(
-            tab_key="tab2", css_class="btn-style", 
+            tab_key="tab2", css_class="btn-style",
             title="状态", title_width=self.tab_title_width)
         tab.add_tab(title="正常", value="1")
         tab.add_tab(title="停用", value="2")
         return tab
-    
+
     def get_query_form(self):
         type_str = xutils.get_argument_str("type")
         keyword = xutils.get_argument_str("keyword")
@@ -207,7 +192,7 @@ class TableExampleHandler(BaseTablePlugin):
 
         return form
 
-    
+
     def get_weight_table(self):
         table = DataTable()
         table.title = "表格2-权重宽度"
@@ -216,9 +201,9 @@ class TableExampleHandler(BaseTablePlugin):
         table.add_head("权重2", field="value3", width_weight=2)
         table.add_head("权重1", field="value4", width_weight=1)
         table.add_action("编辑", link_field="edit_url", type=TableActionType.edit_form)
-        table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, 
+        table.add_action("删除", link_field="delete_url", type=TableActionType.confirm,
                          msg_field="delete_msg", css_class="btn danger")
-        
+
         row = {}
         row["value1"] = "value1"
         row["value2"] = "value2"
@@ -231,7 +216,7 @@ class TableExampleHandler(BaseTablePlugin):
 
         table.add_row(row)
         return table
-    
+
     def get_empty_table(self):
         table = DataTable()
         table.add_head("权重1", field="value1", width_weight=1)
@@ -239,14 +224,14 @@ class TableExampleHandler(BaseTablePlugin):
         table.add_head("权重2", field="value3", width_weight=2)
         table.add_head("权重1", field="value4", width_weight=1)
         table.add_action("编辑", link_field="edit_url", type=TableActionType.edit_form)
-        table.add_action("删除", link_field="delete_url", type=TableActionType.confirm, 
+        table.add_action("删除", link_field="delete_url", type=TableActionType.confirm,
                          msg_field="delete_msg", css_class="btn danger")
-        
+
         action_bar = table.action_bar
         action_bar.add_span(text="表格3-action_bar")
         action_bar.add_edit_button(text="新建", url="?action=edit", float_right=True)
         return table
-    
+
     def get_info_table(self):
         table = InfoTable()
         table.cols = xutils.get_argument_int("cols", 2)
@@ -284,206 +269,7 @@ class TableExampleHandler(BaseTablePlugin):
             table.add_row({"name": name, "icon": image_url(path), "desc": desc})
         return table
 
-class ExampleHandler:
-
-    def GET(self):
-        user_name = xauth.current_name_str()
-        xmanager.add_visit_log(user_name, "/test/example")
-        
-        name = xutils.get_argument_str("name", "")
-        example_tab = get_example_tab()
-        kw = Storage()
-        kw.title = "组件示例"
-        kw.parent_link = LinkConfig.develop_index
-        kw.example_tab = example_tab
-
-        if name == "":
-            return xtemplate.render("test/page/example_index.html", **kw)
-
-        if name == "tab":
-            return self.render_tab(kw)
-
-        return xtemplate.render(f"test/page/example_{name}.html", **kw)
-
-    def POST(self):
-        return self.GET()
-    
-    def render_tab(self, kw: Storage):
-        title_width = "120px"
-        tab_group_1 = TabBox(tab_key="tab_group_1", css_class="btn-style", title="Tab Group 1", title_width=title_width)
-        tab_group_2 = TabBox(tab_key="tab_group_2", css_class="btn-style", title="Tab Group 2", title_width=title_width)
-        
-        for index in range(3):
-            tab_group_1.add_item(title=f"Tab-{index}", value=f"tab-{index}")
-            tab_group_2.add_item(title=f"Tab-{index}", value=f"tab-{index}")
-            
-        kw.tab_group_1 = tab_group_1
-        kw.tab_group_2 = tab_group_2
-        kw.tab_table = self.get_tab_table()
-        
-        return xtemplate.render("test/page/example_tab.html", **kw)
-
-    def get_tab_table(self):
-        tab_table = TabTable()
-        tab_group_1 = TabBox(tab_key="tab_group_1", css_class="btn-style", title="Tab Group 1")
-        tab_group_2 = TabBox(tab_key="tab_group_2", css_class="btn-style", title="Tab Group 2")
-        
-        for index in range(3):
-            tab_group_1.add_item(title=f"Tab-{index}", value=f"tab-{index}")
-            tab_group_2.add_item(title=f"Tab-{index}", value=f"tab-{index}")
-            
-        tab_table.add_tab_box(tab_group_1)
-        tab_table.add_tab_box(tab_group_2)
-        return tab_table
-
-
-class FormExampleHandler(BaseTablePlugin):
-    """Form 组件示例：静态展示表单 / 查询表单 / 弹窗表单"""
-
-    parent_link = LinkConfig.develop_index
-
-    body_html = """
-{% include test/component/example_nav_tab.html %}
-
-<h3 class="card-title">页面表单 (PageEditForm 渲染，普通文档流，非弹窗)</h3>
-<div class="card">
-    {% render static_form %}
-</div>
-
-<h3 class="card-title">查询表单 (QueryForm 渲染)</h3>
-<div class="card">
-    {% render query_form %}
-</div>
-
-<h3 class="card-title">弹窗表单 (DialogForm 定义表单，EditFormButton 触发)</h3>
-<div class="card">
-    {% render dialog_form %}
-</div>
-"""
-
-    def handle(self, input=""):
-        action = xutils.get_argument_str("action")
-        if action == "edit":
-            return self.handle_edit()
-        if action == "save":
-            return self.handle_save()
-        return self.handle_page()
-
-    def handle_page(self):
-        # 页面表单：PageEditForm（page_edit 类型），渲染为普通文档流的页面表单，
-        # 区别于弹窗用的 edit 类型（DataForm，absolute 定位，仅适合对话框容器）
-        static_form = PageEditForm()
-        static_form.add_heading("基础信息")
-        static_form.add_row("名称", "name", value="示例名称")
-        type_row = static_form.add_select("类型", "type", value="1")
-        type_row.add_option("类型1", "1")
-        type_row.add_option("类型2", "2")
-        static_form.add_date_input("日期", "date", value="2020-01-01")
-        static_form.add_row("内容", "content", type=FormRowType.textarea, value="示例内容")
-        static_form.add_image("封面图片", "cover", value="/_static/xnote.png")
-
-        # 查询表单
-        query_form = QueryForm()
-        query_form.add_row("标题", "title")
-        q_type_row = query_form.add_select("类型", "type")
-        q_type_row.add_option("全部", "")
-        q_type_row.add_option("类型1", "1")
-        q_type_row.add_option("类型2", "2")
-        query_form.add_date_input("日期", "date")
-
-        # 弹窗表单触发按钮（单独的组件，不塞进表单里）
-        dialog_form = EditFormButton(text="打开弹窗表单",
-                                     url="/test/example/form?action=edit")
-
-        kw = Storage()
-        kw.static_form = static_form
-        kw.query_form = query_form
-        kw.dialog_form = dialog_form
-        kw.example_tab = get_example_tab(tab_default="form")
-        self.writehtml(self.body_html, **kw)
-
-    def handle_edit(self):
-        # DialogForm 是 DataForm 的语义化别名，专用于弹窗场景
-        form = DialogForm()
-        form.add_heading("基础信息")
-        form.add_row("名称", "name", value="弹窗表单示例")
-        row = form.add_select("类型", "type", value="1")
-        row.add_option("类型1", "1")
-        row.add_option("类型2", "2")
-        form.add_date_input("日期", "date")
-        form.add_row("内容", "content", type=FormRowType.textarea)
-
-        kw = Storage()
-        kw.form = form
-        return self.response_form(**kw)
-
-    def handle_save(self):
-        return webutil.SuccessResult()
-
-
-class CalendarExampleHandler(BasePlugin):
-    title = "日历组件"
-    rows = 0
-    parent_link = LinkConfig.develop_index
-
-    HTML = """
-{% include test/component/example_nav_tab.html %}
-
-<h3 class="card-title">贡献日历</h3>
-<div class="card">
-    {% raw calendar.render() %}
-</div>
-
-<h3 class="card-title">日期选择器</h3>
-<div class="card">
-    <div class="row">
-        <div class="input-group">
-            <label>年份选择器</label>
-            <input type="text" class="date" data-date-type="year">
-        </div>
-        <div class="input-group">
-            <label>月份选择器</label>
-            <input type="text" class="date" data-date-type="month">
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="input-group">
-            <label>日期选择器</label>
-            <input type="text" class="date" data-date-type="date">
-        </div>
-        <div class="input-group">
-            <label>时间选择器</label>
-            <input type="text" class="date" data-date-type="time">
-        </div>
-        <div class="input-group">
-            <label>日期时间选择器</label>
-            <input type="text" class="date" data-date-type="datetime">
-        </div>
-    </div>
-</div>
-
-{% include common/script/load_laydate.html %}
-"""
-
-    def handle(self, input=""):
-        start = date(2020, 1, 1)
-        end = date(2020, 12, 31)
-        data = {
-            "2020-01-01": 5,
-            "2020-02-16": 1,
-            "2020-03-11": 10,
-            "2020-04-01": 20,
-        }
-        calendar = ContributionCalendar(start_date=start, end_date=end, data = data)
-        kw = Storage()
-        kw.example_tab = get_example_tab()
-        kw.calendar = calendar
-        self.writehtml(self.HTML, **kw)
 
 xurls = (
-    r"/test/example", ExampleHandler,
-    r"/test/example/table", TableExampleHandler,
-    r"/test/example/form", FormExampleHandler,
-    r"/test/example/calendar", CalendarExampleHandler,
+    r"/examples/example/table", TableExampleHandler,
 )

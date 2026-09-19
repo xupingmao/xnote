@@ -10,7 +10,7 @@ from xnote.webui import TextLink, ConfirmActionLink
 from xnote_handlers.config import LinkConfig
 
 BODY_HTML = """
-{% include test/component/example_nav_tab.html %}
+{% include examples/component/example_nav_tab.html %}
 
 <div class="card">
     <span class="card-title">Tree: 手动构建（嵌套节点 / 图标 / 角标 / 操作链接）</span>
@@ -75,10 +75,10 @@ class TreeExampleHandler(BasePlugin):
         self.writehtml(html=BODY_HTML, **kw)
 
     def get_example_tab(self):
-        from .example_handler import get_example_tab
+        from .example_nav import get_example_tab
         return get_example_tab(tab_default="tree")
 
 
 xurls = (
-    r"/test/example/tree", TreeExampleHandler,
+    r"/examples/example/tree", TreeExampleHandler,
 )

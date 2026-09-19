@@ -22,37 +22,37 @@ class TestMain(BaseTestCase):
         self.check_OK("/plugin_list")
 
     def test_table(self):
-        self.check_OK("/test/example/table?name=table")
+        self.check_OK("/examples/example/table?name=table")
 
     def test_contribution_calendar(self):
-        self.check_OK("/test/example/calendar?name=calendar")
+        self.check_OK("/examples/example/calendar?name=calendar")
 
     def test_list(self):
-        self.check_OK("/test/example/list?name=list")
+        self.check_OK("/examples/example/list?name=list")
 
     def test_list_delete_link_is_red(self):
         # ListPlugin 示例页的【删除】操作链接使用红色
-        body = self.request_app("/test/example/list_plugin").data.decode("utf-8")
+        body = self.request_app("/examples/example/list_plugin").data.decode("utf-8")
         self.assertRegex(body, r'<a class="red"[^>]*data-url="\?action=delete')
 
     def test_list_plugin(self):
-        self.check_OK("/test/example/list_plugin")
+        self.check_OK("/examples/example/list_plugin")
 
     def test_tag_example(self):
         # Tag 示例页展示新增的浅红/浅紫标签
-        body = self.request_app("/test/example?name=tag").data.decode("utf-8")
+        body = self.request_app("/examples/example/tag").data.decode("utf-8")
         self.assertIn("lightred标签", body)
         self.assertIn("lightpurple标签", body)
 
     def test_form_example(self):
         # Form 示例页：页面表单 + 查询表单 + 弹窗表单入口
-        body = self.request_app("/test/example/form").data.decode("utf-8")
+        body = self.request_app("/examples/example/form").data.decode("utf-8")
         self.assertIn("页面表单", body)
         self.assertIn("查询表单", body)
         self.assertIn("打开弹窗表单", body)
         # 弹窗表单使用 DialogForm 组件触发（xnote.table.handleEditForm + data-url）
         self.assertIn("xnote.table.handleEditForm(this)", body)
-        self.assertIn('data-url="/test/example/form?action=edit"', body)
+        self.assertIn('data-url="/examples/example/form?action=edit"', body)
         # 静态表单渲染了图片上传行（验证 common-form.css 的 form-upload 样式）
         self.assertIn("form-upload-row", body)
         # 静态表单使用 page_edit 类型（页面内联编辑表单，static 定位，避免弹窗 edit 的 absolute 错位）
@@ -65,7 +65,7 @@ class TestMain(BaseTestCase):
 
     def test_form_example_edit_dialog(self):
         # 弹窗表单：action=edit 返回可注入对话框的表单 HTML
-        body = self.request_app("/test/example/form?action=edit").data.decode("utf-8")
+        body = self.request_app("/examples/example/form?action=edit").data.decode("utf-8")
         self.assertIn("弹窗表单示例", body)
         self.assertIn('class="x-form"', body)
 

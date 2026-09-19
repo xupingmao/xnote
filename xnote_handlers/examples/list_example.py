@@ -8,7 +8,7 @@ from xnote.webui import ListView, ListViewItem, ListItem, TextTag
 from xnote.webui import ConfirmButton, BaseContainer, ActionButton
 from xnote.plugin import TabBox
 from xnote_handlers.config import LinkConfig
-from .example_handler import get_example_tab
+from .example_nav import get_example_tab
 from xnote.webui import TextLink, EditFormActionLink, ConfirmActionLink
 from xnote.webui import FormRowType
 
@@ -105,7 +105,7 @@ class ListExampleHandler(BasePlugin):
     title = "ListView示例"
     rows = 0
     body_html = """
-{% include test/component/example_nav_tab.html %}
+{% include examples/component/example_nav_tab.html %}
 
 <div class="card">
     <span class="card-title">ListView: 外层链接</span>
@@ -155,6 +155,6 @@ class ListExampleHandler(BasePlugin):
         return webutil.FailedResult(code="500", message="mock删除失败")
 
 xurls = (
-    r"/test/example/list", ListExampleHandler,
-    r"/test/example/list_plugin", ListPluginHandler,
+    r"/examples/example/list", ListExampleHandler,
+    r"/examples/example/list_plugin", ListPluginHandler,
 )

@@ -54,6 +54,7 @@ class TestMain(test_base.BaseTestCase):
             r"/system/user\.js",
             "/system/log/visit",
             "/system/todo",
+            "/system/develop",
         ])
 
         check_list = set([
@@ -103,13 +104,13 @@ class TestMain(test_base.BaseTestCase):
         self.check_OK(f"/admin/jobs?action=delete&job_id={job_id}")
         
     def test_example(self):
-        self.check_OK("/test/example/table")
-        self.check_OK("/test/example?name=text")
-        self.check_OK("/test/example?name=tab")
-        self.check_OK("/test/example?name=dialog")
-        self.check_OK("/test/example/list")
-        self.check_OK("/test/example/calendar")
-        self.check_OK("/test/example/list_plugin")
+        self.check_OK("/examples/example/table")
+        self.check_OK("/examples/example/text")
+        self.check_OK("/examples/example/tab")
+        self.check_OK("/examples/example/dialog")
+        self.check_OK("/examples/example/list")
+        self.check_OK("/examples/example/calendar")
+        self.check_OK("/examples/example/list_plugin")
     
     def test_admin_test(self):
         self.check_OK("/admin/test?type=lock")

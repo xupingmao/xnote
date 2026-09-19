@@ -110,7 +110,7 @@ SYS_TOOLS: List[AppLink] = [
     admin_link("Menu_Log",    "/system/log/db"),
     admin_link("Shell",    "/tools/shell", img_src="/_static/image/icons/icon_terminal.png"),
     admin_link("集群管理", "/system/sync?p=home", "server"),
-    admin_link("开发者", "/plugin_list?category=develop", icon="fa-code"),
+    admin_link("开发者", "/system/develop", icon="fa-code"),
 
     user_link("Menu_Plugin",   "/plugin_category_list?category=index&show_back=true", "cogs"),
     # 关于链接，支持外链

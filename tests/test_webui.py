@@ -99,7 +99,7 @@ class TestTree(BaseTestCase):
 class TestTreeExamplePage(BaseTestCase):
 
     def test_example_tree_page(self):
-        html = request_html("/test/example/tree")
+        html = request_html("/examples/example/tree")
         html = html.decode("utf-8")
         assert "x-tree" in html
         assert "我的笔记" in html
@@ -307,8 +307,8 @@ class TestDataForm(BaseTestCase):
         assert row.value_list[1]["name"] == "y.zip"
 
     def test_example_form_has_upload(self):
-        # 示例表单页（/test/example/table?action=edit）应渲染出上传组件
-        body = request_html("/test/example/table?action=edit").decode("utf-8")
+        # 示例表单页（/examples/example/table?action=edit）应渲染出上传组件
+        body = request_html("/examples/example/table?action=edit").decode("utf-8")
         assert 'data-upload-kind="image"' in body
         assert 'data-upload-kind="file"' in body
         assert "添加图片" in body
@@ -378,7 +378,7 @@ class TestDataForm(BaseTestCase):
         assert 'data-value="3"' in html
 
     def test_example_form_has_tag_select(self):
-        body = request_html("/test/example/table?action=edit").decode("utf-8")
+        body = request_html("/examples/example/table?action=edit").decode("utf-8")
         assert "form-tag-select" in body
         assert 'name="tags2"' in body
 
@@ -392,13 +392,13 @@ class TestDataForm(BaseTestCase):
 
     def test_form_id_unique_in_page(self):
         # 同一页面渲染出的表单 id 不能重复
-        body = request_html("/test/example/form").decode("utf-8")
+        body = request_html("/examples/example/form").decode("utf-8")
         form_ids = re.findall(r'<form id="([^"]*)"', body)
         assert len(form_ids) == len(set(form_ids)), f"表单id重复: {form_ids}"
 
     def test_tag_select_save_roundtrip(self):
         # 前端 formData() 收集到的隐藏域值以 data=<json> 提交，后端应能原样解析
         data = {"tags2": "2", "tags3": "1,3"}
-        resp = self.request_app("/test/example/form?action=save", "POST",
+        resp = self.request_app("/examples/example/form?action=save", "POST",
                                 {"data": json.dumps(data)})
         self.assertEqual("200 OK", resp.status)
