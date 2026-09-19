@@ -973,6 +973,34 @@ def init_project_table():
         manager.add_index(["user_id", "status"])
 
 
+def init_recycle_table():
+    """通用的回收表, 保存被删除的记录, 用于恢复/审计/归档
+    各业务表删除记录时按需写入一份 JSON 快照即可
+    @since 2026/09/19
+    """
+    table_name = "recycle_record"
+    comment = "回收站"
+    with create_default_table_manager(table_name, pk_name="id", comment=comment) as manager:
+        manager.add_column("table_name", "varchar(64)", default_value="", comment="来源表名称")
+        manager.add_column("record_id", "bigint", default_value=0, comment="被删除记录的主键ID")
+        manager.add_column("user_id", "bigint", default_value=0, comment="记录归属的用户ID")
+        manager.add_column("content", "text", default_value="", comment="被删除记录的完整内容, json格式")
+        manager.add_column("summary", "varchar(255)", default_value="", comment="摘要/标题, 用于列表展示, 避免解析content")
+        manager.add_column("source", "varchar(32)", default_value="", comment="删除来源, 如user/system/api")
+        manager.add_column("operator_id", "bigint", default_value=0, comment="执行删除操作的用户ID")
+        manager.add_column("restore_time", "bigint", default_value=0, comment="恢复时间(毫秒时间戳), 0=未恢复")
+        manager.add_column("restore_user_id", "bigint", default_value=0, comment="执行恢复操作的用户ID")
+        manager.add_column("extra", "text", default_value="", comment="扩展字段, json格式")
+        manager.add_column("create_time", "bigint", default_value=0, comment="删除时间(毫秒时间戳), 用于归档清理")
+
+        # 按来源表+原记录ID找回
+        manager.add_index(["table_name", "record_id"])
+        # 用户的回收站列表(按删除时间倒序)
+        manager.add_index(["user_id", "create_time"])
+        # 归档清理
+        manager.add_index(["create_time"])
+
+
 def init_user_note_log():
     """用户笔记日志, 从kv数据迁移过来
     @since 2023/10/22
@@ -1206,6 +1234,9 @@ def init():
     # 待办 / 项目（独立模块，从 message 解耦）
     init_todo_table()
     init_project_table()
+
+    # 通用的回收表
+    init_recycle_table()
 
     # 随手记
     init_msg_index_table()
