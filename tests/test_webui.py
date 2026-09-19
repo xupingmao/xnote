@@ -14,7 +14,7 @@ from xnote.webui import Tree, TreeNode
 from xnote.webui import Dropdown, DropdownOption
 from xnote.webui import TextTag, DialogForm
 from xnote.webui.table import DataTable, TableRowType
-from xnote.plugin import DataForm
+from xnote.plugin import DataForm, FormRowType
 
 import xutils
 import json
@@ -402,3 +402,47 @@ class TestDataForm(BaseTestCase):
         resp = self.request_app("/examples/example/form?action=save", "POST",
                                 {"data": json.dumps(data)})
         self.assertEqual("200 OK", resp.status)
+
+    def test_select_row_render_ajax_attrs(self):
+        # 远程搜索(select2 ajax)通过 data-* 属性声明，
+        # 由通用的 xnote.initSelect2 初始化，兼容弹窗与独立页面两种场景
+        form = DataForm()
+        row = form.add_row("关联笔记", "target_id", type=FormRowType.select)
+        row.ajax_url = "/api/v1/note/select_name"
+        row.ajax_data = '{"type":"public"}'
+        html = form.render().decode("utf-8")
+
+        assert 'data-select2-ajax-url="/api/v1/note/select_name"' in html
+        assert "data-select2-ajax-data" in html
+        assert '{"type":"public"}' in html
+
+    def test_select_row_without_ajax_no_attrs(self):
+        # 普通下拉不应输出 ajax 相关属性
+        form = DataForm()
+        form.add_row("类型", "type", type=FormRowType.select)
+        form.rows[-1].add_option("类型1", "1")
+        html = form.render().decode("utf-8")
+
+        assert "data-select2-ajax-url" not in html
+        assert "data-select2-ajax-data" not in html
+        assert 'value="1"' in html
+
+    def test_select_row_selected_option(self):
+        # 编辑已有记录时，已保存的选项需要选中，否则 select2 无法回显
+        form = DataForm()
+        row = form.add_row("关联笔记", "target_id", type=FormRowType.select)
+        row.add_option("未选中笔记", "111")
+        row.add_option("已选中笔记", "222", selected=True)
+        html = form.render().decode("utf-8")
+
+        assert '<option value="222" selected>已选中笔记</option>' in html
+        assert '<option value="111">未选中笔记</option>' in html
+
+    def test_select_row_option_default_not_selected(self):
+        # 默认不选中，保证向后兼容
+        form = DataForm()
+        row = form.add_row("关联笔记", "target_id", type=FormRowType.select)
+        row.add_option("某笔记", "333")
+        html = form.render().decode("utf-8")
+
+        assert ' selected' not in html

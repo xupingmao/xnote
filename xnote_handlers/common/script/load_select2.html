@@ -8,16 +8,54 @@
         xnote.initSelect2 = function () {
             // 只有大于等于10个选项时展示搜索
             $("select").each(function (index, elem) {
-                var parent = $(elem).parents(".layui-layer-content");
+                var $elem = $(elem);
+                // 已经初始化过的跳过，避免重复初始化
+                if ($elem.hasClass("select2-hidden-accessible")) {
+                    return;
+                }
+                var parent = $elem.parents(".layui-layer-content");
                 if (parent.length == 0) {
                     parent = undefined;
                 }
-                if ($(elem).attr("data-disable-select2")) {
+                if ($elem.attr("data-disable-select2")) {
                     return;
                 }
                 // select2默认支持 data-placeholder
                 // https://select2.org/configuration/data-attributes
-                $(elem).select2({
+
+                // 远程搜索（ajax）选择器：通过 data-select2-ajax-url 声明
+                var ajaxUrl = $elem.attr("data-select2-ajax-url");
+                if (ajaxUrl) {
+                    var extraData = {};
+                    var dataAttr = $elem.attr("data-select2-ajax-data");
+                    if (dataAttr) {
+                        try {
+                            extraData = JSON.parse(dataAttr);
+                        } catch (e) {
+                            // 忽略非法的额外参数
+                        }
+                    }
+                    $elem.select2({
+                        dropdownParent: parent,
+                        ajax: {
+                            url: ajaxUrl,
+                            data: function (params) {
+                                var query = {
+                                    search: params.term
+                                };
+                                for (var key in extraData) {
+                                    if (extraData.hasOwnProperty(key)) {
+                                        query[key] = extraData[key];
+                                    }
+                                }
+                                return query;
+                            }
+                        }
+                    });
+                    return;
+                }
+
+                $elem.select2({
                     minimumResultsForSearch: 10,
                     dropdownParent:parent
                 });

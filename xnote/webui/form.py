@@ -43,6 +43,7 @@ class FormRowOption:
     def __init__(self):
         self.title = ""
         self.value = ""
+        self.selected = False
 
 class FormRowOptGroup:
     def __init__(self):
@@ -74,6 +75,11 @@ class FormRow(BaseComponent):
     accept = "" # 文件选择器的 accept 属性（图片/文件上传用）
     value_list = [] # type: typing.List[Storage]  # 图片/文件上传的已有值列表，元素为 {webpath, name}
 
+    # 远程搜索（select2 ajax）。设置 ajax_url 后由通用的 xnote.initSelect2 初始化为 ajax 选择器，
+    # 兼容弹窗（html 注入、<script> 不执行）与独立页面两种场景。
+    ajax_url = ""
+    ajax_data = "" # 额外的查询参数(JSON字符串)，如 '{"type":"public"}'
+
 
     _select_html = """
 <select id="{{row.id}}" name="{{row.field}}" class="form-row-value" value="{{row.value}}" {% raw row.html_attr %}>
@@ -85,7 +91,7 @@ class FormRow(BaseComponent):
         </optgroup>
     {% end %}
     {% for option in row.options %}
-        <option value="{{option.value}}">{{option.title}}</option>
+        <option value="{{option.value}}"{% if option.selected %} selected{% end %}>{{option.title}}</option>
     {% end %}
 </select>
 """
@@ -105,10 +111,11 @@ class FormRow(BaseComponent):
         self.accept = ""
         self.value_list = []
 
-    def add_option(self, title="", value=""):
+    def add_option(self, title="", value="", selected=False):
         option = FormRowOption()
         option.title = title
         option.value = value
+        option.selected = selected
         self.options.append(option)
         return self
     
@@ -129,6 +136,11 @@ class FormRow(BaseComponent):
         
         if self.rows > 0:
             result += f" rows=\"{self.rows}\""
+        
+        if self.ajax_url:
+            result += f' data-select2-ajax-url="{self.ajax_url}"'
+            if self.ajax_data:
+                result += f" data-select2-ajax-data='{self.ajax_data}'"
         
         return result
     

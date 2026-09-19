@@ -1,6 +1,7 @@
 # encoding=utf-8
 import xutils
 from xutils import Storage
+from xutils import jsonutil
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote.plugin import FormRowType
 from .dao_relation import NoteRelationDao, NoteRelationDO
@@ -16,32 +17,11 @@ class NoteRelationHandler(BaseTablePlugin):
     title = "笔记关系编辑"
     
     EDIT_HTML = """
+{% include common/script/load_select2.html %}
+
 <div class="card">
     {% include common/form/form.html %}
 </div>
-
-<script>
-xnote.execute(function() {
-    console.log("init", "{{select_id}}");
-    var parent = $("#{{select_id}}").parents(".layui-layer-content");
-
-    $('#{{select_id}}').select2({
-        dropdownParent: parent,
-        ajax: {
-            url: '/api/v1/note/select_name',
-            data: function (params) {
-                var query = {
-                    search: params.term,
-                    type: 'public'
-                }
-
-                // Query parameters will be ?search=[term]&type=public
-                return query;
-            }
-        }
-    });
-});
-</script>
 """
 
     PAGE_HTML = """
@@ -91,12 +71,15 @@ xnote.execute(function() {
         form.add_row("笔记ID", "note_id", readonly=True, value=str(note_id))
         form.add_row("关系名称", "relation_name", value=relation.relation_name)
         row = form.add_row("关联笔记", "target_id", type=FormRowType.select, value=str(relation.target_id))
+        # 启用远程搜索（select2 ajax），由通用的 xnote.initSelect2 初始化，
+        # 兼容弹窗(html注入、<script>不执行)与独立页面两种场景
+        row.ajax_url = "/api/v1/note/select_name"
+        row.ajax_data = jsonutil.to_json(dict(type="public"))
         if note_name != "":
-            row.add_option(title=note_name, value=str(relation.target_id))
+            row.add_option(title=note_name, value=str(relation.target_id), selected=True)
         
         kw = Storage()
         kw.form = form
-        kw.select_id = row.id
         return self.response_form(**kw)
     
     def handle_save(self):

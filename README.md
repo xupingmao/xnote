@@ -130,6 +130,7 @@ markdown页面
 - [插件扩展](./docs/plugins.md)
 - [搜索扩展](./docs/search_extension.md)
 - [数据库迁移](./docs/db_migrate.md)
+- [select2 使用说明](./docs/select2.md)
 
 ## 协议
 
