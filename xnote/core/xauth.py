@@ -412,21 +412,34 @@ def _get_users(force_reload=False):
     warnings.warn("_get_users(查询所有用户)已经过时，请停止使用", DeprecationWarning)
     raise Exception("_get_users已经废弃")
 
+def _merge_sid_list(sid_list_str: str, sid: str, max_len: int = AuthConfig.sid_list_max_len) -> str:
+    """将 sid 合并进已有的 sid_list 字符串。
+
+    - 已存在则保持原顺序，不重复添加；
+    - 超出容量时移除最早（最旧）的 sid；
+    - 返回新的逗号分隔字符串。
+    说明：空字符串或空元素会被忽略，因此首次写入不会留下多余的逗号；
+    调用方需保证传入的 sid 非空。
+    """
+    sid_list = [x for x in sid_list_str.split(",") if x != ""]
+    if sid in sid_list:
+        return ",".join(sid_list)
+
+    if len(sid_list) > max_len:
+        del sid_list[0]
+
+    sid_list.append(sid)
+    return ",".join(sid_list)
+
+
 def _save_sid_list(sid: str):
     if TestEnv.is_test:
         # 测试环境直接跳过cookie逻辑
         return
     
     sid_list_str: str = web.cookies().get(CookieKeys.sid_list, "")
-    sid_list = sid_list_str.split(",")
-    if sid in sid_list:
-        return
-    
-    if len(sid_list) > AuthConfig.sid_list_max_len:
-        del sid_list[0]
-    
-    sid_list.append(sid)
-    web.setcookie(CookieKeys.sid_list, ",".join(sid_list), expires=str(SESSION_EXPIRE))
+    new_sid_list = _merge_sid_list(sid_list_str, sid)
+    web.setcookie(CookieKeys.sid_list, new_sid_list, expires=str(SESSION_EXPIRE))
 
 def _setcookie(key, value, expires=SESSION_EXPIRE):
     # 默认保留两天,但是只要保持登录会自动刷新

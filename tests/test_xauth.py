@@ -30,6 +30,32 @@ class TestXauth(BaseTestCase):
         self.assertTrue(xauth.is_valid_username("t1234"))
         self.assertFalse(xauth.is_valid_username("public"))
 
+    def test_merge_sid_list(self):
+        # 空列表追加
+        self.assertEqual("sidA", xauth._merge_sid_list("", "sidA"))
+
+        # 去重：已存在则保持原样，不重复添加
+        self.assertEqual("sidA,sidB", xauth._merge_sid_list("sidA,sidB", "sidB"))
+        self.assertEqual("sidA,sidB", xauth._merge_sid_list("sidA,sidB", "sidA"))
+
+        # 追加新 sid
+        self.assertEqual("sidA,sidB,sidC", xauth._merge_sid_list("sidA,sidB", "sidC"))
+
+        # 容量边界：恰好达到 max_len 时不裁剪，追加后长度 = max_len+1
+        max_len = xauth.AuthConfig.sid_list_max_len
+        many = ",".join(f"sid{i}" for i in range(max_len))
+        merged = xauth._merge_sid_list(many, "sidNew")
+        self.assertEqual(max_len + 1, len(merged.split(",")))
+        self.assertTrue(merged.startswith("sid0,"))
+        self.assertTrue(merged.endswith("sidNew"))
+
+        # 超过容量时移除最早（最旧）的 sid
+        overflow = ",".join(f"sid{i}" for i in range(max_len + 1))
+        merged2 = xauth._merge_sid_list(overflow, "sidNew")
+        self.assertEqual(max_len + 1, len(merged2.split(",")))
+        self.assertFalse(merged2.startswith("sid0,"))
+        self.assertTrue(merged2.endswith("sidNew"))
+
     def test_create_and_delete_user(self):
         xauth.delete_user("u123456")
         old_count = xauth.count_user()

@@ -389,7 +389,12 @@ class SwitchAccountHandler(BasePluginV2):
         list_view = ListView()
         cookies = web.cookies()
         session_id: str = cookies.get("sid") # type: ignore
-        
+
+        # 访问切换账号页时，先保存当前 sid 到 sid_list，
+        # 否则通过「登录新账号」登录后，当前账号的 sid 会丢失（无法再切回）
+        if session_id:
+            xauth._save_sid_list(session_id)
+
         user_info = xauth.get_user_by_sid(session_id)
         if user_info:
             current = ListViewItem()
