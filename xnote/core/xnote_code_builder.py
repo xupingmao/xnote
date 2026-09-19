@@ -150,7 +150,7 @@ def build_app_css():
         builder.append("./_static/css/common-react.css")
         builder.append("./_static/css/message.css")
         builder.append("./_static/css/note.css")
-        builder.append("./_static/css/note-comment.css")
+        builder.append("./_static/css/comment.css")
         builder.append("./_static/css/plugins.css")
         builder.append("./_static/css/search.css")
         builder.append("./_static/css/todo.css")
