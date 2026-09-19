@@ -1,4 +1,4 @@
-recursive-include static * 
+recursive-include _static * 
 recursive-include lib *
 recursive-include config *
 recursive-include docs *
