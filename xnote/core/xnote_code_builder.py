@@ -108,8 +108,14 @@ class FileBuilder:
         if not os.path.exists(self.target_path):
             self.do_build()
             return
-        
+
         target_mtime = os.stat(self.target_path).st_mtime
+        # 构建清单所在的脚本本身有修改时也触发重建: 新加入清单的源文件
+        # mtime 可能早于已有的构建产物, 仅比较源文件会漏打包(且之后一直跳过)
+        if os.stat(__file__).st_mtime > target_mtime:
+            self.do_build()
+            return
+
         for fpath in self.source_path_list:
             source_mtime = os.stat(fpath).st_mtime
             if source_mtime > target_mtime:
