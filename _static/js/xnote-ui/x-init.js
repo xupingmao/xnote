@@ -350,6 +350,10 @@ var XUI = function(window) {
             xnote.initTagSelect();
         }
 
+        if (xnote.initSwitch) {
+            xnote.initSwitch();
+        }
+
         if (xnote.initLaydate) {
             xnote.initLaydate();
         }

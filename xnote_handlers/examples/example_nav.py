@@ -15,6 +15,7 @@ def get_example_tab(tab_default=""):
     tab.add_tab("按钮示例", value="btn", href="/examples/btn")
     tab.add_tab("Tab示例", value="tab", href="/examples/tab")
     tab.add_tab("Tag示例", value="tag", href="/examples/tag")
+    tab.add_tab("Switch示例", value="switch", href="/examples/switch")
     tab.add_tab("Form示例", value="form", href="/examples/form")
     tab.add_tab("Dialog示例", value="dialog", href="/examples/dialog")
     tab.add_tab("Dropdown示例", value="dropdown", href="/examples/dropdown")

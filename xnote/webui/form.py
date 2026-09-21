@@ -15,6 +15,7 @@ from xutils import Storage
 from xnote.core import xtemplate
 from xnote.webui.base import BaseComponent
 from xnote.webui._tag_select import TagSelect
+from xnote.webui._switch import Switch
 
 FormValueType = typing.Union[int, str, list]
 
@@ -31,6 +32,7 @@ class FormRowType:
     input = "input"
     select = "select"
     tag_select = "tag_select"  # tag 风格的选择器（点选标签）
+    switch = "switch"          # 开关（二态：开/关）
     textarea = "textarea"
     date = "date"
     heading = "heading"
@@ -72,6 +74,7 @@ class FormRow(BaseComponent):
     multiple = False
     html : typing.Union[str, bytes] = ""
     rows = 0 # textarea 行数
+    size = "" # 开关等组件的尺寸: sm / lg
     accept = "" # 文件选择器的 accept 属性（图片/文件上传用）
     value_list = [] # type: typing.List[Storage]  # 图片/文件上传的已有值列表，元素为 {webpath, name}
 
@@ -150,7 +153,10 @@ class FormRow(BaseComponent):
         
         if self.type == FormRowType.tag_select:
             return self.render_tag_select()
-        
+
+        if self.type == FormRowType.switch:
+            return self.render_switch()
+
         return ""
             
     def render_select(self):
@@ -171,6 +177,20 @@ class FormRow(BaseComponent):
         for option in self.options:
             tag_select.add_option(option.title, option.value)
         return tag_select.render()
+
+    def render_switch(self):
+        """渲染开关，复用通用 Switch 组件。
+
+        行标题由表单模板渲染为 label，这里不再重复开关文本。
+        """
+        switch = Switch(
+            name=self.field,
+            checked=self.value,
+            disabled=self.readonly,
+            size=self.size,
+            css_class=("form-switch " + self.css_class).strip(),
+        )
+        return switch.render()
 
     
 class DataForm(BaseComponent):
@@ -279,6 +299,27 @@ class DataForm(BaseComponent):
         self.rows.append(row)
         return row
     
+    def add_switch(self, title = "", field = "", checked = False,
+                   css_class = "", readonly = False, size = ""):
+        """添加开关行（二态：开/关）
+
+        :param checked: 是否默认打开，支持 bool 或 "true"/"1" 等字符串
+        :param readonly: 只读的开关不可点击（等价于 disabled）
+        :param size: 尺寸，可选 "sm" / "lg"
+        """
+        row = FormRow()
+        row.id = self._create_row_id()
+        row.type = FormRowType.switch
+        row.title = title
+        row.field = field
+        row.value = checked
+        row.css_class = css_class
+        row.readonly = readonly
+        row.size = size
+
+        self.rows.append(row)
+        return row
+
     def add_textarea(self, title="", field="", placeholder="", value="", 
                 css_class="", readonly=False, rows = 0):
         row = FormRow()

@@ -57,6 +57,24 @@ class TestMain(BaseTestCase):
         self.assertIn("分段选择器（单选）", body)
         self.assertIn("分段选择器（多选）", body)
 
+    def test_switch_example(self):
+        # Switch 示例页：渲染出各尺寸的开关，且默认关闭的不带 active
+        body = self.request_app("/examples/switch").data.decode("utf-8")
+        self.assertIn("x-switch", body)
+        self.assertIn("switch-sm", body)
+        self.assertIn("switch-lg", body)
+        self.assertIn("默认开启", body)
+
+    def test_switch_example_submit(self):
+        # 开关在表单里提交：隐藏域是值的唯一来源，未提交时取到 off_value
+        url = "/examples/switch"
+        body = self.request_app(url, method="POST",
+                                data=dict(enabled="true", notify="false")).data.decode("utf-8")
+        self.assertIn("enabled=true", body)
+        self.assertIn("notify=false", body)
+        # 提交上来的值回填到开关的选中态
+        self.assertIn('value="true"', body)
+
     def test_form_example(self):
         # Form 示例页：页面表单 + 查询表单 + 弹窗表单入口
         body = self.request_app("/examples/form").data.decode("utf-8")

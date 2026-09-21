@@ -170,7 +170,7 @@ def search_todo(ctx: SearchContext, expression=None):
 
 Python-side UI components extend `BaseComponent` (`xnote/webui/base.py`), provide a `render()` method returning HTML string. In templates, import via `{% from xnote.webui import %}` and render via `{% render %}`.
 
-Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `TextLink`, `ActionLink`, `Input`, `Textarea`, `Panel`, `BlockTitle`, `ActionButton`, `RawHtml`, `TextSpan`, `Checkbox`, etc.
+Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Switch`, `Div`, `TextLink`, `ActionLink`, `Input`, `Textarea`, `Panel`, `BlockTitle`, `ActionButton`, `RawHtml`, `TextSpan`, `Checkbox`, etc.
 
 > 组件模块的可见性：上文"webui 组件模块默认私有，统一由 `__init__.py` 对外暴露"约定要求——新增组件类必须先在 `xnote/webui/__init__.py` 中 `from .xxx import Yyy` 导出，业务侧再 `from xnote.webui import Yyy`（或 `xnote.plugin`）使用，严禁直接 import 内部模块路径（见编码规范）。
 
@@ -205,6 +205,7 @@ Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Div`, `
   for e in TodoStatusEnum.enums():
       status_row.add_option(e.name, e.value)
   ```
+- **布尔字段用 `add_switch`（开关）**：编辑表单里的二态字段（启用/禁用、是否公开等）用 `DataForm.add_switch(title=..., field=..., checked=...)`，不要退化成 `add_select` 的「是/否」下拉。开关组件（`Switch`）也可独立使用（`from xnote.plugin import Switch`），**值的唯一来源是它渲染的隐藏域**（默认开=`true`、关=`false`，可用 `on_value`/`off_value` 自定义），由 `x-switch.js` 在点击时同步；用隐藏域而不是原生 checkbox，是因为 DataForm 的 `formData()` 取 `.val()`，checkbox 未选中时仍会提交 `value`，无法表达关闭状态。服务端取值用 `webutil.get_argument_str(field, "false")`。案例见 `/examples/switch`。
 - 组件样式统一放 `static/css/base/common-*.css`（见上文"webui 组件 CSS 放公共文件"）。
 
 ### 列表/CRUD 页面优先用 `ListView`（`BaseListPlugin`）

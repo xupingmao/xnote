@@ -20,6 +20,9 @@
                 {% if row.type == "tag_select" %}
                     {% render row %}
                 {% end %}
+                {% if row.type == "switch" %}
+                    {% render row %}
+                {% end %}
                 {% if row.type == "date" %}
                     <input id="{{row.id}}" name="{{row.field}}" class="form-row-value form-date" data-date-type="{{row.date_type}}" 
                         placeholder="{{row.placeholder}}" value="{{row.value}}" autocomplete="off">
@@ -279,5 +282,10 @@
     // 初始化tag风格选择器
     if (xnote.initTagSelect) {
         xnote.initTagSelect();
+    }
+
+    // 初始化开关组件
+    if (xnote.initSwitch) {
+        xnote.initSwitch();
     }
 </script>

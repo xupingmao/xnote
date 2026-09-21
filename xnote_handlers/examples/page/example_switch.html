@@ -1,0 +1,78 @@
+{% extends base %}
+
+{% block body %}
+
+	{% include examples/component/example_nav.html %}
+
+<h3 class="card-title">
+    <span>基础用法</span>
+    <button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="code1">展示代码</button>
+</h3>
+<div class="card">
+	<pre id="code1" class="marked-code hide">{{code_basic}}</pre>
+	<div class="row">
+		{% render switch_basic %}
+		{% render switch_checked %}
+		{% render switch_no_text %}
+	</div>
+	<div class="row">
+		<span class="tag lightgray">点击切换，值写入隐藏域（唯一来源）</span>
+	</div>
+</div>
+
+<h3 class="card-title">
+    <span>尺寸</span>
+    <button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="code2">展示代码</button>
+</h3>
+<div class="card">
+	<pre id="code2" class="marked-code hide">{{code_size}}</pre>
+	<div class="row">
+		{% render switch_sm %}
+		{% render switch_lg %}
+	</div>
+</div>
+
+<h3 class="card-title">
+    <span>禁用状态</span>
+    <button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="code3">展示代码</button>
+</h3>
+<div class="card">
+	<pre id="code3" class="marked-code hide">{{code_disabled}}</pre>
+	<div class="row">
+		{% render switch_disabled %}
+		{% render switch_disabled_on %}
+	</div>
+</div>
+
+<h3 class="card-title">
+    <span>自定义提交值</span>
+    <button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="code4">展示代码</button>
+</h3>
+<div class="card">
+	<pre id="code4" class="marked-code hide">{{code_custom}}</pre>
+	<div class="row">
+		{% render switch_custom %}
+	</div>
+</div>
+
+<h3 class="card-title">
+    <span>表单提交</span>
+    <button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="code5">展示代码</button>
+</h3>
+<div class="card">
+	<pre id="code5" class="marked-code hide">{{code_form}}</pre>
+	<form class="row" method="post">
+		{% render form_enabled %}
+		{% render form_notify %}
+		<button class="btn" type="submit">提交</button>
+	</form>
+	{% if result %}
+	<div class="row">
+		<span class="tag lightblue">{{result}}</span>
+	</div>
+	{% end %}
+</div>
+
+{% include examples/page/example_script.html %}
+
+{% end %}

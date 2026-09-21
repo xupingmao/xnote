@@ -13,6 +13,7 @@
 | `x-tab.js` | UI 组件 | Tab 切换（tab-link、tab-btn、tab-box） |
 | `x-dropdown.js` | UI 组件 | 下拉菜单（桌面/移动端） |
 | `x-table.js` | UI 组件 | 表格行操作：确认、编辑、查看详情 |
+| `x-switch.js` | UI 组件 | 开关（`.x-switch`）：点击切换选中态并同步隐藏域 |
 | `x-photo.js` | UI 组件 | 点击 `.x-photo` 图片打开相册浏览 |
 | `x-layout.js` | UI 组件 | textarea 自动高度、滚动定位 |
 | `x-upload.js` | UI 组件 | 文件上传（WebUploader）、剪贴板上传 |
@@ -133,6 +134,29 @@ xnote.closeAllDialog()
 | `.x-tab-btn` | 匹配当前 URL path+search 自动激活，无匹配时 `.x-tab-default` 激活 |
 | `.x-tab-box` | 通过 `data-tab-key` 读取 URL 参数自动激活，参数不存在用 `data-tab-default`；带 `data-content-id` 的子项切换内容区 |
 | `.x-tab-link` | 声明式，框架自动加 `href` 参数 |
+
+## 开关组件（x-switch.js）
+
+```html
+<span class="x-switch active" data-on-value="true" data-off-value="false">
+    <input type="hidden" name="enabled" value="true">
+    <span class="switch-track"><span class="switch-dot"></span></span>
+    <span class="switch-text">启用</span>
+</span>
+```
+
+- **隐藏域是值的唯一来源**，`active` 类只用于展示（与 `x-tag-select.js` 同一套契约）。
+  不用原生 checkbox 的原因是 DataForm 的 `formData()` 取的是 `.val()`，
+  checkbox 的 `val()` 恒等于 `value`，无法表达"未选中"。
+- `data-on-value` / `data-off-value` 自定义开/关时提交的值（默认 `true` / `false`）
+- `.disabled` 或 `data-disabled` 的开关不响应点击；也支持键盘空格/回车切换
+- 尺寸用 `.switch-sm` / `.switch-lg`
+- 初始化：`xnote.initSwitch()`（已挂到 `xnote.refresh()`，弹窗注入的 HTML 会自动生效）
+
+| 方法 | 作用 |
+|------|------|
+| `xnote.initSwitch(root)` | 绑定点击/键盘事件，并按隐藏域的值修正选中态 |
+| `xnote.toggleSwitch(target)` | 切换单个开关的选中态并同步隐藏域 |
 
 ## 下拉菜单（x-dropdown.js）
 

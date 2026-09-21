@@ -1,0 +1,125 @@
+/** x-switch 开关组件
+ *
+ * DOM 结构（由 xnote/webui/_switch.py 渲染）:
+ *   <span class="x-switch [switch-sm|switch-lg] [active] [disabled]" data-on-value="true" data-off-value="false">
+ *       <input type="hidden" name="field" value="false">
+ *       <span class="switch-track"><span class="switch-dot"></span></span>
+ *       <span class="switch-text">文本</span>
+ *   </span>
+ *
+ * 选中态由容器上的 active 类驱动（x-switch.js 点击时切换并同步隐藏域），
+ * 不使用 :checked，因为隐藏域才是值的唯一来源（原生 checkbox 的 val() 无法表达未选中）。
+ */
+
+.x-switch {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.x-switch .switch-track {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    border-radius: 24px;
+    background-color: #ccc;
+    transition: background-color 0.2s ease;
+}
+
+.x-switch .switch-dot {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: left 0.2s ease;
+}
+
+/** 打开状态：绿色与 .btn.success 保持一致 */
+.x-switch.active .switch-track {
+    background-color: #1AAD19;
+}
+
+.x-switch.active .switch-dot {
+    left: 22px;
+}
+
+.x-switch .switch-text {
+    margin-left: 8px;
+    font-size: 14px;
+    line-height: 24px;
+}
+
+/** 尺寸 */
+.x-switch.switch-sm .switch-track {
+    width: 32px;
+    height: 16px;
+    border-radius: 16px;
+}
+
+.x-switch.switch-sm .switch-dot {
+    width: 12px;
+    height: 12px;
+    top: 2px;
+    left: 2px;
+}
+
+.x-switch.switch-sm.active .switch-dot {
+    left: 18px;
+}
+
+.x-switch.switch-sm .switch-text {
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.x-switch.switch-lg .switch-track {
+    width: 56px;
+    height: 32px;
+    border-radius: 24px;
+}
+
+.x-switch.switch-lg .switch-dot {
+    width: 28px;
+    height: 28px;
+    top: 2px;
+    left: 2px;
+}
+
+.x-switch.switch-lg.active .switch-dot {
+    left: 26px;
+}
+
+.x-switch.switch-lg .switch-text {
+    font-size: 16px;
+    line-height: 32px;
+}
+
+/** 禁用 */
+.x-switch.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/** 键盘聚焦 */
+.x-switch:focus {
+    outline: none;
+}
+
+.x-switch:focus .switch-track {
+    box-shadow: 0 0 0 2px rgba(26, 173, 25, 0.4);
+}
+
+/** 表单行里的开关 */
+.form-switch {
+    margin-top: 4px;
+}
