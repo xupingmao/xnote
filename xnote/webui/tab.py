@@ -17,9 +17,14 @@ from xnote.webui.base import BaseComponent, BaseContainer
 # TODO: 支持多级tab, 例如 tab=dev.text
 
 class TabBox(BaseComponent):
-    
+    """tab选项卡组件
+
+    segment=True 时切换为分段选择器样式（浅灰圆角容器 + 选中项实心胶囊），
+    与 TagSelect(segment=True) 视觉一致；两者的交互逻辑各自独立。
+    """
+
     _tab_html_v1 = """
-<div class="row x-tab-box {{css_class}}" data-tab-key="{{tab_key}}" data-tab-default="{{tab_default}}">
+<div class="row x-tab-box {{css_class}}{% if segment %} segment-style{% end %}" data-tab-key="{{tab_key}}" data-tab-default="{{tab_default}}">
     {% render block_title %}
     {% if title %}
         <div style="{{title_style}}">
@@ -41,10 +46,11 @@ class TabBox(BaseComponent):
 """
     _template_v1 = xtemplate.compile_template(_tab_html_v1, "xnote.plugin.tab_v1")
 
-    def __init__(self, tab_key="tab", tab_default="", title = "", css_class="", title_width=""):
+    def __init__(self, tab_key="tab", tab_default="", title = "", css_class="", title_width="", segment=False):
         self.tab_key = tab_key
         self.tab_default = tab_default
         self.css_class = css_class
+        self.segment = segment
         self.title = title
         self.title_width = title_width
         self.tab_list = [] # type: list[TabItem]
@@ -83,6 +89,7 @@ class TabBox(BaseComponent):
         
         return self._template_v1.generate(
             css_class=self.css_class, 
+            segment=self.segment,
             tab_key=self.tab_key,
             tab_default=tab_default,
             title=self.title,

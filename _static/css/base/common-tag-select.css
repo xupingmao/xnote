@@ -49,3 +49,58 @@
 .tag-select-label {
     margin-right: 8px;
 }
+
+/* 分段选择器模式 (segmented control)
+ * 与 tab 组件的 .x-tab-box.segment-style 保持同一套视觉:
+ *   浅灰圆角容器(#f0f1f5) + 选中项紫色实心胶囊(#7c5cf5 + 白字)
+ * 用法: <div class="tag-select segment-style" data-multiple="false"> ... </div>
+ * 或 Python 侧: TagSelect(segment=True)
+ * 表单行/列表行同样支持: .form-tag-select.segment-style / .list-tag-select.segment-style
+ */
+.tag-select.segment-style,
+.form-tag-select.segment-style,
+.list-tag-select.segment-style {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f0f1f5;
+    border-radius: 10px;
+    padding: 4px;
+    line-height: 20px;
+}
+
+.tag-select.segment-style .tag,
+.form-tag-select.segment-style .tag,
+.list-tag-select.segment-style .tag {
+    margin: 0 2px;
+    padding: 4px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: transparent;
+    color: #333;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.tag-select.segment-style .tag.active,
+.form-tag-select.segment-style .tag.active,
+.list-tag-select.segment-style .tag.active {
+    background-color: #7c5cf5;
+    border-color: #7c5cf5;
+    color: #fff;
+    font-weight: 500;
+}
+
+/* 未选中项 hover: 文字变紫, 不铺底色(保持分段控件的整体感) */
+.tag-select.segment-style:not([data-readonly]) .tag:not(.active):hover,
+.form-tag-select.segment-style:not([data-readonly]) .tag:not(.active):hover,
+.list-tag-select.segment-style:not([data-readonly]) .tag:not(.active):hover {
+    background-color: transparent;
+    border-color: transparent;
+    color: #7c5cf5;
+}
+
+.tag-select.segment-style .tag.active:hover,
+.form-tag-select.segment-style .tag.active:hover,
+.list-tag-select.segment-style .tag.active:hover {
+    background-color: #7c5cf5;
+}

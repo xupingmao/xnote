@@ -92,6 +92,24 @@
 	{% raw html3 %}
 </div>
 
+{% init html5 = """
+<div class="tag-select segment-style" data-multiple="false">
+    <input type="hidden" name="status" value="doing">
+    <span class="tag active" data-value="all">全部</span>
+    <span class="tag" data-value="doing">进行中</span>
+    <span class="tag" data-value="archived">归档</span>
+</div>
+""" %}
+
+{% init html6 = """
+<div class="tag-select segment-style" data-multiple="true">
+    <input type="hidden" name="tags" value="python,web">
+    <span class="tag active" data-value="python">Python</span>
+    <span class="tag active" data-value="web">Web</span>
+    <span class="tag" data-value="db">数据库</span>
+</div>
+""" %}
+
 <h3 class="card-title">
     <span>tag-span</span>
     <button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="html4">展示代码</button>
@@ -99,6 +117,32 @@
 <div class="card">
 	<pre id="html4" class="marked-code hide">{{html4}}</pre>
 	{% raw html4 %}
+</div>
+
+<h3 class="card-title">
+    <span>分段选择器（单选）</span>
+    <button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="html5">展示代码</button>
+</h3>
+<div class="card">
+	<pre id="html5" class="marked-code hide">{{html5}}</pre>
+	{% raw html5 %}
+	<div class="row">
+		<span class="tag lightgray">用法：TagSelect(segment=True)</span>
+		<span class="tag lightgray">与 tab 的 segment-style 同一套视觉</span>
+	</div>
+</div>
+
+<h3 class="card-title">
+    <span>分段选择器（多选）</span>
+    <button class="btn link-style" onclick="xnote.showCode(this);" data-code-id="html6">展示代码</button>
+</h3>
+<div class="card">
+	<pre id="html6" class="marked-code hide">{{html6}}</pre>
+	{% raw html6 %}
+	<div class="row">
+		<span class="tag lightgray">用法：TagSelect(segment=True, multiple=True)</span>
+		<span class="tag lightgray">选中值以逗号分隔写入隐藏域</span>
+	</div>
 </div>
 
 {% include examples/page/example_script.html %}

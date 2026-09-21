@@ -26,10 +26,13 @@ class TagSelect(BaseComponent):
         ts = TagSelect(text="状态", name="status", value="1")
         ts.add_option("进行中", "1").add_option("已完成", "2")
     单选默认只选中一个；多选传 multiple=True，提交值为逗号分隔的多个值。
+
+    segment=True 时切换为分段选择器样式（浅灰圆角容器 + 选中项实心胶囊），
+    与 tab 组件的 segment-style 视觉一致，交互逻辑不变。
     """
 
     _code = xtemplate.compile_template("""
-<div class="{{item.css_class}} tag-select" data-multiple="{{'true' if item.multiple else 'false'}}" {% if item.readonly %}data-readonly="1"{% end %}{% if item.data_type %} data-type="{{item.data_type}}"{% end %}{% if item.data_p %} data-p="{{item.data_p}}"{% end %}>
+<div class="{{item.css_class}}{% if item.segment %} segment-style{% end %} tag-select" data-multiple="{{'true' if item.multiple else 'false'}}" {% if item.readonly %}data-readonly="1"{% end %}{% if item.data_type %} data-type="{{item.data_type}}"{% end %}{% if item.data_p %} data-p="{{item.data_p}}"{% end %}>
 
 {% if item.icon_class %}
     <i class="{{item.icon_class}}"></i>
@@ -50,18 +53,20 @@ class TagSelect(BaseComponent):
 
     multiple = False
     readonly = False
+    segment = False
     icon_class = ""
     css_class = ""
     data_type = ""
     data_p = ""
 
-    def __init__(self, text="", name="", value="", multiple=False, readonly=False, css_class="", data_type="", data_p=""):
+    def __init__(self, text="", name="", value="", multiple=False, readonly=False, css_class="", data_type="", data_p="", segment=False):
         self.text = text
         self.name = name
         self.value = self._format_value(value)
         self.selected_values = self._normalize_value(value)
         self.multiple = multiple
         self.readonly = readonly
+        self.segment = segment
         self.css_class = css_class
         self.icon_class = ""
         self.data_type = data_type

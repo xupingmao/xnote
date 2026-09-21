@@ -52,6 +52,10 @@ class TestMain(BaseTestCase):
         body = self.request_app("/examples/tag").data.decode("utf-8")
         self.assertIn("lightred标签", body)
         self.assertIn("lightpurple标签", body)
+        # 分段选择器风格（单选/多选两个案例）
+        self.assertIn("tag-select segment-style", body)
+        self.assertIn("分段选择器（单选）", body)
+        self.assertIn("分段选择器（多选）", body)
 
     def test_form_example(self):
         # Form 示例页：页面表单 + 查询表单 + 弹窗表单入口

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """TagSelect / ListViewTagSelect 渲染测试（tag 风格选择器，支持独立使用）"""
 from . import test_base
-from xnote.webui import ListView, TagSelect
+from xnote.webui import ListView, TagSelect, TabBox
 from xnote.webui._list import ListViewTagSelect
 
 app = test_base.init()
@@ -40,6 +40,39 @@ class TestTagSelect(BaseTestCase):
         ts.add_option("X", "1")
         html = _to_str(ts.render())
         assert 'data-readonly="1"' in html
+
+    def test_standalone_segment(self):
+        """分段选择器风格：容器带 segment-style，选中逻辑不变"""
+        ts = TagSelect(text="状态", name="status", value="1", segment=True)
+        ts.add_option("进行中", "1").add_option("已完成", "2")
+        html = _to_str(ts.render())
+        assert "segment-style" in html
+        assert "tag-select" in html
+        assert html.count('class="tag lightblue active"') == 1
+
+    def test_segment_default_off(self):
+        ts = TagSelect(name="status", value="1")
+        ts.add_option("进行中", "1")
+        assert "segment-style" not in _to_str(ts.render())
+
+
+class TestTabBoxSegment(BaseTestCase):
+    """TabBox 的分段选择器风格，与 TagSelect 共用同一套 segment-style 视觉"""
+
+    def test_segment_on(self):
+        tab = TabBox(tab_key="status", tab_default="all", segment=True)
+        tab.add_item("全部", "all")
+        tab.add_item("进行中", "doing")
+        html = _to_str(tab.render())
+        assert "x-tab-box" in html
+        assert "segment-style" in html
+
+    def test_segment_default_off(self):
+        tab = TabBox(tab_key="status", tab_default="all")
+        tab.add_item("全部", "all")
+        html = _to_str(tab.render())
+        assert "x-tab-box" in html
+        assert "segment-style" not in html
 
 
 class TestListViewTagSelect(BaseTestCase):
