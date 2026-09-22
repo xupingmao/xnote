@@ -1,0 +1,200 @@
+/**
+ * 左侧导航栏（nav_style=left）的现代化样式
+ *
+ * 设计参考 duck-rush/web-tools 的侧边栏：圆角胶囊导航项 + hover 背景
+ * + 渐变高亮激活项 + 分组层次 + 条目图标。
+ *
+ * 使用约定：
+ *   1. 只写"外观"，不写布局宽度。侧边栏宽度(180px)与内容区缩进由
+ *      common/layout/base_layout.html 的 JS 统一计算，此处不要覆盖，
+ *      否则会和 .main-content 的 padding-left 对不上。
+ *   2. 不要覆盖 .nav-left 的 display —— base_nav_left.html 的内联样式
+ *      靠 display 在"移动端隐藏 / 桌面端显示"之间切换，改了会破坏响应式。
+ *   3. 配色优先取主题的 --x-* 变量；经典主题(default)没有定义这些变量，
+ *      走 var() 的第二个参数回退到原有的深灰侧边栏配色(#515865)。
+ *   4. 选择器统一带 .nav-left 前缀：base_nav_left.html 的内联 <style>
+ *      位于 body 内、晚于本文件加载，同特异性下内联会赢，必须提高特异性。
+ *
+ * @author xupingmao
+ * @since 2026/09/23
+ * @filename common-nav-left.css
+ */
+
+.nav-left {
+    /* ---- 侧边栏局部色板：跟随主题，经典主题下回退到原配色 ---- */
+    --nav-bg: var(--x-bg-alt, #515865);
+    --nav-hover: var(--x-surface-3, rgba(255, 255, 255, 0.12));
+    --nav-text: var(--x-text-2, rgba(255, 255, 255, 0.75));
+    --nav-text-strong: var(--x-text, #ffffff);
+    --nav-border: var(--x-border, rgba(255, 255, 255, 0.12));
+    --nav-accent: var(--x-primary, #6ea8fe);
+    --nav-accent-2: var(--x-primary-strong, #3b82f6);
+    --nav-radius: 8px;
+
+    background-color: var(--nav-bg);
+    border-right: 1px solid var(--nav-border);
+    /* 原样式是 padding-top:48px 的大留白，改成贴合内容的舒适间距；
+       底部留白给绝对定位的 #poweredBy 占位，避免菜单被它盖住 */
+    padding-top: 14px;
+    padding-bottom: 56px;
+}
+
+.nav-left .nav-scroll {
+    padding: 0 8px 12px;
+}
+
+/* 分组：内联样式给了 float:left + width:100%，父容器高度会塌陷，改回流布局 */
+.nav-left .nav-left-block {
+    float: none;
+    width: auto;
+    margin-bottom: 10px;
+}
+
+/* 分组之间的细分隔线（第一组不需要） */
+.nav-left .nav-left-block + .nav-left-block::before {
+    content: "";
+    display: block;
+    height: 1px;
+    margin: 0 12px 8px;
+    background-color: var(--nav-border);
+}
+
+/* 菜单容器内纵向排列，条目之间留 2px 让胶囊之间有呼吸感 */
+.nav-left .navMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* ---- 导航条目：覆盖 base_nav_left.html 内联的 .nav-left-block a ---- */
+.nav-left .nav-left-block a {
+    float: none;
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* 内联样式是 padding-left:40px 的深缩进，改成左右均衡的胶囊内边距 */
+    padding: 8px 12px;
+    margin: 0;
+    border-radius: var(--nav-radius);
+    color: var(--nav-text);
+    font-size: 14px;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.nav-left .nav-left-block a:hover {
+    background-color: var(--nav-hover);
+    color: var(--nav-text-strong);
+    text-decoration: none;
+    transform: translateX(2px);
+}
+
+/* 按下时的即时反馈 */
+.nav-left .nav-left-block a:active {
+    transform: translateX(2px) scale(0.98);
+}
+
+/* 激活项：渐变胶囊 + 柔和阴影（当前模板不带 active 类，先定义好备用） */
+.nav-left .nav-left-block a.active {
+    color: #fff;
+    background-image: linear-gradient(135deg, var(--nav-accent), var(--nav-accent-2));
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    font-weight: 500;
+}
+
+.nav-left .nav-left-block a.active:hover {
+    color: #fff;
+    background-color: transparent;
+}
+
+/* ---- 条目图标 ----
+   模板里只有纯文字链接，用属性选择器按 href 注入 font-awesome 图标，
+   不改模板也能有图标。font-awesome 4.7 已打包进 app.build.css，字体全局可用。
+   注意：用图标字体而不是 emoji —— emoji 在不同系统上基线不一致，会和文字错开。
+   href 形如 {{_server_home}}/note/index，带不带 server_home 前缀都以 /note/index
+   结尾，用 $= 匹配；带查询参数的链接只能用 *= 包含匹配。 */
+.nav-left .nav-left-block a::before {
+    font-family: FontAwesome;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 1;
+    /* 固定宽度+居中：各图标字形宽度不一，统一占一列的宽度后文字左边缘才能对齐 */
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+    flex: 0 0 auto;
+    /* 略微透明，让图标退到文字之后，视觉主次分明 */
+    opacity: 0.85;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 图标统一用文字色(继承 color)，不逐个上纯色：
+   试过给每个入口配语义色，但 emoji 是自带多色渐变的，换成单色块反而花哨不协调；
+   单色图标随文字色走，深色/浅色主题自动适配，整体更干净。 */
+.nav-left .nav-left-block a[href$="/note/index"]::before { content: "\f015"; }        /* fa-home 首页 */
+/* 动态: 真实链接带查询参数(?orderby=update), 不能用后缀匹配 */
+.nav-left .nav-left-block a[href*="/note/recent"]::before { content: "\f017"; }       /* fa-clock-o 动态 */
+.nav-left .nav-left-block a[href$="/note/taglist"]::before { content: "\f02c"; }      /* fa-tags 标签 */
+.nav-left .nav-left-block a[href$="/note/public"]::before { content: "\f1e0"; }       /* fa-share-alt 分享 */
+.nav-left .nav-left-block a[href$="/note/calendar"]::before { content: "\f073"; }     /* fa-calendar 日历 */
+.nav-left .nav-left-block a[href$="/search/history"]::before { content: "\f002"; }    /* fa-search 搜索 */
+.nav-left .nav-left-block a[href$="/todo"]::before { content: "\f046"; }              /* fa-check-square-o 待办 */
+.nav-left .nav-left-block a[href*="/message?tag=log"]::before { content: "\f044"; }   /* fa-pencil-square-o 随手记 */
+.nav-left .nav-left-block a[href$="/system/index"]::before { content: "\f00a"; }      /* fa-th 应用 */
+.nav-left .nav-left-block a[href$="/plugin_list"]::before { content: "\f1e6"; }       /* fa-plug 插件 */
+.nav-left .nav-left-block a[href$="/fs_list"]::before { content: "\f114"; }           /* fa-folder-o 文件 */
+.nav-left .nav-left-block a[href$="/system/admin"]::before { content: "\f013"; }      /* fa-cog 后台 */
+.nav-left .nav-left-block a[href$="/system/settings"]::before { content: "\f1de"; }   /* fa-sliders 设置 */
+.nav-left .nav-left-block a[href$="/login"]::before { content: "\f090"; }             /* fa-sign-in 登录 */
+
+/* 激活项(渐变胶囊)下图标转为实心白，和文字保持一致 */
+.nav-left .nav-left-block a.active::before,
+.nav-left .nav-left-block a.active:hover::before {
+    opacity: 1;
+}
+
+/* ---- 底部 about 区域 ----
+   common.css 里 #poweredBy 是 ID 选择器(1,0,0)，这里加 .nav-left 前缀才能覆盖 */
+.nav-left #poweredBy {
+    padding: 12px 16px;
+    padding-left: 16px;
+    border-top: 1px solid var(--nav-border);
+    font-size: 12px;
+    text-align: left;
+}
+
+.nav-left #poweredBy,
+.nav-left #poweredBy a {
+    color: var(--nav-text);
+}
+
+.nav-left #poweredBy a {
+    text-decoration: none;
+    opacity: 0.85;
+}
+
+.nav-left #poweredBy a:hover {
+    color: var(--nav-text-strong);
+    text-decoration: underline;
+    opacity: 1;
+}
+
+/* ---- 滚动条细化：侧边栏内容较多时避免粗滚动条破坏观感 ---- */
+.nav-left .nav-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav-left .nav-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--nav-border);
+    border-radius: 3px;
+}
+
+.nav-left .nav-scroll::-webkit-scrollbar-track {
+    background-color: transparent;
+}

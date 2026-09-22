@@ -27,6 +27,11 @@
 <link rel="bookmark" href="{{_server_home}}/_static/favicon.ico"/>
 <link rel="stylesheet" href="{{_server_home}}/_static/css/app.build.css?ts={{_ts}}"/>
 <link rel="stylesheet" href="{{_server_home}}/_static/css/common-card.css?ts={{_ts}}"/>
+<!-- 主题样式(按 UserConfig.THEME 加载, 放在基础样式之后才能覆盖配色) -->
+{% include common/script/theme_css.html %}
+<!-- 左侧导航栏样式: 只作用于 nav_style=left 时的 .nav-left, 配色取自主题的 --x-* 变量,
+     所以要放在主题样式之后; 同时需要压过 base_nav_left.html 的内联样式 -->
+<link rel="stylesheet" href="{{_server_home}}/_static/css/common-nav-left.css?ts={{_ts}}"/>
 
 <script type="text/javascript" src="{{_server_home}}/_static/lib/jquery/jquery-1.12.4.min.js"></script>
 <!-- 弹层组件 -->

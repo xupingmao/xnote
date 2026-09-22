@@ -66,7 +66,9 @@ _filter_text_help = """
 """
 
 class UserConfig:
-    THEME = UserConfigItem("THEME", "主题") 
+    # 主题: default=经典(基础配色), dark=深色, light=浅色
+    # 对应的css在 _static/css/theme/ 下, 由 common/script/theme_css.html 按主题名加载
+    THEME = UserConfigItem("THEME", "主题", default_value="default") 
     HOME_PATH = UserConfigItem("HOME_PATH", "桌面端首页")
     HOME_PATH_MOBILE = UserConfigItem("HOME_PATH_MOBILE", "移动端首页")
     LANG = UserConfigItem("LANG", "语言/Language")

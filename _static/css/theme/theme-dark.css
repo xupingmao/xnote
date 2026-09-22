@@ -1,0 +1,859 @@
+/**
+ * 主题: 深色 (modern dark)
+ *
+ * 使用方式: 在「设置」页面把「主题」切换为「深色」即可,
+ *           由 common/script/theme_css.html 按 UserConfig.THEME 动态加载。
+ *
+ * 约定(重要):
+ *   1. 本文件在 app.build.css 与 common-card.css 之后加载, 同优先级的选择器可以直接覆盖,
+ *      因此这里**只写配色**, 不写布局/尺寸, 避免影响原有排版。
+ *   2. 需要覆盖第三方组件(select2 / layer)时因为它们加载更晚, 只能使用 !important。
+ *   3. 主题 CSS 不参与 app.build.css 打包, 注释不会被 FileBuilder 处理,
+ *      但仍建议只使用块注释, 保持与基础样式一致。
+ *   4. 新增/修改规则时, 请同步 theme-light.css 保持两份文件的选择器顺序一致, 便于比对。
+ */
+
+:root {
+    /* 背景层级: 由深到浅 */
+    --x-bg: #101418;
+    --x-bg-alt: #0b0e12;
+    --x-surface: #181d24;
+    --x-surface-2: #212832;
+    --x-surface-3: #2c3542;
+
+    /* 描边 */
+    --x-border: #2b333e;
+    --x-border-strong: #3c4653;
+
+    /* 文字层级: 由强到弱 */
+    --x-text: #e4e9f0;
+    --x-text-2: #a8b3c1;
+    --x-text-3: #7b8794;
+
+    /* 主色与语义色 */
+    --x-primary: #6ea8fe;
+    --x-primary-strong: #3b82f6;
+    --x-primary-hover: #2f6fdc;
+    --x-success: #4ade80;
+    --x-success-soft: rgba(74, 222, 128, 0.15);
+    --x-warn: #f5c451;
+    --x-warn-soft: rgba(245, 196, 81, 0.15);
+    --x-danger: #f87171;
+    --x-danger-soft: rgba(248, 113, 113, 0.15);
+    --x-info-soft: rgba(110, 168, 254, 0.15);
+    --x-purple: #c084fc;
+    --x-purple-soft: rgba(192, 132, 252, 0.15);
+
+    /* 阴影: 深色下用更弱的阴影, 靠边框划分层次 */
+    --x-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ========== 1. 全局 ========== */
+
+html {
+    background-color: var(--x-bg);
+    /* 深色模式下让浏览器自带的滚动条/表单控件同步变深 */
+    color-scheme: dark;
+}
+
+body {
+    background-color: var(--x-bg);
+    color: var(--x-text);
+}
+
+/* 深色下大部分容器都是硬编码的浅色文字, 这里统一收敛 */
+h1, h2, h3, h4, h5, h6, p, li, dt, dd, label, th, td, caption {
+    color: inherit;
+}
+
+::selection {
+    background-color: rgba(59, 130, 246, 0.4);
+    color: var(--x-text);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background-color: var(--x-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #454f5c;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--x-bg);
+}
+
+::-webkit-input-placeholder {
+    color: var(--x-text-3);
+}
+
+/* ========== 2. 链接 ========== */
+
+a {
+    color: var(--x-primary);
+}
+
+a:hover {
+    color: #9cc0ff;
+}
+
+.group-link, .note-link, .link, .contract-link, .default-path-link {
+    color: var(--x-primary);
+}
+
+.contract-link:hover, .link.active {
+    color: #fff;
+    background-color: var(--x-primary-strong);
+}
+
+/* 高对比度的黑色链接在深色下不可读 */
+.black-link, .link.black, .link2, .path-link {
+    color: var(--x-text);
+}
+
+.link2:hover, .path-link:hover {
+    color: var(--x-text-2);
+}
+
+.danger-link, a.danger {
+    color: var(--x-danger);
+}
+
+/* ========== 3. 导航与页脚 ========== */
+
+.nav {
+    background-color: var(--x-bg-alt);
+    border-bottom: 1px solid var(--x-border);
+}
+
+.nav-item > a, .menu-link, li.menu-item a {
+    color: var(--x-text);
+}
+
+li.menu-item:hover {
+    background-color: var(--x-surface-2);
+}
+
+.navMenu-top {
+    color: var(--x-text);
+    border-bottom: 1px solid var(--x-border);
+}
+
+.nav-left {
+    background-color: var(--x-bg-alt);
+    border-right: 1px solid var(--x-border);
+}
+
+.navMenu > li > a {
+    color: var(--x-text);
+}
+
+.navMenu > li > a.active, .navMenu > li > a:hover {
+    color: var(--x-text);
+    background-color: var(--x-surface-2);
+}
+
+.navMenu > li > ul.sub-menu li > a {
+    color: var(--x-text-2);
+}
+
+.navMenu > li > ul.sub-menu li > a.active,
+.navMenu > li > ul.sub-menu li > a:hover,
+.navMenu > li > ul.sub-menu > li.active > a {
+    color: var(--x-text);
+    background-color: var(--x-surface-2);
+}
+
+.footer {
+    color: var(--x-text-2);
+    background-color: var(--x-bg-alt);
+    border-top: 1px solid var(--x-border);
+}
+
+#poweredBy {
+    border-top: 1px solid var(--x-border);
+}
+
+#poweredBy, #poweredBy a {
+    color: var(--x-text-3);
+}
+
+/* ========== 4. 主体容器与卡片 ========== */
+
+.root, .x-body {
+    background-color: transparent;
+}
+
+.main-content {
+    background-color: transparent;
+}
+
+.main-content-bg {
+    background-color: var(--x-bg);
+}
+
+/* 深色下卡片靠细边框区分层次 */
+.card, .grid-card, .box, .plugin-head, .message-row, .plugin-item,
+.aside-item {
+    background-color: var(--x-surface);
+    border: 1px solid var(--x-border);
+    color: var(--x-text);
+}
+
+/* 透明卡片保持透明(语义如此), 只收敛文字色 */
+.transparent-card {
+    color: var(--x-text);
+}
+
+.card-title, .grid-title, .card > h1, .card > h2, .card > h3, .card > h4 {
+    color: var(--x-text);
+    border-left-color: var(--x-primary-strong);
+}
+
+.heading {
+    background-color: var(--x-surface-2);
+    color: var(--x-text);
+    border-left-color: var(--x-primary-strong);
+}
+
+.card-title-2, .block-title, .split-title, .fs-path, .output-body {
+    background-color: var(--x-surface-2);
+    color: var(--x-text);
+}
+
+.output-title, .output-body, .marked-contents {
+    border-color: var(--x-border);
+}
+
+.aside-title {
+    border-bottom-color: var(--x-border);
+}
+
+/* ========== 5. 列表 ========== */
+
+.list-item, .list-link {
+    border-bottom-color: var(--x-border);
+}
+
+.list-item:hover, .list-link:hover {
+    background-color: var(--x-surface-2);
+}
+
+.list-item-line, .list-item-badge, .gray-text {
+    color: var(--x-text-2);
+}
+
+.list-item-black, .list-item-black a,
+.list-link i, .list-item i, .fs-file {
+    color: var(--x-text);
+}
+
+.fs-folder, .keyword, .tool-div a {
+    color: var(--x-primary);
+}
+
+.item-option {
+    color: var(--x-text-3);
+}
+
+.item-option:hover {
+    color: var(--x-primary);
+}
+
+.grid-link:hover, .group-div:hover {
+    background-color: var(--x-surface-2);
+}
+
+.light-bottom-border {
+    border-bottom-color: var(--x-border);
+}
+
+/* ========== 6. 表格 ========== */
+
+table {
+    color: var(--x-text);
+    border-color: var(--x-border);
+}
+
+table th {
+    border-color: var(--x-border);
+    background-color: var(--x-surface-2);
+    color: var(--x-text);
+}
+
+table td {
+    border-color: var(--x-border);
+    /* td 原来硬编码白色, 改为透明让卡片背景透出 */
+    background-color: transparent;
+}
+
+.table th, .table td {
+    border-color: var(--x-border);
+}
+
+.table tr:hover, .hover-tr:hover, .hover-tr:hover td {
+    background-color: var(--x-surface-2);
+}
+
+.table-thumbnail {
+    border-color: var(--x-border);
+}
+
+/* ========== 7. 表单控件 ========== */
+
+input, textarea, select {
+    background-color: var(--x-surface-2);
+    border-color: var(--x-border-strong);
+    color: var(--x-text);
+}
+
+textarea:focus, input:focus {
+    border-color: var(--x-primary-strong);
+}
+
+textarea:read-only, input[type=text]:read-only {
+    background-color: var(--x-surface-3);
+    color: var(--x-text-2);
+}
+
+.nav-search-input, .search-input {
+    background-color: var(--x-surface-2);
+    border-color: var(--x-border-strong);
+    color: var(--x-text);
+}
+
+.nav-search-btn {
+    color: var(--x-text-2);
+}
+
+.nav-search-btn:hover {
+    color: var(--x-text);
+    background-color: transparent;
+}
+
+.form-control {
+    background-color: var(--x-surface-2);
+    color: var(--x-text);
+}
+
+/* 主按钮 */
+.btn, [type=submit], [type=button], button, .inline-btn,
+.x-tab-btn, .btn-default, .btn-cancel, .search-btn {
+    background-color: var(--x-primary-strong);
+    border-color: var(--x-primary-strong);
+    color: #fff;
+}
+
+button:hover, .btn:hover, .inline-btn:hover, .btn-default:hover,
+.btn-cancel:hover, .search-btn:hover {
+    background-color: var(--x-primary-hover);
+    border-color: var(--x-primary-hover);
+    color: #fff;
+}
+
+/* 次级按钮 */
+.btn-default, .btn-cancel, .btn.danger, .fixed-button, .fixed-button-2 {
+    background-color: var(--x-surface-2);
+    border: 1px solid var(--x-border-strong);
+    color: var(--x-text);
+}
+
+.btn-default:hover, .btn-cancel:hover, .btn.danger:hover {
+    background-color: var(--x-surface-3);
+    border-color: var(--x-border-strong);
+    color: var(--x-text);
+}
+
+.btn.danger {
+    color: var(--x-danger);
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    border-color: #dc2626;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.btn.green {
+    background-color: #16a34a;
+    border-color: #16a34a;
+}
+
+.btn.link-style {
+    background: none;
+    border: none;
+    color: var(--x-primary);
+}
+
+.btn-link:hover, .button-link:hover {
+    background-color: var(--x-surface-2);
+}
+
+/* ========== 8. 标签 / chip / 开关 / 分段控件 ========== */
+
+.tag {
+    background-color: var(--x-success-soft);
+    color: #86efac;
+}
+
+.tag.red {
+    background-color: #b91c1c;
+    color: #fff;
+}
+
+.tag.orange {
+    background-color: #c2410c;
+    color: #fff;
+}
+
+.tag.gray {
+    background-color: #4b5563;
+    color: #fff;
+}
+
+.tag.system {
+    background-color: #4b5563;
+    color: #fff;
+}
+
+.tag.info {
+    background-color: #0891b2;
+    color: #fff;
+}
+
+.tag.lightblue {
+    background-color: var(--x-info-soft);
+    color: #8ab4fd;
+}
+
+.tag.lightgray {
+    background-color: var(--x-surface-2);
+    color: var(--x-text-2);
+}
+
+.tag.grayblue {
+    background-color: var(--x-surface-2);
+    color: var(--x-primary);
+}
+
+.tag.lightred {
+    background-color: var(--x-danger-soft);
+    color: #fca5a5;
+}
+
+.tag.lightpurple {
+    background-color: var(--x-purple-soft);
+    color: #d8b4fe;
+}
+
+a.tag {
+    color: var(--x-text-2);
+}
+
+.tag.lightgray.active, .tag.lightblue.active, .tag.grayblue.active {
+    background-color: var(--x-primary-strong);
+    color: #fff;
+}
+
+.tag.lightred.active {
+    background-color: #dc2626;
+    color: #fff;
+}
+
+.tag.lightpurple.active {
+    background-color: #9333ea;
+    color: #fff;
+}
+
+.tag-span, .tag-span-danger {
+    border-color: var(--x-border-strong);
+    color: var(--x-text);
+}
+
+.tag-span:hover {
+    background-color: var(--x-surface-2);
+}
+
+.tag-span-danger {
+    color: var(--x-danger);
+}
+
+.tag-span-light, .tag-span-light a {
+    background-color: var(--x-success-soft);
+    border-color: rgba(74, 222, 128, 0.4);
+    color: #86efac;
+}
+
+.x-switch .switch-track {
+    background-color: var(--x-surface-3);
+}
+
+.x-switch.active .switch-track {
+    background-color: #22c55e;
+}
+
+.x-switch .switch-dot {
+    background-color: #f1f5f9;
+}
+
+.x-tab-box.segment-style {
+    background-color: var(--x-surface-2);
+}
+
+.x-tab-box.segment-style .x-tab {
+    color: var(--x-text-2);
+}
+
+.x-tab-box.segment-style .x-tab.active {
+    background-color: var(--x-primary-strong);
+    color: #fff;
+}
+
+.x-tab-box.segment-style .x-tab:hover:not(.active) {
+    color: var(--x-primary);
+}
+
+/* ========== 9. TAB ========== */
+
+.tab-link, .x-tab {
+    color: var(--x-text-3);
+}
+
+.tab-link:hover, .x-tab:hover, .x-tab.active, .x-tab.title {
+    color: var(--x-text);
+}
+
+.x-tab-btn, .x-tab.btn, .x-tab-box.btn-style .x-tab {
+    background-color: var(--x-surface-2);
+    color: var(--x-primary);
+}
+
+.x-tab-btn:hover, .x-tab.btn:hover, .x-tab-box.btn-style .x-tab:hover,
+.x-tab-btn.active, .x-tab.btn.active, .x-tab-box.btn-style .x-tab.active {
+    background-color: var(--x-primary-strong);
+    color: #fff;
+}
+
+.x-tab-box.btn-style span.x-tab,
+.x-tab-box.btn-style span.x-tab:hover {
+    background-color: var(--x-surface-2);
+    color: var(--x-text);
+}
+
+.sidebar-btn-style .x-tab {
+    background-color: var(--x-surface-2);
+    color: var(--x-text);
+    border-color: var(--x-border);
+}
+
+.sidebar-btn-style .x-tab.active {
+    background-color: var(--x-primary-strong);
+    border-color: var(--x-primary-strong);
+    color: #fff;
+}
+
+.sidebar-list-style > .x-tab-item {
+    color: var(--x-primary);
+    border-bottom-color: var(--x-border);
+}
+
+.sidebar-list-style > .x-tab-item:hover {
+    background-color: var(--x-surface-2);
+}
+
+.secondary {
+    color: var(--x-text-2);
+}
+
+/* ========== 10. 分页 ========== */
+
+.x-page-link {
+    background-color: var(--x-surface-2);
+    border-color: var(--x-border-strong);
+    color: var(--x-text);
+}
+
+.x-page-link:hover {
+    background-color: var(--x-primary-strong);
+    border-color: var(--x-primary-strong);
+    color: #fff;
+}
+
+.x-page-link.active {
+    background-color: var(--x-primary-strong);
+    border-color: var(--x-primary-strong);
+    color: #fff;
+}
+
+.x-page-link.disabled, .x-page-link.disabled:hover {
+    background-color: var(--x-surface-2);
+    border-color: var(--x-border);
+    color: var(--x-text-3);
+}
+
+/* ========== 11. 提示块 ========== */
+
+.notice {
+    background-color: var(--x-success-soft);
+    border-color: rgba(74, 222, 128, 0.4);
+    color: var(--x-text);
+}
+
+.error {
+    background-color: var(--x-danger-soft);
+    color: #fca5a5;
+}
+
+.warn {
+    background-color: var(--x-warn-soft);
+    color: #fcd34d;
+}
+
+.info {
+    background-color: var(--x-info-soft);
+    border-color: rgba(110, 168, 254, 0.4);
+    color: #a8c7ff;
+}
+
+.info.light {
+    background-color: var(--x-surface-2);
+    color: var(--x-text-2);
+}
+
+.success {
+    background-color: var(--x-success-soft);
+    color: #86efac;
+}
+
+.highlight-word {
+    background-color: rgba(250, 204, 21, 0.4);
+    color: #fde68a;
+}
+
+/* ========== 12. 代码与 Markdown ========== */
+
+blockquote {
+    background-color: var(--x-surface-2);
+    border-left-color: var(--x-primary-strong);
+    color: var(--x-text-2);
+}
+
+.marked-codespan {
+    background-color: var(--x-surface-2);
+    border-color: var(--x-border);
+    color: var(--x-text);
+}
+
+.code-line {
+    background-color: var(--x-surface-2);
+}
+
+.line-number {
+    color: var(--x-text-3);
+}
+
+.code-container {
+    border-color: var(--x-border);
+}
+
+.code-header {
+    background-color: var(--x-surface-2);
+    border-bottom-color: var(--x-border);
+}
+
+.code-language {
+    color: var(--x-text-2);
+}
+
+/* 原样式带 !important, 这里用更高的优先级覆盖 */
+body pre code.hljs {
+    background-color: var(--x-surface-2) !important;
+    color: var(--x-text);
+}
+
+.xnote-todo {
+    background-color: rgba(245, 196, 81, 0.2);
+    color: #fcd34d;
+}
+
+.xnote-todo.doing {
+    background-color: var(--x-success-soft);
+    color: #86efac;
+}
+
+.xnote-done {
+    color: var(--x-text-3);
+}
+
+/* ========== 13. 对话框与下拉菜单 ========== */
+
+.x-dialog {
+    background-color: var(--x-surface);
+    border: 1px solid var(--x-border);
+    box-shadow: var(--x-shadow);
+}
+
+.x-dialog-title {
+    background-color: var(--x-surface-2);
+    color: var(--x-text);
+    border-bottom: 1px solid var(--x-border);
+}
+
+.dialog-title {
+    background-color: var(--x-surface-2);
+}
+
+.x-dialog-close {
+    background-color: #b91c1c;
+}
+
+.dropdown-content {
+    background-color: var(--x-surface);
+    border-color: var(--x-border-strong);
+    box-shadow: var(--x-shadow);
+}
+
+.dropdown-option {
+    color: var(--x-text);
+}
+
+.dropdown-option:hover, .dropdown-option-red:hover {
+    background-color: var(--x-primary-strong);
+    color: #fff;
+}
+
+.dropdown-option-red {
+    color: var(--x-danger);
+}
+
+.x-more-menu-toggle {
+    color: var(--x-text-3);
+}
+
+.x-more-menu-toggle:hover {
+    color: var(--x-text);
+}
+
+.x-more-menu-list {
+    background-color: var(--x-surface);
+    border-color: var(--x-border-strong);
+    box-shadow: var(--x-shadow);
+}
+
+.x-more-menu-list .x-more-menu-item {
+    color: var(--x-text);
+}
+
+.x-more-menu-list .x-more-menu-item:hover {
+    background-color: var(--x-surface-2);
+}
+
+.x-more-menu-list .x-more-menu-item.active {
+    color: var(--x-warn);
+}
+
+.x-more-menu-list .x-more-menu-item.chat-session-delete {
+    color: var(--x-danger);
+}
+
+.x-more-menu-list .x-more-menu-item.chat-session-delete:hover {
+    background-color: var(--x-danger-soft);
+    color: var(--x-danger);
+}
+
+/* ========== 14. 业务语义色 ========== */
+
+.chat-avatar, .msg-strong.level-4 {
+    color: #38bdf8;
+}
+
+.chat-msg-option, .chat-msg-time {
+    color: var(--x-text-3);
+}
+
+.msg-amount-text {
+    color: var(--x-text-2);
+}
+
+.finished {
+    background-color: #15803d;
+    color: #fff;
+}
+
+.in-progress {
+    background-color: #b45309;
+    color: #fff;
+}
+
+.suspended {
+    background-color: #4b5563;
+    color: #fff;
+}
+
+/* ========== 15. 第三方组件(加载时机更晚, 只能使用 !important) ========== */
+
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    background-color: var(--x-surface-2) !important;
+    border-color: var(--x-border-strong) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--x-text) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder,
+.select2-container--default .select2-selection__placeholder {
+    color: var(--x-text-3) !important;
+}
+
+.select2-dropdown {
+    background-color: var(--x-surface) !important;
+    border-color: var(--x-border-strong) !important;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field,
+.select2-container--default .select2-search__field {
+    background-color: var(--x-surface-2) !important;
+    border-color: var(--x-border-strong) !important;
+    color: var(--x-text) !important;
+}
+
+.select2-container--default .select2-results__option {
+    background-color: transparent !important;
+    color: var(--x-text) !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted {
+    background-color: var(--x-primary-strong) !important;
+    color: #fff !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--x-surface-3) !important;
+    border-color: var(--x-border-strong) !important;
+    color: var(--x-text) !important;
+}
+
+.layui-layer {
+    background-color: var(--x-surface) !important;
+}
+
+.layui-layer-title {
+    background-color: var(--x-surface-2) !important;
+    border-bottom: 1px solid var(--x-border) !important;
+    color: var(--x-text) !important;
+}
+
+.layui-layer-content {
+    background-color: var(--x-surface) !important;
+    color: var(--x-text) !important;
+}

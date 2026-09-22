@@ -1,0 +1,11 @@
+{# 主题样式
+   按用户配置(UserConfig.THEME)加载对应的主题css, 变量 THEME 由 xtemplate 统一注入。
+   新增主题时: 只要在这里加一个 elif 分支并放入 _static/css/theme/ 下的css文件即可,
+   不需要改动 base_head.html。
+   注意: 必须放在 app.build.css 与 common-card.css 之后, 才能覆盖基础配色。 #}
+{% init THEME = "default" %}
+{% if THEME == "dark" %}
+  <link rel="stylesheet" href="{{_server_home}}/_static/css/theme/theme-dark.css?ts={{_ts}}"/>
+{% elif THEME == "light" %}
+  <link rel="stylesheet" href="{{_server_home}}/_static/css/theme/theme-light.css?ts={{_ts}}"/>
+{% end %}

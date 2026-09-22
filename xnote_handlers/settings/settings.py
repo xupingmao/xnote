@@ -188,6 +188,12 @@ class SettingsHandler:
                                      css_class="list-item-black"))
 
         user_id = xauth.current_user_id()
+
+        d = self.add_user_select_config(result, xnote_user_config.UserConfig.THEME, user_id)
+        d.add_option("经典", "default")
+        d.add_option("深色", "dark")
+        d.add_option("浅色", "light")
+
         d = self.add_user_select_config(result, xnote_user_config.UserConfig.HOME_PATH, user_id)
         d.add_option("笔记本列表", "/note/group")
         d.add_option("功能列表", "/system/index")
