@@ -200,9 +200,9 @@ class ConfirmButton(ActionButton):
         if self.is_alert:
             is_alert_attr = "data-is-alert=1"
             
-        return f"""<button class="btn {css_class}" onclick="xnote.table.handleConfirmAction(this, event)" {is_alert_attr}
-        data-url="{url}" data-msg="{message}" data-method="{method}" data-reload-url="{reload_url}">{text}</button>
-        """
+        # 结尾不要带换行/缩进: 被包进 <span> 时浏览器会渲染成空格, 撑开按钮间距
+        return (f'<button class="btn {css_class}" onclick="xnote.table.handleConfirmAction(this, event)" {is_alert_attr} '
+                f'data-url="{url}" data-msg="{message}" data-method="{method}" data-reload-url="{reload_url}">{text}</button>')
 
 class PromptButton:
     """询问输入按钮"""
@@ -218,10 +218,9 @@ class EditFormButton(BaseComponent):
 
     def render(self):
         text = escape_html(self.text)
-        return f"""
-<button class="btn {self.css_class}" onclick="xnote.table.handleEditForm(this)"
-    data-url="{self.url}" data-title="{text}">{text}</button>
-"""
+        # 首尾不要带换行: 被包进 <span> 时浏览器会渲染成空格, 撑开按钮间距
+        return (f'<button class="btn {self.css_class}" onclick="xnote.table.handleEditForm(this)" '
+                f'data-url="{self.url}" data-title="{text}">{text}</button>')
 
 class TextSpan(BaseComponent):
     """行内文本"""

@@ -13,6 +13,7 @@ from xnote.webui import Div
 from xnote.webui import Tree, TreeNode
 from xnote.webui import Dropdown, DropdownOption
 from xnote.webui import TextTag, DialogForm
+from xnote.webui import TabBox, TabTable, EditFormButton
 from xnote.webui import TextContainer, Icon
 from xnote.webui import ListView, ListItem
 from xnote.webui.table import DataTable, TableRowType
@@ -476,3 +477,51 @@ class TestDataForm(BaseTestCase):
         html = form.render().decode("utf-8")
 
         assert ' selected' not in html
+
+
+class TestComponentHtmlOutput(BaseTestCase):
+    """组件输出的 HTML 片段不应带多余空白/空属性
+
+    - 首尾换行被包进 <span> 时浏览器会渲染成空格, 撑开按钮间距
+    - 空的 style="" 会误触发「禁止内联样式」的校验
+    """
+
+    def _to_str(self, html):
+        if isinstance(html, bytes):
+            return html.decode("utf-8")
+        return str(html)
+
+    def test_tab_box_title_without_style(self):
+        # 不设置 title_width 时不应输出空的 style 属性
+        tab = TabBox(title="小标题")
+        tab.add_item("选项1", "1")
+        html = self._to_str(tab.render())
+
+        assert 'style=""' not in html
+        assert "小标题" in html
+
+    def test_tab_box_title_with_width(self):
+        # 设置了 title_width 才输出 style
+        tab = TabBox(title="小标题", title_width="100px")
+        tab.add_item("选项1", "1")
+        html = self._to_str(tab.render())
+
+        assert 'style="float: left; width: 100px"' in html
+        assert 'style=""' not in html
+
+    def test_tab_table_without_style(self):
+        tab = TabBox(title="小标题")
+        tab.add_item("选项1", "1")
+        table = TabTable()
+        table.add_tab_box(tab)
+        html = self._to_str(table.render())
+
+        assert 'style=""' not in html
+
+    def test_edit_form_button_no_surrounding_whitespace(self):
+        button = EditFormButton(text="编辑", url="/edit?id=1")
+        html = self._to_str(button.render())
+
+        assert html.startswith("<button ")
+        assert html.endswith("</button>")
+        assert "\n" not in html

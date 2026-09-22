@@ -27,12 +27,12 @@ class TabBox(BaseComponent):
 <div class="row x-tab-box {{css_class}}{% if segment %} segment-style{% end %}" data-tab-key="{{tab_key}}" data-tab-default="{{tab_default}}">
     {% render block_title %}
     {% if title %}
-        <div style="{{title_style}}">
+        <div{% if title_style %} style="{{title_style}}"{% end %}>
             <span class="x-tab title" >{{title}}</span>
         </div>
     {% end %}
 
-    <div style="{{tabs_style}}">
+    <div{% if tabs_style %} style="{{tabs_style}}"{% end %}>
         {% for item in tab_list %}
             <a class="x-tab {{item.css_class}}" 
                 {% if item.href != "" %} href="{{item.href}}" {% end %}
@@ -117,7 +117,7 @@ class TabTable(BaseComponent):
 <table class="x-tab-table">
     {% for tab_box in tab_box_list %}
     <tr>
-        <td style="{{tab_box._title_style}}">
+        <td{% if tab_box._title_style %} style="{{tab_box._title_style}}"{% end %}>
             <span class="x-tab title">{{tab_box.title}}</span>
         </td>
         <td>
