@@ -127,10 +127,22 @@ xtemplate.register_memory_template("memory:my_tpl", "<h1>{{name}}</h1>")
 | `format_date` | 日期格式化函数（`dateutil.format_date`） |
 | `format_time` | 时间格式化函数（`dateutil.format_time`） |
 | `quote` | URL 编码（`urllib.parse.quote`） |
-| `add_url_param` | 给URL增加参数（同名参数会被替换），见 `xutils.textutil.add_url_param` |
-| `remove_url_param` | 删除URL中的参数，见 `xutils.textutil.remove_url_param` |
 
 开发者模式下额外注入：`_debug_info`、`_dev_info`。
+
+**不要往全局命名空间里加业务/工具函数**（全局只有上面这几个跨页面通用的项）。某个模板或组件需要额外的函数时，
+在使用处局部注入即可：
+
+```python
+# 组件内部 render 时作为模板变量传入
+return self._template.generate(add_url_param=add_url_param, ...)
+```
+
+```html
+<!-- 或者在模板里按需 import -->
+{% from xutils.textutil import add_url_param %}
+<a href="{{add_url_param(page_url, 'page', 2)}}">第2页</a>
+```
 
 ### 设备适配
 

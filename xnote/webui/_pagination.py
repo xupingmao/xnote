@@ -134,7 +134,11 @@ class Pagination(BaseComponent):
         return int(math.ceil(self.page_total / self.page_size))
 
     def render(self):
-        """渲染分页 HTML"""
+        """渲染分页 HTML
+
+        注意: add_url_param 是渲染时**局部注入**的(不依赖 xtemplate 的全局 NAMESPACE),
+        保持全局命名空间干净。
+        """
         return self._template.generate(
             page=self.page,
             page_max=self.get_page_max(),

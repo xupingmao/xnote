@@ -313,3 +313,4 @@ debug.type = bool
 - **Build step**: Run `scripts/build.py` to build CSS/JS bundles before production (referenced in code, file may not exist at root).
 - **JS 语法兼容 ES3**: `static/js/` 下的运行时代码必须兼容 ES3 语法（只用 `var`、函数声明、`function` 表达式，不用 `let`/`const`/箭头函数/模板字符串/`class` 等 ES5+ 语法），以适配老旧浏览器/引擎。测试脚本（`tests/js/`）不受此限制，可使用现代 JS 语法。
 - **模板引擎导入**: 使用 `from xnote.core import xtemplate`，不要直接 `import xtemplate`（当前兼容但不推荐，后续可能移除顶层别名）。
+- **不要污染模板全局命名空间**: `xnote/core/xtemplate.py` 的 `NAMESPACE` 只保留跨页面通用的少数几项（`format_date`/`format_time`/`quote` 等），**不要为了某个模板/组件往里加工具函数**。需要用到的函数在使用处局部注入即可：组件内部的模板在 `render()` 里作为模板变量传入（如 `self._template.generate(add_url_param=add_url_param, ...)`），独立的 `.html` 模板用 `{% from xutils.textutil import add_url_param %}` 按需导入。
