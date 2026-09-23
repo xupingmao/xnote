@@ -37,12 +37,6 @@ class BaseTablePlugin(BasePluginV2):
 {% if table %}
 <div class="card">
     {% include common/table/table.html %}
-
-    {% if page_max > 0 or page_total > 0 %}
-        <div class="top-offset-2 bottom-offset-1">
-            {% include common/pagination.html %}
-        </div>
-    {% end %}
 </div>
 {% end %}
 """
@@ -71,6 +65,14 @@ class BaseTablePlugin(BasePluginV2):
         return self.response_ajax(self.EDIT_HTML, **kw)
 
     def response_page(self, **kw):
+        table = kw.get("table")
+        if isinstance(table, DataTable):
+            page_max = kw.get("page_max", 0)
+            page_total = kw.get("page_total", 0)
+            if page_max > 0 or page_total > 0:
+                # 兼容历史逻辑
+                table.set_pagination(**kw)
+                
         page_html = self.get_page_html()
         self.writehtml(page_html, **kw)
 

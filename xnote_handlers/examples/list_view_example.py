@@ -67,12 +67,14 @@ class ListPluginHandler(BaseListPlugin):
             list_item.extra.add(ConfirmActionLink(text="删除", url="?action=delete", msg=f"确认删除[{text}]吗?", css_class="red"))
             
             list_view.add_item(list_item)
+            
+        page = xutils.get_argument_int("page", 1)
+
+        # 分页直接设置到列表组件上, 列表底部会自动渲染分页
+        list_view.set_pagination(page=page, page_total=100, page_size=20)
 
         kw = Storage()
         kw.list_view = list_view
-        kw.page_current = 1
-        kw.page_total = 100
-        kw.page_url = "?page="
 
         self.writehtml(
             self.tab_html, 

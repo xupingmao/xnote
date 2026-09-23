@@ -13,7 +13,8 @@ from typing import Any, List, Optional, Union
 
 from xutils import textutil
 from xnote.webui.base import BaseComponent, BaseContainer
-from xnote.webui.container import ActionBar
+from xnote.webui.container import ActionBar, Div
+from xnote.webui._pagination import Pagination
 
 from xnote.core import xtemplate
 from web.utils import group  # type: ignore
@@ -306,6 +307,7 @@ class DataTable(BaseComponent):
     action_bar: ActionBar
     action_bar_html: Union[str, bytes]
     pagination_html: str
+    pagination: Optional[Pagination]
 
     def __init__(self):
         self.title = "表格名称"
@@ -319,10 +321,12 @@ class DataTable(BaseComponent):
 
         # 操作栏
         self.action_bar = ActionBar()
-        self.action_bar_html = ""  # type: Union[str, bytes]
+        self.action_bar_html: Union[str, bytes] = ""
 
-        # 分页html
+        # 分页html(自定义html, 优先级低于 pagination 组件)
         self.pagination_html = ""
+        # 分页组件
+        self.pagination: Optional[Pagination] = None
 
     def add_head(self, title: str = "", field: str = "", type: str = TableRowType.empty, link_field: str = "",
                  width: str = DEFAULT_WIDTH, width_weight: int = 0, min_width: str = "", max_width: str = "",
@@ -369,6 +373,34 @@ class DataTable(BaseComponent):
 
     def set_rows(self, rows: List[dict]) -> None:
         self.rows = rows
+
+    def set_pagination(self, page: Any = 1, page_max: Any = 0, page_total: Any = 0,
+                       page_size: Any = 20, page_url: str = "",
+                       page_arg_name: str = "page", **kw: Any) -> Pagination:
+        """设置分页信息, 设置之后表格底部会自动渲染分页组件
+
+        Arguments:
+            - page: 当前页码
+            - page_max: 最大页码, 不传时由 page_total/page_size 计算
+            - page_total: 总记录数
+            - page_size: 每页记录数
+            - page_url: 分页的基础URL, 不传时使用当前页面的URL
+            - page_arg_name: 分页参数名, 默认 page(比如评论用 comment_page)
+            - kw: 兼容调用方直接透传模板变量(set_pagination(**kw)), 多余的参数会被忽略
+        """
+        self.pagination = Pagination(page=page, page_max=page_max, page_total=page_total,
+                                     page_size=page_size, page_url=page_url,
+                                     page_arg_name=page_arg_name)
+        return self.pagination
+
+    def render_pagination_html(self) -> str:
+        """渲染分页的HTML(模板内部使用), 优先渲染分页组件"""
+        pagination = self.pagination
+        if pagination is not None:
+            div = Div("row py-2")
+            div.add(pagination)
+            return div.render_str()
+        return self.pagination_html
 
     def set_action_style(self, width: str = "auto", width_weight: int = 0, min_width: str = "", max_width: str = "") -> None:
         action_head = self.action_head

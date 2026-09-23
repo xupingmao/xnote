@@ -92,11 +92,11 @@ class TableExampleHandler(BaseTablePlugin):
         row["delete_msg"] = "确认删除记录吗?"
         table.add_row(row)
 
+        # 分页直接设置到表格组件上, 表格底部会自动渲染分页
+        table.set_pagination(page=1, page_total=100, page_size=20)
+
         kw = Storage()
         kw.table = table
-        kw.page = 1
-        kw.page_max = 1
-        kw.page_url = "?page="
 
         kw.query_form = self.get_query_form()
         kw.weight_table = self.get_weight_table()

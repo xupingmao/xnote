@@ -21,12 +21,6 @@ class BaseListPlugin(BasePluginV2):
 {% if list_view %}
 <div class="card">
     {% render list_view %}
-    
-    {% if page_max > 0 or page_total > 0 %}
-        <div class="row padding-top-md padding-bottom-md">
-            {% include common/pagination.html %}
-        </div>
-    {% end %}
 </div>
 {% end %}
 """
@@ -42,6 +36,14 @@ class BaseListPlugin(BasePluginV2):
         return self.page_html
 
     def response_page(self, **kw):
+        table = kw.get("list_view")
+        if isinstance(table, ListView):
+            page_max = kw.get("page_max", 0)
+            page_total = kw.get("page_total", 0)
+            if page_max > 0 or page_total > 0:
+                # 兼容历史逻辑
+                table.set_pagination(**kw)
+                
         page_html = self.get_page_html()
         self.writehtml(page_html, **kw)
         

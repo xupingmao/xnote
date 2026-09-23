@@ -37,7 +37,10 @@ TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(
     format_date=dateutil.format_date,
     format_time=dateutil.format_time,
-    quote=quote
+    quote=quote,
+    # 模板里拼接带参数的URL, 比如 {{add_url_param(page_url, "page", 2)}}
+    add_url_param=textutil.add_url_param,
+    remove_url_param=textutil.remove_url_param,
 )
 
 LOAD_TIME = int(time.time())

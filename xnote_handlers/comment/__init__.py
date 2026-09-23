@@ -129,7 +129,7 @@ def _to_text(html):
 
 
 def build_comment_page_url() -> str:
-    """构造评论分页链接模板, 保留当前请求的其它参数, 仅替换 comment_page。
+    """构造评论分页的基础URL, 保留当前请求的其它参数, 不含分页参数。
 
     评论分页参数是 comment_page(而非 page), 避免与页面自身分页参数冲突。
     """
@@ -140,8 +140,8 @@ def build_comment_page_url() -> str:
     params.pop("comment_page", None)
     params.pop("page", None)
     if params:
-        return "?" + urllib.parse.urlencode(params, doseq=True) + "&comment_page="
-    return "?comment_page="
+        return "?" + urllib.parse.urlencode(params, doseq=True)
+    return ""
 
 
 def render_to_html(
@@ -153,6 +153,7 @@ def render_to_html(
         page=page,
         page_max=page_max,
         page_url=build_comment_page_url(),
+        page_arg_name="comment_page",
         comments=comments,
         show_note=show_note,
         note_user_id=note_user_id,

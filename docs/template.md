@@ -127,6 +127,8 @@ xtemplate.register_memory_template("memory:my_tpl", "<h1>{{name}}</h1>")
 | `format_date` | 日期格式化函数（`dateutil.format_date`） |
 | `format_time` | 时间格式化函数（`dateutil.format_time`） |
 | `quote` | URL 编码（`urllib.parse.quote`） |
+| `add_url_param` | 给URL增加参数（同名参数会被替换），见 `xutils.textutil.add_url_param` |
+| `remove_url_param` | 删除URL中的参数，见 `xutils.textutil.remove_url_param` |
 
 开发者模式下额外注入：`_debug_info`、`_dev_info`。
 

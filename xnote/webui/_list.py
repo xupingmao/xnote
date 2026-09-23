@@ -6,6 +6,7 @@ from .component import ConfirmButton, ActionButton, TextTag, escape_html, TextSp
 from xnote.core import xconfig
 from .container import TextContainer
 from ._tag_select import TagSelect
+from ._pagination import Pagination
 
 
 class ListViewLine(TextContainer):
@@ -259,13 +260,47 @@ class ListView(BaseContainer):
 {% for item in item_list %}
     {% render item %}
 {% end %}
+
+{% raw pagination_html %}
 """)
-    
+
+    def __init__(self, css_class="", css_style="", html="", id=""):
+        super().__init__(css_class=css_class, css_style=css_style, html=html, id=id)
+        self.pagination: typing.Optional[Pagination] = None
+
+    def set_pagination(self, page=1, page_max=0, page_total=0, page_size=20,
+                       page_url="", page_arg_name="page", **kw: typing.Any) -> Pagination:
+        """设置分页信息, 设置之后列表底部会自动渲染分页组件
+
+        Arguments:
+            - page: 当前页码
+            - page_max: 最大页码, 不传时由 page_total/page_size 计算
+            - page_total: 总记录数
+            - page_size: 每页记录数
+            - page_url: 分页的基础URL, 不传时使用当前页面的URL
+            - page_arg_name: 分页参数名, 默认 page(比如评论用 comment_page)
+            - kw: 兼容调用方直接透传模板变量(set_pagination(**kw)), 多余的参数会被忽略
+        """
+        self.pagination = Pagination(page=page, page_max=page_max, page_total=page_total,
+                                     page_size=page_size, page_url=page_url,
+                                     page_arg_name=page_arg_name)
+        return self.pagination
+
+    def render_pagination_html(self) -> str:
+        """渲染分页的HTML(模板内部使用)"""
+        pagination = self.pagination
+        if pagination is not None:
+            div = Div(css_class="row py-2")
+            div.add(pagination)
+            return div.render_str()
+        return ""
+
     def add_item(self, item: ListViewItem):
         self.add(item)
 
     def render(self):
-        return self._code.generate(item_list = self.children)
+        return self._code.generate(item_list = self.children,
+                                   pagination_html = self.render_pagination_html())
     
     def add_dropdown(self, text="", name="", data_type="int", value=""):
         dropdown = ListViewDropdown(text=text, name=name, data_type=data_type, value=value)
