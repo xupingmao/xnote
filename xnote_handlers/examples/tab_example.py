@@ -31,11 +31,19 @@ class TabExampleHandler:
         kw.tab_group_1 = tab_group_1
         kw.tab_group_2 = tab_group_2
         kw.tab_table = self.get_tab_table()
+        kw.tab_default_hide = self.get_default_hide_tab()
 
         return xtemplate.render("examples/page/example_tab.html", **kw)
 
     def POST(self):
         return self.GET()
+
+    def get_default_hide_tab(self):
+        """默认隐藏的tab: 只有 tab_default_hide=secret 命中时才展示"""
+        tab_box = TabBox(tab_key="tab_default_hide", tab_default="normal", css_class="btn-style")
+        tab_box.add_item(title="常规Tab", value="normal")
+        tab_box.add_item(title="隐藏Tab", value="secret", default_hide=True)
+        return tab_box
 
     def get_tab_table(self):
         tab_table = TabTable()

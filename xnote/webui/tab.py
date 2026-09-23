@@ -63,8 +63,9 @@ class TabBox(BaseComponent):
     def right_div(self):
         return self.extra
     
-    def add_item(self, title="", value="", href="", css_class="", onclick="", item_id=""):
-        item = TabItem(title=title, value=value, href=href, css_class=css_class, onclick=onclick, item_id=item_id)
+    def add_item(self, title="", value="", href="", css_class="", onclick="", item_id="", default_hide=False):
+        item = TabItem(title=title, value=value, href=href, css_class=css_class, 
+                       onclick=onclick, item_id=item_id, default_hide=default_hide)
 
         if len(item_id) > 0:
             for item in self.tab_list:
@@ -101,7 +102,7 @@ class TabBox(BaseComponent):
 
 
 class TabItem:
-    def __init__(self, title="", value="", href="", css_class="", onclick="", item_id=""):
+    def __init__(self, title="", value="", href="", css_class="", onclick="", item_id="", default_hide=False):
         href = xconfig.WebConfig.resolve_path(href)
         self.title = title
         self.value = value
@@ -109,6 +110,10 @@ class TabItem:
         self.css_class = css_class
         self.onclick = onclick
         self.item_id = item_id
+        self.default_hide = default_hide
+        
+        if default_hide:
+            self.css_class += " hide"
 
 
 class TabTable(BaseComponent):

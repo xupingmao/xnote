@@ -725,7 +725,7 @@ class TimelineSearchDialogHandler:
 
     html = """
 <div class="card">
-    <div class="row"> <input type="text" class="nav-search-input" id="note-search-text" 
+    <div class="group-select-search"> <input type="text" class="nav-search-input" id="note-search-text" 
         placeholder="搜索笔记" value="{{searchText}}" onkeyup="xnote.action.note.searchNote(this);">
         <button class="nav-search-btn btn-default" onclick="xnote.action.note.searchNote(this)">
         <i class="fa fa-search"></i></button>
