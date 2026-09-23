@@ -1,0 +1,200 @@
+/**
+ * 间距工具类(padding / margin)
+ *
+ * 共两套：
+ * 1. Tailwind 风格工具类（推荐使用）：{p|m}{x|y|t|r|b|l}-{n}
+ *    - p = padding, m = margin
+ *    - x = 左右, y = 上下, t/r/b/l = 上/右/下/左单边
+ *    - n 为 tailwind 默认 scale, 实际值 = n*4px
+ *      目前只收录常用的小间距: (0, 1, 2, 3, 4, 5, 6, 8)
+ *      即 0/4/8/12/16/20/24/32px, 需要更大间距时再补
+ *    - 例: px-2 => padding-left/right: 8px, mb-4 => margin-bottom: 16px
+ *    - 另有 auto 边距: mx-auto / my-auto / ml-auto / mr-auto
+ *    - 不含 tailwind 的半档(0.5/1.5/2.5/3.5)与负margin
+ * 2. 历史别名（保持兼容，新代码不要再用）
+ *    - padding-5/padding-sm、padding-top-md、margin-top-sm、top-offset-1 等
+ *
+ * 取值规范见 docs/code_style_css.md 的 8px 栅格：
+ * 优先用偶数档(px-2=8px, px-4=16px, px-6=24px)；
+ * p-1(4px) 是半步，只用于紧凑组件微调；px-3/px-5(12/20px) 不在栅格上，不要用于布局间距。
+ *
+ * 注意：相邻的 margin 会合并，padding 不会合并。
+ */
+
+/* ===== Tailwind 风格: padding ===== */
+
+.p-0{padding:0;}
+.p-1{padding:4px;}
+.p-2{padding:8px;}
+.p-3{padding:12px;}
+.p-4{padding:16px;}
+.p-5{padding:20px;}
+.p-6{padding:24px;}
+.p-8{padding:32px;}
+
+.px-0{padding-left:0;padding-right:0;}
+.px-1{padding-left:4px;padding-right:4px;}
+.px-2{padding-left:8px;padding-right:8px;}
+.px-3{padding-left:12px;padding-right:12px;}
+.px-4{padding-left:16px;padding-right:16px;}
+.px-5{padding-left:20px;padding-right:20px;}
+.px-6{padding-left:24px;padding-right:24px;}
+.px-8{padding-left:32px;padding-right:32px;}
+
+.py-0{padding-top:0;padding-bottom:0;}
+.py-1{padding-top:4px;padding-bottom:4px;}
+.py-2{padding-top:8px;padding-bottom:8px;}
+.py-3{padding-top:12px;padding-bottom:12px;}
+.py-4{padding-top:16px;padding-bottom:16px;}
+.py-5{padding-top:20px;padding-bottom:20px;}
+.py-6{padding-top:24px;padding-bottom:24px;}
+.py-8{padding-top:32px;padding-bottom:32px;}
+
+.pt-0{padding-top:0;}
+.pt-1{padding-top:4px;}
+.pt-2{padding-top:8px;}
+.pt-3{padding-top:12px;}
+.pt-4{padding-top:16px;}
+.pt-5{padding-top:20px;}
+.pt-6{padding-top:24px;}
+.pt-8{padding-top:32px;}
+
+.pr-0{padding-right:0;}
+.pr-1{padding-right:4px;}
+.pr-2{padding-right:8px;}
+.pr-3{padding-right:12px;}
+.pr-4{padding-right:16px;}
+.pr-5{padding-right:20px;}
+.pr-6{padding-right:24px;}
+.pr-8{padding-right:32px;}
+
+.pb-0{padding-bottom:0;}
+.pb-1{padding-bottom:4px;}
+.pb-2{padding-bottom:8px;}
+.pb-3{padding-bottom:12px;}
+.pb-4{padding-bottom:16px;}
+.pb-5{padding-bottom:20px;}
+.pb-6{padding-bottom:24px;}
+.pb-8{padding-bottom:32px;}
+
+.pl-0{padding-left:0;}
+.pl-1{padding-left:4px;}
+.pl-2{padding-left:8px;}
+.pl-3{padding-left:12px;}
+.pl-4{padding-left:16px;}
+.pl-5{padding-left:20px;}
+.pl-6{padding-left:24px;}
+.pl-8{padding-left:32px;}
+
+/* ===== Tailwind 风格: margin ===== */
+
+.m-0{margin:0;}
+.m-1{margin:4px;}
+.m-2{margin:8px;}
+.m-3{margin:12px;}
+.m-4{margin:16px;}
+.m-5{margin:20px;}
+.m-6{margin:24px;}
+.m-8{margin:32px;}
+
+.mx-0{margin-left:0;margin-right:0;}
+.mx-1{margin-left:4px;margin-right:4px;}
+.mx-2{margin-left:8px;margin-right:8px;}
+.mx-3{margin-left:12px;margin-right:12px;}
+.mx-4{margin-left:16px;margin-right:16px;}
+.mx-5{margin-left:20px;margin-right:20px;}
+.mx-6{margin-left:24px;margin-right:24px;}
+.mx-8{margin-left:32px;margin-right:32px;}
+.mx-auto{margin-left:auto;margin-right:auto;}
+
+.my-0{margin-top:0;margin-bottom:0;}
+.my-1{margin-top:4px;margin-bottom:4px;}
+.my-2{margin-top:8px;margin-bottom:8px;}
+.my-3{margin-top:12px;margin-bottom:12px;}
+.my-4{margin-top:16px;margin-bottom:16px;}
+.my-5{margin-top:20px;margin-bottom:20px;}
+.my-6{margin-top:24px;margin-bottom:24px;}
+.my-8{margin-top:32px;margin-bottom:32px;}
+.my-auto{margin-top:auto;margin-bottom:auto;}
+
+.mt-0{margin-top:0;}
+.mt-1{margin-top:4px;}
+.mt-2{margin-top:8px;}
+.mt-3{margin-top:12px;}
+.mt-4{margin-top:16px;}
+.mt-5{margin-top:20px;}
+.mt-6{margin-top:24px;}
+.mt-8{margin-top:32px;}
+
+.mr-0{margin-right:0;}
+.mr-1{margin-right:4px;}
+.mr-2{margin-right:8px;}
+.mr-3{margin-right:12px;}
+.mr-4{margin-right:16px;}
+.mr-5{margin-right:20px;}
+.mr-6{margin-right:24px;}
+.mr-8{margin-right:32px;}
+.mr-auto{margin-right:auto;}
+
+.mb-0{margin-bottom:0;}
+.mb-1{margin-bottom:4px;}
+.mb-2{margin-bottom:8px;}
+.mb-3{margin-bottom:12px;}
+.mb-4{margin-bottom:16px;}
+.mb-5{margin-bottom:20px;}
+.mb-6{margin-bottom:24px;}
+.mb-8{margin-bottom:32px;}
+
+.ml-0{margin-left:0;}
+.ml-1{margin-left:4px;}
+.ml-2{margin-left:8px;}
+.ml-3{margin-left:12px;}
+.ml-4{margin-left:16px;}
+.ml-5{margin-left:20px;}
+.ml-6{margin-left:24px;}
+.ml-8{margin-left:32px;}
+.ml-auto{margin-left:auto;}
+
+/* ===== 历史别名(保持兼容, 新代码请用上面的 tailwind 工具类) ===== */
+
+.top-offset-1 {margin-top: 4px;}
+.top-offset-2 {margin-top: 8px;}
+.bottom-offset-1{margin-bottom: 4px;}
+.bottom-offset-2{margin-bottom: 8px;}
+
+.padding-5, .padding-sm {
+    padding: 4px;
+}
+.padding-10, .padding-md {
+    padding: 8px;
+}
+.padding-lg {
+    padding: 24px;
+}
+.padding-top-5, .padding-top-sm {
+    padding-top: 4px;
+}
+.padding-top-10, .padding-top-md {
+    padding-top: 8px;
+}
+.padding-left-5, .padding-left-sm {
+    padding-left: 4px;
+}
+.padding-bottom-5, .padding-bottom-sm {
+    padding-bottom: 4px;
+}
+.padding-bottom-10, .padding-bottom-md {
+    padding-bottom: 8px
+}
+.margin-top-5, .margin-top-sm, .margin-top-small {
+    margin-top: 4px;
+}
+.margin-top-10, .margin-top-md, .margin-top-medium {
+    margin-top: 8px;
+}
+.margin-bottom-5, .margin-bottom-sm, .margin-bottom-small {
+    margin-bottom: 4px;
+}
+.margin-bottom-10, .margin-bottom-md, .margin-bottom-medium {
+    margin-bottom: 8px;
+}

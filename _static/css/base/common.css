@@ -924,49 +924,9 @@ li.menu-item:hover {
 .col-md-offset-2{margin-left:16.666666666666664%;}
 .col-md-offset-1{margin-left:8.333333333333332%;}
 .col-md-offset-0{margin-left:0;}
-.top-offset-1 {margin-top: 4px;}
-.top-offset-2 {margin-top: 8px;}
-.bottom-offset-1{margin-bottom: 4px;}
-.bottom-offset-2{margin-bottom: 8px;}
-
 .row{float: left;width: 100%;overflow: auto;}
 .row-extra {
     float: right;
 }
 
-.padding-5, .padding-sm {
-    padding: 4px;
-}
-.padding-10, .padding-md {
-    padding: 8px;
-}
-.padding-lg {
-    padding: 24px;
-}
-.padding-top-5, .padding-top-sm {
-    padding-top: 4px;
-}
-.padding-top-10, .padding-top-md {
-    padding-top: 8px;
-}
-.padding-left-5, .padding-left-sm {
-    padding-left: 4px;
-}
-.padding-bottom-5, .padding-bottom-sm {
-    padding-bottom: 4px;
-}
-.padding-bottom-10, .padding-bottom-md {
-    padding-bottom: 8px
-}
-.margin-top-5, .margin-top-sm, .margin-top-small {
-    margin-top: 4px;
-}
-.margin-top-10, .margin-top-md, .margin-top-medium {
-    margin-top: 8px;
-}
-.margin-bottom-5, .margin-bottom-sm, .margin-bottom-small {
-    margin-bottom: 4px;
-}
-.margin-bottom-10, .margin-bottom-md, .margin-bottom-medium {
-    margin-bottom: 8px;
-}
+/* 间距工具类(padding/margin)已拆分到 base/common-spacing.css */

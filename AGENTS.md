@@ -13,6 +13,7 @@
 - 结构化对象优先：设计接口（函数/方法）的输入输出参数时，优先使用结构化的对象（自定义类，如 `XxxResult`/`XxxInfo`），而不是裸 `dict`。兼容 Python 3.6 不可用 `dataclass` 时，用普通类实现，并通过 `from_dict` / `to_dict` 与 JSON 互转；类的字段用类型注解明确标注。
 - 小模板内联：小于 20 行的 HTML 模板直接放在 Python 代码里，用 `xtemplate.render_text(text, template_name, **kw)` 渲染，不要单独建 `.html` 模板文件。大于 20 行的模板才放 `xnote_handlers/` 下单独的模板文件中。
 - webui 组件 CSS 放公共文件：`xnote/webui/` 下的组件是公共组件，其样式不要写在业务模块的 css 里，统一放到 `static/css/base/common-*.css`（例如下拉/更多操作菜单放 `common-dropdown.css`）。注意 `common-*.css` 经打包进入 `static/css/app.build.css`（全局加载），但若未重新执行构建脚本，本地开发可在使用组件的页面直接 `<link>` 该 `common-*.css` 使其立即生效。
+- **间距优先用内置工具类**：间距工具类（padding / margin）统一收在 `static/css/base/common-spacing.css`，不要散落到各组件 css。里面是 Tailwind 风格的一套：`p-`/`px-`/`py-`/`pt-`/`pr-`/`pb-`/`pl-` 与 `m-`/`mx-`/`my-`/`mt-`/`mr-`/`mb-`/`ml-`，刻度为 `n*4px`，另含 `mx-auto`/`ml-auto`/`mr-auto`/`my-auto`。写页面/组件的内外边距时**优先在 HTML 里组合这些类，不要再新造 `.padding-*`/`.margin-*` 之类的别名**（文件里保留的历史别名 `padding-sm`/`margin-top-md`/`top-offset-1` 等仅为兼容，新代码不要用）。取值遵守 `docs/code_style_css.md` 的 8px 栅格，即**用偶数档**（`px-2`=8px、`px-4`=16px、`px-6`=24px）；`p-1`(4px) 属半步、只用于紧凑组件微调，不用 `px-3`/`px-5`（12/20px 不在栅格上）。改动 `common-spacing.css` 后必须重建产物 `python -c "import sys; sys.path.insert(0,'.'); from xnote.core import xnote_code_builder as b; b.build_app_css()"`，否则页面读到的还是旧的 `app.build.css`。
 - webui 组件模块默认私有，统一由 `__init__.py` 对外暴露：`xnote/webui/` 下的组件模块**默认都是私有的**，新增/重构组件时，组件类必须在该包的 `xnote/webui/__init__.py` 里**显式导出**（如 `from ._tag_select import TagSelect`、`from ._list import ListView`），业务代码通过 `from xnote.webui import ...` 或更上层的 `xnote.plugin` 使用，**不要直接 import 内部模块路径**（如 `from xnote.webui._list import ListView`、`import xnote.webui._tag_select`）。模块名用下划线前缀（如 `_list.py` / `_pagination.py` / `_image.py` / `_tag_select.py`）表达私有模块；没有前缀的内部模块（如 `form.py` / `component.py`）同样视为内部模块，不对外直接 import。
 - **不要自行提交 git commit**：仅在用户明确要求提交时才执行 `git commit`（例如用户说"提交代码"）。其余情况下只修改工作区文件，不要主动 `git add` / `git commit`，把提交时机交给用户。
 - 浅灰标签慎用：`TextTag(css_class="lightgray")`（背景 `#eee`，见 `_static/css/base/common-tag.css`）与列表行的 hover 背景同色（`.list-item:hover` 也是 `#eee`，见 `common-list.css`），**不要在有 hover 效果的组件上使用**（例如列表行 `ListViewItem` 的标签），否则 hover 时标签会“消失”。列表内的日期等元信息改用无背景的 `TextSpan(css_class="todo-time")` 之类的纯文本样式。
@@ -249,18 +250,16 @@ Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Switch`
 后端组装方式（参考 `xnote_handlers/chatbot/chatbot_render.py`）：
 
 ```python
-from typing import List
+from typing import Any, List
 from xnote.core import xtemplate
 from xutils import webutil
 
-def render_message_rows(message_list):
-    # type: (list) -> str
+def render_message_rows(message_list: List[Any]) -> str:
     # 注意 xtemplate.render_text 返回 bytes, 命令的 value 必须是 str
     html = xtemplate.render_text(_MESSAGE_ROWS_TEMPLATE, message_list=message_list)
     return html.decode("utf-8") if isinstance(html, bytes) else html
 
-def build_send_commands(result):
-    # type: (...) -> List[webutil.CommandItem]
+def build_send_commands(result: Any) -> List[webutil.CommandItem]:
     rows = render_message_rows([result.message, result.reply])
     return [webutil.CommandItem(command="append_html",
                                 id="message-list", value=rows)]
@@ -291,7 +290,23 @@ debug.type = bool
 - **数据库时间字段**：时间字段统一使用 `bigint` 类型，保存**毫秒时间戳**（而不是 datetime 字符串），与 DB 无关、跨库一致；字段命名统一用 **`create_time` / `update_time`**（`ctime` / `mtime` 是旧用法，**新表不要再使用**）。写入用 `dateutil.timestamp_ms()`（返回 `int(time.time()*1000)`），展示用 `dateutil.format_millis(ms)`。建表时 `manager.add_column("create_time", "bigint", default_value=0, comment="创建时间(毫秒时间戳)")`，模型类 `self.create_time = 0`。参考 `chat_session` / `note_fragment`。历史遗留的 datetime 字符串时间字段（如有）按新旧约定共存于旧表，新表不要再引入。
 - **DAO 新增数据**：DAO 层新增记录**优先使用 `table.insert_record(record)`**（传入 `XxxRecord` 模型对象，内部调用 `record.to_save_dict()` 做字段过滤），**不建议直接使用 `table.insert(**save_dict)`** 手拼字典。仅当需要显式指定主键等特殊场景（例如从消息迁移、用 msg_id 作为 task_id）才直接用 `insert`，参考 `TodoDao.create_with_id`。
 - **类型检查**：增量代码需要通过 mypy 检查。改动后运行 `python -m mypy <改动的文件>`（配置见 `mypy.ini`），确保被改动的文件本身无类型错误；新增/修改的代码应补充类型注解。
-- **Python 兼容性**：运行环境兼容 `Python >= 3.6`，新增代码请勿使用 3.7+ 语法（例如 `from __future__ import annotations`、内置泛型 `dict[str, Any]`/`list[int]` 等），请使用 `typing` 中的 `List`/`Dict`/`Optional`/`Union` 等；类属性注解（PEP 526）可用。
+- **类型标注一律用语法标注，不用注释式**：新增代码的类型必须用 **Python 语法支持的类型标注**表达（PEP 484 函数签名 / PEP 526 变量与属性注解），**不要写注释式标注**（`# type: (str) -> int`、`x = []  # type: List[str]`）：
+  ```python
+  # 推荐
+  def add_url_param(url: str, name: str, value: int) -> str: ...
+
+  class DataTable:
+      def __init__(self):
+          self.rows: List[TableRowType] = []
+          self.pagination: Optional[Pagination] = None
+
+  # 不推荐（注释式）
+  def add_url_param(url, name, value):
+      # type: (str, str, int) -> str
+      ...
+  ```
+  原因是语法标注是语言的一部分，mypy / IDE / `typing.get_type_hints()` 都能直接读到，改签名时不会像注释那样被漏改而与实际代码脱节。存量代码里的注释式标注不必专门清理，但**改动到那段代码时顺手迁移成语法标注**。
+- **Python 兼容性**：运行环境兼容 `Python >= 3.6`，新增代码请勿使用 3.7+ 语法（例如 `from __future__ import annotations`、内置泛型 `dict[str, Any]`/`list[int]` 等），请使用 `typing` 中的 `List`/`Dict`/`Optional`/`Union` 等；函数签名注解（PEP 484）与类属性注解（PEP 526）均可用，且**类型必须用语法标注表达，不要写 `# type:` 注释式标注**（见上文"类型标注一律用语法标注"）。
 - **Version**: `config/version.txt` — auto-updated during test run (branch-date format).
 - **Sentinel**: `sentinel.py` wraps the server; exit code 205 or 52480 triggers restart. Also respects `xnote-reboot.txt` file.
 - **Migrations**: `xnote_migrate/` has numbered `upgrade_xxx.py` files for schema/data migration during version upgrades.
