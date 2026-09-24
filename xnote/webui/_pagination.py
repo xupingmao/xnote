@@ -70,6 +70,12 @@ class Pagination(BaseComponent):
         {% if page_total > 0 and not _is_mobile %}
             <span class="x-page-span">{{page_total}}条记录</span>
         {% end %}
+        
+        {% if page_total > 0 and _is_mobile %}
+            <div class="row mt-2 gray">
+                <span>{{page_total}}条记录 | 分页大小: {{page_size}}</span>
+            </div>
+        {% end %}
     </div>
 {% end %}
 """, name="pagination")
@@ -145,6 +151,7 @@ class Pagination(BaseComponent):
             page_url=self.page_url,
             page_arg_name=self.page_arg_name,
             page_total=self.page_total,
+            page_size = self.page_size,
             add_url_param=add_url_param,
             _is_mobile=xtemplate.is_mobile_device(),
         )

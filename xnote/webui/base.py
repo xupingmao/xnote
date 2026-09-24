@@ -1,7 +1,7 @@
 import typing
 
 from typing import List, Union
-from xutils.textutil import safe_str
+from xutils.textutil import safe_str, safe_bytes
 
 MAX_DEPTH = 50
 
@@ -14,6 +14,9 @@ class BaseComponent:
     
     def render_str(self) -> str:
         return safe_str(self.render())
+    
+    def render_bytes(self) -> bytes:
+        return safe_bytes(self.render())
 
 class BaseContainer(BaseComponent):
     def __init__(self, css_class="", css_style="", html = "", id = ""):

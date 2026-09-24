@@ -19,6 +19,7 @@ import random
 import json
 import hashlib
 import base64
+from typing import Any
 from xutils.base import is_str
 from configparser import ConfigParser
 from xutils.textutil_url import *
@@ -846,18 +847,31 @@ class Properties(object):
         self.load_properties()
 
 
-def safe_str(obj, max_length=-1):
+def safe_str(obj, max_length=-1, errors="ignore"):
     if obj == None:
         return ""
     
     if isinstance(obj, bytes):
-        value = obj.decode("utf-8", errors="ignore")
+        value = obj.decode("utf-8", errors=errors)
     else:
         value = str(obj)
     
     if max_length > 0:
         return value[:max_length]
     return value
+
+def safe_bytes(obj: Any, errors="ignore") -> bytes:
+    if obj is None:
+        return b""
+
+    if isinstance(obj, bytes):
+        return obj
+    
+    if isinstance(obj, str):
+        return obj.encode("utf-8", errors=errors)
+    
+    return str(obj).encode("utf-8", errors=errors)
+
 
 def append_text(text="", new_item="", sep = ", "):
     if new_item == "":
