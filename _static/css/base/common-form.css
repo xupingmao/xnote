@@ -105,6 +105,11 @@ input[readonly] {
 .query-form.form-body {
     position: static;
     padding: 0px;
+    /* ⚠ 不能继承 .form-body 的 `overflow-y:auto`: 那是为"绝对定位的弹窗表单在固定高度
+       对话框里滚动"准备的。查询表单是页面内联的静态块, 一旦带上 overflow-y:auto,
+       在浮动卡片(.card float:left)里宽度会塌成 0, 整块表单项溢出到卡片外(和页面编辑
+       表单是同一类 bug)。静态流里的表单不需要自滚, 显式复位。 */
+    overflow-y: visible;
 }
 .query-form.form-footer {
     position: static;
@@ -125,6 +130,12 @@ input[readonly] {
 .page-edit-form.form-body {
     position: static;
     padding: 0px;
+    /* ⚠ 不能继承 .form-body 的 `overflow-y:auto`: 那是给"绝对定位的弹窗表单在固定高度
+       对话框里滚动"用的。整页编辑表单是页面内联的静态块, 一旦带上 overflow-y:auto,
+       在浮动的 .card(float:left) 里宽度会塌成 0, 所有表单项(label 100px + 控件 300px)
+       溢出到卡片右外缘、整页空白(2026-09-25 实测 bodyWidth=0 / 控件 right=1400)。
+       静态流里的表单不需要自滚, 显式复位成可见即可恢复成卡片宽度(实测 800px)。 */
+    overflow-y: visible;
 }
 .page-edit-form.form-footer {
     position: static;
