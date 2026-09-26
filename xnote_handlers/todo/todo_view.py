@@ -123,12 +123,6 @@ class _TodoListPlugin(BaseListPlugin):
 </div>
 {% end %}
 
-{% if page_max > 1 %}
-<div class="card row padding-top-md padding-bottom-md">
-    {% include common/pagination.html %}
-</div>
-{% end %}
-
 <script type="text/javascript">
 // 打开待办评论弹窗（iframe 加载评论页面）
 xnote.todo = xnote.todo || {};
@@ -292,13 +286,22 @@ class TaskListPlugin(_TodoListPlugin):
         page = xutils.get_argument_int("page", 1)
         page_size = 50
         offset = max(0, page - 1) * page_size
-
-        tasks = TodoDao.list_with_filters(
-            user_id, project_id=project_filter_id, status=status_filter, status_list=status_list,
-            priority=priority or None, key=key, sort="create_time_desc", offset=offset, limit=page_size)
-        total = TodoDao.count_with_filters(
-            user_id, project_id=project_filter_id, status=status_filter, status_list=status_list,
-            priority=priority or None, key=key)
+        
+        if status == STATUS_FILTER_PENDING or status in PENDING_STATUS_LIST:
+            # 待办视图(待办/未开始/进行中): 全量查出后在内存排序,
+            # 优先级从高到低(紧急>高>普通>低), 同优先级按创建时间倒序
+            all_tasks = TodoDao.list_pending_sorted(
+                user_id, project_id=project_filter_id,
+                priority=priority or None, key=key)
+            total = len(all_tasks)
+            tasks = all_tasks[offset:offset + page_size]
+        else:
+            tasks = TodoDao.list_with_filters(
+                user_id, project_id=project_filter_id, status=status_filter, status_list=status_list,
+                priority=priority or None, key=key, sort="create_time_desc", offset=offset, limit=page_size)
+            total = TodoDao.count_with_filters(
+                user_id, project_id=project_filter_id, status=status_filter, status_list=status_list,
+                priority=priority or None, key=key)
         page_max = max(1, int(math.ceil(total / page_size)))
 
         list_view = self.create_list_view()

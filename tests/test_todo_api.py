@@ -123,6 +123,42 @@ class TestTodoPages(BaseTestCase):
         self.assertIn("x-tab-box", body)
         self.assertIn("list-item", body)
 
+    def test_todo_list_pagination_only_once(self):
+        # 回归: 列表页曾有「模板手动分页 + ListView自动分页」两个分页,
+        # 现在统一由 ListView 的 set_pagination 渲染, 分页只能出现一次
+        pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
+                                            data=dict(name="分页项目"))["data"]
+        # 每页 50 条, 造 51 条保证 page_max > 1 (旧的双分页只在该条件下出现)
+        for i in range(51):
+            self.json_request_return_dict("/api/v1/todo/create", method="POST",
+                                          data=dict(content=f"分页待办{i}", project_id=str(pid)))
+        resp = self.request_app(f"/todo/task?project_id={pid}&status=all")
+        self.assertEqual("200 OK", resp.status)
+        body = resp.data.decode("utf-8")
+        self.assertEqual(body.count('class="pagenation"'), 1)
+
+    def test_todo_pending_sorted_by_priority(self):
+        # 待办视图排序: 优先级 紧急>高>普通>低, 同优先级按创建时间倒序
+        import uuid
+        marker = uuid.uuid4().hex
+        pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
+                                            data=dict(name="排序项目%s" % marker))["data"]
+        # 故意乱序创建, 两条 low 中「low-旧」先创建、「low-新」后创建
+        cases = [("low-旧", "low"), ("high", "high"), ("normal", "normal"),
+                 ("urgent", "urgent"), ("low-新", "low")]
+        for content, priority in cases:
+            resp = self.json_request_return_dict(
+                "/api/v1/todo/create", method="POST",
+                data=dict(content=content + marker, priority=priority,
+                          project_id=str(pid)))
+            self.assertTrue(resp["success"])
+
+        body = self.request_app(f"/todo/task?project_id={pid}&status=pending").data.decode("utf-8")
+        expected = ["urgent", "high", "normal", "low-新", "low-旧"]
+        positions = [body.index(content + marker) for content in expected]
+        self.assertEqual(positions, sorted(positions),
+                         f"页面排序应为 {expected}, 实际位置 {positions}")
+
     def test_todo_list_title_uses_project_name(self):
         # 待办列表标题展示所属项目名称
         pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
@@ -140,9 +176,12 @@ class TestTodoPages(BaseTestCase):
 
     def test_todo_list_content_uses_mark_text(self):
         # 列表行内容用 mark_text 渲染（markdown 语法生效），且内容后附【详情】入口
+        # 用独立项目隔离（列表按优先级排序，共享项目里其它用例的高优先级待办会排到前面）
+        pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
+                                            data=dict(name="marktext项目"))["data"]
         tid = self.json_request_return_dict("/api/v1/todo/create", method="POST",
-                                            data=dict(content="# 标题待办", project_id="1"))["data"]
-        body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
+                                            data=dict(content="# 标题待办", project_id=str(pid)))["data"]
+        body = self.request_app("/todo/task?project_id=%s" % pid).data.decode("utf-8")
         row = self._find_task_row(body)
         self.assertIsNotNone(row)
         # 内容按 markdown 渲染
@@ -171,17 +210,23 @@ class TestTodoPages(BaseTestCase):
                             pos_content, pos_tag, pos_actions))
 
     def test_todo_list_row_shows_create_date(self):
-        # 列表行展示创建日期（YYYY-MM-DD）
+        # 列表行展示创建日期（YYYY-MM-DD）。
+        # 用独立项目隔离：列表按优先级排序后，共享项目(project_id=1)里其它
+        # 高优先级待办会排到前面，导致目标行不在第一行、_find_task_row 命中错行
+        import uuid
+        marker = uuid.uuid4().hex
+        pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
+                                            data=dict(name="创建日期项目%s" % marker))["data"]
         self.json_request_return_dict("/api/v1/todo/create", method="POST",
-                                      data=dict(content="创建日期待办", project_id="1"))
-        lst = self.json_request_return_dict("/api/v1/todo/list?project_id=1")
+                                      data=dict(content="创建日期待办", project_id=str(pid)))
+        lst = self.json_request_return_dict("/api/v1/todo/list?project_id=%s" % pid)
         task = [item for item in lst["data"]["items"]
                 if item["content"] == "创建日期待办"][0]
         from xnote_handlers.todo.todo_model import format_date_ms
         create_date = format_date_ms(task["create_time"])
         self.assertTrue(create_date)  # 前置：create_time 有效
 
-        body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
+        body = self.request_app("/todo/task?project_id=%s" % pid).data.decode("utf-8")
         row = self._find_task_row(body)
         self.assertIsNotNone(row)
         self.assertIn("创建 %s" % create_date, row)
@@ -315,14 +360,8 @@ class TestTodoPages(BaseTestCase):
                                             data=dict(name="计数页面项目"))["data"]
         self.json_request_return_dict("/api/v1/todo/create", method="POST",
                                       data=dict(content="计数待办", project_id=str(pid)))
-        body = self.request_app("/todo").data.decode("utf-8")
-        # 通过本项目的 project_id 定位行（测试库中存在多个同名/种子项目，
-        # 直接用 body.find(名称) 会命中错误的行）
-        marker = "model=project&amp;project_id=%d" % pid
-        idx = body.find(marker)
-        self.assertGreater(idx, 0)
-        row = self._find_project_row(body, pid)
-        self.assertIsNotNone(row)
+        row = self._find_project_row_across_pages(pid)
+        self.assertIsNotNone(row, "未找到 project_id=%s 的项目行" % pid)
         self.assertIn("待办 1", row)
         self.assertIn("完成 0", row)
 
@@ -335,12 +374,26 @@ class TestTodoPages(BaseTestCase):
         start = body.rfind("<", 0, idx)
         return body[start:start + 1200]
 
+    def _find_project_row_across_pages(self, pid, max_page=20):
+        """项目列表按 create_time asc 分页(每页50条), 测试库积累的项目可能
+        超过一页, 逐页查找目标项目行"""
+        page = 1
+        while page <= max_page:
+            body = self.request_app("/todo?page=%s" % page).data.decode("utf-8")
+            row = self._find_project_row(body, pid)
+            if row is not None:
+                return row
+            # 未满一页说明已经是最后一页
+            if body.count('class="list-item-link todo-project-row"') < 50:
+                return None
+            page += 1
+        return None
+
     def test_project_row_links_to_project_tasks(self):
         # 项目行链接指向该项目自己的待办列表（project_id 正确），而非其它项目/固定地址
         pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
                                             data=dict(name="链接项目"))["data"]
-        body = self.request_app("/todo").data.decode("utf-8")
-        row = self._find_project_row(body, pid)
+        row = self._find_project_row_across_pages(pid)
         self.assertIsNotNone(row, "未找到 project_id=%s 的项目行" % pid)
         self.assertIn("链接项目", row)
 
@@ -348,8 +401,7 @@ class TestTodoPages(BaseTestCase):
         # 项目行提供编辑/归档入口，且归档地址指向本项目（不是删除）
         pid = self.json_request_return_dict("/api/v1/project/create", method="POST",
                                             data=dict(name="操作项目"))["data"]
-        body = self.request_app("/todo").data.decode("utf-8")
-        row = self._find_project_row(body, pid)
+        row = self._find_project_row_across_pages(pid)
         self.assertIsNotNone(row, "未找到 project_id=%s 的项目行" % pid)
         self.assertIn("action=edit&amp;model=project&amp;project_id=%s" % pid, row)
         self.assertIn("action=archive&amp;model=project&amp;project_id=%s" % pid, row)

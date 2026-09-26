@@ -14,6 +14,15 @@ from .project_model import ProjectRecord, ProjectStatusEnum
 _todo_db = xtables.get_table_by_name("todo_task")
 _project_db = xtables.get_table_by_name("todo_project")
 
+# 优先级排序权重, 越小越靠前: urgent > high > normal > low
+# (枚举声明顺序为 low/normal/high/urgent, 反转后得到 urgent=0 ... low=3)
+_PRIORITY_SORT_WEIGHT = {
+    e.value: i for i, e in enumerate(reversed(TodoPriorityEnum.enums()))
+}
+
+# 待办视图全量查询的保护上限, 超过该数量的待办不再保证内存排序的完整性
+PENDING_SORT_MAX_LIMIT = 1000
+
 
 class TodoDao:
     """待办数据访问"""
@@ -174,7 +183,8 @@ class TodoDao:
                           begin_start: int = 0, begin_end: int = 0,
                           key: str = "",
                           sort: str = "create_time_desc",
-                          offset: int = 0, limit: int = 50) -> List[TodoRecord]:
+                          offset: Optional[int] = 0,
+                          limit: Optional[int] = 50) -> List[TodoRecord]:
         order_map = {
             "create_time_desc": "create_time desc",
             "create_time_asc": "create_time asc",
@@ -192,6 +202,30 @@ class TodoDao:
         rows = _todo_db.select(where=where, vars=vars, offset=offset,
                                limit=limit, order=order)
         return TodoRecord.from_dict_list(rows)
+
+    @classmethod
+    def list_pending_sorted(cls, user_id: int,
+                            project_id: Optional[int] = None,
+                            priority: Optional[str] = None,
+                            key: str = "") -> List[TodoRecord]:
+        """待办视图专用: 查出待办(未开始+进行中), 在内存中按优先级排序
+        (紧急>高>普通>低), 同优先级按创建时间倒序。
+
+        优先级是字符串值, SQL 排序需要方言相关的 CASE WHEN, 简单起见查回后
+        在内存排序。查询有 PENDING_SORT_MAX_LIMIT 保护上限, 超过后不再保证
+        排序的完整性; 分页由调用方对返回列表切片。
+        """
+        status_list = [TodoStatusEnum.not_started.value,
+                       TodoStatusEnum.in_progress.value]
+        # 不带 offset(避免生成无 LIMIT 的 OFFSET 子句), 带 limit 做 DB 保护
+        tasks = cls.list_with_filters(user_id, project_id=project_id,
+                                      status_list=status_list,
+                                      priority=priority, key=key,
+                                      offset=None,
+                                      limit=PENDING_SORT_MAX_LIMIT)
+        tasks.sort(key=lambda t: (_PRIORITY_SORT_WEIGHT.get(t.priority, 2),
+                                  -(t.create_time or 0)))
+        return tasks
 
     @classmethod
     def count_by_project(cls, user_id: int, project_id: int) -> int:
