@@ -52,9 +52,28 @@
 }
 
 .table-action-row, .table-action-bar, .action-bar {
-    padding-bottom: 4px;
+    margin-bottom: 4px;
+    display: table;
     width: 100%;
     float: left;
+}
+
+.action-bar .row-main {
+    display: table-cell;
+}
+
+.action-bar .row-extra {
+    display: table-cell;
+    text-align: right;
+    float: none;
+}
+
+.row-main * {
+    margin-right: 4px;
+}
+
+.row-extra * {
+    margin-left: 4px;
 }
 
 .info-table {

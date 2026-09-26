@@ -4,7 +4,7 @@ from .base import BaseComponent, BaseContainer, Div
 from xnote.core import xtemplate
 from .component import ConfirmButton, ActionButton, TextTag, escape_html, TextSpan, TextLink, TextBr, RawHtml, TextNbsp, TextItemSep
 from xnote.core import xconfig
-from .container import TextContainer
+from .container import TextContainer, ActionBar
 from ._tag_select import TagSelect
 from ._pagination import Pagination
 
@@ -251,6 +251,7 @@ class ListViewTagSelect(BaseComponent):
 
 class ListView(BaseContainer):    
     _code = xtemplate.compile_template("""
+{% render action_bar %}
 {% if len(item_list) == 0 %}
     <div class="row">
     {% include common/text/empty_text.html %}
@@ -267,6 +268,7 @@ class ListView(BaseContainer):
     def __init__(self, css_class="", css_style="", html="", id=""):
         super().__init__(css_class=css_class, css_style=css_style, html=html, id=id)
         self.pagination: typing.Optional[Pagination] = None
+        self.action_bar = ActionBar()
 
     def set_pagination(self, page=1, page_max=0, page_total=0, page_size=20,
                        page_url="", page_arg_name="page", **kw: typing.Any) -> Pagination:
@@ -299,7 +301,7 @@ class ListView(BaseContainer):
         self.add(item)
 
     def render(self):
-        return self._code.generate(item_list = self.children,
+        return self._code.generate(item_list = self.children, action_bar = self.action_bar,
                                    pagination_html = self.render_pagination_html())
     
     def add_dropdown(self, text="", name="", data_type="int", value=""):

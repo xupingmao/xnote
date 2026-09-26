@@ -11,6 +11,7 @@ from xnote_handlers.config import LinkConfig
 from .example_nav import get_example_tab
 from xnote.webui import TextLink, EditFormActionLink, ConfirmActionLink
 from xnote.webui import FormRowType
+from xnote.webui import ActionBar
 
 class ListPluginHandler(BaseListPlugin):
     title = "ListPlugin示例"
@@ -42,6 +43,17 @@ class ListPluginHandler(BaseListPlugin):
         tab2.title_width = title_width
     
         list_view = self.create_list_view()
+        list_view.action_bar.add_span("操作栏")
+        list_view.action_bar.add_edit_button("操作1")
+        list_view.action_bar.add_edit_button("操作2")
+        
+        action_bar2 = ActionBar()
+        action_bar2.add_span("操作栏2")
+        action_bar2.extra.add_edit_button("操作1")
+        action_bar2.extra.add_confirm_button("操作2")
+        
+        list_view.add(action_bar2)
+        
         now = dateutil.format_date()
         
         for i in range(1, 6):

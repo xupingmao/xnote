@@ -30,34 +30,47 @@ class TextContainer(BaseContainer):
     def add_item_sep(self):
         """增加换行符号"""
         self.children.append(TextItemSep())
+        
+    def add_edit_button(self, text="", url="", css_class=""):
+        btn = EditFormButton(text = text, url = url, css_class=css_class)
+        self.children.append(btn)
+
+    def add_confirm_button(self, text="", url="", message="", css_class="", method="GET", reload_url="", is_alert=False):
+        btn = ConfirmButton(text=text, url=url, message=message, method=method, reload_url=reload_url, css_class=css_class, is_alert=is_alert)
+        self.children.append(btn)
 
 class ActionBar(TextContainer):
     """操作栏"""
     def __init__(self, css_class="", css_style=""):
         super().__init__(css_class=f"action-bar {css_class}", css_style=css_style)
+        self.main = TextContainer("row-main")
         self.extra = TextContainer("row-extra")
-        self.add(self.extra)
+        self.children.append(self.main)
+        self.children.append(self.extra)
 
     @property
     def right_div(self):
         return self.extra
 
     def is_empty(self):
-        return len(self.extra.children) == 0 and len(self.children) == 1
+        return len(self.extra.children) == 0 and len(self.children) == 2 and len(self.main.children) == 0
     
     @property
     def visible(self):
         return not self.is_empty()
+    
+    def add(self, item: BaseComponent):
+        self.main.add(item)
 
     def _add(self, item: BaseComponent, float_right=False):
         if float_right:
             self.extra.add(item)
         else:
-            self.add(item)
+            self.main.add(item)
 
     def add_right(self, item: BaseComponent):
         self.extra.add(item)
-
+        
     def add_span(self, text="", css_class="", float_right=False, id=""):
         span = TextSpan(text=text, css_class=css_class, id=id)
         self._add(span, float_right)
@@ -76,10 +89,10 @@ class ActionBar(TextContainer):
     
     def add_nbsp(self, count=1):
         for _ in range(count):
-            self.children.append(TextNbsp())
+            self.main.add(TextNbsp())
             
     def add_item_sep(self):
-        self.children.append(TextItemSep())
+        self.main.add(TextItemSep())
         
 
 class Card(BaseContainer):
