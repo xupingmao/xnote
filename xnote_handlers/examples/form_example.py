@@ -56,6 +56,9 @@ class FormExampleHandler(BaseTablePlugin):
         static_form.add_date_input("日期", "date", value="2020-01-01")
         static_form.add_row("内容", "content", type=FormRowType.textarea, value="示例内容")
         static_form.add_image("封面图片", "cover", value="/_static/xnote.png")
+        tag_select = static_form.add_tag_select("单选标签", field="tag_select")
+        tag_select.add_option("标签1", "1")
+        tag_select.add_option("标签2", "2")
 
         # 查询表单
         query_form = QueryForm()
