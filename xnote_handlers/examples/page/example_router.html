@@ -1,0 +1,51 @@
+{% extends base %}
+
+{% block body %}
+
+    {% include examples/component/example_nav.html %}
+
+{% init usage_code = """
+from xnote.plugin import BasePluginV2, BaseRouterPlugin
+
+# 子视图也是插件类, 各自渲染自己的内容
+class HelloView(BasePluginV2):
+    def handle(self, input=""):
+        self.writetext("hello")
+
+class RouterDemoPlugin(BaseRouterPlugin):
+    # 每个路由插件子类定义自己的路由表
+    handlers = []
+    # 未命中路由时使用的兜底视图
+    default_handler = DefaultView
+
+    def on_init(self, context=None):
+        # 注册路由: 正则 pattern -> 子视图插件类, 使用 re.match 前缀匹配
+        self.add_handler(r"hello", HelloView)
+        self.add_handler(r"search.*", SearchView)
+        self.default_handler = DefaultView
+
+# 使用 (URL 为 /examples/router 时)
+# /examples/router?action=hello       -> HelloView
+# /examples/router?action=search&k=1  -> SearchView
+# /examples/router                    -> DefaultView (兜底)
+""" %}
+
+<span class="card-title">效果（当前 action = {{action}}）</span>
+<div class="card">
+    {% raw router_html %}
+</div>
+
+<span class="card-title">试一试</span>
+<div class="card">
+    <a href="?action=hello" class="btn default">?action=hello</a>
+    <a href="?action=time" class="btn default">?action=time</a>
+    <a href="?action=search&key=abc" class="btn default">?action=search&key=abc</a>
+    <a href="?" class="btn default">无action（默认页面）</a>
+</div>
+
+<span class="card-title">代码</span>
+<div class="card">
+    <pre class="marked-code">{{usage_code}}</pre>
+</div>
+
+{% end %}

@@ -47,6 +47,21 @@ class TestMain(BaseTestCase):
     def test_list_plugin(self):
         self.check_OK("/examples/list_plugin")
 
+    def test_router_plugin_example(self):
+        # 路由插件示例页可访问，action=hello 命中 HelloView
+        self.check_OK("/examples/router")
+        body = self.request_app("/examples/router?action=hello").data.decode("utf-8")
+        self.assertIn("HelloView", body)
+
+    def test_router_plugin_dispatch(self):
+        # action=search.* 正则匹配，子视图自己从 query 取业务参数
+        body = self.request_app("/examples/router?action=search&key=abc").data.decode("utf-8")
+        self.assertIn("SearchView", body)
+        self.assertIn("key=abc", body)
+        # 未命中任何路由时展示兜底视图
+        body = self.request_app("/examples/router").data.decode("utf-8")
+        self.assertIn("DefaultView", body)
+
     def test_tag_example(self):
         # Tag 示例页展示新增的浅红/浅紫标签
         body = self.request_app("/examples/tag").data.decode("utf-8")

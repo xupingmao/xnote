@@ -22,6 +22,7 @@ def get_example_tab(tab_default=""):
     tab.add_tab("Table示例", value="table", href="/examples/table")
     tab.add_tab("ListView示例", value="list_view", href="/examples/list_view")
     tab.add_tab("ListPlugin", value="list_plugin", href="/examples/list_plugin")
+    tab.add_tab("路由插件", value="router", href="/examples/router")
     tab.add_tab("Tree示例", value="tree", href="/examples/tree")
     tab.add_tab("日历组件", value="calendar", href="/examples/calendar")
     tab.add_tab("Hammer示例", value="hammer", href="/examples/hammer")

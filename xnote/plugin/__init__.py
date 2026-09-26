@@ -11,3 +11,4 @@ from xnote.webui import Switch
 from xnote.webui import TextTag, ConfirmActionLink, ActionLink, AjaxActionLink
 from xnote.webui.comment import CommentBox
 from xnote.plugin.base import BasePluginV2
+from xnote.plugin.router_plugin import BaseRouterPlugin

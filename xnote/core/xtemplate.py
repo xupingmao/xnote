@@ -31,7 +31,11 @@ from xutils import Storage
 from xutils import textutil
 from xutils.textutil import safe_str
 from urllib.parse import quote
-from typing import Union, List
+from typing import Union, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # 仅类型检查时导入, 运行时不导入 (plugin.py 依赖 xtemplate, 反向导入会循环)
+    from xnote.plugin.plugin import PluginContext
 
 TEMPLATE_DIR = xconfig.HANDLERS_DIR
 NAMESPACE = dict(
@@ -662,7 +666,7 @@ class BasePlugin:
         """卸载插件事件, TODO"""
         pass
 
-    def on_init(self, context=None):
+    def on_init(self, context: typing.Optional["PluginContext"] = None):
         """系统初始化事件"""
         pass
 
