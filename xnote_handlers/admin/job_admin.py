@@ -25,10 +25,6 @@ HTML = r"""
 <div class="card">
     {% include common/table/table.html %}
 </div>
-
-<div class="card">
-    {% include common/pagination.html %}
-</div>
 """
 
 ASIDE_HTML = """
@@ -147,13 +143,12 @@ class JobHandler(BasePlugin):
             row["delete_msg"] = f"确认删除记录【{job_info.id}】吗?"
             table.add_row(row)
         
-        pagination = webutil.Pagination(page=1, total=total)
+        # 分页直接设置到表格组件上, 表格底部会自动渲染分页
+        # (page_max 不传时由 page_total/page_size 自动计算)
+        table.set_pagination(page=page, page_total=total, page_size=page_size)
         kw = Storage()
         kw.table = table
-        kw.page = page
-        kw.page_max = pagination.page_max
-        kw.page_url = "?page="
-        
+
         self.writehtml(HTML, **kw)
         self.write_aside(ASIDE_HTML)
     
