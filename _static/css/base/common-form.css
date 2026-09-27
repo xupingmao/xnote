@@ -212,6 +212,8 @@ input[readonly] {
     min-height: 32px;
     display: flex;
     align-items: center;
+    flex-wrap: wrap; /* 选项多时允许换行 */
+    row-gap: 4px;    /* 换行后行与行之间保留间距（.x-tab 的上下 margin 已清零） */
     overflow: hidden; /* 兜底：内部 .x-tab 是浮动的，避免溢出到下一行 */
 }
 
