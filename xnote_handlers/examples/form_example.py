@@ -60,6 +60,14 @@ class FormExampleHandler(BaseTablePlugin):
         tag_select.add_option("标签1", "1")
         tag_select.add_option("标签2", "2")
 
+        # tab 选项卡行：标题与其它表单行一样渲染为 label，tabs 落在值列与之对齐。
+        # 选项用 href 带查询参数切换，默认选中值由 value 指定（data-tab-default）。
+        # 注意 tab 只做切换/筛选，本身不参与表单提交。
+        tab_row = static_form.add_tab_box("状态", tab_key="status", value="pending")
+        tab_row.add_tab("待办", "pending", href="/examples/form?status=pending")
+        tab_row.add_tab("全部", "all", href="/examples/form?status=all")
+        tab_row.add_tab("已完成", "done", href="/examples/form?status=done")
+
         # 查询表单
         query_form = QueryForm()
         query_form.add_row("标题", "title")

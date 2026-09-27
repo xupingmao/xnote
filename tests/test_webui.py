@@ -413,6 +413,17 @@ class TestDataForm(BaseTestCase):
         assert "form-tag-select" in body
         assert 'name="tags2"' in body
 
+    def test_example_form_has_tab_box(self):
+        # 表单示例页(/examples/form)应渲染出 tab 选项卡行
+        # （标题渲染为 label，tabs 落在值列 .form-tab-box 与之对齐）
+        body = request_html("/examples/form").decode("utf-8")
+        assert "form-tab-box" in body
+        assert 'data-tab-key="status"' in body
+        assert 'data-tab-default="pending"' in body
+        assert 'data-tab-value="pending"' in body
+        assert 'data-tab-value="all"' in body
+        assert 'data-tab-value="done"' in body
+
     def test_form_id_unique_per_instance(self):
         # 每个 DataForm 实例应有独立的 id
         # （曾经硬编码为 "0"，导致同页多个表单渲染出相同的 xnoteForm0，
@@ -477,6 +488,51 @@ class TestDataForm(BaseTestCase):
         html = form.render().decode("utf-8")
 
         assert ' selected' not in html
+
+    def test_add_tab_box_render(self):
+        # tab 选项卡行: 标题渲染为 label, tabs 落在值列(.form-tab-box 与其它行对齐)
+        form = DataForm()
+        row = form.add_tab_box("状态", tab_key="status", value="pending")
+        row.add_tab("待办", "pending")
+        row.add_tab("全部", "all")
+        row.add_tab("已完成", "done", href="?status=done")
+
+        assert row.type == FormRowType.tab_box
+        html = form.render().decode("utf-8")
+
+        # 标题与其它表单行一致渲染为 label, 且不在 tab 内部重复渲染一次
+        assert "<label>状态</label>" in html
+        assert html.count("状态") == 1
+        # tab 的查询参数名与默认选中值
+        assert 'data-tab-key="status"' in html
+        assert 'data-tab-default="pending"' in html
+        # 选项全部渲染出来
+        assert 'data-tab-value="pending"' in html
+        assert 'data-tab-value="all"' in html
+        assert 'data-tab-value="done"' in html
+        assert "status=done" in html
+        # tabs 落在值列(与其它表单行对齐)，默认为按钮样式
+        assert "form-tab-box" in html
+        assert "btn-style" in html
+
+    def test_add_tab_box_style_can_be_overridden(self):
+        # 传 css_class 覆盖默认的 btn-style（传空串用朴素样式）
+        form = DataForm()
+        form.add_tab_box("状态", tab_key="status", css_class="")
+        html = form.render().decode("utf-8")
+
+        assert "form-tab-box" in html
+        assert "btn-style" not in html
+
+    def test_add_tab_box_without_options(self):
+        # 未添加选项时也应正常渲染, 不产生任何 tab
+        form = DataForm()
+        row = form.add_tab_box("类型", tab_key="type")
+        assert row.value == ""
+        html = form.render().decode("utf-8")
+
+        assert 'data-tab-key="type"' in html
+        assert 'data-tab-value' not in html
 
 
 class TestComponentHtmlOutput(BaseTestCase):

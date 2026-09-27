@@ -16,6 +16,7 @@ from xnote.core import xtemplate
 from xnote.webui.base import BaseComponent
 from xnote.webui._tag_select import TagSelect
 from xnote.webui._switch import Switch
+from xnote.webui.tab import TabBox
 
 FormValueType = typing.Union[int, str, list]
 
@@ -33,6 +34,7 @@ class FormRowType:
     select = "select"
     tag_select = "tag_select"  # tag 风格的选择器（点选标签）
     switch = "switch"          # 开关（二态：开/关）
+    tab_box = "tab_box"        # tab选项卡（复用通用 TabBox 组件）
     textarea = "textarea"
     date = "date"
     heading = "heading"
@@ -75,6 +77,7 @@ class FormRow(BaseComponent):
     html : typing.Union[str, bytes] = ""
     rows = 0 # textarea 行数
     size = "" # 开关等组件的尺寸: sm / lg
+    tab_box = None # type: typing.Optional[TabBox]  # tab_box 行的 TabBox 组件
     accept = "" # 文件选择器的 accept 属性（图片/文件上传用）
     value_list = [] # type: typing.List[Storage]  # 图片/文件上传的已有值列表，元素为 {webpath, name}
 
@@ -157,6 +160,9 @@ class FormRow(BaseComponent):
         if self.type == FormRowType.switch:
             return self.render_switch()
 
+        if self.type == FormRowType.tab_box:
+            return self.render_tab_box()
+
         return ""
             
     def render_select(self):
@@ -191,6 +197,31 @@ class FormRow(BaseComponent):
             css_class=("form-switch " + self.css_class).strip(),
         )
         return switch.render()
+
+    def add_tab(self, title="", value="", href="", css_class="", onclick="", item_id=""):
+        """添加 tab 选项（tab_box 行专用），等价于 TabBox.add_item
+
+        tab 通过 href 带查询参数切换（或 onclick 自定义交互），本身不参与表单提交。
+        """
+        if self.tab_box is None:
+            self.tab_box = TabBox(tab_key=self.field or "tab", tab_default=str(self.value))
+        self.tab_box.add_item(title=title, value=value, href=href,
+                              css_class=css_class, onclick=onclick, item_id=item_id)
+        return self
+
+    def render_tab_box(self):
+        """渲染 tab 选项卡行，复用通用 TabBox 组件。
+
+        行标题由表单模板渲染为 label，这里不再重复渲染 tab 的标题；
+        容器带 .form-tab-box，使 tabs 与其它表单行的值列对齐。
+        """
+        tab_box = self.tab_box
+        if tab_box is None:
+            tab_box = TabBox(tab_key=self.field or "tab", tab_default=str(self.value))
+            self.tab_box = tab_box
+        # css_class 同时用于行容器，这里补上对齐类
+        tab_box.css_class = ("form-tab-box " + self.css_class).strip()
+        return tab_box.render()
 
     
 class DataForm(BaseComponent):
@@ -316,6 +347,32 @@ class DataForm(BaseComponent):
         row.css_class = css_class
         row.readonly = readonly
         row.size = size
+
+        self.rows.append(row)
+        return row
+
+    def add_tab_box(self, title="", tab_key="tab", value="", css_class="btn-style", segment=False):
+        """添加一行 tab 选项卡（复用通用 TabBox 组件）
+
+        标题与其它表单行一样渲染为 label，tabs 渲染在值列（.form-tab-box）与之对齐。
+        选项通过 row.add_tab(title, value, href=...) 添加，常用于筛选条件切换。
+
+        默认用按钮样式（btn-style，与站内其它 tab 一致）；传 css_class="" 用朴素样式，
+        或传 "underline-style" / "border-style" 等切换其它风格。
+
+        :param tab_key: tab 对应的查询参数名（data-tab-key）
+        :param value: 默认选中的值（data-tab-default）
+        :param segment: 是否使用分段选择器样式
+        """
+        row = FormRow()
+        row.id = self._create_row_id()
+        row.type = FormRowType.tab_box
+        row.title = title
+        row.field = tab_key
+        row.value = value
+        row.css_class = css_class
+        row.tab_box = TabBox(tab_key=tab_key, tab_default=str(value),
+                              css_class=css_class, segment=segment)
 
         self.rows.append(row)
         return row
