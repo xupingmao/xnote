@@ -201,34 +201,27 @@ input[readonly] {
     }
 }
 
-/* 表单的 tab 选项卡行（tabs 落在 label 右侧的第二列，与 .form-tag-select 对齐方式一致） */
+/* 表单的 tab 选项卡行（tabs 落在 label 右侧的第二列，与 .form-tag-select 对齐方式一致）
+   .x-tab 是 float:left，靠 TabBox 组件自带的 .row 类(BFC)兜住高度；
+   换行后的行间距由 .x-tab 的 margin-bottom 提供，与全站其它 tab 完全一致，
+   不依赖 flex（flex 一旦没生效，被清零的 margin 会让换行后两行贴死）。 */
 .form-tab-box {
-    /* TabBox 自带 .row(float:left; width:100%)，这里复位成普通块级，
-       否则 100% 宽度 + 浮动的 label 会把整行挤到下一行 */
     float: none;
     width: auto;
     margin-left: 104px; /* 与 label（宽 100px）同行的第二列 */
-    /* 与 label/输入框同高(32px)并让 tabs 垂直居中，避免该行比其它表单行高一截 */
     min-height: 32px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap; /* 选项多时允许换行 */
-    row-gap: 4px;    /* 换行后行与行之间保留间距（.x-tab 的上下 margin 已清零） */
     overflow: hidden; /* 兜底：内部 .x-tab 是浮动的，避免溢出到下一行 */
 }
 
-/* .x-tab 自带 4px 上下 margin（会把行高撑到 36px 且顶不齐），
-   表单行里交给 flex 垂直居中；右侧间距统一到 8px 栅格 */
+/* 上边距清零让 tabs 与 label 顶部对齐；下边距 8px 保证选项换行后
+   行与行之间留间距（全站 tab 换行靠的就是这个 margin）；右侧 8px 栅格 */
 .x-tab-box.form-tab-box .x-tab {
     margin-top: 0;
-    margin-bottom: 0;
+    margin-bottom: 8px;
     margin-right: 8px;
 }
 
-/* flex 容器里 float 不生效，右侧内容（TabBox.right_div）改由 margin-left:auto 靠右 */
-.form-tab-box .float-right {
-    margin-left: auto;
-}
+/* .row 是浮动容器，TabBox.right_div 的 .float-right 自然靠右，无需特殊处理 */
 
 @media screen and (max-width: 1000px) {
     .form-tab-box {
