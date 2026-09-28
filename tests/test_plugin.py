@@ -4,11 +4,18 @@
 # @modified 2021/07/18 19:45:09
 # @filename test_search.py
 
+import os
+import tempfile
+import xutils
+
 from . import test_base
 from .test_base import json_request_return_dict
 from xnote.core import xauth
+from xnote.core import xconfig
 from xnote.core import xtables
+from xutils import fsutil
 from xnote_handlers.plugin.dao import add_visit_log, delete_visit_log
+from xnote.plugin import load_plugin_file
 from xnote.plugin import db as plugin_db
 
 app          = test_base.init()
@@ -133,4 +140,155 @@ class TestMain(BaseTestCase):
         results = db.select()
         print(f"results={results}")
         assert len(results) > 0
+
+
+class TestPluginManageDelete(BaseTestCase):
+    """插件管理页的删除功能"""
+
+    PLUGIN_NAME = "unit_test_plugin_manage.py"
+
+    PLUGIN_CODE = '''# -*- coding:utf-8 -*-
+# @api-level 2.8
+# @title 插件管理单元测试
+# @description 仅用于测试插件删除
+# @category test
+from xnote.core.xtemplate import BasePlugin
+
+class Main(BasePlugin):
+    def render(self):
+        return "unit-test-plugin"
+'''
+
+    def setUp(self):
+        # 删除是软删除(移动到回收站), 把回收站重定向到临时目录, 避免写脏 testdata/trash
+        self._trash = fsutil.FileUtilConfig.trash_dir
+        self.tmp = tempfile.TemporaryDirectory()
+        fsutil.FileUtilConfig.trash_dir = os.path.join(self.tmp.name, "trash")
+        os.makedirs(fsutil.FileUtilConfig.trash_dir)
+
+        self.fpath = os.path.join(xconfig.PLUGINS_DIR, self.PLUGIN_NAME)
+        xutils.savetofile(self.fpath, self.PLUGIN_CODE)
+        load_plugin_file(self.fpath)
+
+    def tearDown(self):
+        xconfig.PLUGINS_DICT.pop(self.PLUGIN_NAME, None)
+        if os.path.exists(self.fpath):
+            os.remove(self.fpath)
+        fsutil.FileUtilConfig.trash_dir = self._trash
+        self.tmp.cleanup()
+
+    def list_trash_files(self):
+        result = []
+        for root, _, files in os.walk(fsutil.FileUtilConfig.trash_dir):
+            result.extend(files)
+        return result
+
+    def test_delete_action_rendered_in_page(self):
+        # 表格里渲染出删除按钮(确认操作 + 红色)
+        body = self.request_app("/plugin_manage").data.decode("utf-8")
+        self.assertIn(self.PLUGIN_NAME, body)
+        self.assertRegex(body, r'data-url="\?action=delete&(amp;)?plugin_name=unit_test_plugin_manage\.py"')
+        self.assertIn("xnote.table.handleConfirmAction", body)
+        self.assertIn("btn danger", body)
+
+    def test_delete_plugin(self):
+        self.assertIn(self.PLUGIN_NAME, xconfig.PLUGINS_DICT)
+        url = "/plugin_manage?action=delete&plugin_name=" + xutils.quote(self.PLUGIN_NAME)
+
+        resp = json_request_return_dict(url)
+        self.assertTrue(resp.get("success"))
+        self.assertIn("已删除", resp.get("message"))
+
+        # 原件已不在插件目录
+        self.assertFalse(os.path.exists(self.fpath))
+        # 软删除: 文件落到了回收站
+        self.assertEqual(1, len(self.list_trash_files()))
+        # 内存中同步移除
+        self.assertNotIn(self.PLUGIN_NAME, xconfig.PLUGINS_DICT)
+        # 插件地址立即失效
+        body = self.request_app("/plugin/" + self.PLUGIN_NAME).data.decode("utf-8")
+        self.assertIn("不存在", body)
+
+    def test_delete_plugin_without_name(self):
+        resp = json_request_return_dict("/plugin_manage?action=delete")
+        self.assertFalse(resp.get("success"))
+        self.assertIn("plugin_name", resp.get("message"))
+
+    def test_delete_plugin_not_exists(self):
+        resp = json_request_return_dict("/plugin_manage?action=delete&plugin_name=not_exists_plugin.py")
+        self.assertFalse(resp.get("success"))
+        self.assertIn("不存在", resp.get("message"))
+
+    def test_delete_builtin_plugin_refused(self):
+        # 内置工具也在 PLUGINS_DICT 中, 但不允许删除
+        builtin_name = "/note/stat"
+        self.assertIn(builtin_name, xconfig.PLUGINS_DICT)
+
+        url = "/plugin_manage?action=delete&plugin_name=" + xutils.quote(builtin_name)
+        resp = json_request_return_dict(url)
+        self.assertFalse(resp.get("success"))
+        self.assertIn("内置插件", resp.get("message"))
+        self.assertIn(builtin_name, xconfig.PLUGINS_DICT)
+
+
+class TestDeletePluginByFileApi(BaseTestCase):
+    """通过文件接口删除插件文件(比如 code/edit 页面的删除按钮), 内存中的插件同步失效"""
+
+    PLUGIN_NAME = "unit_test_plugin_fs_delete.py"
+
+    PLUGIN_CODE = '''# -*- coding:utf-8 -*-
+# @api-level 2.8
+# @title 文件接口删除插件测试
+# @description 仅用于测试删除插件文件
+# @category test
+from xnote.core.xtemplate import BasePlugin
+
+class Main(BasePlugin):
+    def render(self):
+        return "unit-test-plugin-fs-delete"
+'''
+
+    def setUp(self):
+        # 删除是软删除(移动到回收站), 把回收站重定向到临时目录, 避免写脏 testdata/trash
+        self._trash = fsutil.FileUtilConfig.trash_dir
+        self.tmp = tempfile.TemporaryDirectory()
+        fsutil.FileUtilConfig.trash_dir = os.path.join(self.tmp.name, "trash")
+        os.makedirs(fsutil.FileUtilConfig.trash_dir)
+
+        self.fpath = os.path.join(xconfig.PLUGINS_DIR, self.PLUGIN_NAME)
+        xutils.savetofile(self.fpath, self.PLUGIN_CODE)
+        load_plugin_file(self.fpath)
+
+    def tearDown(self):
+        xconfig.PLUGINS_DICT.pop(self.PLUGIN_NAME, None)
+        if os.path.exists(self.fpath):
+            os.remove(self.fpath)
+        fsutil.FileUtilConfig.trash_dir = self._trash
+        self.tmp.cleanup()
+
+    def test_delete_plugin_file(self):
+        self.assertIn(self.PLUGIN_NAME, xconfig.PLUGINS_DICT)
+
+        resp = json_request_return_dict("/fs_api/remove", method="POST", data=dict(path=self.fpath))
+        self.assertEqual("success", resp["code"])
+
+        self.assertFalse(os.path.exists(self.fpath))
+        # 内存中的插件同步移除, 插件地址立即失效
+        self.assertNotIn(self.PLUGIN_NAME, xconfig.PLUGINS_DICT)
+        body = self.request_app("/plugin/" + self.PLUGIN_NAME).data.decode("utf-8")
+        self.assertIn("不存在", body)
+
+    def test_delete_common_file_keeps_plugins(self):
+        # 删除普通文件不应该影响插件的注册状态
+        plugin_names = list(xconfig.PLUGINS_DICT.keys())
+        path = os.path.join(xconfig.PLUGINS_DIR, "unit_test_common_file.txt")
+        xutils.savetofile(path, "not a plugin")
+
+        try:
+            resp = json_request_return_dict("/fs_api/remove", method="POST", data=dict(path=path))
+            self.assertEqual("success", resp["code"])
+            self.assertEqual(plugin_names, list(xconfig.PLUGINS_DICT.keys()))
+        finally:
+            if os.path.exists(path):
+                os.remove(path)
 

@@ -137,6 +137,11 @@ class ViewSourceHandler:
             kw.name = os.path.basename(path)
             kw.content = content
             kw.plugin_name = plugin_name
+            # 真实文件才支持删除, config/user_config 这类虚拟文件不支持
+            kw.show_delete = os.path.isfile(path)
+            # 删除之后回到父目录的文件浏览页, 编码方式对齐 FileItem.encoded_path
+            parent_dir = os.path.dirname(path).replace("\\", "/")
+            kw.parent_dir_url = "/fs/~" + xutils.encode_uri_component(parent_dir)
             kw.lines = content.count("\n")+1
             kw.file_too_large = file_too_large
             kw.part_links = part_links

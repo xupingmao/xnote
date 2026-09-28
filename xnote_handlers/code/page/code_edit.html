@@ -72,6 +72,8 @@
 {% init title = "文本编辑" %}
 {% init parent_link = None %}
 {% init show_rename = True %}
+{% init show_delete = False %}
+{% init parent_dir_url = "" %}
 {% init help_text = "" %}
 {% init is_iframe = False %}
 
@@ -127,6 +129,11 @@
 
             {% if not readonly and show_rename %}
                 <input type="button" id="rename" class="btn rename-btn" value="重命名"/>
+            {% end %}
+
+            {# show_delete/parent_dir_url 只由真实的文件编辑页提供 #}
+            {% if not readonly and show_delete %}
+                <input type="button" class="btn danger delete-btn" value="删除" data-url="{{parent_dir_url}}"/>
             {% end %}
 
             <input id="execute" type="button" class="btn hide" value="执行"/>
@@ -192,6 +199,24 @@
                         } else {
                             showErrorMessage("重命名失败, %s".format(resp.message));
                         }
+                });
+            });
+        });
+
+        // 删除文件(软删除, 移动到回收站)
+        $(".delete-btn").click(function (event) {
+            var path = $("[name=path]").val();
+            var name = $("[name=basename]").val();
+            var redirectUrl = $(this).attr("data-url");
+
+            xnote.confirm("确定删除【" + name + "】? 文件会移动到回收站", function () {
+                xnote.http.post("/fs_api/remove", { path: path }, function (resp) {
+                    if (resp.code == "success") {
+                        xnote.toast("删除成功");
+                        window.location.href = redirectUrl;
+                    } else {
+                        xnote.toast("删除失败: " + resp.message);
+                    }
                 });
             });
         });

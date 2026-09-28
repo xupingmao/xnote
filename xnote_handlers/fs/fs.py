@@ -44,7 +44,7 @@ from . import fs_helper
 from . import fs_checker
 from .fs_dao import FileInfoDao
 
-from xnote.plugin import ActionBar
+from xnote.plugin import ActionBar, unregister_plugin_by_fpath
 
 # 配置文件
 READ_BUF_SIZE = 64 * 1024 # 64K
@@ -499,6 +499,9 @@ class RemoveAjaxHandler:
                 basename = os.path.basename(path)
                 return webutil.FailedResult(code="fail", message="源文件`%s`不存在" % basename)
             xutils.remove(path)
+
+            # 删除的是插件文件时, 同步移除内存中已注册的插件, 否则插件会残留到下次重载
+            unregister_plugin_by_fpath(path)
 
             event = xnote_event.FileDeleteEvent()
             event.fpath = path

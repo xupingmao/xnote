@@ -254,3 +254,19 @@ def find_plugin(url: str) -> typing.Optional[PluginContext]:
 
 def iter_plugins() -> typing.Generator[PluginContext, None, None]:
     yield from xconfig.PLUGINS_DICT.values()
+
+
+def unregister_plugin_by_fpath(fpath: str) -> bool:
+    """插件文件被删除后, 同步移除内存中已注册的插件
+
+    插件列表和 /plugin/<name> 都优先读取内存缓存(PLUGINS_DICT), 不同步移除的话,
+    已删除的插件会一直可用, 直到插件目录被重新加载。
+
+    @param {str} fpath 插件文件的路径
+    @return {bool} 是否移除了插件, 文件不是插件时返回 False
+    """
+    for plugin_name, plugin in list(xconfig.PLUGINS_DICT.items()):
+        if fsutil.path_equals(plugin.fpath, fpath):
+            xconfig.PLUGINS_DICT.pop(plugin_name, None)
+            return True
+    return False

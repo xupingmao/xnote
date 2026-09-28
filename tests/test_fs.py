@@ -6,6 +6,7 @@ import xutils
 from .a import *
 import os
 import io
+import tempfile
 from contextlib import contextmanager
 from unittest import mock
 from xnote.core import xconfig
@@ -286,7 +287,66 @@ class TestMain(BaseTestCase):
         fsutil.writefile(txt_file, "hello,world")
         with ZipFile(zip_file, mode="w") as fp:
             fp.write(txt_file, arcname="zip.txt")
-        
+
         zip_path_b64 = textutil.encode_base64(zip_file)
         self.check_OK(f"/fs/zip/{zip_path_b64}")
         self.check_OK(f"/fs/zip/{zip_path_b64}/zip.txt")
+
+
+class TestCodeEditDelete(BaseTestCase):
+    """code/edit 页面的删除按钮"""
+
+    def setUp(self):
+        # 删除是软删除(移动到回收站), 把回收站重定向到临时目录, 避免写脏 testdata/trash
+        self._trash_dir = fsutil.FileUtilConfig.trash_dir
+        self.tmp = tempfile.TemporaryDirectory()
+        fsutil.FileUtilConfig.trash_dir = os.path.join(self.tmp.name, "trash")
+        os.makedirs(fsutil.FileUtilConfig.trash_dir)
+
+    def tearDown(self):
+        fsutil.FileUtilConfig.trash_dir = self._trash_dir
+        self.tmp.cleanup()
+
+    def get_page_html(self, path):
+        return request_html(f"/code/edit?path={path}").decode("utf-8")
+
+    def test_delete_button_rendered_for_file(self):
+        body = self.get_page_html("./README.md")
+
+        # 删除按钮(注意: 内联脚本里也有 .delete-btn 选择器, 这里断言的是按钮元素本身)
+        self.assertIn('class="btn danger delete-btn"', body)
+        # 删除之后跳转的父目录地址
+        self.assertIn('data-url="/fs/~', body)
+        # 删除走统一的文件删除接口
+        self.assertIn("/fs_api/remove", body)
+
+    def test_delete_button_hidden_for_config(self):
+        # config/user_config 是虚拟文件, 不支持删除
+        body = request_html("/code/edit/config?config_key=config.init.script").decode("utf-8")
+        self.assertNotIn('class="btn danger delete-btn"', body)
+
+    def test_delete_button_hidden_when_readonly(self):
+        old_max_size = xconfig.MAX_TEXT_SIZE
+        xconfig.MAX_TEXT_SIZE = 100
+        try:
+            body = self.get_page_html("./README.md")
+            # 只读(文件过大)时不支持编辑, 也不提供删除
+            self.assertNotIn('class="btn danger delete-btn"', body)
+        finally:
+            xconfig.MAX_TEXT_SIZE = old_max_size
+
+    def test_remove_file_by_api(self):
+        path = get_test_file_path("./test_code_edit_delete.txt")
+        xutils.savetofile(path, "hello,delete")
+
+        self.assertTrue(os.path.exists(path))
+        resp = json_request_return_dict("/fs_api/remove", method="POST", data=dict(path=path))
+        self.assertEqual("success", resp["code"])
+        self.assertFalse(os.path.exists(path))
+
+    def test_remove_file_not_exists(self):
+        path = get_test_file_path("./test_code_edit_not_exists.txt")
+        resp = json_request_return_dict("/fs_api/remove", method="POST", data=dict(path=path))
+        # 文件不存在时接口报错, 而不是静默成功
+        self.assertFalse(resp.get("success"))
+        self.assertIn("不存在", resp.get("message"))
