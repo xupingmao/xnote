@@ -106,7 +106,7 @@ def get_argument(key, default_value=None, type = None, strip=False):
     
     return value
 
-def get_argument_str(key: str, default_value = "", is_base64 = False) -> str:
+def get_argument_str(key: str, default_value: str = "", is_base64 = False) -> str:
     """获取字符串参数"""
     value = get_argument(key, default_value, type = str, strip = True)
     assert isinstance(value, str)
@@ -114,19 +114,19 @@ def get_argument_str(key: str, default_value = "", is_base64 = False) -> str:
         return textutil.decode_base64(value)
     return value
 
-def get_argument_int(key: str, default_value = 0) -> int:
+def get_argument_int(key: str, default_value: int = 0) -> int:
     """获取int参数"""
     value = get_argument(key, default_value=default_value, type = int, strip = True)
     assert isinstance(value, int)
     return value
 
-def get_argument_float(key: str, default_value = 0.0) -> float:
+def get_argument_float(key: str, default_value: float = 0.0) -> float:
     """获取float参数"""
     value = get_argument(key, default_value=default_value, type = float, strip = True)
     assert isinstance(value, float)
     return value
 
-def get_argument_bool(key: str, default_value = False) -> bool:
+def get_argument_bool(key: str, default_value: bool = False) -> bool:
     """获取bool参数"""
     value = get_argument(key, default_value=default_value, type = bool, strip = True)
     if not isinstance(value, bool):
