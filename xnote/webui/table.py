@@ -13,7 +13,7 @@ from typing import Any, List, Optional, Union
 
 from xutils import textutil
 from xnote.webui.base import BaseComponent, BaseContainer
-from xnote.webui.container import ActionBar, Div
+from xnote.webui.container import ActionBar
 from xnote.webui._pagination import Pagination
 
 from xnote.core import xtemplate
@@ -397,9 +397,7 @@ class DataTable(BaseComponent):
         """渲染分页的HTML(模板内部使用), 优先渲染分页组件"""
         pagination = self.pagination
         if pagination is not None:
-            div = Div("row py-2")
-            div.add(pagination)
-            return div.render_str()
+            return pagination.render_str()
         return self.pagination_html
 
     def set_action_style(self, width: str = "auto", width_weight: int = 0, min_width: str = "", max_width: str = "") -> None:

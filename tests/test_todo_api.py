@@ -190,7 +190,8 @@ class TestTodoPages(BaseTestCase):
         resp = self.request_app(f"/todo/task?project_id={pid}&status=all")
         self.assertEqual("200 OK", resp.status)
         body = resp.data.decode("utf-8")
-        self.assertEqual(body.count('class="pagenation"'), 1)
+        # 分页容器上还可能带工具类(如 row py-2), 所以只匹配 class 属性前缀
+        self.assertEqual(body.count('class="pagenation'), 1)
 
     def test_todo_pending_sorted_by_priority(self):
         # 待办视图排序: 优先级 紧急>高>普通>低, 同优先级按创建时间倒序

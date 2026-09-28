@@ -292,9 +292,7 @@ class ListView(BaseContainer):
         """渲染分页的HTML(模板内部使用)"""
         pagination = self.pagination
         if pagination is not None:
-            div = Div(css_class="row py-2")
-            div.add(pagination)
-            return div.render_str()
+            return pagination.render_str()
         return ""
 
     def add_item(self, item: ListViewItem):

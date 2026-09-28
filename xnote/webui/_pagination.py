@@ -41,7 +41,7 @@ class Pagination(BaseComponent):
 
     _template = xtemplate.compile_template("""
 {% if page_max >= 0 %}
-    <div class="pagenation">
+    <div class="pagenation row py-2">
         <a class="x-page-link" href="{{add_url_param(page_url, page_arg_name, 1)}}">首页</a>
 
         {% if page <= 1 %}
