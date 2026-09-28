@@ -17,6 +17,7 @@ from xnote_handlers.message.message_utils import sort_keywords_by_marked, Messag
 from xnote_handlers.message.message_model import MessageTag, MessageTagEnum
 from xnote_handlers.message.message_utils import MAX_LIST_LIMIT
 from xnote_handlers.message.message_utils import filter_msg_list_by_keys, mark_filter_text
+from xnote_handlers.message.message_utils import build_page_url
 from xnote_handlers.message.message_template_service import handle_template_tab
 from .message_tab import get_task_tab
 
@@ -183,7 +184,10 @@ class TaskListAjaxHandler:
         limit = 20
         page = xutils.get_argument_int("page", default_value=1)
         offset = (page-1) * limit
-        chatlist, amount = self.do_list_task(user_name, offset=offset, limit=limit)
+        p = xutils.get_argument_str("p", "")
+        filter_key = xutils.get_argument_str("filterKey", "")
+        chatlist, amount = self.do_list_task(
+            user_name, offset=offset, limit=limit, p=p, filter_key=filter_key)
 
         parser = MessageListParser(chatlist, tag=MessageTagEnum.task.value)
         parser.parse()
@@ -193,12 +197,11 @@ class TaskListAjaxHandler:
         kw.page = page
         kw.page_total = amount
         kw.item_list = chatlist
+        # 分页链接要回到页面本身(相对地址), 不能指向这个 ajax 接口
+        kw.page_url = build_page_url(dict(p=p, filterKey=filter_key))
         return xtemplate.render("message/page/message_list_ajax.html", **kw)
 
-    def do_list_task(self, user_name, offset, limit):
-        p = xutils.get_argument_str("p", "")
-        filter_key = xutils.get_argument_str("filterKey", "")
-
+    def do_list_task(self, user_name, offset, limit, p="", filter_key=""):
         if p == "done":
             return msg_dao.list_task_done(user_name, offset, limit)
 

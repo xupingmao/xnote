@@ -3,6 +3,7 @@
 # @modified 2022/04/17 14:28:57
 
 import os
+import re
 from .a import *
 
 from xnote.core import xtemplate
@@ -134,6 +135,45 @@ class TestMain(BaseTestCase):
         json_request("/message/list?key=1")
 
         self.check_OK("/message/list?format=html")
+
+    def get_page_links(self, url):
+        """取出片段里分页组件的链接(href 的原始文本)"""
+        html = request_html(url).decode("utf-8")
+        self.assertIn("pagenation", html)
+        return re.findall(r'<a class="x-page-link[^"]*"\s+href="([^"]*)"', html)
+
+    def create_messages_for_pagination(self, prefix="page-test"):
+        for i in range(25):
+            json_request("/message/save", method="POST",
+                         data=dict(content="%s-%d" % (prefix, i), tag="log"))
+
+    def test_message_list_pagination_links(self):
+        """分页链接必须回到页面本身，不能指向 ajax 接口
+
+        回归：列表片段是 ajax 拉回来注入页面的，分页链接曾经指向
+        /message/list?format=html&...（接口地址本身），点击后浏览器整页跳到了
+        接口返回的 html 片段上。所以这里要求链接是相对地址(?xxx&page=N)。
+        """
+        self.create_messages_for_pagination()
+
+        links = self.get_page_links("/message/list?format=html&tag=log&page=1")
+        self.assertTrue(len(links) > 0, links)
+        for link in links:
+            self.assertFalse(link.startswith("/message/list"), link)
+        self.assertIn("?tag=log&amp;page=2", links)
+
+    def test_message_list_pagination_keep_filter(self):
+        """翻页要保留筛选条件(key / filter_tag1)"""
+        self.create_messages_for_pagination(prefix="page-test-abc")
+
+        url = "/message/list?format=html&tag=log&page=1&key=abc&filter_tag1=%23test%23"
+        links = self.get_page_links(url)
+        self.assertTrue(len(links) > 0, links)
+        for link in links:
+            self.assertFalse(link.startswith("/message/list"), link)
+            self.assertIn("key=abc", link)
+            self.assertIn("filter_tag1=%23test%23", link)
+        self.assertIn("?tag=log&amp;key=abc&amp;filter_tag1=%23test%23&amp;page=2", links)
 
     def test_message_finish(self):
         # 老待办(task/done)已冻结为只读，新建/完成均被拦截

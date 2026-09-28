@@ -515,6 +515,20 @@ def format_filter_key(key: str) -> str:
 
 filter_key = format_filter_key
 
+def build_page_url(params: dict) -> str:
+    """构造随手记列表分页的基础URL(不含 page 参数, 以 "?xxx&page=" 结尾)
+
+    随手记的列表是「ajax 接口渲染 HTML 片段 -> 前端注入页面」的, 分页链接必须是**相对地址**:
+    相对地址由浏览器按当前**文档**地址解析, 点击后回到页面本身;
+    如果交给 Pagination 用 `get_current_url()` 默认值, 拿到的是 ajax 请求的地址
+    (如 /message/list?format=html), 点分页会整页跳到接口返回的片段上。
+    """
+    query_string = netutil.build_query_string(params, skip_empty_value=True)
+    if query_string == "":
+        return "?page="
+    return f"?{query_string}&page="
+
+
 def get_remote_ip():
     x_forwarded_for = web.ctx.env.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for != None:

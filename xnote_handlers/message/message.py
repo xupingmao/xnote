@@ -193,6 +193,9 @@ class ListAjaxHandler:
         date = xutils.get_argument("date", "")
         key = xutils.get_argument("key", "")
         filter_key = xutils.get_argument_str("filterKey", "")
+        filter_tag1 = xutils.get_argument_str("filter_tag1", "")
+        filter_tag2 = xutils.get_argument_str("filter_tag2", "")
+        filter_tag3 = xutils.get_argument_str("filter_tag3", "")
         orderby = xutils.get_argument("orderby", "")
         p = xutils.get_argument("p", "")
         xutils.get_argument_bool("show_marked_tag", True)
@@ -219,13 +222,20 @@ class ListAjaxHandler:
             filterKey=filter_key,
             orderby=orderby,
             p=p,
+            filter_tag1=filter_tag1,
+            filter_tag2=filter_tag2,
+            filter_tag3=filter_tag3,
         )
+
+        # 分页链接要回到页面本身(相对地址), 不能指向这个 ajax 接口
+        page_url = message_utils.build_page_url(params)
 
         kw = Storage(
             show_todo_check=show_todo_check,
             show_edit_btn=show_edit_btn,
             show_to_log_btn=show_to_log_btn,
             page=page,
+            page_url=page_url,
             page_total = page_total,
             page_size = page_size,
             item_list=msg_list
@@ -559,10 +569,15 @@ class DateAjaxHandler:
 
         page_max = get_page_max(msg_count, xconfig.PAGE_SIZE)
 
+        # 分页链接要回到页面本身(相对地址), 不能指向这个 ajax 接口
+        page_url = message_utils.build_page_url(
+            dict(tag=tag, date=date, filterKey=filter_key))
+
         return xtemplate.render(
             "message/page/message_list_ajax.html",
             page_max=page_max,
             page=page,
+            page_url=page_url,
             item_list=msg_list)
 
 
