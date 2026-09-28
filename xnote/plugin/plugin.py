@@ -177,6 +177,9 @@ def load_plugin_file(fpath: str, fname=None, raise_exception=False):
         context.plugin_name = plugin_name
         
         if context.plugin_id == "":
+            context.plugin_id = meta.get_str_value("id")
+        
+        if context.plugin_id == "":
             # 兼容没有 plugin_id 的数据
             context.plugin_id = fpath
 

@@ -166,6 +166,9 @@ class Main(BasePlugin):
         fsutil.FileUtilConfig.trash_dir = os.path.join(self.tmp.name, "trash")
         os.makedirs(fsutil.FileUtilConfig.trash_dir)
 
+        # 预热: 首个请求会触发插件目录的懒加载(会重建 PLUGINS_DICT), 先消耗掉
+        self.request_app("/plugin_manage")
+
         self.fpath = os.path.join(xconfig.PLUGINS_DIR, self.PLUGIN_NAME)
         xutils.savetofile(self.fpath, self.PLUGIN_CODE)
         load_plugin_file(self.fpath)
@@ -229,6 +232,72 @@ class Main(BasePlugin):
         self.assertFalse(resp.get("success"))
         self.assertIn("内置插件", resp.get("message"))
         self.assertIn(builtin_name, xconfig.PLUGINS_DICT)
+
+
+class TestPluginManageMeta(BaseTestCase):
+    """插件管理页的查看meta功能"""
+
+    PLUGIN_NAME = "unit_test_plugin_meta.py"
+
+    PLUGIN_CODE = '''# -*- coding:utf-8 -*-
+# @api-level 2.8
+# @title 插件meta单元测试
+# @description 仅用于测试查看meta
+# @category test
+# @category develop
+from xnote.core.xtemplate import BasePlugin
+
+class Main(BasePlugin):
+    def render(self):
+        return "unit-test-plugin-meta"
+'''
+
+    def setUp(self):
+        # 预热: 首个请求会触发插件目录的懒加载, 该过程会重建 PLUGINS_DICT,
+        # 会冲掉刚手动注册的插件, 所以先消耗掉这次加载
+        self.request_app("/plugin_manage")
+
+        self.fpath = os.path.join(xconfig.PLUGINS_DIR, self.PLUGIN_NAME)
+        xutils.savetofile(self.fpath, self.PLUGIN_CODE)
+        load_plugin_file(self.fpath)
+
+    def tearDown(self):
+        xconfig.PLUGINS_DICT.pop(self.PLUGIN_NAME, None)
+        if os.path.exists(self.fpath):
+            os.remove(self.fpath)
+
+    def request_meta(self):
+        url = "/plugin_manage?action=meta&plugin_name=" + xutils.quote(self.PLUGIN_NAME)
+        return self.json_request_return_dict(url)
+
+    def test_meta_action_rendered_in_page(self):
+        # 表格的「操作」列渲染出查看meta的链接
+        body = self.request_app("/plugin_manage").data.decode("utf-8")
+        self.assertIn(self.PLUGIN_NAME, body)
+        self.assertRegex(body, r'class="[^"]*plugin-meta-btn[^"]*"')
+        self.assertRegex(body, r'href="\?action=meta&(amp;)?plugin_name=unit_test_plugin_meta\.py"')
+
+    def test_view_meta(self):
+        data = self.request_meta()
+        self.assertTrue(data.get("success"))
+        self.assertEqual(self.PLUGIN_NAME, data.get("plugin_name"))
+        self.assertEqual(self.fpath, data.get("fpath"))
+
+        meta = data.get("meta")
+        self.assertEqual("插件meta单元测试", meta.get("title"))
+        self.assertEqual("2.8", meta.get("api-level"))
+        # 写了多个 @category 时聚合为 list
+        self.assertEqual(["test", "develop"], meta.get("category"))
+
+    def test_view_meta_without_name(self):
+        data = self.json_request_return_dict("/plugin_manage?action=meta")
+        self.assertFalse(data.get("success"))
+        self.assertIn("plugin_name", data.get("message"))
+
+    def test_view_meta_not_exists(self):
+        data = self.json_request_return_dict("/plugin_manage?action=meta&plugin_name=not_exists_plugin.py")
+        self.assertFalse(data.get("success"))
+        self.assertIn("不存在", data.get("message"))
 
 
 class TestDeletePluginByFileApi(BaseTestCase):

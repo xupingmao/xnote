@@ -1,7 +1,8 @@
 
+import json
 import os
 import xutils
-from xnote.core import xauth, xconfig
+from xnote.core import xauth, xconfig, xtemplate
 from xnote.plugin.table_plugin import BaseTablePlugin
 from xnote_handlers.config import LinkConfig
 from xutils import Storage, dateutil
@@ -14,6 +15,26 @@ from .plugin_config import CategoryService
 from xnote_handlers.config import AsideConfig
 from xnote.webui import Card
 
+
+def build_meta_dict(plugin) -> dict:
+    """把插件的meta信息整理成dict, 用于以JSON展示
+
+    - 单值字段保持字符串
+    - 出现多次的字段(比如写了多个 @category)聚合为list
+    """
+    meta = plugin.meta
+    result = dict(meta.meta_dict)
+    for key, values in meta.meta_list_dict.items():
+        if len(values) > 1:
+            result[key] = values
+
+    return {
+        "plugin_name": plugin.plugin_name,
+        "fpath": plugin.fpath,
+        "meta": result,
+    }
+
+
 class PluginManageHandler(BaseTablePlugin):
     title = "插件管理"
     parent_link = LinkConfig.plugin_index
@@ -21,9 +42,23 @@ class PluginManageHandler(BaseTablePlugin):
     show_pagenation = False
     NAV_HTML = ""
 
+    # 「查看meta」点击后拉取纯文本JSON, 用文本弹窗展示(不跳转页面)
+    VIEW_META_SCRIPT = """
+<script>
+$(document).on("click", ".plugin-meta-btn", function (event) {
+    event.preventDefault();
+    var url = $(this).attr("href");
+    xnote.http.get(url, function (text) {
+        xnote.showTextDialog("插件meta", text);
+    });
+});
+</script>
+"""
+
     def handle_page(self):
         self.update_aside(AsideConfig.default_aside_html)
-        
+        self.write_plain_html(self.VIEW_META_SCRIPT)
+
         filter_tab = TabBox(tab_key="category", tab_default="all")
 
         for category in CategoryService.category_list:
@@ -42,6 +77,8 @@ class PluginManageHandler(BaseTablePlugin):
         table.add_head("访问次数", "visit_cnt")
 
         table.add_action("编辑", link_field="edit_url", type=TableActionType.link, css_class="btn btn-default")
+        table.add_action("查看meta", link_field="meta_url", type=TableActionType.link,
+                         css_class="btn btn-default plugin-meta-btn")
         table.add_action("删除", link_field="delete_url", type=TableActionType.confirm,
                          msg_field="delete_msg", css_class="btn danger")
         table.action_bar.add_edit_button(text="新增插件", url="?action=edit")
@@ -60,6 +97,7 @@ class PluginManageHandler(BaseTablePlugin):
             row["view_url"] = plugin.abs_url
             row["edit_url"] = plugin.edit_link
             row["plugin_id"] = plugin.plugin_id
+            row["meta_url"] = "?action=meta&plugin_name=" + xutils.encode_uri_component(plugin.plugin_name)
             row["delete_url"] = "?action=delete&plugin_name=" + xutils.encode_uri_component(plugin.plugin_name)
             row["delete_msg"] = "确定删除插件[%s]吗? 插件文件会移动到回收站" % plugin.title
             table.add_row(row)
@@ -67,6 +105,25 @@ class PluginManageHandler(BaseTablePlugin):
         kw = Storage()
         kw.table = table
         return self.response_page(**kw)
+
+    def json_text_response(self, data: dict):
+        """以纯文本JSON返回, 前端用文本弹窗展示"""
+        text = json.dumps(data, ensure_ascii=False, indent=2)
+        return xtemplate.TextResponse(text)
+
+    def handle_meta(self):
+        """查看插件meta信息, 以纯文本JSON展示"""
+        plugin_name = xutils.get_argument_str("plugin_name")
+        if plugin_name == "":
+            return self.json_text_response(dict(success=False, message="缺少参数plugin_name"))
+
+        plugin = xconfig.PLUGINS_DICT.get(plugin_name)
+        if plugin is None:
+            return self.json_text_response(dict(success=False, message="插件[%s]不存在" % plugin_name))
+
+        result = dict(success=True)
+        result.update(build_meta_dict(plugin))
+        return self.json_text_response(result)
 
     def handle_delete(self):
         """删除插件: 把插件文件移动到回收站, 并同步移除内存中已注册的插件"""
