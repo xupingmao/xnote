@@ -19,7 +19,7 @@
             <a class="btn btn-default" href="{{right_link2.href}}">{{right_link2.text}}</a>
         {% end %}
 
-        {% if back_url != None and back_url != "" %}
+        {% if back_url %}
             <a class="btn btn-default" href="{{back_url}}">返回</a>
         {% else %}
             <button class="btn btn-default" onclick="javascript:history.back();">返回</button>
