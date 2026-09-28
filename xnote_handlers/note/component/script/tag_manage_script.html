@@ -1,23 +1,4 @@
-<!-- 顶层控制区域的模板 -->
-<script type="text/template" id="tagTopTemplate">
-    <div class="card btn-line-height">
-        <div class="row">
-            <span>标签</span>
-            <a href="{{!linkOfTagAll}}" class="tag lightgray large {{! if selectedTags.length==0 }}active{{!/if}}">全部</a>
-            {{! each tagList tag }}
-                <a class="tag lightgray meta large {{!tag.active}}" 
-                    data-name="{{! tag.tag_name }}" onclick="onTagFilterClick(this);">{{! tag.tag_name }}({{!tag.amount}})</a>
-            {{!/each}}
-        </div>
-
-        <div class="row top-offset-1">
-            <button class="create-tag-btn btn-default">创建新标签</button>
-            <button class="delete-tag-btn btn danger" onclick="xnote.action.note.deleteTagMeta(xnote.note.tagList)">删除标签</button>
-        </div>
-    </div>
-</script>
-
-{% include note/component/script/note_template.html %}
+<!-- 顶层控制区域的模板由后端 /note/tag/suggest_html 渲染并返回 HTML 片段 -->
 
 <div class="tag-top"></div>
 
@@ -35,40 +16,14 @@ xnote.api["note.tag.manage.init"] = function (cmd) {
         xnote.validate.notUndefined(cmd.groupId, "cmd.groupId is undefined");
     }
 
-    function renderTagTop(tagList) {
-        var html = $("#tagTopTemplate").render({
-            tagList: tagList,
-            selectedTags: cmd.selectedTags,
-            linkOfTagAll: cmd.linkOfTagAll
-        });
-
-        $(".tag-top").html(html);
-    }
-
     function refreshTagTop() {
-        var filterTags = JSON.parse(xnote.getUrlParam("tags", "[]"));
         var params = {
             "group_id": cmd.groupId,
-            "tag_type": cmd.tagType
+            "tag_type": cmd.tagType,
+            "tags": xnote.getUrlParam("tags", "[]")
         };
-
-        xnote.http.get("/note/tag/suggest", params, function (resp) {
-            console.log("resp", resp);
-            if (!resp.success) {
-                xnote.alert(resp.message);
-            } else {
-                tagList = resp.data;
-                xnote.note.tagList = tagList;
-                for (var i=0; i < tagList.length; i++) {
-                    var item = tagList[i];
-                    if (filterTags.indexOf(item.tag_name)>=0) {
-                        item.active = "active";
-                    } else {
-                        item.active = "";
-                    }
-                }
-                renderTagTop(tagList);
-            }
+        xnote.http.get("/note/tag/suggest_html", params, function (html) {
+            $(".tag-top").html(html);
         });
     };
 

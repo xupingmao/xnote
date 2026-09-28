@@ -65,25 +65,8 @@ FileView.openOptionDialog = function (target, event) {
     event.stopPropagation();
     console.log(target);
     var filePath = $(target).attr("data-path");
-    var fileName = $(target).attr("data-name");
-    var fileRealName = $(target).attr("data-realname");
-    var dialogId = xnote.dialog.createNewId();
-    var filePathB64 = $(target).attr("data-path-b64");
 
-    var html = $("#fileItemOptionDialog").render({
-        "filePath": filePath,
-        "fileName": fileName,
-        "fileRealName": fileRealName,
-        "dialogId": dialogId,
-        "filePathB64": filePathB64,
-    });
-
-    var options = {};
-    options.title = "选项";
-    options.html  = html;
-    options.dialogId = dialogId;
-
-    xnote.openDialogEx(options);
+    xnote.openAjaxDialog("选项", "/fs/dialog/option?path=" + encodeURIComponent(filePath));
 };
 
 // 查看文件详情

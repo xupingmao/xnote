@@ -27,8 +27,7 @@ xnote.renderTemplate = function(templateText, object) {
         return temp.innerText || temp.textContent
     }
 
-    // TODO 处理转义问题
-    // 使用 art-template
+    // TODO 处理转义问题（基于 ${key} 的简单占位符替换，不依赖 art-template）
     return templateText.replace(/\$\{(.+?)\}/g, function (context, objKey) {
         var value = object[objKey.trim()];
         return escapeHTML(value);
@@ -37,26 +36,4 @@ xnote.renderTemplate = function(templateText, object) {
 
 xnote.string.format = xnote.renderTemplate;
 
-// 使用art-template渲染
-xnote.renderArtTemplate = function(templateText, data, options) {
-    return template.render(templateText, data, options);
-};
-
-// 初始化template
-(function() {
-    function jqRenderTemplate(data, options) {
-        var templateText = $(this).text();
-        // 使用art-template模板渲染
-        return template.render(templateText, data, options);
-    }
-
-    /**
-     * 获取表单数据
-     */
-    $.fn.extend({
-        /** 渲染模板 **/
-        "render": jqRenderTemplate,
-        "renderTemplate": jqRenderTemplate,
-    });
-})();
 

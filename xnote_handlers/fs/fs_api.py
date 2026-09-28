@@ -11,8 +11,8 @@
 
 import os
 import xutils
-from xutils import webutil, dateutil, fsutil
-from xnote.core import xauth
+from xutils import webutil, dateutil, fsutil, textutil
+from xnote.core import xauth, xtemplate
 
 class FileConfigHandler:
 
@@ -75,7 +75,63 @@ class FileDetailHandler:
             xutils.print_exc()
             return webutil.FailedResult(code="500", message="读取文件信息失败")
 
+class FileOptionDialogHandler:
+    """文件操作对话框的 HTML 片段，替代前端 art-template 渲染"""
+
+    html = """
+<div class="card dialog-body">
+    <div class="align-center">
+        <button class="btn btn-default fs-wide-btn" 
+            data-path="{{filePath}}" 
+            data-path-b64="{{filePathB64}}"
+            onclick="xnote.action.fs.download(this);">下载</button>
+        <button class="btn btn-default fs-wide-btn" 
+            data-path="{{filePath}}" 
+            data-name="{{fileName}}"
+            data-realname="{{fileRealName}}"
+            onclick="xnote.action.fs.rename(this);">重命名</button>
+        <button class="btn btn-default fs-wide-btn"
+            data-path="{{filePath}}"
+            onclick="xnote.action.fs.move(this);">移动</button>
+        <button class="btn btn-default fs-wide-btn"
+            onclick="xnote.action.fs.copy(this);">复制</button>
+        <button class="btn btn-default fs-wide-btn"
+            data-path="{{filePath}}"
+            onclick="xnote.action.fs.showDetail(this);">详细信息</button>
+        <button class="btn btn-default fs-wide-btn"
+            data-path="{{filePath}}"
+            data-path-b64="{{filePathB64}}"
+            onclick="xnote.action.fs.viewHex(this);">查看二进制</button>
+        <button class="btn danger fs-wide-btn" 
+            data-path="{{filePath}}"
+            data-name="{{fileName}}"
+            data-realname="{{fileRealName}}"
+            onclick="xnote.action.fs.delete(this);">删除</button>
+    </div>
+</div>
+
+<div class="dialog-footer">
+    <div class="float-right">
+        <button class="large btn-default" onclick="xnote.dialog.closeByElement(this)">关闭</button>
+    </div>
+</div>
+"""
+
+    @xauth.login_required("admin")
+    def GET(self):
+        path = xutils.get_argument_str("path", "")
+        filePathB64 = textutil.encode_base64(path)
+        fileName = xutils.decode_name(os.path.basename(path))
+        fileRealName = fileName
+        return xtemplate.render_text(self.html,
+            filePath=textutil.html_escape(path),
+            filePathB64=textutil.html_escape(filePathB64),
+            fileName=textutil.html_escape(fileName),
+            fileRealName=textutil.html_escape(fileRealName))
+
+
 xurls = (
     r"/fs_api/config", FileConfigHandler,
     r"/fs_api/detail", FileDetailHandler,
+    r"/fs/dialog/option", FileOptionDialogHandler,
 )

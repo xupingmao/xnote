@@ -15,45 +15,6 @@
 
 <input type="hidden" id="currentPath" value="{{path}}">
 
-<script type="text/template" id="fileItemOptionDialog">
-    <div class="card dialog-body">
-        <div class="align-center">
-            <button class="btn btn-default fs-wide-btn" 
-                data-path="{{!filePath}}" 
-                data-path-b64="{{!filePathB64}}"
-                onclick="xnote.action.fs.download(this);">下载</button>
-            <button class="btn btn-default fs-wide-btn" 
-                data-path="{{!filePath}}" 
-                data-name="{{!fileName}}"
-                data-realname="{{!fileRealName}}"
-                onclick="xnote.action.fs.rename(this);">重命名</button>
-            <button class="btn btn-default fs-wide-btn"
-                data-path="{{!filePath}}"
-                onclick="xnote.action.fs.move(this);">移动</button>
-            <button class="btn btn-default fs-wide-btn"
-                onclick="xnote.action.fs.copy(this);">复制</button>
-            <button class="btn btn-default fs-wide-btn"
-                data-path="{{!filePath}}"
-                onclick="xnote.action.fs.showDetail(this);">详细信息</button>
-            <button class="btn btn-default fs-wide-btn"
-                data-path="{{!filePath}}"
-                data-path-b64="{{!filePathB64}}"
-                onclick="xnote.action.fs.viewHex(this);">查看二进制</button>
-            <button class="btn danger fs-wide-btn" 
-                data-path="{{!filePath}}"
-                data-name="{{!fileName}}"
-                data-realname="{{!fileRealName}}"
-                onclick="xnote.action.fs.delete(this);">删除</button>
-        </div>
-    </div>
-
-    <div class="dialog-footer">
-        <div class="float-right">
-            <button class="large btn-default" data-dialog-id="{{!dialogId}}" onclick="xnote.dialog.closeByElement(this)">关闭</button>
-        </div>
-    </div>
-</script>
-
 <script type="text/javascript">
 
 xnote.action.fs.download = function(target) {

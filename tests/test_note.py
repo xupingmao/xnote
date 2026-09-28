@@ -345,12 +345,12 @@ class TestMain(BaseTestCase):
             
             # 登出后无法搜索到数据
             result = note_dao.search_name(["share"])
-            assert len(result) == 0
+            assert len(result) == 0            
+        finally:
+            login_test_user()
             
             # clean up
             json_request(f"/note/remove?id={id}")
-        finally:
-            login_test_user()
 
     def test_note_share_to(self):
         """分享给指定用户"""

@@ -36,9 +36,8 @@ def create_note_for_test(type="", name="", *, content = "", tags="", parent_id=0
         method = "POST",
         data = data)
     
-    resp_data = note_result.get("data")
-    assert isinstance(resp_data, dict)
-    note_id = resp_data.get("id")
+    resp_data = note_result.get_dict("data")
+    note_id = resp_data.get_int("id")
     print("新笔记id:", note_id)
     assert isinstance(note_id, int)
     return note_id

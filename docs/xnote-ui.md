@@ -7,7 +7,7 @@
 | `x-init.js` | 核心 | 命名空间定义、HTTP 封装、全局初始化、工具函数 |
 | `x-event.js` | 核心 | 事件派发机制（EventDispatcher） |
 | `x-url.js` | 工具 | URL 解析、参数读写、HTML 转义 |
-| `x-template.js` | 工具 | 简单模板渲染 + art-template 桥接 |
+| `x-template.js` | 工具 | 简单模板渲染（基于 `${key}` 占位符替换） |
 | `x-device.js` | 工具 | 设备/浏览器检测、窗口尺寸 |
 | `x-dialog.js` | UI 组件 | 基于 layer.js 的对话框系统 |
 | `x-tab.js` | UI 组件 | Tab 切换（tab-link、tab-btn、tab-box） |
@@ -230,10 +230,9 @@ xnote.escapeHTML(text)             // HTML 转义
 
 ```js
 xnote.renderTemplate("Hello,${name}!", {name: "World"})  // => "Hello,World!"
-xnote.renderArtTemplate(text, data, options)              // art-template 渲染
 ```
 
-jQuery 扩展：`$(selector).render(data)` 或 `$(selector).renderTemplate(data)`
+> 历史说明：早期通过 `xnote.renderArtTemplate` 与 jQuery 的 `$(selector).render()/renderTemplate()` 桥接 art-template 在前端渲染模板；该依赖已移除，所有动态模板改为由后端（Tornado 模板）渲染并通过接口返回 HTML 片段，前端直接注入 DOM。
 
 ## 设备检测（x-device.js）
 

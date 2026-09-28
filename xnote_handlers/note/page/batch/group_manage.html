@@ -11,7 +11,6 @@
 {% init note_tags = dict() %}
 {% include note/component/script/create_script.html %}
 {% include note/component/script/tag_script.html %}
-{% include note/component/script/note_template.html %}
 {% include note/component/script/group_select_script.html %}
 
 <style>
@@ -42,26 +41,6 @@
     </div>
 </div>
 
-<script id="book_item_template" type="text/template">
-    <div class="book-item {{!if level>0}}child{{!/if}}">
-        <div class="row">
-            <i class="fa {{!item.icon}} fa-{{!item.icon}} black"></i>
-            <a class="link2" href="{{!item.url}}">{{!item.name}}</a>
-            <span class="tag lightgray">{{!item.children.length}}</span>
-            {{! if childrenBoxId > 0 }}
-                <a class="op-link toggle-op" data-id="{{!childrenBoxId}}" data-state="close" onclick="toggleChildrenBox(this)">[展开]</a>
-            {{!/if }}
-            <span class="float-right">
-                <a class="item-option" data-id="{{!item.id}}" data-name="{{!item.name}}" 
-                    onclick="xnote.note.renameByElement(this);" href="javascript:void(0);">重命名</a>
-                <a class="item-option danger" data-id="{{!item.id}}" data-name="{{!item.name}}" data-post-action="refresh"
-                    onclick="xnote.note.deleteByElement(this)">删除</a>
-                <input class="group-checkbox" type="checkbox" data-id="{{!item.id}}" data-name="{{!item.name}}"/>
-            </span>
-        </div>
-    </div>
-</script>
-
 <div class="tag-top"></div>
 <div class="card btn-line-height">
     <button class="btn btn-default" data-state="close" onclick="toggleAllChilren(this)">展开全部</button>
@@ -74,41 +53,6 @@
 {% include note/component/script/rename_script.html %}
 
 <script type="text/javascript">
-
-function convertArrayToTree(array) {
-    var result = [];
-    var noteMap = {};
-    for (var i = 0; i < array.length; i++) {
-        var item = array[i];
-        item.children = [];
-        item.title = item.name;
-        item.spread = true; // 默认展开
-        noteMap[item.id] = item;
-    }
-
-    for (var i = 0; i < array.length; i++) {
-        var item = array[i];
-        if (item.id == 0) {
-            // 不渲染跟节点
-            continue;
-        }
-        if (item.parent_id == 0) {
-            result.push(item);
-        } else {
-            parentNote = noteMap[item.parent_id];
-            if (parentNote) {
-                parentNote.children.push(item);
-            }
-        }
-    }
-
-    return result;
-}
-
-function buildBookItem(noteInfo, level, childrenBoxId) {
-    var html = $("#book_item_template").render({item: noteInfo, level: level, childrenBoxId: childrenBoxId});
-    return $(html);
-}
 
 function toggleChildrenBox(target, targetState) {
     var state = $(target).attr("data-state");
@@ -150,35 +94,9 @@ function toggleAllChilren(target) {
     }
 }
 
-function renderGroupTreeData(parent, data, level) {
-    for (var i = 0; i < data.length; i++) {
-        var noteInfo = data[i];
-        var childrenBoxId = 0;
-        if (noteInfo.children.length > 0) {
-            childrenBoxId = xnote.createNewId();
-        }
-        var child = buildBookItem(noteInfo, level, childrenBoxId);
-        parent.append(child);
-
-        if (noteInfo.children.length > 0) {
-            var children = $("<div>").addClass("children-box box-" + childrenBoxId);
-            renderGroupTreeData(children, noteInfo.children, level+1);
-            parent.append(children);
-        }
-    }
-}
-
 function renderGroupTree() {
-    xnote.http.get("/api/v1/note/group?list_type=all", function (resp) {
-        if (resp.success) {
-            // console.log(resp);
-            var parent = $(".group-tree");
-            var noteTree = convertArrayToTree(resp.data);
-            console.log("noteTree", noteTree);
-            renderGroupTreeData(parent, noteTree, 0);
-        } else {
-            xnote.alert(resp.message);
-        }
+    xnote.http.get("/api/v1/note/group/tree_html", function (html) {
+        $(".group-tree").html(html);
     })
 }
 

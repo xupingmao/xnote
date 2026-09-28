@@ -42,6 +42,18 @@ class TxtPageInfoDO(Storage):
 
 class TextHandler:
 
+    # book 目录的 HTML 片段，替代前端 art-template 渲染
+    bookmark_html = """
+{% for item in contents %}
+<div class="contents-item">
+    <a data-offset="{{item.offset}}" data-page="{{item.page}}" 
+        class="contents-link {% if current_offset == item.offset %}current{% end %}">
+        [{{item.page}}] {{item.title}}
+    </a>
+</div>
+{% end %}
+"""
+
     @xauth.login_required("admin")
     def GET(self):
         method = xutils.get_argument("method", "page")
@@ -49,6 +61,8 @@ class TextHandler:
 
         if method == "contents":
             return self.get_bookmark()
+        if method == "contents_html":
+            return self.get_bookmark_html()
         if method == "read_page":
             return self.read_page()
         if method == "refresh":
@@ -100,6 +114,32 @@ class TextHandler:
             bookmark = self.build_bookmark(bookmark)
 
         return dict(code="success", data=bookmark)
+    
+    def get_bookmark_html(self):
+        path = xutils.get_argument_str("path", "")
+        if path == "":
+            return "path不能为空"
+        
+        user_info = xauth.current_user()
+        assert user_info != None
+        
+        bookmark = self.get_txt_info_record(user_info.id, path)
+        if bookmark == None:
+            bookmark = TxtInfoDO()
+        
+        bookmark.user_name = user_info.name
+        bookmark.user_id = user_info.id
+        bookmark.path = path
+        
+        if bookmark.contents == None or bookmark.version != TXT_INFO_VER:
+            bookmark = self.build_bookmark(bookmark)
+
+        contents = bookmark.contents or []
+        for i, item in enumerate(contents):
+            item.page = i + 1
+
+        return xtemplate.render_text(self.bookmark_html,
+            contents=contents, current_offset=bookmark.current_offset)
     
     def build_bookmark(self, txt_info: TxtInfoDO):
         fpath = txt_info.path

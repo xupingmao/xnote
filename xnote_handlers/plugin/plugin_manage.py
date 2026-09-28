@@ -9,6 +9,7 @@ from xnote.plugin import iter_plugins, TabBox
 from .plugin_page import list_all_plugins, list_plugins
 from .plugin_config import CategoryService
 from xnote_handlers.config import AsideConfig
+from xnote.webui import Card
 
 class PluginManageHandler(BaseTablePlugin):
     title = "插件管理"
@@ -16,12 +17,6 @@ class PluginManageHandler(BaseTablePlugin):
     require_admin = True
     show_pagenation = False
     NAV_HTML = ""
-
-    filter_tab_html = """
-<div class="card">
-    {% render filter_tab %}
-</div>
-"""
 
     def handle_page(self):
         self.update_aside(AsideConfig.default_aside_html)
@@ -31,13 +26,14 @@ class PluginManageHandler(BaseTablePlugin):
         for category in CategoryService.category_list:
             filter_tab.add_tab(title=category.name, value=category.code)
 
-        self.writetemplate(self.filter_tab_html, filter_tab = filter_tab)
+        self.add_component(Card().add(filter_tab))
 
         category = xutils.get_argument_str("category")
 
         table = self.create_table()
         table.default_head_style.min_width = "100px"
         table.add_head("插件类别", "category_list")
+        table.add_head("插件ID", "plugin_id")
         table.add_head("插件名称", "title", link_field="view_url")
         table.add_head("最近使用", "visit_date")
         table.add_head("访问次数", "visit_cnt")
@@ -58,6 +54,7 @@ class PluginManageHandler(BaseTablePlugin):
             row["visit_cnt"] = plugin.visit_cnt
             row["view_url"] = plugin.abs_url
             row["edit_url"] = plugin.edit_link
+            row["plugin_id"] = plugin.plugin_id
             table.add_row(row)
 
         kw = Storage()

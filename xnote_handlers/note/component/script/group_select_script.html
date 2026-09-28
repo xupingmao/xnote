@@ -6,29 +6,6 @@
     }
 </style>
 
-<script type="text/template" id="group_select_tpl">
-    <div class="note-group-select col-md-12 scroll-y">
-        {{! if hasNoMatch }}
-            <p class="align-center">没有匹配项,请重新输入关键字</p>
-        {{!/if}}
-
-        {{! each groups group }}
-            {{! if group.isVisible() }}
-                <h3 class="group-select-header">{{!group.title}}</h3>    
-                {{! each group.children item }}
-                    <p class="group-select-row">
-                        <i class="fa {{!item.icon}}"></i>
-                        <a class="link" data-id="{{!item.id}}">
-                            {{!item.path || item.name}}
-                        </a>
-                        <span class="group-select-size">{{!item.children_count}}</span>
-                    </p>
-                {{!/each}}
-            {{!/if}}
-        {{!/each}}
-    </div>    
-</script>
-
 <div class="group-select-box hide">
     <div class="dialog-body">
         <div class="group-select-search">

@@ -17,29 +17,26 @@
     </div>
 </div>
 
-<script id="sidebar-content-template" type="text/html">
-    {{!each list }}
-    <a class="list-item level-{{!$value.level}}" data-line="{{! $value.lineNo }}">
-        <span>{{! $value.name }}</span>
-    </a>
-    {{!/each }}
-</script>
-
 <script>
 $(function () {
+    var refreshTimer = null;
+
     function refreshContents() {
         var content = $("#markdown-input").val();
-        var mdHeading = new MarkdownHeading();
-    
-        mdHeading.load(content);
-        console.log(mdHeading);
-    
-        var html = $("#sidebar-content-template").render({list: mdHeading.getHeadings()});
-        $(".sidebar-contents").html(html);
+        xnote.http.post("/note/api/markdown/outline", {text: content}, function (html) {
+            $(".sidebar-contents").html(html);
+        });
+    }
+
+    function refreshContentsDebounced() {
+        if (refreshTimer) {
+            clearTimeout(refreshTimer);
+        }
+        refreshTimer = setTimeout(refreshContents, 300);
     }
 
     refreshContents();
-    xnote.on("editor.change", refreshContents);
+    xnote.on("editor.change", refreshContentsDebounced);
 });
 
 $(".sidebar-contents").on("click", ".list-item", function (e) {

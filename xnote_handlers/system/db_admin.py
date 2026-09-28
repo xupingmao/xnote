@@ -103,6 +103,89 @@ class DbScanHandler:
         web_result.scanned = scanned
         return web_result
     
+    def build_search_rows(self, result):
+        for item in result:
+            value = item.get("value", "")
+            if len(value) > 100:
+                item.valueShort = value[:97] + "..."
+            else:
+                item.valueShort = value
+        return result
+    
+    # 搜索结果 HTML 片段，替代前端 art-template 渲染
+    search_result_html = """
+<div class="card btn-line-height">
+    <span>扫描行数: {{scanned}}</span>
+    <span>匹配行数: {{resultLength}}</span>
+</div>
+
+<div class="card">
+    <table class="table">
+        <tr>
+            <th>主键</th>
+            <th>值</th>
+            <th><div class="float-right">操作</div></th>
+        </tr>
+        {% for item in result %}
+            <tr class="hover-tr">
+                <td style="width:20%">{{item.key}}</td>
+                <td style="width:60%">{{item.valueShort}}</td>
+                <td style="width:20%">
+                    <div class="float-right">
+                        <button class="btn btn-default view-btn" 
+                            data-url="/system/sqldb_detail?method=get_kv_detail&key={{item.key_encoded}}" 
+                            onclick="xnote.admin.viewMainRecord(this)">查看</button>
+                        <button class="btn btn-danger delete-btn" data-key="{{item.data_key}}" 
+                            onclick="xnote.admin.deleteRecord(this)">删除</button>
+                    </div>
+                </td>
+            </tr>
+        {% end %}
+    </table>
+</div>
+"""
+
+    def do_search_html(self):
+        prefix = xutils.get_argument_str("prefix", "")
+        cursor = xutils.get_argument_str("cursor", "")
+        keyword = xutils.get_argument_str("keyword", "")
+        reverse = xutils.get_argument_bool("reverse", False)
+        q_user_name = xutils.get_argument_str("q_user_name", "")
+
+        if q_user_name != "":
+            prefix = prefix + ":" + q_user_name
+        if prefix != "" and prefix[-1] != ":":
+            prefix += ":"
+
+        limit = 100
+        max_scan = 10000
+        result = []
+        scanned = 0
+        has_next = False
+        keywords = textutil.split_words(keyword)
+
+        key_from = cursor if cursor != "" else None
+        key_to = None
+        if reverse:
+            key_from = None
+            key_to = cursor if cursor != "" else None
+
+        for key, value in dbutil.prefix_iter(prefix, key_from=key_from, key_to=key_to,
+                                             include_key=True, limit=max_scan, parse_json=False,
+                                             reverse=reverse, scan_db=True):
+            scanned += 1
+            if len(result) < limit and (textutil.contains_all(key, keywords) or textutil.contains_all(value, keywords)):
+                item = Storage(key=key, key_encoded=xutils.quote(key),
+                               value=value, data_key=xutils.html_escape(key))
+                result.append(item)
+            if scanned >= max_scan or len(result) >= limit:
+                has_next = True
+                break
+
+        self.build_search_rows(result)
+        return xtemplate.render_text(self.search_result_html,
+            result=result, resultLength=len(result), scanned=scanned, has_next=has_next)
+    
     def do_list_meta(self):
         p2 = xutils.get_argument_str("p2")
         kw = Storage()
@@ -140,6 +223,9 @@ class DbScanHandler:
 
         if action == "search":
             return self.do_search()
+        
+        if action == "search_html":
+            return self.do_search_html()
         
         if p == "meta":
             return self.do_list_meta()

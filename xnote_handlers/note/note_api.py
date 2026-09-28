@@ -11,6 +11,7 @@ from typing import List
 from xutils import Storage
 from xnote.core import xauth
 from xnote.core import xconfig
+from xnote.core import xtemplate
 from xnote.core.xtemplate import T
 from xutils import webutil
 from xutils import textutil
@@ -266,8 +267,203 @@ xutils.register_func("page.list_msg_types", list_msg_types)
 xutils.register_func("page.list_system_types", list_system_types)
 xutils.register_func("page.list_special_groups", list_special_groups)
 
+class GroupSelectHtmlHandler:
+    """移动笔记-选择笔记本的 HTML 片段，替代前端 art-template 渲染"""
+
+    html = """
+<div class="note-group-select col-md-12 scroll-y">
+    {% if hasNoMatch %}
+    <p class="align-center">没有匹配项,请重新输入关键字</p>
+    {% end %}
+    {% for group in groups %}
+        {% if group.visible %}
+        <h3 class="group-select-header">{{ group.title }}</h3>
+        {% for item in group.children %}
+        <p class="group-select-row">
+            <i class="fa {{ item.icon }}"></i>
+            <a class="link" data-id="{{ item.id }}">
+                {{ item.path or item.name }}
+            </a>
+            <span class="group-select-size">{{ item.children_count }}</span>
+        </p>
+        {% end %}
+        {% end %}
+    {% end %}
+</div>
+"""
+
+    @xauth.login_required()
+    def GET(self):
+        orderby = xutils.get_argument_str("orderby", "name")
+        keyword = xutils.get_argument_str("keyword", "").lower()
+        user_name = xauth.current_name_str()
+
+        notes = dao.list_group_v2(user_name, limit=1000, orderby=orderby) + [dao.get_root()]
+        if keyword != "":
+            notes = [item for item in notes if keyword in (item.name or "").lower()]
+
+        first = Storage(title="置顶", children=[])
+        firstGroup = Storage(title="一级笔记本", children=[])
+        second = Storage(title="其他笔记本", children=[])
+        last = Storage(title="归档", children=[])
+
+        for item in notes:
+            if item.level >= 1:
+                first.children.append(item)
+            elif item.level < 0:
+                last.children.append(item)
+            elif item.parent_id == 0:
+                firstGroup.children.append(item)
+            else:
+                second.children.append(item)
+
+        groups = [first, firstGroup, second, last]
+        for group in groups:
+            group.visible = len(group.children) > 0
+
+        hasNoMatch = len(notes) == 0
+        return xtemplate.render_text(self.html, groups=groups, hasNoMatch=hasNoMatch)
+
+
+class GroupTreeHtmlHandler:
+    """笔记本树 HTML 片段，替代前端 art-template 渲染（递归构建整棵树）"""
+
+    book_item_html = """
+<div class="book-item {% if level > 0 %}child{% end %}">
+    <div class="row">
+        <i class="fa {{ item.icon }} fa-{{ item.icon }} black"></i>
+        <a class="link2" href="{{ item.url }}">{{ item.name }}</a>
+        <span class="tag lightgray">{{ childrenLength }}</span>
+        {% if childrenBoxId > 0 %}
+        <a class="op-link toggle-op" data-id="{{ childrenBoxId }}" data-state="close" onclick="toggleChildrenBox(this)">[展开]</a>
+        {% end %}
+        <span class="float-right">
+            <a class="item-option" data-id="{{ item.id }}" data-name="{{ item.name }}" 
+                onclick="xnote.note.renameByElement(this);" href="javascript:void(0);">重命名</a>
+            <a class="item-option danger" data-id="{{ item.id }}" data-name="{{ item.name }}" data-post-action="refresh"
+                onclick="xnote.note.deleteByElement(this)">删除</a>
+            <input class="group-checkbox" type="checkbox" data-id="{{ item.id }}" data-name="{{ item.name }}"/>
+        </span>
+    </div>
+</div>
+"""
+
+    @xauth.login_required()
+    def GET(self):
+        user_name = xauth.current_name_str()
+        notes = dao.list_group_v2(user_name, limit=1000, orderby="name") + [dao.get_root()]
+
+        note_map = {}
+        for item in notes:
+            item.children = []
+            note_map[item.id] = item
+
+        tree = []
+        for item in notes:
+            if item.id == 0:
+                continue
+            if item.parent_id == 0:
+                tree.append(item)
+            else:
+                parent = note_map.get(item.parent_id)
+                if parent:
+                    parent.children.append(item)
+
+        box_counter = [0]
+        html = self.render_tree(tree, 0, box_counter)
+        return html
+
+    def render_tree(self, nodes, level, box_counter):
+        parts = []
+        for node in nodes:
+            children = node.children
+            children_box_id = 0
+            if len(children) > 0:
+                box_counter[0] += 1
+                children_box_id = box_counter[0]
+            # xtemplate.render_text 返回的是 bytes, 拼接前需要转成 str
+            node_html = xtemplate.render_text(self.book_item_html,
+                item=node, level=level, childrenBoxId=children_box_id, childrenLength=len(children))
+            parts.append(node_html.decode("utf-8"))
+            if len(children) > 0:
+                child_html = self.render_tree(children, level + 1, box_counter)
+                parts.append(f'<div class="children-box box-{children_box_id}">{child_html}</div>')
+        return "".join(parts)
+
+
+class MarkdownOutlineHandler:
+    """编辑侧栏大纲 HTML 片段，替代前端 art-template 渲染（复制 editor.js MarkdownHeading 逻辑）"""
+
+    html = """
+{% for item in headings %}
+<a class="list-item level-{{ item.level }}" data-line="{{ item.lineNo }}">
+    <span>{{ item.name }}</span>
+</a>
+{% end %}
+"""
+
+    @xauth.login_required()
+    def POST(self):
+        text = xutils.get_argument_str("text", "")
+        headings = self.parse_headings(text)
+        return xtemplate.render_text(self.html, headings=headings)
+
+    def parse_headings(self, text):
+        lines = text.split("\n")
+        headings = []
+        line_no = 0
+        is_in_code = False
+        code_tag = "```"
+        for line in lines:
+            line_no += 1
+            line = line.rstrip("\r")
+            if is_in_code:
+                if code_tag in line:
+                    is_in_code = False
+            else:
+                if line and line[0] == "#":
+                    level, name = self.parse_heading(line)
+                    headings.append(Storage(level=level, lineNo=line_no, name=name))
+                if code_tag in line:
+                    is_in_code = True
+        return headings
+
+    def parse_heading(self, line):
+        level = 0
+        for c in line:
+            if c == "#":
+                level += 1
+            elif c == " ":
+                continue
+            else:
+                break
+        return level, self.format_name(line)
+
+    def format_name(self, text):
+        start = 0
+        end = len(text) - 1
+        while start < len(text):
+            c = text[start]
+            if c in (" ", "\t", "#", "*"):
+                start += 1
+            else:
+                break
+        while end >= 0:
+            c = text[end]
+            if c in ("*", " ", "\t"):
+                end -= 1
+            else:
+                break
+        if end >= start:
+            return text[start:end + 1]
+        return text
+
+
 xurls = (
     r"/api/v1/note/group", GroupApiHandler,
+    r"/api/v1/note/group/select_html", GroupSelectHtmlHandler,
+    r"/api/v1/note/group/tree_html", GroupTreeHtmlHandler,
+    r"/note/api/markdown/outline", MarkdownOutlineHandler,
     r"/api/v1/note/stat", StatApiHandler,
     r"/api/v1/note/select_name", SelectNameHandler,
     r"/api/v1/note/content", NoteContentApiHandler,

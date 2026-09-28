@@ -70,39 +70,6 @@
     </div>
 </div>
 
-<!-- 模板 -->
-<script type="text/template" id="result-rows-template">
-<div class="card btn-line-height">
-    <span>扫描行数: {{!scanned}}</span>
-    <span>匹配行数: {{!result.length}}</span>
-</div>
-
-<div class="card">
-    <table class="table">
-        <tr>
-            <th>主键</th>
-            <th>值</th>
-            <th><div class="float-right">操作</div></th>
-        </tr>
-        {{! each result item }}
-            <tr class="hover-tr">
-                <td style="width:20%">{{!item.key}}</td>
-                <td style="width:60%">{{!item.valueShort}}</td>
-                <td style="width:20%">
-                    <div class="float-right">
-                        <button class="btn btn-default view-btn" 
-                            data-url="/system/sqldb_detail?method=get_kv_detail&key={{!item.key_encoded}}" 
-                            onclick="xnote.admin.viewMainRecord(this)">查看</button>
-                        <button class="btn btn-danger delete-btn" data-key="{{!item.data_key}}" 
-                            onclick="xnote.admin.deleteRecord(this)">删除</button>
-                    </div>
-                </td>
-            </tr>
-        {{!/each }}
-    </table>
-</div>
-</script>
-
 <script>
 $(function () {
     var globalVersion = 0;
@@ -123,68 +90,23 @@ $(function () {
         search();    
     });
 
-    // 搜索接口
+    // 搜索接口（结果由后端渲染为 HTML 片段）
     function search() {
-        globalVersion++;
-        doSearch("", [], 0, globalVersion);
-    }
-
-    // 执行搜索
-    function doSearch(cursor, result, scanned, version) {
-        if (version != globalVersion) {
-            return;
-        }
-        var maxResultCount = 100;
         var prefix = $("[name=prefix]").val();
         var reverse = $("[name=reverse]").val();
         var keyword = $("[name=db_key]").val();
         var userName = $("[name=q_user_name]").val();
         var params = {
-            action: "search",
+            action: "search_html",
             keyword: keyword,
             reverse: reverse,
-            cursor: cursor,
             prefix: prefix,
             q_user_name: userName,
         };
-
-        xnote.http.get("", params, function (resp) {
-            console.log("search result", resp);
-            if (resp.code != "success") {
-                xnote.alert(resp.message);
-            } else {
-                scanned += resp.scanned;
-                for (var i = 0; i < resp.data.length; i++) {
-                    var item = resp.data[i];
-                    if (item.value.length>100) {
-                        item.valueShort = item.value.substring(0,97) + "...";
-                    } else {
-                        item.valueShort = item.value;
-                    }
-                    result.push(item);
-                }
-                var hasTooManyResult = result.length > maxResultCount;
-                if (hasTooManyResult) {
-                    result = result.slice(0, maxResultCount);
-                }
-
-                var html = $("#result-rows-template").renderTemplate({
-                    result: result,
-                    scanned: scanned,
-                });
-                $(".result-rows").html(html);
-                if (hasTooManyResult) {
-                    xnote.toast("结果过多，只展示前面" + maxResultCount + "条记录");
-                    return;
-                }
-
-                var hasNext = resp.has_next;
-                if (hasNext) {
-                    doSearch(resp.next_cursor, result, scanned, version);
-                }
-            }
+        xnote.http.get("", params, function (html) {
+            $(".result-rows").html(html);
         });
-    };
+    }
 
     // 初始化
     search();

@@ -56,17 +56,6 @@
     </div>
 </div>
 
-<script type="text/template" id="book-contents-tpl">
-{{!each contents item}}
-    <div class="contents-item">
-        <a data-offset="{{!item.offset}}" data-page="{{!$index+1}}" 
-            class="contents-link {{!if currentOffset == item.offset }}current{{!/if}}">
-            [{{!$index+1}}] {{! item.title }}
-        </a>
-    </div>
-{{!/each}}
-</script>
-
 <script type="text/javascript">
 $(function () {
     var path = xnote.getUrlParam("path");
@@ -126,26 +115,19 @@ $(function () {
 
     // 读取目录
     function readContents() {
-        xnote.http.get("/fs_text", params, function (resp) {
-            console.log(resp);
-            if (resp.code != "success") {
-                xnote.alert(resp.message);
-            } else {
-                var bookmark = resp.data;
-                var html = $("#book-contents-tpl").renderTemplate({
-                    contents: bookmark.contents,
-                    currentOffset: bookmark.current_offset,
-                });
-
-                var contents = bookmark.contents;
-                // console.log("html", html);
-                for (var i = 0; i < contents.length; i++) {
-                    var item = contents[i];
-                    state.offsetMap[i+1] = item.offset;
-                }
-
-                $(".book-contents").html(html);
-            }
+        var htmlParams = {
+            method: "contents_html",
+            path: path
+        };
+        xnote.http.get("/fs_text", htmlParams, function (html) {
+            $(".book-contents").html(html);
+            // 重建 页码 -> offset 映射，供 readPage 使用
+            state.offsetMap = {};
+            $(".book-contents a.contents-link").each(function (i, ele) {
+                var page = $(ele).attr("data-page");
+                var offset = $(ele).attr("data-offset");
+                state.offsetMap[page] = offset;
+            });
         });
     }
 

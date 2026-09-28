@@ -101,7 +101,7 @@ def json_request(localpart='/', method='GET', data=None, **kw):
     assert APP != None
     ret = APP.request(localpart, method, data, **kw)
     if ret.status == "303 See Other":
-        return
+        raise Exception(f"expect 200 but see {ret.status}, localpart={localpart}")
     assert ret.status == "200 OK"
     data = ret.data
     return json.loads(data.decode("utf-8"))
@@ -112,7 +112,8 @@ def json_request_return_dict(localpart='/', method='GET', data: Union[dict, str,
     - json_request_return_dict("/api/v1/get_info?p1=1&p2=test")
     """
     ret = json_request(localpart, method, data, **kw)
-    assert isinstance(ret, dict)
+    if not isinstance(ret, dict):
+        raise Exception(f"expect dict but got type {type(ret)}")
     return TypedDict(ret)
 
 def json_request_return_list(*args, **kw):

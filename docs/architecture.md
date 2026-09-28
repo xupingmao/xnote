@@ -74,7 +74,6 @@
 - codemirror 代码编辑器
 - jexcel web表格
 - font-awesome 图标库
-- art-template 模板引擎
 - vue2 MVVM框架
 - qrcode 二维码生成器
 - csv.js 解析csv文件

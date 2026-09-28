@@ -210,10 +210,10 @@ class TestMain(BaseTestCase):
         self.check_200("/system/script_admin")
 
     def test_script_add_remove(self):
-        json_request("/system/script/save", method="POST",
+        self.check_OK("/system/script/save", method="POST",
                      data=dict(name="xnote-unit-test.py", content="print(123)"))
         out = xutils.exec_script("xnote-unit-test.py", False, False)
-        json_request(
+        self.check_OK(
             "/system/script/delete?name=xnote-unit-test.py", method="POST")
 
     def test_script_rename(self):

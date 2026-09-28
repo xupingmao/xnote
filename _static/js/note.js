@@ -302,25 +302,15 @@ NoteView.addNoteToTag = function (tagCode) {
  */
 NoteView.selectGroupFlat = function (req) {
     var noteId = req.noteId;
-    var respData;
 
     xnote.validate.isFunction(req.callback, "参数callback无效");
 
     function bindEvent() {
         $(".group-select-box").on("keyup", ".nav-search-input", function (event) {
-            /* Act on the event */
-            // console.log("event", event);
             var searchKey = $(this).val().toLowerCase();
-
-            var newData = [];
-
-            for (var i = 0; i < respData.length; i++) {
-                var item = respData[i];
-                if (item.name.toLowerCase().indexOf(searchKey) >= 0) {
-                    newData.push(item);
-                }
-            }
-            renderData(newData);
+            xnote.http.get("/api/v1/note/group/select_html?keyword=" + encodeURIComponent(searchKey), function (html) {
+                $(".group-select-data").html(html);
+            });
         });
 
         $(".group-select-box").on("click", ".link", function (event) {
@@ -329,66 +319,12 @@ NoteView.selectGroupFlat = function (req) {
         });
     }
 
-    function Section() {
-        this.children = [];
-        this.title = "title";
-    }
-
-    Section.prototype.add = function (item) {
-        this.children.push(item);
-    }
-
-    Section.prototype.isVisible = function () {
-        return this.children.length > 0;
-    }
-
-    // 渲染数据
-    function renderData(data) {
-        var first = new Section();
-        var second = new Section();
-        var last = new Section();
-        var firstGroup = new Section(); // 一级笔记本
-        for (var i = 0; i < data.length; i++) {
-            var item = data[i];
-            if (item.level >= 1) {
-                first.add(item);
-            } else if (item.level < 0) {
-                last.add(item);
-            } else if (item.parent_id == 0) {
-                firstGroup.add(item);
-            } else {
-                second.add(item);
-            }
-        }
-
-        first.title = "置顶";
-        firstGroup.title = "一级笔记本";
-        second.title = "其他笔记本";
-        last.title = "归档";
-
-        var groups = [first, firstGroup, second, last];
-        var hasNoMatch = (data.length === 0);
-
-        var html = $("#group_select_tpl").renderTemplate({
-            groups: groups,
-            noteId: noteId,
-            hasNoMatch: hasNoMatch
-        });
-        $(".group-select-data").html(html);
-    }
-
-    xnote.http.get("/api/v1/note/group?list_type=all&orderby=name", function (resp) {
-        if (resp.code != "success") {
-            xnote.alert(resp.message);
-            return;
-        }
-
-        respData = resp.data;
+    xnote.http.get("/api/v1/note/group/select_html?orderby=name", function (html) {
         xnote.showDialog("移动笔记", $(".group-select-box"));
         // 绑定事件
         bindEvent();
-        // 渲染数据
-        renderData(respData);
+        // 渲染数据（由后端返回 HTML 片段）
+        $(".group-select-data").html(html);
     });
 };
 
@@ -399,32 +335,38 @@ NoteView.selectGroupTree = function () {
 
 // 删除标签元信息
 NoteView.deleteTagMeta = function (tagMetaList) {
-    var html = $("#deleteTagTemplate").render({
-        tagList: tagMetaList,
-    });
+    var groupId = NoteView.groupId;
+    xnote.http.get("/note/tag/delete_html?group_id=" + encodeURIComponent(groupId), function (html) {
+        xnote.openDialog("删除标签", html, ["确定删除", "取消"], function () {
+            var tagCodeList = [];
+            $(".tag.delete.active").each(function (idx, ele) {
+                var tagCode = $(ele).attr("data-tag-code");
+                tagCodeList.push(tagCode);
+            });
 
-    xnote.openDialog("删除标签", html, ["确定删除", "取消"], function () {
-        var tagCodeList = [];
-        $(".tag.delete.active").each(function (idx, ele) {
-            var tagCode = $(ele).attr("data-tag-code");
-            tagCodeList.push(tagCode);
-        });
-
-        var deleteParams = {
-            tag_type: "group",
-            group_id: NoteView.groupId,
-            tag_code_list: JSON.stringify(tagCodeList),
-        };
-        xnote.http.post("/note/tag/delete", deleteParams, function (resp) {
-            if (!resp.code) {
-                xnote.alert(resp.message);
-            } else {
-                xnote.toast("删除成功,准备刷新...");
-                setTimeout(function () {
-                    window.location.reload()
-                }, 500);
-            }
-            refreshTagTop();
+            var deleteParams = {
+                tag_type: "group",
+                group_id: groupId,
+                tag_code_list: JSON.stringify(tagCodeList),
+            };
+            xnote.http.post("/note/tag/delete", deleteParams, function (resp) {
+                if (!resp.code) {
+                    xnote.alert(resp.message);
+                } else {
+                    xnote.toast("删除成功,准备刷新...");
+                    setTimeout(function () {
+                        window.location.reload()
+                    }, 500);
+                }
+                var params = {
+                    "group_id": groupId,
+                    "tag_type": "note",
+                    "tags": xnote.getUrlParam("tags", "[]")
+                };
+                xnote.http.get("/note/tag/suggest_html", params, function (fragHtml) {
+                    $(".tag-top").html(fragHtml);
+                });
+            });
         });
     });
 };

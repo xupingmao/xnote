@@ -261,6 +261,71 @@ class SuggestTagHandler:
         return webutil.SuccessResult(data=suggest_list)
 
 
+class TagTopHtmlHandler:
+    """标签管理顶部控制区 HTML 片段，替代前端 art-template 渲染"""
+
+    html = """
+<div class="card btn-line-height">
+    <div class="row">
+        <span>标签</span>
+        <a href="{{ linkOfTagAll }}" class="tag lightgray large {% if selectedTagsEmpty %}active{% end %}">全部</a>
+        {% for tag in tagList %}
+        <a class="tag lightgray meta large {{ tag.active }}" 
+            data-name="{{ tag.tag_name }}" onclick="onTagFilterClick(this);">{{ tag.tag_name }}({{ tag.amount }})</a>
+        {% end %}
+    </div>
+
+    <div class="row top-offset-1">
+        <button class="create-tag-btn btn-default">创建新标签</button>
+        <button class="delete-tag-btn btn danger" onclick="xnote.action.note.deleteTagMeta(xnote.note.tagList)">删除标签</button>
+    </div>
+</div>
+"""
+
+    @xauth.login_required()
+    def GET(self):
+        group_id = xutils.get_argument_int("group_id")
+        tag_type = xutils.get_argument_str("tag_type", "note")
+        selected_tags = json.loads(xutils.get_argument_str("tags", "[]"))
+        if not isinstance(selected_tags, list):
+            selected_tags = []
+
+        user_id = xauth.current_user_id()
+        tag_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id)
+        for tag in tag_list:
+            if tag.tag_name in selected_tags:
+                tag.active = "active"
+            else:
+                tag.active = ""
+
+        link_of_tag_all = xconfig.WebConfig.server_home + "/note/manage?parent_id=" + str(group_id)
+        return xtemplate.render_text(self.html,
+            tagList=tag_list,
+            selectedTagsEmpty=len(selected_tags) == 0,
+            linkOfTagAll=link_of_tag_all)
+
+
+class TagDeleteHtmlHandler:
+    """删除标签对话框 HTML 片段，替代前端 art-template 渲染"""
+
+    html = """
+<div class="card btn-line-height">
+    {% for tag in tagList %}
+    <a class="tag lightgray for-dialog large delete" data-tag-code="{{ tag.tag_code }}" onclick="xnote.action.note.onTagClick(this)">
+        {{ tag.tag_name }}
+    </a>
+    {% end %}
+</div>
+"""
+
+    @xauth.login_required()
+    def GET(self):
+        group_id = xutils.get_argument_int("group_id")
+        user_id = xauth.current_user_id()
+        tag_list = NoteTagInfoDao.list(user_id=user_id, group_id=group_id)
+        return xtemplate.render_text(self.html, tagList=tag_list)
+
+
 class TagListHtmlHandler:
 
     html = """
@@ -354,6 +419,8 @@ xurls = (
     r"/note/tag/bind", BindTagAjaxHandler,
     r"/note/tag/add_note_to_tag", AddNoteToTagHandler,
     r"/note/tag/suggest", SuggestTagHandler,
+    r"/note/tag/suggest_html", TagTopHtmlHandler,
+    r"/note/tag/delete_html", TagDeleteHtmlHandler,
 
     # 页面
     r"/note/taginfo", TagInfoHandler,
