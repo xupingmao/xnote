@@ -47,6 +47,11 @@ class TodoCreateHandler:
 
 
 class TodoUpdateHandler:
+    """部分更新待办：只更新传了非空值的字段，其余保持原值
+
+    约定：字符串字段用空串表示“未指定”，project_id 用 -1 表示“未指定”
+    （不能用 0，0 是合法的项目ID）
+    """
 
     @xauth.login_required()
     def POST(self):
@@ -56,24 +61,24 @@ class TodoUpdateHandler:
         if todo is None:
             return webutil.FailedResult(code="404", message="待办不存在")
 
-        content = webutil.get_argument("content", None)
-        priority = webutil.get_argument("priority", None)
-        project_id = webutil.get_argument("project_id", None, type=int)
-        begin_time = webutil.get_argument("begin_time", None)
-        end_time = webutil.get_argument("end_time", None)
-        tags = webutil.get_argument("tags", None)
+        content = xutils.get_argument_str("content", "")
+        priority = xutils.get_argument_str("priority", "")
+        project_id = xutils.get_argument_int("project_id", -1)
+        begin_time = xutils.get_argument_str("begin_time", "")
+        end_time = xutils.get_argument_str("end_time", "")
+        tags = xutils.get_argument_str("tags", "")
 
-        if content is not None:
+        if content != "":
             todo.content = content
-        if priority is not None:
+        if priority != "":
             todo.priority = priority
-        if project_id is not None:
+        if project_id >= 0:
             todo.project_id = project_id
-        if begin_time is not None:
+        if begin_time != "":
             todo.begin_time = parse_time_ms(begin_time)
-        if end_time is not None:
+        if end_time != "":
             todo.end_time = parse_time_ms(end_time)
-        if tags is not None:
+        if tags != "":
             todo.tags = tags
 
         TodoDao.update(todo)
@@ -163,6 +168,7 @@ class ProjectCreateHandler:
 
 
 class ProjectUpdateHandler:
+    """部分更新项目：只更新传了非空值的字段，其余保持原值"""
 
     @xauth.login_required()
     def POST(self):
@@ -172,14 +178,14 @@ class ProjectUpdateHandler:
         if project is None:
             return webutil.FailedResult(code="404", message="项目不存在")
 
-        name = xutils.get_argument_str("name", None)
-        desc = xutils.get_argument_str("desc", None)
-        status = xutils.get_argument_str("status", None)
-        if name is not None:
+        name = xutils.get_argument_str("name", "")
+        desc = xutils.get_argument_str("desc", "")
+        status = xutils.get_argument_str("status", "")
+        if name != "":
             project.name = name
-        if desc is not None:
+        if desc != "":
             project.desc = desc
-        if status is not None:
+        if status != "":
             project.status = status
 
         ProjectDao.update(project)

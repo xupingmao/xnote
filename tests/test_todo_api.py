@@ -54,6 +54,61 @@ class TestTodoApi(BaseTestCase):
             "/api/v1/todo/delete", method="POST", data=dict(task_id=todo_id))
         self.assertTrue(resp["success"])
 
+    def test_todo_update_keeps_unsent_fields(self):
+        # 部分更新：只传 content 时，未传的字段(所属项目/开始时间/标签)保持原值。
+        # 读回数据直接查 DAO，避免共享测试库的分页/排序干扰
+        from xnote_handlers.todo.dao import TodoDao
+        import xauth
+
+        pid = self.json_request_return_dict(
+            "/api/v1/project/create", method="POST", data=dict(name="部分更新项目"))["data"]
+        todo_id = self.json_request_return_dict(
+            "/api/v1/todo/create", method="POST",
+            data=dict(content="部分更新待办", project_id=str(pid),
+                      begin_time="2026-09-12", tags='["t1"]'))["data"]
+        user_id = xauth.current_user_id()
+        before = TodoDao.get_by_id(todo_id, user_id=user_id)
+        self.assertTrue(before.begin_time > 0)
+        self.assertEqual(before.tags, '["t1"]')
+
+        resp = self.json_request_return_dict(
+            "/api/v1/todo/update", method="POST",
+            data=dict(task_id=todo_id, content="部分更新待办改"))
+        self.assertTrue(resp["success"])
+
+        after = TodoDao.get_by_id(todo_id, user_id=user_id)
+        self.assertEqual(after.content, "部分更新待办改")
+        self.assertEqual(after.project_id, pid)             # 未传 project_id 不被清成 0
+        self.assertEqual(after.begin_time, before.begin_time)  # 未传 begin_time 不被清空
+        self.assertEqual(after.tags, '["t1"]')              # 未传 tags 不被清空
+
+    def test_project_update_keeps_unsent_fields(self):
+        # 部分更新项目：缺省参数不再抛 AssertionError，且不会清掉未传的字段
+        from xnote_handlers.todo.dao import ProjectDao
+        import xauth
+
+        pid = self.json_request_return_dict(
+            "/api/v1/project/create", method="POST",
+            data=dict(name="部分更新项目名", desc="原描述"))["data"]
+        user_id = xauth.current_user_id()
+
+        # 一个字段都不传：全部保持原值
+        resp = self.json_request_return_dict(
+            "/api/v1/project/update", method="POST", data=dict(project_id=pid))
+        self.assertTrue(resp["success"])
+        project = ProjectDao.get_by_id(pid, user_id=user_id)
+        self.assertEqual(project.name, "部分更新项目名")
+        self.assertEqual(project.desc, "原描述")
+
+        # 只传 desc：name 不变，desc 更新
+        resp = self.json_request_return_dict(
+            "/api/v1/project/update", method="POST",
+            data=dict(project_id=pid, desc="新描述"))
+        self.assertTrue(resp["success"])
+        project = ProjectDao.get_by_id(pid, user_id=user_id)
+        self.assertEqual(project.name, "部分更新项目名")
+        self.assertEqual(project.desc, "新描述")
+
     def test_project_crud(self):
         resp = self.json_request_return_dict(
             "/api/v1/project/create", method="POST", data=dict(name="项目X"))
