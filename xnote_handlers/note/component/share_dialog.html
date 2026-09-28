@@ -121,7 +121,8 @@ $(function () {
 <!-- 移动单个笔记 -->
 <div class="note-search-dialog hide">
     <div class="card pad10">
-        <div class="row">
+        <!-- 搜索框: 用紧凑搜索框容器, 输入框占满、按钮内嵌在右侧(透明图标), 与笔记搜索弹窗保持一致 -->
+        <div class="group-select-search">
             <input type="text" class="nav-search-input" placeholder="搜索笔记" onchange="onSearchInputChange(this)"/>
             <button class="nav-search-btn btn-default" onclick="onSearchBtnClick(this)">
                 <i class="fa fa-search"></i>
