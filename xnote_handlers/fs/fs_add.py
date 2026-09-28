@@ -12,7 +12,6 @@ from xnote.core import xconfig
 from xnote.core import xauth
 
 PLUGIN_TEMPLATE      = xconfig.load_config_as_text("./config/plugin/plugin.tpl.py")
-FORM_PLUGIN_TEMPLATE = xconfig.load_config_as_text("./config/plugin/form_plugin.tpl.py")
 
 class BaseAddFileHandler:
 
@@ -75,15 +74,9 @@ class AddPluginFileHandler(BaseAddFileHandler):
         code = code.replace("$date", xutils.format_date())
         xutils.writefile(path, code)
 
-class AddFormPluginFileHandler(AddPluginFileHandler):
-
-    def get_plugin_template(self):
-        return FORM_PLUGIN_TEMPLATE
-
 
 xurls = (
     r"/fs_api/add_dir", AddDirHandler,
     r"/fs_api/add_file", AddFileHandler,
     r"/fs_api/add_plugin", AddPluginFileHandler,
-    r"/fs_api/add_form_plugin", AddFormPluginFileHandler,
 )

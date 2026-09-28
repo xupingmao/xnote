@@ -14,21 +14,17 @@
 # @debug  # 开启调试
 # @icon-class fa-cube
 
-from xnote.core.xtemplate import BasePlugin
+from xnote.plugin import BasePluginV2
+from xnote.webui import TextContainer
 
-BODY_HTML = """
-<!-- 插件主体 -->
-<div class="card">
-    <p>Hello,World!</p>
-</div>
-"""
-
-class Main(BasePlugin):
+class Main(BasePluginV2):
 
     rows = 0  # 输入框的行数
     
     def handle(self, input):
-        self.writehtml(BODY_HTML)
+        container = TextContainer()
+        container.add_span("Hello, World")
+        self.add_component(container)
 
 
 if __name__ == "__main__":
