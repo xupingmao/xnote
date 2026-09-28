@@ -43,12 +43,6 @@
     {% set files = notes %}
     {% include note/component/note_list_component.html %}
 
-    {% if show_pagination %}
-        <div class="card">
-            {% include common/pagination.html %}
-        </div>
-    {% end %}
-
 {% end %}
 
 {% block body_right %}

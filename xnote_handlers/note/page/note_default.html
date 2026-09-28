@@ -15,11 +15,4 @@
 {% set files = notes %}
 {% include note/component/note_list_component.html %}
 
-{# 分页 #}
-{% if "page" in globals() %}
-    <div class="card">
-        {% include mod_pagenation.html %}
-    </div>
-{% end %}
-
 {% end %}
