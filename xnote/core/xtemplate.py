@@ -29,7 +29,7 @@ from xutils import dateutil, u
 from xutils import tojson
 from xutils import Storage
 from xutils import textutil
-from xutils.textutil import safe_str
+from xutils.textutil import safe_str, safe_bytes
 from urllib.parse import quote
 from typing import Union, List, TYPE_CHECKING
 
@@ -306,7 +306,7 @@ def _handle_kw(kw):
 
 
 @xutils.timeit_deco(name="Template.Render", logfile=True)
-def render(template_name, **kw):
+def render(template_name, **kw) -> bytes:
     _loader = XnoteLoader.get_instance()
     # 处理上下文渲染
     nkw = _handle_kw(kw)
@@ -320,7 +320,7 @@ def render(template_name, **kw):
         _input = web.input()
         if _input.get("_format") == "json":
             web.header("Content-Type", "application/json")
-            return tojson(nkw)
+            return safe_bytes(tojson(nkw))
     return _loader.load(template_name).generate(**nkw)
 
 def compile_template(text: str, name="<string>"):

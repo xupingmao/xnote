@@ -2,6 +2,7 @@ import typing
 
 from typing import List, Union
 from xutils.textutil import safe_str, safe_bytes
+from xutils.functions import uniq_list_add, list_remove
 
 MAX_DEPTH = 50
 
@@ -57,5 +58,15 @@ class BaseContainer(BaseComponent):
             out.append(item_html)
         out.append("""</div>""")
         return "".join(out)
+    
+    def add_css_class(self, css_class: str):
+        classes = self.css_class.split()
+        uniq_list_add(classes, css_class)
+        self.css_class = " ".join(classes)
+        
+    def remove_css_class(self, css_class: str):
+        classes = self.css_class.split()
+        list_remove(classes, css_class)
+        self.css_class = " ".join(classes)
 
 Div = BaseContainer

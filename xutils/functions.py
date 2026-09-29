@@ -4,7 +4,7 @@
 # @modified 2022/04/11 23:05:34
 import time
 import typing
-from typing import Union
+from typing import Union, Any
 from collections import deque
 from xutils.dateutil import format_time
 
@@ -222,15 +222,15 @@ class History(MemTable):
         self.data.append(found)
 
 
-def listremove(list: list, obj) -> None:
-    return remove_list_item(list, obj)
-
 def remove_list_item(list: list, obj):
     """删除列表中的所有元素,list自带的remove方法只删除一个，而且如果不包含目标对象会抛出异常"""
     if list is None:
         return
     while obj in list:
         list.remove(obj)
+        
+listremove = remove_list_item
+list_remove = remove_list_item
 
 def listmerge(list1, list2):
     """合并两个列表，过滤重复的值
@@ -259,7 +259,7 @@ def list_replace(lst: list, old, new):
         return item
     return list(map(replace_func, lst))
 
-def uniq_list_add(lst: list, item, ignore_empty=True):
+def uniq_list_add(lst: list, item: Any, ignore_empty=True):
     if ignore_empty and not item:
         return
     if item not in lst:

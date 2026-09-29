@@ -72,8 +72,8 @@
     margin-right: 4px;
 }
 
-.row-extra * {
-    margin-left: 4px;
+.row-extra button, .row-extra .btn {
+    margin-left: 8px;
 }
 
 .info-table {

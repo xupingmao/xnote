@@ -10,8 +10,25 @@ from xnote.plugin import TabBox
 from xnote_handlers.config import LinkConfig
 from .example_nav import get_example_tab
 from xnote.webui import TextLink, EditFormActionLink, ConfirmActionLink
-from xnote.webui import FormRowType
+from xnote.webui import FormRowType, Card
 from xnote.webui import ActionBar
+from xnote.plugin import PageEditForm
+from xnote.plugin.form_plugin import BaseFormPlugin
+from xnote.core import xauth
+from xutils.db.dbutil_cache import DatabaseCache
+
+# kv_cache 单例（延迟初始化，避免模块导入阶段触碰数据库表）
+_KV_CACHE = None
+
+def get_kv_cache():
+    global _KV_CACHE
+    if _KV_CACHE is None:
+        _KV_CACHE = DatabaseCache()
+    return _KV_CACHE
+
+# 缓存有效期：30 天（编辑保存时重新 put 即续期）
+TTL_SECONDS = 30 * 24 * 3600
+
 
 class ListPluginHandler(BaseListPlugin):
     title = "ListPlugin示例"
@@ -28,7 +45,38 @@ class ListPluginHandler(BaseListPlugin):
 </div>
 """
 
+    # ------------------------------------------------------------------
+    # kv_cache 持久化（列表数据，一个用户一条大 JSON）
+    # ------------------------------------------------------------------
+    KV_PREFIX = "examples_list"
+
+    def _kv_key(self):
+        return f"{self.KV_PREFIX}:{xauth.current_user_id()}"
+
+    def _load_records(self):
+        data = get_kv_cache().get(self._kv_key(), default_value={"records": []})
+        if not isinstance(data, dict):
+            return []
+        return data.get("records", []) or []
+
+    def _save_records(self, records):
+        # 编辑保存时重新 put，expire_time 刷新即续期
+        get_kv_cache().put(self._kv_key(), {"records": records}, expire=TTL_SECONDS)
+
+    def _seed_if_empty(self):
+        if len(self._load_records()) > 0:
+            return
+        seed = [
+            {"id": 1, "title": "标题 - row1", "content": "说明XXX", "date": "2020-01-01"},
+            {"id": 2, "title": "标题 - row2", "content": "说明YYY", "date": "2020-03-12"},
+            {"id": 3, "title": "标题 - row3", "content": "说明ZZZ", "date": "2020-05-20"},
+        ]
+        self._save_records(seed)
+
     def handle_page(self):
+        self._seed_if_empty()
+        records = self._load_records()
+
         title_width = "60px"
         tab1 = TabBox(tab_key="list_key", css_class="btn-style", title="筛选1", tab_default="all")
         tab1.add_item(title="全部", value="all")
@@ -41,77 +89,149 @@ class ListPluginHandler(BaseListPlugin):
         tab2.add_item(title="选项A", value="op1")
         tab2.add_item(title="选项B", value="op2")
         tab2.title_width = title_width
-    
+
         list_view = self.create_list_view()
-        list_view.action_bar.add_span("操作栏")
-        list_view.action_bar.add_edit_button("操作1")
-        list_view.action_bar.add_edit_button("操作2")
-        
-        action_bar2 = ActionBar()
-        action_bar2.add_span("操作栏2")
-        action_bar2.extra.add_edit_button("操作1")
-        action_bar2.extra.add_confirm_button("操作2")
-        
-        list_view.add(action_bar2)
-        
+        list_view.action_bar.add_css_class("border-b")
+        list_view.action_bar.add_span("操作栏", css_class="pl-1 bold pr-1")
+        list_view.action_bar.add_link(text = "新增记录", href="/examples/list_plugin/edit", css_class="btn")
+        list_view.action_bar.extra.add_link(text = "新增记录", href="/examples/list_plugin/edit", css_class="btn")
+        list_view.action_bar.extra.add_confirm_button(text="帮助", message="仅用于占位", css_class="btn-default")
+
         now = dateutil.format_date()
-        
-        for i in range(1, 6):
-            text = f"标题 - row{i}"
+
+        for rec in records:
+            text = rec.get("title", "")
             list_item = ListViewItem(
-                badge_info="角标信息",
                 icon_class="fa fa-file-text-o",
                 show_chevron_right=True)
+            
             list_item.add_span(text=text, css_class="bold")
             list_item.add_br()
-            list_item.add_span("说明XXX", css_class="gray")
-            list_item.add_link(text=" 详情", href="")
+            list_item.add_span(rec.get("content", ""), css_class="gray")
             list_item.add_br()
-            
-            # 新行的第一个分隔符会自动跳过
-            list_item.add_item_sep()
-            list_item.add_span(f"更新于 {now}", css_style="color:#999;")
+
+            list_item.add_span(f"更新于 {rec.get('date', now)}", css_style="color:#999;")
             list_item.add_item_sep()
             list_item.add_span("标签", css_class="gray")
-            
-            quote_text = xutils.quote(text)
-            list_item.extra.add(EditFormActionLink(text="编辑", url=f"?action=edit&value={quote_text}"))
-            list_item.extra.add(ConfirmActionLink(text="删除", url="?action=delete", msg=f"确认删除[{text}]吗?", css_class="red"))
-            
+
+            # 编辑：普通链接跳转（导航到 FormPlugin 编辑页）
+            list_item.extra.add_link(text="编辑", href="/examples/list_plugin/edit?id=%s" % rec.get("id"), css_class="btn btn-default")
+            # 删除：确认后调用 FormPlugin（破坏性操作链接用红色，见 AGENTS.md）
+            list_item.extra.add_confirm_button(
+                text="删除",
+                url="/examples/list_plugin/edit?action=delete&id=%s" % rec.get("id"),
+                message=f"确认删除[{text}]吗?",
+                css_class="btn danger")
+
             list_view.add_item(list_item)
-            
+
         page = xutils.get_argument_int("page", 1)
 
         # 分页直接设置到列表组件上, 列表底部会自动渲染分页
-        list_view.set_pagination(page=page, page_total=100, page_size=20)
+        page_total = max(1, (len(records) + 19) // 20)
+        list_view.set_pagination(page=page, page_total=page_total, page_size=20)
 
         kw = Storage()
         kw.list_view = list_view
 
         self.writehtml(
-            self.tab_html, 
-            tab1 = tab1,
-            tab2 = tab2,
-            example_tab = get_example_tab(tab_default="list_plugin"))
+            self.tab_html,
+            tab1=tab1,
+            tab2=tab2,
+            example_tab=get_example_tab(tab_default="list_plugin"))
         return self.response_page(**kw)
-    
+
+
+class ListPluginFormHandler(BaseFormPlugin):
+    """ListPlugin 示例的编辑页（基于 BaseFormPlugin，纯组件渲染）"""
+
+    title = "列表记录编辑"
+    parent_link = LinkConfig.develop_index
+    show_aside = False
+
+    KV_PREFIX = "examples_list"
+
+    def _kv_key(self):
+        return f"{self.KV_PREFIX}:{xauth.current_user_id()}"
+
+    def _load_records(self):
+        data = get_kv_cache().get(self._kv_key(), default_value={"records": []})
+        if not isinstance(data, dict):
+            return []
+        return data.get("records", []) or []
+
+    def _save_records(self, records):
+        # 编辑保存时重新 put，expire_time 刷新即续期
+        get_kv_cache().put(self._kv_key(), {"records": records}, expire=TTL_SECONDS)
+
+    def _find_record(self, record_id):
+        if not record_id:
+            return {}
+        for rec in self._load_records():
+            if str(rec.get("id")) == str(record_id):
+                return rec
+        return {}
+
     def handle_edit(self):
-        value = xutils.get_argument_str("value")
-        form = self.create_form()
-        form.add_row("id", "id", css_class="hide")
-        form.add_row("只读属性", "readonly_attr", value="test", readonly=True)
-        
-        row = form.add_select("类型", "type")
-        row.add_option("类型1", "1")
-        row.add_option("类型2", "2")
+        record_id = xutils.get_argument_str("id")
+        record = self._find_record(record_id)
 
-        form.add_date_input("日期", "date")
-        form.add_row("内容", "content", type=FormRowType.textarea, value=value)
+        form = PageEditForm()
+        form.path = "/examples/list_plugin/edit"
+        form.model_name = "list_plugin_example"
+        form.add_row("id", "id", css_class="hide", value=record_id)
+        form.add_row("标题", "title", value=record.get("title", ""))
+        form.add_date_input("日期", "date", value=record.get("date", ""))
+        form.add_row("内容", "content", type=FormRowType.textarea, value=record.get("content", ""))
 
-        kw = Storage()
-        kw.form = form
-        return self.response_form(**kw)
-    
+        if record_id:
+            form.delete_url = "/examples/list_plugin/edit?action=delete&id=%s" % record_id
+        else:
+            form.delete_url = "/examples/list_plugin/edit?action=delete"
+        form.delete_reload_href = "/examples/list_plugin"
+
+        self.render_form(form)
+
+    def handle_save(self):
+        data = self.get_data_dict()
+        records = self._load_records()
+        record_id = data.get("id", "")
+
+        new_record = {
+            "id": record_id,
+            "title": data.get("title", ""),
+            "date": data.get("date", ""),
+            "content": data.get("content", ""),
+        }
+
+        if record_id:
+            for rec in records:
+                if str(rec.get("id")) == str(record_id):
+                    rec.update(new_record)
+                    break
+        else:
+            new_id = max([int(r.get("id", 0)) for r in records], default=0) + 1
+            new_record["id"] = new_id
+            records.append(new_record)
+
+        self._save_records(records)
+        return webutil.SuccessResult(message="保存成功", redirect_url="/examples/list_plugin")
+
+    def handle_delete(self):
+        record_id = xutils.get_argument_str("id")
+        if not record_id:
+            # 列表的确认删除是 GET（无 data 体），编辑页表单删除带 data 体
+            try:
+                data = self.get_data_dict()
+                record_id = data.get("id", "")
+            except Exception:
+                record_id = ""
+        if not record_id:
+            return webutil.FailedResult(code="400", message="缺少记录ID")
+
+        records = [r for r in self._load_records() if str(r.get("id")) != str(record_id)]
+        self._save_records(records)
+        return webutil.SuccessResult(message="删除成功")
 
 
 class ListViewExampleHandler(BasePlugin):
@@ -160,7 +280,7 @@ class ListViewExampleHandler(BasePlugin):
                 item.tags.append(TextTag(text="标签", css_class="lightblue"))
                 item.tags.append(TextTag(text="标签2", css_class="orange"))
             item.action_btn = ConfirmButton(text="删除", url="?action=delete", message=f"确认删除[{text}]吗", css_class="btn danger")
-            
+
             item_list.add_item(item)
 
             item2 = copy.deepcopy(item)
@@ -234,5 +354,7 @@ class ListViewExampleHandler(BasePlugin):
 
 xurls = (
     r"/examples/list_view", ListViewExampleHandler,
+    # 更具体的子路由放前面，避免被 /examples/list_plugin 的(.*)前缀匹配抢先
+    r"/examples/list_plugin/edit", ListPluginFormHandler,
     r"/examples/list_plugin", ListPluginHandler,
 )

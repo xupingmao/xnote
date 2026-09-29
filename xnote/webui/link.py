@@ -46,7 +46,7 @@ class ActionLink(TextLink):
             onclick_attr = f'onclick="{self.onclick}"'
 
         return f"""
-[<a class="{self.css_class}" {onclick_attr} {href_attr} {data_attrs}>{text}</a>]
+[<a class="action-link {self.css_class}" {onclick_attr} {href_attr} {data_attrs}>{text}</a>]
 """
 
 class EditFormActionLink(ActionLink):

@@ -33,6 +33,9 @@ class BaseTablePlugin(BasePluginV2):
 {% init page_max = 0 %}
 {% init page_total = 0 %}
 {% init table = None %}
+<!-- select2 组件 -->
+{% include common/script/load_select2.html %}
+{% include common/script/load_laydate.html %}
 
 {% if table %}
 <div class="card">

@@ -12,6 +12,7 @@
 import typing
 import itertools
 from xutils import Storage
+from xutils.textutil import escape_html
 from xnote.core import xtemplate
 from xnote.webui.base import BaseComponent
 from xnote.webui._tag_select import TagSelect
@@ -103,6 +104,32 @@ class FormRow(BaseComponent):
 """
     _select_template = xtemplate.compile_template(_select_html, name="plugin.form.row.select")
 
+    _upload_html = """
+<div class="form-upload-row" data-upload-kind="{{row.type}}" data-field="{{row.field}}" data-picker="#filePicker{{row.id}}">
+    <input type="hidden" name="{{row.field}}" value="{{row.value}}" />
+    <div class="form-upload-control">
+        <input type="file" id="filePicker{{row.id}}" class="hide" {% if row.accept %}accept="{{row.accept}}"{% end %} {% if row.multiple %}multiple{% end %} />
+        <button type="button" class="btn btn-default" onclick="xnote.formUpload.pick('#filePicker{{row.id}}')">{{ '添加图片' if row.type == 'image' else '添加附件' }}</button>
+    </div>
+    <div class="form-upload-preview">
+        {% for item in row.value_list %}
+            {% if row.type == "image" %}
+            <div class="form-upload-thumb" data-src="{{item.webpath}}">
+                <img src="{{item.webpath}}?mode=thumbnail" data-src="{{item.webpath}}" />
+                <a class="form-upload-del" onclick="xnote.formUpload.removeItem(this)">删除</a>
+            </div>
+            {% else %}
+            <div class="form-upload-file" data-src="{{item.webpath}}">
+                <a href="{{item.webpath}}" target="_blank">{{item.name}}</a>
+                <a class="form-upload-del" onclick="xnote.formUpload.removeItem(this)">删除</a>
+            </div>
+            {% end %}
+        {% end %}
+    </div>
+</div>
+"""
+    _upload_template = xtemplate.compile_template(_upload_html, name="plugin.form.row.upload")
+
     """数据行"""
     def __init__(self):
         self.id = ""
@@ -151,22 +178,91 @@ class FormRow(BaseComponent):
         return result
     
     def render(self):
-        if self.type == FormRowType.select:
+        """渲染整行内容（标题 + 值），供 form.html 的 {% render row %} 调用。
+
+        说明：原先 form.html 模板里按类型逐个 if 分支渲染行内的 value，现在统一收敛到这里；
+        value 部分统一包进 <div class="form-row-value"> 容器，便于和 .query-form 等样式对齐。
+        """
+        out = []
+        if self.title:
+            out.append("<label>%s</label>" % escape_html(str(self.title)))
+
+        # 子标题（heading）只有标题，没有可编辑的值
+        if self.type == FormRowType.heading:
+            return "".join(out)
+
+        out.append('<div class="form-row-value">')
+        value_html = self.render_value()
+        if isinstance(value_html, bytes):
+            value_html = value_html.decode("utf-8")
+        out.append(value_html)
+        out.append('</div>')
+        return "".join(out)
+
+    def render_value(self):
+        """渲染行的 value 部分（不含标题），结果会被包进 .form-row-value 容器。"""
+        t = self.type
+
+        if t == FormRowType.input:
+            return ('<input type="text" name="%s" class="form-row-value" placeholder="%s" value="%s" %s>'
+                    % (escape_html(self.field), escape_html(self.placeholder),
+                       escape_html(str(self.value)), self.html_attr))
+
+        if t == FormRowType.textarea:
+            return ('<textarea name="%s" class="form-row-value" placeholder="%s" %s>%s</textarea>'
+                    % (escape_html(self.field), escape_html(self.placeholder),
+                       self.html_attr, escape_html(str(self.value))))
+
+        if t == FormRowType.select:
+            # select 的 value 渲染复用模板（自带 form-row-value class）
             return self.render_select()
-        
-        if self.type == FormRowType.tag_select:
+
+        if t == FormRowType.tag_select:
             return self.render_tag_select()
 
-        if self.type == FormRowType.switch:
+        if t == FormRowType.switch:
             return self.render_switch()
 
-        if self.type == FormRowType.tab_box:
+        if t == FormRowType.tab_box:
             return self.render_tab_box()
 
+        if t == FormRowType.date:
+            return ('<input id="%s" name="%s" class="form-row-value form-date" '
+                    'data-date-type="%s" placeholder="%s" value="%s" autocomplete="off">'
+                    % (escape_html(self.id), escape_html(self.field),
+                       escape_html(self.date_type), escape_html(self.placeholder),
+                       escape_html(str(self.value))))
+
+        if t == FormRowType.html:
+            return self._render_html_value()
+
+        if t == FormRowType.image or t == FormRowType.file:
+            return self._render_upload_value()
+
         return ""
+
+    def _render_html_value(self):
+        """html 类型：原样输出（对应模板的 {% raw row.html %}）"""
+        html = self.html
+        if isinstance(html, bytes):
+            html = html.decode("utf-8")
+        return str(html)
+
+    def _render_upload_value(self):
+        """图片/文件上传类型的 value 渲染（对应模板里 form-upload-row 那段）
+
+        复用编译后的上传模板，由模板引擎自动对变量做 HTML 转义。
+        """
+        result = self._upload_template.generate(row=self)
+        if isinstance(result, bytes):
+            result = result.decode("utf-8")
+        return result
             
     def render_select(self):
-        return self._select_template.generate(row = self)
+        result = self._select_template.generate(row = self)
+        if isinstance(result, bytes):
+            result = result.decode("utf-8")
+        return result
 
     def render_tag_select(self):
         """渲染 tag 风格选择器，复用通用 TagSelect 组件。
@@ -473,7 +569,19 @@ class DataForm(BaseComponent):
     @property
     def is_query_form(self):
         return self.form_type == FormType.query
+    
+    def _has_type(self, target_type: str):
+        for item in self.rows:
+            if item.type == target_type:
+                return True
+        return False
+    
+    def has_date_input(self):
+        return self._has_type(FormRowType.date)
 
+    def has_select_input(self):
+        return self._has_type(FormRowType.select)
+    
 class QueryForm(DataForm):
     form_type = FormType.query
     form_type_css = "query-form"

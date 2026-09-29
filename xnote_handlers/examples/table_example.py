@@ -10,16 +10,38 @@ from xnote.core import xmanager
 from xnote.core import xconfig
 from xnote.plugin.table_plugin import BaseTablePlugin, BasePlugin
 from xnote.plugin import DataTable, TableActionType, TabBox, QueryForm, TabTable, DataForm, PageEditForm, DialogForm, EditFormButton
-from xnote.webui import FormRowType
+from xnote.plugin.form_plugin import BaseFormPlugin
+from xnote.webui import Card, FormRowType
 from xnote.plugin.table import InfoTable, InfoItem, ActionBar, TableRowType
 from xnote.webui import ListView, ListItem, ConfirmButton, TextTag
 from xutils import textutil
 from xutils import webutil
 from xutils.number_util import IntCounter
+from xutils.db.dbutil_cache import DatabaseCache
 from xnote_handlers.config import LinkConfig
 from .example_nav import get_example_tab
 
 # 注意：from .example_handler import get_example_tab 已迁移到 example_nav.py
+
+# kv_cache 单例（延迟初始化，避免模块导入阶段触碰数据库表）
+_KV_CACHE = None
+
+def get_kv_cache():
+    global _KV_CACHE
+    if _KV_CACHE is None:
+        _KV_CACHE = DatabaseCache()
+    return _KV_CACHE
+
+# 缓存有效期：30 天（编辑保存时重新 put 即续期）
+TTL_SECONDS = 30 * 24 * 3600
+
+
+def _type_info(type_code):
+    """类型编码 -> (展示名, 配色class)"""
+    return {
+        "1": ("类型1", "red"),
+        "2": ("类型2", "green"),
+    }.get(type_code, ("类型1", "red"))
 
 
 class TableExampleHandler(BaseTablePlugin):
@@ -49,7 +71,7 @@ class TableExampleHandler(BaseTablePlugin):
 </div>
 
 <div class="card">
-    {% include common/table/table_v2.html %}
+    {% include common/table/table.html %}
 </div>
 
 <div class="card">
@@ -68,32 +90,75 @@ class TableExampleHandler(BaseTablePlugin):
 
     tab_title_width = "120px"
 
+    # ------------------------------------------------------------------
+    # kv_cache 持久化（主数据表，一个用户一条大 JSON）
+    # ------------------------------------------------------------------
+    KV_PREFIX = "examples_table"
+
+    def _kv_key(self):
+        return f"{self.KV_PREFIX}:{xauth.current_user_id()}"
+
+    def _load_records(self):
+        data = get_kv_cache().get(self._kv_key(), default_value={"records": []})
+        if not isinstance(data, dict):
+            return []
+        return data.get("records", []) or []
+
+    def _save_records(self, records):
+        # 编辑保存时重新 put，expire_time 刷新即续期
+        get_kv_cache().put(self._kv_key(), {"records": records}, expire=TTL_SECONDS)
+
+    def _seed_if_empty(self):
+        """首次访问（缓存为空）时写入示例数据"""
+        if len(self._load_records()) > 0:
+            return
+        seed = [
+            {"id": 1, "type": "1", "title": "测试", "date": "2020-01-01", "content": "测试内容"},
+            {"id": 2, "type": "2", "title": "示例记录", "date": "2020-06-15", "content": "这是一条示例记录"},
+        ]
+        for r in seed:
+            name, css_class = _type_info(r["type"])
+            r["type_name"] = name
+            r["type_class"] = css_class
+        self._save_records(seed)
+
     def handle_page(self):
+        self._seed_if_empty()
+        records = self._load_records()
+
         table = DataTable()
-        table.title = "表格1-自动宽度"
+        table.title = "表格1-自动宽度（持久化）"
         table.add_head("类型", "type", css_class_field="type_class")
         table.add_head("标题", "title", link_field="view_url")
         table.add_head("日期", "date")
         table.add_head("内容", "content")
 
-        table.add_action("编辑", link_field="edit_url", type=TableActionType.edit_form)
+        # 编辑：普通链接跳转（导航到 FormPlugin 编辑页）；删除：确认后调用 FormPlugin
+        table.add_action("编辑", link_field="edit_url", type=TableActionType.link, css_class="btn default")
         table.add_action("删除", link_field="delete_url", type=TableActionType.confirm,
                          msg_field="delete_msg", css_class="btn danger")
 
-        row = {}
-        row["type"] = "类型1"
-        row["title"] = "测试"
-        row["type_class"] = "red"
-        row["date"] = "2020-01-01"
-        row["content"] = "测试内容"
-        row["view_url"] = "/note/index"
-        row["edit_url"] = "?action=edit"
-        row["delete_url"] = "?action=delete"
-        row["delete_msg"] = "确认删除记录吗?"
-        table.add_row(row)
+        # 操作栏：新建记录（导航到 FormPlugin 编辑页）
+        table.action_bar.add_span("FormPlugin编辑页", css_class="pl-1 bold")
+        table.action_bar.add_link("新建记录", "/examples/table/edit", css_class="btn", float_right=True)
+
+        for rec in records:
+            row = {}
+            row["id"] = rec.get("id")
+            row["type"] = rec.get("type_name", _type_info(rec.get("type", "1"))[0])
+            row["type_class"] = rec.get("type_class", _type_info(rec.get("type", "1"))[1])
+            row["title"] = rec.get("title", "")
+            row["date"] = rec.get("date", "")
+            row["content"] = rec.get("content", "")
+            row["view_url"] = "/note/index"
+            row["edit_url"] = "/examples/table/edit?id=%s" % rec.get("id")
+            row["delete_url"] = "/examples/table/edit?action=delete&id=%s" % rec.get("id")
+            row["delete_msg"] = "确认删除记录[%s]吗?" % rec.get("title", "")
+            table.add_row(row)
 
         # 分页直接设置到表格组件上, 表格底部会自动渲染分页
-        table.set_pagination(page=1, page_total=100, page_size=20)
+        page_total = max(1, (len(records) + 19) // 20)
+        table.set_pagination(page=1, page_total=page_total, page_size=20)
 
         kw = Storage()
         kw.table = table
@@ -109,6 +174,7 @@ class TableExampleHandler(BaseTablePlugin):
 
         return self.response_page(**kw)
 
+    # 保留：弹窗表单示例（供 weight_table / empty_table 的「新建」按钮演示用）
     def handle_edit(self):
         self.heading_count.add(1)
         show_heading = xutils.get_argument_bool("show_heading", True)
@@ -192,7 +258,6 @@ class TableExampleHandler(BaseTablePlugin):
 
         return form
 
-
     def get_weight_table(self):
         table = DataTable()
         table.title = "表格2-权重宽度"
@@ -270,6 +335,111 @@ class TableExampleHandler(BaseTablePlugin):
         return table
 
 
+class TableExampleFormHandler(BaseFormPlugin):
+    """表格示例的编辑页（基于 BaseFormPlugin，纯组件渲染）"""
+
+    title = "表格记录编辑"
+    parent_link = LinkConfig.develop_index
+    show_aside = False
+
+    KV_PREFIX = "examples_table"
+
+    def _kv_key(self):
+        return f"{self.KV_PREFIX}:{xauth.current_user_id()}"
+
+    def _load_records(self):
+        data = get_kv_cache().get(self._kv_key(), default_value={"records": []})
+        if not isinstance(data, dict):
+            return []
+        return data.get("records", []) or []
+
+    def _save_records(self, records):
+        # 编辑保存时重新 put，expire_time 刷新即续期
+        get_kv_cache().put(self._kv_key(), {"records": records}, expire=TTL_SECONDS)
+
+    def _find_record(self, record_id):
+        if not record_id:
+            return {}
+        for rec in self._load_records():
+            if str(rec.get("id")) == str(record_id):
+                return rec
+        return {}
+
+    def handle_edit(self):
+        record_id = xutils.get_argument_str("id")
+        record = self._find_record(record_id)
+
+        # 页面内编辑表单（带保存/删除按钮），提交到当前路由的 save/delete
+        form = PageEditForm()
+        form.path = "/examples/table/edit"
+        form.model_name = "table_example"
+        form.add_row("id", "id", css_class="hide", value=record_id)
+        form.add_row("只读属性", "readonly_attr", value="test", readonly=True)
+
+        row = form.add_select("类型", "type", value=record.get("type", "1"))
+        row.add_option("类型1", "1")
+        row.add_option("类型2", "2")
+
+        form.add_row("标题", "title", value=record.get("title", ""))
+        form.add_date_input("日期", "date", value=record.get("date", ""))
+        form.add_row("内容", "content", type=FormRowType.textarea, value=record.get("content", ""))
+
+        if record_id:
+            form.delete_url = "/examples/table/edit?action=delete&id=%s" % record_id
+        else:
+            form.delete_url = "/examples/table/edit?action=delete"
+        form.delete_reload_href = "/examples/table"
+
+        self.render_form(form)
+
+    def handle_save(self):
+        data = self.get_data_dict()
+        records = self._load_records()
+        record_id = data.get("id", "")
+
+        name, css_class = _type_info(data.get("type", "1"))
+        new_record = {
+            "id": record_id,
+            "type": data.get("type", "1"),
+            "type_name": name,
+            "type_class": css_class,
+            "title": data.get("title", ""),
+            "date": data.get("date", ""),
+            "content": data.get("content", ""),
+        }
+
+        if record_id:
+            for rec in records:
+                if str(rec.get("id")) == str(record_id):
+                    rec.update(new_record)
+                    break
+        else:
+            new_id = max([int(r.get("id", 0)) for r in records], default=0) + 1
+            new_record["id"] = new_id
+            records.append(new_record)
+
+        self._save_records(records)
+        return webutil.SuccessResult(message="保存成功", redirect_url="/examples/table")
+
+    def handle_delete(self):
+        record_id = xutils.get_argument_str("id")
+        if not record_id:
+            # 列表/表格的确认删除是 GET（无 data 体），编辑页表单删除带 data 体
+            try:
+                data = self.get_data_dict()
+                record_id = data.get("id", "")
+            except Exception:
+                record_id = ""
+        if not record_id:
+            return webutil.FailedResult(code="400", message="缺少记录ID")
+
+        records = [r for r in self._load_records() if str(r.get("id")) != str(record_id)]
+        self._save_records(records)
+        return webutil.SuccessResult(message="删除成功")
+
+
 xurls = (
+    # 更具体的子路由放前面，避免被 /examples/table 的(.*)前缀匹配抢先
+    r"/examples/table/edit", TableExampleFormHandler,
     r"/examples/table", TableExampleHandler,
 )

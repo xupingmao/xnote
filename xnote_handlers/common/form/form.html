@@ -5,58 +5,7 @@
     <form id="xnoteForm{{_xnote_form.id}}" class="x-form" method="{{_xnote_form.form_method}}">
         {% for row in _xnote_form.rows %}
             <div class="form-row {{row.css_class}}">
-                {% if row.title %}
-                    <label>{{row.title}}</label>
-                {% end %}
-                {% if row.type == "input" %}
-                    <input type="text" name="{{row.field}}" class="form-row-value" placeholder="{{row.placeholder}}" value="{{row.value}}" {% raw row.html_attr %}>
-                {% end %}
-                {% if row.type == "textarea" %}
-                    <textarea name="{{row.field}}" class="form-row-value" placeholder="{{row.placeholder}}" {% raw row.html_attr %}>{{row.value}}</textarea>
-                {% end %}
-                {% if row.type == "select" %}
-                    {% render row %}
-                {% end %}
-                {% if row.type == "tag_select" %}
-                    {% render row %}
-                {% end %}
-                {% if row.type == "switch" %}
-                    {% render row %}
-                {% end %}
-                {% if row.type == "tab_box" %}
-                    {% render row %}
-                {% end %}
-                {% if row.type == "date" %}
-                    <input id="{{row.id}}" name="{{row.field}}" class="form-row-value form-date" data-date-type="{{row.date_type}}" 
-                        placeholder="{{row.placeholder}}" value="{{row.value}}" autocomplete="off">
-                {% end %}
-                {% if row.type == "html" %}
-                    {% raw row.html %}
-                {% end %}
-                {% if row.type == "image" or row.type == "file" %}
-                    <div class="form-upload-row" data-upload-kind="{{row.type}}" data-field="{{row.field}}" data-picker="#filePicker{{row.id}}">
-                        <input type="hidden" name="{{row.field}}" value="{{row.value}}" />
-                        <div class="form-upload-control">
-                            <input type="file" id="filePicker{{row.id}}" class="hide" {% if row.accept %}accept="{{row.accept}}"{% end %} {% if row.multiple %}multiple{% end %} />
-                            <button type="button" class="btn btn-default" onclick="xnote.formUpload.pick('#filePicker{{row.id}}')">{{ '添加图片' if row.type == 'image' else '添加附件' }}</button>
-                        </div>
-                        <div class="form-upload-preview">
-                            {% for item in row.value_list %}
-                                {% if row.type == "image" %}
-                                <div class="form-upload-thumb" data-src="{{item.webpath}}">
-                                    <img src="{{item.webpath}}?mode=thumbnail" data-src="{{item.webpath}}" />
-                                    <a class="form-upload-del" onclick="xnote.formUpload.removeItem(this)">删除</a>
-                                </div>
-                                {% else %}
-                                <div class="form-upload-file" data-src="{{item.webpath}}">
-                                    <a href="{{item.webpath}}" target="_blank">{{item.name}}</a>
-                                    <a class="form-upload-del" onclick="xnote.formUpload.removeItem(this)">删除</a>
-                                </div>
-                                {% end %}
-                                {% end %}
-                            </div>
-                    </div>
-                {% end %}
+                {% render row %}
             </div>
         {% end %}
     </form>
