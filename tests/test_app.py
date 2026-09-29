@@ -444,19 +444,32 @@ class Main(BasePlugin):
         handler.do_get("test", "127.0.0.1")
 
     def test_ext_handler(self):
+        # FileConfig 是进程级全局配置, 改了必须还原, 否则污染后续所有用例
         dirname = os.path.dirname(__file__)
-        xconfig.FileConfig.ext_handlers_dir = os.path.join(dirname, "ext_handlers")
-        xtemplate.init()
-        text = xtemplate.render("$ext/test.html")
-        assert text.strip() == b"hello"
+        old_dir = xconfig.FileConfig.ext_handlers_dir
+        try:
+            xconfig.FileConfig.ext_handlers_dir = os.path.join(dirname, "ext_handlers")
+            xtemplate.init()
+            text = xtemplate.render("$ext/test.html")
+            assert text.strip() == b"hello"
+        finally:
+            xconfig.FileConfig.ext_handlers_dir = old_dir
+            xtemplate.init()
 
 
     def test_plugin_handler(self):
+        # 同上: plugins_dir 还参与插件的相对路径计算(load_plugin_file),
+        # 不还原会让后续用例注册的插件名变成乱码(如 pts/plugins/xxx.py)
         dirname = os.path.dirname(__file__)
-        xconfig.FileConfig.plugins_dir = os.path.join(dirname, "plugins")
-        xtemplate.init()
-        text = xtemplate.render("$plugin/test_plugin.html")
-        assert text.strip() == b"plugin"
+        old_dir = xconfig.FileConfig.plugins_dir
+        try:
+            xconfig.FileConfig.plugins_dir = os.path.join(dirname, "plugins")
+            xtemplate.init()
+            text = xtemplate.render("$plugin/test_plugin.html")
+            assert text.strip() == b"plugin"
+        finally:
+            xconfig.FileConfig.plugins_dir = old_dir
+            xtemplate.init()
 
     def test_plugin_upload(self):
         user = xauth.get_user_by_name("admin")
