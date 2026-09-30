@@ -108,8 +108,9 @@ class DictHandler(BaseListPlugin):
             return ""
         
         server_home = xconfig.WebConfig.server_home
+        redirect_url = webutil.get_request_url()
         return f"""
-<a class="btn btn-default" href="{server_home}/dict/list?action=page_edit&dict_type={self.dict_type}">新增</a>
+<a class="btn btn-default" href="{server_home}/dict/list?action=page_edit&dict_type={self.dict_type}&redirect_url={quote(redirect_url)}">新增</a>
 """
     
     def get_dict_type(self):
@@ -209,7 +210,7 @@ class DictHandler(BaseListPlugin):
         for type_info in DictTypeEnum.enums():
             row.add_option(title=type_info.name, value=type_info.value)
 
-        dict_form.add_row(title="名称", field="key", value=item.key, readonly=True)
+        dict_form.add_row(title="名称", field="key", value=item.key, readonly=item.key != "")
         dict_form.add_textarea(title="解释", field="value", value=item.value)
 
         if not can_edit_dict(dict_type):
