@@ -21,6 +21,7 @@ from xnote.webui import PageEditForm
 from . import dao_comment as comment_dao
 from .dao_comment import get_comment, delete_comment, CommentDao
 from . import COMMENT_TYPE, to_task_id
+from xnote_handlers.config import AsideConfig
 
 
 class CommentFormPlugin(BaseFormPlugin):
@@ -61,6 +62,8 @@ class CommentFormPlugin(BaseFormPlugin):
     def handle_edit(self):
         comment_id = xutils.get_argument_int("comment_id")
         redirect_url = xutils.get_argument_str("redirect_url")
+        
+        self.update_aside(AsideConfig.default_aside_html)
 
         user_name = xauth.current_name()
         comment = get_comment(comment_id)
