@@ -122,15 +122,6 @@ class _TodoListPlugin(BaseListPlugin):
     {% render list_view %}
 </div>
 {% end %}
-
-<script type="text/javascript">
-// 打开待办评论弹窗（iframe 加载评论页面）
-xnote.todo = xnote.todo || {};
-xnote.todo.openCommentDialog = function (target) {
-    var url = $(target).attr("data-url");
-    xnote.showIframeDialog("{{T('评论')}}", url);
-};
-</script>
 """
 
 
@@ -343,9 +334,9 @@ class TaskListPlugin(_TodoListPlugin):
             comment_text = T("评论")
             if task.comment_count > 0:
                 comment_text = T("评论(%s)") % task.comment_count
+            # 评论入口改为跳转待办详情页（详情页内嵌评论列表），不再弹窗
             action_box.add(ActionLink(
-                text=comment_text, onclick="xnote.todo.openCommentDialog(this)",
-                data_dict=dict(url="/comment/dialog?task_id=%s" % task.task_id)))
+                text=comment_text, href="/todo/detail?task_id=%s" % task.task_id))
             # 状态变更无需确认，直接执行后 toast 结果
             if task.status not in (TodoStatusEnum.done.value, TodoStatusEnum.canceled.value):
                 action_box.add(AjaxActionLink(text=T("完成"), url="?action=finish" + base))

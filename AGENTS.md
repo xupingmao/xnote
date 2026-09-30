@@ -80,6 +80,8 @@ xurls = (
 
 `xmanager` auto-discovers all modules under `xnote_handlers/` reading `xurls`. URL path is derived from module path. No central route table.
 
+**每个 handler 的 `xurls` 只需在该 handler 所属模块里定义一次，不要再到包的 `__init__.py` 里 import 并重复声明。** xmanager 启动时会递归扫描 `xnote_handlers/` 下所有 `.py`，逐个 import 并读取模块自身的 `xurls` 注册路由，因此模块自身的 `xurls` 即会被自动发现。例如评论编辑表单 `/comment/form` 只在 `comment/comment_form.py` 中声明一次即可，无需在 `comment/__init__.py` 再加 `from .comment_form import CommentFormPlugin` 或重复写 `r"/comment/form", CommentFormPlugin,`；随手记编辑表单 `/message/form` 同样只声明在 `message/message_form.py`。若某 handler 模块需要复用包 `__init__.py` 中的模块级符号（如 `comment_form.py` 用 `COMMENT_TYPE` / `to_task_id`），确保 `__init__.py` 在 `os.listdir` 扫描顺序中先于该模块加载（`__init__.py` 与按字母序靠前的模块天然满足），或在模块顶层正常 `from . import ...` 即可。
+
 ## Handler conventions
 
 Handlers are classes with `GET(self)` / `POST(self)` etc. They use the webpy fork (`web`) for request/response. Return strings for HTML, return dict/list for JSON.

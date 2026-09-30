@@ -497,58 +497,6 @@ class MyCommentsHandler:
         return xtemplate.render("comment/page/comment_user_page.html", **kw)
 
 
-class CommentEditHandler:
-    """评论编辑对话框（GET 返回编辑表单 HTML 片段）"""
-
-    @xauth.login_required()
-    def GET(self):
-        user_name = xauth.current_name()
-        comment_id = xutils.get_argument_int("comment_id")
-        comment = dao_comment.get_comment(comment_id)
-        if comment is None:
-            return "评论不存在"
-        if comment.user != user_name:
-            return "无操作权限"
-        return xtemplate.render("comment/page/comment_edit_dialog.html", comment=comment)
-
-
-class CommentUpdateHandler:
-    """提交评论更新（POST）"""
-
-    @xauth.login_required()
-    def POST(self):
-        user_name = xauth.current_name()
-        comment_id = xutils.get_argument_int("comment_id")
-        version = xutils.get_argument_int("version", 0)
-        comment = dao_comment.get_comment(comment_id)
-        if comment is None:
-            return webutil.FailedResult(code="404", message="评论不存在")
-        if comment.user != user_name:
-            return webutil.FailedResult(code="403", message="无权限操作")
-        content = xutils.get_argument_str("content", "")
-        date = xutils.get_argument_str("date")
-        update_ctime = False
-        if date:
-            # create_time 是毫秒时间戳
-            import datetime
-            old_datetime = datetime.datetime.fromtimestamp(comment.create_time / 1000)
-            old_date_str = old_datetime.strftime("%Y-%m-%d")
-            if date != old_date_str:
-                # 构建新的时间字符串并转换为毫秒时间戳
-                new_datetime_str = f"{date} {old_datetime.strftime('%H:%M:%S')}"
-                new_datetime = dateutil.parse_datetime(new_datetime_str)
-                comment.create_time = int(new_datetime * 1000)
-                update_ctime = True
-        comment.content = content
-        comment.files = xutils.get_list_argument("files[]")
-        comment.version = version
-        try:
-            dao_comment.CommentDao.update(comment, update_ctime=update_ctime)
-        except ValueError as e:
-            return webutil.FailedResult(code="400", message=str(e))
-        return build_refresh_commands(message="更新成功")
-
-
 class UpdatePinLevelHandler:
     """置顶 / 取消置顶评论"""
 
@@ -676,8 +624,6 @@ xurls = (
     r"/comment/list", CommentListAjaxHandler,
     r"/comment/save", SaveCommentAjaxHandler,
     r"/comment/delete", DeleteCommentAjaxHandler,
-    r"/comment/edit", CommentEditHandler,
-    r"/comment/update", CommentUpdateHandler,
     r"/comment/mine", MyCommentsHandler,
     r"/comment/update_pin_level", UpdatePinLevelHandler,
     r"/comment/replies", CommentRepliesAjaxHandler,

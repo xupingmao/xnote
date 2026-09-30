@@ -42,6 +42,8 @@ class MessageFormPlugin(BaseFormPlugin):
     
     title = "随手记编辑"
     parent_link = LinkConfig.message
+    require_login = True
+    require_admin = False
 
     def _build_form(self, detail: MessageDO, is_create=False):
         form = PageEditForm()

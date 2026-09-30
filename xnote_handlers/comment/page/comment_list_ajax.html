@@ -46,7 +46,7 @@
             {% end %}
             
             {% if show_comment_edit and _user_id == comment.user_id %}
-                <a class="btn btn-default" data-id="{{comment.id}}" onclick="xnote.comment.openEditDialog(this)">编辑</a>
+                <a class="btn btn-default" data-id="{{comment.id}}" onclick="xnote.comment.openEdit(this)">编辑</a>
             {% end %}
 
             {% if comment.reply_count > 0 %}

@@ -10,7 +10,7 @@
 
 import copy
 
-from .test_base import json_request, json_request_return_dict, BaseTestCase
+from .test_base import json_request, json_request_return_dict, BaseTestCase, build_data_param
 from .test_base import init as init_app
 from xnote_handlers.dict import dict_dao
 from xnote_handlers.note.dao import NoteIndexDao, NoteIndexDO
@@ -66,12 +66,13 @@ class TestMain(BaseTestCase):
 
         comment_id = data[0]["id"]
 
-        # 获取编辑对话框
-        self.check_OK("/comment/edit?comment_id=%s" % comment_id)
+        # 获取编辑表单页
+        self.check_OK("/comment/form?action=edit&comment_id=%s" % comment_id)
 
         # 更新评论
-        data = json_request_return_dict("/comment/update", method="POST",
-            data=dict(comment_id=comment_id, content="#TOPIC# hello"))
+        data = json_request_return_dict("/comment/form?action=save", method="POST",
+            data=build_data_param(comment_id=comment_id, content="#TOPIC# hello",
+                                  redirect_url="/comment/mine", version=0))
         self.assertEqual("success", data["code"])
 
         # 置顶
@@ -189,8 +190,9 @@ class TestMain(BaseTestCase):
         # 更新评论，验证 update_time 变化
         import time
         time.sleep(0.01)  # 等待10毫秒确保时间戳有差异
-        data = json_request_return_dict("/comment/update", method="POST",
-            data=dict(comment_id=comment_id, content="updated content"))
+        data = json_request_return_dict("/comment/form?action=save", method="POST",
+            data=build_data_param(comment_id=comment_id, content="updated content",
+                                  redirect_url="/comment/mine", version=0))
         self.assertEqual("success", data["code"])
         
         # 再次获取评论，验证 update_time 已更新
@@ -224,13 +226,15 @@ class TestMain(BaseTestCase):
             data=dict(note_id=str(note_id), content="refresh-content"))
         assert_toast_reload(resp, "评论成功")
 
-        # 取评论并编辑 -> toast + reload
+        # 取评论并在表单页编辑 -> 返回 redirect_url，前端跳回原页（不再返回 refresh 命令）
         data = json_request_return_list(f"/comment/list?note_id={note_id}")
         comment_id = data[0]["id"]
         resp = json_request_return_dict(
-            "/comment/update", method="POST",
-            data=dict(comment_id=comment_id, content="updated-content"))
-        assert_toast_reload(resp, "更新成功")
+            "/comment/form?action=save", method="POST",
+            data=build_data_param(comment_id=comment_id, content="updated-content",
+                                  redirect_url="/comment/mine", version=0))
+        self.assertEqual("success", resp["code"])
+        self.assertEqual("/comment/mine", resp["redirect_url"])
 
         # 删除评论 -> toast + reload
         resp = json_request_return_dict("/comment/delete", method="POST",

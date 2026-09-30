@@ -115,70 +115,12 @@ xnote.comment.loadList = function (box, order, page) {
 };
 
 
-// 初始化评论编辑对话框
-xnote.comment.initEditDialog = function () {
-    // laydate 渲染
-    if (typeof laydate !== 'undefined') {
-        laydate.render({
-            elem: '#commentDate',
-            value: $("#commentDate").attr("data-value") || ""
-        });
-    }
-
-    // 附件按钮点击
-    $(".attachment-btn").click(function (e) {
-        $("#commentFilePicker2").click();
-    });
-
-    // 文件上传器
-    if ($("#commentFilePicker2").length) {
-        xnote.createUploaderEx({
-            fileSelector: "#commentFilePicker2",
-            chunked: false,
-            successFn: function (resp) {
-                xnote.comment.renderUploadedImg(resp.webpath, "#commentEditImgRow");
-            },
-            fixOrientation: true
-        });
-    }
-
-    // 通过剪切板上传
-    $("#commentUpdateContent").on("paste", function (e) {
-        xnote.requestUploadByClip(e, "msg", function (respJson) {
-            xnote.comment.renderUploadedImg(respJson.webpath, "#commentEditImgRow");
-        });
-    });
-};
-
-// 更新评论
-xnote.comment.updateComment = function () {
-    var params = {};
-    params.comment_id = $("#commentUpdateContent").attr("data-comment-id");
-    params.content = $("#commentUpdateContent").val();
-    params.date = $("#commentDate").val();
-    params.files = xnote.comment.buildFiles("#commentEditImgRow");
-    params.version = $("#commentUpdateContent").attr("data-version");
-    xnote.http.post("/comment/update", params, function (resp) {
-        if (resp.success) {
-            xnote.toast("更新成功");
-            if (resp.data) {
-                xnote.executeCommands(resp.data);
-            }
-            if (xnote.comment.editIndex != null) {
-                xnote.closeDialog(xnote.comment.editIndex);
-            }
-        } else {
-            xnote.alert(resp.message);
-        }
-    });
-};
-
-// 打开编辑对话框
-xnote.comment.openEditDialog = function (element) {
-    var id = $(element).attr("data-id");
-    xnote.http.get("/comment/edit?comment_id=" + id, function (resp) {
-        xnote.comment.editIndex = xnote.showDialog("编辑", resp);
-    });
+// 打开评论编辑页（普通链接跳转，携带返回列表的地址 redirect_url）
+xnote.comment.openEdit = function (target) {
+    var id = $(target).attr("data-id");
+    var redirect_url = location.pathname + location.search;
+    window.location.href = "/comment/form?action=edit&comment_id=" + encodeURIComponent(id)
+        + "&redirect_url=" + encodeURIComponent(redirect_url);
 };
 
 // 删除评论

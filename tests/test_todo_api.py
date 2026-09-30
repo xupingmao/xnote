@@ -381,12 +381,14 @@ class TestTodoPages(BaseTestCase):
         self.assertIn('<span class="tag orange">未开始</span>', body)
 
     def test_todo_list_comment_action(self):
-        # 列表行操作区提供【评论】，弹窗地址指向评论页面
+        # 列表行操作区的【评论】链接改为跳转待办详情页（详情页内嵌评论列表），不再弹窗
         tid = self.json_request_return_dict("/api/v1/todo/create", method="POST",
                                            data=dict(content="评论入口待办", project_id="1"))["data"]
         body = self.request_app("/todo/task?project_id=1").data.decode("utf-8")
-        self.assertIn("xnote.todo.openCommentDialog(this)", body)
-        self.assertIn('data-url="/comment/dialog?task_id=%s"' % tid, body)
+        # 不再使用评论弹窗
+        self.assertNotIn("openCommentDialog", body)
+        # 操作区【评论】链接指向详情页（保留“评论”文案）
+        self.assertRegex(body, r'class="action-link[^"]*"\s+href="/todo/detail\?task_id=%s"' % tid)
 
     def test_todo_comment_dialog_page(self):
         tid = self.json_request_return_dict("/api/v1/todo/create", method="POST",
