@@ -106,13 +106,13 @@ class TestMain(BaseTestCase):
         self.assertEqual("New Content", data.content)
 
         keyword = quote("#test#")
-        self.check_OK(f"/message/create_dialog?keyword={keyword}&tag=log")
-        self.check_OK(f"/message/edit_dialog?id={data.int_id}")
+        self.check_OK(f"/message/form?action=create&keyword={keyword}&tag=log")
+        self.check_OK(f"/message/form?action=edit&id={data.int_id}")
 
         json_request("/message/delete", method="POST",
                      data=dict(id=data.int_id))
         
-        self.check_404(f"/message/edit_dialog?id={data.int_id}")
+        self.check_404(f"/message/form?action=edit&id={data.int_id}")
         
     def test_create_with_date(self):
         data = dict(content="Xnote-Date-Test", date="2020-01-01")

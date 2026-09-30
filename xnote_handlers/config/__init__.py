@@ -36,3 +36,9 @@ class LinkConfig:
 class ScriptConfig:
     
     admin_js = f"/_static/js/admin.js?ts={LOAD_TIME}"
+    
+
+class RedirectConfig:
+    # 通过 history.back() 接口回退不会刷新页面    
+    back = "internal://back"
+

@@ -22,7 +22,7 @@ import logging
 
 from typing import List, Tuple
 from xnote.core import xauth, xconfig, xmanager, xtemplate
-from xutils import BaseRule, Storage
+from xutils import Storage
 from xnote.core.xtemplate import T
 from xutils import netutil, webutil
 from xutils.textutil import quote
@@ -54,8 +54,6 @@ from xnote_handlers.message import message_utils
 from .message_model import MessageComment
 
 MSG_DAO = xutils.DAO("message")
-# 消息处理规则
-MSG_RULES = []
 # 默认的标签
 DEFAULT_TAG = "log"
 MAX_LIST_LIMIT = 1000
@@ -445,19 +443,13 @@ class DeleteAjaxHandler:
             return webutil.FailedResult(message="删除失败")
 
 
-class CalendarRule(BaseRule):
-
-    def execute(self, ctx, date, month, day):
-        print(date, month, day)
-        ctx.type = "calendar"
-
-
-def create_message(user_name, tag, content, ip, files: List[str] = []):
+def create_message(user_name, tag, content, ip, files: List[str] = [], date = ""):
     assert isinstance(user_name, str)
     assert isinstance(tag, str)
     assert isinstance(content, str)
 
-    date = xutils.get_argument_str("date", xutils.format_date())
+    if date == "":
+        date = xutils.format_date()
     content = content.strip()
     ctime = xutils.format_datetime()
 
@@ -492,12 +484,6 @@ def get_or_create_keyword(user_id=0, content="", ip=""):
 
 class SaveAjaxHandler:
 
-    def apply_rules(self, user_name, id, tag, content):
-        global MSG_RULES
-        ctx = Storage(id=id, content=content, user=user_name, type="")
-        for rule in MSG_RULES:
-            rule.match_execute(ctx, content)
-
     @xauth.login_required()
     def do_post(self):
         msg_id = xutils.get_argument_int("id")
@@ -519,11 +505,8 @@ class SaveAjaxHandler:
         if tag in READONLY_TODO_TAGS:
             return webutil.FailedResult(message=READONLY_TODO_HINT)
 
-        # 对消息进行语义分析处理，后期优化把所有规则统一管理起来
-        self.apply_rules(user_name, id, tag, content)
-
         if msg_id == 0:
-            message = create_message(user_name, tag, content, ip, files)
+            message = create_message(user_name, tag, content, ip, files, date=date)
             return webutil.SuccessResult(data=message)
         else:
             msg = MessageDao.get_by_int_id(msg_id)
@@ -616,40 +599,6 @@ class MessagePageHandler:
         tag = xutils.get_argument_str("tag")
         return self.do_get(tag)
 
-class MessageEditDialogHandler:
-    @xauth.login_required()
-    def GET(self):
-        id = xutils.get_argument_int("id")
-        user_name = xauth.current_name_str()
-        user_id = xauth.current_user_id()
-        detail = msg_dao.MessageDao.get_by_int_id(id, user_id=user_id)
-        if detail == None:
-            web.ctx.status = "404 Not Found"
-            return "数据不存在"
-
-        if detail.ref != None:
-            detail = msg_dao.get_message_by_key(detail.ref, user_name=user_name)
-        
-        return xtemplate.render(
-            "message/page/message_edit_dialog.html",
-            detail = detail,
-            submitBtnText="更新",
-        )
-    
-class MessageCreateDialogHandler:
-    @xauth.login_required()
-    def GET(self):
-        keyword = xutils.get_argument_str("keyword")
-        tag = xutils.get_argument_str("tag")
-        detail = msg_dao.MessageDO()
-        detail.content = keyword
-        detail.tag = tag
-        return xtemplate.render(
-            "message/page/message_edit_dialog.html",
-            detail = detail,
-            submitBtnText="创建",
-        )
-
 class StatAjaxHandler:
 
     @xauth.login_required()
@@ -711,10 +660,6 @@ xutils.register_func("message.get_current_message_stat",
                      get_current_message_stat)
 xutils.register_func("url:/message/log", MessageLogHandler)
 
-
-MSG_RULES = [
-    CalendarRule(r"(\d+)年(\d+)月(\d+)日"),
-]
 
 class CreateCommentHandler:
 
@@ -827,8 +772,6 @@ class UpdateTagAjaxHandler:
 xurls = (
     r"/message", MessagePageHandler,
     r"/message/log", MessageLogHandler,
-    r"/message/edit_dialog", MessageEditDialogHandler,
-    r"/message/create_dialog", MessageCreateDialogHandler,
 
     r"/message/refresh", MessageRefreshHandler,
     

@@ -29,10 +29,12 @@
         <label>&nbsp;</label>
         <div class="form-row-value">
             <button class="btn large {{_xnote_form.save_btn_css}}" onclick="xnote.submitFormSave(this)" data-form-id="xnoteForm{{_xnote_form.id}}">保存</button>
+            {% if _xnote_form.delete_url %}
             <button class="btn large btn-default {{_xnote_form.delete_btn_css}}" 
                 data-message="{{_xnote_form.delete_confirm_msg}}"
                 data-url="{{_xnote_form.delete_url}}"
                 onclick="xnote.submitFormDelete(this)" data-form-id="xnoteForm{{_xnote_form.id}}">删除</button>
+            {% end %}
         </div>
     </div>
     {% end %}
@@ -74,7 +76,9 @@
             },
             syncValue: function ($row) {
                 var values = [];
-                $row.find("[data-src]").each(function (index, ele) {
+                // 只统计每个附件的容器节点（.form-upload-thumb / .form-upload-file），
+                // 其内部 <img> 也带 data-src，若一并统计会导致同一附件被重复计数
+                $row.find(".form-upload-thumb, .form-upload-file").each(function (index, ele) {
                     values.push($(ele).attr("data-src"));
                 });
                 $row.find("input[type=hidden][name]").val(values.join(","));
@@ -158,7 +162,11 @@
                 xnote.toast("保存成功");
                 setTimeout(function() {
                     if (resp.redirect_url) {
-                        window.location.href = resp.redirect_url;
+                        if (resp.redirect_url == "internal://back") {
+                            history.back();
+                        } else {
+                            window.location.href = resp.redirect_url;
+                        }
                     } else {
                         window.location.reload();
                     }

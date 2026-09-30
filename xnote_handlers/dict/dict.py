@@ -13,7 +13,7 @@ from xnote.core import xconfig
 from xnote.core import xmanager
 from xutils import Storage, encode_uri_component, dateutil
 from xutils import webutil
-from xutils import textutil
+from xutils import textutil, quote
 
 from . import dict_dao
 from xnote_handlers.dict.dict_dao import search_dict, convert_dict_func
@@ -23,8 +23,8 @@ from xnote.plugin.table import DataTable
 from xnote.plugin.table_plugin import BaseTablePlugin, TableActionType, FormRowType
 from xnote.plugin.list_plugin import BaseListPlugin
 from xnote.plugin.form import DataForm, QueryForm, PageEditForm
-from xnote_handlers.config import LinkConfig
-from xnote.webui import ListViewItem, EditFormActionLink
+from xnote_handlers.config import LinkConfig, RedirectConfig
+from xnote.webui import ListViewItem, EditFormActionLink, ActionLink
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
@@ -86,12 +86,6 @@ class DictHandler(BaseListPlugin):
 {% render build_type_filter_tab(type_list, note_type) %}
 {% include dict/page/dict_type_tab.html %}
 """ + BaseListPlugin.page_html
-    
-    page_edit_html = """
-<div class="card">
-    {% render dict_form %}
-</div>
-"""
 
     page_edit_no_auth_html = """
 <div class="form-row">
@@ -153,15 +147,17 @@ class DictHandler(BaseListPlugin):
         xmanager.add_visit_log(user_name, f"/note/dict?dict_type={dict_type}")
 
         list_view = self.create_list_view()
+        redirect_url = quote(webutil.get_request_url())
 
         for item in items:
+            edit_url = f"?action=page_edit&dict_type={item.dict_type}&dict_id={item.dict_id}&redirect_url={redirect_url}"
+            
             list_item = ListViewItem()
             title = list_item.add_line()
-            title.add_link(text=item.key, href=item.url, css_class="bold")
+            title.add_link(text=item.key, href=edit_url, css_class="bold")
         
             if self.show_edit_action():
-                edit_url = f"?action=edit&dict_type={item.dict_type}&dict_id={item.dict_id}"
-                title.extra.add(EditFormActionLink(text="编辑", url=edit_url))
+                title.extra.add(ActionLink(text="编辑", href=edit_url))
             
             content = list_item.add_line()
             content.add_span(textutil.get_short_text(item.value, 100), css_class="gray")
@@ -185,6 +181,8 @@ class DictHandler(BaseListPlugin):
     
     def handle_page_edit(self):
         dict_id = xutils.get_argument_int("dict_id")
+        redirect_url = xutils.get_argument_str("redirect_url")
+        
         dict_type = self.get_dict_type()
         dao = self.get_dict_dao()
         user_id = xauth.current_user_id()
@@ -204,46 +202,20 @@ class DictHandler(BaseListPlugin):
         dict_form.delete_confirm_msg = f"确认删除记录[{item.key}]吗?"
         dict_form.delete_url = f"?action=delete&dict_id={item.dict_id}"
 
-        dict_form.add_row(field="dict_id", value=str(item.dict_id), css_class="hide")
+        dict_form.add_hidden_input(field="dict_id", value=str(item.dict_id))
+        dict_form.add_hidden_input(field="redirect_url", value=redirect_url)
+        
         row = dict_form.add_select(title="类型", field="dict_type", value=str(item.dict_type))
         for type_info in DictTypeEnum.enums():
             row.add_option(title=type_info.name, value=type_info.value)
 
-        dict_form.add_row(title="名称", field="key", value=item.key)
+        dict_form.add_row(title="名称", field="key", value=item.key, readonly=True)
         dict_form.add_textarea(title="解释", field="value", value=item.value)
 
         if not can_edit_dict(dict_type):
             dict_form.footer_html = self.page_edit_no_auth_html
 
-        self.writetemplate(self.page_edit_html, dict_form = dict_form)
-    
-    def handle_edit(self):
-        check_edit_auth()
-        dict_id = xutils.get_argument_int("dict_id")
-        dict_type = self.get_dict_type()
-        user_id = xauth.current_user_id()
-
-        dao = self.get_dict_dao()
-        if dict_id > 0:
-            dict_item = dao.get_by_id(dict_id, user_id=user_id)
-        else:
-            dict_item = dict_dao.DictDO()
-
-        if dict_item == None:
-            return self.response_text("dict_item为空")
-
-        form = self.create_form()
-        form.add_row("dict_id", "dict_id", value=str(dict_item.dict_id), css_class="hide")
-        dict_type_name = DictTypeEnum.get_name_by_value(str(dict_type))
-        form.add_row("词典类型", "dict_type", type=FormRowType.input, value=dict_type_name, readonly=True)
-        form.add_row("关键字", "key", value=dict_item.key, readonly=True)
-        form.add_row("解释", "value", type=FormRowType.textarea, value=dict_item.value)
-        if dict_type == DictTypeEnum.relevant.int_value:
-            form.add_row("说明", type=FormRowType.textarea, value="多个单词使用空格或者换行分隔", readonly=True)
-        
-        kw = Storage()
-        kw.form = form
-        return self.response_form(**kw)
+        self.render_form(dict_form)
     
     def handle_save(self):
         data_dict = self.get_data_dict()
@@ -253,8 +225,8 @@ class DictHandler(BaseListPlugin):
         key = data_dict.get_str("key")
         value = data_dict.get_str("value")
         dao = self.get_dict_dao(dict_type)
-
         user_id = xauth.current_user_id()
+        redirect_url = data_dict.get_str("redirect_url")
 
         if dict_id == 0:
             # insert
@@ -269,7 +241,8 @@ class DictHandler(BaseListPlugin):
             dao.create(dict_item)
         else:
             dao.update(dict_id=dict_id, user_id=user_id, value=value)
-        return webutil.SuccessResult()
+        
+        return webutil.SuccessResult(redirect_url=redirect_url)
     
     def handle_delete(self):
         dict_id = xutils.get_argument_int("dict_id")

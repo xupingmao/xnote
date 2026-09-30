@@ -76,16 +76,6 @@ class BaseFormPlugin(BasePluginV2):
     def create_form(self) -> DataForm:
         """创建表单实例，子类可重写以返回 QueryForm / PageEditForm 等子类"""
         return DataForm()
-    
-    def render_form(self, form: DataForm):
-        if form.has_select_input():
-            self.load_select2()
-            
-        if form.has_date_input():
-            self.load_laydate()
-        
-        self.add_component(Card().add(form))
-        
         
     def handle_edit(self):
         """构建编辑表单，子类应重写以添加真实字段。

@@ -42,5 +42,9 @@ class _AsideConfigImpl:
     @property
     def note_aside_html(self):
         return xtemplate.render("note/component/sidebar/group_list_sidebar.html")
+    
+    @property
+    def message_aside_html(self):
+        return xtemplate.render("message/page/message_aside.html")
 
 AsideConfig = _AsideConfigImpl()

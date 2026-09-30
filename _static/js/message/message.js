@@ -105,19 +105,21 @@ MessageView.updateInputBox = function (webpath) {
 }
 
 MessageView.getInputText = function () {
-    if (this.state.isEditDialog) {
-        return $(".edit-box").val();
-    } else {
-        return $(".input-box").val();
+    // 编辑弹窗中的内容文本框由 BaseFormPlugin 的表单渲染，name=content
+    var $edit = $("textarea[name=content]");
+    if ($edit.length) {
+        return $edit.val();
     }
+    return $(".input-box").val();
 }
 
 MessageView.setInputText = function (text) {
-    if (this.state.isEditDialog) {
-        $(".edit-box").val(text);
-    } else {
-        $(".input-box").val(text);
+    var $edit = $("textarea[name=content]");
+    if ($edit.length) {
+        $edit.val(text);
+        return;
     }
+    $(".input-box").val(text);
 }
 
 MessageView.insertTagToInputBox = function (newTopic) {
@@ -153,23 +155,23 @@ MessageView.closeTopicDiloag = function () {
     // 关闭
 }
 
-// 编辑随手记
+// 编辑随手记（普通链接跳转到表单页；返回列表的地址由后端基于 Referer 构建）
 MessageView.edit = function (target) {
-    MessageView.state.isEditDialog = true;
-
     var id = $(target).attr("data-id");
-    // 打开编辑器
-    var params = {
-        id: id
-    };
-    xnote.http.get("/message/edit_dialog", params, function (html) {
-        var layerId = xnote.openDialog("编辑", html);
-        MessageView.closeEdit = function () {
-            // console.log("close dialog:", layerId);
-            xnote.closeDialog(layerId);
-            MessageView.state.isEditDialog = false;
-        };
-    });
+    var redirect_url = location.pathname + location.search;
+    window.location.href = "/message/form?action=edit&id=" + encodeURIComponent(id) 
+        + "&redirect_url=" + encodeURIComponent(redirect_url);
+};
+
+// 新建随手记（普通链接跳转到表单页；返回列表的地址由后端基于 Referer 构建）
+MessageView.createMessageOnTag = function(target) {
+    var keyword = $(target).attr("data-keyword") || "";
+    var tag = $(target).attr("data-tag") || "";
+    var url = "/message/form?action=create"
+        + "&tag=" + encodeURIComponent(tag)
+        + "&keyword=" + encodeURIComponent(keyword)
+        + "&redirect_url=" + encodeURIComponent(location.pathname + location.search);
+    window.location.href = url;
 };
 
 // 展示选择标签对话框
@@ -190,36 +192,6 @@ MessageView.buildFiles = function() {
     });
     return result;
 }
-
-
-MessageView.saveMessage = function (target) {
-    // 保存信息
-    var id = $("#messageEditId").val();
-    var content = $("#messageEditContent").val();
-    var tag = $("#messageEditTag").val();
-
-    var params = {
-        id: id,
-        content: content,
-        tag: tag
-    }
-    
-    params.files = MessageView.buildFiles();
-    params.date = $("#msgDate").val();
-
-    var self = this;
-
-    xnote.http.post("/message/update", params, function (resp) {
-        if (resp.code == "success") {
-            xnote.toast("更新成功");
-            self.closeEdit();
-            // self.refreshList();
-            window.location.reload();
-        } else {
-            xnote.alert("更新失败:" + resp.message);
-        }
-    });
-};
 
 MessageView.createMessage = function (target) {
     var createTag = $(target).attr("data-create-tag");
@@ -244,27 +216,6 @@ MessageView.createMessage = function (target) {
             }
     });
 }
-
-// 基于标签创建新记录
-MessageView.createMessageOnTag = function(target) {
-    var self = this;
-    self.state.isEditDialog = true;
-    var keyword = $(target).attr("data-keyword");
-    var tag = $(target).attr("data-tag");
-    var title = $(target).attr("data-title");
-    var params = {
-        "tag": tag,
-        "keyword": keyword
-    };
-    xnote.http.get("/message/create_dialog", params, function (html) {
-        var layerId = xnote.openDialog(title, html);
-        self.closeEdit = function () {
-            // console.log("close dialog:", layerId);
-            xnote.closeDialog(layerId);
-            self.state.isEditDialog = false;
-        };
-    })
-};
 
 MessageView.upload = function () {
     // 上传文件

@@ -373,6 +373,16 @@ class DataForm(BaseComponent):
         self.rows.append(row)
         return row
     
+    def add_hidden_input(self, field="", value=""):
+        row = FormRow()
+        row.id = self._create_row_id()
+        row.field = field
+        row.value = value
+        row.type = FormRowType.input
+        row.css_class = "hide"        
+        self.rows.append(row)
+        return row
+    
     def _format_value(self, value: FormValueType) -> str:
         if isinstance(value, list):
             values = []
