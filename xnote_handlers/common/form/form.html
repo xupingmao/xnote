@@ -1,6 +1,8 @@
 {% init xnote_form_var = "form" %}
 {% set _xnote_form = globals()[xnote_form_var] %}
 
+{% render _xnote_form.action_bar %}
+
 <div class="form-body {{_xnote_form.form_type_css}}">
     <form id="xnoteForm{{_xnote_form.id}}" class="x-form" method="{{_xnote_form.form_method}}">
         {% for row in _xnote_form.rows %}

@@ -740,7 +740,8 @@ li.menu-item:hover {
 }
 
 .border {
-    border: solid 1px #ccc;
+    border: solid 1px #eee;
+    border-radius: 4px;
 }
 
 .main-content {

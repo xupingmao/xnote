@@ -42,7 +42,7 @@ class TextContainer(BaseContainer):
 class ActionBar(TextContainer):
     """操作栏"""
     def __init__(self, css_class="", css_style=""):
-        super().__init__(css_class=f"action-bar {css_class}", css_style=css_style)
+        super().__init__(css_class=f"action-bar py-1 {css_class}", css_style=css_style)
         self.main = TextContainer("row-main")
         self.extra = TextContainer("row-extra")
         self.children.append(self.main)
@@ -70,6 +70,9 @@ class ActionBar(TextContainer):
 
     def add_right(self, item: BaseComponent):
         self.extra.add(item)
+        
+    def add_title(self, text="", css_class=""):
+        self.add_span(text=text, css_class=f"px-2 bold {css_class}")
         
     def add_span(self, text="", css_class="", float_right=False, id=""):
         span = TextSpan(text=text, css_class=css_class, id=id)

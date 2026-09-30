@@ -48,7 +48,8 @@ class FormExampleHandler(BaseTablePlugin):
         # 页面表单：PageEditForm（page_edit 类型），渲染为普通文档流的页面表单，
         # 区别于弹窗用的 edit 类型（DataForm，absolute 定位，仅适合对话框容器）
         static_form = PageEditForm()
-        static_form.add_heading("基础信息")
+        static_form.action_bar.add_css_class("border-b")
+        static_form.action_bar.add_title("表单标题")
         static_form.add_row("名称", "name", value="示例名称")
         type_row = static_form.add_select("类型", "type", value="1")
         type_row.add_option("类型1", "1")

@@ -11,6 +11,7 @@
 
 import typing
 import itertools
+from typing import Union
 from xutils import Storage
 from xutils.textutil import escape_html
 from xnote.core import xtemplate
@@ -18,6 +19,7 @@ from xnote.webui.base import BaseComponent
 from xnote.webui._tag_select import TagSelect
 from xnote.webui._switch import Switch
 from xnote.webui.tab import TabBox
+from xnote.webui.container import ActionBar
 
 FormValueType = typing.Union[int, str, list]
 
@@ -129,6 +131,8 @@ class FormRow(BaseComponent):
 </div>
 """
     _upload_template = xtemplate.compile_template(_upload_html, name="plugin.form.row.upload")
+    
+    value: Union[str, bool]
 
     """数据行"""
     def __init__(self):
@@ -271,7 +275,7 @@ class FormRow(BaseComponent):
         """
         tag_select = TagSelect(
             name=self.field,
-            value=self.value,
+            value=str(self.value),
             multiple=self.multiple,
             readonly=self.readonly,
             css_class=(self.css_class + " form-tag-select") if self.css_class else "form-tag-select",
@@ -346,6 +350,7 @@ class DataForm(BaseComponent):
         self.model_name = "default"
         self.path = ""
         self.headings = []
+        self.action_bar = ActionBar()
 
     def _create_row_id(self):
         self.row_id += 1
@@ -512,8 +517,7 @@ class DataForm(BaseComponent):
         """添加文件上传行（交互参考评论/随手记的附件上传）"""
         return self._add_upload_row(FormRowType.file, title, field, value, css_class, multiple, accept="")
 
-    def _normalize_upload_value(self, value):
-        # type: (typing.Union[int, str, list, None]) -> list
+    def _normalize_upload_value(self, value: Union[int, str, list, None]):
         """把 value（逗号分隔字符串或列表）归一化为值列表"""
         if value is None:
             return []

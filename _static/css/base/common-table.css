@@ -68,8 +68,8 @@
     float: none;
 }
 
-.row-main * {
-    margin-right: 4px;
+.row-main button, .row-main .btn {
+    margin-right: 8px;
 }
 
 .row-extra button, .row-extra .btn {
