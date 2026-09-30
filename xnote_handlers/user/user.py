@@ -133,6 +133,7 @@ class UserHandler:
         log_list = OP_LOG_TABLE.list_by_user(user_id=user_id, offset=offset, limit=page_size)
 
         table = DataTable()
+        table.action_bar.add_title("用户操作日志")
         table.default_head_style.min_width = "100px"
         table.add_head("操作类型", "type")
         table.add_head("操作时间", "ctime", min_width="200px")
@@ -142,11 +143,9 @@ class UserHandler:
         for item in log_list:
             table.add_row(item)
 
+        page_total = OP_LOG_TABLE.count(user_id=user_id)
+        table.set_pagination(page=page, page_total=page_total)
         kw.table = table
-        kw.page = page
-        kw.page_size = page_size
-        kw.page_totalsize = OP_LOG_TABLE.count(user_id=user_id)
-        kw.page_url = f"?name={user_info.name}&page="
     
     @xauth.login_required("admin")
     def GET(self):

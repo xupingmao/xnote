@@ -18,13 +18,7 @@
 </div>
 
 <div class="card">
-    <div class="card-title">
-        <span>用户操作日志</span>    
-    </div>
-    {% include common/table/table.html %}
-    <div class="top-offset-1 bottom-offset-1">
-        {% include common/pagination.html %}
-    </div>
+    {% render table %}
 </div>
 
 {% end %}

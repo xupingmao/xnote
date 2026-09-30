@@ -478,7 +478,7 @@ class InfoTable(BaseComponent):
     def __init__(self):
         self.cols = 2  # 默认2列,这种最简单,各个设备都能正常展示
         self.items = []  # type: List[InfoItem]
-        self.bottom_action_bar = ActionBar(css_class="margin-top-sm")  # 底部的操作栏
+        self.bottom_action_bar = ActionBar()  # 底部的操作栏
 
     def add_item(self, item: InfoItem) -> None:
         item.index = len(self.items)
