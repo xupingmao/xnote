@@ -23,8 +23,8 @@ def main():
         command = 'cloc ./ --fullpath --not-match-d="py3.8|py3.7|py3.6|lib|static/lib|data|htmlcov"'
         os.system(command)
     else:
-        print("cloc command not found, use duck-rush code-count-lines command")
-        os.system("code-count-lines xnote xnote_handlers xutils xnote_migrate static/js/ tools --exclude py3.8 py3.7 py3.6 lib static/lib data* htmlcov dist build tmp *.build.js")
+        print("cloc command not found, use duck-rush duck-count-lines command")
+        os.system("duck-count-lines xnote xnote_handlers xutils xnote_migrate static/js/ tools --exclude py3.8 py3.7 py3.6 lib static/lib data* htmlcov dist build tmp *.build.js")
 
 if __name__ == "__main__":
     main()
