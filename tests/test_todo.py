@@ -1,4 +1,5 @@
 # encoding=utf-8
+import json
 import re
 import unittest
 
@@ -10,6 +11,7 @@ from xnote_handlers.todo.todo_model import TodoRecord, TodoStatusEnum, TodoPrior
 from xnote_handlers.todo.project_model import ProjectRecord, ProjectStatusEnum
 from xnote_handlers.comment import to_comment_target_id
 from xnote_handlers.comment import dao_comment
+from xutils import quote
 
 
 def _clear_table(name):
@@ -228,6 +230,94 @@ class TestTodoCommentCount(BaseTestCase):
         # 详情页复用了评论组件（列表服务端直接渲染 / 保存走 todo 评论端点）
         self.assertIn('id="comments"', body)
         self.assertIn("todo_task", body)
+
+
+class TestTodoTaskEditPage(BaseTestCase):
+    """待办编辑：独立页面（非弹窗）+ 保存后跳回列表页"""
+
+    def setUp(self):
+        _clear_table("todo_task")
+        _clear_table("todo_project")
+
+    def tearDown(self):
+        _clear_table("todo_task")
+        _clear_table("todo_project")
+
+    def _create_project(self):
+        project = ProjectRecord()
+        project.user_id = 1
+        project.name = "编辑页项目"
+        return ProjectDao.create(project)
+
+    def _create_task(self, project_id):
+        todo = TodoRecord()
+        todo.user_id = 1
+        todo.user = "admin"
+        todo.content = "待办编辑页"
+        todo.project_id = project_id
+        return TodoDao.create(todo)
+
+    def test_list_edit_link_is_page_link(self):
+        project_id = self._create_project()
+        task_id = self._create_task(project_id)
+
+        body = self.request_app("/todo/task?project_id=%s&status=all" % project_id).data.decode("utf-8")
+        # 编辑入口是普通链接（带 redirect_url），不再是弹窗的 handleEditForm
+        quoted = quote("/todo/task?project_id=%s&status=all" % project_id)
+        self.assertIn(
+            'href="?action=edit&model=task&project_id=%s&task_id=%s&redirect_url=%s"' % (
+                project_id, task_id, quoted), body)
+        self.assertNotIn("handleEditForm", body)
+        # 新建入口同样是页面链接
+        self.assertIn('href="?action=edit&model=task&project_id=%s&redirect_url=' % project_id, body)
+
+    def test_edit_page_is_standalone_form(self):
+        project_id = self._create_project()
+        task_id = self._create_task(project_id)
+
+        body = self.request_app(
+            "/todo/task?action=edit&model=task&project_id=%s&task_id=%s" % (project_id, task_id)
+        ).data.decode("utf-8")
+        # 完整页面框架 + 表单（不再是局部 ajax 片段）
+        self.assertIn("<!DOCTYPE html>", body)
+        self.assertIn('name="content"', body)
+        self.assertIn('name="redirect_url"', body)
+        # PageEditForm 自带【保存】按钮
+        self.assertIn("xnote.submitFormSave(this)", body)
+        self.assertNotIn("xnote.dialog.closeByElement(this)", body)
+        # 页面标题面包屑指向所属待办列表
+        self.assertIn("<span>编辑待办</span>", body)
+        self.assertIn('href="/todo/task?project_id=%s"' % project_id, body)
+        # 未传 redirect_url 时兜底到该项目的待办列表
+        self.assertIn('value="/todo/task?project_id=%s"' % project_id, body)
+
+    def test_save_returns_redirect_url(self):
+        project_id = self._create_project()
+        task_id = self._create_task(project_id)
+
+        resp = self.json_request_return_dict(
+            "/todo/task?action=save&model=task", method="POST",
+            data=dict(data=json.dumps(dict(
+                task_id=str(task_id), project_id=str(project_id),
+                # 注意: POST body 含非 ASCII 时会被框架的 CONTENT_LENGTH 截断，内容用 ASCII
+                content="edited-by-test", priority="normal", status="not_started",
+                begin_time="", end_time="",
+                redirect_url="/todo/task?project_id=%s&status=all" % project_id))))
+        self.assertTrue(resp["success"])
+        self.assertEqual(resp["redirect_url"],
+                         "/todo/task?project_id=%s&status=all" % project_id)
+        self.assertEqual(TodoDao.get_by_id(task_id).content, "edited-by-test")
+
+    def test_detail_page_has_edit_link(self):
+        project_id = self._create_project()
+        task_id = self._create_task(project_id)
+
+        body = self.request_app("/todo/detail?task_id=%s" % task_id).data.decode("utf-8")
+        self.assertIn(
+            'href="/todo/task?action=edit&amp;model=task&amp;project_id=%s&amp;task_id=%s&amp;redirect_url=' % (
+                project_id, task_id), body)
+        # 详情页的编辑链接带回到列表页的 redirect_url
+        self.assertIn(quote("/todo/task?project_id=%s" % project_id), body)
 
 
 class TestTodoFormTagSelect(BaseTestCase):

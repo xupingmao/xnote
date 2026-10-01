@@ -7,13 +7,14 @@ import web
 import math
 
 from typing import Dict, List, Optional, Union
-from xutils import Storage, webutil
+from xutils import Storage, webutil, quote
 from xnote.core import xauth, xtemplate
 from xnote.core.xtemplate import T
 from xnote.plugin import (
     ListViewItem, EditFormActionLink, EditFormButton,
     ConfirmActionLink, AjaxActionLink, ActionLink, TextTag, FormRowType, TabBox,
     Div, RawHtml, TextLink, TextSpan)
+from xnote.plugin.form import PageEditForm
 from xnote.plugin.list_plugin import BaseListPlugin
 from xnote_handlers.config import AsideConfig, LinkConfig
 from xutils.textutil import mark_text
@@ -56,6 +57,23 @@ PROJECT_STATUS_TAG_CLASS = {
     ProjectStatusEnum.active.value: "",
     ProjectStatusEnum.archived.value: "gray",
 }
+
+
+def _default_task_redirect_url(project_id: int) -> str:
+    """待办编辑页未带 redirect_url 时的默认回跳地址（列表页）"""
+    return "%s?project_id=%s" % (TASK_PAGE_PATH, project_id)
+
+
+def _build_task_edit_url(project_id: int, task_id: int, redirect_url: str) -> str:
+    """待办编辑页链接（独立页面，保存后跳回 redirect_url 对应的列表页）"""
+    return "?action=edit&model=task&project_id=%s&task_id=%s&redirect_url=%s" % (
+        project_id, task_id, quote(redirect_url))
+
+
+def _build_task_create_url(project_id: int, redirect_url: str) -> str:
+    """待办新建页链接"""
+    return "?action=edit&model=task&project_id=%s&redirect_url=%s" % (
+        project_id, quote(redirect_url))
 
 
 def _render_component(component) -> str:
@@ -263,6 +281,9 @@ class TaskListPlugin(_TodoListPlugin):
         status_labels = _enum_label_map(TodoStatusEnum)
         priority_labels = _enum_label_map(TodoPriorityEnum)
 
+        # 当前列表页 URL（含筛选参数），编辑页据此回填 redirect_url，保存后跳回这里
+        list_url = webutil.get_request_url()
+
         # 状态筛选：【待办】= 未开始+进行中；【全部】= 不过滤；其它 = 单状态
         status_list = None  # type: Optional[List[str]]
         status_filter = None  # type: Optional[str]
@@ -345,13 +366,16 @@ class TaskListPlugin(_TodoListPlugin):
                 action_box.add(AjaxActionLink(text=T("重开"), url="?action=reset" + base))
             if task.status != TodoStatusEnum.canceled.value:
                 action_box.add(AjaxActionLink(text=T("取消"), url="?action=cancel" + base))
-            action_box.add(EditFormActionLink(text=T("编辑"), url="?action=edit" + base))
+            # 编辑改用独立页面（带 redirect_url，保存后回到当前列表页）
+            action_box.add(ActionLink(
+                text=T("编辑"),
+                href=_build_task_edit_url(project_id, task.task_id, list_url)))
             item.extra.add(action_box)
 
             list_view.add_item(item)
 
-        self.option_html = EditFormButton(
-            text=T("新建待办"), url="?action=edit&model=task&project_id=%s" % project_id).render()
+        self.option_html = TextLink(
+            text=T("新建待办"), css_class="btn", href=_build_task_create_url(project_id, list_url)).render()
         self.update_aside(AsideConfig.default_aside_html)
         # 顶部全局搜索组件：在当前项目内搜索全部状态的待办（project_id<=0 时跨项目）
         self.search_action = TASK_PAGE_PATH
@@ -365,20 +389,39 @@ class TaskListPlugin(_TodoListPlugin):
                                   page=page, page_max=page_max, page_total=total, page_size=page_size)
 
     def handle_edit(self):
+        """待办编辑/新建页（独立页面，参考 DictHandler 的 page_edit 实现）"""
         user_id = xauth.current_user_id()
         project_id = xutils.get_argument_int("project_id", 0)
         task_id = xutils.get_argument_int("task_id", 0)
-        task = TodoDao.get_by_id(task_id, user_id=user_id) if task_id != 0 else None
-        
+        if task_id != 0:
+            task = TodoDao.get_by_id(task_id, user_id=user_id)
+        else:
+            task = None
+
         if task is None:
             task = TodoRecord()
             task.task_id = task_id
 
-        form = self.create_form()
+        # 保存后回跳的地址，缺省回到当前项目的待办列表页
+        redirect_url = xutils.get_argument_str("redirect_url", "")
+        if redirect_url == "":
+            redirect_url = _default_task_redirect_url(task.project_id or project_id)
+
+        # 编辑页标题 + 面包屑（上级指向所属待办列表）
+        edit_title = T("新建待办") if task_id == 0 else T("编辑待办")
+        self.title = edit_title
+        owner_project_id = task.project_id or project_id
+        self.parent_link = LinkConfig.task_list
+        if owner_project_id > 0:
+            owner_project = ProjectDao.get_by_id(owner_project_id)
+            if owner_project is not None:
+                self.parent_link = TextLink(text=owner_project.name, href=redirect_url)
+
+        form = PageEditForm()
         form.path = TASK_PAGE_PATH
         form.model_name = "task"
-        form.id = "task_edit"
-        form.add_row(title="", field="task_id", value=str(task_id), css_class="hide")
+        form.add_hidden_input(field="task_id", value=str(task_id))
+        form.add_hidden_input(field="redirect_url", value=redirect_url)
         form.add_textarea(title=T("内容"), field="content", value=task.content if task else "",
                           placeholder=T("待办内容"))
         # 优先级、状态都是枚举（EnumItem 数量 <= 5），用 tag 风格选择器
@@ -392,11 +435,10 @@ class TaskListPlugin(_TodoListPlugin):
             status_row.add_option(e.name, e.value)
 
         # 所属项目（待办必须归属到一个项目，新建时默认用当前列表所在的项目）
-        current_project_id = task.project_id or project_id
         project_row = form.add_row(title=T("所属项目"), field="project_id", type=FormRowType.select,
-                                   value=str(current_project_id))
-        for project in ProjectDao.list_by_user(user_id):
-            project_row.add_option(project.name, str(project.project_id))
+                                   value=str(owner_project_id))
+        for project_item in ProjectDao.list_by_user(user_id):
+            project_row.add_option(project_item.name, str(project_item.project_id))
 
         form.add_date_input(title=T("开始时间"), field="begin_time",
                             value=format_date_ms(task.begin_time) if task else "")
@@ -410,7 +452,8 @@ class TaskListPlugin(_TodoListPlugin):
                      value=format_time_ms(task.create_time), readonly=True)
         form.add_row(title=T("更新时间"), field="update_time",
                      value=format_time_ms(task.update_time), readonly=True)
-        return self.response_form(form=form)
+        # 独立页面渲染（PageEditForm 自带【保存】按钮，不再走弹窗）
+        self.render_form(form)
 
     def handle_save(self):
         user_id = xauth.current_user_id()
@@ -444,7 +487,11 @@ class TaskListPlugin(_TodoListPlugin):
             task.end_time = parse_time_ms(data.get_str("end_time", ""))
             TodoDao.apply_status(task, data.get_str("status", task.status))
             TodoDao.update(task)
-        return webutil.SuccessResult()
+        # 独立编辑页保存后跳回列表页（无 redirect_url 时兜底到该项目的列表页）
+        redirect_url = data.get_str("redirect_url", "")
+        if redirect_url == "":
+            redirect_url = _default_task_redirect_url(project_id)
+        return webutil.SuccessResult(redirect_url=redirect_url)
 
     def handle_finish(self):
         return self._do_status(TodoStatusEnum.done.value)
@@ -539,6 +586,11 @@ class TodoDetailHandler:
         kw.back_url = task_list_href
         kw.content_html = mark_text(task.content)
         kw.info_tags = _build_task_info_tags(task, project_name)
+
+        # 详情页右上角【编辑】入口：跳转独立编辑页，保存后回到所属待办列表
+        task_edit_url = "%s?action=edit&model=task&project_id=%s&task_id=%s&redirect_url=%s" % (
+            TASK_PAGE_PATH, task.project_id, task.task_id, quote(task_list_href))
+        kw.right_link = TextLink(text=T("编辑"), href=task_edit_url)
 
         # 评论列表（复用统一评论组件，type=todo_task + 独立 target_id 空间隔离；
         # 列表由前端初始化时通过独立接口异步加载，不再服务端静态输出）
