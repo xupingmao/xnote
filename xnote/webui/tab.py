@@ -63,6 +63,10 @@ class TabBox(BaseComponent):
     def right_div(self):
         return self.extra
     
+    def set_title(self, title="", style=""):
+        self.title = title
+        self._title_style = style
+    
     def add_item(self, title="", value="", href="", css_class="", onclick="", item_id="", default_hide=False):
         item = TabItem(title=title, value=value, href=href, css_class=css_class, 
                        onclick=onclick, item_id=item_id, default_hide=default_hide)

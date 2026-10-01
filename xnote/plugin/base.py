@@ -1,5 +1,5 @@
 from xnote.webui.base import *
-from xnote.webui import DataForm, Card
+from xnote.webui import DataForm, Card, DataTable
 from xnote.core.xtemplate import BasePlugin, LOAD_TIME
 from xnote.core import xtemplate
 from xnote.core import xconfig
@@ -35,3 +35,6 @@ class BasePluginV2(BasePlugin):
         
         self.add_component(Card().add(form))
         
+        
+    def render_table(self, table: DataTable):
+        self.add_component(Card().add(table))

@@ -140,15 +140,12 @@ class BaseTablePlugin(BasePluginV2):
         row["delete_url"] = "?action=delete"
         row["delete_msg"] = "确认删除记录吗?"
         table.add_row(row)
+        table.set_pagination(page=1, page_total=1)
 
-        kw = Storage()
-        kw.table = table
-        kw.page = 1
-        kw.page_max = 1
-        kw.page_url = "?page="
-
-        return self.response_page(**kw)
-
+        self.load_select2()
+        self.load_laydate()
+        self.render_table(table)
+        
     def handle_delete(self):
         # data_id = xutils.get_argument_int("data_id")
         return webutil.FailedResult(code="500", message="Not Implemented")
