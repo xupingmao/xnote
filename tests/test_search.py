@@ -119,6 +119,21 @@ class TestMain(BaseTestCase):
         """测试API搜索"""
         self.check_OK(xutils.quote_unicode("/search?key=weather"))
 
+    def test_comment_search_handler_registered_once(self):
+        """评论搜索处理器只能注册一次（注册按ID幂等）
+
+        HandlerManager.load_model_dir 会把包目录下的 `__init__.py` 当成模块
+        `pkg.__init__` 导入，而包 `pkg` 本身在父模块导入时也会被执行一遍，
+        同一个 `searchable` 处理器因此被注册两次（搜索会重复执行）。
+        """
+        handlers = xmanager.get_event_manager()._handlers.get("search", [])
+        func_names = [h.func_name for h in handlers if h.func_name.endswith("on_search_comments")]
+        self.assertEqual(["xnote_handlers.comment.on_search_comments"], func_names)
+
+        # 处理器标识(事件类型+函数全名+描述)不重复, 否则说明重复注册了
+        handler_keys = [h.key for h in handlers]
+        self.assertEqual(len(handler_keys), len(set(handler_keys)))
+
     def test_searchable_decorator(self):
         """测试 searchable 装饰器注册的处理器是否正确"""
         import xnote_handlers.search.mute as mute_module

@@ -642,7 +642,7 @@ class WorkerThread(Thread):
 class EventHandler:
     """事件处理器,执行的时候不抛出异常"""
 
-    def __init__(self, event_type: str, func, is_async=True, description=""):
+    def __init__(self, event_type: str, func, is_async=True, description="", id = ""):
         self.event_type = event_type
         self.key = None
         self.func = func
@@ -658,6 +658,13 @@ class EventHandler:
             self.key = f"{func_name}:{self.description}"
         else:
             self.key = func_name
+
+        # id 是处理器实例ID, 未显式指定时随机生成。
+        # 注册的幂等去重由 key(事件类型 + 函数全名 + 描述, 见 EventManager.add_handler)
+        # 保证; 显式指定了 id 的处理器还会按 id 去重(声明"这就是同一个处理器")。
+        if id == "":
+            id = xutils.create_uuid()
+        self.id = id
 
     def execute(self, ctx=None, is_async = None):
         _debug_logger.log("event:(%s) key:(%s), is_async:(%s)",
@@ -716,15 +723,29 @@ class SearchHandler(EventHandler):
         return "<SearchHandler /%s/ %s>" % (pattern, self.key)
 
 
+def fix_module_name(module_name: str) -> str:
+    """归一化模块名, 去掉 `.__init__` 后缀。
+
+    `HandlerManager.load_model_dir` 遍历包目录时会把 `__init__.py` 当作模块
+    `pkg.__init__` 导入, 而包 `pkg` 本身在导入父模块(`__import__("pkg.__init__")`)
+    时也会被执行一遍, 于是同一个函数被两个模块对象各定义了一份、注册了两次
+    (比如评论模块的搜索处理器会执行两次)。归一化后两者视为同一个模块,
+    注册时才能按函数标识(key)幂等去重。
+    """
+    if module_name.endswith(".__init__"):
+        return module_name[:-len(".__init__")]
+    return module_name
+
+
 def get_func_abs_name(func) -> str:
     module = inspect.getmodule(func)
     if module is not None:
-        return module.__name__ + "." + func.__name__
+        return fix_module_name(module.__name__) + "." + func.__name__
     else:
         func_globals = func.__globals__
         script_name = func_globals.get("script_name", "unknown")
         script_name = xutils.unquote(script_name)
-        return script_name + "." + func.__name__
+        return fix_module_name(script_name) + "." + func.__name__
 
 
 class EventManager:
@@ -735,12 +756,15 @@ class EventManager:
 
     def add_handler(self, handler: EventHandler):
         """注册事件处理器
+
+        注册是幂等的: 同一个逻辑处理器(事件类型 + 函数全名 + 描述, 即 handler.key)重复注册
+        时只保留最后注册的那份, 不会被执行多次; 显式指定了相同 id 的处理器同样只保留一份。
         事件处理器的去重,通过判断是不是同一个函数，不通过函数名，如果修改初始化脚本需要执行【重新加载模块】功能
         """
         event_type = handler.event_type
         handlers = self._handlers.get(event_type, [])
         for index, old_handler in enumerate(handlers):
-            if handler == old_handler:
+            if handler.key == old_handler.key or handler.id == old_handler.id:
                 warn(f"handler {handler} is already registered, update to new one")
                 handlers[index] = handler
                 return
@@ -886,8 +910,8 @@ def fire(event_type: str, ctx=None, is_async: Optional[bool] = None):
     get_event_manager().fire(event_type, ctx, is_async = is_async)
 
 
-def listen(event_type_list, is_async=True, description=""):
-    """事件监听器注解"""
+def listen(event_type_list, is_async=True, description="", id=""):
+    """事件监听器注解, id 可选(未指定时随机生成, 用于显式声明处理器身份以便去重)"""
 
     # 同步任务使用专门的线程执行
     if event_type_list == "sync.step":
@@ -899,23 +923,25 @@ def listen(event_type_list, is_async=True, description=""):
             for event_type in event_type_list:
                 handler = EventHandler(event_type, func,
                                        is_async=is_async,
-                                       description=description)
+                                       description=description,
+                                       id=id)
                 event_manager.add_handler(handler)
         else:
             event_type = event_type_list
             handler = EventHandler(event_type, func,
                                    is_async=is_async,
-                                   description=description)
+                                   description=description,
+                                   id=id)
             event_manager.add_handler(handler)
         return func
     return deco
 
 
-def searchable(pattern=r".*", description="", event_type="search"):    
-    """搜索装饰器"""
+def searchable(pattern=r".*", description="", event_type="search", id=""):
+    """搜索装饰器, id 可选(未指定时随机生成, 用于显式声明处理器身份以便去重)"""
     def deco(func):
         assert _event_manager != None
-        handler = SearchHandler(event_type, func, description=description)
+        handler = SearchHandler(event_type, func, description=description, id=id)
         # unicode_pat = r"^%s\Z" % u(pattern)
         unicode_pat = str(pattern)
         handler.pattern = re.compile(unicode_pat)
