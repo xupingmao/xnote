@@ -67,7 +67,7 @@ class CalendarExampleHandler(BasePlugin):
         }
         calendar = ContributionCalendar(start_date=start, end_date=end, data = data)
         kw = Storage()
-        kw.example_tab = get_example_tab()
+        kw.example_tab = get_example_tab(tab_default="calendar")
         kw.calendar = calendar
         self.writehtml(self.HTML, **kw)
 
