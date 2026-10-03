@@ -1,0 +1,239 @@
+/**
+ * 月历组件 (xnote.webui.MonthCalendar)
+ *
+ * 约定(重要):
+ *   1. 本文件会打进 app.build.css, 只写布局/尺寸/配色, 配色统一走 --x-* 主题变量
+ *      并给出回退值(默认主题不加载 theme-*.css, 变量取不到)。
+ *   2. 单元格是等宽等高的正方形: 宽度由 grid 的 7 列决定, 高度用 aspect-ratio
+ *      跟随宽度, 所以不同月份的月历尺寸完全一致。
+ *   3. hover 效果: 背景+描边高亮, 带 tip 的单元格额外弹出气泡(纯 CSS, 无 JS)。
+ *   4. 必须清除浮动: 常见用法是放在 <div class="card"> 里, 而全局样式 .card-title 是
+ *      float:left + width:100%。月历头部 (.x-calendar-head) 是 flex 容器(= BFC 根),
+ *      按规范不能与浮动重叠, 会被压缩进浮动「右边剩下的空间」; 浮动占了 100% 宽 →
+ *      剩余空间为 0 → 头部塌缩成 0 宽, justify-content:center 把按钮挤到卡片外并换行。
+ *      所以这里显式 clear:both 让月历整体排到浮动下方。
+ */
+
+.x-calendar {
+    /* 见上方说明 4: 避开 .card-title 等外部浮动元素 */
+    clear: both;
+
+    --x-calendar-bg: var(--x-surface, #ffffff);
+    --x-calendar-bg-hover: var(--x-surface-2, #f2f5fa);
+    --x-calendar-border: var(--x-border, #e3e6ea);
+    --x-calendar-text: var(--x-text, #333333);
+    --x-calendar-text-weak: var(--x-text-3, #98a1ab);
+    --x-calendar-accent: var(--x-primary, #3b82f6);
+    --x-calendar-accent-soft: var(--x-info-soft, rgba(59, 130, 246, 0.12));
+
+    box-sizing: border-box;
+    width: 100%;
+    color: var(--x-calendar-text);
+    user-select: none;
+}
+
+/** 第一行: 【上个月】+ 年份/月份下拉 +【下个月】+【今天】 **/
+
+.x-calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 工具行不换行: 即使容器变窄也保持一行, 不出现竖排文字 */
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+    width: 100%;
+    gap: 6px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+/** 头部子元素不参与收缩, 避免按钮被压成竖排文字 **/
+
+.x-calendar-head > * {
+    flex-shrink: 0;
+}
+
+.x-calendar-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+}
+
+.x-calendar-prev,
+.x-calendar-next,
+.x-calendar-today {
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+/** 第二行: 标题（可选，show_title=True 时才渲染） **/
+
+.x-calendar-title {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    text-align: center;
+}
+
+/** 星期表头 **/
+
+.x-calendar-week,
+.x-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.x-calendar-week-cell {
+    box-sizing: border-box;
+    padding: 6px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--x-calendar-text-weak);
+}
+
+/** 日期单元格: 等宽等高 **/
+
+.x-calendar-cell {
+    position: relative;
+    box-sizing: border-box;
+    /* 宽高一致: 宽度由 grid 列宽决定, 高度跟随宽度 */
+    aspect-ratio: 1 / 1;
+    min-height: 64px;
+    padding: 4px;
+    overflow: hidden;
+    border: 1px solid var(--x-calendar-border);
+    background-color: var(--x-calendar-bg);
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.x-calendar-day {
+    font-size: 13px;
+    line-height: 18px;
+    text-align: right;
+}
+
+.x-calendar-infos {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 2px;
+}
+
+.x-calendar-info {
+    display: block;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 12px;
+    line-height: 17px;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--x-calendar-text);
+    background-color: var(--x-calendar-accent-soft);
+}
+
+a.x-calendar-info:hover {
+    text-decoration: underline;
+    color: var(--x-calendar-accent);
+}
+
+/** 非本月的日期 (补齐前后空白) **/
+
+.x-calendar-out {
+    background-color: transparent;
+}
+
+.x-calendar-out .x-calendar-day {
+    color: var(--x-calendar-text-weak);
+}
+
+/** 今天 **/
+
+.x-calendar-today-cell .x-calendar-day {
+    display: inline-block;
+    min-width: 20px;
+    border-radius: 50%;
+    text-align: center;
+    color: #ffffff;
+    background-color: var(--x-calendar-accent);
+}
+
+/** hover 效果 **/
+
+.x-calendar-cell:hover {
+    z-index: 2;
+    border-color: var(--x-calendar-accent);
+    background-color: var(--x-calendar-bg-hover);
+    box-shadow: 0 2px 8px var(--x-shadow, rgba(0, 0, 0, 0.12));
+}
+
+/** hover 气泡: 只有带 data-tip 的单元格才显示 **/
+
+.x-calendar-has-tip:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    z-index: 10;
+    transform: translate(-50%, -4px);
+    max-width: 200px;
+    width: max-content;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 16px;
+    white-space: normal;
+    color: #ffffff;
+    background-color: var(--x-text, #24292e);
+    box-shadow: 0 2px 8px var(--x-shadow, rgba(0, 0, 0, 0.2));
+}
+
+.x-calendar-has-tip:hover::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    z-index: 10;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top-color: var(--x-text, #24292e);
+}
+
+/** 可选修饰: 信息高亮(x-calendar-info-red) **/
+
+.x-calendar-info-red,
+.x-calendar-info-red:hover {
+    color: var(--x-danger, #d9363e);
+    background-color: var(--x-danger-soft, rgba(217, 54, 62, 0.12));
+}
+
+/** 可选修饰: 示例代码块(x-calendar-code) **/
+
+pre.x-calendar-code {
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 4px;
+    overflow: auto;
+    font-size: 12px;
+    line-height: 18px;
+    background-color: var(--x-surface-2, #f5f7fa);
+}
+
+/** 窄屏下放宽单元格, 保证文字可读 **/
+
+@media screen and (max-width: 768px) {
+    .x-calendar-cell {
+        aspect-ratio: auto;
+        min-height: 72px;
+    }
+
+    .x-calendar-info {
+        font-size: 11px;
+    }
+}

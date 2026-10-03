@@ -152,6 +152,7 @@ def build_app_css():
         builder.append("./_static/css/base/common-tree.css")
         builder.append("./_static/css/base/common-select.css")
         builder.append("./_static/css/base/common-grid.css")
+        builder.append("./_static/css/base/common-calendar.css")
         builder.append("./_static/css/base/common-misc.css")
         builder.append("./_static/css/base/common-upload.css")
 
