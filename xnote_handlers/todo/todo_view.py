@@ -165,6 +165,8 @@ class ProjectListPlugin(_TodoListPlugin):
         page_max = max(1, int(math.ceil(total / page_size)))
 
         list_view = self.create_list_view()
+        redirect_url = quote(webutil.get_request_url())
+
         for project in projects:
             bucket = count_map.get(project.project_id, {})
             pending_count = bucket.get(TodoStatusEnum.not_started.value, 0) + \
@@ -176,8 +178,9 @@ class ProjectListPlugin(_TodoListPlugin):
             item = ListViewItem(icon_class="fa fa-folder-o", href=href,
                                 css_class="todo-project-row", show_chevron_right=True)
             item.add_span(text=project.name, css_class="bold")
-            item.extra.add(EditFormActionLink(
-                text=T("编辑"), url="?action=edit&model=project&project_id=%s" % project.project_id))
+
+            edit_link = f"?action=edit&model=project&project_id={project.project_id}&redirect_url={redirect_url}"
+            item.extra.add_link(text=T("编辑"), href=edit_link, is_bracketed=True)
             item.extra.add(ConfirmActionLink(
                 text=T("归档"), url="?action=archive&model=project&project_id=%s" % project.project_id,
                 msg=T("确定归档项目【%s】吗?") % project.name))
@@ -194,7 +197,7 @@ class ProjectListPlugin(_TodoListPlugin):
             
             list_view.add(item)
             
-        self.option_html = EditFormButton(text=T("新建项目"), url="?action=edit&model=project").render()
+        self.option_html = TextLink(text=T("新建项目"), href="?action=edit&model=project&is_create=true", css_class="btn").render()
         self.update_aside(AsideConfig.default_aside_html)
         # 顶部全局搜索组件：项目首页跨项目搜索全部待办（status=all 不过滤状态），提交到待办列表页
         self.search_action = TASK_PAGE_PATH
@@ -205,17 +208,22 @@ class ProjectListPlugin(_TodoListPlugin):
                                   page=page, page_max=page_max, page_total=total, page_size=page_size)
 
     def handle_edit(self):
+        self.update_aside(AsideConfig.default_aside_html)
+        is_create = xutils.get_argument_bool("is_create")
+        redirect_url = xutils.get_argument_str("redirect_url")
         user_id = xauth.current_user_id()
         project_id = xutils.get_argument_int("project_id", 0)
         project = ProjectDao.get_by_id(project_id, user_id=user_id) if project_id != 0 else None
         if project is None:
             project = ProjectRecord()
 
-        form = self.create_form()
+        form = PageEditForm()
         form.path = PROJECT_PAGE_PATH
         form.model_name = "project"
         form.id = "project_edit"
-        form.add_row(title="", field="project_id", value=str(project_id), css_class="hide")
+        form.add_hidden_input("project_id", value=str(project_id))
+        form.add_hidden_input("redirect_url", value=redirect_url)
+        
         form.add_row(title=T("名称"), field="name", value=project.name,
                      placeholder=T("项目名称"))
         form.add_row(title=T("描述"), field="desc", value=project.desc,
@@ -223,7 +231,13 @@ class ProjectListPlugin(_TodoListPlugin):
         status_row = form.add_tag_select(title=T("状态"), field="status", value=project.status)
         for e in ProjectStatusEnum.enums():
             status_row.add_option(e.name, e.value)
-        return self.response_form(form=form)
+        
+        if is_create:
+            self.title = T("新建项目")
+        else:
+            self.title = T("编辑项目")
+        
+        return self.render_form(form)
 
     def handle_save(self):
         user_id = xauth.current_user_id()
@@ -232,6 +246,8 @@ class ProjectListPlugin(_TodoListPlugin):
         name = data.get_str("name", "")
         desc = data.get_str("desc", "")
         status = data.get_str("status", ProjectStatusEnum.active.value)
+        redirect_url = data.get_str("redirect_url")
+        
         if name == "":
             return webutil.FailedResult(message="项目名称不能为空")
 
@@ -250,7 +266,8 @@ class ProjectListPlugin(_TodoListPlugin):
             project.desc = desc
             project.status = status
             ProjectDao.update(project)
-        return webutil.SuccessResult()
+        
+        return webutil.SuccessResult(redirect_url=redirect_url)
 
     def handle_archive(self):
         user_id = xauth.current_user_id()
@@ -454,6 +471,7 @@ class TaskListPlugin(_TodoListPlugin):
                      value=format_time_ms(task.update_time), readonly=True)
         # 独立页面渲染（PageEditForm 自带【保存】按钮，不再走弹窗）
         self.render_form(form)
+        self.update_aside(AsideConfig.default_aside_html)
 
     def handle_save(self):
         user_id = xauth.current_user_id()
