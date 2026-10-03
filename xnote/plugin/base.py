@@ -41,14 +41,14 @@ class BasePluginV2(BasePlugin):
     
     def _render_pre(self, text: str, css_class=""):
         div = TextContainer(css_class="row")
-        div.add_pre(text, css_class=f"{css_class}")
+        div.add_pre(text, css_class=f"my-1 border {css_class}")
         self.add_component(div)
                 
     def render_error(self, text: str, css_class=""):
-        self._render_pre(text=text, css_class=f"text-error my-1 {css_class}")
+        self._render_pre(text=text, css_class=f"text-error {css_class}")
         
     def render_info(self, text: str, css_class=""):
-        self._render_pre(text=text, css_class=f"text-info my-1 {css_class}")
+        self._render_pre(text=text, css_class=f"text-info {css_class}")
         
     def render_warn(self, text: str, css_class=""):
-        self._render_pre(text=text, css_class=f"text-warn my-1 {css_class}")
+        self._render_pre(text=text, css_class=f"text-warn {css_class}")
