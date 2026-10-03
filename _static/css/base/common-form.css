@@ -51,19 +51,20 @@ input[readonly] {
     width: 100%;
     float: left;
 }
-.form-row label {
+.form-row-label {
     width: 100px;
     display: block;
     float: left;
     line-height: 32px;
 }
 
-.form-row input, .form-row select, .form-row textarea {
+.form-row-value {
+    float: left;
     width: 300px;
 }
 
 /* textarea 的高度由 JS 按内容自动调整，这里只声明高度区间 */
-.form-row textarea {
+.form-row-textarea {
     min-height: 50px;
     max-height: 200px;
 }
@@ -133,15 +134,14 @@ input[readonly] {
 /* 表单图片/文件上传组件：label 列 + input 列，与多数 row 一致 */
 .form-upload-row {
     /* 普通块级容器 */
+    width: 400px;
 }
 /* 按钮列：始终位于 label（宽 100px）右侧，与 label 同一行（PC/移动一致） */
 .form-upload-control {
-    margin-left: 104px;
     margin-bottom: 4px;
 }
 /* 预览列：PC 下位于第二列（label 右侧、按钮下方）；移动端落到 label 下方（整行） */
 .form-upload-preview {
-    margin-left: 104px;
     overflow: hidden;
     min-height: 5px;
 }
@@ -168,18 +168,9 @@ input[readonly] {
     color: red;
     cursor: pointer;
 }
-/* 移动端：预览整行落到 label 下方（label 与按钮仍同一行） */
-@media screen and (max-width: 1000px) {
-    .form-upload-preview {
-        margin-left: 0;
-        clear: both;
-        width: 100%;
-    }
-}
 
 /* 表单的 tag 风格选择器（tag 本体与选中态复用 common-tag.css 的 .tag / .tag.active） */
 .form-tag-select {
-    margin-left: 104px; /* 与 label（宽 100px）同行的第二列 */
     line-height: 24px;
     overflow: hidden;
 }
@@ -192,13 +183,6 @@ input[readonly] {
 }
 .form-tag-select input[type=hidden] {
     display: none;
-}
-@media screen and (max-width: 1000px) {
-    .form-tag-select {
-        margin-left: 0;
-        clear: both;
-        width: 100%;
-    }
 }
 
 /* 表单的 tab 选项卡行（tabs 落在 label 右侧的第二列，与 .form-tag-select 对齐方式一致）
@@ -227,6 +211,26 @@ input[readonly] {
     .form-tab-box {
         margin-left: 0;
         clear: both;
+        width: 100%;
+    }
+
+    .form-tag-select {
+        clear: both;
+        width: 100%;
+    }
+
+    .form-row-value {
+        width: 100%;
+    }
+
+    /* 移动端：预览整行落到 label 下方（label 与按钮仍同一行） */
+    .form-upload-preview {
+        margin-left: 0;
+        clear: both;
+        width: 100%;
+    }
+
+    .form-upload-row {
         width: 100%;
     }
 }

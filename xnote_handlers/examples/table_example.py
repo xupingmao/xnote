@@ -383,6 +383,9 @@ class TableExampleFormHandler(BaseFormPlugin):
         form.add_row("标题", "title", value=record.get("title", ""))
         form.add_date_input("日期", "date", value=record.get("date", ""))
         form.add_row("内容", "content", type=FormRowType.textarea, value=record.get("content", ""))
+        
+        form.add_file(title="文件", field="files")
+        form.add_image(title="图片", field="images")
 
         if record_id:
             form.delete_url = "/examples/table/edit?action=delete&id=%s" % record_id

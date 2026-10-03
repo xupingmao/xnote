@@ -189,7 +189,7 @@ class FormRow(BaseComponent):
         """
         out = []
         if self.title:
-            out.append("<label>%s</label>" % escape_html(str(self.title)))
+            out.append('<label class="form-row-label">%s</label>' % escape_html(str(self.title)))
 
         # 子标题（heading）只有标题，没有可编辑的值
         if self.type == FormRowType.heading:
@@ -213,7 +213,7 @@ class FormRow(BaseComponent):
                        escape_html(str(self.value)), self.html_attr))
 
         if t == FormRowType.textarea:
-            return ('<textarea name="%s" class="form-row-value" placeholder="%s" %s>%s</textarea>'
+            return ('<textarea name="%s" class="form-row-value form-row-textarea" placeholder="%s" %s>%s</textarea>'
                     % (escape_html(self.field), escape_html(self.placeholder),
                        self.html_attr, escape_html(str(self.value))))
 
