@@ -48,8 +48,8 @@ class CommentFormPlugin(BaseFormPlugin):
         form.add_hidden_input("redirect_url", value=redirect_url)
         form.add_hidden_input("version", value=str(comment.version))
 
-        form.add_textarea("内容", "content", value=comment.content)
         form.add_date_input("时间", "date", value=comment.date)
+        form.add_textarea("内容", "content", value=comment.content)
 
         files_value = ",".join(comment.files or [])
         form.add_image("附件", "files", value=files_value)
