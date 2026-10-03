@@ -32,6 +32,10 @@ pre {
     white-space: pre-wrap;
     display: block;
     width: 100%;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    margin: 0;
 }
 
 p,li,a {

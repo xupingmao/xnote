@@ -1,5 +1,5 @@
 from xnote.webui.base import *
-from xnote.webui import DataForm, Card, DataTable
+from xnote.webui import DataForm, Card, DataTable, TextContainer
 from xnote.core.xtemplate import BasePlugin, LOAD_TIME
 from xnote.core import xtemplate
 from xnote.core import xconfig
@@ -38,3 +38,17 @@ class BasePluginV2(BasePlugin):
         
     def render_table(self, table: DataTable):
         self.add_component(Card().add(table))
+    
+    def _render_pre(self, text: str, css_class=""):
+        div = TextContainer(css_class="row")
+        div.add_pre(text, css_class=f"{css_class}")
+        self.add_component(div)
+                
+    def render_error(self, text: str, css_class=""):
+        self._render_pre(text=text, css_class=f"text-error my-1 {css_class}")
+        
+    def render_info(self, text: str, css_class=""):
+        self._render_pre(text=text, css_class=f"text-info my-1 {css_class}")
+        
+    def render_warn(self, text: str, css_class=""):
+        self._render_pre(text=text, css_class=f"text-warn my-1 {css_class}")

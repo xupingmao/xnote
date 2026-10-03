@@ -361,6 +361,24 @@ li.menu-item:hover {
     color: #f00;
 }
 
+.text-info {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+
+.text-warn {
+    background-color: #fffbeb;
+    border-color: #fbbf24;
+    color: #92400e;
+}
+
+.text-error {
+    background-color: #fff2f2;
+    border-color: #fecdd3;
+    color: #dc2626;
+}
+
 .blue-text {
     color: #00f;
 }

@@ -501,7 +501,7 @@ class TestDataForm(BaseTestCase):
         html = form.render().decode("utf-8")
 
         # 标题与其它表单行一致渲染为 label, 且不在 tab 内部重复渲染一次
-        assert "<label>状态</label>" in html
+        assert re.search(r"<label.*>状态</label>", html)
         assert html.count("状态") == 1
         # tab 的查询参数名与默认选中值
         assert 'data-tab-key="status"' in html

@@ -222,8 +222,11 @@ class EditFormButton(BaseComponent):
         return (f'<button class="btn {self.css_class}" onclick="xnote.table.handleEditForm(this)" '
                 f'data-url="{self.url}" data-title="{text}">{text}</button>')
 
-class TextSpan(BaseComponent):
-    """行内文本"""
+class TextBase(BaseComponent):
+    """文本基类"""
+    
+    tag_name = "span"
+    
     def __init__(self, text="", css_class="", css_style="", id=""):
         self.text = text
         self.css_class = css_class
@@ -238,7 +241,18 @@ class TextSpan(BaseComponent):
             "class": self.css_class,
         }
         attr_list = build_attrs(attr_dict)
-        return f"""<span {attr_list}>{text}</span>"""
+        tag_name = self.tag_name
+        
+        return f"""<{tag_name} {attr_list}>{text}</{tag_name}>"""
+
+class TextSpan(TextBase):
+    """行内文本"""
+    tag_name = "span"
+    
+class TextPre(TextBase):
+    """格式化文本"""
+    tag_name = "pre"
+    
 
 class Icon(BaseComponent):
     """行内图标，渲染为 <i class="{icon_class}"></i>（如 font-awesome 的 fa fa-file-text-o）"""

@@ -1,6 +1,6 @@
 from xnote.webui.base import BaseComponent, BaseContainer, Div
 from xnote.webui.component import TextSpan, EditFormButton, ConfirmButton, TextLink
-from xnote.webui.component import TextItemSep, TextNbsp, TextBr, Icon
+from xnote.webui.component import TextItemSep, TextNbsp, TextBr, Icon, TextPre
 from xnote.core import xtemplate
 from typing import Optional
 
@@ -9,6 +9,9 @@ class TextContainer(BaseContainer):
     
     def add_span(self, text="", css_class="", css_style="", id=""):
         self.children.append(TextSpan(text=text, css_class=css_class, css_style=css_style, id=id))
+        
+    def add_pre(self, text="", css_class="", css_style="", id=""):
+        self.children.append(TextPre(text=text, css_class=css_class, css_style=css_style, id=id))
     
     def add_link(self, text="", href="", css_class="", is_bracketed=False):
         self.children.append(TextLink(text=text, href=href, css_class=css_class, is_bracketed=is_bracketed))
@@ -103,6 +106,10 @@ class Card(BaseContainer):
     def __init__(self, css_class="") -> None:
         super().__init__(css_class="card " + css_class)
 
+    def add_text_container(self):
+        child = TextContainer()
+        self.add(child)
+        return child
 
 class RowPanel(TextContainer):
     """行面板容器"""

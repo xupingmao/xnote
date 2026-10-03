@@ -88,6 +88,10 @@ class FormExampleHandler(BaseTablePlugin):
         kw.dialog_form = dialog_form
         kw.example_tab = get_example_tab(tab_default="form")
         self.writehtml(self.body_html, **kw)
+        
+        self.render_info("提示文案\n第一行\n第二行")
+        self.render_warn("警告文案\n第一行\n第二行")
+        self.render_error("错误文案\n第一行\n第二行")
 
     def handle_edit(self):
         # DialogForm 是 DataForm 的语义化别名，专用于弹窗场景
