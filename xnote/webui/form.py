@@ -21,7 +21,7 @@ from xnote.webui._switch import Switch
 from xnote.webui.tab import TabBox
 from xnote.webui.container import ActionBar
 
-FormValueType = typing.Union[int, str, list]
+FormValueType = typing.Union[int, str, list, set]
 
 class FormType:
     # 弹窗编辑
@@ -95,7 +95,7 @@ class FormRow(BaseComponent):
     {% for opt_group in row.opt_groups %}
         <optgroup label="{{opt_group.label}}">
             {% for option in opt_group.options %}
-                <option value="{{option.value}}">{{option.title}}</option>
+                <option value="{{option.value}}"{% if option.selected %} selected{% end %}>{{option.title}}</option>
             {% end %}
         </optgroup>
     {% end %}
@@ -262,7 +262,33 @@ class FormRow(BaseComponent):
             result = result.decode("utf-8")
         return result
             
+    def sync_selected_options(self):
+        """按 row.value 同步 option 的选中态
+
+        <select> 元素并不支持 value 属性（浏览器直接忽略），选中态只能由
+        <option selected> 表达；前端 initSelect() 会在 DOM ready 时按 value 补一遍，
+        但 select2 常常先于它初始化而读不到值。所以这里在服务端就渲染出正确的
+        selected，多选时 value 是逗号分隔的字符串。
+        """
+        if self.value == "" or self.value is None:
+            return
+
+        selected_values = set(str(self.value).split(","))
+        for option in self.options:
+            if option.selected:
+                continue  # 调用方显式指定的优先
+            if str(option.value) in selected_values:
+                option.selected = True
+
+        for group in self.opt_groups:
+            for option in group.options:
+                if option.selected:
+                    continue
+                if str(option.value) in selected_values:
+                    option.selected = True
+
     def render_select(self):
+        self.sync_selected_options()
         result = self._select_template.generate(row = self)
         if isinstance(result, bytes):
             result = result.decode("utf-8")
@@ -384,7 +410,7 @@ class DataForm(BaseComponent):
         return row
     
     def _format_value(self, value: FormValueType) -> str:
-        if isinstance(value, list):
+        if isinstance(value, (list, set, tuple)):
             values = []
             for item in value:
                 values.append(str(item))

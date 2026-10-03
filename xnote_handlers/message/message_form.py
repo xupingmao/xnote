@@ -29,6 +29,7 @@ from .message import (
     READONLY_TODO_HINT,
     DEFAULT_TAG,
 )
+from .message_utils import mark_text_v2, get_standard_tag_set
 from .message_tag import filter_tag_list
 from xnote_handlers.message.message_utils import TagHelper, get_remote_ip
 from xnote_handlers.config import AsideConfig, LinkConfig
@@ -66,8 +67,11 @@ class MessageFormPlugin(BaseFormPlugin):
         user_id = xauth.current_user_id()
         tag_info_list = msg_dao.MsgTagInfoDao.list(user_id=user_id, offset=0, limit=1000)
         tag_info_list = filter_tag_list(tag_info_list, only_standard=True)
+        
+        result = mark_text_v2(detail)
+        tags = get_standard_tag_set(result.keywords)
                 
-        tag_select = form.add_select(title="标签", field="tag", multiple=True)
+        tag_select = form.add_select(title="标签", field="tag", multiple=True, value=tags)
         for item in tag_info_list:
             tag_select.add_option(title=item.name, value=item.name)
             

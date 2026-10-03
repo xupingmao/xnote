@@ -345,6 +345,47 @@ class TestDataForm(BaseTestCase):
         assert "添加图片" in body
         assert "添加附件" in body
 
+    def test_select_value_render_selected(self):
+        # <select> 不支持 value 属性，选中态必须由 option.selected 表达，
+        # 否则 select2 初始化时读到的是「空选中」
+        form = DataForm()
+        row = form.add_select(title="标签", field="tag", multiple=True,
+                              value={"#a#", "#c#"})
+        row.add_option("#a#", "#a#")
+        row.add_option("#b#", "#b#")
+        row.add_option("#c#", "#c#")
+        html = row.render()
+        if isinstance(html, bytes):
+            html = html.decode("utf-8")
+
+        assert '<option value="#a#" selected>' in html
+        assert '<option value="#c#" selected>' in html
+        assert '<option value="#b#" selected>' not in html
+        # 未匹配的选项仍然渲染出来
+        assert '<option value="#b#">' in html
+
+    def test_select_single_value_render_selected(self):
+        form = DataForm()
+        row = form.add_select(title="类型", field="type", value="b")
+        row.add_option("A", "a")
+        row.add_option("B", "b")
+        html = row.render()
+        if isinstance(html, bytes):
+            html = html.decode("utf-8")
+
+        assert '<option value="b" selected>' in html
+        assert '<option value="a" selected>' not in html
+
+    def test_select_empty_value_no_selected(self):
+        form = DataForm()
+        row = form.add_select(title="类型", field="type", value="")
+        row.add_option("A", "a")
+        html = row.render()
+        if isinstance(html, bytes):
+            html = html.decode("utf-8")
+
+        assert "selected" not in html
+
     def test_add_tag_select_value_from_list(self):
         form = DataForm()
         row = form.add_tag_select("标签", field="tags", value=["1", "3"], multiple=True)

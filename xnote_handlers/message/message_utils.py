@@ -19,7 +19,7 @@ import web
 import typing
 import re
 
-from typing import List, Optional
+from typing import List, Optional, Sequence
 from xnote.core import xconfig
 from xnote.core.xtemplate import T
 from xutils import textutil
@@ -396,8 +396,7 @@ def is_user_tag_or_heading(tag: str):
 def get_user_tag_or_heading_set(tags):
     return set(filter(is_user_tag_or_heading, tags))
 
-def get_standard_tag_set(tags):
-    # type: (set)->set
+def get_standard_tag_set(tags: Sequence[str]):
     return set(filter(is_standard_tag, tags))
 
 

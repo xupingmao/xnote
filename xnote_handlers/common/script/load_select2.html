@@ -5,6 +5,25 @@
     <link rel="stylesheet" href="{{_server_home}}/_static/lib/select2/4.0.13/select2.min.css" type="text/css" />
     <script type="text/javascript" src="{{_server_home}}/_static/lib/select2/4.0.13/select2.min.js"></script>
     <script>
+        // 把 select 的 value 属性同步到 option 的选中态
+        // 说明: <select> 不支持 value 属性，只有 <option selected> 才算选中；
+        // 而本函数可能早于 xnote.refresh() 里的 initSelect() 执行（jQuery ready
+        // 回调按注册顺序执行，本片段通常位于表单 HTML 之前），若不先同步，
+        // select2 会读到「没有选中项」从而渲染成空，后续再改 DOM 也不会同步。
+        function syncSelectValue($elem) {
+            var value = $elem.attr("value");
+            if (value === undefined || value === null || value === "") {
+                return;
+            }
+            var multiple = $elem.attr("multiple");
+            var values = (multiple === "multiple") ? value.split(",") : [value];
+            $elem.find("option").each(function (index, child) {
+                if (values.indexOf(child.value) >= 0) {
+                    child.selected = "selected";
+                }
+            });
+        }
+
         xnote.initSelect2 = function () {
             // 只有大于等于10个选项时展示搜索
             $("select").each(function (index, elem) {
@@ -22,6 +41,9 @@
                 }
                 // select2默认支持 data-placeholder
                 // https://select2.org/configuration/data-attributes
+
+                // 初始化前先把 value 落到 option.selected，保证 select2 读到初始值
+                syncSelectValue($elem);
 
                 // 远程搜索（ajax）选择器：通过 data-select2-ajax-url 声明
                 var ajaxUrl = $elem.attr("data-select2-ajax-url");
