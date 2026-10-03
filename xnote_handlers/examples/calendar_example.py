@@ -6,7 +6,7 @@ from datetime import date
 from xutils import Storage
 from xnote.core import xauth
 from xnote.plugin.table_plugin import BaseTablePlugin, BasePlugin
-from xnote.webui.calendar import ContributionCalendar
+from xnote.webui import ContributionCalendar
 from xnote_handlers.config import LinkConfig
 from .example_nav import get_example_tab
 

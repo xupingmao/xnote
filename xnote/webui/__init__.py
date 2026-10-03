@@ -19,4 +19,4 @@ from ._pagination import Pagination
 from .tree import Tree, TreeNode
 from .more_actions import MoreActionsMenu, MenuItem
 from .comment import CommentBox
-from .calendar import CalendarCell, CalendarDateInfo, ContributionCalendar, MonthCalendar
+from ._calendar import CalendarCell, CalendarDateInfo, ContributionCalendar, MonthCalendar
