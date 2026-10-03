@@ -175,7 +175,7 @@ Python-side UI components extend `BaseComponent` (`xnote/webui/base.py`), provid
 
 Available: `Pagination`, `ListView`, `Card`, `Table`, `Form`, `TabBox`, `Switch`, `Div`, `TextLink`, `ActionLink`, `Input`, `Textarea`, `Panel`, `BlockTitle`, `ActionButton`, `RawHtml`, `TextSpan`, `Checkbox`, etc.
 
-> 组件模块的可见性：上文"webui 组件模块默认私有，统一由 `__init__.py` 对外暴露"约定要求——新增组件类必须先在 `xnote/webui/__init__.py` 中 `from .xxx import Yyy` 导出，业务侧再 `from xnote.webui import Yyy`（或 `xnote.plugin`）使用，严禁直接 import 内部模块路径（见编码规范）。
+> 组件模块的可见性：上文"webui 组件模块默认私有，统一由 `__init__.py` 对外暴露"约定要求——新增组件模块命名使用下划线前缀，比如`_list.py`，组件类必须先在 `xnote/webui/__init__.py` 中 `from .xxx import Yyy` 导出，业务侧再 `from xnote.webui import Yyy`（或 `xnote.plugin`）使用，严禁直接 import 内部模块路径（见编码规范）。
 
 ### 优先用组件开发页面
 
