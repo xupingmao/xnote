@@ -461,7 +461,7 @@ class TestTodoPages(BaseTestCase):
                                             data=dict(name="操作项目"))["data"]
         row = self._find_project_row_across_pages(pid)
         self.assertIsNotNone(row, "未找到 project_id=%s 的项目行" % pid)
-        self.assertIn("action=edit&amp;model=project&amp;project_id=%s" % pid, row)
+        self.assertIn("action=edit&model=project&project_id=%s" % pid, row)
         self.assertIn("action=archive&amp;model=project&amp;project_id=%s" % pid, row)
         self.assertNotIn("action=delete", row)
 
