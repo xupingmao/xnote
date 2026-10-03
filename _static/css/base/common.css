@@ -75,13 +75,11 @@
     text-decoration: underline;
 }
 
-
 .line-td {
     border-top: none;
     border-left: none;
     border-right: none;
 }
-
 
 /** 以下为具体场景下的样式 **/
 .menu-selected {
@@ -164,7 +162,6 @@ li.menu-item:hover {
   left: 0px;
   top: 0px;
 }
-
 
 .root {
     /*    
@@ -270,7 +267,6 @@ li.menu-item:hover {
     border: 1px solid #ccc;
 }
 
-
 .nav-search {
     width: 345px;
     float: right;
@@ -341,12 +337,7 @@ li.menu-item:hover {
     width: 100%;
 }
 
-
 /** file-list样式 END **/
-
-.green-text {
-    color: green;
-}
 
 .green-bg {
     color: #fff;
@@ -355,40 +346,6 @@ li.menu-item:hover {
 
 .red-bg {
     background-color: red;
-}
-
-.red-text {
-    color: #f00;
-}
-
-.text-info {
-    background-color: #eff6ff;
-    border-color: #3b82f6;
-    color: #1e40af;
-}
-
-.text-warn {
-    background-color: #fffbeb;
-    border-color: #fbbf24;
-    color: #92400e;
-}
-
-.text-error {
-    background-color: #fff2f2;
-    border-color: #fecdd3;
-    color: #dc2626;
-}
-
-.blue-text {
-    color: #00f;
-}
-
-.center-text {
-    text-align: center;
-}
-
-.gray-text {
-    color: #888;
 }
 
 .error {
@@ -515,7 +472,6 @@ li.menu-item:hover {
     background-color: gray;
 }
 
-
 .dialog-title {
     float: left;
     width: 100%;
@@ -530,11 +486,9 @@ li.menu-item:hover {
     border: none
 }
 
-
 .no-border tr td {
     border: none;
 }
-
 
 #searchBox {
     margin-bottom: 4px;
@@ -689,22 +643,6 @@ li.menu-item:hover {
     float: right;
 }
 
-.align-right {
-    text-align: right;
-}
-
-.align-center {
-    text-align: center;
-}
-
-.small-font {
-    font-size: small;
-}
-
-.code {
-    font-family: Consolas, monospace;
-}
-
 .nav-ul {
     display: block;
     float: left;
@@ -718,10 +656,6 @@ li.menu-item:hover {
     padding-right: 4px;
     display: block;
     float: left;
-}
-
-.keyword {
-    color: blue;
 }
 
 .output-title {
@@ -740,7 +674,6 @@ li.menu-item:hover {
     border-top: none;
     font-family: consolas, monospace;
 }
-
 
 .bot-btn {
     position: fixed;
@@ -815,26 +748,7 @@ li.menu-item:hover {
     width: 100%;
 }
 
-/** 颜色属性 **/
-.red {
-    color:red;
-}
-
-.black {
-    color: black;
-}
-
-.orange {
-    color: orange;
-}
-
-.green {
-    color: green;
-}
-
-.gray {
-    color: gray;
-}
+/* 颜色属性（.red/.green/.gray 等）已拆分到 base/common-text.css */
 
 .small-device {
     display: none;
@@ -874,7 +788,6 @@ li.menu-item:hover {
     background-color: #999;
 }
 
-
 .scrollbar::-webkit-scrollbar-track { 
     /*滚动条里面轨道*/
     /*border-radius: 8px; */
@@ -884,7 +797,6 @@ li.menu-item:hover {
 .x-option-dialog div.layui-layer-content {
     padding: 8px;
 }
-
 
 .light-bottom-border {
     border-bottom: 1px solid #eee;
@@ -908,14 +820,6 @@ li.menu-item:hover {
     padding-bottom: 8px;
 }
 
-.bold {
-    font-weight: bold;
-}
-
-.bolder {
-    font-weight: bolder;
-}
-
 /* 高优先级样式 */
 /* 相邻的margin会合并, padding不会合并 */
 .col-md-1{float:left;width:8.3%;}
@@ -930,19 +834,6 @@ li.menu-item:hover {
 .col-md-10{float:left;width:83.3%;}
 .col-md-11{float:left;width:91.7%;}
 .col-md-12{float:left;width:100%;}
-.col-md-offset-12{margin-left:100%;}
-.col-md-offset-11{margin-left:91.66666666666666%;}
-.col-md-offset-10{margin-left:83.33333333333334%;}
-.col-md-offset-9{margin-left:75%;}
-.col-md-offset-8{margin-left:66.66666666666666%;}
-.col-md-offset-7{margin-left:58.333333333333336%;}
-.col-md-offset-6{margin-left:50%;}
-.col-md-offset-5{margin-left:41.66666666666667%;}
-.col-md-offset-4{margin-left:33.33333333333333%;}
-.col-md-offset-3{margin-left:25%;}
-.col-md-offset-2{margin-left:16.666666666666664%;}
-.col-md-offset-1{margin-left:8.333333333333332%;}
-.col-md-offset-0{margin-left:0;}
 .row{float: left;width: 100%;overflow: auto;}
 .row-extra {
     float: right;

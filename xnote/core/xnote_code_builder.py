@@ -131,7 +131,7 @@ def build_app_css():
         builder.append("./_static/css/base/reset.css")
         builder.append("./_static/css/base/common.css")
         builder.append("./_static/css/base/common-spacing.css")
-        builder.append("./_static/css/base/common-span.css")
+        builder.append("./_static/css/base/common-text.css")
         builder.append("./_static/css/base/common-link.css")
         builder.append("./_static/css/base/common-list.css")
         builder.append("./_static/css/base/common-mobile.css")

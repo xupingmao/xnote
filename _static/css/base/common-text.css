@@ -1,0 +1,109 @@
+/**
+ * 文本相关的通用样式（颜色/字号/字重/对齐/字体/高亮）
+ * @author xupingmao
+ * @since 2026/10/03
+ * @filename common-text.css
+ */
+
+.card-title-span {
+    padding-left: 4px;
+    font-weight: bold;
+}
+
+.highlight-word {
+    background-color: #fff380;
+    color: #000;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/** 文本颜色 **/
+.green-text {
+    color: green;
+}
+
+.red-text {
+    color: #f00;
+}
+
+.blue-text {
+    color: #00f;
+}
+
+.gray-text {
+    color: #888;
+}
+
+/** 提示文本 **/
+.text-info {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+
+.text-warn {
+    background-color: #fffbeb;
+    border-color: #fbbf24;
+    color: #92400e;
+}
+
+.text-error {
+    background-color: #fff2f2;
+    border-color: #fecdd3;
+    color: #dc2626;
+}
+
+/** 颜色属性 **/
+.red {
+    color: red;
+}
+
+.black {
+    color: black;
+}
+
+.orange {
+    color: orange;
+}
+
+.green {
+    color: green;
+}
+
+.gray {
+    color: gray;
+}
+
+/** 对齐 **/
+.center-text {
+    text-align: center;
+}
+
+.align-right {
+    text-align: right;
+}
+
+.align-center {
+    text-align: center;
+}
+
+/** 字号 / 字重 / 字体 **/
+.small-font {
+    font-size: small;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.bolder {
+    font-weight: bolder;
+}
+
+.code {
+    font-family: Consolas, monospace;
+}
+
+.keyword {
+    color: blue;
+}
