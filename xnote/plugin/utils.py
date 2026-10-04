@@ -30,6 +30,8 @@ class ParamDict:
     
     def get_list(self, key: str, default_value=[]):
         value = self._dict.get(key, default_value)
+        if value is None:
+            return default_value
         if not isinstance(value, list):
             raise Exception(f"expect list but got {type(value)}")
         return value
