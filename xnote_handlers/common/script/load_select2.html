@@ -77,9 +77,12 @@
                     return;
                 }
 
+                var tags = $elem.attr("data-tags");
+
                 $elem.select2({
                     minimumResultsForSearch: 10,
-                    dropdownParent:parent
+                    dropdownParent:parent,
+                    tags: tags
                 });
             })
         };

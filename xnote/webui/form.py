@@ -88,6 +88,7 @@ class FormRow(BaseComponent):
     # 兼容弹窗（html 注入、<script> 不执行）与独立页面两种场景。
     ajax_url = ""
     ajax_data = "" # 额外的查询参数(JSON字符串)，如 '{"type":"public"}'
+    select2_tags = False
 
 
     _select_html = """
@@ -178,6 +179,9 @@ class FormRow(BaseComponent):
             result += f' data-select2-ajax-url="{self.ajax_url}"'
             if self.ajax_data:
                 result += f" data-select2-ajax-data='{self.ajax_data}'"
+                
+        if self.select2_tags:
+            result += " data-tags=true"
         
         return result
     
@@ -431,7 +435,7 @@ class DataForm(BaseComponent):
         return row
     
     def add_select(self, title = "", field = "", placeholder = "", value: FormValueType = "", 
-                   css_class = "", readonly = False, multiple = False):
+                   css_class = "", readonly = False, multiple = False, select2_tags = False):
         row = FormRow()
         row.id = self._create_row_id()
         row.type = FormRowType.select
@@ -442,6 +446,7 @@ class DataForm(BaseComponent):
         row.css_class = css_class
         row.readonly = readonly
         row.multiple = multiple
+        row.select2_tags = select2_tags
         
         self.rows.append(row)
         return row

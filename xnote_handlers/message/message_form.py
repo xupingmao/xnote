@@ -29,8 +29,8 @@ from .message import (
     READONLY_TODO_HINT,
     DEFAULT_TAG,
 )
-from .message_utils import mark_text_v2, get_standard_tag_set
-from .message_tag import filter_tag_list
+from .message_utils import mark_text_v2, get_standard_tag_set, normalize_tags
+from .message_tag import filter_tag_list, add_tags_to_content, split_content_tags
 from xnote_handlers.message.message_utils import TagHelper, get_remote_ip
 from xnote_handlers.config import AsideConfig, LinkConfig
 
@@ -52,6 +52,7 @@ class MessageFormPlugin(BaseFormPlugin):
         form.model_name = "message"
 
         redirect_url = xutils.get_argument_str("redirect_url")
+        tags, content = split_content_tags(detail.content)
         
         int_id = getattr(detail, "int_id", 0)
         form.add_hidden_input("id", value=str(int_id) if not is_create else "0")
@@ -59,21 +60,19 @@ class MessageFormPlugin(BaseFormPlugin):
         
         form.add_row("tag", "tag", value=detail.tag, css_class="hide")
         form.add_date_input("时间", "date", value=detail.date)
-        form.add_textarea("内容", "content", value=detail.content)
-
-        files_value = ",".join(detail.files or [])
-        form.add_image("附件", "files", value=files_value)
+        form.add_textarea("内容", "content", value=content)
 
         user_id = xauth.current_user_id()
         tag_info_list = msg_dao.MsgTagInfoDao.list(user_id=user_id, offset=0, limit=1000)
         tag_info_list = filter_tag_list(tag_info_list, only_standard=True)
         
-        result = mark_text_v2(detail)
-        tags = get_standard_tag_set(result.keywords)
-                
-        tag_select = form.add_select(title="标签", field="tag", multiple=True, value=tags)
+        tag_select = form.add_select(title="标签", field="tags", multiple=True, value=tags, select2_tags=True)
         for item in tag_info_list:
             tag_select.add_option(title=item.name, value=item.name)
+                
+        files_value = ",".join(detail.files or [])
+        form.add_image("附件", "files", value=files_value)
+
             
         # 返回列表的地址（后端基于 Referer/tag 构建，提交时带回，保存/删除后跳回原列表）
 
@@ -121,8 +120,8 @@ class MessageFormPlugin(BaseFormPlugin):
         param = self.get_param_dict()
         msg_id = param.get_int("id", 0)
         content = param.get_str("content", "")
-        tag = param.get_str("tag", DEFAULT_TAG)
         files_str = param.get_str("files", "")
+        tags = param.get_list("tags")
         # 去重并保持顺序（前端上传组件偶发会将同一附件计数两次）
         files = [f for f in dict.fromkeys(files_str.split(",")) if f]
         date = param.get_str("date", "")
@@ -142,7 +141,10 @@ class MessageFormPlugin(BaseFormPlugin):
         msg = MessageDao.get_by_int_id(msg_id)
         if msg is not None and msg.tag in READONLY_TODO_TAGS:
             return webutil.FailedResult(message=READONLY_TODO_HINT)
-
+        
+        normalize_tags(tags)
+        content = add_tags_to_content(content, tags)
+        
         update_message_content(msg_id, user_id, content, files, date=date)
         return webutil.SuccessResult(data=dict(id=msg_id), redirect_url=redirect_url)
 

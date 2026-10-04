@@ -795,5 +795,14 @@ def parse_filter_config(config_value: str) -> TagFilterConfig:
     return TagFilterConfig(tag1=tag1_list, tag2=[], tag3=[])
 
 
+def normalize_tags(tags: List[str]):
+    for index, tag in enumerate(tags):
+        if not tag.startswith("#"):
+            tag = "#" + tag
+        if not tag.endswith("#"):
+            tag = tag + "#"
+        tags[index] = tag
+        
+
 xutils.register_func("message.list_hot_tags", list_hot_tags)
 xutils.register_func("message.filter_default_content", filter_default_content)

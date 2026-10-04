@@ -27,7 +27,13 @@ class ParamDict:
     
     def get_bool(self, key: str, default_value=False):
         return bool(self._dict.get(key, default_value))
-
+    
+    def get_list(self, key: str, default_value=[]):
+        value = self._dict.get(key, default_value)
+        if not isinstance(value, list):
+            raise Exception(f"expect list but got {type(value)}")
+        return value
+        
     def get(self, key: str, default_value = None):
         return self._dict.get(key, default_value)
     

@@ -5,7 +5,7 @@ import json
 import xutils
 import logging
 
-from typing import List
+from typing import List, Sequence
 from xnote.core import xauth, xtemplate, xconfig, xmanager
 from xnote.core.xtemplate import T
 from xutils import Storage, webutil, dateutil
@@ -88,8 +88,11 @@ def get_recent_keywords(user_name: str, tag="search", limit =20):
     return result
 
 def add_tag_to_content(content="", new_tag=""):
-    msg_struct = message_utils.mark_text_to_tokens(content=content)
+    return add_tags_to_content(content, [new_tag])
 
+def split_content_tags(content: str):
+    msg_struct = message_utils.mark_text_to_tokens(content=content)
+        
     tags = []
     rest_str_list = []
     is_rest = False
@@ -110,11 +113,15 @@ def add_tag_to_content(content="", new_tag=""):
             is_rest = True
             rest_str_list.append(token.value)
 
-    if new_tag not in tags:
-        tags.append(new_tag)
+    return tags, "".join(rest_str_list)
 
-    rest_text = "".join(rest_str_list).strip()
-    return " ".join(tags) + "\n" + rest_text
+def add_tags_to_content(content: str, new_tags: Sequence[str]): 
+    tags, rest_content = split_content_tags(content)
+    for tag_name in new_tags:
+        if tag_name not in tags:
+            tags.append(tag_name)
+
+    return " ".join(tags) + "\n" + rest_content
 
 def update_tag_amount(tag_info: msg_dao.MsgTagInfo, user_id=0, key=""):
     amount = msg_dao.MsgTagBindDao.count_by_key(user_id=user_id, key=key)
