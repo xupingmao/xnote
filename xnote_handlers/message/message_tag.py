@@ -116,11 +116,12 @@ def split_content_tags(content: str):
     return tags, "".join(rest_str_list)
 
 def add_tags_to_content(content: str, new_tags: Sequence[str]): 
+    if len(new_tags) == 0:
+        return content
     tags, rest_content = split_content_tags(content)
     for tag_name in new_tags:
         if tag_name not in tags:
             tags.append(tag_name)
-
     return " ".join(tags) + "\n" + rest_content
 
 def update_tag_amount(tag_info: msg_dao.MsgTagInfo, user_id=0, key=""):
