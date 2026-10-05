@@ -111,7 +111,9 @@ class _NoteRelationServiceImpl:
     
     def get_table(self, note_id=0, user_id=0):
         relation_list = NoteRelationDao.list(user_id=user_id, note_id=note_id)
-        return self.render_table(relation_list)
+        table = self.render_table(relation_list)
+        table.action_bar.add_edit_button(text="创建关联", url=f"/note/relation?action=edit&note_id={note_id}")
+        return table
 
     def get_rev_table(self, target_id=0, user_id=0, offset=0, limit=20):
         relation_list = NoteRelationDao.list(user_id=user_id, target_id=target_id)
@@ -163,7 +165,6 @@ class _NoteRelationServiceImpl:
         if ctx.tab == "relation":
             ctx.hide_components()
             ctx.show_relation = True
-            ctx.create_btn_text = "创建关联"
             ctx.relation_table = NoteRelationService.get_table(note_id=ctx.note_id, user_id=ctx.user_id)
             ctx.rev_relation_table = NoteRelationService.get_rev_table(target_id=ctx.note_id, user_id=ctx.user_id)
         

@@ -11,7 +11,7 @@ from xnote.core import xconfig
 from xutils.db.dbutil_helper import new_from_dict
 from xutils.base import EnumItem, BaseDataRecord
 from xnote_handlers.note.constant import NoteType
-from xnote.plugin import TextLink, TabBox, DataTable, Card
+from xnote.plugin import TextLink, TabBox, DataTable, Card, DataForm
 from xutils.functions import del_dict_key, delete_None_values
 from xutils.fsutil import FileItem
 
@@ -380,6 +380,7 @@ class NoteViewContext(Storage):
     meta_table: DataTable
     filelist: List[FileItem]
     note_fragment: Card
+    edit_form: Optional[DataForm] = None
 
     def __init__(self, **kw):
         self.user_name = ""
