@@ -104,6 +104,10 @@
     font-family: Consolas, monospace;
 }
 
+.inline-block {
+    display: inline-block;
+}
+
 .keyword {
     color: blue;
 }
