@@ -330,7 +330,7 @@ class TagListHtmlHandler:
 
     html = """
 {% for tag in tag_list %}
-    <a class="tag lightgray large create-tag">{{ tag.tag_name }}</a>
+    <a class="tag grayblue large create-tag">{{ tag.tag_name }}</a>
 {% end %}
 """
 
