@@ -354,6 +354,12 @@ var XUI = function(window) {
             xnote.initSwitch();
         }
 
+        // 表单组件的初始化（上传/日期/textarea/oninput-ajax 等）
+        // 弹窗是通过 html 注入的，注入的 <script> 不会执行，只能在这里统一初始化
+        if (xnote.initForm) {
+            xnote.initForm();
+        }
+
         if (xnote.initLaydate) {
             xnote.initLaydate();
         }

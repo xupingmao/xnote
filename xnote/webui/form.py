@@ -11,8 +11,8 @@
 
 import typing
 import itertools
-from typing import Union
-from xutils import Storage
+from typing import Union, List
+from xutils import Storage, safe_str
 from xutils.textutil import escape_html
 from xnote.core import xtemplate
 from xnote.webui.base import BaseComponent
@@ -89,6 +89,10 @@ class FormRow(BaseComponent):
     ajax_url = ""
     ajax_data = "" # 额外的查询参数(JSON字符串)，如 '{"type":"public"}'
     select2_tags = False
+    
+    # oninput 事件回调：值变化时请求该地址，返回的 data 交给 xnote.executeCommands 执行
+    # （前端逻辑见 _static/js/xnote-ui/x-form.js，防抖 300ms；select 走 change 事件）
+    oninput_ajax_url = ""
 
 
     _select_html = """
@@ -182,6 +186,10 @@ class FormRow(BaseComponent):
                 
         if self.select2_tags:
             result += " data-tags=true"
+            
+        if self.oninput_ajax_url:
+            # 只用 HTML 转义，不能用 quote（会把 ? & = 一起转义成 %3F 等，URL 就废了）
+            result += f' data-oninput-ajax-url="{escape_html(self.oninput_ajax_url)}"'
         
         return result
     
@@ -191,7 +199,7 @@ class FormRow(BaseComponent):
         说明：原先 form.html 模板里按类型逐个 if 分支渲染行内的 value，现在统一收敛到这里；
         value 部分统一包进 <div class="form-row-value"> 容器，便于和 .query-form 等样式对齐。
         """
-        out = []
+        out:List[str] = []
         if self.title:
             out.append('<label class="form-row-label">%s</label>' % escape_html(str(self.title)))
 
@@ -200,9 +208,7 @@ class FormRow(BaseComponent):
             return "".join(out)
 
         out.append('<div class="form-row-value">')
-        value_html = self.render_value()
-        if isinstance(value_html, bytes):
-            value_html = value_html.decode("utf-8")
+        value_html = safe_str(self.render_value())
         out.append(value_html)
         out.append('</div>')
         return "".join(out)
@@ -294,9 +300,7 @@ class FormRow(BaseComponent):
     def render_select(self):
         self.sync_selected_options()
         result = self._select_template.generate(row = self)
-        if isinstance(result, bytes):
-            result = result.decode("utf-8")
-        return result
+        return safe_str(result)
 
     def render_tag_select(self):
         """渲染 tag 风格选择器，复用通用 TagSelect 组件。
@@ -400,6 +404,20 @@ class DataForm(BaseComponent):
         row.readonly = readonly
         row.date_type = date_type
         
+        self.rows.append(row)
+        return row
+    
+    def add_input(self, title="", field="", placeholder="", value="", css_class="", readonly=False, oninput_ajax_url=""):
+        row = FormRow()
+        row.id = self._create_row_id()
+        row.title = title
+        row.field = field
+        row.placeholder = placeholder
+        row.value = value
+        row.type = FormRowType.input
+        row.css_class = css_class
+        row.readonly = readonly        
+        row.oninput_ajax_url = oninput_ajax_url
         self.rows.append(row)
         return row
     

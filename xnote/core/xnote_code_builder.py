@@ -202,6 +202,7 @@ def build_app_js():
         builder.append("./_static/js/xnote-ui/x-template.js")
         builder.append("./_static/js/xnote-ui/x-url.js")
         builder.append("./_static/js/xnote-ui/x-table.js")
+        builder.append("./_static/js/xnote-ui/x-form.js")
 
         # app.js
         builder.append("./_static/js/app.js")

@@ -42,6 +42,8 @@ class FormExampleHandler(BaseTablePlugin):
             return self.handle_edit()
         if action == "save":
             return self.handle_save()
+        if action == "on_input":
+            return self.handle_on_input()
         return self.handle_page()
 
     def handle_page(self):
@@ -51,6 +53,12 @@ class FormExampleHandler(BaseTablePlugin):
         static_form.action_bar.add_css_class("border-b")
         static_form.action_bar.add_title("表单标题")
         static_form.add_row("名称", "name", value="示例名称")
+        # oninput_ajax_url: 值变化时（防抖300ms）请求后端，返回的命令由前端
+        # xnote.executeCommands 执行（见 _static/js/xnote-ui/x-form.js）
+        static_form.add_input("联动输入", "on_input_demo", value="改我试试",
+                              oninput_ajax_url="/examples/form?action=on_input")
+        static_form.add_input("联动结果", "on_input_result", value="",
+                              placeholder="输入上面的内容会自动回填到这里")
         type_row = static_form.add_select("类型", "type", value="1")
         type_row.add_option("类型1", "1")
         type_row.add_option("类型2", "2")
@@ -110,6 +118,16 @@ class FormExampleHandler(BaseTablePlugin):
 
     def handle_save(self):
         return webutil.SuccessResult()
+
+    def handle_on_input(self):
+        """oninput_ajax_url 的回调：返回渲染命令，前端交给 xnote.executeCommands 执行"""
+        name = xutils.get_argument_str("name", "")
+        value = xutils.get_argument_str("value", "")
+
+        result = webutil.CommandsResult()
+        result.add_command(command="update_value", name="on_input_result",
+                           value=f"{name} -> {value}")
+        return result
 
 
 xurls = (

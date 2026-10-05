@@ -177,6 +177,50 @@ class TestDialogForm(BaseTestCase):
         assert "xnote.table.handleEditForm" not in html
         assert "打开弹窗表单" not in html
 
+    def test_render_form_no_inline_script(self):
+        # 表单的JS统一放在 _static/js/xnote-ui/x-form.js，模板里不再内联 <script>
+        # （弹窗是通过 html 注入的，注入的 <script> 不会执行）
+        form = DialogForm()
+        form.add_row("名称", "name", value="x")
+        html = form.render().decode("utf-8")
+        assert "<script" not in html
+
+    def test_render_form_data_attrs(self):
+        # 提交地址等参数通过 <form> 上的 data-* 传给前端，不再由模板变量拼进 JS
+        form = DialogForm()
+        form.path = "/message/form"
+        form.model_name = "message"
+        html = form.render().decode("utf-8")
+
+        assert 'data-form-path="/message/form"' in html
+        assert 'data-model-name="message"' in html
+        assert 'data-save-action="save"' in html
+
+    def test_input_row_render_oninput_ajax_url(self):
+        # oninput_ajax_url 渲染成 data-oninput-ajax-url:
+        # URL 只做 HTML 转义, 查询参数不能被 quote 成 %3F/%3D
+        form = DataForm()
+        form.add_input("关键词", "key", oninput_ajax_url="/examples/form?action=on_input")
+        html = form.render().decode("utf-8")
+
+        assert 'data-oninput-ajax-url="/examples/form?action=on_input"' in html
+
+    def test_input_row_without_oninput_no_attr(self):
+        form = DataForm()
+        form.add_input("关键词", "key")
+        html = form.render().decode("utf-8")
+
+        assert "data-oninput-ajax-url" not in html
+
+    def test_oninput_ajax_url_escaped(self):
+        # URL 里的特殊字符要转义，否则会冲出属性（XSS）
+        form = DataForm()
+        form.add_input("关键词", "key", oninput_ajax_url='/x?a=1&b=2" onmouseover="x()')
+        html = form.render().decode("utf-8")
+
+        assert 'data-oninput-ajax-url="/x?a=1&amp;b=2&quot; onmouseover=&quot;x()"' in html
+        assert 'onmouseover="x()"' not in html
+
 
 class TestDataTable(BaseTestCase):
 
