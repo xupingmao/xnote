@@ -30,13 +30,33 @@ class Panel(BaseContainer):
         super().__init__(css_class=f"row x-plugin-panel {css_class}")
 
 class Input(BaseComponent):
-    def __init__(self, type = "text", name = "", css_class="", value="", id="", placeholder="") -> None:
+    """输入控件
+
+    除了固定的几个参数, 其余**原生属性**通过关键字参数透传, 这样 `accept` /
+    `pattern` / `maxlength` 这类 HTML 原生能力不用再靠手写 `<input>` 绕开组件:
+
+        Input(type="file", name="file", accept=".csv")
+        Input(name="age", type="number", min="0", max="120")
+
+    ⚠ 关键字里的下划线会转成短横线(`data_role` -> `data-role`), 因为 Python 的
+    关键字参数名不允许出现短横线。
+    """
+
+    def __init__(self, type = "text", name = "", css_class="", value="", id="", placeholder="",
+                 accept = "", pattern = "", maxlength = "", minlength = "",
+                 readonly = False, **extra_attrs) -> None:
         self.name = name
         self.type = type
         self.css_class = css_class
         self.value = value
         self.id = id
         self.placeholder = placeholder
+        self.accept = accept
+        self.pattern = pattern
+        self.maxlength = maxlength
+        self.minlength = minlength
+        self.readonly = readonly
+        self.extra_attrs = extra_attrs
 
     def render(self) -> str:
         attr_dict = {
@@ -44,11 +64,20 @@ class Input(BaseComponent):
             "class": self.css_class,
             "type": self.type,
             "value": self.value,
+            "accept": self.accept,
+            "pattern": self.pattern,
+            "maxlength": self.maxlength,
+            "minlength": self.minlength,
         }
         if self.id:
             attr_dict["id"] = self.id
         if self.placeholder:
             attr_dict["placeholder"] = self.placeholder
+        if self.readonly:
+            attr_dict["readonly"] = "readonly"
+        # 其余原生属性原样透传(下划线转短横线)
+        for key, value in self.extra_attrs.items():
+            attr_dict[key.replace("_", "-")] = value
         attr_list = build_attrs(attr_dict)
         return f"<input {attr_list}>"
 
@@ -134,11 +163,33 @@ class TabLink:
         pass
 
 
-class SubmitButton:
-    """提交按钮"""
+class SubmitButton(BaseComponent):
+    """原生提交按钮 `<button type="submit">`
 
-    def __init__(self, text):
-        pass
+    ⚠ `form` 参数是给"按钮不在 `<form>` 里面"的场景用的: `DataForm` 的 footer 渲染在
+    `</form>` **之后**(见 `common/form/form.html`), 那里放 `<button type="submit">`
+    是点不动的。HTML5 的 `form="<表单的 DOM id>"` 正好解决这件事 —— 不写 JS,
+    按钮照样提交指定的表单, 浏览器原生支持。
+    """
+
+    def __init__(self, text="提交", css_class="btn", form="", id="", name=""):
+        self.text = text
+        self.css_class = css_class
+        self.form = form
+        self.id = id
+        self.name = name
+
+    def render(self):
+        attr_dict = {
+            "type": "submit",
+            "class": self.css_class,
+            "id": self.id,
+            "name": self.name,
+            "form": self.form,
+        }
+        attr_list = build_attrs(attr_dict)
+        text = escape_html(self.text)
+        return f"<button {attr_list}>{text}</button>"
 
 
 class ActionButton(BaseComponent):

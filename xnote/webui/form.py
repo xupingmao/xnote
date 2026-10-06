@@ -367,6 +367,11 @@ class DataForm(BaseComponent):
     form_type = FormType.edit
     form_type_css = ""
     form_method = "POST"
+    # 表单提交地址, 为空表示"提交到当前页面"(浏览器默认行为)
+    # 需要提交到别的地址时显式指定, 如 `form.form_action = "?"`
+    # 注意: 不叫 `action` —— 表单的业务动作也用 `action`(见 add_hidden_input("action", ...)),
+    # 同名容易混淆
+    form_action = ""
     footer_btn_group_css = "float-right"
     footer_html:typing.Union[str, bytes] = ""
     save_action = "save"
@@ -577,9 +582,12 @@ class DataForm(BaseComponent):
         """添加图片上传行（交互参考评论/随手记的图片上传）"""
         return self._add_upload_row(FormRowType.image, title, field, value, css_class, multiple, accept="image/*")
 
-    def add_file(self, title="", field="", value="", css_class="", multiple=True):
-        """添加文件上传行（交互参考评论/随手记的附件上传）"""
-        return self._add_upload_row(FormRowType.file, title, field, value, css_class, multiple, accept="")
+    def add_file(self, title="", field="", value="", css_class="", multiple=True, accept=""):
+        """添加文件上传行（交互参考评论/随手记的附件上传）
+
+        :param accept: 原生 accept 属性, 用于文件对话框的预过滤, 如 `.csv` / `image/*`
+        """
+        return self._add_upload_row(FormRowType.file, title, field, value, css_class, multiple, accept)
 
     def _normalize_upload_value(self, value: Union[int, str, list, None]):
         """把 value（逗号分隔字符串或列表）归一化为值列表"""

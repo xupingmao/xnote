@@ -7,6 +7,7 @@
     {# 表单的后端参数通过 data-* 传递给 _static/js/xnote-ui/x-form.js，
        这样弹窗注入的 HTML（<script> 不执行）也能正常工作 #}
     <form id="xnoteForm{{_xnote_form.id}}" class="x-form" method="{{_xnote_form.form_method}}"
+        {% if _xnote_form.form_action %}action="{{_xnote_form.form_action}}"{% end %}
         data-form-path="{{_xnote_form.path}}"
         data-model-name="{{_xnote_form.model_name}}"
         data-save-action="{{_xnote_form.save_action}}"

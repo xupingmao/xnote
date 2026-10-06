@@ -36,6 +36,13 @@ calendar.add_date_text("2026-10-01", "假期", end_date="2026-10-07")
 # 链接 + hover 提示
 calendar.add_date_link("2026-10-06", "/note/view?name=plan", "月度计划", tip="点击查看月度计划")
 
+# 批量添加(推荐): 一次调用写完，全程增量更新不重建网格
+calendar.add_date_infos([
+    {"date": "2026-10-10", "text": "周例会", "href": "/note/view?name=weekly"},
+    {"date": "2026-10-11", "text": "值班", "tip": "周末值班"},
+    {"date": "2026-10-24", "text": "封版", "end_date": "2026-10-26"},
+])
+
 # 模板里用 raw 表达式输出: {{'{%'}} raw calendar.render() %}
 self.writehtml(HTML, calendar=calendar)
     </pre>
@@ -65,6 +72,14 @@ def build_month_calendar():
     # 日期范围: 20号到22号
     calendar.add_date_link(date_str(20), "/examples/month_calendar", "里程碑",
                            end_date=date_str(22), tip="里程碑节点")
+
+    # 批量添加：循环里逐条 add 也可以，但一次传进来更省（内部只做增量更新）
+    calendar.add_date_infos([
+        {"date": date_str(10), "text": "周例会", "href": "/note/view?name=weekly"},
+        {"date": date_str(11), "text": "值班", "tip": "周末值班"},
+        {"date": date_str(24), "text": "封版", "end_date": date_str(26)},
+    ])
+
     calendar.add_date_text(calendar.today.strftime("%Y-%m-%d"), "今天")
     return calendar
 

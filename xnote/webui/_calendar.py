@@ -1,8 +1,8 @@
-import typing
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 from urllib.parse import urlencode
 
 from xnote.core import xtemplate
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from xutils import textutil
 from xnote.webui.base import BaseComponent
 
@@ -31,7 +31,7 @@ class CalendarItem:
 class CalendarRow:
     def __init__(self, label: str):
         self.label = label
-        self.items = [] # type: list[CalendarItem]
+        self.items: List[CalendarItem] = []
 
 class MonthInfo:
     def __init__(self, label="", month = 1, cols = 1):
@@ -41,7 +41,7 @@ class MonthInfo:
 
 class MonthList:
     def __init__(self):
-        self.items = [] # type: list[MonthInfo]
+        self.items: List[MonthInfo] = []
 
     def add_month(self, month = 0):
         if len(self.items) == 0:
@@ -51,7 +51,7 @@ class MonthList:
         else:
             self.items[-1].cols += 1
 
-    def handle_rows(self, rows: typing.List[CalendarRow]):
+    def handle_rows(self, rows: List[CalendarRow]):
         # 以每周的最后一天的月份为准
         for cell in rows[6].items:
             self.add_month(cell.date.month)
@@ -65,9 +65,10 @@ class ContributionCalendar(BaseComponent):
     show_stats = False
     stats = ContributionStats()
 
-    def __init__(self, start_date = date(2020, 1, 1), end_date = date(2020, 12, 31), data:dict = {}):
+    def __init__(self, start_date = date(2020, 1, 1), end_date = date(2020, 12, 31),
+                 data: Dict[str, int] = {}):
         self.id = textutil.create_uuid()
-        self.rows = [] # type: list[CalendarRow]
+        self.rows: List[CalendarRow] = []
         month_list = MonthList()
 
         start_date = self.resolve_start_date(start_date)
@@ -95,13 +96,13 @@ class ContributionCalendar(BaseComponent):
         self.row_style = f"min-width: {width}px"
 
 
-    def resolve_end_date(self, date: date):
+    def resolve_end_date(self, date: date) -> date:
         if date.weekday == 6:
             return date
         diff = 6 - date.weekday()
         return date + timedelta(days=diff)
     
-    def resolve_start_date(self, date: date):
+    def resolve_start_date(self, date: date) -> date:
         if date.weekday == 0:
             return date
         return date - timedelta(days = date.weekday())
@@ -110,15 +111,40 @@ class ContributionCalendar(BaseComponent):
         return xtemplate.render("common/date/contribution_calendar.html", calendar = self)
 
 
+# 日期参数的几种写法: YYYY-MM-DD 字符串 / date / datetime
+DateValue = Union[str, date, datetime]
+
+
 def format_date_str(value: date) -> str:
     """date -> YYYY-MM-DD"""
-    return value.strftime("%Y-%m-%d")
+    # isoformat 比 strftime 快不少，批量构建时能省下可观的开销
+    return value.isoformat()
+
+
+# 日期字符串缓存，批量构建时同一个日期会被反复解析
+_DATE_KEY_CACHE: Dict[Union[str, date], str] = {}
+_DATE_KEY_CACHE_MAX = 10000
+
+
+def format_date_key(value: DateValue) -> str:
+    """date/datetime/字符串 -> YYYY-MM-DD（带缓存）"""
+    cacheable = isinstance(value, str) or isinstance(value, date)
+    if cacheable:
+        key = _DATE_KEY_CACHE.get(value)
+        if key is not None:
+            return key
+
+    key = format_date_str(MonthCalendar.parse_date(value))
+    if cacheable and len(_DATE_KEY_CACHE) < _DATE_KEY_CACHE_MAX:
+        _DATE_KEY_CACHE[value] = key
+    return key
 
 
 class CalendarDateInfo:
     """某个日期上要展示的一条信息（文字或链接）"""
 
-    def __init__(self, date_str="", text="", href="", tip="", css_class=""):
+    def __init__(self, date_str: str = "", text: str = "", href: str = "",
+                 tip: str = "", css_class: str = ""):
         self.date_str = date_str
         self.text = text
         self.href = href
@@ -129,15 +155,15 @@ class CalendarDateInfo:
 class CalendarCell:
     """月历里的一个单元格"""
 
-    def __init__(self, day=0, cur_date: typing.Optional[date] = None, in_month=True):
+    def __init__(self, day: int = 0, cur_date: Optional[date] = None, in_month: bool = True):
         self.day = day
-        self.date = cur_date
+        self.date: Optional[date] = cur_date
         self.date_str = format_date_str(cur_date) if cur_date else ""
         self.in_month = in_month
         self.is_today = False
-        self.infos = []  # type: list[CalendarDateInfo]
+        self.infos: List[CalendarDateInfo] = []
 
-    def add_info(self, info: CalendarDateInfo):
+    def add_info(self, info: CalendarDateInfo) -> "CalendarCell":
         self.infos.append(info)
         return self
 
@@ -148,6 +174,10 @@ class CalendarCell:
             if info.tip:
                 return info.tip
         return ""
+
+
+# add_date_infos 支持的单条数据类型: dict / CalendarDateInfo / (date, text[, href])
+CalendarDateItem = Union[Dict[str, Any], CalendarDateInfo, tuple, list]
 
 
 class MonthCalendar(BaseComponent):
@@ -161,6 +191,14 @@ class MonthCalendar(BaseComponent):
         calendar.add_date_text("2026-10-01", "国庆节")
         calendar.add_date_text("2026-10-01", "假期", end_date="2026-10-07")   # 覆盖一整段
         calendar.add_date_link("2026-10-06", "/note/view?name=plan", "月度计划", tip="点击查看")
+
+    批量添加用 add_date_infos（一次调用写完，只做增量更新，不重建网格）:
+
+        calendar.add_date_infos([
+            {"date": "2026-10-01", "text": "国庆节"},
+            {"date": "2026-10-06", "text": "月度计划", "href": "/note/view?name=plan"},
+            {"date": "2026-10-20", "text": "冲刺", "end_date": "2026-10-22"},
+        ])
 
     - 单元格是等宽等高的正方形（CSS aspect-ratio），hover 有高亮 + 提示气泡
 
@@ -223,8 +261,10 @@ class MonthCalendar(BaseComponent):
 </div>
 """, name="xnote.webui.month_calendar")
 
-    def __init__(self, year=0, month=0, base_url="", params: typing.Optional[dict] = None,
-                 year_range=5, week_start=0, css_class="", title="", show_title=False):
+    def __init__(self, year: int = 0, month: int = 0, base_url: str = "",
+                 params: Optional[Dict[str, Any]] = None,
+                 year_range: int = 5, week_start: int = 0, css_class: str = "",
+                 title: str = "", show_title: bool = False):
         """
         :param year: 年份，缺省取当前年
         :param month: 月份(1-12)，缺省取当前月
@@ -238,7 +278,7 @@ class MonthCalendar(BaseComponent):
         self.id = "calendar-" + textutil.create_uuid()
         self.css_class = css_class
         self.base_url = base_url
-        self.params = params if params else {}
+        self.params: Dict[str, Any] = params if params else {}
         self.year_range = year_range
         self.week_start = week_start
         self.show_title = show_title
@@ -249,24 +289,28 @@ class MonthCalendar(BaseComponent):
         self.month = month if month else today.month
         self.today = today
 
-        # date_str -> list[CalendarDateInfo]
-        self.date_infos = {}  # type: dict[str, list[CalendarDateInfo]]
-        self.weeks = []  # type: list[list[CalendarCell]]
+        # date_str -> 该日期上的信息列表
+        self.date_infos: Dict[str, List[CalendarDateInfo]] = {}
+        # date_str -> CalendarCell, 加/删信息时按日期直接定位单元格，避免重建整个网格
+        self._cell_index: Dict[str, CalendarCell] = {}
+        # 网格缓存，None 时由 weeks 属性触发构建
+        self._weeks: Optional[List[List[CalendarCell]]] = None
         self.build_weeks()
 
     # ---------- 对外接口: 在指定日期上设置链接/文字 ----------
 
-    def add_date_info(self, date_str, text="", href="", tip="", css_class="") -> CalendarDateInfo:
+    def add_date_info(self, date_str: DateValue, text: str = "", href: str = "",
+                      tip: str = "", css_class: str = "") -> CalendarDateInfo:
         """在【单个】日期上添加一条信息（有 href 渲染成链接，否则渲染成文字）
 
+        只做增量更新（不重建网格），可以放心在循环里调用。
         要覆盖一段日期范围请用 add_date_text / add_date_link 的 end_date 参数。
         :param date_str: YYYY-MM-DD 字符串或 date 对象
         """
-        info = self._append_info(self.format_key(date_str), text, href, tip, css_class)
-        self.build_weeks()
-        return info
+        return self._append_info(self.format_key(date_str), text, href, tip, css_class)
 
-    def add_date_text(self, date_str, text="", tip="", css_class="", end_date="") -> list:
+    def add_date_text(self, date_str: DateValue, text: str = "", tip: str = "",
+                      css_class: str = "", end_date: DateValue = "") -> List[CalendarDateInfo]:
         """在指定日期上显示纯文字
 
         :param date_str: 起始日期，YYYY-MM-DD 字符串或 date 对象
@@ -275,7 +319,9 @@ class MonthCalendar(BaseComponent):
         """
         return self._add_range(date_str, end_date, text=text, href="", tip=tip, css_class=css_class)
 
-    def add_date_link(self, date_str, href="", text="", tip="", css_class="", end_date="") -> list:
+    def add_date_link(self, date_str: DateValue, href: str = "", text: str = "",
+                      tip: str = "", css_class: str = "",
+                      end_date: DateValue = "") -> List[CalendarDateInfo]:
         """在指定日期上显示一个链接
 
         :param date_str: 起始日期，YYYY-MM-DD 字符串或 date 对象
@@ -284,37 +330,160 @@ class MonthCalendar(BaseComponent):
         """
         return self._add_range(date_str, end_date, text=text, href=href, tip=tip, css_class=css_class)
 
-    def add_range_info(self, start_date, end_date, text="", href="", tip="", css_class="") -> list:
-        """在一段日期范围内的每一天添加同一条信息"""
-        infos = []
-        for key in self.resolve_date_keys(start_date, end_date):
-            infos.append(self._append_info(key, text, href, tip, css_class))
-        self.build_weeks()
+    def add_text_list(self, dates: Sequence[DateValue], text: str = "", tip: str = "",
+                      css_class: str = "") -> List[CalendarDateInfo]:
+        """在一批（可以不连续的）日期上添加同一段文字
+
+        :param dates: 日期列表，元素是 YYYY-MM-DD 字符串或 date 对象
+        :return: 添加的 CalendarDateInfo 列表
+        """
+        infos: List[CalendarDateInfo] = []
+        for item in dates:
+            infos.append(self._append_info(self.format_key(item), text, "", tip, css_class))
         return infos
 
-    def _add_range(self, date_str, end_date, text="", href="", tip="", css_class="") -> list:
+    def add_link_list(self, dates: Sequence[DateValue], href: str = "", text: str = "",
+                      tip: str = "", css_class: str = "") -> List[CalendarDateInfo]:
+        """在一批（可以不连续的）日期上添加同一个链接
+
+        :param dates: 日期列表，元素是 YYYY-MM-DD 字符串或 date 对象
+        :return: 添加的 CalendarDateInfo 列表
+        """
+        infos: List[CalendarDateInfo] = []
+        for item in dates:
+            infos.append(self._append_info(self.format_key(item), text, href, tip, css_class))
+        return infos
+
+    def add_date_infos(self, items: Sequence[CalendarDateItem], default_text: str = "",
+                       default_href: str = "", default_tip: str = "",
+                       default_css_class: str = "") -> List[CalendarDateInfo]:
+        """批量添加日期信息：一次调用写完所有数据，全程增量更新（不重建网格）
+
+        items 里每一条支持下面几种写法:
+
+            {"date": "2026-10-01", "text": "国庆节"}
+            {"date": "2026-10-06", "text": "月度计划", "href": "/note/view?name=plan"}
+            {"date": "2026-10-20", "text": "冲刺", "end_date": "2026-10-22"}  # 一段范围
+            CalendarDateInfo(date_str="2026-10-08", text="提醒")
+            ("2026-10-08", "提醒") / ("2026-10-08", "提醒", "/todo/task")
+
+        dict 的日期键也可以写 date_str / start_date；带 end_date 时覆盖整段范围。
+
+        :param default_xxx: 各字段的缺省值，item 里没写时用它兜底
+        :return: 添加的 CalendarDateInfo 列表
+        """
+        infos: List[CalendarDateInfo] = []
+        for item in items:
+            infos.extend(self._add_one_item(item, default_text, default_href,
+                                            default_tip, default_css_class))
+        return infos
+
+    def _add_one_item(self, item: CalendarDateItem, default_text: str = "",
+                      default_href: str = "", default_tip: str = "",
+                      default_css_class: str = "") -> List[CalendarDateInfo]:
+        """解析批量数据里的一条并写入"""
+        if isinstance(item, CalendarDateInfo):
+            return [self._append_info(self.format_key(item.date_str),
+                                      item.text or default_text,
+                                      item.href or default_href,
+                                      item.tip or default_tip,
+                                      item.css_class or default_css_class)]
+
+        if isinstance(item, dict):
+            date_str = item.get("date")
+            if not date_str:
+                date_str = item.get("date_str") or item.get("start_date")
+                if not date_str:
+                    raise ValueError("add_date_infos: 缺少日期字段 %s" % item)
+
+            end_date = item.get("end_date")
+            if end_date:
+                return self.add_range_info(
+                    date_str, end_date,
+                    text=item.get("text") or default_text,
+                    href=item.get("href") or default_href,
+                    tip=item.get("tip") or default_tip,
+                    css_class=item.get("css_class") or default_css_class)
+
+            return [self._append_info(format_date_key(date_str),
+                                      item.get("text") or default_text,
+                                      item.get("href") or default_href,
+                                      item.get("tip") or default_tip,
+                                      item.get("css_class") or default_css_class)]
+
+        if isinstance(item, (tuple, list)):
+            values = list(item)
+            while len(values) < 3:
+                values.append("")
+            return [self._append_info(self.format_key(values[0]),
+                                      values[1] or default_text,
+                                      values[2] or default_href,
+                                      default_tip, default_css_class)]
+
+        raise ValueError("add_date_infos: 不支持的数据类型 %s" % type(item))
+
+    def add_range_info(self, start_date: DateValue, end_date: DateValue, text: str = "",
+                       href: str = "", tip: str = "",
+                       css_class: str = "") -> List[CalendarDateInfo]:
+        """在一段日期范围内的每一天添加同一条信息（同样只做增量更新）"""
+        infos: List[CalendarDateInfo] = []
+        for key in self.resolve_date_keys(start_date, end_date):
+            infos.append(self._append_info(key, text, href, tip, css_class))
+        return infos
+
+    def _add_range(self, date_str: DateValue, end_date: DateValue, text: str = "",
+                   href: str = "", tip: str = "",
+                   css_class: str = "") -> List[CalendarDateInfo]:
         if end_date:
             return self.add_range_info(date_str, end_date, text=text, href=href,
                                        tip=tip, css_class=css_class)
         return [self.add_date_info(date_str, text=text, href=href, tip=tip, css_class=css_class)]
 
-    def _append_info(self, key: str, text="", href="", tip="", css_class="") -> CalendarDateInfo:
-        """只写入数据不重建网格，范围写入时由调用方统一重建一次"""
+    def _append_info(self, key: str, text: str = "", href: str = "", tip: str = "",
+                     css_class: str = "") -> CalendarDateInfo:
+        """写入一条信息
+
+        增量更新：单元格和 date_infos 共用同一个 list，追加一次即可，
+        不需要重建整个 6x7 网格（原来每加一条都要重建 42 个单元格）。
+        """
         info = CalendarDateInfo(date_str=key, text=text, href=href, tip=tip, css_class=css_class)
-        self.date_infos.setdefault(key, []).append(info)
+        infos = self.date_infos.get(key)
+        if infos is None:
+            infos = []
+            self.date_infos[key] = infos
+            cell = self._cell_index.get(key)
+            if cell is not None:
+                cell.infos = infos
+        infos.append(info)
         return info
 
-    def get_date_infos(self, date_str) -> list:
+    def get_date_infos(self, date_str: DateValue) -> List[CalendarDateInfo]:
         """查询某个日期上的信息列表"""
         return self.date_infos.get(self.format_key(date_str), [])
 
-    def remove_date_infos(self, date_str, end_date=""):
-        """清除某个日期（或一段日期范围）上的信息"""
+    def get_cell(self, date_str: DateValue) -> Optional[CalendarCell]:
+        """取某个日期对应的单元格，不在当前月历显示范围内时返回 None"""
+        if self._weeks is None:
+            self.build_weeks()
+        return self._cell_index.get(self.format_key(date_str))
+
+    def remove_date_infos(self, date_str: DateValue, end_date: DateValue = "") -> None:
+        """清除某个日期（或一段日期范围）上的信息（增量更新）"""
         for key in self.resolve_date_keys(date_str, end_date):
             self.date_infos.pop(key, None)
-        self.build_weeks()
+            cell = self._cell_index.get(key)
+            if cell is not None:
+                cell.infos = []
 
-    def resolve_date_keys(self, date_str, end_date="") -> list:
+    def clear_date_infos(self) -> None:
+        """清空所有日期上的信息"""
+        self.date_infos.clear()
+        if self._weeks is None:
+            return
+        for cell in self._cell_index.values():
+            cell.infos = []
+
+    def resolve_date_keys(self, date_str: DateValue, end_date: DateValue = "") -> List[str]:
         """把起始日期（+可选结束日期）展开成日期字符串列表"""
         start = self.parse_date(date_str)
         if not end_date:
@@ -324,20 +493,20 @@ class MonthCalendar(BaseComponent):
         if end < start:
             start, end = end, start
 
-        keys = []
-        cur = start
-        while cur <= end:
-            keys.append(format_date_str(cur))
-            cur = cur + timedelta(days=1)
-        return keys
+        # 用序号直接算，避免逐天做 timedelta 加法
+        start_no = start.toordinal()
+        days = end.toordinal() - start_no + 1
+        return [format_date_str(date.fromordinal(start_no + i)) for i in range(days)]
 
     @staticmethod
-    def format_key(date_str) -> str:
-        return format_date_str(MonthCalendar.parse_date(date_str))
+    def format_key(date_str: DateValue) -> str:
+        return format_date_key(date_str)
 
     @staticmethod
-    def parse_date(date_str) -> date:
-        """把 YYYY-MM-DD 字符串或 date 对象统一转成 date"""
+    def parse_date(date_str: DateValue) -> date:
+        """把 YYYY-MM-DD 字符串或 date/datetime 对象统一转成 date"""
+        if isinstance(date_str, datetime):
+            return date_str.date()
         if isinstance(date_str, date):
             return date_str
         return date.fromisoformat(str(date_str))
@@ -351,41 +520,55 @@ class MonthCalendar(BaseComponent):
         last = date(self.year, self.month + 1, 1) - timedelta(days=1)
         return last.day
 
-    def build_weeks(self):
-        """按周构建单元格，前后补齐相邻月份的日期，保证是完整的 7 列"""
+    @property
+    def weeks(self) -> List[List[CalendarCell]]:
+        """按周组织的单元格（6 行 * 7 列），首次访问时才构建"""
+        if self._weeks is None:
+            self.build_weeks()
+        return self._weeks or []
+
+    def build_weeks(self) -> List[List[CalendarCell]]:
+        """按周构建单元格，前后补齐相邻月份的日期，保证是完整的 7 列
+
+        只有初始化、年月变化、或者需要整体重排时才调用；
+        平时 add_xxx / remove_xxx 走增量更新，不会触发这里。
+        """
         first_day = date(self.year, self.month, 1)
         # weekday(): 周一=0 ... 周日=6
         offset = (first_day.weekday() - self.week_start) % 7
         start = first_day - timedelta(days=offset)
 
         # 6 行 * 7 列，保证不同月份的月历高度一致
-        cells = []  # type: list[CalendarCell]
-        for index in range(42):
-            cur_date = start + timedelta(days=index)
+        cells: List[CalendarCell] = []
+        index: Dict[str, CalendarCell] = {}
+        for i in range(42):
+            cur_date = start + timedelta(days=i)
             in_month = cur_date.month == self.month and cur_date.year == self.year
             cell = CalendarCell(day=cur_date.day, cur_date=cur_date, in_month=in_month)
             cell.is_today = cur_date == self.today
-            for info in self.date_infos.get(cell.date_str, []):
-                cell.add_info(info)
+            # 直接复用 date_infos 里的 list，后续追加信息两边都能看到
+            cell.infos = self.date_infos.get(cell.date_str) or []
             cells.append(cell)
+            index[cell.date_str] = cell
 
+        self._cell_index = index
         weeks = [cells[i:i + 7] for i in range(0, len(cells), 7)]
-        self.weeks = weeks
+        self._weeks = weeks
         return weeks
 
     # ---------- 年月切换 ----------
 
-    def get_prev_month(self):
+    def get_prev_month(self) -> Tuple[int, int]:
         if self.month > 1:
             return self.year, self.month - 1
         return self.year - 1, 12
 
-    def get_next_month(self):
+    def get_next_month(self) -> Tuple[int, int]:
         if self.month < 12:
             return self.year, self.month + 1
         return self.year + 1, 1
 
-    def build_url(self, year=0, month=0) -> str:
+    def build_url(self, year: int = 0, month: int = 0) -> str:
         if not self.base_url:
             return ""
         params = dict(self.params)
@@ -409,20 +592,20 @@ class MonthCalendar(BaseComponent):
         return self.build_url(self.today.year, self.today.month)
 
     @property
-    def param_items(self) -> list:
+    def param_items(self) -> List[Tuple[str, Any]]:
         return sorted(self.params.items())
 
     @property
-    def year_options(self) -> list:
+    def year_options(self) -> List[int]:
         return list(range(self.year - self.year_range, self.year + self.year_range + 1))
 
     @property
-    def month_options(self) -> list:
+    def month_options(self) -> List[int]:
         return list(range(1, 13))
 
     @property
-    def week_labels(self) -> list:
-        labels = ["一", "二", "三", "四", "五", "六", "日"]
+    def week_labels(self) -> List[str]:
+        labels: List[str] = ["一", "二", "三", "四", "五", "六", "日"]
         if self.week_start == 6:
             return ["日"] + labels[:6]
         return labels

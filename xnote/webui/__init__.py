@@ -3,7 +3,7 @@ from .form import *
 from .base import Div
 from .component import TagSpan, BaseContainer, EditFormActionLink, TextTag
 from .component import Textarea, Input, Checkbox, InputGroup
-from .component import EditFormButton, ActionButton, ConfirmButton
+from .component import EditFormButton, ActionButton, ConfirmButton, SubmitButton
 from .component import RawHtml
 from .component import TextSpan
 from .component import Icon

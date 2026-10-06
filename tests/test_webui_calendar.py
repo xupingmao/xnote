@@ -3,7 +3,7 @@
 from datetime import date
 
 from . import test_base
-from xnote.webui import MonthCalendar
+from xnote.webui import CalendarDateInfo, MonthCalendar
 
 app = test_base.init()
 BaseTestCase = test_base.BaseTestCase
@@ -145,6 +145,143 @@ class TestMonthCalendarDateInfo(BaseTestCase):
         """没有信息的日期返回空列表"""
         calendar = MonthCalendar(year=2026, month=10)
         self.assertEqual(calendar.get_date_infos("2026-10-02"), [])
+
+
+class TestMonthCalendarBatch(BaseTestCase):
+
+    def test_add_date_infos_with_dict(self):
+        """批量: dict 形式，文字和链接混着来"""
+        calendar = MonthCalendar(year=2026, month=10)
+        infos = calendar.add_date_infos([
+            {"date": "2026-10-01", "text": "国庆节", "tip": "放假"},
+            {"date": "2026-10-06", "text": "月度计划", "href": "/note/view?name=plan"},
+        ])
+        self.assertEqual(len(infos), 2)
+        self.assertEqual(len(calendar.get_date_infos("2026-10-01")), 1)
+        self.assertEqual(calendar.get_date_infos("2026-10-06")[0].href, "/note/view?name=plan")
+        html = _to_str(calendar.render())
+        self.assertIn('<span class="x-calendar-info " title="放假">国庆节</span>', html)
+        self.assertIn('href="/note/view?name=plan">月度计划</a>', html)
+
+    def test_add_date_infos_with_range(self):
+        """批量: dict 带 end_date 时覆盖整段范围"""
+        calendar = MonthCalendar(year=2026, month=10)
+        infos = calendar.add_date_infos([
+            {"date": "2026-10-01", "text": "假期", "end_date": "2026-10-07"},
+        ])
+        self.assertEqual(len(infos), 7)
+        for day in range(1, 8):
+            self.assertEqual(len(calendar.get_date_infos("2026-10-%02d" % day)), 1)
+        self.assertEqual(_to_str(calendar.render()).count(">假期</span>"), 7)
+
+    def test_add_date_infos_with_info_and_tuple(self):
+        """批量: CalendarDateInfo 实例 / 元组"""
+        calendar = MonthCalendar(year=2026, month=10)
+        infos = calendar.add_date_infos([
+            CalendarDateInfo(date_str="2026-10-08", text="提醒"),
+            ("2026-10-09", "待办", "/todo/task"),
+        ])
+        self.assertEqual(len(infos), 2)
+        self.assertEqual(calendar.get_date_infos("2026-10-08")[0].text, "提醒")
+        self.assertEqual(calendar.get_date_infos("2026-10-09")[0].href, "/todo/task")
+
+    def test_add_date_infos_default_value(self):
+        """批量: default_xxx 兜底"""
+        calendar = MonthCalendar(year=2026, month=10)
+        calendar.add_date_infos([
+            {"date": "2026-10-10"},
+            {"date": "2026-10-11", "text": "自定义"},
+        ], default_text="默认文字", default_href="/default")
+        self.assertEqual(calendar.get_date_infos("2026-10-10")[0].text, "默认文字")
+        self.assertEqual(calendar.get_date_infos("2026-10-11")[0].text, "自定义")
+        self.assertEqual(calendar.get_date_infos("2026-10-11")[0].href, "/default")
+
+    def test_add_text_list_and_link_list(self):
+        """按日期列表批量添加同一段文字/同一个链接"""
+        calendar = MonthCalendar(year=2026, month=10)
+        calendar.add_text_list(["2026-10-05", date(2026, 10, 12)], "复盘")
+        calendar.add_link_list(["2026-10-20", "2026-10-25"], "/todo/task", "任务")
+        for day in (5, 12):
+            self.assertEqual(calendar.get_date_infos("2026-10-%02d" % day)[0].text, "复盘")
+            self.assertEqual(calendar.get_date_infos("2026-10-%02d" % day)[0].href, "")
+        for day in (20, 25):
+            self.assertEqual(calendar.get_date_infos("2026-10-%02d" % day)[0].href, "/todo/task")
+
+    def test_add_date_infos_bad_item(self):
+        """不支持的数据类型直接报错"""
+        calendar = MonthCalendar(year=2026, month=10)
+        with self.assertRaises(ValueError):
+            calendar.add_date_infos([123])
+        with self.assertRaises(ValueError):
+            calendar.add_date_infos([{"text": "没有日期"}])
+
+
+class TestMonthCalendarIncremental(BaseTestCase):
+
+    def _build_counter(self, **kw):
+        """统计 build_weeks 调用次数的月历"""
+        class CountingCalendar(MonthCalendar):
+            def __init__(self, *args, **kwargs):
+                self.build_count = 0
+                super().__init__(*args, **kwargs)
+
+            def build_weeks(self):
+                self.build_count += 1
+                return super().build_weeks()
+
+        return CountingCalendar(**kw)
+
+    def test_batch_add_without_rebuild(self):
+        """批量添加不再触发网格重建（旧实现每加一条重建一次）"""
+        calendar = self._build_counter(year=2026, month=10)
+        base = calendar.build_count
+        for day in range(1, 29):
+            calendar.add_date_text("2026-10-%02d" % day, "日报")
+        self.assertEqual(calendar.build_count, base)
+        self.assertEqual(_to_str(calendar.render()).count(">日报</span>"), 28)
+
+    def test_single_add_without_rebuild(self):
+        """单条 add_date_text/add_date_link 也是增量更新"""
+        calendar = self._build_counter(year=2026, month=10)
+        base = calendar.build_count
+        calendar.add_date_text("2026-10-01", "国庆节")
+        calendar.add_date_link("2026-10-02", "/note/view", "计划")
+        self.assertEqual(calendar.build_count, base)
+
+    def test_cell_is_updated_in_place(self):
+        """添加后单元格立即可见（不依赖重建）"""
+        calendar = MonthCalendar(year=2026, month=10)
+        calendar.add_date_text("2026-10-15", "月中")
+        cell = calendar.get_cell("2026-10-15")
+        self.assertIsNotNone(cell)
+        self.assertEqual(len(cell.infos), 1)
+        self.assertEqual(cell.infos[0].text, "月中")
+        self.assertEqual(calendar.get_date_infos("2026-10-15"), cell.infos)
+
+    def test_remove_updates_cell(self):
+        """删除后单元格同步清空"""
+        calendar = MonthCalendar(year=2026, month=10)
+        calendar.add_date_text("2026-10-01", "国庆节")
+        calendar.remove_date_infos("2026-10-01")
+        self.assertEqual(calendar.get_cell("2026-10-01").infos, [])
+        self.assertNotIn("国庆节", _to_str(calendar.render()))
+
+    def test_clear_date_infos(self):
+        """清空所有信息"""
+        calendar = MonthCalendar(year=2026, month=10)
+        calendar.add_date_text("2026-10-01", "国庆节", end_date="2026-10-03")
+        calendar.clear_date_infos()
+        self.assertEqual(calendar.date_infos, {})
+        html = _to_str(calendar.render())
+        self.assertNotIn("国庆节", html)
+        self.assertNotIn("x-calendar-has-info", html)
+
+    def test_out_of_grid_date_is_kept(self):
+        """不在当前网格里的日期也能存，重建网格后正常渲染"""
+        calendar = MonthCalendar(year=2026, month=10)
+        calendar.add_date_text("2026-12-25", "圣诞节")
+        self.assertEqual(len(calendar.get_date_infos("2026-12-25")), 1)
+        self.assertIsNone(calendar.get_cell("2026-12-25"))
 
 
 class TestMonthCalendarRender(BaseTestCase):
