@@ -11,7 +11,8 @@ import xutils
 # before any xnote_handlers.* module is imported.
 from tests.test_base import (
     BaseTestCase, json_request, json_request_return_dict,
-    get_test_app, login_test_user, logout_test_user, init as _test_base_init,
+    get_test_app, login_test_user, logout_test_user, build_data_param,
+    init as _test_base_init,
 )
 _test_base_init()
 
@@ -29,8 +30,10 @@ from xnote_handlers.note import note_edit
 from xnote_handlers.note import note_view
 from xnote_handlers.note import note_timeline
 from xnote_handlers.note.note_edit import (
-    NoteException, CreateNoteContext, get_heading_by_type,
-    check_get_note, update_and_notify,
+    NoteException, check_get_note, update_and_notify,
+)
+from xnote_handlers.note.note_create import (
+    CreateNoteContext, get_heading_by_type, NoteCreateHandler,
 )
 from xnote_handlers.note.note_view import (
     is_empty_id, result, get_link, find_note_for_view0, find_note_for_view,
@@ -194,6 +197,93 @@ class NoteEditTest(BaseTestCase):
         resp = get_test_app().request("/note/create/check", method="POST",
                                       data=dict(name=name[:8]))
         self.assertEqual("200 OK", resp.status)
+
+    # ---------- NoteCreateHandler: DataForm 页面 ----------
+    def test_create_page_render_dataform(self):
+        """创建页面用 DataForm 渲染，不再依赖 note/page/create.html"""
+        resp = get_test_app().request("/note/create")
+        self.assertEqual("200 OK", resp.status)
+        body = resp.data.decode("utf-8")
+
+        # 表单及其提交参数
+        self.assertIn('class="x-form"', body)
+        self.assertIn('data-form-path="/note/create"', body)
+        self.assertIn('data-save-action="save"', body)
+        # 标题/日期/笔记本三行都挂了 oninput 的联动地址
+        self.assertIn('data-oninput-ajax-url="/note/create?action=check"', body)
+        self.assertIn('data-oninput-ajax-url="/note/create?action=fill_name"', body)
+        self.assertIn('data-oninput-ajax-url="/note/create?action=reload_tags"', body)
+        # 标签行 / 检测结果容器（ajax局部刷新的目标）
+        self.assertIn('id="note-create-tags-value"', body)
+        self.assertIn('id="note-create-check"', body)
+        # 类型切换tab
+        self.assertIn('data-tab-key="type"', body)
+
+    def test_create_page_check_action(self):
+        """标题检测返回渲染命令"""
+        resp = json_request_return_dict("/note/create?action=check", method="POST",
+                                        data=dict(value="not-exist-note"))
+        self.assertTrue(resp.get("success"))
+        commands = resp.get("data")
+        self.assertEqual("update_html", commands[0]["command"])
+        self.assertEqual("note-create-check", commands[0]["id"])
+
+        # 空标题提示
+        resp = json_request_return_dict("/note/create?action=check", method="POST",
+                                        data=dict(value=""))
+        self.assertEqual("请输入标题", resp["data"][0]["value"])
+
+    def test_create_page_fill_name_action(self):
+        """选择日期后回填标题: 日期 + 星期"""
+        resp = json_request_return_dict("/note/create?action=fill_name", method="POST",
+                                        data=dict(value="2026-10-06"))
+        self.assertTrue(resp.get("success"))
+        command = resp["data"][0]
+        self.assertEqual("update_value", command["command"])
+        self.assertEqual("name", command["name"])
+        self.assertEqual("2026-10-06周二", command["value"])
+
+        # 非法日期不报错，原样返回
+        resp = json_request_return_dict("/note/create?action=fill_name", method="POST",
+                                        data=dict(value="bad-date"))
+        self.assertEqual("bad-date", resp["data"][0]["value"])
+
+    def test_create_page_reload_tags_action(self):
+        """切换笔记本后刷新标签（整棵控件重建到行值容器）"""
+        resp = json_request_return_dict("/note/create?action=reload_tags", method="POST",
+                                        data=dict(value=str(self._default_group())))
+        self.assertTrue(resp.get("success"))
+        command = resp["data"][0]
+        self.assertEqual("update_html", command["command"])
+        self.assertEqual("note-create-tags-value", command["id"])
+        self.assertIn('class="form-tag-select tag-select"', command["value"])
+        self.assertIn('name="tags"', command["value"])
+
+    def test_create_page_save_action(self):
+        """DataForm 提交创建"""
+        name = uniq("save")
+        self._names.append(name)
+        resp = json_request_return_dict("/note/create?action=save", method="POST",
+                                        data=build_data_param(
+                                            name=name, type="md",
+                                            parent_id=str(self._default_group()),
+                                            tags="tag1,tag2"))
+        self.assertTrue(resp.get("success"))
+        self.assertTrue(resp.get("redirect_url", "").startswith("/note/edit"))
+
+        created = note_dao.get_by_name("admin", name)
+        self.assertIsNotNone(created)
+        # 标签来自tag选择器（逗号分隔），要拆成多个
+        self.assertEqual(["tag1", "tag2"], created.tags)
+        self._ids.append(created.id)
+
+    def test_create_page_save_action_failed(self):
+        """DataForm 提交失败时返回错误信息（而不是500页面）"""
+        resp = json_request_return_dict("/note/create?action=save", method="POST",
+                                        data=build_data_param(name="", type="md",
+                                                              parent_id=str(self._default_group())))
+        self.assertFalse(resp.get("success"))
+        self.assertEqual("标题为空", resp.get("message"))
 
     # ---------- RemoveAjaxHandler ----------
     def test_remove_by_id(self):

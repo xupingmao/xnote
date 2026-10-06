@@ -95,4 +95,7 @@ class TagSelect(BaseComponent):
         return [str(value)]
 
     def render(self):
-        return self._code.generate(item = self)
+        result = self._code.generate(item = self)
+        if isinstance(result, bytes):
+            return result.decode("utf-8")
+        return result

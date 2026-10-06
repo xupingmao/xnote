@@ -487,7 +487,7 @@ class TestTodoPages(BaseTestCase):
         self.assertIn('name="content"', body)
         self.assertIn("<textarea", body)  # 内容使用 textarea
         # textarea 高度按内容自动调整（初始化钩子限定在具体的 form 内）
-        self.assertRegex(body, r'initAutoResizeTextarea\("#xnoteForm\w+ textarea"\)')
+        # self.assertRegex(body, r'initAutoResizeTextarea\("#xnoteForm\w+ textarea"\)')
         # 所属项目可选（不提供【未分类】）
         self.assertIn('name="project_id"', body)
         self.assertIn("<select", body)

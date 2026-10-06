@@ -184,6 +184,9 @@ xnote.form.initDateInput = function ($form) {
                 change: function (value, date, endDate) {
                     // 数据变化就更新
                     $(elem).val(value);
+                    // laydate 是js赋值，不会触发input事件，这里手动触发一次，
+                    // 让 data-oninput-ajax-url 之类的回调能收到变化
+                    $(elem).trigger("input");
                     // 自动关闭日期选择器
                     $(elem).remove(".layui-date");
                 },

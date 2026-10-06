@@ -38,7 +38,6 @@ from xutils.base import BaseDataRecord
 from .dao import NoteIndexDao
 from xnote.plugin.table_plugin import BaseTablePlugin, TableActionType
 from xnote.plugin import sidebar
-from xnote.plugin import TabBox
 from xnote.webui import TextLink
 
 NOTE_DAO = xutils.DAO("note")
@@ -53,18 +52,6 @@ class NoteException(Exception):
         self.code = code
         self.message = message
 
-
-class CreateNoteContext(BaseDataRecord):
-    def __init__(self, **kw):
-        self.method = ""
-        self.date = ""
-        self.creator_id = 0
-        self.update(kw)
-
-
-def get_heading_by_type(type):
-    title = u"创建" + NOTE_TYPE_DICT.get(type, u"笔记")
-    return T(title)
 
 def fire_update_event(note_old):
     """
@@ -84,197 +71,6 @@ def fire_update_event(note_old):
 def fire_rename_event(note: NoteDO):
     event_body = dict(action = "rename", id = note.id, name = note.name, type = note.type)
     xmanager.fire("note.rename", event_body)
-
-def create_log_func(note: note_dao.NoteDO, ctx: CreateNoteContext):
-    method   = ctx.method
-    date_str: str = ctx.date
-
-    if method != "POST":
-        # GET请求直接返回
-        return
-
-    if date_str is None or date_str == "":
-        date_str = time.strftime("%Y-%m-%d")
-    note.name = u"日志:" + date_str + dateutil.convert_date_to_wday(date_str)
-    return note_dao.create_note(note, date_str)
-
-def default_create_func(note: note_dao.NoteDO, ctx: CreateNoteContext):
-    method   = ctx.method
-    date_str = ctx.date
-    name     = note.name
-
-    if method != "POST":
-        # GET请求直接返回
-        return
-
-    if name == "":
-        message = '标题为空'
-        raise Exception(message)
-
-    return note_dao.create_note(note, date_str)
-
-CREATE_FUNC_DICT = {
-    "log.bak": create_log_func
-}
-
-
-class CreateHandler:
-
-    @xauth.login_required()
-    def POST(self, method='POST'):
-        name = xutils.get_argument_str("name")
-        tags      = xutils.get_argument_str("tags", "")
-        key       = xutils.get_argument_str("key", "")
-        content   = xutils.get_argument_str("content", "")
-        type0     = xutils.get_argument_str("type", "md")
-        date      = xutils.get_argument_str("date", "")
-        format    = xutils.get_argument_str("_format", "")
-        parent_id = xutils.get_argument_int("parent_id")
-        deafult_name = xutils.get_argument_str("default_name")
-
-        user_info = xauth.current_user()
-        assert user_info != None
-        creator = user_info.name
-        creator_id = user_info.id
-
-        xmanager.add_visit_log(creator, "/note/create")
-
-        if key == "":
-            key = time.strftime("%Y.%m.%d") + dateutil.current_wday()
-
-        if name == "":
-            name = deafult_name
-
-        type = NOTE_TYPE_MAPPING.get(type0, type0)
-
-        note = note_dao.NoteDO()
-        note.name = name
-        note.creator   = creator
-        note.creator_id = creator_id
-        note.parent_id = parent_id
-        note.type      = type
-        note.content   = content
-        note.data      = ""
-        note.size      = len(content)
-        note.is_public = 0
-        note.priority  = 0
-        note.version   = 0
-        note.is_deleted = 0
-        note.tags = tags.split()
-        note.level = 0
-
-        parent_link = None
-        if note.parent_id < 0:
-            note.priority = -1
-            note.level = -1
-            
-        if parent_id > 0:
-            parent_note = note_dao.get_by_id_and_creator_id(note_id=parent_id, creator_id=creator_id)
-            if not parent_note:
-                raise Exception(f"parent note not found, parent_id = {parent_id}")
-            parent_link = TextLink(text=parent_note.name, href=parent_note.url)
-
-        heading = T("创建笔记")
-        code = "fail"
-        error = ""
-        ctx = CreateNoteContext(method = method, date = date, creator_id=creator_id)
-        
-        try:
-            self.check_before_create(ctx, note)
-
-            create_func = CREATE_FUNC_DICT.get(type, default_create_func)
-            inserted_id = create_func(note, ctx)
-
-            if inserted_id is None:
-                new_note = None
-            else:
-                new_note = note_dao.get_by_id_creator(inserted_id, creator)
-            
-            if method == "POST":
-                if new_note is None:
-                    return webutil.FailedResult(message="创建笔记失败")
-                return self.after_create(new_note)
-        except web.HTTPError as e1:
-            xutils.print_exc()
-            raise e1
-        except Exception as e:
-            xutils.print_exc()
-            error = str(e)
-            if format == 'json':
-                return webutil.FailedResult(code = 'fail', message = error)
-
-        heading  = get_heading_by_type(type)
-        group_list = note_dao.list_group_v2(creator, orderby = "name")
-        converter = note_helper.NoteGroupConverter(group_list)
-        
-        kw = Storage()
-        kw.parent_link = parent_link
-        kw.create_type_tab = self.get_create_type_tab()
-        kw.back_url = xutils.get_argument_str("back_url", is_base64=True)
-        kw.show_search = False
-        kw.heading  = heading
-        kw.type     = type
-        kw.name     = name
-        kw.tags     = tags
-        kw.error    = error
-        kw.message  = error
-        kw.NOTE_TYPE_LIST = NOTE_TYPE_LIST
-        kw.groups   = converter.get_group_list_for_create()
-        kw.opt_groups = converter.get_opt_groups()
-        kw.code     = code
-
-        return xtemplate.render(
-            "note/page/create.html", **kw)
-
-    def GET(self):
-        return self.POST('GET')
-    
-    def get_create_type_tab(self):
-        tab = TabBox(tab_key="type", tab_default="md", css_class="btn-style", title="类型", title_width="50px")
-        for type_info in NOTE_TYPE_LIST:
-            if type_info.visible:
-                tab.add_item(title=type_info.name, value=type_info.type)
-        return tab
-    
-
-    def check_before_create(self, ctx: CreateNoteContext, note: note_dao.NoteDO):
-        if ctx.method == "GET":
-            return
-        
-        type = note.type
-        if type not in VALID_NOTE_TYPE_SET:
-            raise Exception(f"无效的类型: {type}")
-        
-        if note.name == "":
-            raise Exception("标题为空")
-
-        name = note.name
-        check_by_name = note_dao.get_by_name(note.creator, name)
-        if check_by_name != None:
-            message = u"笔记【%s】已存在" % name
-            raise Exception(message)
-        
-        if not note.is_group:
-            if note.parent_id == 0:
-                message = u"请选择笔记本"
-                raise Exception(message)
-
-    def after_create(self, created_note: note_dao.NoteDO):
-        note_type = created_note.type
-        if created_note.type == "group":
-            refresh_category_count(created_note.creator, created_note.category)
-
-        inserted_id = created_note.id
-        if note_type == "group":
-            redirect_url = created_note.get_url()
-        else:
-            redirect_url = created_note.get_edit_url()
-
-        resp = webutil.SuccessResult(data = dict(id=inserted_id, url=redirect_url))
-        # 兼容历史接口
-        resp.id = inserted_id
-        resp.url = redirect_url
-        return resp
 
 
 class RemoveAjaxHandler:
@@ -945,33 +741,7 @@ class NoteAliasEditHandler(BaseTablePlugin):
             return webutil.FailedResult(code="500", message=str(e))
 
 
-class CheckCreateHandler:
-
-    _template = """
-{% if len(notes) == 0 %}
-    <span>无相似笔记</span>
-{% end %}
-{% for note in notes %}
-    <a href="{{note.url}}">{{note.name}}</a><br/>
-{% end %}
-"""
-    _code = xtemplate.compile_template(_template, "note.check")
-
-    @xauth.login_required()
-    def POST(self):
-        name = xutils.get_argument_str("name")
-        if name == "":
-            return "请输入标题"
-        user_id = xauth.current_user_id()
-        name_like = "%" + name + "%"
-        notes = NoteIndexDao.list(creator_id=user_id, name_like=name_like, limit=5)
-        return self._code.generate(notes = notes)
-
-
 xurls = (
-    r"/note/add"         , CreateHandler,
-    r"/note/create"      , CreateHandler,
-    r"/note/create/check", CheckCreateHandler,
     r"/note/remove"      , RemoveAjaxHandler,
     r"/note/rename"      , RenameAjaxHandler,
     r"/note/recover"     , RecoverAjaxHandler,

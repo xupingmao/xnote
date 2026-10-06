@@ -207,7 +207,9 @@ class FormRow(BaseComponent):
         if self.type == FormRowType.heading:
             return "".join(out)
 
-        out.append('<div class="form-row-value">')
+        # value 容器的id: 行的 ajax 局部刷新用它做锚点（见 update_html 命令），
+        # 好处是不用替换控件本身 —— 控件可以整棵重建，不必依赖它的内部结构
+        out.append('<div class="form-row-value" id="%s-value">' % escape_html(str(self.id)))
         value_html = safe_str(self.render_value())
         out.append(value_html)
         out.append('</div>')
@@ -241,11 +243,12 @@ class FormRow(BaseComponent):
             return self.render_tab_box()
 
         if t == FormRowType.date:
+            # html_attr 带 oninput 的 ajax 地址等（日期选择后由前端触发 input 事件）
             return ('<input id="%s" name="%s" class="form-row-value form-date" '
-                    'data-date-type="%s" placeholder="%s" value="%s" autocomplete="off">'
+                    'data-date-type="%s" placeholder="%s" value="%s" autocomplete="off" %s>'
                     % (escape_html(self.id), escape_html(self.field),
                        escape_html(self.date_type), escape_html(self.placeholder),
-                       escape_html(str(self.value))))
+                       escape_html(str(self.value)), self.html_attr))
 
         if t == FormRowType.html:
             return self._render_html_value()
@@ -561,12 +564,14 @@ class DataForm(BaseComponent):
         row.type = FormRowType.heading
         self.rows.append(row)
 
-    def add_html(self, html : typing.Union[str, bytes] = ""):
+    def add_html(self, html : typing.Union[str, bytes] = "", title = ""):
         row = FormRow()
         row.id = self._create_row_id()
+        row.title = title
         row.html = html
         row.type = FormRowType.html
         self.rows.append(row)
+        return row
 
     def add_image(self, title="", field="", value="", css_class="", multiple=True):
         """添加图片上传行（交互参考评论/随手记的图片上传）"""
