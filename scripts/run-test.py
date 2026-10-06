@@ -208,7 +208,7 @@ def load_config_from_test_prop_file(args: Namespace):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("target", default="all", nargs="?")
-    parser.add_argument("--run_mysql_test", default="true")
+    parser.add_argument("--skip-mysql-test", action="store_true", default=False)
     parser.add_argument("--test_mysql", action="store_true", default=False)
     parser.add_argument("--mysql_host", default="192.168.50.96")
     parser.add_argument("--mysql_user", default="test")
@@ -219,9 +219,8 @@ def main():
     args = parser.parse_args()
     load_config_from_test_prop_file(args)
 
-    args.skip_mysql_test = (args.run_mysql_test.lower() == "false")
-    print(f"option: run_mysql_test={args.run_mysql_test}")
-
+    print(f"option: skip-mysql-test={args.skip_mysql_test}")
+    
     start_time = time.time()
 
     do_clean()
