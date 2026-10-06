@@ -567,7 +567,6 @@ xnote._executeSingleCommand = function (command) {
 xnote._executeSingleCommandDo = function (command) {
     var value = command.value;
     var command_type = command.command;
-    var delay = command.delay;
 
     console.debug("execute command", command);
 
@@ -613,6 +612,11 @@ xnote._executeSingleCommandDo = function (command) {
 
     if (command_type === "reload") {
         location.reload();
+        return;
+    }
+
+    if (command_type === "xnote.refresh") {
+        xnote.refresh();
         return;
     }
 
