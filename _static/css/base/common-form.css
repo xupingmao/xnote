@@ -60,7 +60,7 @@ input[readonly] {
 
 .form-row-value {
     float: left;
-    width: 300px;
+    width: 400px;
 }
 
 /* textarea 的高度由 JS 按内容自动调整，这里只声明高度区间 */
