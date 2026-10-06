@@ -129,8 +129,10 @@ def build_app_css():
 
         # 通用的css
         builder.append("./_static/css/base/reset.css")
+        # 针对特殊设备的适配
+        builder.append("./_static/css/base/reset-wide.css")
+        
         builder.append("./_static/css/base/common.css")
-        builder.append("./_static/css/base/common-spacing.css")
         builder.append("./_static/css/base/common-text.css")
         builder.append("./_static/css/base/common-link.css")
         builder.append("./_static/css/base/common-list.css")
@@ -153,9 +155,13 @@ def build_app_css():
         builder.append("./_static/css/base/common-select.css")
         builder.append("./_static/css/base/common-grid.css")
         builder.append("./_static/css/base/common-calendar.css")
-        builder.append("./_static/css/base/common-misc.css")
         builder.append("./_static/css/base/common-upload.css")
+        builder.append("./_static/css/base/common-card.css")
 
+        # 工具类放在后面
+        builder.append("./_static/css/base/common-spacing.css")
+        builder.append("./_static/css/base/common-misc.css")
+        
         # 场景化的css
         builder.append("./_static/css/common-react.css")
         builder.append("./_static/css/message.css")
@@ -166,8 +172,6 @@ def build_app_css():
         builder.append("./_static/css/todo.css")
         # echo "打包app.build.css ... [OK]"
 
-        # 针对特殊设备的适配
-        builder.append("./_static/css/base/reset-wide.css")
 
 def build_utils_js():
     with FileBuilder("./_static/js/utils.build.js") as builder:
