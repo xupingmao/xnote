@@ -19,6 +19,8 @@ import random
 import json
 import hashlib
 import base64
+import unicodedata
+
 from typing import Any
 from xutils.base import is_str
 from configparser import ConfigParser
@@ -170,6 +172,30 @@ def is_cjk(c):
         # 2009年，统一码5.2基本多文种平面增加U+9FC4–U+9FCB。
         return True
     return False
+
+def char_width(c: str) -> int:
+    """
+    获取单个字符的显示宽度
+    :param c: 单个字符
+    :return: 1 半角 / 2 全角
+    """
+    if len(c) != 1:
+        raise ValueError("只能传入单个字符")
+    w = unicodedata.east_asian_width(c)
+    # F / W / A 属于宽字符；N / H 窄字符
+    if w in ("F", "W", "A"):
+        return 2
+    else:
+        return 1
+
+def string_display_width(s: str) -> int:
+    """
+    计算整个字符串在终端的总显示宽度
+    """
+    total = 0
+    for ch in s:
+        total += char_width(ch)
+    return total
 
 def is_number(value):
     try:

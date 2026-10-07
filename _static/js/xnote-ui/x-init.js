@@ -482,53 +482,65 @@ xnote.parseBoolean = function (text) {
  */
 xnote.plugin.onClick = function (target) {
     var params = {};
+    var $target = $(target);
+
     params.event_type = "click";
-    params.btn_id = $(target).attr("id");
-    params.btn_name = $(target).attr("name");
-    var dataNames = $(target).attr("data-names");
-    var dataParams = $(target).attr("data-params");
+    params.btn_id = $target.attr("id");
+    params.btn_name = $target.attr("name");
+    var dataNames = $target.attr("data-names");
+    var dataParams = $target.attr("data-params");
+    var url = $target.attr("data-url") || "?";
+    var confirmMsg = $target.attr("data-confirm-msg");
 
-    var getValue = function (jq) {
-        if (jq.attr("type") === "checkbox") {
-            return jq.prop("checked");
+    var callback = function() {
+        var getValue = function (jq) {
+            if (jq.attr("type") === "checkbox") {
+                return jq.prop("checked");
+            }
+            return jq.val();
         }
-        return jq.val();
-    }
 
-    // 表单参数
-    if (dataNames === "*" || dataNames === undefined) {
-        // 提交所有表单字段
-        // :input 伪类会自动匹配所有表单控件，包括input/textarea/select等
-        $(":input[name]").each(function (index, element) {
-            var name = $(element).attr("name");
-            params[name] = getValue($(element));
-        });
-    } else if (dataNames == "_") {
-        // 不指定参数
-    } else {
-        // 提交指定的表单字段
-        var nameList = dataNames.split(",");
-        for (var i = 0; i < nameList.length; i++) {
-            var name = nameList[i];
-            params[name] = getValue($("[name=" + name + "]"));
-        }
-    }
-
-    // 自定义参数
-    if (dataParams) {
-        var dataParamsObj = JSON.parse(dataParams);
-        for (var key in dataParamsObj) {
-            params[key] = dataParamsObj[key];
-        }
-    }
-
-    xnote.http.post("?", params, function (resp) {
-        if (resp.success) {
-            xnote.executeCommands(resp.data);
+        // 表单参数
+        if (dataNames === "*" || dataNames === undefined) {
+            // 提交所有表单字段
+            // :input 伪类会自动匹配所有表单控件，包括input/textarea/select等
+            $(":input[name]").each(function (index, element) {
+                var name = $(element).attr("name");
+                params[name] = getValue($(element));
+            });
+        } else if (dataNames == "_") {
+            // 不指定参数
         } else {
-            xnote.alert(resp.message);
+            // 提交指定的表单字段
+            var nameList = dataNames.split(",");
+            for (var i = 0; i < nameList.length; i++) {
+                var name = nameList[i];
+                params[name] = getValue($("[name=" + name + "]"));
+            }
         }
-    });
+
+        // 自定义参数
+        if (dataParams) {
+            var dataParamsObj = JSON.parse(dataParams);
+            for (var key in dataParamsObj) {
+                params[key] = dataParamsObj[key];
+            }
+        }
+
+        xnote.http.post(url, params, function (resp) {
+            if (resp.success) {
+                xnote.executeCommands(resp.data);
+            } else {
+                xnote.alert(resp.message);
+            }
+        });
+    }
+
+    if (confirmMsg) {
+        xnote.confirm(confirmMsg, callback);
+    } else {
+        callback();
+    }
 }
 
 /**

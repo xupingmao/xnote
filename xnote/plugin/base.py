@@ -1,3 +1,4 @@
+import xutils
 from xnote.webui.base import *
 from xnote.webui import DataForm, Card, DataTable, TextContainer
 from xnote.core.xtemplate import BasePlugin, LOAD_TIME
@@ -8,6 +9,19 @@ from xutils import quote
 class BasePluginV2(BasePlugin):
     rows = 0
     show_edit = False
+    
+    
+    def handle(self, input=""):
+        """按 action 字段反射派发到 handle_<action>()，未命中则交给 handle_default()"""
+        action = xutils.get_argument_str("action")
+        method = getattr(self, "handle_" + action, None)
+        if method is not None:
+            return method()
+        
+        self.handle_default(action)        
+        
+    def handle_default(self, action=""):
+        self.render_error(f"功能待实现, action={action}")
         
     def add_component(self, component: BaseComponent):
         html = component.render()

@@ -1,6 +1,6 @@
 # encoding=utf-8
 # 演示(example)功能的公共导航 tab 组件，供各 demo 子页面复用。
-from xnote.plugin import TabBox
+from xnote.webui import TabBox, Card, Div, TextContainer, RawHtml
 
 
 def get_example_tab(tab_default=""):
@@ -28,3 +28,21 @@ def get_example_tab(tab_default=""):
     tab.add_tab("月历组件", value="month_calendar", href="/examples/month_calendar")
     tab.add_tab("Hammer示例", value="hammer", href="/examples/hammer")
     return tab
+
+def get_example_tab_card(tab_default=""):
+    tab_box = get_example_tab(tab_default)
+    return Card().add(tab_box)
+
+def get_example_card(html: str):
+    card = Card()
+    card.add(RawHtml(html))
+    
+    pre_card = TextContainer(css_class="card")
+    pre_card.add_pre(text=html, css_class="marked-code")
+    
+    result = TextContainer()
+    result.add_span("效果", css_class="card-title")
+    result.add(card)
+    result.add_span("代码", css_class="card-title")
+    result.add(pre_card)
+    return result

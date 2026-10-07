@@ -9,6 +9,7 @@
 @Description  : 描述
 """
 
+import warnings
 from typing import Optional
 from xnote.webui.base import BaseComponent, BaseContainer
 from xnote.core import xtemplate
@@ -164,7 +165,9 @@ class TabLink:
 
 
 class SubmitButton(BaseComponent):
-    """原生提交按钮 `<button type="submit">`
+    """TODO 待优化
+    
+    原生提交按钮 `<button type="submit">`
 
     ⚠ `form` 参数是给"按钮不在 `<form>` 里面"的场景用的: `DataForm` 的 footer 渲染在
     `</form>` **之后**(见 `common/form/form.html`), 那里放 `<button type="submit">`
@@ -195,20 +198,27 @@ class SubmitButton(BaseComponent):
 class ActionButton(BaseComponent):
     """查询后的操作行为按钮，不需要确认就能安全执行的, 比如刷新等"""
 
-    def __init__(self, text="", onclick="xnote.plugin.onClick(this)", css_class="btn", id="", name="",
-                 data_names = "", data_params:Optional[dict] = None):
+    def __init__(self, *, text="", onclick="xnote.plugin.onClick(this)", url="", 
+                 css_class="btn",  css_style = "",
+                 id="", name="", type="",
+                 data_names = "", data_params:Optional[dict] = None, confirm_msg = ""):
         """
         :param id: 按钮本身的id
         :param name: 按钮本身的name
         :param data_names: 需要提交数据的names列表, {*}或者为空表示所有参数, {_}表示无参数, {arg1,arg2} 指定参数
+        :param confirm_msg: 如果需要用户确认, 通过这个参数设置确认信息.
         """
         self.text = text
         self.onclick = onclick
         self.css_class = css_class
+        self.css_style = css_style
         self.id = id
         self.name = name
+        self.type = type
         self.data_names = data_names
         self.data_params = data_params
+        self.url = url
+        self.confirm_msg = confirm_msg
     
     def render(self):
         data_params_json = ""
@@ -218,42 +228,60 @@ class ActionButton(BaseComponent):
         attr_dict = {
             "id": self.id,
             "name": self.name,
+            "type": self.type,
             "class": self.css_class,
+            "style": self.css_style,
             "onclick": self.onclick,
+            "data-url": self.url,
             "data-names": self.data_names,
             "data-params": data_params_json,
+            "data-confirm-msg": escape_html(self.confirm_msg),
         }
         attr_list = build_attrs(attr_dict)
         text = escape_html(self.text)
         return f"<button {attr_list}>{text}</button>\n"
 
+# 别名
+AjaxButton = ActionButton
 
 class ConfirmButton(ActionButton):
-    """确认按钮"""
-    def __init__(self, text="", url="", message="确认执行吗?", method="GET", reload_url="", css_class="", is_alert=False):
+    """
+    .. deprecated:: 1.2.0
+        新接入请使用 `ActionButton` 的 `confirm_msg` 参数, 此处为兼容旧代码保留
+        
+    确认按钮
+    """
+    def __init__(self, text="", url="", message="确认执行吗?", method="GET", reload_url="", css_class="", css_style="", is_alert=False, id=""):
+        warnings.warn("使用 `ActionButton` 的 `confirm_msg` 参数, 此处兼容旧代码保留")
+        self.id = id
         self.text = text
         self.url = url
         self.method = method
         self.css_class = css_class
+        self.css_style = css_style
         self.message = message
         self.reload_url = reload_url
         self.is_alert = is_alert
 
     def render(self):
         text = escape_html(self.text)
-        message = escape_html(self.message)
-        css_class = self.css_class
-        url = self.url
-        method = self.method
-        reload_url = self.reload_url
-        
         is_alert_attr = ""
         if self.is_alert:
-            is_alert_attr = "data-is-alert=1"
+            is_alert_attr = "1"
             
-        # 结尾不要带换行/缩进: 被包进 <span> 时浏览器会渲染成空格, 撑开按钮间距
-        return (f'<button class="btn {css_class}" onclick="xnote.table.handleConfirmAction(this, event)" {is_alert_attr} '
-                f'data-url="{url}" data-msg="{message}" data-method="{method}" data-reload-url="{reload_url}">{text}</button>')
+        attr_dict = {
+            "id": self.id,
+            "class": f"btn {self.css_class}",
+            "style": self.css_style,
+            "onclick": "xnote.table.handleConfirmAction(this, event)",
+            "data-url": self.url,
+            "data-msg": escape_html(self.message),
+            "data-method": self.method,
+            "data-is-alert": is_alert_attr,
+            "data-reload-url": self.reload_url,
+        }
+        attr_list = build_attrs(attr_dict)
+        return f"<button {attr_list}>{text}</button>\n"
 
 class PromptButton:
     """询问输入按钮"""
@@ -262,16 +290,25 @@ class PromptButton:
 
 class EditFormButton(BaseComponent):
     """编辑表单的按钮"""
-    def __init__(self, text = "", url = "", css_class=""):
+    def __init__(self, text = "", url = "", css_class="", css_style=""):
         self.text = text
         self.url = url
         self.css_class = css_class
+        self.css_style = css_style
 
     def render(self):
         text = escape_html(self.text)
         # 首尾不要带换行: 被包进 <span> 时浏览器会渲染成空格, 撑开按钮间距
-        return (f'<button class="btn {self.css_class}" onclick="xnote.table.handleEditForm(this)" '
-                f'data-url="{self.url}" data-title="{text}">{text}</button>')
+        attr_dict = {
+            "style": self.css_style,
+            "class": f"btn {self.css_class}",
+            "onclick": "xnote.table.handleEditForm(this)",
+            "data-url": self.url,
+            "data-title": text,
+        }
+        attr_list = build_attrs(attr_dict)
+        return f'<button {attr_list}>{text}</button>'
+
 
 class TextBase(BaseComponent):
     """文本基类"""

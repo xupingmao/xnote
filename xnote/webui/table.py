@@ -11,11 +11,11 @@
 import re
 from typing import Any, List, Optional, Union
 
+from xutils import safe_str
 from xutils import textutil
 from xnote.webui.base import BaseComponent, BaseContainer
 from xnote.webui.container import ActionBar
 from xnote.webui._pagination import Pagination
-
 from xnote.core import xtemplate
 from web.utils import group  # type: ignore
 
@@ -27,6 +27,7 @@ def _escape(value: Any) -> str:
 
 DEFAULT_WIDTH = "auto"
 DEFAULT_MIN_WIDTH = "100px"
+CHAR_WIDTH = 10 # 半角字符宽度
 
 class TableActionType:
     """表格动作的类型"""
@@ -185,8 +186,8 @@ class TableHead:
 
         type_info = TableRowEnum.get_by_name(self.type)
         if type_info:
-            return type_info.min_width
-
+            return type_info.min_width        
+        
         default_style = self.default_style
         if default_style.min_width != "":
             return default_style.min_width
@@ -230,6 +231,25 @@ class TableHead:
         if min_width:
             return _get_px_value(min_width)
         return _get_px_value(self.width)
+    
+    def _update_min_width(self, rows: List[dict]):
+        if self.min_width:
+            return
+        
+        max_width = textutil.string_display_width(self.title)
+        
+        for row in rows:
+            value = row.get(self.field, "")
+            width = textutil.string_display_width(safe_str(value))
+            if width > max_width:
+                max_width = width
+        
+        width_px = int(max_width * CHAR_WIDTH) # 半角宽度, 字符+间距
+        if width_px >= 300:
+            self.min_width = "300px"
+        else:
+            self.min_width = f"{width_px}px"
+        
 
 class TableAction:
     """表格的操作单元"""
@@ -419,6 +439,7 @@ class DataTable(BaseComponent):
         return action
 
     def get_min_width(self) -> int:
+        """如果表格min-width大于屏幕, 需要设置width属性"""
         min_width = 0
         for head in self.heads:
             min_width += head.get_min_width_int()
@@ -454,6 +475,9 @@ class DataTable(BaseComponent):
         return "\n".join(parts)
 
     def render(self) -> bytes:
+        for head in self.heads:
+            head._update_min_width(self.rows)
+            
         return xtemplate.render("common/table/table.html", table = self)
 
 class InfoItem:
