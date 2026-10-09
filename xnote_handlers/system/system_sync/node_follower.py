@@ -29,7 +29,7 @@ from .node_base import NodeManagerBase
 from .node_base import convert_follower_dict_to_list
 from .system_sync_proxy import HttpClient
 from .system_sync_proxy import empty_http_client
-from .models import FileIndexInfo, LeaderStat, FollowerInfo
+from .models import FileIndexInfo, LeaderStat, FollowerInfo, LeaderBaseInfo
 from xutils.mem_util import log_mem_info_deco
 from .dao import ClusterConfigDao
 from .system_sync_indexer import count_fs_index
@@ -132,6 +132,9 @@ class Follower(NodeManagerBase):
         self.last_ping_time = time.time()
         self.fs_max_index = result.fs_max_index
         self.access_token = result.access_token
+        
+        if not isinstance(result.leader, LeaderBaseInfo):
+            result.leader = LeaderBaseInfo.from_dict(result.leader)
 
         if len(self.follower_list) > 0:
             item = self.follower_list[0]
