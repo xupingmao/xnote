@@ -201,12 +201,18 @@ class ActionButton(BaseComponent):
     def __init__(self, *, text="", onclick="xnote.plugin.onClick(this)", url="", 
                  css_class="btn",  css_style = "",
                  id="", name="", type="",
-                 data_names = "", data_params:Optional[dict] = None, confirm_msg = ""):
+                 data_names = "", data_params:Optional[dict] = None, 
+                 confirm_msg = "", prompt_msg = "", prompt_value = "",
+                 extra_data_attrs:Optional[dict] = None) -> None:
         """
         :param id: 按钮本身的id
         :param name: 按钮本身的name
         :param data_names: 需要提交数据的names列表, {*}表示所有参数, 为空或{_}表示无参数, {arg1,arg2} 指定参数
         :param confirm_msg: 如果需要用户确认, 通过这个参数设置确认信息.
+        :param prompt_msg: 如果需要用户输入，通过这个参数来设置
+        :param prompt_value: 输入框的默认值, 配合 prompt_msg 使用
+        :param extra_data_attrs: 额外的 data-* 属性(dict), key 中的下划线会转成短横线,
+                                 例如 {"data_key": "x"} 渲染为 data-key="x", 供页面自定义 JS 读取.
         """
         self.text = text
         self.onclick = onclick
@@ -219,6 +225,9 @@ class ActionButton(BaseComponent):
         self.data_params = data_params
         self.url = url
         self.confirm_msg = confirm_msg
+        self.prompt_msg = prompt_msg
+        self.prompt_value = prompt_value
+        self.extra_data_attrs = extra_data_attrs or {}
     
     def render(self):
         data_params_json = ""
@@ -236,7 +245,12 @@ class ActionButton(BaseComponent):
             "data-names": self.data_names,
             "data-params": data_params_json,
             "data-confirm-msg": escape_html(self.confirm_msg),
+            "data-prompt-msg": escape_html(self.prompt_msg),
+            "data-prompt-value": escape_html(self.prompt_value),
         }
+        for key, value in self.extra_data_attrs.items():
+            # 形如 {"data_key": "x"} -> data-key="x"
+            attr_dict[key.replace("_", "-")] = escape_html(str(value))
         attr_list = build_attrs(attr_dict)
         text = escape_html(self.text)
         return f"<button {attr_list}>{text}</button>\n"

@@ -136,5 +136,5 @@ class ClusterConfigDao:
 
 
     @classmethod
-    def get_follower_whitelist(cls):
+    def get_follower_whitelist(cls) -> str:
         return cls.db.get("follower.whitelist", "")

@@ -158,6 +158,58 @@ class TestSystemSync(BaseTestCase):
         finally:
             netutil.set_net_mock(None)
 
+    def test_set_config(self):
+        # 通过框架默认 onClick 提交的配置/操作
+        self.init_leader_config()
+        admin_token = self.get_access_token()
+
+        # 1) value 路径：直接提交配置值
+        data = {"p": "set_config", "key": "leader.host", "value": "http://127.0.0.1:9999"}
+        resp = json_request_return_dict("/system/sync", method="POST", data=data)
+        self.assertEqual("success", resp["code"])
+        commands = resp["data"]
+        self.assertIsInstance(commands, list)
+        self.assertTrue(any(c.get("command") == "reload" for c in commands))
+
+        # 2) 框架 prompt 输入走 __input 字段
+        data = {"p": "set_config", "key": "leader.host", "__input": "http://127.0.0.1:8888"}
+        resp = json_request_return_dict("/system/sync", method="POST", data=data)
+        self.assertEqual("success", resp["code"])
+
+        # 3) 非法 URL 应返回失败
+        data = {"p": "set_config", "key": "leader.host", "value": "not-a-url"}
+        resp = json_request_return_dict("/system/sync", method="POST", data=data)
+        self.assertEqual("400", resp["code"])
+
+        # 4) sync_status 通过 data_params 直接传 value
+        data = {"p": "set_config", "key": "sync_status", "value": "false"}
+        resp = json_request_return_dict("/system/sync", method="POST", data=data)
+        self.assertEqual("success", resp["code"])
+
+    def test_follower_view_buttons(self):
+        # 从节点视图：校验按钮使用框架默认 onClick，无自定义 JS
+        from xnote_handlers.system.system_sync import system_sync_controller as c
+        kw = c.SystemSyncHomeModel()
+        kw.leader_host = "http://127.0.0.1:3333"
+        kw.leader_token = "tok"
+        kw.sync_status = True
+        kw.fs_max_index = 100
+        kw.fs_current_index = 90
+        kw.sync_process = "running"
+        kw.fs_sync_failed_msg = ""
+        kw.follower_db_sync_state = "binlog"
+        kw.follower_db_last_key = "k1"
+        kw.leader_binlog_seq = 50
+        kw.follower_binlog_seq = 40
+
+        html = c._build_follower_view(kw).render().decode("utf-8")
+        self.assertIn("开启同步", html)
+        self.assertIn("关闭同步", html)
+        self.assertIn("trigger_db_sync", html)
+        self.assertIn("trigger_fs_sync", html)
+        self.assertNotIn("config-select", html)
+        self.assertNotIn("SystemSync", html)
+
     def fast_backup(self, force=False):
         if TestEnv.has_backup and not force:
             return

@@ -328,7 +328,7 @@ var XUI = function(window) {
         var inputValue = prompt(message, defaultValue);
         if (inputValue != "" && inputValue) {
             var actionUrl = action + encodeURIComponent(inputValue);
-            $.get(actionUrl, function(resp) {
+            xnote.http.get(actionUrl, function(resp) {
                 window.location.reload();
             })
         }
@@ -491,8 +491,10 @@ xnote.plugin.onClick = function (target) {
     var dataParams = $target.attr("data-params");
     var url = $target.attr("data-url") || "?";
     var confirmMsg = $target.attr("data-confirm-msg");
+    var promptMsg = $target.attr("data-prompt-msg");
+    var promptValue = $target.attr("data-prompt-value");
 
-    var callback = function() {
+    var callback = function(inputValue) {
         var getValue = function (jq) {
             if (jq.attr("type") === "checkbox") {
                 return jq.prop("checked");
@@ -531,6 +533,10 @@ xnote.plugin.onClick = function (target) {
             }
         }
 
+        if (inputValue) {
+            params["__input"] = inputValue;
+        }
+
         xnote.http.post(url, params, function (resp) {
             if (resp.success) {
                 xnote.executeCommands(resp.data);
@@ -542,6 +548,8 @@ xnote.plugin.onClick = function (target) {
 
     if (confirmMsg) {
         xnote.confirm(confirmMsg, callback);
+    } else if (promptMsg) {
+        xnote.prompt(promptMsg, promptValue, callback);
     } else {
         callback();
     }

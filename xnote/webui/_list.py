@@ -138,7 +138,7 @@ class ListViewDropdown(BaseComponent):
                                        
 {% for tag in item.tags %} {% render tag %} {% end %}
 <div class="float-right">
-    <select name="{{item.name}}" data-type="{{item.data_type}}" value="{{item.value}}">
+    <select name="{{item.name}}" data-type="{{item.data_type}}" value="{{item.value}}" class="{{item.select_css_class}}">
         {% for option in item.options %}
             <option value="{{option.value}}">{{option.name}}</option>
         {% end %}
@@ -158,11 +158,12 @@ class ListViewDropdown(BaseComponent):
     icon_class = ""
     css_class = ""
     
-    def __init__(self, text="", name="", data_type="int", value=""):
+    def __init__(self, text="", name="", data_type="int", value="", select_css_class=""):
         self.text = text
         self.name = name
         self.data_type = data_type
         self.value = value
+        self.select_css_class = select_css_class
         self.tags = []
         self.options = []
 
@@ -302,8 +303,9 @@ class ListView(BaseContainer):
         return self._code.generate(item_list = self.children, action_bar = self.action_bar,
                                    pagination_html = self.render_pagination_html())
     
-    def add_dropdown(self, text="", name="", data_type="int", value=""):
-        dropdown = ListViewDropdown(text=text, name=name, data_type=data_type, value=value)
+    def add_dropdown(self, text="", name="", data_type="int", value="", select_css_class=""):
+        dropdown = ListViewDropdown(text=text, name=name, data_type=data_type,
+                                   value=value, select_css_class=select_css_class)
         self.add(dropdown)
         return dropdown
 

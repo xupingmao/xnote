@@ -24,7 +24,8 @@ import typing
 
 from xnote.core import xauth, xconfig, xtemplate, xmanager
 from xnote.plugin import TabBox
-from xnote.webui import ListView, ListViewItem
+from xnote.plugin.list_plugin import BaseListPlugin
+from xnote.webui import ListView, ListViewItem, TextSpan, TextTag, ActionButton, Card
 from xnote.service.system_meta_service import SystemMetaEnum
 
 from xutils import webutil
@@ -41,6 +42,7 @@ from .system_sync_instances import LeaderInstance, FollowerInstance
 from . import system_sync_open_api
 from .node_leader import Leader
 from .node_follower import Follower
+from .models import FollowerInfo
 
 system_sync_open_api.init()
 
@@ -65,6 +67,50 @@ class SyncConfig:
     @classmethod
     def is_leader(cls):
         return xconfig.WebConfig.is_leader()
+
+
+class SystemSyncHomeModel:
+    """集群管理首页的数据模型，替代原先松散的 Storage() 字典，字段类型明确"""
+
+    def __init__(self) -> None:
+        # 节点角色信息
+        self.node_role: str = ""
+        self.is_leader: bool = False
+
+        # 主节点信息
+        self.leader_host: str = ""
+        self.leader_token: str = ""
+        self.leader_url: str = ""
+        self.leader_node_id: str = ""
+        self.leader_binlog_seq: int = 0
+
+        # 集群信息
+        self.follower_list: typing.List[FollowerInfo] = []
+        self.ping_error: typing.Optional[str] = None
+
+        # 文件索引 / 配置
+        self.fs_index_count: int = 0
+        self.whitelist: str = ""
+        self.sync_process: str = ""
+
+        # 从节点 DB 同步状态
+        self.follower_binlog_seq: int = 0
+        self.follower_db_sync_state: str = ""
+        self.follower_db_last_key: str = ""
+
+        # 同步开关
+        self.sync_status: bool = False
+
+        # 从节点专有：文件同步进度
+        self.fs_max_index: int = 0
+        self.fs_current_index: int = 0
+        self.fs_sync_failed_msg: str = ""
+
+        # 渲染产物（各区块组件）
+        self.leader_view: typing.Optional[ListView] = None
+        self.follower_view: typing.Optional[ListView] = None
+        self.cluster_info_view: typing.Optional[ListView] = None
+
 
 def get_system_role():
     return xconfig.WebConfig.cluster_node_role
@@ -102,39 +148,270 @@ def get_system_sync_info_list():
                                     css_class="list-item-black"))
     return info_list
 
+def _config_btn(title: str, key: str, default: str) -> ActionButton:
+    """「设置」按钮：点击后弹输入框（prompt_msg/prompt_value），由框架默认 onClick 提交 set_config"""
+    return ActionButton(text="设置", css_class="btn btn-default",
+                       url="/system/sync",
+                       prompt_msg=title, prompt_value=textutil.safe_str(default),
+                       data_params={"p": "set_config", "key": key})
+
+
+def _confirm_btn(title: str, key: str, text: str, value: str = "true") -> ActionButton:
+    """「重置 / 同步」按钮：点击后确认（confirm_msg），由框架默认 onClick 提交 set_config"""
+    return ActionButton(text=text, css_class="btn btn-default",
+                       url="/system/sync",
+                       confirm_msg=title,
+                       data_params={"p": "set_config", "key": key, "value": value})
+
+
+def _build_cluster_info_view(kw: SystemSyncHomeModel) -> ListView:
+    """集群信息列表（主从节点都展示）"""
+    lv = ListView()
+
+    title_item = ListViewItem()
+    title_item.add_span("集群信息")
+    title_item.extra.add(ActionButton(text="刷新", css_class="btn btn-default",
+                                     url="/system/sync?p=refresh"))
+    lv.add_item(title_item)
+
+    if kw.ping_error:
+        err_item = ListViewItem()
+        err_item.add_span("错误信息")
+        err_item.extra.add(TextSpan(text=textutil.safe_str(kw.ping_error), css_class="error"))
+        lv.add_item(err_item)
+
+    leader_item = ListViewItem()
+    leader_item.add(TextTag(text="主节点", css_class="orange"))
+    leader_item.add_span(textutil.safe_str(kw.leader_node_id))
+    leader_item.add_link("(" + textutil.safe_str(kw.leader_url) + ")", textutil.safe_str(kw.leader_url))
+    lv.add_item(leader_item)
+
+    for info in kw.follower_list:
+        item = ListViewItem()
+        item.add(TextTag(text="从节点", css_class="info"))
+        item.add_span(textutil.safe_str(info.node_id))
+        item.add_link("(" + textutil.safe_str(info.http_url) + ")", textutil.safe_str(info.http_url))
+        lv.add_item(item)
+
+    return lv
+
+
+def _build_leader_view(kw: SystemSyncHomeModel) -> ListView:
+    """主节点视图：授权 token、白名单、文件索引数"""
+    lv = ListView()
+
+    item = ListViewItem()
+    item.add_span("授权token")
+    item.extra.add(_config_btn("更新token", "leader.token", textutil.safe_str(kw.leader_token)))
+    lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("子节点IP白名单")
+    item.extra.add(_config_btn("更新白名单", "follower.whitelist", textutil.safe_str(kw.whitelist)))
+    lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("文件索引数")
+    item.extra.add(TextSpan(text=textutil.safe_str(kw.fs_index_count)))
+    lv.add_item(item)
+
+    return lv
+
+
+def _build_follower_view(kw: SystemSyncHomeModel) -> ListView:
+    """从节点视图：主服务器配置、同步状态、文件/DB 同步进度、位点重置等"""
+    lv = ListView()
+
+    leader_host = textutil.safe_str(kw.leader_host)
+    
+    item = ListViewItem()
+    item.add_span("主节点服务器: ")
+    item.add_link(text=leader_host, href=leader_host)
+    item.extra.add(_config_btn("设置主服务器", "leader.host", textutil.safe_str(kw.leader_host)))
+    lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("主服务器token")
+    item.extra.add(_config_btn("设置主服务器token", "leader.token", textutil.safe_str(kw.leader_token)))
+    lv.add_item(item)
+
+    status_text = "开启" if kw.sync_status else "关闭"
+    item = ListViewItem()
+    item.add_span("同步状态")
+    item.extra.add(TextSpan(text=f"当前: {status_text}"))
+    item.extra.add(_confirm_btn("确认开启同步?", "sync_status", "开启同步", value="true"))
+    item.extra.add(_confirm_btn("确认关闭同步?", "sync_status", "关闭同步", value="false"))
+    lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("文件索引同步")
+    diff = int(kw.fs_max_index) - int(kw.fs_current_index)
+    item.extra.add(TextSpan(text=f"{kw.fs_current_index} -> {kw.fs_max_index} (落后{diff})"))
+    lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("文件同步进度")
+    item.extra.add(TextSpan(text=textutil.safe_str(kw.sync_process)))
+    lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("文件同步操作")
+    item.extra.add(_confirm_btn("确认同步一次?", "trigger_fs_sync", "同步一次"))
+    item.extra.add(_confirm_btn("确认重置文件同步位点?", "reset_fs_offset", "重置位点"))
+    lv.add_item(item)
+
+    if kw.fs_sync_failed_msg:
+        item = ListViewItem()
+        item.add_span("文件同步失败信息")
+        item.extra.add(TextSpan(text=textutil.safe_str(kw.fs_sync_failed_msg)))
+        lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("DB同步状态")
+    item.extra.add(TextSpan(text=textutil.safe_str(kw.follower_db_sync_state)))
+    lv.add_item(item)
+
+    
+    if kw.follower_db_sync_state == "full":
+        item = ListViewItem()
+        item.add_span("全量同步当前key")
+        item.extra.add(TextSpan(text=textutil.safe_str(kw.follower_db_last_key)))
+        lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("binlog位点")
+    diff = int(kw.leader_binlog_seq) - int(kw.follower_binlog_seq)
+    item.extra.add(TextSpan(
+        text=f"{kw.follower_binlog_seq}->{kw.leader_binlog_seq} (落后{diff})"))
+    lv.add_item(item)
+
+    item = ListViewItem()
+    item.add_span("binlog操作")
+    item.extra.add(_confirm_btn("确认同步一次binlog?", "trigger_db_sync", "同步一次"))
+    item.extra.add(_confirm_btn("确认重置当前位点?", "reset_offset", "重置位点"))
+    
+    lv.add_item(item)
+
+    return lv
+
+
+def get_leader_binlog_seq(role_manager: typing.Union[Leader, Follower]) -> int:
+    leader_info = role_manager.get_leader_info()
+    if leader_info == None:
+        return -1
+    return leader_info.binlog_last_seq
+
+
+class SystemSyncHomePlugin(BaseListPlugin):
+    """集群管理首页（概览），使用 webui 组件渲染，不再依赖 .html 模板"""
+
+    title = T("集群管理")
+    parent_link = LinkConfig.app_index
+    show_category = False
+
+    def handle_page(self):
+        self.title = T("集群管理")
+
+        role_manager = get_system_role_manager()
+
+        try:
+            role_manager.sync_for_home_page()
+        except:
+            xutils.print_exc()
+
+        is_leader = SyncConfig.is_leader()
+
+        kw = SystemSyncHomeModel()
+        kw.node_role = get_system_role()
+        kw.is_leader = is_leader
+        kw.leader_host = ClusterConfigDao.get_leader_host()
+        kw.leader_token = role_manager.get_leader_token()
+        kw.leader_url = role_manager.get_leader_url()
+        kw.leader_node_id = role_manager.get_leader_node_id()
+        kw.leader_binlog_seq = get_leader_binlog_seq(role_manager)
+
+        kw.follower_list = role_manager.get_follower_list()
+        kw.ping_error = role_manager.get_ping_error()
+        kw.fs_index_count = role_manager.get_fs_index_count()
+
+        kw.whitelist = LeaderInstance.get_ip_whitelist()
+        kw.sync_process = FollowerInstance.get_sync_process()
+        kw.follower_binlog_seq = FollowerInstance.db_syncer.get_binlog_last_seq()
+        kw.follower_db_sync_state = FollowerInstance.db_syncer.get_db_sync_state()
+        kw.follower_db_last_key = FollowerInstance.db_syncer.get_db_last_key()
+        kw.sync_status = SyncConfig.need_sync_db()
+
+        if is_leader:
+            kw.leader_view = _build_leader_view(kw)
+        else:
+            # 从节点
+            kw.fs_max_index = FollowerInstance.fs_max_index
+            kw.fs_current_index = FollowerInstance.get_fs_sync_last_id()
+            kw.fs_sync_failed_msg = FollowerInstance.http_client.fs_sync_failed_msg
+            kw.follower_view = _build_follower_view(kw)
+
+        kw.cluster_info_view = _build_cluster_info_view(kw)
+
+        # 依次渲染各区块（每个区块独立成卡片）
+        self.add_component(Card().add(get_system_sync_tab()))
+        self.add_component(Card().add(get_system_sync_info_list()))
+        
+        if kw.leader_view:
+            self.add_component(Card().add(kw.leader_view))
+        
+        if kw.follower_view:
+            self.add_component(Card().add(kw.follower_view))
+        
+        self.add_component(Card().add(kw.cluster_info_view))
+
+        # 右侧管理导航
+        self.show_aside = True
+        self.aside_html = xtemplate.render("system/component/admin_nav.html").decode("utf-8")
+
+
 class ConfigHandler:
+    """处理同步相关的配置/操作（set_config），由框架默认 onClick 提交"""
 
     def execute(self):
         key = xutils.get_argument("key")
         value = xutils.get_argument("value")
+        if not value:
+            # 框架的 prompt 输入会放在 __input 字段
+            value = xutils.get_argument("__input", "")
 
         if key == "leader.host":
-            return self.set_leader_host(value)
+            result = self.set_leader_host(value)
+        elif key == "leader.token":
+            result = self.set_leader_token(value)
+        elif key == "reset_offset":
+            result = self.reset_offset()
+        elif key == "reset_fs_offset":
+            result = self.reset_fs_offset()
+        elif key == "trigger_sync":
+            result = self.trigger_sync()
+        elif key == "trigger_fs_sync":
+            result = self.trigger_fs_sync()
+        elif key == "trigger_db_sync":
+            result = self.trigger_db_sync()
+        elif key == "sync_status":
+            result = self.set_sync_status(value)
+        else:
+            result = webutil.SuccessResult()
 
-        if key == "leader.token":
-            return self.set_leader_token(value)
+        if not result.success:
+            return result
 
-        if key == "reset_offset":
-            return self.reset_offset()
-        
-        if key == "reset_fs_offset":
-            return self.reset_fs_offset()
-
-        if key == "trigger_sync":
-            return self.trigger_sync()
-        
-        if key == "trigger_fs_sync":
-            return self.trigger_fs_sync()
-        
-        if key == "sync_status":
-            return self.set_sync_status(value)
-
-        return webutil.SuccessResult()
+        # 框架 onClick 成功后会执行 commands，这里用 toast 反馈 + 刷新页面
+        commands = webutil.CommandsResult()
+        if result.message:
+            commands.add_toast_command(result.message)
+        commands.add_reload_command()
+        return commands
 
     def reset_offset(self):
         FollowerInstance.reset_sync()
         return webutil.SuccessResult()
-    
+
     def reset_fs_offset(self):
         FollowerInstance.reset_fs_offset()
         return webutil.SuccessResult()
@@ -143,10 +420,16 @@ class ConfigHandler:
         FollowerInstance.ping_leader()
         FollowerInstance.sync_files_from_leader()
         return webutil.SuccessResult()
-    
+
     def trigger_fs_sync(self):
         FollowerInstance.ping_leader()
         FollowerInstance.sync_files_from_leader()
+        return webutil.SuccessResult()
+
+    def trigger_db_sync(self):
+        """触发一次 DB/binlog 同步（增量 binlog 或全量，取决于当前同步状态）"""
+        FollowerInstance.ping_leader()
+        FollowerInstance.sync_db_from_leader()
         return webutil.SuccessResult()
 
     def set_leader_host(self, host):
@@ -161,11 +444,11 @@ class ConfigHandler:
     def set_leader_token(self, token):
         ClusterConfigDao.put_leader_token(token)
         return webutil.SuccessResult()
-    
+
     def set_sync_status(self, value):
-        if value == None:
-            return dict(code="err", message="配置值为空")
-        bool_value = value.lower() == "true"
+        if value == None or value == "":
+            return webutil.FailedResult(code="400", message="配置值为空")
+        bool_value = str(value).lower() == "true"
         SyncConfig.set_need_sync_db(bool_value)
         SyncConfig.set_need_sync_files(bool_value)
         if bool_value:
@@ -197,6 +480,9 @@ class SyncHandler:
         if p == "set_config":
             return self.do_set_config()
 
+        if p == "refresh":
+            return self.do_refresh()
+
         if p == "ping":
             return self.do_ping()
 
@@ -220,59 +506,21 @@ class SyncHandler:
 
         return LeaderHandler().handle_leader_action()
     
-    def get_leader_binlog_seq(self, role_manager: typing.Union[Leader, Follower]):
-        leader_info = role_manager.get_leader_info()
-        if leader_info == None:
-            return -1
-        return leader_info.get("binlog_last_seq")
-
     @xauth.login_required("admin")
     def get_home_page(self):
-        kw = Storage()
-        role_manager = get_system_role_manager()
-
-        try:
-            role_manager.sync_for_home_page()
-        except:
-            xutils.print_exc()
-
-        kw.title = T("集群管理")
-        kw.parent_link = LinkConfig.app_index
-        kw.node_role = get_system_role()
-        kw.is_leader = SyncConfig.is_leader()
-        kw.leader_host = ClusterConfigDao.get_leader_host()
-        kw.leader_token = role_manager.get_leader_token()
-        kw.leader_url = role_manager.get_leader_url()
-        kw.leader_node_id = role_manager.get_leader_node_id()
-        kw.leader_binlog_seq = self.get_leader_binlog_seq(role_manager)
-
-        kw.follower_list = role_manager.get_follower_list()
-        kw.ping_error = role_manager.get_ping_error()
-        kw.fs_index_count = role_manager.get_fs_index_count()
-
-        kw.whitelist = LeaderInstance.get_ip_whitelist()
-        kw.sync_process = FollowerInstance.get_sync_process()
-        kw.follower_binlog_seq = FollowerInstance.db_syncer.get_binlog_last_seq()
-        kw.follower_db_sync_state = FollowerInstance.db_syncer.get_db_sync_state()
-        kw.follower_db_last_key = FollowerInstance.db_syncer.get_db_last_key()
-        kw.sync_status = SyncConfig.need_sync_db()
-        kw.system_sync_tab = get_system_sync_tab()
-        kw.system_sync_info_list = get_system_sync_info_list()
-
-        if SyncConfig.is_leader():
-            pass
-        else:
-            # 从节点
-            kw.fs_max_index = FollowerInstance.fs_max_index
-            kw.fs_current_index = FollowerInstance.get_fs_sync_last_id()
-            kw.fs_sync_failed_msg = FollowerInstance.http_client.fs_sync_failed_msg
-        
-        return xtemplate.render("system/page/system_sync.html", **kw)
+        return SystemSyncHomePlugin().render()
 
     @xauth.login_required("admin")
     def do_set_config(self):
         handler = ConfigHandler()
         return handler.execute()
+
+    @xauth.login_required("admin")
+    def do_refresh(self):
+        # 刷新按钮：仅重新加载页面（首页渲染时会重新拉取集群信息）
+        commands = webutil.CommandsResult()
+        commands.add_reload_command()
+        return commands
 
     @xauth.login_required("admin")
     def get_detail(self):
