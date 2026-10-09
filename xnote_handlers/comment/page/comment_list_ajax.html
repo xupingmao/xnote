@@ -51,21 +51,14 @@
 
             {% if comment.reply_count > 0 %}
                 <span class="comment-reply-info">
-                    <a class="btn btn-default" data-id="{{comment.id}}" 
-                    data-user="{{comment.user}}"
-                    data-user-id="{{comment.user_id}}"
-                    data-note-id="{{comment.note_id}}"
-                    onclick="xnote.comment.viewReplies(this)">
+                    <a class="btn btn-default"
+                        href="/comment/reply?note_id={{comment.note_id}}&parent_comment_id={{comment.id}}&ref_comment_id={{comment.id}}&ref_user_id={{comment.user_id}}&ref_user={{quote(comment.user)}}">
                         查看{{comment.reply_count}}条回复
                     </a>
                 </span>
             {% elif _user_id > 0 %}
-                <a class="btn btn-default" 
-                    data-id="{{comment.id}}" 
-                    data-user="{{comment.user}}"
-                    data-user-id="{{comment.user_id}}"
-                    data-note-id="{{comment.note_id}}"
-                    onclick="xnote.comment.openReplyDialog(this)">回复</a>
+                <a class="btn btn-default"
+                    href="/comment/reply?note_id={{comment.note_id}}&parent_comment_id={{comment.id}}&ref_comment_id={{comment.id}}&ref_user_id={{comment.user_id}}&ref_user={{quote(comment.user)}}">回复</a>
             {% end %}
 
             <div class="float-right">

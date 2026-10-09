@@ -667,7 +667,7 @@ class BasePlugin:
         pass
 
     def on_init(self, context: typing.Optional["PluginContext"] = None):
-        """系统初始化事件"""
+        """系统初始化事件, 系统启动/重启的时候执行一次"""
         pass
 
     def on_event(self, event):

@@ -5,7 +5,7 @@ from xutils import webutil, Storage
 from xutils import dateutil
 from xnote.plugin.list_plugin import BaseListPlugin, BasePlugin
 from xnote.webui import ListView, ListViewItem, ListItem, TextTag
-from xnote.webui import ConfirmButton, BaseContainer, ActionButton
+from xnote.webui import BaseContainer, ActionButton
 from xnote.plugin import TabBox
 from xnote_handlers.config import LinkConfig
 from .example_nav import get_example_tab
@@ -279,7 +279,7 @@ class ListViewExampleHandler(BasePlugin):
                 item.icon_class = "fa fa-list"
                 item.tags.append(TextTag(text="标签", css_class="lightblue"))
                 item.tags.append(TextTag(text="标签2", css_class="orange"))
-            item.action_btn = ConfirmButton(text="删除", url="?action=delete", message=f"确认删除[{text}]吗", css_class="btn danger")
+            item.action_btn = ActionButton(text="删除", confirm_msg=f"确认删除[{text}]吗", url="?action=delete", css_class="btn danger", data_names="*")
 
             item_list.add_item(item)
 

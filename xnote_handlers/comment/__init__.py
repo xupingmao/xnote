@@ -35,6 +35,7 @@ from xnote_handlers.note.models import NoteTypeInfo
 # xnote_handlers 的依赖(依赖方向: xnote_handlers.comment -> webui.comment)。
 from xnote.webui.comment import CommentBox
 
+
 if TYPE_CHECKING:
     from .dao_comment import CommentVO
 
@@ -385,6 +386,9 @@ class SaveCommentAjaxHandler:
     def POST(self):
         note_id = xutils.get_argument_int("note_id")
         content = xutils.get_argument_str("content")
+        if not content:
+            # 回复页(组件化)输入框 name 为 reply_content(name 需页面唯一), 兼容读取
+            content = xutils.get_argument_str("reply_content")
         comment_type = xutils.get_argument_str("type")
         user_info = xauth.current_user()
         files = xutils.get_list_argument("files[]")
@@ -517,72 +521,6 @@ class UpdatePinLevelHandler:
         dao_comment.CommentDao.update_index(comment_index)
         return webutil.SuccessResult()
 
-
-class CommentRepliesAjaxHandler:
-    """获取评论的回复列表"""
-
-    def GET(self):
-        note_id = xutils.get_argument_int("note_id")
-        parent_comment_id = xutils.get_argument_int("parent_comment_id")
-        page = xutils.get_argument_int("page", 1)
-        page_size = xutils.get_argument_int("page_size", 20)
-
-        if note_id == 0 or parent_comment_id == 0:
-            return webutil.FailedResult(message="参数错误")
-
-        offset = max(0, page - 1) * page_size
-        replies, total = dao_comment.list_replies(note_id, parent_comment_id, offset, page_size)
-
-        # 处理评论内容
-        process_comments(replies, show_note=False)
-
-        return webutil.SuccessResult(data={
-            "replies": replies,
-            "total": total,
-            "page": page,
-            "page_size": page_size
-        })
-
-
-class CommentReplyListHandler:
-    """获取评论回复列表（返回HTML片段）"""
-
-    def GET(self):
-        note_id = xutils.get_argument_int("note_id")
-        parent_comment_id = xutils.get_argument_int("parent_comment_id")
-
-        if note_id == 0 or parent_comment_id == 0:
-            return "参数错误"
-
-        replies, total = dao_comment.list_replies(note_id, parent_comment_id, offset=0, limit=100)
-        process_comments(replies, show_note=False)
-
-        return xtemplate.render("comment/page/comment_reply_list.html",
-            replies=replies,
-            total=total)
-
-
-class CommentReplyDialogHandler:
-    """回复对话框页面"""
-
-    def GET(self):
-        note_id = xutils.get_argument_int("note_id")
-        parent_comment_id = xutils.get_argument_int("parent_comment_id")
-        ref_comment_id = xutils.get_argument_int("ref_comment_id")
-        ref_user_id = xutils.get_argument_int("ref_user_id")
-        ref_user = xutils.get_argument_str("ref_user")
-
-        if note_id == 0 or parent_comment_id == 0:
-            return "参数错误"
-
-        return xtemplate.render("comment/page/comment_reply_dialog.html",
-            note_id=note_id,
-            parent_comment_id=parent_comment_id,
-            ref_comment_id=ref_comment_id,
-            ref_user_id=ref_user_id,
-            ref_user=ref_user)
-
-
 class TodoCommentDialogHandler:
     """待办评论弹窗页面（供 iframe 弹窗加载，复用统一评论组件）"""
 
@@ -626,8 +564,5 @@ xurls = (
     r"/comment/delete", DeleteCommentAjaxHandler,
     r"/comment/mine", MyCommentsHandler,
     r"/comment/update_pin_level", UpdatePinLevelHandler,
-    r"/comment/replies", CommentRepliesAjaxHandler,
-    r"/comment/reply_list", CommentReplyListHandler,
-    r"/comment/reply_dialog", CommentReplyDialogHandler,
     r"/comment/dialog", TodoCommentDialogHandler,
 )

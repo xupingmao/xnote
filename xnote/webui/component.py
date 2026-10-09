@@ -205,7 +205,7 @@ class ActionButton(BaseComponent):
         """
         :param id: 按钮本身的id
         :param name: 按钮本身的name
-        :param data_names: 需要提交数据的names列表, {*}或者为空表示所有参数, {_}表示无参数, {arg1,arg2} 指定参数
+        :param data_names: 需要提交数据的names列表, {*}表示所有参数, 为空或{_}表示无参数, {arg1,arg2} 指定参数
         :param confirm_msg: 如果需要用户确认, 通过这个参数设置确认信息.
         """
         self.text = text

@@ -9,7 +9,7 @@ from xnote.core import xmanager
 from xnote_handlers.config import LinkConfig
 from .example_nav import get_example_tab_card, get_example_card
 from xnote.plugin import BasePluginV2
-from xnote.webui import RawHtml, Card, ActionButton, ConfirmButton, TextContainer, Div
+from xnote.webui import RawHtml, Card, ActionButton, TextContainer, Div
 
 _example_html = """
 <button class="btn">按钮1</button>
@@ -30,10 +30,10 @@ class ButtonExampleHandler(BasePluginV2):
         self.add_component(get_example_tab_card(tab_default="btn"))
         self.add_component(get_example_card(_example_html))
                 
-        self.add_component(ActionButton(text="toast测试", url="?action=toast"))
-        self.add_component(ActionButton(text="刷新测试", url="?action=reload"))
-        self.add_component(ActionButton(text="确认按钮", confirm_msg="确认执行吗?", url="?action=confirm"))
-        self.add_component(ActionButton(text="更新HTML", url="?action=update_html"))
+        self.add_component(ActionButton(text="toast测试", url="?action=toast", data_names="*"))
+        self.add_component(ActionButton(text="刷新测试", url="?action=reload", data_names="*"))
+        self.add_component(ActionButton(text="确认按钮", confirm_msg="确认执行吗?", url="?action=confirm", data_names="*"))
+        self.add_component(ActionButton(text="更新HTML", url="?action=update_html", data_names="*"))
         
         output = TextContainer()
         output.add_span(text="输出", css_class="card-title")

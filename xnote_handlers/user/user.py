@@ -308,7 +308,7 @@ class ChangePasswordHandler(BasePluginV2):
         card.add(InputGroup(label="再次确认新密码", name="confirmed_password", value="", type="password", css_class="row"))
         
         row = RowDiv()
-        row.add(ActionButton(text="确认修改"))
+        row.add(ActionButton(text="确认修改", data_names="*"))
         
         error_row = RowDiv(css_class="red", id="error_info")
         card.add(row)

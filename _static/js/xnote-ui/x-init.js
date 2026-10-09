@@ -501,15 +501,19 @@ xnote.plugin.onClick = function (target) {
         }
 
         // 表单参数
-        if (dataNames === "*" || dataNames === undefined) {
+        // data_names 语义:
+        //   *            -> 提交页面所有 :input[name] 字段
+        //   未设置/空/_  -> 不提交任何表单字段(无参数)
+        //   其他(逗号分隔) -> 只提交指定 name 的字段
+        if (dataNames === "*") {
             // 提交所有表单字段
             // :input 伪类会自动匹配所有表单控件，包括input/textarea/select等
             $(":input[name]").each(function (index, element) {
                 var name = $(element).attr("name");
                 params[name] = getValue($(element));
             });
-        } else if (dataNames == "_") {
-            // 不指定参数
+        } else if (dataNames === undefined || dataNames === "" || dataNames === "_") {
+            // 不指定参数（未设置 / 空 / _ 均表示无参数）
         } else {
             // 提交指定的表单字段
             var nameList = dataNames.split(",");

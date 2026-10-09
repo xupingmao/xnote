@@ -98,7 +98,7 @@ class EncodeHandler(BasePluginV2):
         btn_row = RowPanel(css_class="top-offset-1")
         btn_row.add(Input(type="hidden", name="encode_type", value=encode_type))
         btn_row.add(ActionButton(text="编码", name="encode", data_names = "input,encode_type,urlsafe"))
-        btn_row.add(ActionButton(text="解码", name="decode"))
+        btn_row.add(ActionButton(text="解码", name="decode", data_names="*"))
         if encode_type == "base64":
             btn_row.add(Checkbox(name="urlsafe", text="urlsafe", checked=urlsafe))
         card.add(btn_row)

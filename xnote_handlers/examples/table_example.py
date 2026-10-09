@@ -13,7 +13,7 @@ from xnote.plugin import DataTable, TableActionType, TabBox, QueryForm, TabTable
 from xnote.plugin.form_plugin import BaseFormPlugin
 from xnote.webui import Card, FormRowType
 from xnote.plugin.table import InfoTable, InfoItem, ActionBar, TableRowType
-from xnote.webui import ListView, ListItem, ConfirmButton, TextTag
+from xnote.webui import ListView, ListItem, ActionButton, TextTag
 from xutils import textutil
 from xutils import webutil
 from xutils.number_util import IntCounter
@@ -306,7 +306,7 @@ class TableExampleHandler(BaseTablePlugin):
         table.add_item(InfoItem(name="其他"))
         table.bottom_action_bar.add_edit_button("编辑1", "?action=edit&show_heading=true", css_class="btn-default")
         table.bottom_action_bar.add_edit_button("编辑2", "?action=edit&show_heading=false", css_class="btn-default")
-        table.bottom_action_bar.add_confirm_button("删除", url="?action=delete", message="确认删除吗?", css_class="danger")
+        table.bottom_action_bar.add(ActionButton(text="删除", confirm_msg="确认删除吗?", url="?action=delete", css_class="danger", data_names="*"))
         return table
 
     def get_image_table(self):

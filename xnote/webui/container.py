@@ -1,5 +1,5 @@
 from xnote.webui.base import BaseComponent, BaseContainer, Div
-from xnote.webui.component import TextSpan, EditFormButton, ConfirmButton, TextLink
+from xnote.webui.component import TextSpan, EditFormButton, ConfirmButton, TextLink, ActionButton
 from xnote.webui.component import TextItemSep, TextNbsp, TextBr, Icon, TextPre
 from xnote.core import xtemplate
 from typing import Optional
@@ -33,6 +33,9 @@ class TextContainer(BaseContainer):
     def add_item_sep(self):
         """增加换行符号"""
         self.children.append(TextItemSep())
+        
+    def add_action_btn(self, **kw):
+        self.children.append(ActionButton(**kw))
         
     def add_edit_button(self, text="", url="", css_class=""):
         btn = EditFormButton(text = text, url = url, css_class=css_class)
@@ -103,6 +106,9 @@ class ActionBar(TextContainer):
 
 class Card(BaseContainer):
     """卡片容器，一个卡片可以包含多个行"""
+    
+    _title = ""
+    
     def __init__(self, css_class="", id="") -> None:
         super().__init__(css_class="card " + css_class, id=id)
 
@@ -110,6 +116,16 @@ class Card(BaseContainer):
         child = TextContainer()
         self.add(child)
         return child
+    
+    def set_title(self, title=""):
+        self._title = title
+        return self
+    
+    def render(self) -> str:
+        if self._title:
+            title_html = TextSpan(text=self._title, css_class="card-title").render()
+            return title_html + super().render()
+        return super().render()
 
 class RowPanel(TextContainer):
     """行面板容器"""

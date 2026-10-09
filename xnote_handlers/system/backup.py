@@ -461,7 +461,7 @@ class BackupHandler:
     def create_list_view(self):
         view = ListView()
         item = ListViewItem(text="备份数据库", css_class="list-item-black")
-        item.action_btn = ActionButton(text="备份", onclick="xnote.admin.backup()", css_class="btn-default")
+        item.action_btn = ActionButton(text="备份", onclick="xnote.admin.backup()", css_class="btn-default", data_names="*")
         view.add_item(item)
         view.add_item(ListViewItem(text="数据库目录", css_class="list-item-black", href="/fs_link/db", show_chevron_right=True))
         view.add_item(ListViewItem(text="备份目录", css_class="list-item-black", href="/fs_link/backup/db", show_chevron_right=True))

@@ -327,30 +327,11 @@ class TestMain(BaseTestCase):
         self.assertEqual(1, len(data))
         self.assertEqual(1, data[0]["reply_count"])
         
-        # 获取回复列表 - 测试JSON接口
-        reply_data = json_request_return_dict(
-            f"/comment/replies?note_id={note_id}&parent_comment_id={main_comment_id}"
-        )
-        self.assertTrue(reply_data["success"])
-        replies = reply_data["data"]["replies"]
-        self.assertEqual(1, len(replies))
-        self.assertEqual("first reply to main comment", replies[0]["content"])
-        self.assertEqual(main_comment_id, replies[0]["parent_comment_id"])
-        self.assertEqual(main_comment_id, replies[0]["ref_comment_id"])
-        self.assertEqual(main_user_id, replies[0]["ref_user_id"])
-        
-        # 获取回复列表 - 测试HTML接口
-        from tests.test_base import request_html
-        html_resp = request_html(
-            f"/comment/reply_list?note_id={note_id}&parent_comment_id={main_comment_id}"
-        )
-        html_str = html_resp.decode("utf-8")
-        self.assertIn("first", html_str)
-        self.assertIn("reply", html_str)
-        
         # 创建第二个回复 - 回复第一个回复
-        reply1_id = replies[0]["id"]
-        reply1_user_id = replies[0]["user_id"]
+        from xnote_handlers.comment.dao_comment import list_replies
+        first_replies, _ = list_replies(note_id, main_comment_id, 0, 10)
+        reply1_id = first_replies[0].id
+        reply1_user_id = first_replies[0].user_id
         reply2_request = dict(
             note_id=str(note_id),
             content="reply to first reply",
@@ -364,19 +345,8 @@ class TestMain(BaseTestCase):
         data = json_request_return_list(f"/comment/list?note_id={note_id}")
         self.assertEqual(2, data[0]["reply_count"])
         
-        # 获取回复列表，验证第二条回复
-        reply_data = json_request_return_dict(
-            f"/comment/replies?note_id={note_id}&parent_comment_id={main_comment_id}"
-        )
-        replies = reply_data["data"]["replies"]
-        self.assertEqual(2, len(replies))
-        self.assertEqual("reply to first reply", replies[1]["content"])
-        self.assertEqual(reply1_id, replies[1]["ref_comment_id"])
-        self.assertEqual(reply1_user_id, replies[1]["ref_user_id"])
-        
         # 直接查询评论验证 ref_user 字段是否被正确处理
         from xnote_handlers.comment import process_comments
-        from xnote_handlers.comment.dao_comment import list_replies
         reply_comments, _ = list_replies(note_id, main_comment_id, 0, 10)
         process_comments(reply_comments, show_note=False)
         
