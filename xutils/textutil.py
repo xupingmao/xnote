@@ -625,7 +625,7 @@ def is_img_file(filename: str):
     name, ext = os.path.splitext(filename)
     return ext.lower() in xconfig.FS_IMG_EXT_LIST
 
-def mark_text(content):
+def mark_text(content: str):
     from xnote.core import xconfig
     from xutils.text_parser import TextParser, set_img_file_ext
     # 设置图片文集后缀

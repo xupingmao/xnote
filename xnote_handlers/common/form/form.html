@@ -20,29 +20,4 @@
     </form>
 </div>
 
-<div class="form-footer {{_xnote_form.form_type_css}}">
-    {% if _xnote_form.footer_html %}
-        {% raw _xnote_form.footer_html %}
-    {% elif _xnote_form.is_edit_form %}
-    <div class="{{_xnote_form.footer_btn_group_css}}">
-        <button class="btn large {{_xnote_form.save_btn_css}}" onclick="xnote.submitFormSave(this)" data-form-id="xnoteForm{{_xnote_form.id}}">保存</button>
-        <button class="btn large btn-default {{_xnote_form.close_btn_css}}" onclick="xnote.dialog.closeByElement(this)" data-form-id="xnoteForm{{_xnote_form.id}}">关闭</button>
-    </div>
-    {% elif _xnote_form.is_query_form %}
-        <button type="button" class="btn" onclick="xnote.submitFormQuery(this)" data-form-id="xnoteForm{{_xnote_form.id}}">查询数据</button>
-        <a class="btn btn-default" href="?">重置查询</a>
-    {% elif _xnote_form.is_page_edit_form %}
-    <div class="form-row {{_xnote_form.footer_btn_group_css}}">
-        <label>&nbsp;</label>
-        <div class="form-row-value">
-            <button class="btn large {{_xnote_form.save_btn_css}}" onclick="xnote.submitFormSave(this)" data-form-id="xnoteForm{{_xnote_form.id}}">保存</button>
-            {% if _xnote_form.delete_url %}
-            <button class="btn large btn-default {{_xnote_form.delete_btn_css}}" 
-                data-message="{{_xnote_form.delete_confirm_msg}}"
-                data-url="{{_xnote_form.delete_url}}"
-                onclick="xnote.submitFormDelete(this)" data-form-id="xnoteForm{{_xnote_form.id}}">删除</button>
-            {% end %}
-        </div>
-    </div>
-    {% end %}
-</div>
+{% raw _xnote_form.render_footer() %}

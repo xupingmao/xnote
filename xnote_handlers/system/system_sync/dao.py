@@ -83,7 +83,7 @@ class ClusterConfigDao:
             cls.put_fs_sync_last_id(0)
             return 0
         try:
-            return int(value)
+            return int(value) # type: ignore
         except:
             return 0
         
@@ -137,4 +137,4 @@ class ClusterConfigDao:
 
     @classmethod
     def get_follower_whitelist(cls) -> str:
-        return cls.db.get("follower.whitelist", "")
+        return cls.db.get("follower.whitelist", "") # type: ignore

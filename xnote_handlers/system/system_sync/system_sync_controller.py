@@ -235,12 +235,15 @@ def _build_follower_view(kw: SystemSyncHomeModel) -> ListView:
     item.extra.add(_config_btn("设置主服务器token", "leader.token", textutil.safe_str(kw.leader_token)))
     lv.add_item(item)
 
-    status_text = "开启" if kw.sync_status else "关闭"
     item = ListViewItem()
-    item.add_span("同步状态")
-    item.extra.add(TextSpan(text=f"当前: {status_text}"))
-    item.extra.add(_confirm_btn("确认开启同步?", "sync_status", "开启同步", value="true"))
-    item.extra.add(_confirm_btn("确认关闭同步?", "sync_status", "关闭同步", value="false"))
+    item.add_span(f"同步状态: ")
+    if kw.sync_status:
+        item.add_span("开启", css_class="tag green")
+        item.extra.add(_confirm_btn("确认关闭同步?", "sync_status", "关闭同步", value="false"))
+    else:
+        item.add_span("关闭", css_class="tag gray")
+        item.extra.add(_confirm_btn("确认开启同步?", "sync_status", "开启同步", value="true"))
+        
     lv.add_item(item)
 
     item = ListViewItem()

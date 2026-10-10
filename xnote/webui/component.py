@@ -10,7 +10,7 @@
 """
 
 import warnings
-from typing import Optional
+from typing import Optional, Union
 from xnote.webui.base import BaseComponent, BaseContainer
 from xnote.core import xtemplate
 from xutils import escape_html
@@ -19,7 +19,7 @@ from .utils import build_attrs
 from xutils import jsonutil
 
 class RawHtml(BaseComponent):
-    def __init__(self, html: str) -> None:
+    def __init__(self, html: Union[str, bytes]) -> None:
         self.html = html
         
     def render(self):

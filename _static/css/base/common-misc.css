@@ -28,3 +28,7 @@
 .badge-info, .book-size-span {
     color: #888;
 }
+
+.h-px {
+    height: 1px;
+}

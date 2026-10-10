@@ -11,11 +11,12 @@
 
 import typing
 import itertools
-from typing import Union, List
-from xutils import Storage, safe_str
+from typing import Union, List, Optional
+from xutils import Storage, safe_str, quote
 from xutils.textutil import escape_html
 from xnote.core import xtemplate
 from xnote.webui.base import BaseComponent
+from xnote.webui.component import RawHtml
 from xnote.webui._tag_select import TagSelect
 from xnote.webui._switch import Switch
 from xnote.webui.tab import TabBox
@@ -202,6 +203,8 @@ class FormRow(BaseComponent):
         out:List[str] = []
         if self.title:
             out.append('<label class="form-row-label">%s</label>' % escape_html(str(self.title)))
+        else:
+            out.append("""<label class="form-row-label h-px"></label>""")
 
         # 子标题（heading）只有标题，没有可编辑的值
         if self.type == FormRowType.heading:
@@ -373,6 +376,7 @@ class DataForm(BaseComponent):
     # 同名容易混淆
     form_action = ""
     footer_btn_group_css = "float-right"
+    footer: Optional[BaseComponent] = None
     footer_html:typing.Union[str, bytes] = ""
     save_action = "save"
     delete_confirm_msg = "Delete?"
@@ -633,6 +637,47 @@ class DataForm(BaseComponent):
     
     def render(self):
         return xtemplate.render("common/form/form.html", form = self)
+    
+    def render_footer(self):
+        footer_html = self._build_footer_html()
+        return f"""<div class="form-footer {self.form_type_css}">
+    {footer_html}
+</div>"""
+    
+    def _build_footer_html(self):
+        if self.footer:
+            return self.footer.render()
+        
+        if self.footer_html:
+            return self.footer_html
+        
+        if self.is_edit_form:
+            return f"""<div class="{self.footer_btn_group_css}">
+    <button class="btn large {self.save_btn_css}" onclick="xnote.submitFormSave(this)" data-form-id="xnoteForm{self.id}">保存</button>
+    <button class="btn large btn-default {self.close_btn_css}" onclick="xnote.dialog.closeByElement(this)" data-form-id="xnoteForm{self.id}">关闭</button>
+</div>"""
+    
+        if self.is_query_form:
+            return f"""<button type="button" class="btn" onclick="xnote.submitFormQuery(this)" data-form-id="xnoteForm{self.id}">查询数据</button>
+        <a class="btn btn-default" href="?">重置查询</a>"""
+        
+        if self.is_page_edit_form:
+            delete_html = ""
+            if self.delete_url:
+                delete_html = f"""<button class="btn large btn-default {self.delete_btn_css}" 
+                                data-message="{escape_html(self.delete_confirm_msg)}"
+                                data-url="{escape_html(self.delete_url)}"
+                                onclick="xnote.submitFormDelete(this)" data-form-id="xnoteForm{self.id}">删除</button>"""
+            html = f"""<div class="form-row {self.footer_btn_group_css}">
+        <label class="form-row-label h-px"></label>
+        <div class="form-row-value">
+            <button class="btn large {self.save_btn_css}" onclick="xnote.submitFormSave(this)" data-form-id="xnoteForm{self.id}">保存</button>
+            {delete_html}
+        </div>
+    </div>"""
+            return html
+        
+        return ""
     
     @property
     def is_edit_form(self):

@@ -24,7 +24,7 @@ from xnote.plugin.table_plugin import BaseTablePlugin, TableActionType, FormRowT
 from xnote.plugin.list_plugin import BaseListPlugin
 from xnote.plugin.form import DataForm, QueryForm, PageEditForm
 from xnote_handlers.config import LinkConfig, RedirectConfig
-from xnote.webui import ListViewItem, EditFormActionLink, ActionLink
+from xnote.webui import ListViewItem, ActionLink, Card, TextContainer, Div, TextLink
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
@@ -151,11 +151,12 @@ class DictHandler(BaseListPlugin):
         redirect_url = quote(webutil.get_request_url())
 
         for item in items:
+            view_url = f"?action=view&dict_type={item.dict_type}&dict_id={item.dict_id}"
             edit_url = f"?action=page_edit&dict_type={item.dict_type}&dict_id={item.dict_id}&redirect_url={redirect_url}"
             
             list_item = ListViewItem()
             title = list_item.add_line()
-            title.add_link(text=item.key, href=edit_url, css_class="bold")
+            title.add_link(text=item.key, href=view_url, css_class="bold")
         
             if self.show_edit_action():
                 title.extra.add(ActionLink(text="编辑", href=edit_url))
@@ -179,6 +180,34 @@ class DictHandler(BaseListPlugin):
         self.search_action = f"/note/dict?dict_type={dict_type}"
 
         return self.response_page(**kw)
+    
+    def handle_view(self):
+        dict_id = xutils.get_argument_int("dict_id")
+        
+        dict_type = self.get_dict_type()
+        dao = self.get_dict_dao()
+        user_id = xauth.current_user_id()
+        if dict_id > 0:
+            item = dao.get_by_id(dict_id, user_id=user_id)
+        else:
+            item = dict_dao.DictDO()
+
+        if item == None:
+            return self.response_text("dict_item is None")
+        
+        self.parent_link = LinkConfig.dict_list
+        self.title = "查看"
+        
+        dict_form = PageEditForm()
+        dict_form.add_row(title="类型", value=DictTypeEnum.get_name_by_value(str(item.dict_type)), readonly=True)
+        dict_form.add_row(title="名称", field="key", value=item.key, readonly=True)
+        dict_form.add_html(title="解释", html=textutil.mark_text(item.value))
+        
+        edit_btn = TextLink(text="编辑", href=f"?action=page_edit&dict_type={item.dict_type}&dict_id={item.dict_id}", css_class="btn btn-default large")
+        dict_form.add_html(title="", html=edit_btn.render())        
+        dict_form.footer = Div()
+        
+        self.render_form(dict_form)
     
     def handle_page_edit(self):
         dict_id = xutils.get_argument_int("dict_id")
