@@ -376,8 +376,11 @@ class DataForm(BaseComponent):
     # 同名容易混淆
     form_action = ""
     footer_btn_group_css = "float-right"
+    # 底部区域（webui 组件）。如需自定义 footer，请用 set_footer() 设置本属性，
+    # 不要直接操作下方私有字段 _footer_html
     footer: Optional[BaseComponent] = None
-    footer_html:typing.Union[str, bytes] = ""
+    # 私有的原始 HTML 兜底，仅内部使用，外部不要直接赋值
+    _footer_html: typing.Union[str, bytes] = ""
     save_action = "save"
     delete_confirm_msg = "Delete?"
     delete_url = ""
@@ -644,12 +647,20 @@ class DataForm(BaseComponent):
     {footer_html}
 </div>"""
     
+    def set_footer(self, footer: BaseComponent) -> None:
+        """设置表单底部区域（覆盖默认的保存/查询/删除按钮）。
+
+        footer 应为 webui 组件（如 ActionBar / TextContainer 等），
+        不要直接赋值私有字段 _footer_html。
+        """
+        self.footer = footer
+    
     def _build_footer_html(self):
         if self.footer:
             return self.footer.render()
         
-        if self.footer_html:
-            return self.footer_html
+        if self._footer_html:
+            return self._footer_html
         
         if self.is_edit_form:
             return f"""<div class="{self.footer_btn_group_css}">

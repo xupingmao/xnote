@@ -160,4 +160,6 @@ class TestMain(test_base.BaseTestCase):
 
     def test_tools_shell(self):
         self.check_OK("/tools/shell")
-        
+
+    def test_handler_profile(self):
+        self.check_OK("/system/handler_profile")

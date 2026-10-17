@@ -1,52 +1,20 @@
-# encoding=utf-8
+# -*- coding:utf-8 -*-
+# 性能分析（profile），基于 BasePluginV2 + webui 组件开发
 # created by xupingmao on 2017/06/30
-# Last Modified 
 import io
 import profile
 import threading
 import web
 import xutils
-from xnote.core import xauth
-from xnote.core import xtemplate
+from xnote.plugin import BasePluginV2, ActionButton
+from xnote.webui import Card, Textarea, ActionBar
+from xnote_handlers.config import LinkConfig
+from xutils import webutil
 
-html = """
-{% extends base %}
-
-{% block body_left %}
-{% init url = "" %}
-{% init result = "" %}
-
-<div class="col-md-12 card">
-    {% set title = "性能分析" %}
-    {% from xnote.plugin import TextLink %}
-    {% set parent_link = TextLink(text="开发者", href=f"{_server_home}/system/develop") %}
-    {% include common/base_title.html %}
-</div>
-
-
-<div class="card">
-    <form method="GET">
-    <textarea class="col-md-12" name="url" placeholder="请输入PATH,比如/note/index">{{url}}</textarea>
-    <button class="btn">开始分析</button>
-    </form>
-</div>
-
-<div class="card">
-    <span>结果</span>
-    <textarea class="row" rows=20>{{result}}</textarea>
-</div>
-
-{% end %}
-
-{% block body_right %}
-    {% include common/sidebar/default.html %}
-{% end %}
-"""
-
-def get_stats(self, sort=-1):
+def get_stats(prof, sort=-1):
     import pstats
     buf = io.StringIO()
-    stats = pstats.Stats(self);
+    stats = pstats.Stats(prof)
     stats.stream = buf
     # 统计累计时间
     stats.strip_dirs().sort_stats('cumulative').print_stats()
@@ -62,27 +30,62 @@ def runctx(statement, globals, locals):
     finally:
         return get_stats(prof)
 
-class ProfileHandler:
+
+class ProfileHandler(BasePluginV2):
+
+    title = "性能分析"
+    require_admin = True
+    parent_link = LinkConfig.develop_index
 
     def profile(self, url):
         headers = web.ctx.env
         data = web.data()
+
         def request_url(url, headers, data):
             quoted_url = xutils.quote_unicode(url)
-            self.stats = runctx("xmanager.request(url, method='GET',env=headers, data=data)", globals(), locals())
+            self.stats = runctx(
+                "xmanager.request(url, method='GET',env=headers, data=data)",
+                globals(), locals())
+
         # 新开一个线程，不然会破坏原来的上下文
         timer = threading.Timer(0, request_url, args=(url, headers, data))
         timer.start()
         timer.join()
         return self.stats
 
-    @xauth.login_required("admin")
-    def GET(self):
-        url = xutils.get_argument("url")
-        result = ""
-        if url is not None and url != "":
-            result = self.profile(url)
-        return xtemplate.render_text(html, template_name="handler_profile", url=url, result=result)
+    def handle_default(self, action=""):
+        # 分析表单（GET 提交，样式对齐原实现：textarea + 开始分析按钮）
+        form_card = Card()
+        form_card.add(Textarea(value="", name="url",
+                              placeholder="请输入PATH,比如/note/index",
+                              rows="2", css_class="row"))
+        form_card.add(ActionButton(
+            text="开始分析",
+            css_class="btn",
+            url="?action=query",
+            data_names="url",
+        ))
+        self.add_component(form_card)
+
+        # 分析结果
+        result_card = Card()
+        bar = ActionBar()
+        bar.add_title("结果")    
+        result_card.add(bar)
+        result_card.add(Textarea("", css_class="row", rows="20", name="output"))
+        self.add_component(result_card)
+
+    def handle_query(self):
+        url = xutils.get_argument_str("url")
+        result_text = f"url = {url}\n"
+        result_text += "-" * 30
+        if url != "":
+            result_text += "\n"
+            result_text += str(self.profile(url))
+
+        result = webutil.CommandsResult()
+        result.add_command("update_text", name="output", value=result_text)
+        return result
 
 xurls = (
     r"/system/handler_profile", ProfileHandler,

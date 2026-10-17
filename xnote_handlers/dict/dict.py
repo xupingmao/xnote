@@ -25,6 +25,7 @@ from xnote.plugin.list_plugin import BaseListPlugin
 from xnote.plugin.form import DataForm, QueryForm, PageEditForm
 from xnote_handlers.config import LinkConfig, RedirectConfig
 from xnote.webui import ListViewItem, ActionLink, Card, TextContainer, Div, TextLink
+from xnote.plugin import RawHtml
 
 PAGE_SIZE = xconfig.PAGE_SIZE
 
@@ -243,7 +244,7 @@ class DictHandler(BaseListPlugin):
         dict_form.add_textarea(title="解释", field="value", value=item.value)
 
         if not can_edit_dict(dict_type):
-            dict_form.footer_html = self.page_edit_no_auth_html
+            dict_form.set_footer(RawHtml(self.page_edit_no_auth_html))
 
         self.render_form(dict_form)
     

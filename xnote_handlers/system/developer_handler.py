@@ -6,21 +6,9 @@ import xutils
 
 from xnote.core import xauth
 from xutils import Storage
-from xnote.plugin.grid import AppGrid, AppInfo
+from xnote.plugin.grid import AppGrid
 from xnote.plugin import BasePlugin
-from xnote_handlers.config import LinkConfig, AsideConfig
-
-
-# 开发者工具分类（宫格项），URL 取自 plugin_config.py 中的 dev_plugin 注册
-DEVELOPER_APPS = [
-    AppInfo(name="浏览器信息", url="/tools/browser_info",                 icon="globe"),
-    AppInfo(name="图片工具",   url="/tools/img_merge?tab=merge&nav=true", icon="image"),
-    AppInfo(name="编解码工具", url="/tools/encode?tab=BASE64&nav=true",    icon="exchange"),
-    AppInfo(name="文本工具",   url="/tools/text_convert?tab=convert&nav=true", icon="file-text-o"),
-    AppInfo(name="前端组件",   url="/examples",                    icon="cubes"),
-    AppInfo(name="系统模块",   url="/system/module_list",                 icon="sitemap"),
-    AppInfo(name="性能分析",   url="/system/handler_profile",             icon="tachometer"),
-]
+from xnote_handlers.config import LinkConfig, AsideConfig, DEVELOPER_APPS
 
 
 class DeveloperHandler(BasePlugin):

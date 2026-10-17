@@ -1,6 +1,6 @@
 
 import xutils
-from xnote.plugin import TextLink, sidebar
+from xnote.plugin import TextLink, sidebar, RawHtml
 from xnote.plugin import TableActionType
 from xnote.plugin.table_plugin import BaseTablePlugin, FormRowType
 from . import dao as note_dao
@@ -190,7 +190,7 @@ xnote.execute(function() {
         form.add_row(field="note_id", css_class="hide", value=str(note_id))
         html = xtemplate.render_text(self.copy_link_html, share_link = share_link)
         form.add_html(html)
-        form.footer_html = xtemplate.render_text(self.copy_footer_html, _xnote_form = form)
+        form.set_footer(RawHtml(xtemplate.render_text(self.copy_footer_html, _xnote_form = form)))
 
         kw = Storage()
         kw.form = form

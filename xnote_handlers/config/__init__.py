@@ -2,6 +2,7 @@
 from xnote.plugin import TextLink
 from xnote.plugin import TabBox
 from ._aside_config import AsideConfig
+from ._develop_config import DEVELOPER_APPS
 from xnote.core.xtemplate import LOAD_TIME
 from ._tab_config import TabConfig, get_system_log_tab
 from ._system_config import AppLink, MENU_LIST

@@ -112,7 +112,8 @@ class InputGroup(BaseComponent):
 
 
 class Textarea(BaseComponent):
-    def __init__(self, value: str, name = "", placeholder = "", rows = "", cols = "", css_class="", label = ""):
+    def __init__(self, value: str, name:str = "", placeholder:str = "", rows:str = "", cols:str = "", 
+                 css_class:str ="", label:str = "", id: str = ""):
         self.name = name
         self.value = value
         self.placeholder = placeholder
@@ -121,9 +122,12 @@ class Textarea(BaseComponent):
         self.rows = rows
         self.cols = cols
         self.css_class = css_class
+        self.id = id
     
     def render(self):
         attr_dict = {}
+        if self.id:
+            attr_dict["id"] = self.id
         if self.name:
             attr_dict["name"] = self.name
         if self.placeholder:
@@ -206,6 +210,7 @@ class ActionButton(BaseComponent):
                  extra_data_attrs:Optional[dict] = None) -> None:
         """
         :param id: 按钮本身的id
+        :param url: 提交的url
         :param name: 按钮本身的name
         :param data_names: 需要提交数据的names列表, {*}表示所有参数, 为空或{_}表示无参数, {arg1,arg2} 指定参数
         :param confirm_msg: 如果需要用户确认, 通过这个参数设置确认信息.
