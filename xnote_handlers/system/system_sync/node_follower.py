@@ -134,7 +134,7 @@ class Follower(NodeManagerBase):
         self.access_token = result.access_token
         
         if not isinstance(result.leader, LeaderBaseInfo):
-            result.leader = LeaderBaseInfo.from_dict(result.leader)
+            result.leader = LeaderBaseInfo.from_dict_or_None(result.leader)
 
         if len(self.follower_list) > 0:
             item = self.follower_list[0]

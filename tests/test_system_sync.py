@@ -253,8 +253,10 @@ class TestSystemSync(BaseTestCase):
             FollowerInstance.sync_db_from_leader()
 
             self.assertEqual(db_syncer.get_db_sync_state(), "binlog")
-            # 备份前第一步进行binlog id备份，但是备份完成后会插入一条新的文件索引记录，所以这里是max_id - 1
-            self.assertEqual(db_syncer.get_binlog_last_seq(), max_id - 1)
+            # 全量同步会把本次备份开始时的 binlog id（db_backup_binlog_id）作为位点，
+            # 之后新增的记录（含备份文件自身的索引）走增量同步，因此位点应等于备份记录的 binlog id
+            self.assertEqual(db_syncer.get_binlog_last_seq(),
+                             SystemMetaEnum.db_backup_binlog_id.meta_value_int)
         finally:
             netutil.set_net_mock(None)
 
