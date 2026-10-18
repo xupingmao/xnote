@@ -186,13 +186,14 @@ class TestSystemSync(BaseTestCase):
         resp = json_request_return_dict("/system/sync", method="POST", data=data)
         self.assertEqual("success", resp["code"])
 
-    def test_follower_view_buttons(self):
-        # 从节点视图：校验按钮使用框架默认 onClick，无自定义 JS
+    def _assert_follower_view_buttons(self, sync_status, expect_btn, not_expect_btn):
+        # 从节点视图：校验按钮使用框架默认 onClick，无自定义 JS；
+        # 同步状态为开/关时只展示对应的「关闭/开启同步」按钮
         from xnote_handlers.system.system_sync import system_sync_controller as c
         kw = c.SystemSyncHomeModel()
         kw.leader_host = "http://127.0.0.1:3333"
         kw.leader_token = "tok"
-        kw.sync_status = True
+        kw.sync_status = sync_status
         kw.fs_max_index = 100
         kw.fs_current_index = 90
         kw.sync_process = "running"
@@ -203,12 +204,18 @@ class TestSystemSync(BaseTestCase):
         kw.follower_binlog_seq = 40
 
         html = c._build_follower_view(kw).render().decode("utf-8")
-        self.assertIn("开启同步", html)
-        self.assertIn("关闭同步", html)
+        self.assertIn(expect_btn, html)
+        self.assertNotIn(not_expect_btn, html)
         self.assertIn("trigger_db_sync", html)
         self.assertIn("trigger_fs_sync", html)
         self.assertNotIn("config-select", html)
         self.assertNotIn("SystemSync", html)
+
+    def test_follower_view_buttons(self):
+        # 同步开启时只展示「关闭同步」
+        self._assert_follower_view_buttons(True, "关闭同步", "开启同步")
+        # 同步关闭时只展示「开启同步」
+        self._assert_follower_view_buttons(False, "开启同步", "关闭同步")
 
     def fast_backup(self, force=False):
         if TestEnv.has_backup and not force:
