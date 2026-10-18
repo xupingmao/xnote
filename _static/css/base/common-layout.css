@@ -10,6 +10,7 @@
 .content-left {
     float: left;
     width: 700px;
+    max-width: 1000px;
 }
 
 .content-right {

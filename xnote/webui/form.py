@@ -94,10 +94,9 @@ class FormRow(BaseComponent):
     # oninput 事件回调：值变化时请求该地址，返回的 data 交给 xnote.executeCommands 执行
     # （前端逻辑见 _static/js/xnote-ui/x-form.js，防抖 300ms；select 走 change 事件）
     oninput_ajax_url = ""
-
-
+    
     _select_html = """
-<select id="{{row.id}}" name="{{row.field}}" class="form-row-value" value="{{row.value}}" {% raw row.html_attr %}>
+<select id="{{row.id}}" name="{{row.field}}" class="form-row-input {{row.css_class}}" value="{{row.value}}" {% raw row.html_attr %}>
     {% for opt_group in row.opt_groups %}
         <optgroup label="{{opt_group.label}}">
             {% for option in opt_group.options %}
@@ -223,12 +222,12 @@ class FormRow(BaseComponent):
         t = self.type
 
         if t == FormRowType.input:
-            return ('<input type="text" name="%s" class="form-row-value" placeholder="%s" value="%s" %s>'
+            return ('<input type="text" name="%s" class="form-row-input {{row.css_class}}" placeholder="%s" value="%s" %s>'
                     % (escape_html(self.field), escape_html(self.placeholder),
                        escape_html(str(self.value)), self.html_attr))
 
         if t == FormRowType.textarea:
-            return ('<textarea name="%s" class="form-row-value form-row-textarea" placeholder="%s" %s>%s</textarea>'
+            return ('<textarea name="%s" class="form-row-textarea" placeholder="%s" %s>%s</textarea>'
                     % (escape_html(self.field), escape_html(self.placeholder),
                        self.html_attr, escape_html(str(self.value))))
 
@@ -247,7 +246,7 @@ class FormRow(BaseComponent):
 
         if t == FormRowType.date:
             # html_attr 带 oninput 的 ajax 地址等（日期选择后由前端触发 input 事件）
-            return ('<input id="%s" name="%s" class="form-row-value form-date" '
+            return ('<input id="%s" name="%s" class="form-row-input form-date {{row.css_class}}" '
                     'data-date-type="%s" placeholder="%s" value="%s" autocomplete="off" %s>'
                     % (escape_html(self.id), escape_html(self.field),
                        escape_html(self.date_type), escape_html(self.placeholder),
@@ -369,6 +368,7 @@ class DataForm(BaseComponent):
 
     form_type = FormType.edit
     form_type_css = ""
+    _css_class_suffix = ""
     form_method = "POST"
     # 表单提交地址, 为空表示"提交到当前页面"(浏览器默认行为)
     # 需要提交到别的地址时显式指定, 如 `form.form_action = "?"`

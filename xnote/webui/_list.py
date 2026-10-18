@@ -1,11 +1,11 @@
 import typing
 
-from .base import BaseComponent, BaseContainer, Div
+from .base import BaseContainer, Div
 from xnote.core import xtemplate
 from .component import ConfirmButton, ActionButton, TextTag, escape_html, TextSpan, TextLink, TextBr, RawHtml, TextNbsp, TextItemSep
 from xnote.core import xconfig
 from .container import TextContainer, ActionBar
-from ._tag_select import TagSelect
+from ._switch import Switch
 from ._pagination import Pagination
 
 
@@ -29,7 +29,7 @@ class ListViewItem(TextContainer):
     is_link_outside = True
 
     _outside_html = """
-<div class="list-item no-padding list-item-outer">
+<div class="list-item no-padding list-item-outer"{% for k, v in item.extra_attrs.items() %} {{k}}="{{v}}"{% end %}>
     <a class="list-item-link {{item.css_class}}" href="{{ item.href }}">
         {% if item.icon_class %}
             <i class="{{item.icon_class}}"></i>
@@ -42,7 +42,7 @@ class ListViewItem(TextContainer):
 """
 
     _inside_html = """
-<div class="list-item {{item.css_class}}">
+<div class="list-item {{item.css_class}}"{% for k, v in item.extra_attrs.items() %} {{k}}="{{v}}"{% end %}>
     {% if item.icon_class %}
         <i class="{{item.icon_class}}"></i>
     {% end %}
@@ -59,7 +59,7 @@ class ListViewItem(TextContainer):
     def __init__(
             self, text="", href="", icon_class="", badge_info="", 
             show_chevron_right = False, action_html = "",
-            css_class="") -> None:
+            css_class="", extra_attrs: typing.Optional[typing.Dict[str, str]] = None) -> None:
         super().__init__()
         self.text = text
         self.css_class = css_class
@@ -69,6 +69,8 @@ class ListViewItem(TextContainer):
         self.show_chevron_right = show_chevron_right
         self.tags = []
         self.action_html = action_html
+        # 容器上的额外 HTML 属性（如 tag-select 行需要的 data-multiple/data-type 等）
+        self.extra_attrs = extra_attrs or {}
         self.extra = TextContainer(css_class="float-right list-item-extra")
         self._extra_html = ""
 
@@ -125,129 +127,124 @@ class _ListViewOption:
         self.name = name
         self.value = value
 
-class ListViewDropdown(BaseComponent):
+class ListViewDropdown(ListViewItem):
+    """ListView 内的下拉选择行。
 
-    _code = xtemplate.compile_template("""
-<div class="list-item {{item.css_class}}">
+    复用 ListViewItem 的 .list-item 外壳与 .float-right 布局，
+    仅在右侧 extra 区渲染一个 <select>。
+    """
 
-{% if item.icon_class %}
-    <i class="{{item.icon_class}}"></i>
-{% end %}
-
-    <span>{{ item.text }}</span>
-                                       
-{% for tag in item.tags %} {% render tag %} {% end %}
-<div class="float-right">
-    <select name="{{item.name}}" data-type="{{item.data_type}}" value="{{item.value}}" class="{{item.select_css_class}}">
-        {% for option in item.options %}
-            <option value="{{option.value}}">{{option.name}}</option>
-        {% end %}
-    </select>
-    {% if item.show_chevron_right %}
-        <i class="fa fa-chevron-right"></i>
+    _select_code = xtemplate.compile_template("""
+<select name="{{item.name}}" data-type="{{item.data_type}}" value="{{item.value}}" class="{{item.select_css_class}}">
+    {% for option in item.options %}
+        <option value="{{option.value}}">{{option.name}}</option>
     {% end %}
-</div>
-
-</div>
+</select>
 """)
-    
-    show_chevron_right = False
-    # 标签列表
-    tags: typing.List[TextTag]
 
-    icon_class = ""
-    css_class = ""
-    
     def __init__(self, text="", name="", data_type="int", value="", select_css_class=""):
-        self.text = text
+        super().__init__(text=text)
         self.name = name
         self.data_type = data_type
         self.value = value
         self.select_css_class = select_css_class
-        self.tags = []
         self.options = []
 
     def add_option(self, name="", value=""):
         self.options.append(_ListViewOption(name=name, value=value))
+        return self
 
     def render(self):
-        return self._code.generate(item = self)
+        # 把 <select> 放进右侧 float-right 的 extra 区，复用父类的 .list-item 外壳
+        select_html = self._select_code.generate(item=self)
+        self.extra.children = [RawHtml(select_html)]
+        return super().render()
 
 
-class ListViewTagSelect(BaseComponent):
-    """ListView 内的 tag 选择器行（列表行外壳 + 右对齐布局由本类负责）。
+class ListViewTagSelect(ListViewItem):
+    """ListView 内的 tag 选择器行。
 
-    采用组合模式：内部持有一个通用 TagSelect 实例负责选项与选中值的管理，
-    本类只负责列表行特有的 .list-item 外壳与 .float-right 右对齐布局，
-    不再通过继承 TagSelect 与之耦合。
+    复用 ListViewItem 的 .list-item 外壳与 .float-right 布局；
+    容器属性（data-multiple / data-type / data-p / data-readonly）写到 extra_attrs，
+    由 x-tag-select.js 读取；选项渲染为右侧 float-right 的 .tag 点选。
     """
 
-    _code = xtemplate.compile_template("""
-<div class="{{item.css_class}} tag-select" data-multiple="{{'true' if item.multiple else 'false'}}" {% if item.readonly %}data-readonly="1"{% end %}{% if item.data_type %} data-type="{{item.data_type}}"{% end %}{% if item.data_p %} data-p="{{item.data_p}}"{% end %}>
-
-{% if item.icon_class %}
-    <i class="{{item.icon_class}}"></i>
-{% end %}
-
-{% if item.text %}
-    <span class="tag-select-label">{{ item.text }}</span>
-{% end %}
-
-    <input type="hidden" name="{{item.name}}" class="form-row-value" value="{{item.value}}">
-
-<div class="float-right">
-{% for option in item.options %}
-    <span class="tag lightblue {% if option.value in item.selected_values %}active{% end %}" data-value="{{option.value}}">{{option.title}}</span>
-{% end %}
-</div>
-
-</div>
-""")
-
-    def __init__(self, text="", name="", value="", multiple=False, readonly=False, css_class="list-item list-tag-select", data_type="", data_p=""):
-        super().__init__()
-        # 组合通用 TagSelect：选项与选中值的管理交给它，本类只负责列表行布局
-        self.selector = TagSelect(text=text, name=name, value=value,
-                                  multiple=multiple, readonly=readonly,
-                                  data_type=data_type, data_p=data_p)
-        self.css_class = css_class
+    def __init__(self, text="", name="", value="", multiple=False, readonly=False,
+                 css_class="list-item list-tag-select tag-select", data_type="", data_p=""):
+        super().__init__(text="", css_class=css_class)
+        self.name = name
+        self.value = value
         self.multiple = multiple
         self.readonly = readonly
         self.data_type = data_type
         self.data_p = data_p
-
-    # 渲染所需的属性统一委托给组合的 TagSelect，保证单一数据源
-    @property
-    def text(self):
-        return self.selector.text
-
-    @property
-    def name(self):
-        return self.selector.name
-
-    @property
-    def value(self):
-        return self.selector.value
-
-    @property
-    def selected_values(self):
-        return self.selector.selected_values
+        # 容器属性（x-tag-select.js 读取），直接挂到 .list-item 外壳上
+        self.extra_attrs["data-multiple"] = "true" if multiple else "false"
+        if readonly:
+            self.extra_attrs["data-readonly"] = "1"
+        if data_type:
+            self.extra_attrs["data-type"] = data_type
+        if data_p:
+            self.extra_attrs["data-p"] = data_p
+        if text:
+            self.add_span(text=text, css_class="tag-select-label")
+        # 隐藏域（值的唯一来源），位于内容区（非 float-right）
+        self.add(RawHtml('<input type="hidden" name="%s" class="form-row-value" value="%s">'
+                         % (escape_html(self.name), escape_html(self.value_str))))
 
     @property
-    def icon_class(self):
-        return self.selector.icon_class
+    def value_str(self) -> str:
+        """规整为逗号分隔字符串，用于隐藏域（兼容 list / 逗号串 / 空值）"""
+        value = self.value
+        if value is None:
+            return ""
+        if isinstance(value, (list, tuple)):
+            return ",".join(str(v) for v in value)
+        return str(value)
 
     @property
-    def options(self):
-        return self.selector.options
+    def selected_values(self) -> typing.List[str]:
+        value_str = self.value_str
+        if not value_str:
+            return []
+        return [v for v in value_str.split(",") if v != ""]
 
     def add_option(self, title="", value=""):
-        """添加选项（委托给组合的 TagSelect）"""
-        self.selector.add_option(title, value)
+        """添加选项（渲染为右侧 .tag 点选）"""
+        cls = "tag lightblue"
+        if value in self.selected_values:
+            cls += " active"
+        self.extra.add(RawHtml('<span class="%s" data-value="%s">%s</span>'
+                               % (cls, escape_html(value), escape_html(title))))
         return self
 
-    def render(self):
-        return self._code.generate(item=self)
+    # render 继承自 ListViewItem
+
+
+class ListViewSwitch(ListViewItem):
+    """ListView 内的开关行。
+
+    复用 ListViewItem 的 .list-item 外壳与 .float-right 布局；
+    开关组件（Switch）放在右侧 extra 区，值变化时经 oninput_ajax_url 回调后端。
+    """
+
+    def __init__(self, text="", name="", checked: bool = False,
+                 on_value="1", off_value="0", oninput_ajax_url="", css_class=""):
+        super().__init__(text=text, css_class=css_class)
+        self.switch = Switch(name=name, text="", checked=checked,
+                             on_value=on_value, off_value=off_value,
+                             oninput_ajax_url=oninput_ajax_url)
+        self.extra.add(self.switch)
+
+    @property
+    def name(self) -> str:
+        return self.switch.name
+
+    @property
+    def value(self) -> str:
+        return self.switch.hidden_value
+
+    # render 继承自 ListViewItem
 
 
 class ListView(BaseContainer):    
@@ -323,6 +320,25 @@ class ListView(BaseContainer):
             tag_select.css_class = css_class
         self.add(tag_select)
         return tag_select
+
+    def add_switch(self, text="", name="", value="", on_value="1", off_value="0",
+                   oninput_ajax_url="", css_class=""):
+        """添加开关行（列表行外壳 + 右对齐开关）。
+
+        开关值变化时通过 oninput_ajax_url 回调后端（与 FormRow.oninput_ajax_url 一致）：
+        前端 x-switch.js 在切换后对该隐藏域发起 requestOnInputAjax 请求，
+        后端返回 xnote.executeCommands 可执行的命令列表（如 reload / update_text）。
+        oninput_ajax_url 应包含 key/type/p 等查询参数，例如
+        f"/system/config?key={name}&type=int&p=sys"。
+
+        value 是字符串（"1"/"0"/"true" 等），而开关 checked 需要 bool，这里统一解析。
+        """
+        checked = Switch.parse_checked(value)
+        switch_row = ListViewSwitch(text=text, name=name, checked=checked,
+                                    on_value=on_value, off_value=off_value,
+                                    oninput_ajax_url=oninput_ajax_url, css_class=css_class)
+        self.add(switch_row)
+        return switch_row
 
 ItemList = ListView
 ListItem = ListViewItem

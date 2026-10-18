@@ -33,11 +33,17 @@ class Switch(BaseComponent):
         off_value: 开关关闭时提交的值（默认 "false"）
         disabled:  禁用，点击不生效
         size:      尺寸，可选 "sm" / "lg"，留空为默认尺寸
+        css_class: 追加到最外层 span 的自定义 class
+        id:        最外层 span 的 id（用于命令机制 update_text 等）
+        oninput_ajax_url: 可选，开关值变化时回调的后端地址（与 FormRow.oninput_ajax_url 一致）；
+            前端 x-switch.js 在切换后对该隐藏域发起 requestOnInputAjax 请求，
+            后端返回 xnote.executeCommands 可执行的命令列表（如 reload / update_text）。
+            回调会自动带上隐藏域的 name 与当前值（on_value/off_value）。
     """
 
     _code = xtemplate.compile_template("""
 <span class="{{item.full_css_class}}"{% if item.id %} id="{{item.id}}"{% end %} role="switch" tabindex="{{item.tab_index}}" aria-checked="{{'true' if item.checked else 'false'}}" data-on-value="{{item.on_value}}" data-off-value="{{item.off_value}}"{% if item.disabled %} data-disabled="1"{% end %}>
-    <input type="hidden" name="{{item.name}}" value="{{item.hidden_value}}">
+    <input type="hidden" name="{{item.name}}" value="{{item.hidden_value}}"{% if item.oninput_ajax_url %} data-oninput-ajax-url="{{item.oninput_ajax_url}}"{% end %}>
     <span class="switch-track"><span class="switch-dot"></span></span>
     {% if item.text %}
     <span class="switch-text">{{item.text}}</span>
@@ -46,19 +52,22 @@ class Switch(BaseComponent):
 """)
 
     def __init__(self, name="", text="", checked: Any = False, on_value="true",
-                 off_value="false", disabled=False, size="", css_class="", id=""):
+                 off_value="false", disabled=False, size="", css_class="", id="",
+                 oninput_ajax_url=""):
         self.name = name
         self.text = text
-        self.checked = self._parse_checked(checked)
+        self.checked = self.parse_checked(checked)
         self.on_value = str(on_value)
         self.off_value = str(off_value)
         self.disabled = disabled
         self.size = size
         self.css_class = css_class
         self.id = id
+        self.oninput_ajax_url = oninput_ajax_url
 
-    def _parse_checked(self, checked: Any) -> bool:
-        """把 bool / 字符串 / 数字归一化为布尔值"""
+    @staticmethod
+    def parse_checked(checked: Any) -> bool:
+        """把 bool / 字符串 / 数字归一化为布尔值（"1"/"true"/"on"/"yes" 视为开）"""
         if isinstance(checked, bool):
             return checked
         if checked is None:

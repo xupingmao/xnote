@@ -20,7 +20,7 @@ from xnote.core import xauth
 from xnote.core import xtables
 from xnote.core import xmanager
 from xnote.core import xnote_user_config
-from xutils import sqlite3, Storage, cacheutil
+from xutils import sqlite3, Storage, cacheutil, _sqlite_mem
 from xnote.core.xtemplate import T
 from xutils import logutil, webutil
 from xnote.service.system_meta_service import SystemMetaEnum, SystemMetaEnumItem
@@ -107,10 +107,14 @@ class SettingsHandler:
         return list_view.add_dropdown(text=info_enum.meta_name, name=info_enum.meta_key, value=info_enum.meta_value)
     
     def add_system_bool_config(self, list_view: ListView, info_enum: SystemMetaEnumItem):
-        d = self.add_dropdown_config(list_view, info_enum)
-        d.add_option(name="开启", value="1")
-        d.add_option(name="关闭", value="0")
-        return d
+        # 用开关组件替代下拉（开关值变化时经 oninput_ajax_url 直接回调 /system/config 持久化）
+        return list_view.add_switch(
+            text=info_enum.meta_name,
+            name=info_enum.meta_key,
+            value=info_enum.meta_value,
+            on_value="1",
+            off_value="0",
+            oninput_ajax_url=f"/system/config?key={info_enum.meta_key}&type=int&p=sys")
     
     def add_link(self, list_view: ListView, link: TextLink):
         list_view.add_item(ListViewItem(
@@ -147,6 +151,7 @@ class SettingsHandler:
         self.add_system_bool_config(result, SystemMetaEnum.debug_html_box)
         self.add_system_bool_config(result, SystemMetaEnum.dev_mode)
         self.add_system_bool_config(result, SystemMetaEnum.trace_malloc_enabled)
+        self.add_system_bool_config(result, SystemMetaEnum.sqlite_mem_sample_enabled)
 
         self.add_link(result, LinkConfig.customized_css)
         self.add_link(result, LinkConfig.customized_js)
@@ -168,9 +173,14 @@ class SettingsHandler:
     
     def add_user_bool_config(self, list_view: ListView, config: xnote_user_config.UserConfigItem, user_id: int):
         value = config.get_str(user_id)
-        d = list_view.add_dropdown(text=config.label, name=config.key, value=value, data_type="str")
-        d.add_option(name="开启", value="1")
-        d.add_option(name="关闭", value="0")
+        # 与系统开关一致改用 add_switch，oninput_ajax_url 带 p=user 走用户配置持久化路径
+        return list_view.add_switch(
+            text=config.label,
+            name=config.key,
+            value=value,
+            on_value="1",
+            off_value="0",
+            oninput_ajax_url=f"/system/config?key={config.key}&type=str&p=user")
 
     def add_user_select_config(self, list_view: ListView, config: xnote_user_config.UserConfigItem, user_id: int):
         value = config.get_str(user_id)
@@ -310,6 +320,9 @@ def update_sys_config(key: str, value: str):
     meta = SystemMetaEnum.get_by_meta_key(key)
     if meta:
         meta.save_meta(value)
+        # 采样开关变更后立即生效（无需重启）
+        if key == SystemMetaEnum.sqlite_mem_sample_enabled.meta_key:
+            _sqlite_mem.set_enabled(meta.bool_value)
         return
     else:
         raise Exception(f"meta_key not exists: {key}")

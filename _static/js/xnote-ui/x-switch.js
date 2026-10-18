@@ -38,6 +38,16 @@ if (!xnote.initSwitch) {
         }
         $box.toggleClass("active");
         syncSwitchValue($box);
+
+        // 值变化触发 oninput 回调（参考 FormRow.oninput_ajax_url）：
+        // 隐藏域上挂了 data-oninput-ajax-url 时，POST 到该地址并把返回 data 交给 xnote.executeCommands 执行
+        var $input = $box.find("input[type=hidden]");
+        if ($input.length > 0) {
+            var ajaxUrl = $input.attr("data-oninput-ajax-url");
+            if (ajaxUrl && xnote.form && xnote.form.requestOnInputAjax) {
+                xnote.form.requestOnInputAjax($input, ajaxUrl);
+            }
+        }
     };
 
     xnote.initSwitch = function (root) {

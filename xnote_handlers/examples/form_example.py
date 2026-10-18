@@ -47,6 +47,9 @@ class FormExampleHandler(BaseTablePlugin):
         return self.handle_page()
 
     def handle_page(self):
+        self.load_laydate()
+        self.load_select2()
+        
         # 页面表单：PageEditForm（page_edit 类型），渲染为普通文档流的页面表单，
         # 区别于弹窗用的 edit 类型（DataForm，absolute 定位，仅适合对话框容器）
         static_form = PageEditForm()

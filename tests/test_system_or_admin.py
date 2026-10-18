@@ -138,6 +138,83 @@ class TestMain(test_base.BaseTestCase):
         result = json_request_return_dict("/system/config", method="POST", data=data)
         assert result["success"] == False
 
+    def test_admin_settings_switch_render(self):
+        # 管理员设置页：布尔开关应用 ListViewSwitch 组件渲染，并直连 /system/config 持久化
+        # （验证行为/数据正确性，不验证 CSS 样式或 DOM 结构）
+        resp = self.request_app("/system/settings?category=admin")
+        self.assertIn(resp.status, ("200 OK", "303 See Other", "302 Found"))
+        body = resp.data
+        if isinstance(body, bytes):
+            body = body.decode("utf-8")
+        meta = SystemMetaEnum.sqlite_mem_sample_enabled
+        # 开关行渲染出对应的配置项 key（内容正确性）
+        assert meta.meta_key in body
+        # 开关通过 oninput_ajax_url 直连持久化接口（行为正确性）
+        assert "data-oninput-ajax-url" in body
+        assert ("/system/config?key=" + meta.meta_key) in body
+        # URL 只应被 HTML 转义一次（& -> &amp;），不能双重转义（&amp;amp; 会破坏 &type/&p 参数）
+        assert "&amp;amp;" not in body
+
+    def test_sqlite_mem_switch_persist(self):
+        # 开关回调 /system/config 后，SQLite 内存采样开关应即时生效（无需重启）
+        from xutils import _sqlite_mem
+        meta = SystemMetaEnum.sqlite_mem_sample_enabled
+        try:
+            result = json_request_return_dict("/system/config", method="POST",
+                                              data=dict(key=meta.meta_key, value="0", type="int", p="sys"))
+            assert result["success"] == True
+            assert _sqlite_mem.is_enabled() == False
+
+            result = json_request_return_dict("/system/config", method="POST",
+                                              data=dict(key=meta.meta_key, value="1", type="int", p="sys"))
+            assert result["success"] == True
+            assert _sqlite_mem.is_enabled() == True
+        finally:
+            _sqlite_mem.set_enabled(True)
+
+    def test_user_settings_switch_render(self):
+        # 搜索设置 / 笔记设置 页的用户级布尔开关也应使用 add_switch 直连 /system/config?p=user
+        # （验证行为/数据正确性，不验证 CSS 样式或 DOM 结构）
+        from xnote.core.xnote_user_config import UserConfig
+        # 每个设置页只渲染自己的一组用户级布尔开关
+        category_keys = {
+            "search": (UserConfig.search_message_detail_show.key,
+                       UserConfig.search_plugin_detail_show.key),
+            "": (UserConfig.show_md_preview.key,
+                 UserConfig.show_comment_edit.key),
+        }
+        for category, user_keys in category_keys.items():
+            resp = self.request_app("/system/settings?category=" + category)
+            self.assertIn(resp.status, ("200 OK", "303 See Other", "302 Found"))
+            body = resp.data
+            if isinstance(body, bytes):
+                body = body.decode("utf-8")
+            assert "data-oninput-ajax-url" in body
+            # 开关回调走用户配置持久化路径
+            assert "p=user" in body
+            # 该页相关配置项的 key 应出现在页面（内容正确性）
+            for key in user_keys:
+                assert key in body
+
+    def test_user_switch_persist(self):
+        # 用户级开关回调 /system/config?p=user 后，配置应持久化
+        from xnote.core import xauth
+        from xnote.core.xnote_user_config import UserConfig
+        config = UserConfig.search_message_detail_show
+        user_id = xauth.current_user_id()
+        try:
+            result = json_request_return_dict("/system/config", method="POST",
+                                              data=dict(key=config.key, value="1", type="str", p="user"))
+            assert result["success"] == True
+            assert config.get_str(user_id) == "1"
+
+            result = json_request_return_dict("/system/config", method="POST",
+                                              data=dict(key=config.key, value="0", type="str", p="user"))
+            assert result["success"] == True
+            assert config.get_str(user_id) == "0"
+        finally:
+            config.save_config(user_id=user_id, value=config.default_value)
+
     def test_backup(self):
         TestEnv.is_test = True
         TestEnv.skip_backup = False
@@ -163,3 +240,9 @@ class TestMain(test_base.BaseTestCase):
 
     def test_handler_profile(self):
         self.check_OK("/system/handler_profile")
+
+    def test_trace_malloc_sqlite_tab(self):
+        # 内存分析 - SQLite 内存 tab
+        self.check_OK("/system/trace_malloc?tab=sqlite")
+        # 内存分析 - 默认内存快照 tab
+        self.check_OK("/system/trace_malloc")

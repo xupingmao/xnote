@@ -48,6 +48,7 @@ input[readonly] {
     margin-top: 0px;
     margin-bottom: 8px;
     padding-left: 8px;
+    padding-right: 8px;
     width: 100%;
     float: left;
 }
@@ -60,13 +61,18 @@ input[readonly] {
 
 .form-row-value {
     float: left;
-    width: 400px;
+    width: calc(100% - 100px);
+}
+
+.form-row-input {
+    width: 240px;
 }
 
 /* textarea 的高度由 JS 按内容自动调整，这里只声明高度区间 */
 .form-row-textarea {
     min-height: 50px;
     max-height: 200px;
+    width: 100%;
 }
 
 .form-body {
@@ -128,6 +134,10 @@ input[readonly] {
     margin-bottom: 4px;
 }
 .query-form .form-row-value {
+    width: 160px;
+}
+
+.query-form .form-row-input {
     width: 160px;
 }
 

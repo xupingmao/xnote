@@ -11,7 +11,7 @@ from .component import Dropdown, DropdownOption
 from .tab import TabBox, TabTable
 from .container import Card, CardRow, RowDiv, RowPanel, TextContainer
 from .link import TextLink, ActionLink, EditFormActionLink, ConfirmActionLink, AjaxActionLink
-from ._list import ListView, ListViewItem, ListItem, ListViewDropdown, ItemList
+from ._list import ListView, ListViewItem, ListItem, ListViewDropdown, ListViewSwitch, ItemList
 from ._tag_select import TagSelect
 from ._switch import Switch
 from ._image import Image
