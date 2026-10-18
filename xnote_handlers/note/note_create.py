@@ -159,7 +159,7 @@ class NoteCreateHandler(BaseFormPlugin):
     def handle_page(self):
         note_type = xutils.get_argument_str("type", "md")
         parent_id = xutils.get_argument_int("parent_id")
-        name = xutils.get_argument_str("name", "")
+        default_name = xutils.get_argument_str("default_name", "")
         date = xutils.get_argument_str("date", "")
 
         self.show_aside = True
@@ -178,7 +178,7 @@ class NoteCreateHandler(BaseFormPlugin):
             if type_info.visible:
                 tab.tab_box.add_item(title=type_info.name, value=type_info.type)
                         
-        form.add_input("标题", "name", value=name,
+        form.add_input("标题", "name", value=default_name,
                        oninput_ajax_url="/note/create?action=check")
 
         date_row = form.add_date_input("日期", "date", value=date or dateutil.format_date())
