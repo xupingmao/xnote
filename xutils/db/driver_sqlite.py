@@ -13,6 +13,7 @@ import web.db
 import time
 
 from xutils import interfaces
+from xutils import _sqlite_mem
 
 class FreeLock:
 
@@ -81,6 +82,11 @@ class SqliteKV(interfaces.DBInterface):
         r_iter = self.db.query(sql, vars=vars)
         result = list(r_iter) # type: ignore
         self.log_sql(sql, vars=vars, prefix="[Get]")
+        # 随机采样当前线程连接的内存占用（默认 10% 命中率），供内存分析页面展示
+        try:
+            _sqlite_mem.sample_current_connection(self.db.ctx.db)
+        except Exception:
+            pass
         if len(result) > 0:
             return result[0].value
         return None

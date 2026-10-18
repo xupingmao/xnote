@@ -629,6 +629,14 @@ def init(boot_config_file=None, boot_config_kw = None):
     # 初始化模板配置
     TemplateConfig.init()
 
+    # 同步 SQLite 内存采样开关（由管理员设置页面控制，见 xutils._sqlite_mem）
+    try:
+        from xutils import _sqlite_mem
+        from xnote.service.system_meta_service import SystemMetaEnum
+        _sqlite_mem.set_enabled(SystemMetaEnum.sqlite_mem_sample_enabled.bool_value)
+    except Exception:
+        pass
+
     # 数据库地址
     init_db_config()
 

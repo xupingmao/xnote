@@ -121,6 +121,8 @@ class SystemMetaEnum:
 
     # 配置信息
     trace_malloc_enabled = SystemMetaEnumItem("trace_malloc开关", "config.trace_malloc.enabled")
+    # SQLite 连接内存采样开关（DAO 入口随机采样，见 xutils.sqlite_mem）
+    sqlite_mem_sample_enabled = SystemMetaEnumItem("SQLite内存采样开关", "config.sqlite_mem_sample_enabled.bool", default_value="1")
     page_size = SystemMetaEnumItem("分页大小", "config.page_size.int")
     trash_expire_seconds = SystemMetaEnumItem("回收站清理周期", "config.trash_expire.seconds", default_value=str(3600*24*30))
     fs_hide_files = SystemMetaEnumItem("隐藏系统文件", "config.fs.hide_files.bool")

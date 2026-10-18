@@ -19,6 +19,7 @@ from xutils.sqldb import table_manager
 from xutils.sqldb.table_config import TableConfig
 from xutils.interfaces import ProfileLog, ProfileLogger, SQLDBInterface
 from xutils.db.binlog import BinLog, BinLogOpType
+from xutils import _sqlite_mem
 
 
 
@@ -106,6 +107,11 @@ class TableProxy(SQLDBInterface):
         result_set = self.db.select(self.tablename, vars=vars, what=what, where=where, order=order, group=group,
                               limit=limit, offset=offset, _test=_test)
         records = list(result_set) # type: ignore
+        # 随机采样当前线程连接的内存占用（默认 10% 命中率），供内存分析页面展示
+        try:
+            _sqlite_mem.sample_current_connection(self.db.ctx.db)
+        except Exception:
+            pass
         return records
     
     def select_first(self, *args, **kw):
