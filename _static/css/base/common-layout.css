@@ -7,10 +7,11 @@
  */
 
 
+/* ===== 默认样式 ===== */
 .content-left {
     float: left;
     width: 700px;
-    max-width: 1000px;
+    max-width: 2000px;
 }
 
 .content-right {
@@ -72,16 +73,82 @@
     line-height: 24px;
 }
 
-/** 移动端样式放在最后 **/
-@media screen and (max-width: 800px) {
-    /** mobile **/
+/* 容器最小高度对齐视口（原 JS: window.height - 39） */
+.root {
+    min-height: calc(100vh - 39px);
+}
+
+/* ===== 打印模式 / print.html 的 isPrintMode ===== */
+body.print-mode .nav-left,
+.print-mode .nav-left {
+    display: none;
+}
+
+body.print-mode .main-content,
+.print-mode .main-content {
+    margin-left: 0;
+    padding-left: 10px;
+}
+
+body.print-mode .content-left,
+.print-mode .content-left {
+    width: 100%;
+}
+
+
+/* ===== 桌面端 (>=1000px) ===== */
+@media screen and (min-width: 1000px) {
+    .content-left {
+        width: calc(100% - 300px);
+    }
+
+    .content-right {
+        width: 300px;
+    }
+
+    .mobile-only {
+        display: none;
+    }
+
+    .desktop-only {
+        display: block;
+    }
+
+    .desktop-only-inline {
+        display: inline;
+    }
+
+    .desktop-only-inline-block {
+        display: inline-block;
+    }
+
+    /* 内容容器：最大宽度对齐 CONTENT_WIDTH(1000)，居中，两侧留 10px */
+    .x-center,
+    .nav-container,
+    .main-content {
+        float: left;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+/* ===== 移动端 (<1000px) ===== */
+@media screen and (max-width: 999px) {
     .content-left {
         width: 100%;
     }
 
     .content-right {
+        display: none;
         padding-left: 0px;
         width: 100%;
+    }
+
+    .nav {
+        display: block;
     }
 
     .mobile-only {
@@ -92,8 +159,21 @@
         display: none;
     }
 
-    .desktop-only, .desktop-only-inline, .desktop-only-inline-block {
+    .desktop-only,
+    .desktop-only-inline,
+    .desktop-only-inline-block {
         display: none;
     }
+}
 
+/* ===== 打印模式（@media print） ===== */
+@media print {
+    .nav-left {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
 }

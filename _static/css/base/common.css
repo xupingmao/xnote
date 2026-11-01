@@ -182,7 +182,8 @@ li.menu-item:hover {
 
 .nav-container {
     float: left;
-    width: 1000px;
+    width: 100%;
+    max-width: 2000px;
     padding-left: 8px;
     padding-right: 8px;
 }
