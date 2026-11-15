@@ -1,54 +1,269 @@
 {% extends base %}
 
 {% block head %}
+<link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/xterm/xterm.css">
+<script type="text/javascript" src="{{_server_home}}/_static/lib/xterm/xterm.js"></script>
+<script type="text/javascript" src="{{_server_home}}/_static/lib/xterm/xterm-addon-fit.js"></script>
+
 <style>
-    #console {
-        width:100%;
-        height:30em;
-        background: black;
+    /* 终端区域配色固定为深色，不随主题切换 */
+    #terminal-wrap {
+        background: #1e1e1e;
+        border-radius: 4px;
+        padding: 8px;
+        min-height: 400px;
+        height: calc(100vh - 280px);
     }
-    .console_text {
-        color:#fff;
-        font-family: consolas;
-        font-size:1em;
+    #terminal {
+        height: 100%;
     }
-    #cursor {
-        margin: 0px;
-        padding: 0px;
-        background: blue;
-        font-size: 1em;
+    /* 全站 reset.css 有两处会破坏 xterm 的等宽排版：
+       1) `* { font-family: 微软雅黑(比例字体) }` 会污染 xterm 的每个字符 span，
+          以及挂在 document.body 下的隐藏字符宽度测量 span；
+       2) `body { letter-spacing: 1px }` 会被测量元素继承。
+       两者使 xterm 测出的字符宽度与实际渲染不一致，逐字符补偿字距后
+       表现为字符忽宽忽窄、列对不齐。这里在本页统一抵消。
+       xterm 自己写入的 inline 样式优先级更高，不受影响。 */
+    html body {
+        letter-spacing: normal;
+    }
+    /* 优先级高于 `*`，让测量 span 继承其容器（xterm 设置为等宽字体栈）的字体 */
+    body > div > span {
+        font-family: inherit;
+    }
+    #terminal .xterm,
+    #terminal .xterm * {
+        font-family: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New",
+                     "Sarasa Mono SC", "Microsoft YaHei Mono", "NSimSun", monospace;
+    }
+    .terminal-status {
+        font-size: 14px;
+        margin-left: 8px;
+    }
+    .terminal-status.running {
+        color: #4caf50;
+    }
+    .terminal-status.stopped {
+        color: #f44336;
+    }
+    .terminal-toolbar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .terminal-toolbar select, .terminal-toolbar .btn {
+        margin-right: 8px;
+        height: 30px;
     }
 </style>
-
-<link rel="stylesheet" type="text/css" href="{{_server_home}}/_static/lib/jquery.terminal/jquery.terminal-1.3.1.min.css">
 {% end %}
 
 {% block body_left %}
 
 <div class="card">
-    {% set title = "在线终端" %}
-    {% include common/base_title.html %}
+    {% init title = "在线终端" %}
+    {% include common/title/base_title.html %}
 </div>
 
 <div class="card">
-    <div id="console"></div>
+    <div class="terminal-toolbar">
+        <select id="shell-select">
+            {% from xutils import is_windows %}
+            {% if is_windows() %}
+            <option value="cmd">cmd</option>
+            <option value="powershell">PowerShell</option>
+            {% else %}
+            <option value="bash">bash</option>
+            <option value="zsh">zsh</option>
+            <option value="sh">sh</option>
+            {% end %}
+        </select>
+        <button class="btn btn-default" id="btn-new-session">新建会话</button>
+        <button class="btn btn-default" id="btn-clear">清屏</button>
+        <span class="terminal-status" id="terminal-status">未连接</span>
+    </div>
+    <div id="terminal-wrap">
+        <div id="terminal"></div>
+    </div>
 </div>
 
-<script type="text/javascript" src="/_static/lib/jquery.terminal/jquery.terminal-1.3.1.min.js"></script>
 <script type="text/javascript">
-$(document).ready(function() {
-    $("#console").terminal(function(command, term) {
-        if (command.indexOf("calc ")>=0) {
-            term.echo(eval(command.substring(4)));
-        } else {            
-            xnote.http.post("/system/command", {command: command}, function (data, status) {
-                term.echo(data);
-            }).fail(function (data) {
-                console.log(data);
-                term.exception("failed"+data, "error");
-            });
+$(function () {
+    var API_PREFIX = "/api/v1/tools/terminal/";
+
+    var term = new Terminal({
+        fontFamily: "'Cascadia Mono', 'Cascadia Code', Consolas, 'Courier New', 'Sarasa Mono SC', 'Microsoft YaHei Mono', NSimSun, monospace",
+        fontSize: 14,
+        letterSpacing: 0,
+        cursorBlink: true,
+        scrollback: 5000,
+        theme: {
+            background: "#1e1e1e",
+            foreground: "#e8e8e8"
         }
     });
+    var fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById("terminal"));
+    fitAddon.fit();
+    term.focus();
+
+    var sessionId = null;
+    var polling = false;
+    var pollStopped = true;
+    var pendingInput = "";
+    var inputTimer = null;
+    var resizeTimer = null;
+
+    function setStatus(text, cssClass) {
+        var status = $("#terminal-status");
+        status.text(text);
+        status.removeClass("running").removeClass("stopped");
+        if (cssClass) {
+            status.addClass(cssClass);
+        }
+    }
+
+    function base64Encode(text) {
+        var bytes = new TextEncoder().encode(text);
+        var binary = "";
+        for (var i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
+
+    function stopPoll() {
+        pollStopped = true;
+    }
+
+    function writeInfo(text) {
+        term.write("\r\n\x1b[33m" + text + "\x1b[0m\r\n");
+    }
+
+    function startSession() {
+        stopPoll();
+        var data = {
+            shell: $("#shell-select").val(),
+            cols: term.cols,
+            rows: term.rows
+        };
+        xnote.http.post(API_PREFIX + "start", data, function (resp) {
+            if (!resp.success) {
+                setStatus("创建失败", "stopped");
+                writeInfo("[创建会话失败] " + resp.message);
+                return;
+            }
+            sessionId = resp.data.session_id;
+            term.reset();
+            if (resp.data.mode == "pipe") {
+                writeInfo("[提示] 当前为兼容模式(管道)，回显和交互能力受限");
+            }
+            setStatus(resp.data.shell + " 运行中 (" + resp.data.mode + ")", "running");
+            term.focus();
+            pollStopped = false;
+            pollLoop();
+        });
+    }
+
+    function pollLoop() {
+        if (sessionId == null || polling) {
+            return;
+        }
+        if (pollStopped) {
+            return;
+        }
+        polling = true;
+        xnote.http.internalPost(API_PREFIX + "poll", {
+            session_id: sessionId,
+            wait_ms: 1000
+        }, function (resp) {
+            polling = false;
+            if (!resp.success) {
+                // 会话不存在(如服务重启)，停止轮询
+                stopPoll();
+                setStatus("已断开", "stopped");
+                writeInfo("[会话已结束，请点击【新建会话】重新连接]");
+                return;
+            }
+            if (resp.data.output) {
+                term.write(resp.data.output);
+            }
+            if (!resp.data.running) {
+                stopPoll();
+                setStatus("已退出", "stopped");
+                writeInfo("[终端进程已退出，请点击【新建会话】重新连接]");
+                return;
+            }
+            pollLoop();
+        }).fail(function () {
+            polling = false;
+            stopPoll();
+            setStatus("连接失败", "stopped");
+            writeInfo("[连接失败，请稍后点击【新建会话】重试]");
+        });
+    }
+
+    function flushInput() {
+        if (sessionId == null || pendingInput == "") {
+            return;
+        }
+        var input = pendingInput;
+        pendingInput = "";
+        xnote.http.internalPost(API_PREFIX + "write", {
+            session_id: sessionId,
+            input: base64Encode(input)
+        });
+    }
+
+    term.onData(function (data) {
+        if (sessionId == null) {
+            return;
+        }
+        // 批量合并按键，减少请求数
+        pendingInput += data;
+        if (inputTimer) {
+            clearTimeout(inputTimer);
+        }
+        inputTimer = setTimeout(flushInput, 30);
+    });
+
+    function syncResize() {
+        if (sessionId == null) {
+            return;
+        }
+        xnote.http.internalPost(API_PREFIX + "resize", {
+            session_id: sessionId,
+            cols: term.cols,
+            rows: term.rows
+        });
+    }
+
+    $(window).resize(function () {
+        fitAddon.fit();
+        if (resizeTimer) {
+            clearTimeout(resizeTimer);
+        }
+        resizeTimer = setTimeout(syncResize, 200);
+    });
+
+    $("#btn-new-session").on("click", function () {
+        if (sessionId != null) {
+            xnote.http.post(API_PREFIX + "kill", { session_id: sessionId });
+        }
+        sessionId = null;
+        pollStopped = false;
+        startSession();
+    });
+
+    $("#btn-clear").on("click", function () {
+        term.clear();
+        term.focus();
+    });
+
+    // 启动会话
+    pollStopped = false;
+    startSession();
 });
 </script>
 
