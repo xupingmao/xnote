@@ -108,7 +108,7 @@ SYS_TOOLS: List[AppLink] = [
     admin_link("事件注册", "/system/event"),
     admin_link("线程管理", "/system/thread_info"),
     admin_link("Menu_Log",    "/system/log/db"),
-    admin_link("Shell",    "/tools/shell", img_src="/_static/image/icons/icon_terminal.png"),
+    admin_link("终端",      "/tools/terminal", img_src="/_static/image/icons/icon_terminal.png"),
     admin_link("集群管理", "/system/sync?p=home", "server"),
     admin_link("开发者", "/system/develop", icon="fa-code"),
 
