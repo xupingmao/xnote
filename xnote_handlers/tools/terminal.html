@@ -55,6 +55,31 @@
         margin-right: 8px;
         height: 30px;
     }
+    /* 最大化：只在浏览器页面内铺满可视区域，不进入浏览器 Fullscreen 模式。
+       工具栏保留在卡片内，可见"还原"按钮；终端占满剩余高度。
+       content-box 下用 border-box 抵消 padding 造成的溢出。 */
+    #terminal-card.maximized {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        width: auto;
+        height: auto;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 8px;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    #terminal-card.maximized #terminal-wrap {
+        flex: 1;
+        min-height: 0;
+        height: auto;
+        margin-bottom: 0;
+    }
 </style>
 {% end %}
 
@@ -65,7 +90,7 @@
     {% include common/title/base_title.html %}
 </div>
 
-<div class="card">
+<div class="card" id="terminal-card">
     <div class="terminal-toolbar">
         <select id="shell-select">
             {% from xutils import is_windows %}
@@ -80,6 +105,7 @@
         </select>
         <button class="btn btn-default" id="btn-new-session">新建会话</button>
         <button class="btn btn-default" id="btn-clear">清屏</button>
+        <button class="btn btn-default" id="btn-maximize">最大化</button>
         <span class="terminal-status" id="terminal-status">未连接</span>
     </div>
     <div id="terminal-wrap">
@@ -259,6 +285,31 @@ $(function () {
     $("#btn-clear").on("click", function () {
         term.clear();
         term.focus();
+    });
+
+    // 最大化切换：只在浏览器页面内铺满可视区域（不进入浏览器 Fullscreen 模式）
+    var maximized = false;
+    $("#btn-maximize").on("click", function () {
+        maximized = !maximized;
+        $("#terminal-card").toggleClass("maximized", maximized);
+        $(this).text(maximized ? "还原" : "最大化");
+        // 切换后容器尺寸立即变化，重新计算行列并同步后端
+        fitAddon.fit();
+        if (resizeTimer) {
+            clearTimeout(resizeTimer);
+        }
+        resizeTimer = setTimeout(syncResize, 100);
+        term.focus();
+    });
+
+    // 页面关闭/刷新时释放会话，避免无人读取时会话仍空转占用资源。
+    // 用 sendBeacon：页面卸载时异步 AJAX 可能被浏览器取消，Beacon 会可靠送达。
+    $(window).on("beforeunload", function () {
+        if (sessionId != null && navigator.sendBeacon) {
+            var params = new URLSearchParams();
+            params.append("session_id", sessionId);
+            navigator.sendBeacon(API_PREFIX + "kill", params);
+        }
     });
 
     // 启动会话

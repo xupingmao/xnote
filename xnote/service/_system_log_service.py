@@ -22,6 +22,7 @@ class SystemLogType:
     plugin = "plugin"
     note = "note"
     backup = "backup"
+    terminal = "terminal"
 
 class SystemLogService:
 

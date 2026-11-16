@@ -125,3 +125,64 @@ class TerminalApiTest(test_base.BaseTestCase):
 
         # 会话数量统计
         self.assertEqual(0, manager.get_count())
+
+    def test_output_buffer_limit(self):
+        """输出缓冲必须有上限，超出后丢弃最旧内容并提示前端"""
+        from xnote_handlers.tools.terminal import (
+            TerminalSession, MAX_OUTPUT_CHARS, OUTPUT_TRUNCATED_TIP)
+
+        session = TerminalSession("test-buffer", "test", ".", 80, 24)
+        chunk = "x" * (1024 * 1024)  # 1MB
+        for _ in range(5):
+            session.append_output(chunk)
+        self.assertLessEqual(session.output_size, MAX_OUTPUT_CHARS)
+
+        output = session.drain_output()
+        self.assertTrue(output.startswith(OUTPUT_TRUNCATED_TIP))
+        self.assertLessEqual(len(output) - len(OUTPUT_TRUNCATED_TIP), MAX_OUTPUT_CHARS)
+        self.assertTrue(output.endswith("x" * 100))  # 保留的是最新内容
+        # drain 后状态归零
+        self.assertEqual(0, session.output_size)
+        self.assertEqual([], session.output_buffer)
+        self.assertFalse(session.output_truncated)
+        self.assertEqual("", session.drain_output())
+
+    def test_output_buffer_single_huge_chunk(self):
+        """单块输出本身超过上限时，保留尾部"""
+        from xnote_handlers.tools.terminal import (
+            TerminalSession, MAX_OUTPUT_CHARS, OUTPUT_TRUNCATED_TIP)
+
+        session = TerminalSession("test-huge", "test", ".", 80, 24)
+        session.append_output("y" * (MAX_OUTPUT_CHARS + 5000))
+        self.assertEqual(MAX_OUTPUT_CHARS, session.output_size)
+        output = session.drain_output()
+        self.assertTrue(output.startswith(OUTPUT_TRUNCATED_TIP))
+        self.assertEqual(MAX_OUTPUT_CHARS, len(output) - len(OUTPUT_TRUNCATED_TIP))
+
+    def test_output_buffer_no_truncation(self):
+        """未超限时不应插入截断提示"""
+        from xnote_handlers.tools.terminal import TerminalSession
+
+        session = TerminalSession("test-normal", "test", ".", 80, 24)
+        session.append_output("hello")
+        session.append_output(" world")
+        self.assertEqual("hello world", session.drain_output())
+        self.assertFalse(session.output_truncated)
+
+    def test_session_log(self):
+        """新建/关闭会话应写入 system_log 表"""
+        from xnote.service import SystemLogService, SystemLogType
+
+        resp = self.start_session()
+        self.assertTrue(resp.get_bool("success"), resp.get_str("message"))
+        session_id = resp.get_dict("data").get_str("session_id")
+        self.kill_session(session_id)
+
+        logs = SystemLogService.get_logs(limit=500)
+        matched = [log for log in logs
+                   if log.log_type == SystemLogType.terminal
+                   and session_id in log.log_content]
+        contents = [log.log_content for log in matched]
+        self.assertTrue(any("新建终端会话" in c for c in contents), contents)
+        self.assertTrue(any("关闭终端会话" in c and "用户关闭" in c for c in contents), contents)
+        self.assertTrue(all(log.log_level == "INFO" for log in matched))

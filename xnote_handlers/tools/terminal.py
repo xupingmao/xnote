@@ -32,12 +32,18 @@ import xutils
 from xutils import Storage
 from xnote.core import xauth
 from xutils import webutil
+from xnote.service import SystemLogService, SystemLogLevel, SystemLogType
 
 MAX_SESSIONS = 20
 SESSION_TTL = 600.0        # 会话空闲10分钟后回收
 DEAD_SESSION_TTL = 60.0    # 子进程退出后再保留60秒供前端读取尾部输出
 CLEANUP_INTERVAL = 30.0
 MAX_POLL_WAIT_MS = 2000
+# 单个会话的输出缓冲上限（字符数）。超过后从头部丢弃最旧内容，
+# 避免页面关闭/输出速度超过拉取速度时 reader 线程无限堆积导致 OOM。
+# 2MB 远超正常量（5000 行 x 80 列 ≈ 0.4MB）。
+MAX_OUTPUT_CHARS = 2 * 1024 * 1024
+OUTPUT_TRUNCATED_TIP = "[输出过多，已丢弃较早内容]\r\n"
 
 class TerminalSessionException(Exception):
     """终端会话相关异常"""
@@ -67,6 +73,8 @@ class TerminalSession:
         self.last_active_time = time.time()
         self.running = True
         self.output_buffer: List[str] = []
+        self.output_size = 0          # output_buffer 中累计的字符数
+        self.output_truncated = False # 是否发生过丢弃（drain 时提示前端）
         self.lock = threading.Lock()
 
     # ---------- 对外接口 ----------
@@ -94,14 +102,32 @@ class TerminalSession:
         self.last_active_time = time.time()
 
     def append_output(self, text: str):
+        if not text:
+            return
         with self.lock:
             self.output_buffer.append(text)
+            self.output_size += len(text)
+            # 从头部丢弃最旧内容，直到总量回到上限内
+            while self.output_size > MAX_OUTPUT_CHARS and len(self.output_buffer) > 1:
+                dropped = self.output_buffer.pop(0)
+                self.output_size -= len(dropped)
+                self.output_truncated = True
+            # 仅剩一块且它本身超过上限：保留尾部
+            if self.output_size > MAX_OUTPUT_CHARS and self.output_buffer:
+                tail = self.output_buffer[-1][-MAX_OUTPUT_CHARS:]
+                self.output_buffer[-1] = tail
+                self.output_size = len(tail)
+                self.output_truncated = True
 
     def drain_output(self) -> str:
         """取出并清空累计的输出"""
         with self.lock:
             output = "".join(self.output_buffer)
+            if self.output_truncated:
+                output = OUTPUT_TRUNCATED_TIP + output
             self.output_buffer = []
+            self.output_size = 0
+            self.output_truncated = False
             return output
 
     def idle_time(self) -> float:
@@ -556,6 +582,28 @@ def create_terminal_session(session_id: str, shell: str, cwd: str,
             logging.exception("创建PTY会话失败，降级到管道模式: %s", e)
     return PipeSession(session_id, cmdline, shell_name, cwd, cols, rows, owner)
 
+def log_terminal_event(action: str, session: TerminalSession, reason: str = ""):
+    """记录终端会话的新建/关闭事件到 system_log 表。
+
+    日志写入失败不能影响会话本身，所以这里吞掉异常。
+    """
+    try:
+        duration = int(time.time() - session.created_time)
+        content = "%s终端会话: id=%s shell=%s mode=%s owner=%s" % (
+            action, session.id, session.shell_name, session.mode,
+            session.owner or "-")
+        if reason:
+            content += " 原因=%s" % reason
+        if action == "关闭":
+            content += " 存活=%ss" % duration
+        SystemLogService.save_log(
+            log_level=SystemLogLevel.INFO,
+            log_type=SystemLogType.terminal,
+            log_content=content,
+            cost_time=duration)
+    except Exception:
+        logging.exception("记录终端会话日志失败")
+
 class TerminalSessionManager:
     """终端会话管理器"""
 
@@ -595,10 +643,10 @@ class TerminalSessionManager:
                 pass
             if session.idle_time() > SESSION_TTL:
                 logging.info("终端会话(%s)空闲超时，自动关闭", session_id)
-                self.remove(session_id)
+                self.remove(session_id, "空闲超时")
             elif not running and session.idle_time() > DEAD_SESSION_TTL:
                 logging.info("终端会话(%s)已退出，自动回收", session_id)
-                self.remove(session_id)
+                self.remove(session_id, "进程已退出")
 
     def create_session(self, shell: str, cwd: str, cols: int, rows: int,
                        owner: str) -> TerminalSession:
@@ -614,9 +662,10 @@ class TerminalSessionManager:
                         oldest_time = item.created_time
                         oldest_id = key
                 if oldest_id is not None:
-                    self.remove(oldest_id)
+                    self.remove(oldest_id, "会话数超限淘汰")
             self.sessions[session_id] = session
         self._ensure_cleanup_thread()
+        log_terminal_event("新建", session)
         return session
 
     def get_session(self, session_id: str, owner: str = "") -> Optional[TerminalSession]:
@@ -629,7 +678,7 @@ class TerminalSessionManager:
             session.touch()
             return session
 
-    def remove(self, session_id: str):
+    def remove(self, session_id: str, reason: str = ""):
         """删除并关闭会话"""
         with self.lock:
             session = self.sessions.pop(session_id, None)
@@ -639,13 +688,14 @@ class TerminalSessionManager:
             session.close()
         except Exception:
             logging.exception("关闭终端会话(%s)失败", session_id)
+        log_terminal_event("关闭", session, reason)
 
-    def close_all(self):
+    def close_all(self, reason: str = ""):
         """关闭并清空全部会话"""
         with self.lock:
             sessions = list(self.sessions.values())
             self.sessions = {}
-        _close_session_list(sessions)
+        _close_session_list(sessions, reason)
 
     def get_count(self) -> int:
         with self.lock:
@@ -656,16 +706,17 @@ _SESSION_MANAGER = TerminalSessionManager()
 def get_session_manager() -> TerminalSessionManager:
     return _SESSION_MANAGER
 
-def _close_session_list(sessions: List[TerminalSession]):
+def _close_session_list(sessions: List[TerminalSession], reason: str = ""):
     for session in sessions:
         try:
             session.close()
         except Exception:
             logging.exception("关闭终端会话失败")
+        log_terminal_event("关闭", session, reason)
 
 def unload():
     """handlers重载时清理所有终端会话"""
-    _SESSION_MANAGER.close_all()
+    _SESSION_MANAGER.close_all("服务重载")
 
 # ---------------------------------------------------------------------------
 # HTTP 接口
@@ -773,7 +824,7 @@ class TerminalApiHandler:
         if session is None:
             # 会话不存在视为成功，保证幂等
             return webutil.SuccessResult()
-        manager.remove(session_id)
+        manager.remove(session_id, "用户关闭")
         return webutil.SuccessResult()
 
 xurls = (
